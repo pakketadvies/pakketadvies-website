@@ -41,7 +41,7 @@ export default function ContractAfsluitenPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12 pt-32 md:pt-36">
       <div className="container-custom max-w-3xl">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-brand-navy-500 mb-2">

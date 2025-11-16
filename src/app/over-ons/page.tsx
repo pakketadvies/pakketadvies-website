@@ -5,9 +5,9 @@ import Image from 'next/image'
 
 export default function OverOnsPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-20 md:pt-24">
       {/* Hero */}
-      <section className="bg-brand-navy-500 text-white py-16 md:py-20 relative overflow-hidden">
+      <section className="bg-brand-navy-500 text-white py-12 md:py-16 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image

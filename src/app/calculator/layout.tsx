@@ -1,8 +1,6 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { Lightning } from '@phosphor-icons/react'
 
 export default function CalculatorLayout({
@@ -12,8 +10,6 @@ export default function CalculatorLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header />
-      
       {/* Hero Section */}
       <div className="pt-32 pb-16 bg-brand-navy-500 relative overflow-hidden">
         {/* Background decorations */}
@@ -53,8 +49,6 @@ export default function CalculatorLayout({
       <main className="flex-grow bg-gray-50">
         {children}
       </main>
-
-      <Footer />
     </div>
   )
 }

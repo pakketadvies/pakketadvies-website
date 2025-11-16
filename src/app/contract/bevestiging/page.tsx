@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default function BevestigingPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12 pt-32 md:pt-36">
       <div className="container-custom max-w-3xl">
         <Card>
           <CardContent className="pt-12 pb-8 text-center">
