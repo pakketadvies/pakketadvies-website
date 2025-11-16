@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Lightning, ChartLineUp, ShieldCheck } from '@phosphor-icons/react'
+import { QuickCalculator } from '@/components/calculator/QuickCalculator'
 
 export function Hero() {
   return (
@@ -28,14 +28,6 @@ export function Hero() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="space-y-8 animate-slide-up">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark border border-brand-teal-500/30">
-              <Lightning weight="duotone" className="w-5 h-5 text-brand-teal-500" />
-              <span className="text-sm font-medium text-white">
-                Specialist in zakelijke energiecontracten
-              </span>
-            </div>
-
             {/* Heading */}
             <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               Stop met te veel betalen voor{' '}
@@ -52,17 +44,6 @@ export function Hero() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/calculator">
-                <button className="group relative px-8 py-4 bg-brand-teal-500 text-white rounded-2xl font-semibold text-lg shadow-2xl shadow-brand-teal-500/30 hover:shadow-brand-teal-500/50 hover:bg-brand-teal-600 transition-all duration-300 hover:scale-105">
-                  <span className="flex items-center gap-2">
-                    Bereken je besparing
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                </button>
-              </Link>
-              
               <Link href="/contact">
                 <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-semibold text-lg border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
                   Plan een gesprek
@@ -87,28 +68,9 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Visual Side - Bento Grid Cards */}
-          <div className="hidden lg:grid grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {/* Card 1 - Big */}
-            <div className="col-span-2 glass-dark rounded-3xl p-8 border border-white/10 hover-lift group cursor-pointer">
-              <ChartLineUp weight="duotone" className="w-12 h-12 text-brand-teal-500 mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold text-white mb-2">Tot 40% besparing</h3>
-              <p className="text-gray-300">Wij onderhandelen de beste tarieven voor jouw bedrijf</p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="glass-dark rounded-3xl p-6 border border-white/10 hover-lift group cursor-pointer">
-              <Lightning weight="duotone" className="w-10 h-10 text-brand-teal-500 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl font-bold text-white mb-2">Snel schakelen</h3>
-              <p className="text-sm text-gray-300">Binnen 2 weken geregeld</p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="glass-dark rounded-3xl p-6 border border-white/10 hover-lift group cursor-pointer">
-              <ShieldCheck weight="duotone" className="w-10 h-10 text-brand-teal-500 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl font-bold text-white mb-2">Zorgeloos</h3>
-              <p className="text-sm text-gray-300">Wij regelen alles van A tot Z</p>
-            </div>
+          {/* Quick Calculator Widget */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <QuickCalculator />
           </div>
         </div>
       </div>
