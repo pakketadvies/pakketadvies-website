@@ -131,7 +131,7 @@ export function VerbruikForm() {
             <input
               type="hidden"
               {...register('gasJaar', { valueAsNumber: true })}
-              value={gasWaarde}
+              value={gasWaarde ?? 0}
             />
           </div>
 
