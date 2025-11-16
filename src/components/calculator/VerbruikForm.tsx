@@ -14,6 +14,7 @@ const verbruikSchema = z.object({
   elektriciteitJaar: z.number().min(0, 'Vul een geldig verbruik in'),
   gasJaar: z.number().min(0, 'Vul een geldig verbruik in').nullable(),
   postcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/, 'Vul een geldige postcode in'),
+  geschat: z.boolean(),
 })
 
 export function VerbruikForm() {
