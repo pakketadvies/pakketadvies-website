@@ -8,7 +8,7 @@ const inputVariants = cva(
   'w-full px-4 rounded-xl border text-gray-900 placeholder:text-gray-500/50 transition-all duration-150 focus:outline-none focus:ring-3 disabled:bg-gray-50 disabled:cursor-not-allowed',
   {
     variants: {
-      size: {
+      inputSize: {
         sm: 'h-10 text-sm',
         md: 'h-12 md:h-14 text-base',
       },
@@ -19,14 +19,14 @@ const inputVariants = cva(
       },
     },
     defaultVariants: {
-      size: 'md',
+      inputSize: 'md',
       state: 'default',
     },
   }
 )
 
 export interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement>,
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   label?: string
   error?: string
@@ -34,7 +34,7 @@ export interface InputProps
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size, state, label, error, helpText, ...props }, ref) => {
+  ({ className, inputSize, state, label, error, helpText, ...props }, ref) => {
     const inputState = error ? 'error' : state
 
     return (
@@ -48,7 +48,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
-          className={cn(inputVariants({ size, state: inputState, className }))}
+          className={cn(inputVariants({ inputSize, state: inputState, className }))}
           ref={ref}
           {...props}
         />

@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 
 const voorkeurenSchema = z.object({
   type: z.enum(['vast', 'dynamisch', 'beide']),
-  looptijd: z.enum([1, 2, 3, 5]),
+  looptijd: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(5)]),
   groeneEnergie: z.boolean(),
   opmerkingen: z.string().optional(),
 })
