@@ -79,10 +79,31 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Bottom wave */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-12 md:h-auto">
-          <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
+      {/* Bottom energy flow transition */}
+      <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-16 md:h-auto">
+          {/* Main white background */}
+          <path d="M0,40 Q360,10 720,40 T1440,40 L1440,120 L0,120 Z" fill="white"/>
+          
+          {/* Subtle teal energy accent line */}
+          <path 
+            d="M0,40 Q360,10 720,40 T1440,40" 
+            stroke="url(#energyGradient)" 
+            strokeWidth="2" 
+            fill="none"
+            opacity="0.4"
+          />
+          
+          {/* Gradient definition */}
+          <defs>
+            <linearGradient id="energyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#00AF9B" stopOpacity="0" />
+              <stop offset="20%" stopColor="#00AF9B" stopOpacity="1" />
+              <stop offset="50%" stopColor="#00AF9B" stopOpacity="1" />
+              <stop offset="80%" stopColor="#00AF9B" stopOpacity="1" />
+              <stop offset="100%" stopColor="#00AF9B" stopOpacity="0" />
+            </linearGradient>
+          </defs>
         </svg>
       </div>
     </section>

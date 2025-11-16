@@ -65,10 +65,7 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
-      {/* Top divider */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-30" />
-      
+    <section className="py-24 bg-white">
       <div className="container-custom">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
