@@ -114,8 +114,14 @@ export function Hero() {
       </div>
 
       {/* Bottom energy flow transition */}
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-16 md:h-auto">
+      <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden">
+        <svg 
+          viewBox="0 0 1440 120" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg" 
+          className="w-full h-20 md:h-24 lg:h-auto"
+          preserveAspectRatio="none"
+        >
           {/* Main white background */}
           <path d="M0,40 Q360,10 720,40 T1440,40 L1440,120 L0,120 Z" fill="white"/>
           
