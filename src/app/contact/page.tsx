@@ -1,13 +1,25 @@
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import Image from 'next/image'
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-brand-navy-500 text-white py-16">
-        <div className="container-custom">
+      <section className="bg-brand-navy-500 text-white py-16 md:py-20 relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/office-team.jpg"
+            alt="Professional office team"
+            fill
+            className="object-cover opacity-10"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-navy-500/95 to-brand-navy-600/90" />
+        </div>
+        
+        <div className="container-custom relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact</h1>
           <p className="text-lg text-white/90 max-w-2xl">
             Heeft u vragen of wilt u vrijblijvend advies? Neem contact met ons op.
