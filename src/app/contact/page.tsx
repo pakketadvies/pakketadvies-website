@@ -37,7 +37,7 @@ export default function ContactPage() {
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder:text-gray-500/50 focus:outline-none focus:ring-3 focus:ring-brand-teal-500/20 focus:border-brand-teal-500 transition-all duration-150 resize-none"
                     />
                   </div>
-                  <Button fullWidth>Verstuur bericht</Button>
+                  <Button className="w-full">Verstuur bericht</Button>
                 </form>
               </CardContent>
             </Card>

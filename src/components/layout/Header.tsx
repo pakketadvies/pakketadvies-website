@@ -1,90 +1,106 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useState } from 'react'
-import { Button } from '@/components/ui/Button'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Lightning, List, X } from '@phosphor-icons/react'
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const navigation = [
-    { name: 'Diensten', href: '/diensten' },
-    { name: 'Over ons', href: '/over-ons' },
-    { name: 'Kennisbank', href: '/kennisbank' },
-    { name: 'Contact', href: '/contact' },
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const navLinks = [
+    { href: '/diensten', label: 'Diensten' },
+    { href: '/kennisbank', label: 'Kennisbank' },
+    { href: '/over-ons', label: 'Over ons' },
+    { href: '/contact', label: 'Contact' },
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'py-3' : 'py-5'
+    }`}>
       <div className="container-custom">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-brand-navy-500">
-              PakketAdvies
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-brand-navy-500 hover:text-brand-teal-500 font-medium transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* CTA Button Desktop */}
-          <div className="hidden lg:block">
-            <Link href="/calculator">
-              <Button>Bereken uw besparing</Button>
+        <nav className={`rounded-2xl transition-all duration-300 ${
+          isScrolled 
+            ? 'glass border border-white/20 shadow-xl backdrop-blur-lg' 
+            : 'bg-white/80 backdrop-blur-sm border border-white/40'
+        }`}>
+          <div className="flex items-center justify-between px-6 py-4">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary-500/50 transition-all duration-300 group-hover:scale-110">
+                <Lightning weight="duotone" className="w-6 h-6 text-white" />
+              </div>
+              <span className="font-display text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
+                PakketAdvies
+              </span>
             </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-4 py-2 rounded-xl text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 font-medium"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <div className="hidden lg:flex items-center gap-3">
+              <Link href="/calculator">
+                <button className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-105 transition-all duration-300">
+                  Bereken besparing
+                </button>
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6 text-gray-700" />
+              ) : (
+                <List className="w-6 h-6 text-gray-700" />
+              )}
+            </button>
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            className="lg:hidden w-10 h-10 flex items-center justify-center text-brand-navy-500"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <XMarkIcon className="w-6 h-6" />
-            ) : (
-              <Bars3Icon className="w-6 h-6" />
-            )}
-          </button>
-        </div>
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden border-t border-gray-200 px-6 py-4 space-y-2 animate-slide-down">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block px-4 py-3 rounded-xl text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Link href="/calculator" onClick={() => setIsMobileMenuOpen(false)}>
+                <button className="w-full px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold shadow-lg">
+                  Bereken besparing
+                </button>
+              </Link>
+            </div>
+          )}
+        </nav>
       </div>
-
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-20 z-40 bg-white">
-          <nav className="p-4 space-y-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="block px-4 py-3 rounded-xl text-brand-navy-500 font-medium hover:bg-brand-teal-50 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* CTA Button Mobile */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
-            <Link href="/calculator" className="block">
-              <Button fullWidth>Bereken uw besparing</Button>
-            </Link>
-          </div>
-        </div>
-      )}
     </header>
   )
 }
-

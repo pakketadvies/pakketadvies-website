@@ -1,74 +1,136 @@
-import { Card, CardContent } from '@/components/ui/Card'
+'use client'
+
+import { Star, Quotes } from '@phosphor-icons/react'
+
+const testimonials = [
+  {
+    name: 'Jan van der Berg',
+    company: 'Van der Berg Installatietechniek',
+    role: 'Directeur',
+    content: 'PakketAdvies heeft ons binnen 2 weken geholpen met overstappen naar een veel voordeliger contract. We besparen nu €8.000 per jaar!',
+    rating: 5,
+    savings: '€8.000',
+    avatar: '👨‍💼'
+  },
+  {
+    name: 'Linda Hermans',
+    company: 'Hermans & Zn. Bakkerij',
+    role: 'Eigenaar',
+    content: 'Eindelijk iemand die echt meedenkt. Geen gedoe, gewoon een eerlijk advies en een contract dat perfect past bij onze situatie.',
+    rating: 5,
+    savings: '€3.500',
+    avatar: '👩‍💼'
+  },
+  {
+    name: 'Mark Jansen',
+    company: 'Jansen Transport B.V.',
+    role: 'CFO',
+    content: 'Transparantie en vakkennis op één plek. De vergelijking was helder en het hele proces vlekkeloos. Absolute aanrader!',
+    rating: 5,
+    savings: '€12.000',
+    avatar: '👨'
+  },
+]
 
 export function Testimonials() {
-  const testimonials = [
-    {
-      name: 'Jan de Vries',
-      company: 'Bakkerij De Vries',
-      rating: 5,
-      text: 'Zeer tevreden met de service van PakketAdvies. Ze hebben ons geholpen om te besparen op onze energiekosten en het hele proces was simpel en transparant.',
-    },
-    {
-      name: 'Maria Jansen',
-      company: 'Kapsalon Elegance',
-      rating: 5,
-      text: 'Professionele begeleiding van begin tot eind. De adviseur nam de tijd om alles uit te leggen en we zijn nu zeer blij met ons nieuwe contract.',
-    },
-    {
-      name: 'Peter Smit',
-      company: 'Restaurant Het Anker',
-      rating: 5,
-      text: 'Enorme besparing gerealiseerd! PakketAdvies vond een contract dat perfect bij ons bedrijf past. Aanrader voor elke ondernemer.',
-    },
-  ]
-
   return (
-    <section className="py-16 md:py-24 bg-gray-50">
+    <section className="py-24 bg-gradient-to-b from-white to-primary-50 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent" />
+      
       <div className="container-custom">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
-            Wat onze klanten over ons zeggen
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-50 border border-accent-200">
+            <Star weight="duotone" className="w-5 h-5 text-accent-600" />
+            <span className="text-sm font-semibold text-accent-700">
+              4.9/5 gemiddelde beoordeling
+            </span>
+          </div>
+          
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-dark-900">
+            Wat onze klanten{' '}
+            <span className="gradient-text">zeggen</span>
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Ontdek waarom meer dan 500 bedrijven ons vertrouwen
+          
+          <p className="text-lg text-gray-600">
+            Sluit je aan bij honderden tevreden bedrijven die al besparen met PakketAdvies
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+        {/* Testimonials Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {testimonials.map((testimonial, index) => (
-            <Card key={index}>
-              <CardContent className="pt-8">
-                {/* Rating */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5 text-warning-500 fill-current"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
+            <div
+              key={index}
+              className="group relative bg-white rounded-3xl p-8 border border-gray-200 hover-lift transition-all duration-300"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* Quote icon */}
+              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                <Quotes weight="bold" className="w-6 h-6 text-white" />
+              </div>
 
-                {/* Testimonial text */}
-                <p className="text-gray-500 mb-6 italic">
-                  "{testimonial.text}"
-                </p>
+              {/* Stars */}
+              <div className="flex gap-1 mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} weight="fill" className="w-5 h-5 text-accent-500" />
+                ))}
+              </div>
 
-                {/* Author */}
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="font-semibold text-brand-navy-500">
-                    {testimonial.name}
-                  </p>
-                  <p className="text-sm text-gray-500">{testimonial.company}</p>
+              {/* Content */}
+              <p className="text-gray-700 leading-relaxed mb-6 text-lg">
+                "{testimonial.content}"
+              </p>
+
+              {/* Author */}
+              <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-energy-100 rounded-2xl flex items-center justify-center text-2xl">
+                  {testimonial.avatar}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex-1">
+                  <div className="font-bold text-dark-900">{testimonial.name}</div>
+                  <div className="text-sm text-gray-600">{testimonial.role}</div>
+                  <div className="text-xs text-gray-500">{testimonial.company}</div>
+                </div>
+              </div>
+
+              {/* Savings badge */}
+              <div className="absolute -bottom-3 -right-3 px-4 py-2 bg-gradient-to-r from-energy-500 to-energy-600 text-white rounded-xl shadow-lg font-bold text-sm">
+                {testimonial.savings} bespaard
+              </div>
+            </div>
           ))}
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <div className="text-center">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mb-2">
+              500+
+            </div>
+            <div className="text-gray-600 font-medium">Tevreden klanten</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-energy-600 to-energy-700 bg-clip-text text-transparent mb-2">
+              €2M+
+            </div>
+            <div className="text-gray-600 font-medium">Totaal bespaard</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-accent-600 to-accent-700 bg-clip-text text-transparent mb-2">
+              4.9
+            </div>
+            <div className="text-gray-600 font-medium">Gemiddelde score</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary-600 to-energy-600 bg-clip-text text-transparent mb-2">
+              98%
+            </div>
+            <div className="text-gray-600 font-medium">Aanbeveelt ons</div>
+          </div>
         </div>
       </div>
     </section>
   )
 }
-

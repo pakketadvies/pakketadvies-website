@@ -1,63 +1,154 @@
-import { Card, CardContent, CardTitle } from '@/components/ui/Card'
+'use client'
+
+import { 
+  Lightning, 
+  ChartLineUp, 
+  ShieldCheck, 
+  Users, 
+  ClockClockwise, 
+  Leaf,
+  HandCoins,
+  Lightbulb
+} from '@phosphor-icons/react'
+
+const features = [
+  {
+    icon: ChartLineUp,
+    title: 'Transparante vergelijking',
+    description: 'Vergelijk alle beschikbare energieleveranciers in één overzicht. Geen verrassingen, alleen heldere cijfers.',
+    gradient: 'from-primary-500 to-primary-600',
+    size: 'large'
+  },
+  {
+    icon: HandCoins,
+    title: 'Direct besparen',
+    description: 'Gemiddeld 30-40% besparing op je energiekosten',
+    gradient: 'from-energy-500 to-energy-600',
+    size: 'small'
+  },
+  {
+    icon: Lightning,
+    title: 'Snel geregeld',
+    description: 'Binnen 2 weken volledig overgestapt',
+    gradient: 'from-accent-500 to-accent-600',
+    size: 'small'
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Volledig ontzorgd',
+    description: 'Wij regelen alles voor je, van opzeggen tot activeren. Jij hoeft nergens meer aan te denken.',
+    gradient: 'from-primary-600 to-primary-700',
+    size: 'medium'
+  },
+  {
+    icon: Users,
+    title: 'Persoonlijk advies',
+    description: 'Geen bots of formulieren. Altijd contact met een echte specialist.',
+    gradient: 'from-energy-600 to-energy-700',
+    size: 'medium'
+  },
+  {
+    icon: ClockClockwise,
+    title: '24/7 support',
+    description: 'Vragen? We staan altijd voor je klaar',
+    gradient: 'from-accent-600 to-accent-700',
+    size: 'small'
+  },
+  {
+    icon: Leaf,
+    title: 'Groene energie opties',
+    description: 'Stap over naar duurzame energie zonder gedoe',
+    gradient: 'from-energy-500 to-energy-600',
+    size: 'small'
+  },
+  {
+    icon: Lightbulb,
+    title: 'Slimme contracten',
+    description: 'We kiezen het perfecte contract voor jouw situatie. Vast, dynamisch of een combinatie - wij weten wat het beste werkt.',
+    gradient: 'from-primary-500 to-energy-500',
+    size: 'large'
+  },
+]
 
 export function Features() {
-  const features = [
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      title: 'Gratis advies op maat',
-      description: 'Onze energiespecialisten adviseren u vrijblijvend over de beste opties voor uw bedrijf.',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      title: 'Van A tot Z geregeld',
-      description: 'Wij nemen het hele proces uit handen, van vergelijken tot en met het afsluiten van uw nieuwe contract.',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      title: 'Zorgeloos overstappen',
-      description: 'Geen gedoe met opzeggingen of administratie. Wij regelen de overstap naar uw nieuwe leverancier.',
-    },
-  ]
-
   return (
-    <section className="py-16 md:py-24 bg-brand-teal-50">
+    <section className="py-24 bg-gradient-to-b from-white to-gray-50">
       <div className="container-custom">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
-            Waarom kiezen voor PakketAdvies?
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 border border-primary-100">
+            <Lightning weight="duotone" className="w-5 h-5 text-primary-600" />
+            <span className="text-sm font-semibold text-primary-700">
+              Waarom PakketAdvies?
+            </span>
+          </div>
+          
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-dark-900">
+            Alles wat je nodig hebt voor{' '}
+            <span className="gradient-text">het beste energiecontract</span>
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            We helpen MKB'ers en grootzakelijke klanten al jaren met het vinden van de beste energiecontracten
+          
+          <p className="text-lg text-gray-600">
+            We maken het overstappen naar een betere energieleverancier simpel, 
+            snel en zorgeloos voor jouw bedrijf.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-          {features.map((feature, index) => (
-            <Card key={index} className="text-center hover:border-brand-teal-500 group">
-              <CardContent className="pt-8">
-                <div className="w-16 h-16 mx-auto mb-4 bg-brand-teal-50 rounded-2xl flex items-center justify-center text-brand-teal-500 group-hover:bg-brand-teal-500 group-hover:text-white transition-colors duration-250">
-                  {feature.icon}
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => {
+            const Icon = feature.icon
+            const isLarge = feature.size === 'large'
+            const isMedium = feature.size === 'medium'
+            
+            return (
+              <div
+                key={index}
+                className={`
+                  group relative overflow-hidden rounded-3xl bg-white border border-gray-200 p-8
+                  hover-lift cursor-pointer transition-all duration-300
+                  ${isLarge ? 'md:col-span-2' : ''}
+                  ${isMedium ? 'md:col-span-1 lg:col-span-2' : ''}
+                `}
+              >
+                {/* Gradient background on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                
+                {/* Content */}
+                <div className="relative z-10 h-full flex flex-col">
+                  {/* Icon */}
+                  <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon weight="duotone" className="w-7 h-7 text-white" />
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-xl md:text-2xl font-bold text-dark-900 mb-3 group-hover:text-primary-600 transition-colors">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className={`text-gray-600 leading-relaxed ${isLarge ? 'text-lg' : ''}`}>
+                    {feature.description}
+                  </p>
                 </div>
-                <CardTitle className="mb-2">{feature.title}</CardTitle>
-                <p className="text-gray-500">{feature.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+
+                {/* Decorative element */}
+                <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary-100 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-16 text-center">
+          <a href="/calculator" className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 hover:scale-105 transition-all duration-300">
+            Start met besparen
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
   )
 }
-

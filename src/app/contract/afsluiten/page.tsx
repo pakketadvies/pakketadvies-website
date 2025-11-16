@@ -311,10 +311,9 @@ export default function ContractAfsluitenPage() {
               <Button
                 size="lg"
                 onClick={handleSubmit}
-                disabled={!handtekeningMethode}
-                loading={isSubmitting}
+                disabled={!handtekeningMethode || isSubmitting}
               >
-                Contract ondertekenen →
+                {isSubmitting ? 'Bezig met ondertekenen...' : 'Contract ondertekenen →'}
               </Button>
             </div>
           </div>

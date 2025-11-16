@@ -1,14 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardTitle } from '@/components/ui/Card'
 import { useCalculatorStore } from '@/store/calculatorStore'
-import type { VerbruikData } from '@/types/calculator'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { Lightning, MapPin } from '@phosphor-icons/react'
+import { useState } from 'react'
 
 const verbruikSchema = z.object({
   elektriciteitJaar: z.number().min(0, 'Vul een geldig verbruik in'),
@@ -17,141 +16,141 @@ const verbruikSchema = z.object({
   geschat: z.boolean(),
 })
 
+type VerbruikFormData = z.infer<typeof verbruikSchema>
+
 export function VerbruikForm() {
   const { setVerbruik, volgendeStap } = useCalculatorStore()
-  const [geschat, setGeschat] = useState(false)
+  const [isGeschat, setIsGeschat] = useState(false)
+  const [heeftGas, setHeeftGas] = useState(true)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
-  } = useForm<VerbruikData>({
+  } = useForm<VerbruikFormData>({
     resolver: zodResolver(verbruikSchema),
     defaultValues: {
-      elektriciteitJaar: 25000,
-      gasJaar: 3500,
-      postcode: '',
       geschat: false,
+      gasJaar: null,
     },
   })
 
-  const elektriciteitWaarde = watch('elektriciteitJaar')
-  const gasWaarde = watch('gasJaar')
-
-  const onSubmit = (data: VerbruikData) => {
-    setVerbruik({ ...data, geschat })
+  const onSubmit = (data: VerbruikFormData) => {
+    setVerbruik({
+      elektriciteitJaar: data.elektriciteitJaar,
+      gasJaar: heeftGas ? data.gasJaar : null,
+      postcode: data.postcode,
+      geschat: isGeschat,
+    })
     volgendeStap()
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card>
-        <CardContent className="pt-8">
-          <CardTitle className="mb-6">Wat is uw jaarlijks energieverbruik?</CardTitle>
-
-          {/* Verbruik type selectie */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <button
-              type="button"
-              onClick={() => setGeschat(false)}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                !geschat
-                  ? 'border-brand-teal-500 bg-brand-teal-50'
-                  : 'border-gray-200 hover:border-brand-teal-500'
-              }`}
-            >
-              <div className="font-medium text-brand-navy-500">Ik weet mijn verbruik</div>
-              <div className="text-sm text-gray-500 mt-1">Exacte invoer</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setGeschat(true)}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                geschat
-                  ? 'border-brand-teal-500 bg-brand-teal-50'
-                  : 'border-gray-200 hover:border-brand-teal-500'
-              }`}
-            >
-              <div className="font-medium text-brand-navy-500">Ik weet het niet</div>
-              <div className="text-sm text-gray-500 mt-1">Schatting</div>
-            </button>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {/* Header */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center">
+            <Lightning weight="duotone" className="w-6 h-6 text-white" />
           </div>
-
-          {/* Elektriciteit */}
-          <div className="space-y-3 mb-6">
-            <label className="block text-sm font-medium text-brand-navy-500">
-              Elektriciteit (kWh per jaar)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100000"
-              step="1000"
-              value={elektriciteitWaarde}
-              onChange={(e) => setValue('elektriciteitJaar', Number(e.target.value))}
-              className="w-full h-2 rounded-full bg-brand-teal-50 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-teal-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>0 kWh</span>
-              <span className="text-lg font-semibold text-brand-teal-500">
-                {elektriciteitWaarde.toLocaleString()} kWh
-              </span>
-              <span>100.000 kWh</span>
-            </div>
-            <input
-              type="hidden"
-              {...register('elektriciteitJaar', { valueAsNumber: true })}
-              value={elektriciteitWaarde}
-            />
+          <div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-dark-900">
+              Energieverbruik
+            </h2>
+            <p className="text-gray-600">Vul je jaarverbruik in</p>
           </div>
-
-          {/* Gas */}
-          <div className="space-y-3 mb-6">
-            <label className="block text-sm font-medium text-brand-navy-500">
-              Gas (m³ per jaar)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="10000"
-              step="100"
-              value={gasWaarde || 0}
-              onChange={(e) => setValue('gasJaar', Number(e.target.value))}
-              className="w-full h-2 rounded-full bg-brand-teal-50 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-teal-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>0 m³</span>
-              <span className="text-lg font-semibold text-brand-teal-500">
-                {(gasWaarde || 0).toLocaleString()} m³
-              </span>
-              <span>10.000 m³</span>
-            </div>
-            <input
-              type="hidden"
-              {...register('gasJaar', { valueAsNumber: true })}
-              value={gasWaarde ?? 0}
-            />
-          </div>
-
-          {/* Postcode */}
-          <Input
-            {...register('postcode')}
-            label="Postcode"
-            placeholder="1234 AB"
-            error={errors.postcode?.message}
-            helpText="Voor regio-specifieke tarieven"
-          />
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end">
-        <Button type="submit" size="lg">
-          Volgende stap →
-        </Button>
+        </div>
       </div>
+
+      {/* Postcode */}
+      <div>
+        <Input
+          label="Postcode"
+          placeholder="1234 AB"
+          error={errors.postcode?.message}
+          helpText="Je postcode gebruiken we om de beste tarieven voor jouw regio te vinden"
+          {...register('postcode')}
+          required
+        />
+      </div>
+
+      {/* Elektriciteit */}
+      <div>
+        <Input
+          label="Elektriciteitsverbruik per jaar (kWh)"
+          type="number"
+          placeholder="bijv. 3500"
+          error={errors.elektriciteitJaar?.message}
+          helpText="Gemiddeld MKB: 5.000-15.000 kWh per jaar"
+          {...register('elektriciteitJaar', { valueAsNumber: true })}
+          required
+        />
+      </div>
+
+      {/* Gas toggle */}
+      <div className="space-y-4">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={heeftGas}
+            onChange={(e) => {
+              setHeeftGas(e.target.checked)
+              if (!e.target.checked) {
+                setValue('gasJaar', null)
+              }
+            }}
+            className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-offset-2"
+          />
+          <span className="text-base font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+            Ik gebruik ook gas
+          </span>
+        </label>
+
+        {heeftGas && (
+          <div className="animate-slide-down">
+            <Input
+              label="Gasverbruik per jaar (m³)"
+              type="number"
+              placeholder="bijv. 1200"
+              error={errors.gasJaar?.message}
+              helpText="Gemiddeld MKB: 1.000-5.000 m³ per jaar"
+              {...register('gasJaar', { valueAsNumber: true })}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Geschat toggle */}
+      <div className="bg-primary-50 border border-primary-100 rounded-2xl p-6">
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={isGeschat}
+            onChange={(e) => {
+              setIsGeschat(e.target.checked)
+              setValue('geschat', e.target.checked)
+            }}
+            className="mt-1 w-5 h-5 rounded border-2 border-primary-300 text-primary-600 focus:ring-primary-500 focus:ring-offset-2"
+          />
+          <div>
+            <span className="text-base font-semibold text-primary-900 block mb-1">
+              Dit is een schatting
+            </span>
+            <span className="text-sm text-primary-700">
+              Geen probleem! We helpen je later met het vinden van je exacte verbruik.
+            </span>
+          </div>
+        </label>
+      </div>
+
+      {/* Submit button */}
+      <Button type="submit" size="lg" className="w-full">
+        Volgende stap
+        <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </Button>
     </form>
   )
 }
-

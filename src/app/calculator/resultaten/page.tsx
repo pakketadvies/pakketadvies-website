@@ -260,7 +260,7 @@ export default function ResultatenPage() {
 
                 {/* Actions */}
                 <div className="space-y-3 pt-4 border-t border-gray-200">
-                  <Button fullWidth>Kies dit contract</Button>
+                  <Button className="w-full">Kies dit contract</Button>
                   <button className="w-full text-gray-500 py-2 text-sm hover:text-brand-teal-500 transition-colors">
                     Bekijk details
                   </button>
