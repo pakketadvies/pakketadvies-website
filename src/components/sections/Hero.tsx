@@ -15,12 +15,12 @@ export function Hero() {
               We regelen het beste energiecontract voor uw bedrijf. Simpel, transparant en altijd met uw voordeel voorop.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" variant="primary" asChild className="bg-white text-brand-teal-500 hover:bg-white/90">
-                <Link href="/calculator">Bereken uw besparing →</Link>
-              </Button>
-              <Button size="lg" variant="secondary" asChild className="border-white text-white hover:bg-white/10">
-                <Link href="/over-ons">Meer over ons</Link>
-              </Button>
+              <Link href="/calculator">
+                <Button size="lg" variant="primary" className="bg-white text-brand-teal-500 hover:bg-white/90">Bereken uw besparing →</Button>
+              </Link>
+              <Link href="/over-ons">
+                <Button size="lg" variant="secondary" className="border-white text-white hover:bg-white/10">Meer over ons</Button>
+              </Link>
             </div>
             {/* Trust indicators */}
             <div className="flex flex-wrap items-center gap-6 pt-6 text-sm text-white/80">

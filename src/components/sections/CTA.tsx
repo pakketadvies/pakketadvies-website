@@ -11,9 +11,9 @@ export function CTA() {
         <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
           Start vandaag nog met een gratis berekening en ontdek hoeveel u kunt besparen
         </p>
-        <Button size="lg" variant="primary" asChild className="bg-white text-brand-teal-500 hover:bg-white/90">
-          <Link href="/calculator">Start gratis berekening →</Link>
-        </Button>
+        <Link href="/calculator">
+          <Button size="lg" variant="primary" className="bg-white text-brand-teal-500 hover:bg-white/90">Start gratis berekening →</Button>
+        </Link>
         <p className="mt-6 text-sm text-white/70">
           Vrijblijvend • Geen verplichtingen • Direct resultaat
         </p>

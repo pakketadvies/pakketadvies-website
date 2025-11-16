@@ -125,9 +125,9 @@ export default function BevestigingPage() {
 
         {/* Back to home */}
         <div className="mt-8 text-center">
-          <Button size="lg" asChild>
-            <Link href="/">Terug naar home</Link>
-          </Button>
+          <Link href="/">
+            <Button size="lg">Terug naar home</Button>
+          </Link>
         </div>
       </div>
     </div>

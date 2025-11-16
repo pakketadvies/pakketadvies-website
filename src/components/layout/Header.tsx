@@ -41,9 +41,9 @@ export function Header() {
 
           {/* CTA Button Desktop */}
           <div className="hidden lg:block">
-            <Button asChild>
-              <Link href="/calculator">Bereken uw besparing</Link>
-            </Button>
+            <Link href="/calculator">
+              <Button>Bereken uw besparing</Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -78,9 +78,9 @@ export function Header() {
 
           {/* CTA Button Mobile */}
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
-            <Button fullWidth asChild>
-              <Link href="/calculator">Bereken uw besparing</Link>
-            </Button>
+            <Link href="/calculator" className="block">
+              <Button fullWidth>Bereken uw besparing</Button>
+            </Link>
           </div>
         </div>
       )}
