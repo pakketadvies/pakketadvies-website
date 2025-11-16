@@ -31,7 +31,7 @@ export function QuickCalculator() {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-gray-100">
+    <div className="bg-white rounded-2xl p-4 md:p-6 lg:p-8 shadow-xl border border-gray-100 w-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 md:w-12 md:h-12 bg-brand-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">

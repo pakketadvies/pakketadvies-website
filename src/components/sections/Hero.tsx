@@ -21,9 +21,9 @@ export function Hero() {
 
       <div className="container-custom py-8 md:py-12 lg:py-20 relative z-10 w-full">
         {/* Mobile Layout */}
-        <div className="lg:hidden space-y-8">
+        <div className="lg:hidden space-y-8 px-4">
           {/* Heading */}
-          <div className="text-center px-4">
+          <div className="text-center">
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
               Stop met te veel betalen voor{' '}
               <span className="text-brand-teal-500">energie</span>
@@ -34,12 +34,12 @@ export function Hero() {
           </div>
 
           {/* Calculator - Prominent on mobile */}
-          <div className="w-full px-4">
+          <div className="w-full">
             <QuickCalculator />
           </div>
 
           {/* Trust indicators - Compact on mobile */}
-          <div className="grid grid-cols-3 gap-3 px-4 pt-4">
+          <div className="grid grid-cols-3 gap-3 pt-4">
             <div className="text-center">
               <div className="text-xl font-bold text-white mb-0.5">500+</div>
               <div className="text-xs text-gray-400">Bedrijven</div>
@@ -55,7 +55,7 @@ export function Hero() {
           </div>
 
           {/* CTA Button */}
-          <div className="px-4">
+          <div className="w-full">
             <Link href="/contact" className="block">
               <button className="w-full px-6 py-3.5 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300">
                 Plan een gratis gesprek
