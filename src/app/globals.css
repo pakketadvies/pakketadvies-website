@@ -6,11 +6,6 @@
   /* Inter font import */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-  /* Base styles */
-  * {
-    @apply border-gray-200;
-  }
-
   html {
     @apply antialiased;
     scroll-behavior: smooth;
