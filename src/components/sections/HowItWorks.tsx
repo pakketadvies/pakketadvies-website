@@ -33,6 +33,9 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="py-24 bg-gray-50 relative overflow-hidden">
+      {/* Top divider */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-30" />
+      
       {/* Background decorations */}
       <div className="absolute top-20 left-0 w-96 h-96 bg-brand-teal-100/50 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-0 w-96 h-96 bg-brand-navy-100/50 rounded-full blur-3xl" />

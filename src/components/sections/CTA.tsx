@@ -7,6 +7,9 @@ import { Lightning, ArrowRight, CheckCircle } from '@phosphor-icons/react'
 export function CTA() {
   return (
     <section className="py-24 bg-brand-navy-500 relative overflow-hidden">
+      {/* Top divider */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-50" />
+      
       {/* Background image */}
       <div className="absolute inset-0">
         <Image
