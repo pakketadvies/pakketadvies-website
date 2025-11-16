@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { 
   Lightning, 
   ChartLineUp, 
@@ -133,6 +134,22 @@ export function Features() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </a>
+        </div>
+
+        {/* Visual Section with Image */}
+        <div className="mt-24 relative h-96 rounded-3xl overflow-hidden">
+          <Image
+            src="/images/features-dashboard.jpg"
+            alt="Energy dashboard analytics"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-500/80 to-transparent flex items-end p-12">
+            <div className="text-white">
+              <h3 className="font-display text-3xl font-bold mb-2">Real-time inzicht in je energiekosten</h3>
+              <p className="text-lg text-gray-200">Volledige transparantie en controle over je zakelijke energiecontracten</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

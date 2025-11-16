@@ -1,11 +1,23 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Lightning, ArrowRight, CheckCircle } from '@phosphor-icons/react'
 
 export function CTA() {
   return (
     <section className="py-24 bg-brand-navy-500 relative overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <Image
+          src="/images/solar-roof.jpg"
+          alt="Solar panels on business roof"
+          fill
+          className="object-cover opacity-15"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-navy-500/95 via-brand-navy-600/90 to-brand-navy-700/95" />
+      </div>
+
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />

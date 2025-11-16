@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Calculator, ChatCircleDots, FileText, CheckCircle } from '@phosphor-icons/react'
 
 const steps = [
@@ -111,6 +112,40 @@ export function HowItWorks() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </a>
+        </div>
+
+        {/* Visual Section with Process Image */}
+        <div className="mt-20 grid md:grid-cols-2 gap-12 items-center">
+          <div className="relative h-80 rounded-2xl overflow-hidden shadow-2xl">
+            <Image
+              src="/images/how-it-works-docs.jpg"
+              alt="Energy contract documents"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <h3 className="font-display text-3xl font-bold text-brand-navy-500 mb-4">
+              Volledig transparant proces
+            </h3>
+            <p className="text-lg text-gray-600 mb-6">
+              Van eerste verbruiksanalyse tot contractondertekening: je hebt altijd volledig inzicht in elke stap. 
+              Geen verborgen kosten, geen verrassingen.
+            </p>
+            <ul className="space-y-3">
+              {[
+                'Gratis en vrijblijvend advies',
+                'Persoonlijke begeleiding door experts',
+                'Contracten altijd juridisch getoetst',
+                'Nazorg na contractafsluiting'
+              ].map((benefit, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Star, Quotes, User } from '@phosphor-icons/react'
 
 const testimonials = [
@@ -10,6 +11,7 @@ const testimonials = [
     content: 'PakketAdvies heeft ons binnen 2 weken geholpen met overstappen naar een veel voordeliger contract. We besparen nu €8.000 per jaar!',
     rating: 5,
     savings: '€8.000',
+    image: '/images/testimonial-warehouse.jpg',
   },
   {
     name: 'Linda Hermans',
@@ -18,6 +20,7 @@ const testimonials = [
     content: 'Eindelijk iemand die echt meedenkt. Geen gedoe, gewoon een eerlijk advies en een contract dat perfect past bij onze situatie.',
     rating: 5,
     savings: '€3.500',
+    image: '/images/testimonial-bakery.jpg',
   },
   {
     name: 'Mark Jansen',
@@ -26,6 +29,7 @@ const testimonials = [
     content: 'Transparantie en vakkennis op één plek. De vergelijking was helder en het hele proces vlekkeloos. Absolute aanrader!',
     rating: 5,
     savings: '€12.000',
+    image: '/images/contract-signing.jpg',
   },
 ]
 
@@ -60,41 +64,48 @@ export function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="group relative bg-white rounded-3xl p-8 border border-gray-200 hover-lift hover:border-brand-teal-500/50 transition-all duration-300"
+              className="group relative bg-white rounded-3xl overflow-hidden border border-gray-200 hover-lift hover:border-brand-teal-500/50 transition-all duration-300"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Quote icon */}
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-brand-teal-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
-                <Quotes weight="bold" className="w-6 h-6 text-white" />
-              </div>
-
-              {/* Stars */}
-              <div className="flex gap-1 mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} weight="fill" className="w-5 h-5 text-brand-teal-500" />
-                ))}
-              </div>
-
-              {/* Content */}
-              <p className="text-gray-700 leading-relaxed mb-6 text-lg">
-                "{testimonial.content}"
-              </p>
-
-              {/* Author */}
-              <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
-                <div className="w-12 h-12 bg-brand-navy-500 rounded-2xl flex items-center justify-center">
-                  <User weight="duotone" className="w-6 h-6 text-brand-teal-500" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-bold text-brand-navy-500">{testimonial.name}</div>
-                  <div className="text-sm text-gray-600">{testimonial.role}</div>
-                  <div className="text-xs text-gray-500">{testimonial.company}</div>
+              {/* Image */}
+              <div className="relative h-48 w-full overflow-hidden">
+                <Image
+                  src={testimonial.image}
+                  alt={`${testimonial.company} - klant van PakketAdvies`}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                {/* Savings badge */}
+                <div className="absolute top-4 right-4 bg-brand-teal-500 text-white px-4 py-2 rounded-xl shadow-xl">
+                  <div className="text-xs font-semibold">Besparing per jaar</div>
+                  <div className="text-xl font-bold">{testimonial.savings}</div>
                 </div>
               </div>
 
-              {/* Savings badge */}
-              <div className="absolute -bottom-3 -right-3 px-4 py-2 bg-brand-teal-500 text-white rounded-xl shadow-lg font-bold text-sm">
-                {testimonial.savings} bespaard
+              <div className="p-8">
+                {/* Stars */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} weight="fill" className="w-5 h-5 text-brand-teal-500" />
+                  ))}
+                </div>
+
+                {/* Content */}
+                <p className="text-gray-700 leading-relaxed mb-6 text-lg">
+                  "{testimonial.content}"
+                </p>
+
+                {/* Author */}
+                <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
+                  <div className="w-12 h-12 bg-brand-navy-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <User weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-brand-navy-500">{testimonial.name}</div>
+                    <div className="text-sm text-gray-600">{testimonial.role}</div>
+                    <div className="text-xs text-gray-500">{testimonial.company}</div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

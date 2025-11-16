@@ -1,11 +1,23 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Lightning, ChartLineUp, ShieldCheck } from '@phosphor-icons/react'
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-navy-700">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-navy-500">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0">
+        <Image
+          src="/images/hero-main.jpg"
+          alt="Professional business meeting"
+          fill
+          className="object-cover opacity-20"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-navy-500/95 via-brand-navy-600/90 to-brand-navy-700/95" />
+      </div>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-brand-teal-500/10 rounded-full blur-3xl animate-float" />
