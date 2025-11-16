@@ -45,7 +45,7 @@ export function BedrijfsgegevensForm() {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-energy-500 to-energy-600 rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-2xl flex items-center justify-center">
             <Buildings weight="duotone" className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -128,8 +128,8 @@ export function BedrijfsgegevensForm() {
                 className={`
                   relative flex flex-col items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20' 
-                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
+                    ? 'border-brand-navy-500 bg-brand-navy-50 shadow-lg shadow-brand-navy-500/20' 
+                    : 'border-gray-200 bg-white hover:border-brand-navy-300 hover:shadow-md'
                   }
                 `}
               >
@@ -140,12 +140,12 @@ export function BedrijfsgegevensForm() {
                   className="sr-only"
                 />
                 <div className="text-3xl mb-2">{option.icon}</div>
-                <div className={`text-sm font-semibold ${isSelected ? 'text-primary-700' : 'text-gray-700'}`}>
+                <div className={`text-sm font-semibold ${isSelected ? 'text-brand-navy-700' : 'text-gray-700'}`}>
                   {option.label}
                 </div>
                 
                 {isSelected && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-brand-navy-600 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>

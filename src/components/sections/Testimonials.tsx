@@ -34,16 +34,16 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-primary-50 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-white to-brand-navy-50 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-navy-500 to-transparent" />
       
       <div className="container-custom">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-50 border border-accent-200">
-            <Star weight="duotone" className="w-5 h-5 text-accent-600" />
-            <span className="text-sm font-semibold text-accent-700">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-50 border border-brand-teal-200">
+            <Star weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+            <span className="text-sm font-semibold text-brand-teal-700">
               4.9/5 gemiddelde beoordeling
             </span>
           </div>
@@ -67,14 +67,14 @@ export function Testimonials() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Quote icon */}
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
                 <Quotes weight="bold" className="w-6 h-6 text-white" />
               </div>
 
               {/* Stars */}
               <div className="flex gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} weight="fill" className="w-5 h-5 text-accent-500" />
+                  <Star key={i} weight="fill" className="w-5 h-5 text-brand-teal-500" />
                 ))}
               </div>
 
@@ -85,7 +85,7 @@ export function Testimonials() {
 
               {/* Author */}
               <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-energy-100 rounded-2xl flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-brand-navy-100 to-brand-teal-100 rounded-2xl flex items-center justify-center text-2xl">
                   {testimonial.avatar}
                 </div>
                 <div className="flex-1">
@@ -96,7 +96,7 @@ export function Testimonials() {
               </div>
 
               {/* Savings badge */}
-              <div className="absolute -bottom-3 -right-3 px-4 py-2 bg-gradient-to-r from-energy-500 to-energy-600 text-white rounded-xl shadow-lg font-bold text-sm">
+              <div className="absolute -bottom-3 -right-3 px-4 py-2 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-xl shadow-lg font-bold text-sm">
                 {testimonial.savings} bespaard
               </div>
             </div>
@@ -106,25 +106,25 @@ export function Testimonials() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
           <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mb-2">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-brand-navy-600 to-brand-navy-700 bg-clip-text text-transparent mb-2">
               500+
             </div>
             <div className="text-gray-600 font-medium">Tevreden klanten</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-energy-600 to-energy-700 bg-clip-text text-transparent mb-2">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-brand-teal-600 to-brand-teal-700 bg-clip-text text-transparent mb-2">
               €2M+
             </div>
             <div className="text-gray-600 font-medium">Totaal bespaard</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-accent-600 to-accent-700 bg-clip-text text-transparent mb-2">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-brand-teal-600 to-brand-teal-700 bg-clip-text text-transparent mb-2">
               4.9
             </div>
             <div className="text-gray-600 font-medium">Gemiddelde score</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary-600 to-energy-600 bg-clip-text text-transparent mb-2">
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-brand-navy-600 to-brand-teal-600 bg-clip-text text-transparent mb-2">
               98%
             </div>
             <div className="text-gray-600 font-medium">Aanbeveelt ons</div>

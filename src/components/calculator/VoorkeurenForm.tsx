@@ -73,7 +73,7 @@ export function VoorkeurenForm() {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-accent-500 to-accent-600 rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-2xl flex items-center justify-center">
             <Leaf weight="duotone" className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -101,8 +101,8 @@ export function VoorkeurenForm() {
                 className={`
                   relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20' 
-                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
+                    ? 'border-brand-navy-500 bg-brand-navy-50 shadow-lg shadow-brand-navy-500/20' 
+                    : 'border-gray-200 bg-white hover:border-brand-navy-300 hover:shadow-md'
                   }
                 `}
               >
@@ -114,13 +114,13 @@ export function VoorkeurenForm() {
                 />
                 <Icon 
                   weight="duotone" 
-                  className={`w-8 h-8 mb-3 ${isSelected ? 'text-primary-600' : 'text-gray-400'}`}
+                  className={`w-8 h-8 mb-3 ${isSelected ? 'text-brand-navy-600' : 'text-gray-400'}`}
                 />
                 <div className="font-bold text-gray-900 mb-1">{option.title}</div>
                 <div className="text-sm text-gray-600">{option.description}</div>
                 
                 {isSelected && (
-                  <div className="absolute top-4 right-4 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                  <div className="absolute top-4 right-4 w-6 h-6 bg-brand-navy-600 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -147,8 +147,8 @@ export function VoorkeurenForm() {
                 className={`
                   relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20' 
-                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
+                    ? 'border-brand-navy-500 bg-brand-navy-50 shadow-lg shadow-brand-navy-500/20' 
+                    : 'border-gray-200 bg-white hover:border-brand-navy-300 hover:shadow-md'
                   }
                 `}
               >
@@ -158,13 +158,13 @@ export function VoorkeurenForm() {
                   {...register('looptijd', { valueAsNumber: true })}
                   className="sr-only"
                 />
-                <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-primary-600' : 'text-gray-900'}`}>
+                <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-brand-navy-600' : 'text-gray-900'}`}>
                   {jaar}
                 </div>
                 <div className="text-xs text-gray-600">jaar</div>
                 
                 {isSelected && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-brand-navy-600 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -177,21 +177,21 @@ export function VoorkeurenForm() {
       </div>
 
       {/* Groene energie */}
-      <div className="bg-energy-50 border border-energy-200 rounded-2xl p-6">
+      <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-2xl p-6">
         <label className="flex items-start gap-4 cursor-pointer group">
           <input
             type="checkbox"
             {...register('groeneEnergie')}
-            className="mt-1 w-5 h-5 rounded border-2 border-energy-300 text-energy-600 focus:ring-energy-500 focus:ring-offset-2"
+            className="mt-1 w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <Leaf weight="duotone" className="w-5 h-5 text-energy-600" />
-              <span className="text-base font-semibold text-energy-900">
+              <Leaf weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+              <span className="text-base font-semibold text-brand-teal-900">
                 Ik wil graag groene energie
               </span>
             </div>
-            <span className="text-sm text-energy-700">
+            <span className="text-sm text-brand-teal-700">
               Kies voor 100% duurzame energie uit wind, zon of water. 
               Goed voor het milieu én vaak voordeliger dan je denkt.
             </span>
@@ -207,7 +207,7 @@ export function VoorkeurenForm() {
         <textarea
           {...register('opmerkingen')}
           rows={4}
-          className="w-full rounded-xl border-2 border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-4 py-3 transition-all duration-200"
+          className="w-full rounded-xl border-2 border-gray-300 focus:border-brand-navy-500 focus:ring-2 focus:ring-brand-navy-500 focus:ring-offset-2 px-4 py-3 transition-all duration-200"
           placeholder="Zijn er nog specifieke zaken waar we rekening mee moeten houden?"
         />
       </div>

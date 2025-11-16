@@ -7,10 +7,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-105 focus:ring-primary-500',
-        secondary: 'bg-gradient-to-r from-energy-500 to-energy-600 text-white shadow-lg shadow-energy-500/30 hover:shadow-xl hover:shadow-energy-500/40 hover:scale-105 focus:ring-energy-500',
-        outline: 'border-2 border-primary-500 text-primary-600 hover:bg-primary-50 hover:scale-105 focus:ring-primary-500',
-        ghost: 'text-gray-700 hover:bg-gray-100 hover:text-primary-600 focus:ring-gray-300',
+        primary: 'bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white shadow-lg shadow-brand-navy-500/30 hover:shadow-xl hover:shadow-brand-navy-500/40 hover:scale-105 focus:ring-brand-navy-500',
+        secondary: 'bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-105 focus:ring-brand-teal-500',
+        outline: 'border-2 border-brand-navy-500 text-brand-navy-600 hover:bg-brand-navy-50 hover:scale-105 focus:ring-brand-navy-500',
+        ghost: 'text-gray-700 hover:bg-gray-100 hover:text-brand-navy-600 focus:ring-gray-300',
         danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 focus:ring-red-500',
       },
       size: {

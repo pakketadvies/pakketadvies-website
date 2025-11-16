@@ -15,22 +15,22 @@ export default function CalculatorLayout({
       <Header />
       
       {/* Hero Section */}
-      <div className="pt-32 pb-16 bg-gradient-to-br from-primary-950 via-primary-900 to-dark-950 relative overflow-hidden">
+      <div className="pt-32 pb-16 bg-gradient-to-br from-brand-navy-950 via-brand-navy-900 to-dark-950 relative overflow-hidden">
         {/* Background decorations */}
         <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-64 h-64 bg-energy-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-10 left-10 w-64 h-64 bg-brand-navy-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-64 h-64 bg-brand-teal-500/20 rounded-full blur-3xl" />
         </div>
 
         <div className="container-custom relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent-500 to-accent-600 rounded-2xl shadow-2xl shadow-accent-500/50 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-2xl shadow-2xl shadow-brand-teal-500/50 mb-4">
               <Lightning weight="duotone" className="w-8 h-8 text-white" />
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
               Bereken je{' '}
-              <span className="bg-gradient-to-r from-accent-400 to-energy-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-brand-teal-400 to-brand-teal-400 bg-clip-text text-transparent">
                 besparing
               </span>
             </h1>

@@ -5,12 +5,12 @@ import { Lightning, ChartLine, ShieldCheck } from '@phosphor-icons/react'
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary-950 via-primary-900 to-dark-900">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-brand-navy-950 via-brand-navy-900 to-dark-900">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-energy-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent-500/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-brand-navy-500/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-brand-teal-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
       </div>
 
       <div className="container-custom py-20 md:py-32 relative z-10">
@@ -18,8 +18,8 @@ export function Hero() {
           {/* Content */}
           <div className="space-y-8 animate-slide-up">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark border border-primary-500/30">
-              <Lightning weight="duotone" className="w-5 h-5 text-accent-500" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark border border-brand-navy-500/30">
+              <Lightning weight="duotone" className="w-5 h-5 text-brand-teal-500" />
               <span className="text-sm font-medium text-white">
                 Specialist in zakelijke energiecontracten
               </span>
@@ -28,7 +28,7 @@ export function Hero() {
             {/* Heading */}
             <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               Stop met te veel betalen voor{' '}
-              <span className="gradient-text bg-gradient-to-r from-accent-400 to-energy-400 bg-clip-text text-transparent">
+              <span className="gradient-text bg-gradient-to-r from-brand-teal-400 to-brand-teal-400 bg-clip-text text-transparent">
                 energie
               </span>
             </h1>
@@ -42,14 +42,14 @@ export function Hero() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/calculator">
-                <button className="group relative px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold text-lg shadow-2xl shadow-primary-500/50 hover:shadow-primary-500/70 transition-all duration-300 hover:scale-105 overflow-hidden">
+                <button className="group relative px-8 py-4 bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white rounded-2xl font-semibold text-lg shadow-2xl shadow-brand-navy-500/50 hover:shadow-brand-navy-500/70 transition-all duration-300 hover:scale-105 overflow-hidden">
                   <span className="relative z-10 flex items-center gap-2">
                     Bereken je besparing
                     <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-primary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-400 to-brand-navy-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
               </Link>
               
@@ -81,21 +81,21 @@ export function Hero() {
           <div className="hidden lg:grid grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             {/* Card 1 - Big */}
             <div className="col-span-2 glass-dark rounded-3xl p-8 border border-white/10 hover-lift group cursor-pointer">
-              <ChartLine weight="duotone" className="w-12 h-12 text-energy-400 mb-4 group-hover:scale-110 transition-transform" />
+              <ChartLine weight="duotone" className="w-12 h-12 text-brand-teal-400 mb-4 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold text-white mb-2">Tot 40% besparing</h3>
               <p className="text-gray-400">Wij onderhandelen de beste tarieven voor jouw bedrijf</p>
             </div>
 
             {/* Card 2 */}
             <div className="glass-dark rounded-3xl p-6 border border-white/10 hover-lift group cursor-pointer">
-              <Lightning weight="duotone" className="w-10 h-10 text-accent-400 mb-3 group-hover:scale-110 transition-transform" />
+              <Lightning weight="duotone" className="w-10 h-10 text-brand-teal-400 mb-3 group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-bold text-white mb-2">Snel schakelen</h3>
               <p className="text-sm text-gray-400">Binnen 2 weken geregeld</p>
             </div>
 
             {/* Card 3 */}
             <div className="glass-dark rounded-3xl p-6 border border-white/10 hover-lift group cursor-pointer">
-              <ShieldCheck weight="duotone" className="w-10 h-10 text-primary-400 mb-3 group-hover:scale-110 transition-transform" />
+              <ShieldCheck weight="duotone" className="w-10 h-10 text-brand-navy-400 mb-3 group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-bold text-white mb-2">Zorgeloos</h3>
               <p className="text-sm text-gray-400">Wij regelen alles van A tot Z</p>
             </div>

@@ -51,7 +51,7 @@ export function VerbruikForm() {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 rounded-2xl flex items-center justify-center">
             <Lightning weight="duotone" className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -100,9 +100,9 @@ export function VerbruikForm() {
                 setValue('gasJaar', null)
               }
             }}
-            className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-offset-2"
+            className="w-5 h-5 rounded border-2 border-gray-300 text-brand-navy-600 focus:ring-brand-navy-500 focus:ring-offset-2"
           />
-          <span className="text-base font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+          <span className="text-base font-medium text-gray-700 group-hover:text-brand-navy-600 transition-colors">
             Ik gebruik ook gas
           </span>
         </label>
@@ -122,7 +122,7 @@ export function VerbruikForm() {
       </div>
 
       {/* Geschat toggle */}
-      <div className="bg-primary-50 border border-primary-100 rounded-2xl p-6">
+      <div className="bg-brand-navy-50 border border-brand-navy-100 rounded-2xl p-6">
         <label className="flex items-start gap-3 cursor-pointer group">
           <input
             type="checkbox"
@@ -131,13 +131,13 @@ export function VerbruikForm() {
               setIsGeschat(e.target.checked)
               setValue('geschat', e.target.checked)
             }}
-            className="mt-1 w-5 h-5 rounded border-2 border-primary-300 text-primary-600 focus:ring-primary-500 focus:ring-offset-2"
+            className="mt-1 w-5 h-5 rounded border-2 border-brand-navy-300 text-brand-navy-600 focus:ring-brand-navy-500 focus:ring-offset-2"
           />
           <div>
-            <span className="text-base font-semibold text-primary-900 block mb-1">
+            <span className="text-base font-semibold text-brand-navy-900 block mb-1">
               Dit is een schatting
             </span>
-            <span className="text-sm text-primary-700">
+            <span className="text-sm text-brand-navy-700">
               Geen probleem! We helpen je later met het vinden van je exacte verbruik.
             </span>
           </div>

@@ -5,24 +5,24 @@ import { Lightning, ArrowRight } from '@phosphor-icons/react'
 
 export function CTA() {
   return (
-    <section className="py-24 bg-gradient-to-br from-primary-950 via-primary-900 to-dark-950 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-br from-brand-navy-950 via-brand-navy-900 to-dark-950 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-energy-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-20 left-20 w-64 h-64 bg-brand-navy-500/20 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
       </div>
 
       <div className="container-custom relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-accent-500 to-accent-600 rounded-3xl shadow-2xl shadow-accent-500/50 animate-float">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-3xl shadow-2xl shadow-brand-teal-500/50 animate-float">
             <Lightning weight="duotone" className="w-10 h-10 text-white" />
           </div>
 
           {/* Heading */}
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
             Klaar om te besparen op je{' '}
-            <span className="bg-gradient-to-r from-accent-400 to-energy-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-brand-teal-400 to-brand-teal-400 bg-clip-text text-transparent">
               energiekosten?
             </span>
           </h2>
@@ -36,7 +36,7 @@ export function CTA() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <Link href="/calculator">
-              <button className="group relative px-8 py-4 bg-white text-primary-600 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 overflow-hidden">
+              <button className="group relative px-8 py-4 bg-white text-brand-navy-600 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 overflow-hidden">
                 <span className="relative z-10 flex items-center gap-2">
                   Start je besparingscheck
                   <ArrowRight weight="bold" className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -54,19 +54,19 @@ export function CTA() {
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center gap-8 pt-12 text-sm text-gray-400">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-energy-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <span>Gratis en vrijblijvend</span>
             </div>
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-energy-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <span>Binnen 2 weken geregeld</span>
             </div>
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-energy-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <span>500+ bedrijven gingen je voor</span>

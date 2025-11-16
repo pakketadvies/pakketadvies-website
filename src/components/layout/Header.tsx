@@ -36,10 +36,10 @@ export function Header() {
           <div className="flex items-center justify-between px-6 py-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary-500/50 transition-all duration-300 group-hover:scale-110">
+              <div className="w-10 h-10 bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-brand-navy-500/50 transition-all duration-300 group-hover:scale-110">
                 <Lightning weight="duotone" className="w-6 h-6 text-white" />
               </div>
-              <span className="font-display text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
+              <span className="font-display text-xl font-bold bg-gradient-to-r from-brand-navy-600 to-brand-navy-700 bg-clip-text text-transparent">
                 PakketAdvies
               </span>
             </Link>
@@ -50,7 +50,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-4 py-2 rounded-xl text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 font-medium"
+                  className="px-4 py-2 rounded-xl text-gray-700 hover:text-brand-navy-600 hover:bg-brand-navy-50 transition-all duration-200 font-medium"
                 >
                   {link.label}
                 </Link>
@@ -60,7 +60,7 @@ export function Header() {
             {/* CTA Button */}
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/calculator">
-                <button className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-105 transition-all duration-300">
+                <button className="px-6 py-3 bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white rounded-xl font-semibold shadow-lg shadow-brand-navy-500/30 hover:shadow-xl hover:shadow-brand-navy-500/40 hover:scale-105 transition-all duration-300">
                   Bereken besparing
                 </button>
               </Link>
@@ -86,14 +86,14 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block px-4 py-3 rounded-xl text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 font-medium"
+                  className="block px-4 py-3 rounded-xl text-gray-700 hover:text-brand-navy-600 hover:bg-brand-navy-50 transition-all duration-200 font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
               <Link href="/calculator" onClick={() => setIsMobileMenuOpen(false)}>
-                <button className="w-full px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold shadow-lg">
+                <button className="w-full px-6 py-3 bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white rounded-xl font-semibold shadow-lg">
                   Bereken besparing
                 </button>
               </Link>

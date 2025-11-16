@@ -9,56 +9,58 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Modern, krachtig kleurenpalet
-        primary: {
-          50: '#E6F0FF',
-          100: '#CCE1FF',
-          200: '#99C3FF',
-          300: '#66A5FF',
-          400: '#3387FF',
-          500: '#0066FF', // Main brand blue - krachtig en modern
-          600: '#0052CC',
-          700: '#003D99',
-          800: '#002966',
-          900: '#001433',
-          950: '#000A1A',
+        // Brand colors from logo
+        brand: {
+          navy: {
+            50: '#E8EBF0',
+            100: '#D1D7E1',
+            200: '#A3AFC3',
+            300: '#7587A5',
+            400: '#475F87',
+            500: '#1A3756', // Main navy from logo
+            600: '#152C45',
+            700: '#102134',
+            800: '#0B1622',
+            900: '#050B11',
+            950: '#030608',
+          },
+          teal: {
+            50: '#E6F7F5',
+            100: '#CCEFEB',
+            200: '#99DFD7',
+            300: '#66CFC3',
+            400: '#33BFAF',
+            500: '#00AF9B', // Main teal from logo
+            600: '#008C7C',
+            700: '#00695D',
+            800: '#00463E',
+            900: '#00231F',
+          },
+          gray: {
+            50: '#F9FAFB',
+            100: '#F3F4F6',
+            200: '#E5E7EB',
+            300: '#D1D5DB',
+            400: '#9CA3AF',
+            500: '#6B7280',
+            600: '#4B5563',
+            700: '#374151',
+            800: '#1F2937',
+            900: '#111827',
+          },
         },
-        accent: {
-          50: '#FFF9E6',
-          100: '#FFF3CC',
-          200: '#FFE799',
-          300: '#FFDB66',
-          400: '#FFCF33',
-          500: '#FFC300', // Vibrant yellow - energie en optimisme
-          600: '#CC9C00',
-          700: '#997500',
-          800: '#664E00',
-          900: '#332700',
-        },
-        energy: {
-          50: '#ECFDF5',
-          100: '#D1FAE5',
-          200: '#A7F3D0',
-          300: '#6EE7B7',
-          400: '#34D399',
-          500: '#10B981', // Groene energie
+        // Semantic colors
+        success: {
+          500: '#10B981',
           600: '#059669',
-          700: '#047857',
-          800: '#065F46',
-          900: '#064E3B',
         },
-        dark: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
-          300: '#CBD5E1',
-          400: '#94A3B8',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          800: '#1E293B',
-          900: '#0F172A',
-          950: '#020617',
+        warning: {
+          500: '#F59E0B',
+          600: '#D97706',
+        },
+        error: {
+          500: '#EF4444',
+          600: '#DC2626',
         },
       },
       fontFamily: {
@@ -96,15 +98,14 @@ const config: Config = {
         'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
         '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
         'inner': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
-        'glow': '0 0 20px rgb(0 102 255 / 0.3)',
-        'glow-lg': '0 0 40px rgb(0 102 255 / 0.4)',
+        'glow': '0 0 20px rgba(0, 175, 155, 0.3)',
+        'glow-lg': '0 0 40px rgba(0, 175, 155, 0.4)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-mesh': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient-energy': 'linear-gradient(135deg, #0066FF 0%, #10B981 100%)',
-        'gradient-accent': 'linear-gradient(135deg, #FFC300 0%, #FF6B6B 100%)',
+        'gradient-brand': 'linear-gradient(135deg, #1A3756 0%, #00AF9B 100%)',
+        'gradient-brand-subtle': 'linear-gradient(135deg, #1A3756 0%, #2A4766 100%)',
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

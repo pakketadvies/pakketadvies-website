@@ -12,9 +12,9 @@ const inputVariants = cva(
         lg: 'px-6 py-4 text-lg',
       },
       state: {
-        default: 'border-gray-300 focus:border-primary-500 focus:ring-primary-500 bg-white',
+        default: 'border-gray-300 focus:border-brand-teal-500 focus:ring-brand-teal-500 bg-white',
         error: 'border-red-500 focus:border-red-500 focus:ring-red-500 bg-red-50',
-        success: 'border-energy-500 focus:border-energy-500 focus:ring-energy-500 bg-energy-50',
+        success: 'border-brand-teal-500 focus:border-brand-teal-500 focus:ring-brand-teal-500 bg-brand-teal-50',
       },
     },
     defaultVariants: {

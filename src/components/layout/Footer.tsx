@@ -7,14 +7,14 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-gradient-to-br from-dark-900 via-primary-950 to-dark-950 text-white">
+    <footer className="bg-gradient-to-br from-dark-900 via-brand-navy-950 to-dark-950 text-white">
       <div className="container-custom">
         {/* Main Footer */}
         <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary-500/50 transition-all duration-300">
+              <div className="w-12 h-12 bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-brand-navy-500/50 transition-all duration-300">
                 <Lightning weight="duotone" className="w-7 h-7 text-white" />
               </div>
               <span className="font-display text-2xl font-bold">
@@ -50,31 +50,31 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link href="/diensten" className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-primary-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  <span className="w-1.5 h-1.5 bg-brand-navy-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
                   Diensten
                 </Link>
               </li>
               <li>
                 <Link href="/calculator" className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-primary-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  <span className="w-1.5 h-1.5 bg-brand-navy-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
                   Bereken besparing
                 </Link>
               </li>
               <li>
                 <Link href="/kennisbank" className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-primary-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  <span className="w-1.5 h-1.5 bg-brand-navy-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
                   Kennisbank
                 </Link>
               </li>
               <li>
                 <Link href="/over-ons" className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-primary-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  <span className="w-1.5 h-1.5 bg-brand-navy-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
                   Over ons
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-primary-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  <span className="w-1.5 h-1.5 bg-brand-navy-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
                   Contact
                 </Link>
               </li>
@@ -99,7 +99,7 @@ export function Footer() {
             <ul className="space-y-4">
               <li>
                 <a href="mailto:info@pakketadvies.nl" className="text-gray-400 hover:text-white transition-colors flex items-center gap-3 group">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-primary-500/20 flex items-center justify-center transition-all duration-300">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-brand-navy-500/20 flex items-center justify-center transition-all duration-300">
                     <Envelope weight="duotone" className="w-5 h-5" />
                   </div>
                   <span>info@pakketadvies.nl</span>
@@ -107,7 +107,7 @@ export function Footer() {
               </li>
               <li>
                 <a href="tel:+31201234567" className="text-gray-400 hover:text-white transition-colors flex items-center gap-3 group">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-primary-500/20 flex items-center justify-center transition-all duration-300">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-brand-navy-500/20 flex items-center justify-center transition-all duration-300">
                     <Phone weight="duotone" className="w-5 h-5" />
                   </div>
                   <span>020 123 4567</span>

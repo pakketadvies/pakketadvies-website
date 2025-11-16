@@ -16,56 +16,56 @@ const features = [
     icon: ChartLineUp,
     title: 'Transparante vergelijking',
     description: 'Vergelijk alle beschikbare energieleveranciers in één overzicht. Geen verrassingen, alleen heldere cijfers.',
-    gradient: 'from-primary-500 to-primary-600',
+    gradient: 'from-brand-navy-500 to-brand-navy-600',
     size: 'large'
   },
   {
     icon: HandCoins,
     title: 'Direct besparen',
     description: 'Gemiddeld 30-40% besparing op je energiekosten',
-    gradient: 'from-energy-500 to-energy-600',
+    gradient: 'from-brand-teal-500 to-brand-teal-600',
     size: 'small'
   },
   {
     icon: Lightning,
     title: 'Snel geregeld',
     description: 'Binnen 2 weken volledig overgestapt',
-    gradient: 'from-accent-500 to-accent-600',
+    gradient: 'from-brand-teal-500 to-brand-teal-600',
     size: 'small'
   },
   {
     icon: ShieldCheck,
     title: 'Volledig ontzorgd',
     description: 'Wij regelen alles voor je, van opzeggen tot activeren. Jij hoeft nergens meer aan te denken.',
-    gradient: 'from-primary-600 to-primary-700',
+    gradient: 'from-brand-navy-600 to-brand-navy-700',
     size: 'medium'
   },
   {
     icon: Users,
     title: 'Persoonlijk advies',
     description: 'Geen bots of formulieren. Altijd contact met een echte specialist.',
-    gradient: 'from-energy-600 to-energy-700',
+    gradient: 'from-brand-teal-600 to-brand-teal-700',
     size: 'medium'
   },
   {
     icon: ClockClockwise,
     title: '24/7 support',
     description: 'Vragen? We staan altijd voor je klaar',
-    gradient: 'from-accent-600 to-accent-700',
+    gradient: 'from-brand-teal-600 to-brand-teal-700',
     size: 'small'
   },
   {
     icon: Leaf,
     title: 'Groene energie opties',
     description: 'Stap over naar duurzame energie zonder gedoe',
-    gradient: 'from-energy-500 to-energy-600',
+    gradient: 'from-brand-teal-500 to-brand-teal-600',
     size: 'small'
   },
   {
     icon: Lightbulb,
     title: 'Slimme contracten',
     description: 'We kiezen het perfecte contract voor jouw situatie. Vast, dynamisch of een combinatie - wij weten wat het beste werkt.',
-    gradient: 'from-primary-500 to-energy-500',
+    gradient: 'from-brand-navy-500 to-brand-teal-500',
     size: 'large'
   },
 ]
@@ -76,9 +76,9 @@ export function Features() {
       <div className="container-custom">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 border border-primary-100">
-            <Lightning weight="duotone" className="w-5 h-5 text-primary-600" />
-            <span className="text-sm font-semibold text-primary-700">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-navy-50 border border-brand-navy-100">
+            <Lightning weight="duotone" className="w-5 h-5 text-brand-navy-600" />
+            <span className="text-sm font-semibold text-brand-navy-700">
               Waarom PakketAdvies?
             </span>
           </div>
@@ -122,7 +122,7 @@ export function Features() {
                   </div>
                   
                   {/* Title */}
-                  <h3 className="text-xl md:text-2xl font-bold text-dark-900 mb-3 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-xl md:text-2xl font-bold text-dark-900 mb-3 group-hover:text-brand-navy-600 transition-colors">
                     {feature.title}
                   </h3>
                   
@@ -133,7 +133,7 @@ export function Features() {
                 </div>
 
                 {/* Decorative element */}
-                <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary-100 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-br from-brand-navy-100 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
             )
           })}
@@ -141,7 +141,7 @@ export function Features() {
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center">
-          <a href="/calculator" className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 hover:scale-105 transition-all duration-300">
+          <a href="/calculator" className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white rounded-2xl font-semibold text-lg shadow-xl shadow-brand-navy-500/30 hover:shadow-2xl hover:shadow-brand-navy-500/40 hover:scale-105 transition-all duration-300">
             Start met besparen
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
