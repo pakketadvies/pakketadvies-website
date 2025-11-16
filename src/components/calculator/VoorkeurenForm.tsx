@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Button } from '@/components/ui/Button'
-import { Leaf } from '@phosphor-icons/react'
+import { Leaf, ClockClockwise, Lightning } from '@phosphor-icons/react'
 
 const voorkeurenSchema = z.object({
   type: z.enum(['vast', 'dynamisch', 'beide']),
@@ -25,6 +25,7 @@ export function VoorkeurenForm() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<VoorkeurenFormData>({
     resolver: zodResolver(voorkeurenSchema),
@@ -37,6 +38,7 @@ export function VoorkeurenForm() {
 
   const type = watch('type')
   const looptijd = watch('looptijd')
+  const groeneEnergie = watch('groeneEnergie')
 
   const onSubmit = (data: VoorkeurenFormData) => {
     setVoorkeuren(data)
@@ -44,9 +46,24 @@ export function VoorkeurenForm() {
   }
 
   const contractTypes = [
-    { value: 'vast', title: 'Vast contract', description: 'Zekerheid met een vaste prijs' },
-    { value: 'dynamisch', title: 'Dynamisch', description: 'Profiteer van lage prijzen' },
-    { value: 'beide', title: 'Beide opties', description: 'Laat mij adviseren' },
+    {
+      value: 'vast',
+      icon: ClockClockwise,
+      title: 'Vast contract',
+      description: 'Zekerheid met een vaste prijs',
+    },
+    {
+      value: 'dynamisch',
+      icon: Lightning,
+      title: 'Dynamisch',
+      description: 'Profiteer van lage prijzen',
+    },
+    {
+      value: 'beide',
+      icon: Lightning,
+      title: 'Beide opties',
+      description: 'Laat mij adviseren',
+    },
   ]
 
   const looptijden = [1, 2, 3, 5]
@@ -54,30 +71,38 @@ export function VoorkeurenForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-brand-navy-500 mb-2">
-          Voorkeuren
-        </h2>
-        <p className="text-gray-600">Wat past het beste bij jouw bedrijf?</p>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-accent-500 to-accent-600 rounded-2xl flex items-center justify-center">
+            <Leaf weight="duotone" className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-dark-900">
+              Voorkeuren
+            </h2>
+            <p className="text-gray-600">Wat past het beste bij jouw bedrijf?</p>
+          </div>
+        </div>
       </div>
 
       {/* Contract type */}
-      <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-900">
+      <div className="space-y-4">
+        <label className="block text-sm font-semibold text-gray-700">
           Type contract <span className="text-red-500">*</span>
         </label>
-        <div className="grid md:grid-cols-3 gap-3">
+        <div className="grid md:grid-cols-3 gap-4">
           {contractTypes.map((option) => {
+            const Icon = option.icon
             const isSelected = type === option.value
             
             return (
               <label
                 key={option.value}
                 className={`
-                  relative flex flex-col p-4 rounded-md border-2 cursor-pointer transition-colors
+                  relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-brand-teal-500 bg-brand-teal-50' 
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20' 
+                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
                   }
                 `}
               >
@@ -87,10 +112,20 @@ export function VoorkeurenForm() {
                   {...register('type')}
                   className="sr-only"
                 />
-                <div className={`font-bold mb-1 ${isSelected ? 'text-brand-teal-700' : 'text-gray-900'}`}>
-                  {option.title}
-                </div>
+                <Icon 
+                  weight="duotone" 
+                  className={`w-8 h-8 mb-3 ${isSelected ? 'text-primary-600' : 'text-gray-400'}`}
+                />
+                <div className="font-bold text-gray-900 mb-1">{option.title}</div>
                 <div className="text-sm text-gray-600">{option.description}</div>
+                
+                {isSelected && (
+                  <div className="absolute top-4 right-4 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
               </label>
             )
           })}
@@ -98,8 +133,8 @@ export function VoorkeurenForm() {
       </div>
 
       {/* Looptijd */}
-      <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-900">
+      <div className="space-y-4">
+        <label className="block text-sm font-semibold text-gray-700">
           Gewenste looptijd <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-4 gap-3">
@@ -110,10 +145,10 @@ export function VoorkeurenForm() {
               <label
                 key={jaar}
                 className={`
-                  relative flex flex-col items-center justify-center p-4 rounded-md border-2 cursor-pointer transition-colors
+                  relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-brand-teal-500 bg-brand-teal-50' 
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20' 
+                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
                   }
                 `}
               >
@@ -123,10 +158,18 @@ export function VoorkeurenForm() {
                   {...register('looptijd', { valueAsNumber: true })}
                   className="sr-only"
                 />
-                <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-brand-teal-700' : 'text-gray-900'}`}>
+                <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-primary-600' : 'text-gray-900'}`}>
                   {jaar}
                 </div>
                 <div className="text-xs text-gray-600">jaar</div>
+                
+                {isSelected && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
               </label>
             )
           })}
@@ -134,21 +177,21 @@ export function VoorkeurenForm() {
       </div>
 
       {/* Groene energie */}
-      <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-md p-4">
-        <label className="flex items-start gap-3 cursor-pointer">
+      <div className="bg-energy-50 border border-energy-200 rounded-2xl p-6">
+        <label className="flex items-start gap-4 cursor-pointer group">
           <input
             type="checkbox"
             {...register('groeneEnergie')}
-            className="mt-1 w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2"
+            className="mt-1 w-5 h-5 rounded border-2 border-energy-300 text-energy-600 focus:ring-energy-500 focus:ring-offset-2"
           />
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Leaf weight="regular" className="w-5 h-5 text-brand-teal-600" />
-              <span className="text-sm font-semibold text-brand-teal-900">
+            <div className="flex items-center gap-2 mb-2">
+              <Leaf weight="duotone" className="w-5 h-5 text-energy-600" />
+              <span className="text-base font-semibold text-energy-900">
                 Ik wil graag groene energie
               </span>
             </div>
-            <span className="text-sm text-brand-teal-700">
+            <span className="text-sm text-energy-700">
               Kies voor 100% duurzame energie uit wind, zon of water. 
               Goed voor het milieu én vaak voordeliger dan je denkt.
             </span>
@@ -158,13 +201,13 @@ export function VoorkeurenForm() {
 
       {/* Opmerkingen */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Opmerkingen of speciale wensen
         </label>
         <textarea
           {...register('opmerkingen')}
           rows={4}
-          className="w-full rounded-md border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500 focus:ring-offset-1 px-4 py-2.5 transition-all duration-200"
+          className="w-full rounded-xl border-2 border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-4 py-3 transition-all duration-200"
           placeholder="Zijn er nog specifieke zaken waar we rekening mee moeten houden?"
         />
       </div>

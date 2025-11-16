@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Buildings, User, Envelope, Phone } from '@phosphor-icons/react'
+import { Buildings, ShieldCheck } from '@phosphor-icons/react'
 
 const bedrijfsgegevensSchema = z.object({
   bedrijfsnaam: z.string().min(2, 'Vul een geldige bedrijfsnaam in'),
@@ -45,11 +45,11 @@ export function BedrijfsgegevensForm() {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-2xl flex items-center justify-center">
-            <Buildings weight="duotone" className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-brand-navy-500 rounded-2xl flex items-center justify-center">
+            <Buildings weight="duotone" className="w-6 h-6 text-brand-teal-500" />
           </div>
           <div>
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-dark-900">
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500">
               Bedrijfsgegevens
             </h2>
             <p className="text-gray-600">Zodat we contact met je op kunnen nemen</p>
@@ -106,8 +106,8 @@ export function BedrijfsgegevensForm() {
       </div>
 
       {/* Type bedrijf */}
-      <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-900">
+      <div className="space-y-4">
+        <label className="block text-sm font-semibold text-gray-700">
           Type bedrijf <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -116,20 +116,20 @@ export function BedrijfsgegevensForm() {
             { value: 'retail', label: 'Retail' },
             { value: 'horeca', label: 'Horeca' },
             { value: 'productie', label: 'Productie' },
-            { value: 'gezondheidszorg', label: 'Gezondheidszorg' },
+            { value: 'gezondheidszorg', label: 'Zorg' },
             { value: 'onderwijs', label: 'Onderwijs' },
             { value: 'overig', label: 'Overig' },
-          ].slice(0, 7).map((option) => {
+          ].map((option) => {
             const isSelected = typeBedrijf === option.value
             
             return (
               <label
                 key={option.value}
                 className={`
-                  relative flex items-center justify-center p-3 rounded-md border-2 cursor-pointer transition-colors
+                  relative flex items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-brand-teal-500 bg-brand-teal-50' 
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg shadow-brand-teal-500/20' 
+                    : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
                   }
                 `}
               >
@@ -142,6 +142,14 @@ export function BedrijfsgegevensForm() {
                 <div className={`text-sm font-semibold ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
                   {option.label}
                 </div>
+                
+                {isSelected && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-brand-teal-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
               </label>
             )
           })}
@@ -149,11 +157,14 @@ export function BedrijfsgegevensForm() {
       </div>
 
       {/* Privacy notice */}
-      <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-        <p className="text-sm text-gray-600">
-          Je gegevens worden veilig opgeslagen en alleen gebruikt voor het verstrekken van een 
-          energieadvies. We delen je gegevens niet met derden zonder jouw toestemming.
-        </p>
+      <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+        <div className="flex items-start gap-3">
+          <ShieldCheck weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-gray-600">
+            Je gegevens worden veilig opgeslagen en alleen gebruikt voor het verstrekken van een 
+            energieadvies. We delen je gegevens niet met derden zonder jouw toestemming.
+          </p>
+        </div>
       </div>
 
       {/* Buttons */}

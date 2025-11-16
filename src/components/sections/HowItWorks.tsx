@@ -31,11 +31,21 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-20 bg-white border-b border-gray-200">
-      <div className="container-custom">
+    <section className="py-24 bg-gray-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-20 left-0 w-96 h-96 bg-brand-teal-100/50 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-0 w-96 h-96 bg-brand-navy-100/50 rounded-full blur-3xl" />
+      
+      <div className="container-custom relative z-10">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <h2 className="font-bold text-4xl md:text-5xl text-brand-navy-500 tracking-tight">
+        <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm">
+            <span className="text-sm font-semibold text-brand-navy-600">
+              Simpel en snel
+            </span>
+          </div>
+          
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brand-navy-500">
             Zo werkt het
           </h2>
           
@@ -45,34 +55,43 @@ export function HowItWorks() {
           </p>
         </div>
 
-        {/* Steps Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        {/* Steps */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {steps.map((step, index) => {
             const Icon = step.icon
+            const isEven = index % 2 === 0
             
             return (
               <div
                 key={index}
-                className="relative"
+                className="group relative"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                {/* Number badge */}
-                <div className="absolute -top-3 -left-3 w-10 h-10 bg-brand-navy-500 text-white rounded-md flex items-center justify-center font-bold text-sm">
-                  {step.number}
-                </div>
+                {/* Connector line (desktop only) */}
+                {index < steps.length - 1 && (
+                  <div className={`hidden md:block absolute ${isEven ? 'left-full' : 'right-full'} top-1/2 w-8 h-0.5 bg-gradient-to-r from-brand-teal-500/30 to-transparent`} />
+                )}
                 
                 {/* Card */}
-                <div className="bg-white border border-gray-200 rounded-md p-6 h-full">
+                <div className="relative bg-white rounded-3xl p-8 md:p-10 border border-gray-200 hover-lift hover:border-brand-teal-500/50 transition-all duration-300 h-full">
+                  {/* Number badge */}
+                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-teal-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                    <span className="font-display text-2xl font-bold text-white">
+                      {step.number}
+                    </span>
+                  </div>
+                  
                   {/* Icon */}
-                  <div className="w-12 h-12 rounded-md bg-brand-teal-500 flex items-center justify-center mb-4">
-                    <Icon weight="regular" className="w-6 h-6 text-white" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-navy-500 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Icon weight="duotone" className="w-8 h-8 text-white" />
                   </div>
                   
                   {/* Content */}
-                  <h3 className="font-bold text-lg text-brand-navy-500 mb-3">
+                  <h3 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 group-hover:text-brand-teal-600 transition-colors">
                     {step.title}
                   </h3>
                   
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed text-lg">
                     {step.description}
                   </p>
                 </div>
@@ -82,14 +101,11 @@ export function HowItWorks() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 text-center">
-          <p className="text-gray-600 mb-4 font-medium">
+        <div className="mt-16 text-center space-y-4">
+          <p className="text-gray-600 text-lg">
             Klaar om te beginnen?
           </p>
-          <a 
-            href="/calculator" 
-            className="inline-flex items-center gap-2 px-8 py-3 bg-brand-teal-500 text-white rounded-md font-semibold shadow-sm hover:bg-brand-teal-600 transition-colors duration-200"
-          >
+          <a href="/calculator" className="inline-flex items-center gap-2 px-8 py-4 bg-brand-teal-500 text-white rounded-2xl font-semibold text-lg shadow-xl shadow-brand-teal-500/30 hover:shadow-2xl hover:shadow-brand-teal-500/40 hover:scale-105 hover:bg-brand-teal-600 transition-all duration-300">
             Start je besparingscheck
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

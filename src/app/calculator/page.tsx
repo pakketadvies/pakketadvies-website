@@ -31,11 +31,11 @@ export default function CalculatorPage() {
           <div className="mt-8 text-center">
             <p className="text-gray-600">
               Vragen? Bel ons op{' '}
-              <a href="tel:+31201234567" className="font-semibold text-brand-navy-600 hover:text-brand-navy-700">
+              <a href="tel:+31201234567" className="font-semibold text-primary-600 hover:text-primary-700">
                 020 123 4567
               </a>
               {' '}of{' '}
-              <a href="mailto:info@pakketadvies.nl" className="font-semibold text-brand-navy-600 hover:text-brand-navy-700">
+              <a href="mailto:info@pakketadvies.nl" className="font-semibold text-primary-600 hover:text-primary-700">
                 mail ons
               </a>
             </p>
