@@ -94,28 +94,28 @@ export function VoorkeurenForm() {
   const isDynamisch = type === 'dynamisch'
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
       {/* Header */}
       <div className="space-y-3">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-brand-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
-            <Leaf weight="duotone" className="w-6 h-6 text-white" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-brand-teal-500 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+            <Leaf weight="duotone" className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <div>
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500">
+          <div className="min-w-0">
+            <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-brand-navy-500 truncate">
               Voorkeuren
             </h2>
-            <p className="text-gray-600">Wat past het beste bij jouw bedrijf?</p>
+            <p className="text-sm md:text-base text-gray-600">Wat past het beste bij jou?</p>
           </div>
         </div>
       </div>
 
       {/* Contract type */}
       <div className="space-y-4">
-        <label className="block text-sm font-semibold text-brand-navy-500">
+        <label className="block text-sm md:text-base font-semibold text-brand-navy-500">
           Type contract <span className="text-red-500">*</span>
         </label>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           {contractTypes.map((option) => {
             const Icon = option.icon
             const isSelected = type === option.value
@@ -124,7 +124,7 @@ export function VoorkeurenForm() {
               <label
                 key={option.value}
                 className={`
-                  relative flex flex-col p-6 rounded-xl border-2 cursor-pointer transition-all duration-300
+                  relative flex flex-col p-4 md:p-6 rounded-xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
                     ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg ring-2 ring-brand-teal-500/20' 
                     : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
@@ -139,16 +139,16 @@ export function VoorkeurenForm() {
                 />
                 <Icon 
                   weight="duotone" 
-                  className={`w-8 h-8 mb-3 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`}
+                  className={`w-7 h-7 md:w-8 md:h-8 mb-2 md:mb-3 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`}
                 />
-                <div className={`font-bold mb-1 ${isSelected ? 'text-brand-navy-500' : 'text-gray-900'}`}>
+                <div className={`text-base md:text-lg font-bold mb-1 ${isSelected ? 'text-brand-navy-500' : 'text-gray-900'}`}>
                   {option.title}
                 </div>
-                <div className="text-sm text-gray-600">{option.description}</div>
+                <div className="text-xs md:text-sm text-gray-600">{option.description}</div>
                 
                 {isSelected && (
-                  <div className="absolute top-4 right-4 w-6 h-6 bg-brand-teal-500 rounded-full flex items-center justify-center shadow-lg">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-3 right-3 md:top-4 md:right-4 w-5 h-5 md:w-6 md:h-6 bg-brand-teal-500 rounded-full flex items-center justify-center shadow-lg">
+                    <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -162,10 +162,10 @@ export function VoorkeurenForm() {
       {/* Looptijd - Only show for vast contract */}
       {showLooptijd && (
         <div className="space-y-4">
-          <label className="block text-sm font-semibold text-brand-navy-500">
+          <label className="block text-sm md:text-base font-semibold text-brand-navy-500">
             Gewenste looptijd <span className="text-red-500">*</span>
           </label>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {looptijden.map((jaar) => {
               const isSelected = looptijd === jaar
               
@@ -173,7 +173,7 @@ export function VoorkeurenForm() {
                 <label
                   key={jaar}
                   className={`
-                    relative flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-300
+                    relative flex flex-col items-center justify-center p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300
                     ${isSelected 
                       ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg ring-2 ring-brand-teal-500/20' 
                       : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
@@ -186,14 +186,14 @@ export function VoorkeurenForm() {
                     {...register('looptijd', { valueAsNumber: true })}
                     className="sr-only"
                   />
-                  <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-brand-teal-600' : 'text-gray-900'}`}>
+                  <div className={`text-xl md:text-2xl font-bold mb-0.5 md:mb-1 ${isSelected ? 'text-brand-teal-600' : 'text-gray-900'}`}>
                     {jaar}
                   </div>
                   <div className="text-xs text-gray-600">jaar</div>
                   
                   {isSelected && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-brand-teal-500 rounded-full flex items-center justify-center shadow-lg">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 bg-brand-teal-500 rounded-full flex items-center justify-center shadow-lg">
+                      <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
@@ -248,28 +248,28 @@ export function VoorkeurenForm() {
 
       {/* Opmerkingen */}
       <div>
-        <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+        <label className="block text-sm md:text-base font-semibold text-brand-navy-500 mb-2">
           Opmerkingen of speciale wensen
         </label>
         <textarea
           {...register('opmerkingen')}
           rows={4}
-          className="w-full rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500 focus:ring-offset-2 px-4 py-3 transition-all duration-200"
+          className="w-full rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500 focus:ring-offset-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base transition-all duration-200"
           placeholder="Zijn er nog specifieke zaken waar we rekening mee moeten houden?"
         />
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-4">
-        <Button type="button" variant="outline" size="lg" onClick={vorigeStap} className="flex-1">
-          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2">
+        <Button type="button" variant="outline" size="lg" onClick={vorigeStap} className="w-full sm:flex-1 text-sm md:text-base">
+          <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
           </svg>
           Vorige
         </Button>
-        <Button type="submit" size="lg" className="flex-1 bg-brand-teal-500 hover:bg-brand-teal-600">
+        <Button type="submit" size="lg" className="w-full sm:flex-1 bg-brand-teal-500 hover:bg-brand-teal-600 text-sm md:text-base">
           Bekijk resultaten
-          <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 md:w-5 md:h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </Button>
