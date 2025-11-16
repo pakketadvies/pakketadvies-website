@@ -9,27 +9,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand colors from logo
+        // Brand colors from logo - flat, no gradients
         brand: {
           navy: {
-            50: '#E8EBF0',
-            100: '#D1D7E1',
-            200: '#A3AFC3',
-            300: '#7587A5',
-            400: '#475F87',
+            50: '#F0F3F7',
+            100: '#E1E7EF',
+            200: '#C3CFE0',
+            300: '#A5B7D0',
+            400: '#879FC1',
             500: '#1A3756', // Main navy from logo
-            600: '#152C45',
-            700: '#102134',
-            800: '#0B1622',
-            900: '#050B11',
-            950: '#030608',
+            600: '#152D47',
+            700: '#102238',
+            800: '#0B1729',
+            900: '#050B14',
           },
           teal: {
-            50: '#E6F7F5',
-            100: '#CCEFEB',
-            200: '#99DFD7',
-            300: '#66CFC3',
-            400: '#33BFAF',
+            50: '#E6F9F6',
+            100: '#CCF3ED',
+            200: '#99E7DB',
+            300: '#66DBC9',
+            400: '#33CFB7',
             500: '#00AF9B', // Main teal from logo
             600: '#008C7C',
             700: '#00695D',
@@ -49,96 +48,47 @@ const config: Config = {
             900: '#111827',
           },
         },
-        // Semantic colors
-        success: {
-          500: '#10B981',
-          600: '#059669',
-        },
-        warning: {
-          500: '#F59E0B',
-          600: '#D97706',
-        },
-        error: {
-          500: '#EF4444',
-          600: '#DC2626',
-        },
+        success: '#10B981',
+        warning: '#F59E0B',
+        error: '#EF4444',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-        '5xl': ['3rem', { lineHeight: '1' }],
-        '6xl': ['3.75rem', { lineHeight: '1' }],
+        'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.02em' }],
+        'sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0.01em' }],
+        'base': ['1rem', { lineHeight: '1.6' }],
+        'lg': ['1.125rem', { lineHeight: '1.6' }],
+        'xl': ['1.25rem', { lineHeight: '1.5' }],
+        '2xl': ['1.5rem', { lineHeight: '1.4' }],
+        '3xl': ['1.875rem', { lineHeight: '1.3' }],
+        '4xl': ['2.25rem', { lineHeight: '1.2' }],
+        '5xl': ['3rem', { lineHeight: '1.1' }],
+        '6xl': ['3.75rem', { lineHeight: '1.05' }],
         '7xl': ['4.5rem', { lineHeight: '1' }],
-        '8xl': ['6rem', { lineHeight: '1' }],
       },
       borderRadius: {
-        'sm': '0.5rem',
-        'DEFAULT': '0.75rem',
-        'md': '0.75rem',
-        'lg': '1rem',
-        'xl': '1.5rem',
-        '2xl': '2rem',
-        '3xl': '3rem',
+        'none': '0',
+        'sm': '0.25rem',  // 4px
+        'DEFAULT': '0.5rem',  // 8px
+        'md': '0.5rem',  // 8px
+        'lg': '0.5rem',  // 8px max
+        'xl': '0.5rem',  // 8px max
+        'full': '9999px',
       },
       boxShadow: {
-        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'DEFAULT': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-        '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        'inner': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
-        'glow': '0 0 20px rgba(0, 175, 155, 0.3)',
-        'glow-lg': '0 0 40px rgba(0, 175, 155, 0.4)',
+        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'DEFAULT': '0 1px 3px 0 rgba(0, 0, 0, 0.08)',
+        'md': '0 2px 4px 0 rgba(0, 0, 0, 0.08)',
+        'lg': '0 4px 6px 0 rgba(0, 0, 0, 0.08)',
+        'xl': '0 8px 12px 0 rgba(0, 0, 0, 0.08)',
+        'none': 'none',
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-brand': 'linear-gradient(135deg, #1A3756 0%, #00AF9B 100%)',
-        'gradient-brand-subtle': 'linear-gradient(135deg, #1A3756 0%, #2A4766 100%)',
-      },
-      animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'slide-up': 'slide-up 0.5s ease-out',
-        'slide-down': 'slide-down 0.5s ease-out',
-        'fade-in': 'fade-in 0.5s ease-out',
-        'scale-in': 'scale-in 0.3s ease-out',
-      },
-      keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' },
-        },
-        'slide-up': {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        'slide-down': {
-          '0%': { transform: 'translateY(-20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        'scale-in': {
-          '0%': { transform: 'scale(0.9)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-      },
-      backdropBlur: {
-        xs: '2px',
+      spacing: {
+        '18': '4.5rem',
+        '22': '5.5rem',
       },
     },
   },

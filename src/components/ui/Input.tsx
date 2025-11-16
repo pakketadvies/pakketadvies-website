@@ -3,18 +3,18 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const inputVariants = cva(
-  'w-full rounded-xl border-2 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+  'w-full rounded-md border font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed',
   {
     variants: {
       inputSize: {
         sm: 'px-3 py-2 text-sm',
-        md: 'px-4 py-3 text-base',
-        lg: 'px-6 py-4 text-lg',
+        md: 'px-4 py-2.5 text-base',
+        lg: 'px-5 py-3 text-base',
       },
       state: {
         default: 'border-gray-300 focus:border-brand-teal-500 focus:ring-brand-teal-500 bg-white',
         error: 'border-red-500 focus:border-red-500 focus:ring-red-500 bg-red-50',
-        success: 'border-brand-teal-500 focus:border-brand-teal-500 focus:ring-brand-teal-500 bg-brand-teal-50',
+        success: 'border-brand-teal-500 focus:border-brand-teal-500 focus:ring-brand-teal-500 bg-white',
       },
     },
     defaultVariants: {
@@ -44,9 +44,9 @@ export function Input({
   const finalState = error ? 'error' : state
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {label && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-gray-900">
           {label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -64,7 +64,7 @@ export function Input({
         </p>
       )}
       {helpText && !error && (
-        <p className="text-sm text-gray-500">{helpText}</p>
+        <p className="text-sm text-gray-600">{helpText}</p>
       )}
     </div>
   )

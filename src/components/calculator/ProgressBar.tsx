@@ -9,24 +9,21 @@ export function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
   const percentage = (currentStep / totalSteps) * 100
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Progress bar */}
-      <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-navy-500 to-brand-teal-500 rounded-full transition-all duration-500 ease-out shadow-lg"
+          className="absolute inset-y-0 left-0 bg-brand-teal-500 transition-all duration-300"
           style={{ width: `${percentage}%` }}
-        >
-          {/* Animated glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-        </div>
+        />
       </div>
 
       {/* Steps indicator */}
       <div className="flex justify-between items-center">
-        <span className="text-sm font-medium text-gray-600">
+        <span className="text-sm font-semibold text-gray-600">
           Stap {currentStep} van {totalSteps}
         </span>
-        <span className="text-sm font-bold bg-gradient-to-r from-brand-navy-600 to-brand-teal-600 bg-clip-text text-transparent">
+        <span className="text-sm font-bold text-brand-teal-600">
           {Math.round(percentage)}% compleet
         </span>
       </div>

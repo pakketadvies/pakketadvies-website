@@ -1,20 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { Lightning, List, X } from '@phosphor-icons/react'
+import { List, X } from '@phosphor-icons/react'
 
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const navLinks = [
     { href: '/diensten', label: 'Diensten' },
@@ -24,82 +15,74 @@ export function Header() {
   ]
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'py-3' : 'py-5'
-    }`}>
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="container-custom">
-        <nav className={`rounded-2xl transition-all duration-300 ${
-          isScrolled 
-            ? 'glass border border-white/20 shadow-xl backdrop-blur-lg' 
-            : 'bg-white/80 backdrop-blur-sm border border-white/40'
-        }`}>
-          <div className="flex items-center justify-between px-6 py-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-brand-navy-500/50 transition-all duration-300 group-hover:scale-110">
-                <Lightning weight="duotone" className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-display text-xl font-bold bg-gradient-to-r from-brand-navy-600 to-brand-navy-700 bg-clip-text text-transparent">
-                PakketAdvies
-              </span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="px-4 py-2 rounded-xl text-gray-700 hover:text-brand-navy-600 hover:bg-brand-navy-50 transition-all duration-200 font-medium"
-                >
-                  {link.label}
-                </Link>
-              ))}
+        <nav className="flex items-center justify-between py-4">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-navy-500 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-xl">P</span>
             </div>
+            <span className="font-bold text-xl text-brand-navy-500 tracking-tight">
+              PAKKETADVIES
+            </span>
+          </Link>
 
-            {/* CTA Button */}
-            <div className="hidden lg:flex items-center gap-3">
-              <Link href="/calculator">
-                <button className="px-6 py-3 bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white rounded-xl font-semibold shadow-lg shadow-brand-navy-500/30 hover:shadow-xl hover:shadow-brand-navy-500/40 hover:scale-105 transition-all duration-300">
-                  Bereken besparing
-                </button>
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-4 py-2 text-gray-700 hover:text-brand-navy-600 hover:bg-gray-50 rounded-md transition-colors font-medium text-sm"
+              >
+                {link.label}
               </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6 text-gray-700" />
-              ) : (
-                <List className="w-6 h-6 text-gray-700" />
-              )}
-            </button>
+            ))}
           </div>
 
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="lg:hidden border-t border-gray-200 px-6 py-4 space-y-2 animate-slide-down">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="block px-4 py-3 rounded-xl text-gray-700 hover:text-brand-navy-600 hover:bg-brand-navy-50 transition-all duration-200 font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <Link href="/calculator" onClick={() => setIsMobileMenuOpen(false)}>
-                <button className="w-full px-6 py-3 bg-gradient-to-r from-brand-navy-500 to-brand-navy-600 text-white rounded-xl font-semibold shadow-lg">
-                  Bereken besparing
-                </button>
-              </Link>
-            </div>
-          )}
+          {/* CTA Button */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Link href="/calculator">
+              <button className="px-6 py-2.5 bg-brand-navy-500 text-white rounded-md font-semibold hover:bg-brand-navy-600 transition-colors shadow-sm">
+                Bereken besparing
+              </button>
+            </Link>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6 text-gray-700" />
+            ) : (
+              <List className="w-6 h-6 text-gray-700" />
+            )}
+          </button>
         </nav>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200 py-4 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block px-4 py-2.5 text-gray-700 hover:text-brand-navy-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link href="/calculator" onClick={() => setIsMobileMenuOpen(false)}>
+              <button className="w-full mt-2 px-6 py-2.5 bg-brand-navy-500 text-white rounded-md font-semibold hover:bg-brand-navy-600 transition-colors shadow-sm">
+                Bereken besparing
+              </button>
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   )
