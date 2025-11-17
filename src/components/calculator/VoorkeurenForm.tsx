@@ -24,11 +24,8 @@ const createVoorkeurenSchema = (type?: string) => {
     })
   }
 
-  // For dynamisch and maatwerk, looptijd is optional
-  return z.object({
-    ...baseSchema,
-    looptijd: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(5)]).optional(),
-  })
+  // For dynamisch and maatwerk, looptijd is not required
+  return z.object(baseSchema)
 }
 
 type VoorkeurenFormData = {
@@ -47,20 +44,23 @@ export function VoorkeurenForm() {
     (verbruik?.elektriciteitJaar && verbruik.elektriciteitJaar >= 60000) ||
     (verbruik?.gasJaar && verbruik.gasJaar >= 10000)
 
+  const form = useForm<VoorkeurenFormData>({
+    resolver: zodResolver(createVoorkeurenSchema('vast')), // Start with vast schema
+    defaultValues: {
+      type: 'vast',
+      looptijd: 3,
+      groeneEnergie: false,
+    },
+    mode: 'onChange', // Validate on change to update schema dynamically
+  })
+
   const {
     register,
     handleSubmit,
     watch,
     setValue,
     formState: { errors },
-  } = useForm<VoorkeurenFormData>({
-    resolver: zodResolver(createVoorkeurenSchema()),
-    defaultValues: {
-      type: 'vast',
-      looptijd: 3,
-      groeneEnergie: false,
-    },
-  })
+  } = form
 
   const type = watch('type')
   const looptijd = watch('looptijd')
@@ -240,6 +240,7 @@ export function VoorkeurenForm() {
               return (
                 <label
                   key={jaar}
+                  onClick={() => setValue('looptijd', jaar as any)}
                   className={`
                     relative flex flex-col items-center justify-center p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300
                     ${isSelected 
@@ -251,7 +252,8 @@ export function VoorkeurenForm() {
                   <input
                     type="radio"
                     value={jaar}
-                    {...register('looptijd', { valueAsNumber: true })}
+                    checked={isSelected}
+                    onChange={() => setValue('looptijd', jaar as any)}
                     className="sr-only"
                   />
                   <div className={`text-xl md:text-2xl font-bold mb-0.5 md:mb-1 ${isSelected ? 'text-brand-teal-600' : 'text-gray-900'}`}>

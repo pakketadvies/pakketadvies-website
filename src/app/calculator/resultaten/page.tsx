@@ -173,7 +173,7 @@ function ResultatenContent() {
             verbruikData = {
               elektriciteitJaar: stroom,
               gasJaar: gas,
-              postcode: '0000 XX',
+              leveringsadressen: [{ postcode: '0000 XX', huisnummer: '1' }],
               geschat: true,
             }
           } else {
@@ -307,6 +307,9 @@ function ResultatenContent() {
               </h1>
               <p className="text-sm md:text-base text-gray-600">
                 Op basis van {verbruikElektriciteit.toLocaleString()} kWh per jaar
+                {verbruik?.leveringsadressen && verbruik.leveringsadressen.length > 1 && 
+                  ` • ${verbruik.leveringsadressen.length} leveringsadressen`
+                }
                 {isQuickCalc && ' • Snelle scan'}
               </p>
             </div>

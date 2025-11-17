@@ -12,7 +12,13 @@ import { useState } from 'react'
 const verbruikSchema = z.object({
   elektriciteitJaar: z.number().min(0, 'Vul een geldig verbruik in'),
   gasJaar: z.number().min(0, 'Vul een geldig verbruik in').nullable(),
-  postcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/, 'Vul een geldige postcode in'),
+  leveringsadressen: z.array(z.object({
+    postcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/, 'Vul een geldige postcode in'),
+    huisnummer: z.string().min(1, 'Vul een huisnummer in'),
+    toevoeging: z.string().optional(),
+    straat: z.string().optional(),
+    plaats: z.string().optional(),
+  })).min(1, 'Voeg minimaal één leveringsadres toe'),
   geschat: z.boolean(),
 })
 
@@ -22,25 +28,84 @@ export function VerbruikForm() {
   const { setVerbruik, volgendeStap } = useCalculatorStore()
   const [isGeschat, setIsGeschat] = useState(false)
   const [heeftGas, setHeeftGas] = useState(true)
+  const [leveringsadressen, setLeveringsadressen] = useState([
+    { postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }
+  ])
+  const [loadingAddresses, setLoadingAddresses] = useState<{ [key: number]: boolean }>({})
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    setError,
+    clearErrors,
   } = useForm<VerbruikFormData>({
     resolver: zodResolver(verbruikSchema),
     defaultValues: {
       geschat: false,
       gasJaar: null,
+      leveringsadressen: [{ postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }],
     },
   })
+
+  // Fetch address from postcode API
+  const fetchAddress = async (index: number) => {
+    const adres = leveringsadressen[index]
+    if (!adres.postcode || !adres.huisnummer) return
+
+    const postcodeClean = adres.postcode.replace(/\s/g, '')
+    
+    setLoadingAddresses({ ...loadingAddresses, [index]: true })
+    
+    try {
+      // Using free postcode.tech API (no key required)
+      const response = await fetch(`https://postcode.tech/api/v1/postcode?postcode=${postcodeClean}&number=${adres.huisnummer}`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        const updated = [...leveringsadressen]
+        updated[index] = {
+          ...updated[index],
+          straat: data.street || '',
+          plaats: data.city || '',
+        }
+        setLeveringsadressen(updated)
+        setValue(`leveringsadressen.${index}.straat`, data.street || '')
+        setValue(`leveringsadressen.${index}.plaats`, data.city || '')
+        clearErrors(`leveringsadressen.${index}`)
+      } else {
+        setError(`leveringsadressen.${index}.postcode` as any, {
+          message: 'Adres niet gevonden. Controleer postcode en huisnummer.'
+        })
+      }
+    } catch (error) {
+      console.error('Postcode API error:', error)
+      // Don't show error, just let user continue
+    } finally {
+      setLoadingAddresses({ ...loadingAddresses, [index]: false })
+    }
+  }
+
+  const addLeveringsadres = () => {
+    const newAdres = { postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }
+    setLeveringsadressen([...leveringsadressen, newAdres])
+    setValue('leveringsadressen', [...leveringsadressen, newAdres])
+  }
+
+  const removeLeveringsadres = (index: number) => {
+    if (leveringsadressen.length === 1) return // Keep at least one
+    const updated = leveringsadressen.filter((_, i) => i !== index)
+    setLeveringsadressen(updated)
+    setValue('leveringsadressen', updated)
+  }
 
   const onSubmit = (data: VerbruikFormData) => {
     setVerbruik({
       elektriciteitJaar: data.elektriciteitJaar,
       gasJaar: heeftGas ? data.gasJaar : null,
-      postcode: data.postcode,
+      leveringsadressen: data.leveringsadressen,
       geschat: isGeschat,
     })
     volgendeStap()
@@ -63,16 +128,128 @@ export function VerbruikForm() {
         </div>
       </div>
 
-      {/* Postcode */}
-      <div>
-        <Input
-          label="Postcode"
-          placeholder="1234 AB"
-          error={errors.postcode?.message}
-          helpText="We gebruiken je postcode om de beste tarieven voor jouw regio te vinden"
-          {...register('postcode')}
-          required
-        />
+      {/* Leveringsadressen */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <label className="block text-base md:text-lg font-semibold text-brand-navy-500">
+            Leveringsadres(sen) <span className="text-red-500">*</span>
+          </label>
+          {leveringsadressen.length < 5 && (
+            <button
+              type="button"
+              onClick={addLeveringsadres}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Adres toevoegen
+            </button>
+          )}
+        </div>
+
+        {leveringsadressen.map((adres, index) => (
+          <div key={index} className="relative p-4 md:p-6 bg-gray-50 rounded-xl border-2 border-gray-200 space-y-4">
+            {/* Remove button (only if more than 1) */}
+            {leveringsadressen.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeLeveringsadres(index)}
+                className="absolute top-3 right-3 p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Verwijder adres"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+
+            {leveringsadressen.length > 1 && (
+              <div className="text-sm font-semibold text-gray-700 mb-3">
+                Adres {index + 1}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Postcode */}
+              <div className="md:col-span-1">
+                <Input
+                  label="Postcode"
+                  placeholder="1234 AB"
+                  value={adres.postcode}
+                  onChange={(e) => {
+                    const updated = [...leveringsadressen]
+                    updated[index].postcode = e.target.value
+                    setLeveringsadressen(updated)
+                    setValue(`leveringsadressen.${index}.postcode`, e.target.value)
+                  }}
+                  onBlur={() => fetchAddress(index)}
+                  error={errors.leveringsadressen?.[index]?.postcode?.message}
+                  required
+                />
+              </div>
+
+              {/* Huisnummer */}
+              <div className="md:col-span-1">
+                <Input
+                  label="Huisnummer"
+                  placeholder="123"
+                  value={adres.huisnummer}
+                  onChange={(e) => {
+                    const updated = [...leveringsadressen]
+                    updated[index].huisnummer = e.target.value
+                    setLeveringsadressen(updated)
+                    setValue(`leveringsadressen.${index}.huisnummer`, e.target.value)
+                  }}
+                  onBlur={() => fetchAddress(index)}
+                  error={errors.leveringsadressen?.[index]?.huisnummer?.message}
+                  required
+                />
+              </div>
+
+              {/* Toevoeging */}
+              <div className="md:col-span-1">
+                <Input
+                  label="Toevoeging (optioneel)"
+                  placeholder="A, bis, etc."
+                  value={adres.toevoeging || ''}
+                  onChange={(e) => {
+                    const updated = [...leveringsadressen]
+                    updated[index].toevoeging = e.target.value
+                    setLeveringsadressen(updated)
+                    setValue(`leveringsadressen.${index}.toevoeging`, e.target.value)
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Automatic address display */}
+            {(adres.straat || loadingAddresses[index]) && (
+              <div className="pt-3 border-t border-gray-300">
+                {loadingAddresses[index] ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin"></div>
+                    <span>Adres ophalen...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <MapPin weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-gray-700">
+                      <div className="font-medium">{adres.straat} {adres.huisnummer}{adres.toevoeging}</div>
+                      <div>{adres.postcode} {adres.plaats}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {leveringsadressen.length > 1 && (
+          <p className="text-xs text-gray-600 mt-2">
+            Je hebt {leveringsadressen.length} leveringsadressen toegevoegd
+          </p>
+        )}
       </div>
 
       {/* Elektriciteit */}

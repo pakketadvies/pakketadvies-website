@@ -1,8 +1,16 @@
+export interface Leveringsadres {
+  postcode: string
+  huisnummer: string
+  toevoeging?: string
+  straat?: string
+  plaats?: string
+}
+
 export interface VerbruikData {
   elektriciteitJaar: number
   gasJaar: number | null
   geschat: boolean
-  postcode: string
+  leveringsadressen: Leveringsadres[]
 }
 
 export interface BedrijfsGegevens {
