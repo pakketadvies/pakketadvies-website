@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Lightning, Envelope, Phone, MapPin, LinkedinLogo, InstagramLogo } from '@phosphor-icons/react'
+import Image from 'next/image'
+import { Envelope, Phone, MapPin, LinkedinLogo, InstagramLogo } from '@phosphor-icons/react'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -13,9 +14,14 @@ export function Footer() {
         <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-12 h-12 bg-brand-teal-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-brand-teal-500/50 transition-all duration-300">
-                <Lightning weight="duotone" className="w-7 h-7 text-white" />
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-12 h-12 transition-transform duration-300 group-hover:scale-110">
+                <Image
+                  src="/images/logo.png"
+                  alt="PakketAdvies Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="font-display text-2xl font-bold">
                 PakketAdvies

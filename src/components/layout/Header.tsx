@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Lightning, List, X } from '@phosphor-icons/react'
+import Image from 'next/image'
+import { List, X } from '@phosphor-icons/react'
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -35,9 +36,15 @@ export function Header() {
         }`}>
           <div className="flex items-center justify-between px-6 py-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-brand-navy-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-brand-teal-500/50 transition-all duration-300 group-hover:scale-110">
-                <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10 transition-transform duration-300 group-hover:scale-110">
+                <Image
+                  src="/images/logo.png"
+                  alt="PakketAdvies Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <span className="font-display text-xl font-bold text-brand-navy-500">
                 PakketAdvies
