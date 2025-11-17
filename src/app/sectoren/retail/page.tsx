@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Storefront, Check, ArrowRight, Lightning, Buildings, ChartLine, ShieldCheck, Handshake } from '@phosphor-icons/react/dist/ssr'
+import { Storefront, Check, ArrowRight, Lightning, Buildings, ChartLine, ShieldCheck, Handshake, Lightbulb, ChartLineUp, CalendarCheck, Users, Package } from '@phosphor-icons/react/dist/ssr'
 
 export default function RetailPage() {
   return (

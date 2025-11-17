@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Storefront, Check, ArrowRight, Lightning, Clock, TrendDown, Users, Handshake } from '@phosphor-icons/react/dist/ssr'
+import { Storefront, Check, ArrowRight, Lightning, Clock, TrendDown, Users, Handshake, Lightbulb } from '@phosphor-icons/react/dist/ssr'
 
 export default function HorecaPage() {
   return (
@@ -90,8 +90,11 @@ export default function HorecaPage() {
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
-                  <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                    <div className="text-xs font-semibold text-brand-teal-800 mb-1">💡 Oplossing:</div>
+                  <div className="bg-brand-teal-50 rounded-lg p-3 border border-brand-teal-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-teal-700" />
+                      <div className="text-xs font-semibold text-brand-teal-800">Oplossing:</div>
+                    </div>
                     <div className="text-sm text-brand-teal-700">{challenge.solution}</div>
                   </div>
                 </div>
@@ -131,7 +134,7 @@ export default function HorecaPage() {
                     saving: 'Voorspelbare kosten'
                   }
                 ].map((contract, i) => (
-                  <div key={i} className="border-l-4 border-brand-teal-500 bg-orange-50 rounded-r-lg p-4">
+                  <div key={i} className="border-l-4 border-brand-teal-500 bg-brand-teal-50 rounded-r-lg p-4">
                     <div className="font-semibold text-brand-navy-500 mb-1">{contract.type}</div>
                     <div className="text-sm text-gray-600 mb-2">{contract.reason}</div>
                     <div className="text-xs font-bold text-brand-teal-600">→ {contract.saving}</div>
@@ -140,10 +143,24 @@ export default function HorecaPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 border border-orange-200">
-              <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-4">
-                Case: Restaurant Amsterdam
-              </h3>
+            <div className="bg-gradient-to-br from-brand-teal-50 to-brand-teal-100 rounded-2xl overflow-hidden border border-brand-teal-200">
+              {/* Mobile-first responsive photo */}
+              <div className="relative h-56 md:h-64 lg:h-72 overflow-hidden">
+                <Image
+                  src="/images/horeca-restaurant.jpg"
+                  alt="Restaurant interior"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-3 left-4 md:bottom-4 md:left-6">
+                  <h3 className="font-display text-xl md:text-2xl font-bold text-white">
+                    Case: Restaurant Amsterdam
+                  </h3>
+                </div>
+              </div>
+              
+              <div className="p-6 md:p-8">
               <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
                 <div className="text-sm text-gray-600 mb-1">Gemiddelde besparing</div>
                 <div className="text-4xl font-bold text-brand-teal-600 mb-1">€4.200</div>
