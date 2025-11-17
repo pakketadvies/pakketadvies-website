@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Factory, Check, ArrowRight, Lightning, TrendUp, Clock, Gauge, Handshake } from '@phosphor-icons/react/dist/ssr'
+import { Factory, Check, ArrowRight, Lightning, TrendUp, Clock, Gauge, Handshake, Lightbulb, Wrench, Fire, SolarPanel, Phone } from '@phosphor-icons/react/dist/ssr'
 
 export default function IndustriePage() {
   return (
@@ -91,7 +91,10 @@ export default function IndustriePage() {
                   </h3>
                   <p className="text-brand-navy-600 mb-4">{challenge.desc}</p>
                   <div className="bg-brand-teal-50 rounded-lg p-3 border border-brand-teal-200">
-                    <div className="text-xs font-semibold text-brand-teal-800 mb-1">💡 Oplossing:</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-teal-700" />
+                      <div className="text-xs font-semibold text-brand-teal-800">Oplossing:</div>
+                    </div>
                     <div className="text-sm text-brand-teal-700">{challenge.solution}</div>
                   </div>
                 </div>
@@ -198,30 +201,34 @@ export default function IndustriePage() {
                 {
                   title: 'Energie-audit',
                   desc: 'Gratis analyse van je productieproces en besparingsmogelijkheden',
-                  icon: '🔍'
+                  icon: Lightbulb
                 },
                 {
                   title: 'Load shifting advies',
                   desc: 'Optimaliseer productie-uren voor lagere energiekosten',
-                  icon: '⚡'
+                  icon: Lightning
                 },
                 {
                   title: 'WKK-integratie',
                   desc: 'Advies over warmte-kracht-koppeling bij geschiktheid',
-                  icon: '🔥'
+                  icon: Fire
                 },
                 {
                   title: 'Zelfopwekking',
                   desc: 'Mogelijkheden voor zonnepanelen en saldering',
-                  icon: '☀️'
+                  icon: SolarPanel
                 }
-              ].map((service, i) => (
+              ].map((service, i) => {
+                const Icon = service.icon
+                return (
                 <div key={i} className="text-center">
-                  <div className="text-4xl mb-3">{service.icon}</div>
+                  <div className="w-12 h-12 bg-brand-teal-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Icon weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+                  </div>
                   <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
                   <div className="text-sm text-brand-navy-600">{service.desc}</div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>
@@ -258,7 +265,7 @@ export default function IndustriePage() {
             <div className="flex items-start gap-3">
               <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0 mt-1" />
               <div>
-                <div className="font-semibold text-brand-navy-500 mb-2">💡 Wanneer maatwerk?</div>
+                <div className="font-semibold text-brand-navy-500 mb-2">Wanneer maatwerk?</div>
                 <p className="text-sm text-brand-navy-700 mb-3">
                   Vanaf <strong>60.000 kWh</strong> of <strong>10.000 m³</strong> gas kom je in aanmerking voor maatwerk. 
                   Maar het wordt echt interessant vanaf 200.000 kWh - dan zijn de besparingen significant.
