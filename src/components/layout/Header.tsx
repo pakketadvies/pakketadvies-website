@@ -34,15 +34,15 @@ export function Header() {
             ? 'glass border border-gray-200 shadow-xl backdrop-blur-lg' 
             : 'bg-white/80 backdrop-blur-sm border border-gray-200'
         }`}>
-          <div className="flex items-center justify-between px-6 py-5">
+          <div className="flex items-center justify-between px-6 py-3">
             {/* Logo */}
-            <Link href="/" className="group flex items-center my-1">
-              <div className="relative h-14 w-auto transition-transform duration-300 group-hover:scale-105">
+            <Link href="/" className="group">
+              <div className="relative h-12 w-auto transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
                   alt="PakketAdvies"
-                  width={240}
-                  height={56}
+                  width={220}
+                  height={48}
                   className="object-contain"
                   priority
                 />
