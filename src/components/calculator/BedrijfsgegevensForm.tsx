@@ -3,12 +3,14 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useState } from 'react'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Buildings, ShieldCheck } from '@phosphor-icons/react'
+import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle } from '@phosphor-icons/react'
 
 const bedrijfsgegevensSchema = z.object({
+  kvkNummer: z.string().optional(),
   bedrijfsnaam: z.string().min(2, 'Vul een geldige bedrijfsnaam in'),
   contactpersoon: z.string().min(2, 'Vul een naam in'),
   email: z.string().email('Vul een geldig e-mailadres in'),
@@ -20,11 +22,16 @@ type BedrijfsgegevensFormData = z.infer<typeof bedrijfsgegevensSchema>
 
 export function BedrijfsgegevensForm() {
   const { setBedrijfsgegevens, volgendeStap, vorigeStap } = useCalculatorStore()
+  const [kvkNummer, setKvkNummer] = useState('')
+  const [kvkLoading, setKvkLoading] = useState(false)
+  const [kvkError, setKvkError] = useState<string | null>(null)
+  const [kvkSuccess, setKvkSuccess] = useState(false)
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<BedrijfsgegevensFormData>({
     resolver: zodResolver(bedrijfsgegevensSchema),
@@ -35,8 +42,53 @@ export function BedrijfsgegevensForm() {
 
   const typeBedrijf = watch('typeBedrijf')
 
+  // Fetch company data from KvK
+  const fetchKvkData = async () => {
+    if (!kvkNummer || kvkNummer.length < 8) {
+      setKvkError('Vul een geldig KvK-nummer in (8 cijfers)')
+      return
+    }
+
+    setKvkLoading(true)
+    setKvkError(null)
+    setKvkSuccess(false)
+
+    try {
+      const response = await fetch(`/api/kvk?kvk=${kvkNummer}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        setKvkError(data.error || 'Kon bedrijf niet vinden')
+        setKvkLoading(false)
+        return
+      }
+
+      // Auto-fill form with KvK data
+      if (data.bedrijfsnaam) {
+        setValue('bedrijfsnaam', data.bedrijfsnaam)
+      }
+      if (data.kvkNummer) {
+        setValue('kvkNummer', data.kvkNummer)
+      }
+
+      setKvkSuccess(true)
+      setKvkError(null)
+      setKvkLoading(false)
+
+      // Show success message briefly
+      setTimeout(() => setKvkSuccess(false), 3000)
+    } catch (error) {
+      console.error('KvK fetch error:', error)
+      setKvkError('Er ging iets mis. Probeer het opnieuw.')
+      setKvkLoading(false)
+    }
+  }
+
   const onSubmit = (data: BedrijfsgegevensFormData) => {
-    setBedrijfsgegevens(data)
+    setBedrijfsgegevens({
+      ...data,
+      kvkNummer: kvkNummer || undefined,
+    })
     volgendeStap()
   }
 
@@ -54,6 +106,77 @@ export function BedrijfsgegevensForm() {
             </h2>
             <p className="text-sm md:text-base text-gray-600">Zodat we contact op kunnen nemen</p>
           </div>
+        </div>
+      </div>
+
+      {/* KvK Lookup */}
+      <div className="bg-gradient-to-br from-brand-teal-50 to-brand-navy-50 border-2 border-brand-teal-200 rounded-xl md:rounded-2xl p-4 md:p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+            <h3 className="font-semibold text-brand-navy-500">KvK-nummer (optioneel)</h3>
+          </div>
+          <p className="text-sm text-gray-600">
+            Vul je KvK-nummer in en we vullen automatisch je bedrijfsgegevens in
+          </p>
+          
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={kvkNummer}
+                onChange={(e) => {
+                  setKvkNummer(e.target.value.replace(/\D/g, ''))
+                  setKvkError(null)
+                  setKvkSuccess(false)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    fetchKvkData()
+                  }
+                }}
+                placeholder="12345678"
+                maxLength={8}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                disabled={kvkLoading}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={fetchKvkData}
+              disabled={kvkLoading || kvkNummer.length !== 8}
+              className="px-4 md:px-6 py-3 bg-brand-teal-500 hover:bg-brand-teal-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg hover:shadow-xl disabled:shadow-none"
+            >
+              {kvkLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="hidden md:inline">Zoeken...</span>
+                </>
+              ) : (
+                <>
+                  <MagnifyingGlass weight="bold" className="w-5 h-5" />
+                  <span className="hidden md:inline">Opzoeken</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Success message */}
+          {kvkSuccess && (
+            <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3 animate-slide-down">
+              <CheckCircle weight="fill" className="w-5 h-5 flex-shrink-0" />
+              <span>Bedrijfsgegevens succesvol opgehaald!</span>
+            </div>
+          )}
+
+          {/* Error message */}
+          {kvkError && (
+            <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 animate-slide-down">
+              <XCircle weight="fill" className="w-5 h-5 flex-shrink-0" />
+              <span>{kvkError}</span>
+            </div>
+          )}
         </div>
       </div>
 
