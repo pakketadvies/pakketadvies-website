@@ -3,11 +3,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle } from '@phosphor-icons/react'
+import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown } from '@phosphor-icons/react'
 
 const bedrijfsgegevensSchema = z.object({
   kvkNummer: z.string().optional(),
@@ -20,12 +20,30 @@ const bedrijfsgegevensSchema = z.object({
 
 type BedrijfsgegevensFormData = z.infer<typeof bedrijfsgegevensSchema>
 
+interface KvkSearchResult {
+  kvkNummer: string
+  bedrijfsnaam: string
+  plaats: string
+  adres: string
+}
+
 export function BedrijfsgegevensForm() {
   const { setBedrijfsgegevens, volgendeStap, vorigeStap } = useCalculatorStore()
+  
+  // KvK number lookup states
   const [kvkNummer, setKvkNummer] = useState('')
   const [kvkLoading, setKvkLoading] = useState(false)
   const [kvkError, setKvkError] = useState<string | null>(null)
   const [kvkSuccess, setKvkSuccess] = useState(false)
+  
+  // Autocomplete states
+  const [bedrijfsnaamInput, setBedrijfsnaamInput] = useState('')
+  const [searchResults, setSearchResults] = useState<KvkSearchResult[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout>()
 
   const {
     register,
@@ -42,9 +60,103 @@ export function BedrijfsgegevensForm() {
 
   const typeBedrijf = watch('typeBedrijf')
 
-  // Fetch company data from KvK
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Search companies by name (debounced)
+  const searchCompanies = async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([])
+      setShowDropdown(false)
+      return
+    }
+
+    setSearchLoading(true)
+    
+    try {
+      const response = await fetch(`/api/kvk/search?query=${encodeURIComponent(query)}`)
+      const data = await response.json()
+
+      if (response.ok && data.results) {
+        setSearchResults(data.results)
+        setShowDropdown(data.results.length > 0)
+      } else {
+        setSearchResults([])
+        setShowDropdown(false)
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+      setSearchResults([])
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  // Handle bedrijfsnaam input change with debounce
+  const handleBedrijfsnaamChange = (value: string) => {
+    setBedrijfsnaamInput(value)
+    setValue('bedrijfsnaam', value)
+    setSelectedIndex(-1)
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    // Debounce search
+    if (value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        searchCompanies(value)
+      }, 300) // 300ms debounce
+    } else {
+      setSearchResults([])
+      setShowDropdown(false)
+    }
+  }
+
+  // Select company from dropdown
+  const selectCompany = (result: KvkSearchResult) => {
+    setBedrijfsnaamInput(result.bedrijfsnaam)
+    setValue('bedrijfsnaam', result.bedrijfsnaam)
+    setKvkNummer(result.kvkNummer)
+    setValue('kvkNummer', result.kvkNummer)
+    setShowDropdown(false)
+    setSearchResults([])
+    setKvkSuccess(true)
+    setTimeout(() => setKvkSuccess(false), 3000)
+  }
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || searchResults.length === 0) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSelectedIndex((prev) => 
+        prev < searchResults.length - 1 ? prev + 1 : prev
+      )
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault()
+      selectCompany(searchResults[selectedIndex])
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false)
+    }
+  }
+
+  // Fetch company data by KvK number
   const fetchKvkData = async () => {
-    if (!kvkNummer || kvkNummer.length < 8) {
+    if (!kvkNummer || kvkNummer.length !== 8) {
       setKvkError('Vul een geldig KvK-nummer in (8 cijfers)')
       return
     }
@@ -65,6 +177,7 @@ export function BedrijfsgegevensForm() {
 
       // Auto-fill form with KvK data
       if (data.bedrijfsnaam) {
+        setBedrijfsnaamInput(data.bedrijfsnaam)
         setValue('bedrijfsnaam', data.bedrijfsnaam)
       }
       if (data.kvkNummer) {
@@ -180,15 +293,73 @@ export function BedrijfsgegevensForm() {
         </div>
       </div>
 
-      {/* Bedrijfsnaam */}
-      <div>
-        <Input
-          label="Bedrijfsnaam"
-          placeholder="Jouw bedrijf B.V."
-          error={errors.bedrijfsnaam?.message}
-          {...register('bedrijfsnaam')}
-          required
-        />
+      {/* Bedrijfsnaam with Autocomplete */}
+      <div className="relative" ref={dropdownRef}>
+        <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">
+          Bedrijfsnaam <span className="text-red-500">*</span>
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            value={bedrijfsnaamInput}
+            onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (searchResults.length > 0) setShowDropdown(true)
+            }}
+            placeholder="Begin met typen..."
+            className={`w-full px-4 py-3 rounded-xl border-2 ${
+              errors.bedrijfsnaam 
+                ? 'border-red-500 focus:border-red-500' 
+                : 'border-gray-300 focus:border-brand-teal-500'
+            } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500`}
+            required
+          />
+          {searchLoading && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+            </div>
+          )}
+          {showDropdown && searchResults.length > 0 && (
+            <CaretDown weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          )}
+        </div>
+        
+        {/* Dropdown */}
+        {showDropdown && searchResults.length > 0 && (
+          <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
+            {searchResults.map((result, index) => (
+              <button
+                key={result.kvkNummer}
+                type="button"
+                onClick={() => selectCompany(result)}
+                className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                  index === selectedIndex ? 'bg-brand-teal-50' : ''
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-brand-navy-500 truncate">
+                      {result.bedrijfsnaam}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-0.5">
+                      KvK: {result.kvkNummer}
+                      {result.plaats && ` • ${result.plaats}`}
+                    </div>
+                  </div>
+                  <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {errors.bedrijfsnaam && (
+          <p className="mt-2 text-sm text-red-600">{errors.bedrijfsnaam.message}</p>
+        )}
+        <p className="mt-2 text-xs text-gray-500">
+          Typ minimaal 2 letters om bedrijven te zoeken in het KvK register
+        </p>
       </div>
 
       {/* Contactpersoon */}
