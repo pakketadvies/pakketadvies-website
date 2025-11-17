@@ -43,7 +43,7 @@ export function BedrijfsgegevensForm() {
   const [searchLoading, setSearchLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const {
     register,
