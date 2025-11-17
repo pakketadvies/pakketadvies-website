@@ -110,18 +110,21 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="tel:+31201234567" className="text-gray-300 hover:text-white transition-colors flex items-center gap-3 group">
+                <a href="tel:+31850477065" className="text-gray-300 hover:text-white transition-colors flex items-center gap-3 group">
                   <div className="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-brand-teal-500 flex items-center justify-center transition-all duration-300">
                     <Phone weight="duotone" className="w-5 h-5" />
                   </div>
-                  <span>020 123 4567</span>
+                  <span>085 047 7065</span>
                 </a>
               </li>
               <li className="text-gray-300 flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
                   <MapPin weight="duotone" className="w-5 h-5" />
                 </div>
-                <span>Amsterdam, Nederland</span>
+                <div>
+                  <span>Stavangerweg 13</span><br />
+                  <span>9723 JC Groningen</span>
+                </div>
               </li>
             </ul>
           </div>

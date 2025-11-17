@@ -71,7 +71,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-brand-navy-500 mb-1">Telefoon</h3>
-                      <p className="text-gray-500">088 - 123 45 67</p>
+                      <p className="text-gray-500">085 047 7065</p>
                       <p className="text-sm text-gray-400 mt-1">
                         Ma-vr: 09:00 - 17:00
                       </p>
@@ -126,8 +126,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold text-brand-navy-500 mb-1">Bezoekadres</h3>
                       <p className="text-gray-500">
-                        Energiestraat 123<br />
-                        1234 AB Amsterdam
+                        Stavangerweg 13<br />
+                        9723 JC Groningen
                       </p>
                       <p className="text-sm text-gray-400 mt-1">
                         Op afspraak

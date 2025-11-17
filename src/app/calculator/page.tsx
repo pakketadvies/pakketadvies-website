@@ -31,8 +31,8 @@ export default function CalculatorPage() {
           <div className="mt-6 md:mt-8 text-center">
             <p className="text-sm md:text-base text-gray-600">
               Vragen? Bel ons op{' '}
-              <a href="tel:+31201234567" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
-                020 123 4567
+              <a href="tel:+31850477065" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
+                085 047 7065
               </a>
               {' '}of{' '}
               <a href="mailto:info@pakketadvies.nl" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">

@@ -13,7 +13,11 @@ const verbruikSchema = z.object({
   elektriciteitJaar: z.number().min(0, 'Vul een geldig verbruik in'),
   gasJaar: z.number().min(0, 'Vul een geldig verbruik in').nullable(),
   leveringsadressen: z.array(z.object({
-    postcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/, 'Vul een geldige postcode in'),
+    postcode: z.string()
+      .min(6, 'Vul een geldige postcode in')
+      .max(7, 'Vul een geldige postcode in')
+      .regex(/^\d{4}\s?[A-Za-z]{2}$/, 'Vul een geldige postcode in (1234AB of 1234 AB)')
+      .transform(val => val.toUpperCase().replace(/\s/g, '').replace(/^(\d{4})([A-Z]{2})$/, '$1 $2')),
     huisnummer: z.string().min(1, 'Vul een huisnummer in'),
     toevoeging: z.string().optional(),
     straat: z.string().optional(),
