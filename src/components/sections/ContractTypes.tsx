@@ -68,10 +68,10 @@ export function ContractTypes() {
         hover: 'hover:border-brand-teal-500'
       },
       purple: {
-        bg: 'bg-brand-brand-brand-purple-500',
-        text: 'text-brand-brand-purple-600',
-        border: 'border-brand-brand-brand-purple-500',
-        hover: 'hover:border-brand-brand-brand-purple-500'
+        bg: 'bg-brand-purple-500',
+        text: 'text-brand-purple-600',
+        border: 'border-brand-purple-500',
+        hover: 'hover:border-brand-purple-500'
       }
     }
     return colors[color as keyof typeof colors][type]

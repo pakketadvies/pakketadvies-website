@@ -126,8 +126,8 @@ export function VoorkeurenForm() {
         bgLight: 'bg-brand-teal-50',
       },
       purple: {
-        bg: 'bg-brand-brand-purple-500',
-        border: 'border-brand-brand-purple-500',
+        bg: 'bg-brand-purple-500',
+        border: 'border-brand-purple-500',
         text: 'text-brand-purple-600',
         bgLight: 'bg-brand-purple-50',
       },

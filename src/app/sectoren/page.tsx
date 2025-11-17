@@ -33,7 +33,7 @@ export default function SectorenPage() {
       description: 'Beleggers, verhuurders en beheerders',
       challenges: ['Meerdere panden', 'ESG-rapportage', 'Doorberekening huurders'],
       solutions: ['Maatwerk contracten', 'Centrale inkoop', 'Duurzaamheidslabels'],
-      color: 'from-brand-brand-purple-400 to-brand-brand-brand-purple-500',
+      color: 'from-brand-purple-400 to-brand-purple-500',
       typicalUsage: '100.000+ kWh/jaar per portfolio',
       href: '/sectoren/vastgoed'
     },

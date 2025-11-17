@@ -161,31 +161,32 @@ export default function HorecaPage() {
               </div>
               
               <div className="p-6 md:p-8">
-              <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
-                <div className="text-sm text-gray-600 mb-1">Gemiddelde besparing</div>
-                <div className="text-4xl font-bold text-brand-teal-600 mb-1">€4.200</div>
-                <div className="text-sm text-gray-600">per jaar</div>
+                <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
+                  <div className="text-sm text-gray-600 mb-1">Gemiddelde besparing</div>
+                  <div className="text-4xl font-bold text-brand-teal-600 mb-1">€4.200</div>
+                  <div className="text-sm text-gray-600">per jaar</div>
+                </div>
+                <p className="text-gray-700 mb-4">
+                  Een restaurant met 120 zitplaatsen stapte over naar een dynamisch contract. 
+                  Door slim gebruik te maken van daluren voor koeling en bereiding bespaarden ze €4.200 per jaar.
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Type bedrijf:</span>
+                    <span className="font-semibold">Restaurant 120 zitplaatsen</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Verbruik:</span>
+                    <span className="font-semibold">75.000 kWh + 8.000 m³</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Contract:</span>
+                    <span className="font-semibold">Dynamisch</span>
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-700 mb-4">
-                Een restaurant met 120 zitplaatsen stapte over naar een dynamisch contract. 
-                Door slim gebruik te maken van daluren voor koeling en bereiding bespaarden ze €4.200 per jaar.
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Type bedrijf:</span>
-                  <span className="font-semibold">Restaurant 120 zitplaatsen</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Verbruik:</span>
-                  <span className="font-semibold">75.000 kWh + 8.000 m³</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Contract:</span>
-                  <span className="font-semibold">Dynamisch</span>
-                </div>
-              </div>
-            </div>
           </div>
+        </div>
 
           {/* Extra benefits */}
           <div className="grid md:grid-cols-3 gap-6">

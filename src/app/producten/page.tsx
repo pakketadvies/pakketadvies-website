@@ -146,7 +146,7 @@ export default function ProductenPage() {
             {/* Maatwerk Contract */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 group">
               <div className="bg-gradient-to-br from-brand-purple-50 to-brand-purple-100 p-8 text-center">
-                <div className="w-16 h-16 bg-brand-brand-brand-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-brand-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Diamond weight="duotone" className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-2">
@@ -182,7 +182,7 @@ export default function ProductenPage() {
                 </div>
 
                 <Link href="/producten/maatwerk-contract" className="block">
-                  <button className="w-full px-6 py-3 bg-brand-brand-brand-purple-500 hover:bg-brand-brand-purple-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
+                  <button className="w-full px-6 py-3 bg-brand-purple-500 hover:bg-brand-purple-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
                     Meer over maatwerk
                     <ArrowRight weight="bold" className="w-5 h-5" />
                   </button>

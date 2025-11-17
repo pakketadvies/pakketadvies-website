@@ -6,7 +6,7 @@ export default function VastgoedPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-brand-brand-purple-600 via-brand-brand-brand-brand-purple-500 to-brand-brand-purple-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-brand-purple-600 via-brand-purple-500 to-brand-purple-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <Image
             src="/images/office-team.jpg"
@@ -24,16 +24,16 @@ export default function VastgoedPage() {
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Energieoplossingen voor <span className="text-brand-brand-purple-200">vastgoedbeleggers en -beheerders</span>
+              Energieoplossingen voor <span className="text-brand-purple-200">vastgoedbeleggers en -beheerders</span>
             </h1>
-            <p className="text-lg md:text-xl text-brand-brand-purple-100 mb-8">
+            <p className="text-lg md:text-xl text-brand-purple-100 mb-8">
               Optimaliseer energie-inkoop over je complete vastgoedportefeuille. Centrale facturering, 
               ESG-rapportage en doorbelasting naar huurders - alles onder controle.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/calculator">
-                <button className="px-8 py-4 bg-white text-brand-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                   <Lightning weight="duotone" className="w-6 h-6" />
                   Bereken je besparing
                 </button>
@@ -85,17 +85,17 @@ export default function VastgoedPage() {
               const Icon = challenge.icon
               return (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <Icon weight="duotone" className="w-10 h-10 text-brand-brand-brand-brand-purple-500 mb-4" />
+                  <Icon weight="duotone" className="w-10 h-10 text-brand-purple-500 mb-4" />
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
-                  <div className="bg-brand-brand-purple-50 rounded-lg p-3 border border-brand-brand-purple-200">
+                  <div className="bg-brand-purple-50 rounded-lg p-3 border border-brand-purple-200">
                     <div className="flex items-center gap-2 mb-1">
-                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-brand-purple-700" />
-                      <div className="text-xs font-semibold text-brand-brand-purple-800">Oplossing:</div>
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-purple-700" />
+                      <div className="text-xs font-semibold text-brand-purple-800">Oplossing:</div>
                     </div>
-                    <div className="text-sm text-brand-brand-purple-700">{challenge.solution}</div>
+                    <div className="text-sm text-brand-purple-700">{challenge.solution}</div>
                   </div>
                 </div>
               )
@@ -141,7 +141,7 @@ export default function VastgoedPage() {
                   }
                 ].map((item, i) => (
                   <li key={i} className="flex gap-3">
-                    <Check weight="bold" className="w-6 h-6 text-brand-brand-purple-600 flex-shrink-0 mt-0.5" />
+                    <Check weight="bold" className="w-6 h-6 text-brand-purple-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-semibold text-brand-navy-500 mb-1">{item.title}</div>
                       <div className="text-sm text-gray-600">{item.desc}</div>
@@ -151,7 +151,7 @@ export default function VastgoedPage() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-brand-brand-purple-50 to-brand-brand-purple-100 rounded-2xl p-8 border border-brand-brand-purple-200">
+            <div className="bg-gradient-to-br from-brand-purple-50 to-brand-purple-100 rounded-2xl p-8 border border-brand-purple-200">
               <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-4">
                 ESG & Duurzaamheid
               </h3>
@@ -168,7 +168,7 @@ export default function VastgoedPage() {
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
                     <span className="text-sm text-gray-600">{item.metric}</span>
-                    <span className="font-semibold text-brand-brand-purple-600">{item.value}</span>
+                    <span className="font-semibold text-brand-purple-600">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -202,15 +202,15 @@ export default function VastgoedPage() {
                   centrale facturering en geautomatiseerde doorbelasting naar huurders bespaarden ze €24.500 
                   per jaar én kregen ze complete ESG-rapportage voor hun beleggers.
                 </p>
-                <div className="bg-brand-brand-purple-50 rounded-xl p-6 border border-brand-brand-purple-200">
+                <div className="bg-brand-purple-50 rounded-xl p-6 border border-brand-purple-200">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-600 mb-1">Aantal panden</div>
-                      <div className="text-2xl font-bold text-brand-brand-purple-600">24</div>
+                      <div className="text-2xl font-bold text-brand-purple-600">24</div>
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Totaal verbruik</div>
-                      <div className="text-2xl font-bold text-brand-brand-purple-600">950k kWh</div>
+                      <div className="text-2xl font-bold text-brand-purple-600">950k kWh</div>
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Besparing/jaar</div>
@@ -218,14 +218,14 @@ export default function VastgoedPage() {
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Extra korting</div>
-                      <div className="text-2xl font-bold text-brand-brand-purple-600">22%</div>
+                      <div className="text-2xl font-bold text-brand-purple-600">22%</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-brand-brand-brand-purple-500 to-brand-brand-purple-600 text-white rounded-xl p-6">
+                <div className="bg-gradient-to-br from-brand-purple-500 to-brand-purple-600 text-white rounded-xl p-6">
                   <div className="text-sm opacity-90 mb-2">Totale besparing</div>
                   <div className="text-5xl font-bold mb-4">€24.500</div>
                   <div className="text-sm opacity-90">per jaar over 24 panden</div>
@@ -242,7 +242,7 @@ export default function VastgoedPage() {
                       'Vaste accountmanager voor portfolio'
                     ].map((service, i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-brand-brand-brand-purple-500 rounded-full" />
+                        <div className="w-1.5 h-1.5 bg-brand-purple-500 rounded-full" />
                         <span className="text-gray-700">{service}</span>
                       </li>
                     ))}
@@ -312,9 +312,9 @@ export default function VastgoedPage() {
             ].map((service, i) => {
               const Icon = service.icon
               return (
-              <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-brand-brand-purple-300 hover:shadow-lg transition-all text-center">
-                <div className="w-12 h-12 bg-brand-brand-purple-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Icon weight="duotone" className="w-6 h-6 text-brand-brand-brand-purple-500" />
+              <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-brand-purple-300 hover:shadow-lg transition-all text-center">
+                <div className="w-12 h-12 bg-brand-purple-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-purple-500" />
                 </div>
                 <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
                 <div className="text-sm text-gray-600">{service.desc}</div>
@@ -342,7 +342,7 @@ export default function VastgoedPage() {
                 <div className="text-sm text-gray-600 mb-3">{portfolio.panden}</div>
                 <div>
                   <div className="text-xs text-gray-600">Totaal verbruik:</div>
-                  <div className="font-bold text-brand-brand-purple-600 text-lg">{portfolio.range}</div>
+                  <div className="font-bold text-brand-purple-600 text-lg">{portfolio.range}</div>
                 </div>
               </div>
             ))}
@@ -351,28 +351,28 @@ export default function VastgoedPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-brand-brand-purple-600 to-brand-brand-purple-700 relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-brand-purple-600 to-brand-purple-700 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
-          <Handshake weight="duotone" className="w-16 h-16 text-brand-brand-purple-200 mx-auto mb-6" />
+          <Handshake weight="duotone" className="w-16 h-16 text-brand-purple-200 mx-auto mb-6" />
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Optimaliseer energie over je complete vastgoedportefeuille
           </h2>
-          <p className="text-lg md:text-xl text-brand-brand-purple-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-brand-purple-100 mb-8 max-w-2xl mx-auto">
             Centrale inkoop, transparante doorbelasting, ESG-rapportage en maximaal volume-voordeel. 
             Alles onder controle met één vaste accountmanager.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/calculator">
-              <button className="px-8 py-4 bg-white text-brand-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                 <Lightning weight="duotone" className="w-6 h-6" />
                 Bereken portfolio besparing
               </button>
             </Link>
             <Link href="/contact">
-              <button className="px-8 py-4 bg-brand-brand-purple-800 hover:bg-brand-brand-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-brand-purple-800 hover:bg-brand-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
                 Plan adviesgesprek
                 <ArrowRight weight="bold" className="w-5 h-5" />
               </button>

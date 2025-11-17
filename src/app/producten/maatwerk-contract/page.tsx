@@ -18,10 +18,10 @@ export default function MaatwerkContractPage() {
         
         <div className="container-custom relative z-10">
           <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-3 bg-brand-brand-brand-purple-500/20 border border-brand-purple-400/30 rounded-full px-4 py-2 mb-6">
+            <div className="inline-flex items-center gap-3 bg-brand-purple-500/20 border border-brand-purple-400/30 rounded-full px-4 py-2 mb-6">
               <Diamond weight="duotone" className="w-5 h-5 text-brand-purple-300" />
               <span className="text-sm font-semibold text-brand-purple-200">Maatwerk Contract</span>
-              <span className="bg-brand-brand-brand-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Premium</span>
+              <span className="bg-brand-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Premium</span>
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
@@ -32,7 +32,7 @@ export default function MaatwerkContractPage() {
               krijg je de onderhandelingskracht van een grote speler en tarieven die anders onbereikbaar zijn.
             </p>
             
-            <div className="bg-brand-brand-brand-purple-500/20 border border-brand-purple-400/30 rounded-xl p-6 mb-8 max-w-2xl">
+            <div className="bg-brand-purple-500/20 border border-brand-purple-400/30 rounded-xl p-6 mb-8 max-w-2xl">
               <div className="flex items-center gap-3 mb-2">
                 <Diamond weight="duotone" className="w-6 h-6 text-brand-purple-300" />
                 <span className="font-semibold text-brand-purple-200">Geschikt voor:</span>
@@ -105,12 +105,12 @@ export default function MaatwerkContractPage() {
                 const Icon = item.icon
                 return (
                   <div key={i} className="flex gap-5 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:border-brand-purple-300 hover:shadow-lg transition-all group">
-                    <div className="w-14 h-14 bg-brand-brand-brand-purple-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <div className="w-14 h-14 bg-brand-purple-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <Icon weight="duotone" className="w-7 h-7 text-white" />
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-sm font-bold text-brand-brand-purple-600">STAP {item.step}</span>
+                        <span className="text-sm font-bold text-brand-purple-600">STAP {item.step}</span>
                       </div>
                       <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">{item.title}</h3>
                       <p className="text-gray-600 leading-relaxed">{item.desc}</p>
@@ -123,7 +123,7 @@ export default function MaatwerkContractPage() {
             <div className="bg-gradient-to-br from-brand-purple-50 to-brand-purple-100 rounded-2xl p-8 md:p-12">
               <div className="bg-white rounded-xl p-6 shadow-lg mb-6">
                 <div className="text-sm text-gray-600 mb-1">Gemiddelde extra besparing</div>
-                <div className="text-4xl font-bold text-brand-brand-purple-600 mb-1">15-25%</div>
+                <div className="text-4xl font-bold text-brand-purple-600 mb-1">15-25%</div>
                 <div className="text-sm text-gray-600">bovenop normale contracten</div>
               </div>
 
@@ -147,7 +147,7 @@ export default function MaatwerkContractPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Extra besparing</span>
-                  <span className="font-semibold text-brand-brand-purple-600">€18.500/jaar</span>
+                  <span className="font-semibold text-brand-purple-600">€18.500/jaar</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Contract type</span>
@@ -207,8 +207,8 @@ export default function MaatwerkContractPage() {
               const Icon = benefit.icon
               return (
                 <div key={i} className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all group">
-                  <div className="w-14 h-14 bg-brand-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-brand-brand-purple-500 transition-colors">
-                    <Icon weight="duotone" className="w-7 h-7 text-brand-brand-purple-600 group-hover:text-white transition-colors" />
+                  <div className="w-14 h-14 bg-brand-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-purple-500 transition-colors">
+                    <Icon weight="duotone" className="w-7 h-7 text-brand-purple-600 group-hover:text-white transition-colors" />
                   </div>
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {benefit.title}
@@ -276,12 +276,12 @@ export default function MaatwerkContractPage() {
             ].map((item, i) => {
               const Icon = item.icon
               return (
-              <div key={i} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-brand-brand-purple-300 hover:shadow-xl transition-all">
+              <div key={i} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-brand-purple-300 hover:shadow-xl transition-all">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-14 h-14 bg-brand-brand-purple-50 rounded-xl flex items-center justify-center">
-                    <Icon weight="duotone" className="w-8 h-8 text-brand-brand-brand-purple-500" />
+                  <div className="w-14 h-14 bg-brand-purple-50 rounded-xl flex items-center justify-center">
+                    <Icon weight="duotone" className="w-8 h-8 text-brand-purple-500" />
                   </div>
-                  <div className="bg-brand-brand-purple-100 text-brand-brand-purple-700 text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="bg-brand-purple-100 text-brand-purple-700 text-xs font-bold px-3 py-1 rounded-full">
                     Premium
                   </div>
                 </div>
@@ -291,15 +291,15 @@ export default function MaatwerkContractPage() {
                 <p className="text-gray-600 leading-relaxed mb-4">
                   {item.desc}
                 </p>
-                <div className="bg-brand-brand-purple-50 rounded-lg px-3 py-2 text-sm flex items-center gap-2">
-                  <Lightbulb weight="duotone" className="w-4 h-4 text-brand-brand-purple-600" />
-                  <span className="font-semibold text-brand-brand-purple-700">{item.verbruik}</span>
+                <div className="bg-brand-purple-50 rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+                  <Lightbulb weight="duotone" className="w-4 h-4 text-brand-purple-600" />
+                  <span className="font-semibold text-brand-purple-700">{item.verbruik}</span>
                 </div>
               </div>
             )})}
           </div>
 
-          <div className="mt-12 bg-gradient-to-br from-brand-brand-brand-purple-500 to-brand-brand-purple-600 text-white rounded-2xl p-8 md:p-12 text-center">
+          <div className="mt-12 bg-gradient-to-br from-brand-purple-500 to-brand-purple-600 text-white rounded-2xl p-8 md:p-12 text-center">
             <Diamond weight="duotone" className="w-16 h-16 mx-auto mb-6" />
             <h3 className="font-display text-2xl md:text-3xl font-bold mb-4">
               Niet zeker of je voldoet aan de minimale afname?
@@ -310,7 +310,7 @@ export default function MaatwerkContractPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/calculator">
-                <button className="px-8 py-4 bg-white text-brand-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                   <Lightning weight="duotone" className="w-6 h-6" />
                   Check je verbruik
                 </button>
@@ -373,13 +373,13 @@ export default function MaatwerkContractPage() {
             ].map((step, i) => (
               <div key={i} className="flex gap-6 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-brand-brand-brand-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-brand-purple-500 rounded-full flex items-center justify-center text-white font-bold">
                     {i + 1}
                   </div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-sm font-bold text-brand-brand-purple-600">{step.week}</span>
+                    <span className="text-sm font-bold text-brand-purple-600">{step.week}</span>
                   </div>
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-1">
                     {step.title}

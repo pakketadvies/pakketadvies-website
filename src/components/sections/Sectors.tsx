@@ -29,7 +29,7 @@ export function Sectors() {
       title: 'Vastgoed',
       description: 'Beleggers en beheerders',
       highlights: ['ESG-rapportage', 'Centrale inkoop'],
-      color: 'from-brand-brand-purple-400 to-brand-brand-brand-purple-500',
+      color: 'from-brand-purple-400 to-brand-purple-500',
       href: '/sectoren/vastgoed'
     },
     {
