@@ -27,7 +27,7 @@ export type TypeBedrijf =
   | 'overig'
 
 export interface ContractVoorkeuren {
-  type: 'vast' | 'dynamisch' | 'beide'
+  type: 'vast' | 'dynamisch' | 'beide' | 'maatwerk'
   looptijd?: 1 | 2 | 3 | 5
   groeneEnergie: boolean
   opmerkingen?: string
