@@ -36,19 +36,17 @@ export function Header() {
         }`}>
           <div className="flex items-center justify-between px-6 py-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 transition-transform duration-300 group-hover:scale-110">
+            <Link href="/" className="group">
+              <div className="relative h-10 w-auto transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
-                  alt="PakketAdvies Logo"
-                  fill
+                  alt="PakketAdvies"
+                  width={180}
+                  height={40}
                   className="object-contain"
                   priority
                 />
               </div>
-              <span className="font-display text-xl font-bold text-brand-navy-500">
-                PakketAdvies
-              </span>
             </Link>
 
             {/* Desktop Navigation */}

@@ -14,18 +14,16 @@ export function Footer() {
         <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-12 h-12 transition-transform duration-300 group-hover:scale-110">
+            <Link href="/" className="group inline-block">
+              <div className="relative h-12 w-auto transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
-                  alt="PakketAdvies Logo"
-                  fill
-                  className="object-contain"
+                  alt="PakketAdvies"
+                  width={200}
+                  height={48}
+                  className="object-contain brightness-0 invert"
                 />
               </div>
-              <span className="font-display text-2xl font-bold">
-                PakketAdvies
-              </span>
             </Link>
             <p className="text-gray-300 leading-relaxed">
               Specialist in zakelijke energiecontracten. Wij bemiddelen het beste contract voor jouw bedrijf.
