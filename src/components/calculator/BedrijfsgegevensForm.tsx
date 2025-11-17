@@ -97,6 +97,7 @@ export function BedrijfsgegevensForm() {
         <Input
           label="Telefoonnummer"
           type="tel"
+          inputMode="tel"
           placeholder="06 12345678"
           error={errors.telefoon?.message}
           helpText="Voor eventuele vragen"

@@ -18,8 +18,28 @@ export function QuickCalculator() {
     if (step === 1 && formData.stroomVerbruik && formData.gasVerbruik) {
       setStep(2)
     } else if (step === 2) {
-      // Navigate to full calculator with pre-filled data
-      router.push(`/calculator?stroom=${formData.stroomVerbruik}&gas=${formData.gasVerbruik}&type=${formData.typeBedrijf}`)
+      // Store data in localStorage for results page
+      const quickCalcData = {
+        verbruik: {
+          elektriciteitJaar: parseInt(formData.stroomVerbruik),
+          gasJaar: parseInt(formData.gasVerbruik),
+          postcode: '0000 XX', // Default postcode for quick calc
+          geschat: true,
+        },
+        bedrijfsgegevens: {
+          typeBedrijf: formData.typeBedrijf,
+        },
+        voorkeuren: {
+          type: 'vast' as const,
+          groeneEnergie: false,
+        },
+        fromQuickCalc: true,
+      }
+      
+      localStorage.setItem('quickcalc-data', JSON.stringify(quickCalcData))
+      
+      // Navigate directly to results with query params
+      router.push(`/calculator/resultaten?quick=true&stroom=${formData.stroomVerbruik}&gas=${formData.gasVerbruik}&type=${formData.typeBedrijf}`)
     }
   }
 
@@ -53,7 +73,9 @@ export function QuickCalculator() {
                   Jaarverbruik stroom (kWh)
                 </label>
                 <input
-                  type="number"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={formData.stroomVerbruik}
                   onChange={(e) => setFormData({ ...formData, stroomVerbruik: e.target.value })}
                   placeholder="Bijv. 50000"
@@ -68,7 +90,9 @@ export function QuickCalculator() {
                   Jaarverbruik gas (m³)
                 </label>
                 <input
-                  type="number"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={formData.gasVerbruik}
                   onChange={(e) => setFormData({ ...formData, gasVerbruik: e.target.value })}
                   placeholder="Bijv. 20000"
@@ -139,7 +163,7 @@ export function QuickCalculator() {
               className="w-full group relative px-6 py-3.5 bg-brand-teal-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:bg-brand-teal-600 transition-all duration-300"
             >
               <span className="flex items-center justify-center gap-2">
-                Bekijk aanbiedingen
+                Bekijk jouw aanbiedingen
                 <CheckCircle weight="duotone" className="w-5 h-5" />
               </span>
             </button>

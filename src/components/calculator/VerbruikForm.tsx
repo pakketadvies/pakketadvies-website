@@ -79,7 +79,9 @@ export function VerbruikForm() {
       <div>
         <Input
           label="Elektriciteitsverbruik per jaar (kWh)"
-          type="number"
+          type="tel"
+          inputMode="numeric"
+          pattern="[0-9]*"
           placeholder="Bijv. 5000"
           error={errors.elektriciteitJaar?.message}
           helpText="Gemiddeld MKB: 5.000-15.000 kWh per jaar"
@@ -111,7 +113,9 @@ export function VerbruikForm() {
           <div className="animate-slide-down">
             <Input
               label="Gasverbruik per jaar (m³)"
-              type="number"
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Bijv. 2000"
               error={errors.gasJaar?.message}
               helpText="Gemiddeld MKB: 1.000-5.000 m³ per jaar"

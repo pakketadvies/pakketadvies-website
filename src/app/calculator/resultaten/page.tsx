@@ -1,287 +1,548 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { useCalculatorStore } from '@/store/calculatorStore'
+import { Lightning, SlidersHorizontal, X, Check, Star, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
+import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 
-// Mock data voor demonstratie
-const mockResultaten: ContractOptie[] = [
-  {
-    id: '1',
-    leverancier: {
-      id: 'gs',
-      naam: 'Groene Stroom',
-      logo: '/logos/groene-stroom.svg',
-      website: 'https://groenestroom.nl',
+// Mock data voor demonstratie - Later vervangen met admin data
+const generateMockResultaten = (verbruikElektriciteit: number, verbruikGas: number): ContractOptie[] => {
+  const basePrice = (verbruikElektriciteit * 0.28 + verbruikGas * 1.15) / 12
+  
+  return [
+    {
+      id: '1',
+      leverancier: {
+        id: 'gs',
+        naam: 'Groene Stroom',
+        logo: '/logos/groene-stroom.svg',
+        website: 'https://groenestroom.nl',
+      },
+      type: 'vast',
+      looptijd: 3,
+      maandbedrag: Math.round(basePrice * 0.92),
+      jaarbedrag: Math.round(basePrice * 0.92 * 12),
+      tariefElektriciteit: 0.28,
+      tariefGas: 1.15,
+      groeneEnergie: true,
+      rating: 4.8,
+      aantalReviews: 253,
+      voorwaarden: ['Prijsgarantie 3 jaar', 'Geen opstapkosten', '1 maand opzegtermijn'],
+      opzegtermijn: 1,
+      bijzonderheden: ['100% Nederlandse windenergie', 'CO2-neutraal'],
+      besparing: Math.round(basePrice * 0.08),
+      aanbevolen: true,
     },
-    type: 'vast',
-    looptijd: 3,
-    maandbedrag: 137,
-    jaarbedrag: 1644,
-    tariefElektriciteit: 0.28,
-    tariefGas: 1.15,
-    groeneEnergie: true,
-    rating: 4.8,
-    aantalReviews: 253,
-    voorwaarden: ['Prijsgarantie 3 jaar', 'Geen opstapkosten', '1 maand opzegtermijn'],
-    opzegtermijn: 1,
-    bijzonderheden: ['100% Nederlandse windenergie'],
-    besparing: 45,
-    aanbevolen: true,
-  },
-  {
-    id: '2',
-    leverancier: {
-      id: 'be',
-      naam: 'Budget Energie',
-      logo: '/logos/budget-energie.svg',
-      website: 'https://budgetenergie.nl',
+    {
+      id: '2',
+      leverancier: {
+        id: 'be',
+        naam: 'Budget Energie',
+        logo: '/logos/budget-energie.svg',
+        website: 'https://budgetenergie.nl',
+      },
+      type: 'vast',
+      looptijd: 1,
+      maandbedrag: Math.round(basePrice * 0.89),
+      jaarbedrag: Math.round(basePrice * 0.89 * 12),
+      tariefElektriciteit: 0.26,
+      tariefGas: 1.10,
+      groeneEnergie: false,
+      rating: 4.5,
+      aantalReviews: 182,
+      voorwaarden: ['Prijsgarantie 1 jaar', 'Geen opstapkosten'],
+      opzegtermijn: 1,
+      bijzonderheden: ['Laagste prijs garantie'],
+      besparing: Math.round(basePrice * 0.11),
     },
-    type: 'vast',
-    looptijd: 1,
-    maandbedrag: 129,
-    jaarbedrag: 1548,
-    tariefElektriciteit: 0.26,
-    tariefGas: 1.10,
-    groeneEnergie: false,
-    rating: 4.5,
-    aantalReviews: 182,
-    voorwaarden: ['Prijsgarantie 1 jaar', 'Geen opstapkosten'],
-    opzegtermijn: 1,
-    bijzonderheden: [],
-    besparing: 53,
-  },
-  {
-    id: '3',
-    leverancier: {
-      id: 'eneco',
-      naam: 'Eneco',
-      logo: '/logos/eneco.svg',
-      website: 'https://eneco.nl',
+    {
+      id: '3',
+      leverancier: {
+        id: 'eneco',
+        naam: 'Eneco Zakelijk',
+        logo: '/logos/eneco.svg',
+        website: 'https://eneco.nl',
+      },
+      type: 'dynamisch',
+      looptijd: 1,
+      maandbedrag: Math.round(basePrice * 0.95),
+      jaarbedrag: Math.round(basePrice * 0.95 * 12),
+      tariefElektriciteit: 0.29,
+      tariefGas: 1.18,
+      groeneEnergie: true,
+      rating: 4.9,
+      aantalReviews: 421,
+      voorwaarden: ['Variabel tarief', 'Geen opstapkosten', 'Maandelijks opzegbaar'],
+      opzegtermijn: 1,
+      bijzonderheden: ['Slimme laadpaal integratie', 'App voor realtime inzicht', 'Profiteer van daluren'],
+      besparing: Math.round(basePrice * 0.05),
+      populair: true,
     },
-    type: 'dynamisch',
-    looptijd: 1,
-    maandbedrag: 142,
-    jaarbedrag: 1704,
-    tariefElektriciteit: 0.29,
-    tariefGas: 1.18,
-    groeneEnergie: true,
-    rating: 4.9,
-    aantalReviews: 421,
-    voorwaarden: ['Variabel tarief', 'Geen opstapkosten', '1 maand opzegtermijn'],
-    opzegtermijn: 1,
-    bijzonderheden: ['Slimme laadpaal integratie', 'App voor realtime inzicht'],
-    besparing: 40,
-    populair: true,
-  },
-]
+    {
+      id: '4',
+      leverancier: {
+        id: 've',
+        naam: 'Vattenfall',
+        logo: '/logos/vattenfall.svg',
+        website: 'https://vattenfall.nl',
+      },
+      type: 'vast',
+      looptijd: 5,
+      maandbedrag: Math.round(basePrice * 0.87),
+      jaarbedrag: Math.round(basePrice * 0.87 * 12),
+      tariefElektriciteit: 0.25,
+      tariefGas: 1.08,
+      groeneEnergie: true,
+      rating: 4.7,
+      aantalReviews: 315,
+      voorwaarden: ['Prijsgarantie 5 jaar', 'Geen opstapkosten', '2 maanden opzegtermijn'],
+      opzegtermijn: 2,
+      bijzonderheden: ['Langste zekerheid', 'Gratis energiescan'],
+      besparing: Math.round(basePrice * 0.13),
+    },
+    {
+      id: '5',
+      leverancier: {
+        id: 'es',
+        naam: 'Essent',
+        logo: '/logos/essent.svg',
+        website: 'https://essent.nl',
+      },
+      type: 'dynamisch',
+      looptijd: 1,
+      maandbedrag: Math.round(basePrice * 0.93),
+      jaarbedrag: Math.round(basePrice * 0.93 * 12),
+      tariefElektriciteit: 0.27,
+      tariefGas: 1.16,
+      groeneEnergie: false,
+      rating: 4.6,
+      aantalReviews: 198,
+      voorwaarden: ['Variabel tarief', 'Geen opstapkosten', 'Maandelijks opzegbaar'],
+      opzegtermijn: 1,
+      bijzonderheden: ['24/7 klantenservice', 'Smart meter compatible'],
+      besparing: Math.round(basePrice * 0.07),
+    },
+  ]
+}
 
-export default function ResultatenPage() {
-  const { verbruik, voorkeuren } = useCalculatorStore()
+function ResultatenContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { verbruik, voorkeuren, reset } = useCalculatorStore()
+  
   const [resultaten, setResultaten] = useState<ContractOptie[]>([])
+  const [filteredResultaten, setFilteredResultaten] = useState<ContractOptie[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    type: 'alle' as 'alle' | 'vast' | 'dynamisch',
+    groeneEnergie: false,
+    maxPrijs: 99999,
+    minRating: 0,
+  })
+  const [sortBy, setSortBy] = useState<'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating'>('besparing')
 
+  // Check if coming from quick calculator
+  const isQuickCalc = searchParams?.get('quick') === 'true'
+  
   useEffect(() => {
-    // Simuleer API call
-    setTimeout(() => {
-      setResultaten(mockResultaten)
-      setLoading(false)
-    }, 1000)
-  }, [])
+    const loadResultaten = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 800))
+        
+        let verbruikData = verbruik
+        
+        // If coming from quick calc, use query params or localStorage
+        if (isQuickCalc) {
+          const stroom = parseInt(searchParams?.get('stroom') || '0')
+          const gas = parseInt(searchParams?.get('gas') || '0')
+          
+          if (stroom && gas) {
+            verbruikData = {
+              elektriciteitJaar: stroom,
+              gasJaar: gas,
+              postcode: '0000 XX',
+              geschat: true,
+            }
+          } else {
+            // Fallback to localStorage
+            const quickData = localStorage.getItem('quickcalc-data')
+            if (quickData) {
+              const parsed = JSON.parse(quickData)
+              verbruikData = parsed.verbruik
+            }
+          }
+        }
+        
+        if (!verbruikData?.elektriciteitJaar) {
+          router.push('/calculator')
+          return
+        }
+        
+        const mockData = generateMockResultaten(
+          verbruikData.elektriciteitJaar,
+          verbruikData.gasJaar || 0
+        )
+        
+        setResultaten(mockData)
+        setFilteredResultaten(mockData)
+        setLoading(false)
+      } catch (err) {
+        setError('Er ging iets mis bij het ophalen van de resultaten. Probeer het opnieuw.')
+        setLoading(false)
+      }
+    }
+    
+    loadResultaten()
+  }, [verbruik, isQuickCalc, searchParams, router])
+
+  // Apply filters and sorting
+  useEffect(() => {
+    let filtered = [...resultaten]
+    
+    // Filter by type
+    if (filters.type !== 'alle') {
+      filtered = filtered.filter(r => r.type === filters.type)
+    }
+    
+    // Filter by groene energie
+    if (filters.groeneEnergie) {
+      filtered = filtered.filter(r => r.groeneEnergie)
+    }
+    
+    // Filter by max price
+    filtered = filtered.filter(r => r.maandbedrag <= filters.maxPrijs)
+    
+    // Filter by min rating
+    filtered = filtered.filter(r => r.rating >= filters.minRating)
+    
+    // Sort
+    switch (sortBy) {
+      case 'prijs-laag':
+        filtered.sort((a, b) => a.maandbedrag - b.maandbedrag)
+        break
+      case 'prijs-hoog':
+        filtered.sort((a, b) => b.maandbedrag - a.maandbedrag)
+        break
+      case 'besparing':
+        filtered.sort((a, b) => (b.besparing || 0) - (a.besparing || 0))
+        break
+      case 'rating':
+        filtered.sort((a, b) => b.rating - a.rating)
+        break
+    }
+    
+    setFilteredResultaten(filtered)
+  }, [resultaten, filters, sortBy])
+
+  const handleStartOpnieuw = () => {
+    reset()
+    localStorage.removeItem('quickcalc-data')
+    router.push('/calculator')
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gray-50 pt-32 pb-12">
         <div className="container-custom">
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
               <div className="w-full h-full border-4 border-brand-teal-50 border-t-brand-teal-500 rounded-full animate-spin" />
             </div>
-            <p className="text-lg text-gray-500">We zoeken de beste opties voor u...</p>
+            <p className="text-lg text-gray-600">We zoeken de beste opties voor jou...</p>
+            <p className="text-sm text-gray-500 mt-2">Dit duurt maar een paar seconden</p>
           </div>
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container-custom max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-brand-navy-500 mb-2">
-            We vonden {resultaten.length} passende contracten voor u
-          </h1>
-          <p className="text-lg text-gray-500">
-            Op basis van uw verbruik van {verbruik?.elektriciteitJaar.toLocaleString()} kWh per jaar
-          </p>
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-32 pb-12">
+        <div className="container-custom max-w-2xl">
+          <div className="bg-white rounded-2xl p-8 text-center shadow-lg">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <X weight="bold" className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-brand-navy-500 mb-2">Er ging iets mis</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => window.location.reload()}>
+                Probeer opnieuw
+              </Button>
+              <Button variant="outline" onClick={handleStartOpnieuw}>
+                Start opnieuw
+              </Button>
+            </div>
+          </div>
         </div>
+      </div>
+    )
+  }
 
-        <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
-          {resultaten.map((contract) => (
-            <Card
-              key={contract.id}
-              className={`relative ${
-                contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
-              }`}
-            >
-              {/* Badges */}
-              {contract.aanbevolen && (
-                <div className="absolute top-4 right-4">
-                  <Badge variant="success">Aanbevolen</Badge>
-                </div>
-              )}
-              {contract.populair && (
-                <div className="absolute top-4 right-4">
-                  <Badge variant="info">Populair</Badge>
-                </div>
-              )}
+  const verbruikElektriciteit = verbruik?.elektriciteitJaar || parseInt(searchParams?.get('stroom') || '0')
 
-              <CardContent className="pt-8">
-                {/* Leverancier */}
-                <div className="mb-4">
-                  <div className="h-10 flex items-center mb-2">
-                    <span className="text-lg font-semibold text-brand-navy-500">
-                      {contract.leverancier.naam}
+  return (
+    <div className="min-h-screen bg-gray-50 pt-32 pb-12">
+      <div className="container-custom max-w-7xl">
+        {/* Header */}
+        <div className="mb-6 md:mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand-navy-500 mb-2">
+                {filteredResultaten.length} {filteredResultaten.length === 1 ? 'passend contract' : 'passende contracten'}
+              </h1>
+              <p className="text-sm md:text-base text-gray-600">
+                Op basis van {verbruikElektriciteit.toLocaleString()} kWh per jaar
+                {isQuickCalc && ' • Snelle scan'}
+              </p>
+            </div>
+            <Button variant="outline" onClick={handleStartOpnieuw} className="w-full md:w-auto">
+              <Lightning weight="bold" className="w-5 h-5 mr-2" />
+              Start opnieuw
+            </Button>
+          </div>
+
+          {/* Filters & Sort Bar */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+              {/* Filter button */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-navy-50 text-brand-navy-600 rounded-lg font-medium hover:bg-brand-navy-100 transition-colors"
+              >
+                <SlidersHorizontal weight="bold" className="w-5 h-5" />
+                <span>Filters</span>
+                {(filters.type !== 'alle' || filters.groeneEnergie || filters.minRating > 0) && (
+                  <span className="w-2 h-2 bg-brand-teal-500 rounded-full" />
+                )}
+              </button>
+
+              {/* Sort dropdown */}
+              <div className="flex items-center gap-2">
+                <ArrowsDownUp weight="bold" className="w-5 h-5 text-gray-500 hidden sm:block" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
+                >
+                  <option value="besparing">Hoogste besparing</option>
+                  <option value="prijs-laag">Laagste prijs</option>
+                  <option value="prijs-hoog">Hoogste prijs</option>
+                  <option value="rating">Beste beoordeling</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Filter panel */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Type filter */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Type contract</label>
+                  <select
+                    value={filters.type}
+                    onChange={(e) => setFilters({ ...filters, type: e.target.value as any })}
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
+                  >
+                    <option value="alle">Alle types</option>
+                    <option value="vast">Vast</option>
+                    <option value="dynamisch">Dynamisch</option>
+                  </select>
+                </div>
+
+                {/* Groene energie filter */}
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={filters.groeneEnergie}
+                      onChange={(e) => setFilters({ ...filters, groeneEnergie: e.target.checked })}
+                      className="w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                      <Leaf weight="duotone" className="w-4 h-4 text-brand-teal-600" />
+                      Alleen groene energie
                     </span>
-                  </div>
+                  </label>
                 </div>
 
-                {/* Prijs */}
-                <div className="mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-4xl font-bold text-brand-navy-500">
-                      €{contract.maandbedrag}
-                    </span>
-                    <span className="text-gray-500">/maand</span>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    €{contract.jaarbedrag.toLocaleString()} per jaar
-                  </div>
-                  {contract.besparing && (
-                    <div className="flex items-center gap-1 text-success-500 font-medium mt-2">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span>€{contract.besparing} besparing per maand</span>
-                    </div>
-                  )}
+                {/* Rating filter */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Min. beoordeling</label>
+                  <select
+                    value={filters.minRating}
+                    onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
+                  >
+                    <option value="0">Alle</option>
+                    <option value="4">4+ sterren</option>
+                    <option value="4.5">4.5+ sterren</option>
+                    <option value="4.8">4.8+ sterren</option>
+                  </select>
                 </div>
 
-                {/* Details */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-brand-teal-500 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-brand-navy-500">
-                      {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-brand-teal-500 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-brand-navy-500">{contract.looptijd} jaar looptijd</span>
-                  </div>
-                  {contract.groeneEnergie && (
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="w-5 h-5 text-brand-teal-500 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span className="text-brand-navy-500">100% groene energie</span>
-                    </div>
-                  )}
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 pt-2">
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(contract.rating)
-                              ? 'text-warning-500 fill-current'
-                              : 'text-gray-300'
-                          }`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {contract.rating} ({contract.aantalReviews} reviews)
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-3 pt-4 border-t border-gray-200">
-                  <Button className="w-full">Kies dit contract</Button>
-                  <button className="w-full text-gray-500 py-2 text-sm hover:text-brand-teal-500 transition-colors">
-                    Bekijk details
+                {/* Reset filters */}
+                <div className="flex items-end">
+                  <button
+                    onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
+                    className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    Reset filters
                   </button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* CTA sectie */}
-        <div className="mt-12 bg-white rounded-2xl p-8 text-center shadow-md">
-          <h2 className="text-2xl font-bold text-brand-navy-500 mb-4">
+        {/* Results grid */}
+        {filteredResultaten.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 text-center">
+            <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
+            <Button variant="outline" onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}>
+              Reset filters
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredResultaten.map((contract) => (
+              <Card
+                key={contract.id}
+                className={`relative hover:shadow-xl transition-shadow duration-300 ${
+                  contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
+                }`}
+              >
+                {/* Badges */}
+                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                  {contract.aanbevolen && (
+                    <Badge variant="success" className="shadow-lg">
+                      <Check weight="bold" className="w-3 h-3 mr-1" />
+                      Aanbevolen
+                    </Badge>
+                  )}
+                  {contract.populair && (
+                    <Badge variant="info" className="shadow-lg">
+                      <Star weight="fill" className="w-3 h-3 mr-1" />
+                      Populair
+                    </Badge>
+                  )}
+                  {contract.groeneEnergie && (
+                    <Badge className="bg-green-100 text-green-700 border-green-200">
+                      <Leaf weight="duotone" className="w-3 h-3 mr-1" />
+                      Groen
+                    </Badge>
+                  )}
+                </div>
+
+                <CardContent className="pt-6">
+                  {/* Leverancier */}
+                  <div className="mb-6">
+                    <h3 className="text-xl font-bold text-brand-navy-500">
+                      {contract.leverancier.naam}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'} • {contract.looptijd} jaar
+                    </p>
+                  </div>
+
+                  {/* Prijs */}
+                  <div className="mb-6 pb-6 border-b-2 border-gray-100">
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-4xl font-bold text-brand-navy-500">
+                        €{contract.maandbedrag}
+                      </span>
+                      <span className="text-gray-500">/maand</span>
+                    </div>
+                    <div className="text-sm text-gray-500 mb-3">
+                      €{contract.jaarbedrag.toLocaleString()} per jaar
+                    </div>
+                    {contract.besparing && contract.besparing > 0 && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm">
+                        <Check weight="bold" className="w-4 h-4" />
+                        <span>€{contract.besparing} besparing/maand</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          weight={i < Math.floor(contract.rating) ? 'fill' : 'regular'}
+                          className={`w-4 h-4 ${
+                            i < Math.floor(contract.rating)
+                              ? 'text-yellow-500'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600 font-medium">
+                      {contract.rating} ({contract.aantalReviews})
+                    </span>
+                  </div>
+
+                  {/* Features */}
+                  <div className="space-y-2 mb-6">
+                    {contract.voorwaarden.slice(0, 3).map((vw, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                        <span>{vw}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-3 pt-4 border-t-2 border-gray-100">
+                    <Link href={`/contract/afsluiten?contract=${contract.id}`}>
+                      <Button className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
+                        Kies dit contract
+                      </Button>
+                    </Link>
+                    <Link href={`/producten/${contract.type}-contract`}>
+                      <button className="w-full text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors">
+                        Meer informatie
+                      </button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* CTA section */}
+        <div className="mt-12 bg-white rounded-2xl p-6 md:p-8 text-center shadow-md">
+          <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-3">
             Hulp nodig bij het kiezen?
           </h2>
-          <p className="text-gray-500 mb-6 max-w-2xl mx-auto">
-            Onze energiespecialisten helpen u graag om het beste contract te vinden dat perfect bij
-            uw bedrijf past.
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto text-sm md:text-base">
+            Onze energiespecialisten helpen je graag om het beste contract te vinden dat perfect bij
+            jouw bedrijf past.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="primary">Bel me terug</Button>
-            <Button variant="secondary">Stuur een email</Button>
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+            <Link href="/contact?reason=advies">
+              <Button className="w-full sm:w-auto">Vraag persoonlijk advies</Button>
+            </Link>
+            <Link href="tel:+31201234567">
+              <Button variant="outline" className="w-full sm:w-auto">Bel 020 123 4567</Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -289,3 +550,21 @@ export default function ResultatenPage() {
   )
 }
 
+export default function ResultatenPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 pt-32 pb-12">
+        <div className="container-custom">
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
+              <div className="w-full h-full border-4 border-brand-teal-50 border-t-brand-teal-500 rounded-full animate-spin" />
+            </div>
+            <p className="text-lg text-gray-600">Laden...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ResultatenContent />
+    </Suspense>
+  )
+}
