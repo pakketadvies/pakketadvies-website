@@ -1,0 +1,9 @@
+{
+  "alias": ["pakketadvies.vercel.app"],
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
+
