@@ -11,7 +11,7 @@ export default function SectorenPage() {
       description: 'Restaurants, hotels, cafés en catering',
       challenges: ['Hoge piekverbruik koeling', 'Wisselende openingstijden', 'Seizoensschommelingen'],
       solutions: ['Dynamische contracten', 'Flexibele tarieven', 'Daluren-optimalisatie'],
-      color: 'from-orange-500 to-orange-600',
+      color: 'from-brand-teal-400 to-brand-teal-500',
       typicalUsage: '30.000 - 150.000 kWh/jaar',
       href: '/sectoren/horeca'
     },
@@ -22,7 +22,7 @@ export default function SectorenPage() {
       description: 'Winkels, supermarkten en winkelketens',
       challenges: ['Meerdere vestigingen', 'Uniforme inkoop', 'Kosten per m²'],
       solutions: ['Portfolio management', 'Centrale facturering', 'Volume voordeel'],
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-brand-navy-400 to-brand-navy-500',
       typicalUsage: '20.000 - 200.000 kWh/jaar',
       href: '/sectoren/retail'
     },
@@ -33,7 +33,7 @@ export default function SectorenPage() {
       description: 'Beleggers, verhuurders en beheerders',
       challenges: ['Meerdere panden', 'ESG-rapportage', 'Doorberekening huurders'],
       solutions: ['Maatwerk contracten', 'Centrale inkoop', 'Duurzaamheidslabels'],
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-brand-purple-400 to-brand-purple-500',
       typicalUsage: '100.000+ kWh/jaar per portfolio',
       href: '/sectoren/vastgoed'
     },
@@ -44,7 +44,7 @@ export default function SectorenPage() {
       description: 'Productie, maakindustrie en drukkerijen',
       challenges: ['Hoog verbruik 24/7', 'Productiepieken', 'Grote aansluitingen'],
       solutions: ['Volume pooling', 'Piekverbruik beheer', 'Maatwerk tarieven'],
-      color: 'from-gray-600 to-gray-700',
+      color: 'from-brand-navy-500 to-brand-navy-600',
       typicalUsage: '200.000+ kWh/jaar',
       href: '/sectoren/industrie'
     },
@@ -55,7 +55,7 @@ export default function SectorenPage() {
       description: 'Glastuinbouw, telers en agrarische bedrijven',
       challenges: ['Extreem hoog verbruik', 'Assimilatiebelichting', 'WKK-integratie'],
       solutions: ['Speciale teelttarieven', 'WKK-contracten', 'Subsidie advies'],
-      color: 'from-green-500 to-green-600',
+      color: 'from-brand-teal-500 to-brand-teal-600',
       typicalUsage: '500.000+ kWh/jaar',
       href: '/sectoren/agrarisch'
     },

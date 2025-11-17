@@ -6,7 +6,7 @@ export default function VastgoedPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-purple-600 via-purple-500 to-purple-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-brand-purple-600 via-brand-purple-500 to-brand-purple-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <Image
             src="/images/office-team.jpg"
@@ -33,7 +33,7 @@ export default function VastgoedPage() {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/calculator">
-                <button className="px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                   <Lightning weight="duotone" className="w-6 h-6" />
                   Bereken je besparing
                 </button>
@@ -85,14 +85,14 @@ export default function VastgoedPage() {
               const Icon = challenge.icon
               return (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <Icon weight="duotone" className="w-10 h-10 text-purple-500 mb-4" />
+                  <Icon weight="duotone" className="w-10 h-10 text-brand-purple-500 mb-4" />
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
                   <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                    <div className="text-xs font-semibold text-purple-800 mb-1">💡 Oplossing:</div>
-                    <div className="text-sm text-purple-700">{challenge.solution}</div>
+                    <div className="text-xs font-semibold text-brand-purple-800 mb-1">💡 Oplossing:</div>
+                    <div className="text-sm text-brand-purple-700">{challenge.solution}</div>
                   </div>
                 </div>
               )
@@ -138,7 +138,7 @@ export default function VastgoedPage() {
                   }
                 ].map((item, i) => (
                   <li key={i} className="flex gap-3">
-                    <Check weight="bold" className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
+                    <Check weight="bold" className="w-6 h-6 text-brand-purple-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-semibold text-brand-navy-500 mb-1">{item.title}</div>
                       <div className="text-sm text-gray-600">{item.desc}</div>
@@ -165,7 +165,7 @@ export default function VastgoedPage() {
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
                     <span className="text-sm text-gray-600">{item.metric}</span>
-                    <span className="font-semibold text-purple-600">{item.value}</span>
+                    <span className="font-semibold text-brand-purple-600">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -189,11 +189,11 @@ export default function VastgoedPage() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-600 mb-1">Aantal panden</div>
-                      <div className="text-2xl font-bold text-purple-600">24</div>
+                      <div className="text-2xl font-bold text-brand-purple-600">24</div>
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Totaal verbruik</div>
-                      <div className="text-2xl font-bold text-purple-600">950k kWh</div>
+                      <div className="text-2xl font-bold text-brand-purple-600">950k kWh</div>
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Besparing/jaar</div>
@@ -201,14 +201,14 @@ export default function VastgoedPage() {
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Extra korting</div>
-                      <div className="text-2xl font-bold text-purple-600">22%</div>
+                      <div className="text-2xl font-bold text-brand-purple-600">22%</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6">
+                <div className="bg-gradient-to-br from-brand-purple-500 to-brand-purple-600 text-white rounded-xl p-6">
                   <div className="text-sm opacity-90 mb-2">Totale besparing</div>
                   <div className="text-5xl font-bold mb-4">€24.500</div>
                   <div className="text-sm opacity-90">per jaar over 24 panden</div>
@@ -225,7 +225,7 @@ export default function VastgoedPage() {
                       'Vaste accountmanager voor portfolio'
                     ].map((service, i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                        <div className="w-1.5 h-1.5 bg-brand-purple-500 rounded-full" />
                         <span className="text-gray-700">{service}</span>
                       </li>
                     ))}
@@ -320,7 +320,7 @@ export default function VastgoedPage() {
                 <div className="text-sm text-gray-600 mb-3">{portfolio.panden}</div>
                 <div>
                   <div className="text-xs text-gray-600">Totaal verbruik:</div>
-                  <div className="font-bold text-purple-600 text-lg">{portfolio.range}</div>
+                  <div className="font-bold text-brand-purple-600 text-lg">{portfolio.range}</div>
                 </div>
               </div>
             ))}
@@ -329,7 +329,7 @@ export default function VastgoedPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-purple-600 to-purple-700 relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-brand-purple-600 to-brand-purple-700 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
@@ -344,13 +344,13 @@ export default function VastgoedPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/calculator">
-              <button className="px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                 <Lightning weight="duotone" className="w-6 h-6" />
                 Bereken portfolio besparing
               </button>
             </Link>
             <Link href="/contact">
-              <button className="px-8 py-4 bg-purple-800 hover:bg-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-brand-purple-800 hover:bg-brand-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
                 Plan adviesgesprek
                 <ArrowRight weight="bold" className="w-5 h-5" />
               </button>

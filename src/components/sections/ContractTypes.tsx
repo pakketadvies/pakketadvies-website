@@ -8,7 +8,7 @@ export function ContractTypes() {
     {
       id: 'vast',
       icon: Lock,
-      color: 'blue',
+      color: 'navy',
       title: 'Vast Contract',
       subtitle: '1 tot 5 jaar',
       description: 'Zekerheid en budgetcontrole',
@@ -55,11 +55,11 @@ export function ContractTypes() {
 
   const getColorClasses = (color: string, type: 'bg' | 'text' | 'border' | 'hover') => {
     const colors = {
-      blue: {
-        bg: 'bg-blue-500',
-        text: 'text-blue-600',
-        border: 'border-blue-500',
-        hover: 'hover:border-blue-500'
+      navy: {
+        bg: 'bg-brand-navy-500',
+        text: 'text-brand-navy-600',
+        border: 'border-brand-navy-400',
+        hover: 'hover:border-brand-navy-500'
       },
       teal: {
         bg: 'bg-brand-teal-500',
@@ -68,10 +68,10 @@ export function ContractTypes() {
         hover: 'hover:border-brand-teal-500'
       },
       purple: {
-        bg: 'bg-purple-500',
-        text: 'text-purple-600',
-        border: 'border-purple-500',
-        hover: 'hover:border-purple-500'
+        bg: 'bg-brand-purple-500',
+        text: 'text-brand-purple-600',
+        border: 'border-brand-purple-500',
+        hover: 'hover:border-brand-purple-500'
       }
     }
     return colors[color as keyof typeof colors][type]

@@ -6,7 +6,7 @@ export default function IndustriePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-700 via-gray-600 to-gray-700 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-brand-navy-700 via-brand-navy-600 to-brand-navy-700 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <Image
             src="/images/features-dashboard.jpg"
@@ -33,7 +33,7 @@ export default function IndustriePage() {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/calculator">
-                <button className="px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                <button className="px-8 py-4 bg-white text-brand-navy-700 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                   <Lightning weight="duotone" className="w-6 h-6" />
                   Bereken je besparing
                 </button>
@@ -56,7 +56,7 @@ export default function IndustriePage() {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
               Energie-uitdagingen in de industrie
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-brand-navy-600">
               Productiebedrijven hebben unieke energiebehoeften met hoog verbruik en specifieke patronen.
             </p>
           </div>
@@ -85,11 +85,11 @@ export default function IndustriePage() {
               const Icon = challenge.icon
               return (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <Icon weight="duotone" className="w-10 h-10 text-gray-600 mb-4" />
+                  <Icon weight="duotone" className="w-10 h-10 text-brand-navy-600 mb-4" />
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {challenge.title}
                   </h3>
-                  <p className="text-gray-600 mb-4">{challenge.desc}</p>
+                  <p className="text-brand-navy-600 mb-4">{challenge.desc}</p>
                   <div className="bg-brand-teal-50 rounded-lg p-3 border border-brand-teal-200">
                     <div className="text-xs font-semibold text-brand-teal-800 mb-1">💡 Oplossing:</div>
                     <div className="text-sm text-brand-teal-700">{challenge.solution}</div>
@@ -108,7 +108,7 @@ export default function IndustriePage() {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
               Zo helpen we productiebedrijven
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-brand-navy-600">
               Vanaf 200.000 kWh komen maatwerk contracten in beeld met maximaal voordeel.
             </p>
           </div>
@@ -118,7 +118,7 @@ export default function IndustriePage() {
               <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-6">
                 Volume pooling voordelen
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-brand-navy-600 mb-6">
                 Door je volume te bundelen met andere industriële bedrijven krijg je toegang tot tarieven 
                 die normaal alleen voor zeer grote afnemers beschikbaar zijn.
               </p>
@@ -145,7 +145,7 @@ export default function IndustriePage() {
                     <Check weight="bold" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-semibold text-brand-navy-500 mb-1">{item.benefit}</div>
-                      <div className="text-sm text-gray-600">{item.desc}</div>
+                      <div className="text-sm text-brand-navy-600">{item.desc}</div>
                     </div>
                   </li>
                 ))}
@@ -158,30 +158,30 @@ export default function IndustriePage() {
               </h3>
               <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
                 <div className="text-center mb-4">
-                  <div className="text-sm text-gray-600 mb-1">Besparing per jaar</div>
-                  <div className="text-5xl font-bold text-gray-700 mb-1">€18.300</div>
-                  <div className="text-sm text-gray-600">22% extra korting</div>
+                  <div className="text-sm text-brand-navy-600 mb-1">Besparing per jaar</div>
+                  <div className="text-5xl font-bold text-brand-navy-700 mb-1">€18.300</div>
+                  <div className="text-sm text-brand-navy-600">22% extra korting</div>
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">
+              <p className="text-brand-navy-700 mb-4">
                 Een drukkerij met 24/7 productie (340.000 kWh/jaar) stapte over naar een maatwerk contract. 
                 Door volume pooling en optimale timing van de inkoop bespaarden ze €18.300 per jaar.
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between py-2 border-b border-gray-300">
-                  <span className="text-gray-600">Type bedrijf:</span>
+                  <span className="text-brand-navy-600">Type bedrijf:</span>
                   <span className="font-semibold">Drukkerij (3-ploegen)</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-300">
-                  <span className="text-gray-600">Verbruik:</span>
+                  <span className="text-brand-navy-600">Verbruik:</span>
                   <span className="font-semibold">340.000 kWh/jaar</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-300">
-                  <span className="text-gray-600">Contract:</span>
+                  <span className="text-brand-navy-600">Contract:</span>
                   <span className="font-semibold">Maatwerk 3 jaar</span>
                 </div>
                 <div className="flex justify-between py-2">
-                  <span className="text-gray-600">Extra voordeel:</span>
+                  <span className="text-brand-navy-600">Extra voordeel:</span>
                   <span className="font-semibold text-green-600">22% volume korting</span>
                 </div>
               </div>
@@ -219,7 +219,7 @@ export default function IndustriePage() {
                 <div key={i} className="text-center">
                   <div className="text-4xl mb-3">{service.icon}</div>
                   <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
-                  <div className="text-sm text-gray-600">{service.desc}</div>
+                  <div className="text-sm text-brand-navy-600">{service.desc}</div>
                 </div>
               ))}
             </div>
@@ -243,11 +243,11 @@ export default function IndustriePage() {
               <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                 <div className="font-semibold text-brand-navy-500 mb-3">{usage.type}</div>
                 <div className="mb-3">
-                  <div className="text-xs text-gray-600">Jaarverbruik:</div>
-                  <div className="font-bold text-gray-700 text-lg">{usage.range}</div>
+                  <div className="text-xs text-brand-navy-600">Jaarverbruik:</div>
+                  <div className="font-bold text-brand-navy-700 text-lg">{usage.range}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-600">Aanbevolen:</div>
+                  <div className="text-xs text-brand-navy-600">Aanbevolen:</div>
                   <div className="text-sm font-semibold text-brand-teal-600">{usage.contract}</div>
                 </div>
               </div>
@@ -259,11 +259,11 @@ export default function IndustriePage() {
               <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0 mt-1" />
               <div>
                 <div className="font-semibold text-brand-navy-500 mb-2">💡 Wanneer maatwerk?</div>
-                <p className="text-sm text-gray-700 mb-3">
+                <p className="text-sm text-brand-navy-700 mb-3">
                   Vanaf <strong>60.000 kWh</strong> of <strong>10.000 m³</strong> gas kom je in aanmerking voor maatwerk. 
                   Maar het wordt echt interessant vanaf 200.000 kWh - dan zijn de besparingen significant.
                 </p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-brand-navy-700">
                   <strong>Voorbeeld:</strong> Bij 500.000 kWh bespaar je gemiddeld €12.000 - €15.000 per jaar extra door maatwerk 
                   vergeleken met een standaard contract.
                 </p>
@@ -291,7 +291,7 @@ export default function IndustriePage() {
             ].map((industry, i) => (
               <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-400 hover:shadow-lg transition-all">
                 <div className="font-semibold text-brand-navy-500 mb-2">{industry.name}</div>
-                <div className="text-sm text-gray-600">Typisch: {industry.typical}</div>
+                <div className="text-sm text-brand-navy-600">Typisch: {industry.typical}</div>
               </div>
             ))}
           </div>
@@ -299,7 +299,7 @@ export default function IndustriePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-gray-700 to-gray-800 relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-brand-navy-700 to-brand-navy-800 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-50" />
         
         <div className="container-custom text-center relative z-10">

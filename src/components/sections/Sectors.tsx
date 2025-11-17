@@ -11,7 +11,7 @@ export function Sectors() {
       title: 'Horeca',
       description: 'Restaurants, hotels, cafés',
       highlights: ['Flexibele contracten', 'Piekverbruik oplossingen'],
-      color: 'from-orange-500 to-orange-600',
+      color: 'from-brand-teal-400 to-brand-teal-500',
       href: '/sectoren/horeca'
     },
     {
@@ -20,7 +20,7 @@ export function Sectors() {
       title: 'Retail',
       description: 'Winkels en winkelketens',
       highlights: ['Portfolio beheer', 'Meerdere vestigingen'],
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-brand-navy-400 to-brand-navy-500',
       href: '/sectoren/retail'
     },
     {
@@ -29,7 +29,7 @@ export function Sectors() {
       title: 'Vastgoed',
       description: 'Beleggers en beheerders',
       highlights: ['ESG-rapportage', 'Centrale inkoop'],
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-brand-purple-400 to-brand-purple-500',
       href: '/sectoren/vastgoed'
     },
     {
@@ -38,7 +38,7 @@ export function Sectors() {
       title: 'Industrie',
       description: 'Productie en maakindustrie',
       highlights: ['Grootverbruik', 'Volume voordeel'],
-      color: 'from-gray-600 to-gray-700',
+      color: 'from-brand-navy-500 to-brand-navy-600',
       href: '/sectoren/industrie'
     },
     {
@@ -47,7 +47,7 @@ export function Sectors() {
       title: 'Agrarisch',
       description: 'Glastuinbouw en telers',
       highlights: ['WKK-integratie', 'Seizoenscontracten'],
-      color: 'from-green-500 to-green-600',
+      color: 'from-brand-teal-500 to-brand-teal-600',
       href: '/sectoren/agrarisch'
     },
     {
@@ -56,7 +56,7 @@ export function Sectors() {
       title: 'Kantoren',
       description: 'Zakelijke dienstverlening',
       highlights: ['Groene energie', 'Budgetzekerheid'],
-      color: 'from-brand-teal-500 to-brand-teal-600',
+      color: 'from-brand-teal-500 to-brand-navy-500',
       href: '/sectoren/kantoren'
     }
   ]

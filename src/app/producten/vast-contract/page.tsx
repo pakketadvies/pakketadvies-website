@@ -19,7 +19,7 @@ export default function VastContractPage() {
         
         <div className="container-custom relative z-10">
           <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-3 bg-blue-500/20 border border-blue-400/30 rounded-full px-4 py-2 mb-6">
+            <div className="inline-flex items-center gap-3 bg-brand-navy-500/20 border border-blue-400/30 rounded-full px-4 py-2 mb-6">
               <Lock weight="duotone" className="w-5 h-5 text-blue-300" />
               <span className="text-sm font-semibold text-blue-200">Vast Contract</span>
             </div>
@@ -98,8 +98,8 @@ export default function VastContractPage() {
               const Icon = benefit.icon
               return (
                 <div key={i} className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all group">
-                  <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500 transition-colors">
-                    <Icon weight="duotone" className="w-7 h-7 text-blue-600 group-hover:text-white transition-colors" />
+                  <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-navy-500 transition-colors">
+                    <Icon weight="duotone" className="w-7 h-7 text-brand-navy-600 group-hover:text-white transition-colors" />
                   </div>
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {benefit.title}

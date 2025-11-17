@@ -6,7 +6,7 @@ export default function RetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-600 via-blue-500 to-blue-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-brand-navy-600 via-brand-navy-500 to-brand-navy-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <Image
             src="/images/testimonial-warehouse.jpg"
@@ -33,7 +33,7 @@ export default function RetailPage() {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/calculator">
-                <button className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                <button className="px-8 py-4 bg-white text-brand-navy-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                   <Lightning weight="duotone" className="w-6 h-6" />
                   Bereken je besparing
                 </button>
@@ -85,14 +85,14 @@ export default function RetailPage() {
               const Icon = challenge.icon
               return (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <Icon weight="duotone" className="w-10 h-10 text-blue-500 mb-4" />
+                  <Icon weight="duotone" className="w-10 h-10 text-brand-navy-500 mb-4" />
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
                   <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                    <div className="text-xs font-semibold text-blue-800 mb-1">💡 Oplossing:</div>
-                    <div className="text-sm text-blue-700">{challenge.solution}</div>
+                    <div className="text-xs font-semibold text-brand-navy-800 mb-1">💡 Oplossing:</div>
+                    <div className="text-sm text-brand-navy-700">{challenge.solution}</div>
                   </div>
                 </div>
               )
@@ -131,10 +131,10 @@ export default function RetailPage() {
                     benefit: 'Tot 20% besparing'
                   }
                 ].map((contract, i) => (
-                  <div key={i} className="border-l-4 border-blue-500 bg-blue-50 rounded-r-lg p-4">
+                  <div key={i} className="border-l-4 border-brand-navy-500 bg-blue-50 rounded-r-lg p-4">
                     <div className="font-semibold text-brand-navy-500 mb-1">{contract.type}</div>
                     <div className="text-sm text-gray-600 mb-2">{contract.reason}</div>
-                    <div className="text-xs font-bold text-blue-600">→ {contract.benefit}</div>
+                    <div className="text-xs font-bold text-brand-navy-600">→ {contract.benefit}</div>
                   </div>
                 ))}
               </div>
@@ -187,7 +187,7 @@ export default function RetailPage() {
                     'Vaste accountmanager voor de hele keten'
                   ].map((benefit, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <Check weight="bold" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <Check weight="bold" className="w-5 h-5 text-brand-navy-600 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{benefit}</span>
                     </li>
                   ))}
@@ -197,7 +197,7 @@ export default function RetailPage() {
               <div className="bg-white rounded-xl p-6 shadow-2xl">
                 <div className="text-center mb-6">
                   <div className="text-sm text-gray-600 mb-1">Totale besparing per jaar</div>
-                  <div className="text-5xl font-bold text-blue-600 mb-1">€6.800</div>
+                  <div className="text-5xl font-bold text-brand-navy-600 mb-1">€6.800</div>
                   <div className="text-sm text-gray-600">over 8 vestigingen</div>
                 </div>
                 <div className="space-y-3 text-sm">
@@ -215,7 +215,7 @@ export default function RetailPage() {
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-600">Extra korting:</span>
-                    <span className="font-semibold text-blue-600">18% volume voordeel</span>
+                    <span className="font-semibold text-brand-navy-600">18% volume voordeel</span>
                   </div>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function RetailPage() {
                 <div className="text-sm text-gray-600 mb-3">{usage.size}</div>
                 <div>
                   <div className="text-xs text-gray-600">Jaarverbruik:</div>
-                  <div className="font-bold text-blue-600 text-lg">{usage.range}</div>
+                  <div className="font-bold text-brand-navy-600 text-lg">{usage.range}</div>
                 </div>
               </div>
             ))}
@@ -309,7 +309,7 @@ export default function RetailPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-blue-600 to-blue-700 relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-brand-navy-600 to-brand-navy-700 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
@@ -323,13 +323,13 @@ export default function RetailPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/calculator">
-              <button className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-white text-brand-navy-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                 <Lightning weight="duotone" className="w-6 h-6" />
                 Bereken je besparing
               </button>
             </Link>
             <Link href="/contact">
-              <button className="px-8 py-4 bg-blue-800 hover:bg-blue-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-brand-navy-800 hover:bg-brand-navy-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
                 Plan adviesgesprek
                 <ArrowRight weight="bold" className="w-5 h-5" />
               </button>

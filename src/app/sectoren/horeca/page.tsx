@@ -6,7 +6,7 @@ export default function HorecaPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-orange-600 via-orange-500 to-orange-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-brand-teal-600 via-brand-teal-500 to-brand-teal-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <Image
             src="/images/testimonial-warehouse.jpg"
@@ -24,16 +24,16 @@ export default function HorecaPage() {
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Energieoplossingen voor <span className="text-orange-200">restaurants, hotels en cafés</span>
+              Energieoplossingen voor <span className="text-teal-100">restaurants, hotels en cafés</span>
             </h1>
-            <p className="text-lg md:text-xl text-orange-100 mb-8">
+            <p className="text-lg md:text-xl text-teal-100 mb-8">
               Flexibele energiecontracten die perfect aansluiten bij wisselende openingstijden, piekverbruik 
               en seizoensschommelingen in de horeca.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/calculator">
-                <button className="px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                <button className="px-8 py-4 bg-white text-brand-teal-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                   <Lightning weight="duotone" className="w-6 h-6" />
                   Bereken je besparing
                 </button>
@@ -85,14 +85,14 @@ export default function HorecaPage() {
               const Icon = challenge.icon
               return (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <Icon weight="duotone" className="w-10 h-10 text-orange-500 mb-4" />
+                  <Icon weight="duotone" className="w-10 h-10 text-brand-teal-500 mb-4" />
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
                   <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                    <div className="text-xs font-semibold text-orange-800 mb-1">💡 Oplossing:</div>
-                    <div className="text-sm text-orange-700">{challenge.solution}</div>
+                    <div className="text-xs font-semibold text-brand-teal-800 mb-1">💡 Oplossing:</div>
+                    <div className="text-sm text-brand-teal-700">{challenge.solution}</div>
                   </div>
                 </div>
               )
@@ -131,10 +131,10 @@ export default function HorecaPage() {
                     saving: 'Voorspelbare kosten'
                   }
                 ].map((contract, i) => (
-                  <div key={i} className="border-l-4 border-orange-500 bg-orange-50 rounded-r-lg p-4">
+                  <div key={i} className="border-l-4 border-brand-teal-500 bg-orange-50 rounded-r-lg p-4">
                     <div className="font-semibold text-brand-navy-500 mb-1">{contract.type}</div>
                     <div className="text-sm text-gray-600 mb-2">{contract.reason}</div>
-                    <div className="text-xs font-bold text-orange-600">→ {contract.saving}</div>
+                    <div className="text-xs font-bold text-brand-teal-600">→ {contract.saving}</div>
                   </div>
                 ))}
               </div>
@@ -146,7 +146,7 @@ export default function HorecaPage() {
               </h3>
               <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
                 <div className="text-sm text-gray-600 mb-1">Gemiddelde besparing</div>
-                <div className="text-4xl font-bold text-orange-600 mb-1">€4.200</div>
+                <div className="text-4xl font-bold text-brand-teal-600 mb-1">€4.200</div>
                 <div className="text-sm text-gray-600">per jaar</div>
               </div>
               <p className="text-gray-700 mb-4">
@@ -216,11 +216,11 @@ export default function HorecaPage() {
                 <div className="space-y-2 text-sm">
                   <div>
                     <div className="text-gray-600">Elektriciteit:</div>
-                    <div className="font-bold text-orange-600">{usage.range}</div>
+                    <div className="font-bold text-brand-teal-600">{usage.range}</div>
                   </div>
                   <div>
                     <div className="text-gray-600">Gas:</div>
-                    <div className="font-bold text-orange-600">{usage.gas}</div>
+                    <div className="font-bold text-brand-teal-600">{usage.gas}</div>
                   </div>
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default function HorecaPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-600 to-orange-700 relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-brand-teal-600 to-brand-teal-700 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
@@ -244,13 +244,13 @@ export default function HorecaPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/calculator">
-              <button className="px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-white text-brand-teal-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                 <Lightning weight="duotone" className="w-6 h-6" />
                 Bereken je besparing
               </button>
             </Link>
             <Link href="/contact">
-              <button className="px-8 py-4 bg-orange-800 hover:bg-orange-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-brand-teal-800 hover:bg-brand-teal-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
                 Plan adviesgesprek
                 <ArrowRight weight="bold" className="w-5 h-5" />
               </button>
