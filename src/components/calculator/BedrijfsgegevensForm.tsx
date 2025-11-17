@@ -314,6 +314,7 @@ export function BedrijfsgegevensForm() {
                 : 'border-gray-300 focus:border-brand-teal-500'
             } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500`}
             required
+            autoFocus
           />
           {searchLoading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">

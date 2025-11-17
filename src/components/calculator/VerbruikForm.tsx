@@ -185,23 +185,24 @@ export function VerbruikForm() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {/* Postcode */}
-              <div className="md:col-span-1">
-                <Input
-                  label="Postcode"
-                  placeholder="1234 AB"
-                  value={adres.postcode}
-                  onChange={(e) => {
-                    const updated = [...leveringsadressen]
-                    updated[index].postcode = e.target.value
-                    setLeveringsadressen(updated)
-                    setValue(`leveringsadressen.${index}.postcode`, e.target.value)
-                  }}
-                  onBlur={() => fetchAddress(index)}
-                  error={errors.leveringsadressen?.[index]?.postcode?.message}
-                  required
-                />
-              </div>
+                  {/* Postcode */}
+                  <div className="md:col-span-1">
+                    <Input
+                      label="Postcode"
+                      placeholder="1234 AB"
+                      value={adres.postcode}
+                      onChange={(e) => {
+                        const updated = [...leveringsadressen]
+                        updated[index].postcode = e.target.value
+                        setLeveringsadressen(updated)
+                        setValue(`leveringsadressen.${index}.postcode`, e.target.value)
+                      }}
+                      onBlur={() => fetchAddress(index)}
+                      error={errors.leveringsadressen?.[index]?.postcode?.message}
+                      required
+                      autoFocus={index === 0}
+                    />
+                  </div>
 
               {/* Huisnummer */}
               <div className="md:col-span-1">
