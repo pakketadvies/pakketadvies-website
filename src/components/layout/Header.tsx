@@ -36,17 +36,15 @@ export function Header() {
         }`}>
           <div className="flex items-center justify-between px-6 py-3 border-2 border-red-500">
             {/* Logo */}
-            <Link href="/" className="group block border-2 border-blue-500">
-              <div className="relative h-12 w-auto transition-transform duration-300 group-hover:scale-105 border-2 border-green-500">
-                <Image
-                  src="/images/logo.png"
-                  alt="PakketAdvies"
-                  width={220}
-                  height={48}
-                  className="object-contain block border-2 border-yellow-500"
-                  priority
-                />
-              </div>
+            <Link href="/" className="group transition-transform duration-300 hover:scale-105 border-2 border-blue-500">
+              <Image
+                src="/images/logo.png"
+                alt="PakketAdvies"
+                width={220}
+                height={48}
+                className="block border-2 border-yellow-500"
+                priority
+              />
             </Link>
 
             {/* Desktop Navigation */}
