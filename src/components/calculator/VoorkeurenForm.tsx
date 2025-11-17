@@ -6,12 +6,12 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Button } from '@/components/ui/Button'
-import { Leaf, ClockClockwise, Lightning, Sparkle } from '@phosphor-icons/react'
+import { Leaf, Lock, Lightning, Diamond, Info, Check } from '@phosphor-icons/react'
 
-// Dynamic schema based on contract type
+// Dynamic schema based on contract type and verbruik
 const createVoorkeurenSchema = (type?: string) => {
   const baseSchema = {
-    type: z.enum(['vast', 'dynamisch', 'beide']),
+    type: z.enum(['vast', 'dynamisch', 'maatwerk']),
     groeneEnergie: z.boolean(),
     opmerkingen: z.string().optional(),
   }
@@ -24,7 +24,7 @@ const createVoorkeurenSchema = (type?: string) => {
     })
   }
 
-  // For dynamisch and beide, looptijd is optional
+  // For dynamisch and maatwerk, looptijd is optional
   return z.object({
     ...baseSchema,
     looptijd: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(5)]).optional(),
@@ -32,7 +32,7 @@ const createVoorkeurenSchema = (type?: string) => {
 }
 
 type VoorkeurenFormData = {
-  type: 'vast' | 'dynamisch' | 'beide'
+  type: 'vast' | 'dynamisch' | 'maatwerk'
   looptijd?: 1 | 2 | 3 | 5
   groeneEnergie: boolean
   opmerkingen?: string
@@ -40,7 +40,12 @@ type VoorkeurenFormData = {
 
 export function VoorkeurenForm() {
   const router = useRouter()
-  const { setVoorkeuren, vorigeStap } = useCalculatorStore()
+  const { setVoorkeuren, vorigeStap, verbruik } = useCalculatorStore()
+
+  // Check if user qualifies for maatwerk (60k kWh OR 10k m³)
+  const qualifiesForMaatwerk = 
+    (verbruik?.elektriciteitJaar && verbruik.elektriciteitJaar >= 60000) ||
+    (verbruik?.gasJaar && verbruik.gasJaar >= 10000)
 
   const {
     register,
@@ -51,7 +56,7 @@ export function VoorkeurenForm() {
   } = useForm<VoorkeurenFormData>({
     resolver: zodResolver(createVoorkeurenSchema()),
     defaultValues: {
-      type: 'beide',
+      type: 'vast',
       looptijd: 3,
       groeneEnergie: false,
     },
@@ -62,6 +67,12 @@ export function VoorkeurenForm() {
   const groeneEnergie = watch('groeneEnergie')
 
   const onSubmit = (data: VoorkeurenFormData) => {
+    // If maatwerk selected, redirect to contact page
+    if (data.type === 'maatwerk') {
+      router.push('/contact?type=maatwerk&verbruik=' + (verbruik?.elektriciteitJaar || 0))
+      return
+    }
+    
     setVoorkeuren(data)
     router.push('/calculator/resultaten')
   }
@@ -69,22 +80,28 @@ export function VoorkeurenForm() {
   const contractTypes = [
     {
       value: 'vast' as const,
-      icon: ClockClockwise,
+      icon: Lock,
       title: 'Vast contract',
       description: 'Zekerheid met een vaste prijs',
+      features: ['1-5 jaar looptijd', 'Geen prijsschommelingen', 'Budgetzekerheid'],
+      color: 'blue',
     },
     {
       value: 'dynamisch' as const,
       icon: Lightning,
       title: 'Dynamisch',
       description: 'Profiteer van lage prijzen',
+      features: ['Maandelijks opzegbaar', 'Marktprijs per uur', 'Flexibel'],
+      color: 'teal',
     },
-    {
-      value: 'beide' as const,
-      icon: Sparkle,
-      title: 'Beide opties',
-      description: 'Laat mij adviseren',
-    },
+    ...(qualifiesForMaatwerk ? [{
+      value: 'maatwerk' as const,
+      icon: Diamond,
+      title: 'Maatwerk',
+      description: 'Volume = extra voordeel',
+      features: ['Bundeling volumes', 'Beste tarieven', 'Accountmanager'],
+      color: 'purple',
+    }] : [])
   ]
 
   const looptijden = [1, 2, 3, 5]
@@ -92,6 +109,31 @@ export function VoorkeurenForm() {
   // Determine if we should show looptijd section
   const showLooptijd = type === 'vast'
   const isDynamisch = type === 'dynamisch'
+  const isMaatwerk = type === 'maatwerk'
+
+  const getColorClasses = (color: string) => {
+    const colors = {
+      blue: {
+        bg: 'bg-blue-500',
+        border: 'border-blue-500',
+        text: 'text-blue-600',
+        bgLight: 'bg-blue-50',
+      },
+      teal: {
+        bg: 'bg-brand-teal-500',
+        border: 'border-brand-teal-500',
+        text: 'text-brand-teal-600',
+        bgLight: 'bg-brand-teal-50',
+      },
+      purple: {
+        bg: 'bg-purple-500',
+        border: 'border-purple-500',
+        text: 'text-purple-600',
+        bgLight: 'bg-purple-50',
+      },
+    }
+    return colors[color as keyof typeof colors]
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
@@ -110,15 +152,31 @@ export function VoorkeurenForm() {
         </div>
       </div>
 
+      {/* Maatwerk qualification badge */}
+      {qualifiesForMaatwerk && (
+        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 flex items-start gap-3">
+          <Diamond weight="duotone" className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold text-purple-900 mb-1">Je komt in aanmerking voor maatwerk!</div>
+            <p className="text-sm text-purple-700">
+              Met jouw verbruik ({verbruik?.elektriciteitJaar?.toLocaleString() || 0} kWh
+              {verbruik?.gasJaar ? ` + ${verbruik.gasJaar.toLocaleString()} m³` : ''}) 
+              kun je profiteren van volume pooling en extra scherpe tarieven.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Contract type */}
       <div className="space-y-4">
         <label className="block text-sm md:text-base font-semibold text-brand-navy-500">
           Type contract <span className="text-red-500">*</span>
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {contractTypes.map((option) => {
             const Icon = option.icon
             const isSelected = type === option.value
+            const colors = getColorClasses(option.color)
             
             return (
               <label
@@ -126,7 +184,7 @@ export function VoorkeurenForm() {
                 className={`
                   relative flex flex-col p-4 md:p-6 rounded-xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg ring-2 ring-brand-teal-500/20' 
+                    ? `${colors.border} ${colors.bgLight} shadow-lg ring-2 ring-${option.color}-500/20` 
                     : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
                   }
                 `}
@@ -137,22 +195,32 @@ export function VoorkeurenForm() {
                   {...register('type')}
                   className="sr-only"
                 />
-                <Icon 
-                  weight="duotone" 
-                  className={`w-7 h-7 md:w-8 md:h-8 mb-2 md:mb-3 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`}
-                />
+                
+                <div className="flex items-start justify-between mb-3">
+                  <Icon 
+                    weight="duotone" 
+                    className={`w-7 h-7 md:w-8 md:h-8 ${isSelected ? colors.text : 'text-gray-400'}`}
+                  />
+                  {isSelected && (
+                    <div className={`w-6 h-6 ${colors.bg} rounded-full flex items-center justify-center shadow-lg`}>
+                      <Check weight="bold" className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                </div>
+
                 <div className={`text-base md:text-lg font-bold mb-1 ${isSelected ? 'text-brand-navy-500' : 'text-gray-900'}`}>
                   {option.title}
                 </div>
-                <div className="text-xs md:text-sm text-gray-600">{option.description}</div>
-                
-                {isSelected && (
-                  <div className="absolute top-3 right-3 md:top-4 md:right-4 w-5 h-5 md:w-6 md:h-6 bg-brand-teal-500 rounded-full flex items-center justify-center shadow-lg">
-                    <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
+                <div className="text-xs md:text-sm text-gray-600 mb-3">{option.description}</div>
+
+                <ul className="space-y-1.5">
+                  {option.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                      <div className={`w-1 h-1 rounded-full ${isSelected ? colors.bg : 'bg-gray-400'}`} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </label>
             )
           })}
@@ -207,7 +275,7 @@ export function VoorkeurenForm() {
 
       {/* Info for dynamisch */}
       {isDynamisch && (
-        <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-xl p-6">
+        <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
           <div className="flex items-start gap-3">
             <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -223,9 +291,41 @@ export function VoorkeurenForm() {
         </div>
       )}
 
+      {/* Info for maatwerk */}
+      {isMaatwerk && (
+        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 md:p-6">
+          <div className="flex items-start gap-3">
+            <Diamond weight="duotone" className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold text-brand-navy-500 mb-2">
+                Maatwerk contract - persoonlijk advies
+              </div>
+              <p className="text-sm text-gray-700 mb-3">
+                Voor maatwerk contracten nemen we persoonlijk contact met je op. We analyseren je verbruik, 
+                bundelen volumes met andere bedrijven en onderhandelen de scherpste tarieven.
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Check weight="bold" className="w-4 h-4 text-purple-600" />
+                  <span>15-25% extra besparing door volume pooling</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Check weight="bold" className="w-4 h-4 text-purple-600" />
+                  <span>Persoonlijke accountmanager</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Check weight="bold" className="w-4 h-4 text-purple-600" />
+                  <span>Op maat gemaakte voorwaarden</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Groene energie */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-        <label className="flex items-start gap-4 cursor-pointer group">
+      <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 md:p-6">
+        <label className="flex items-start gap-3 cursor-pointer group">
           <input
             type="checkbox"
             {...register('groeneEnergie')}
@@ -268,7 +368,7 @@ export function VoorkeurenForm() {
           Vorige
         </Button>
         <Button type="submit" size="lg" className="w-full sm:flex-1 bg-brand-teal-500 hover:bg-brand-teal-600 text-sm md:text-base">
-          Bekijk resultaten
+          {isMaatwerk ? 'Vraag maatwerk aan' : 'Bekijk resultaten'}
           <svg className="w-4 h-4 md:w-5 md:h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
