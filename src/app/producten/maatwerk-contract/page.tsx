@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Diamond, Check, ArrowRight, Users, Handshake, ChartLine, Lightning, ShieldCheck, HeadsetIcon as Headset } from '@phosphor-icons/react/dist/ssr'
+import { Diamond, Check, ArrowRight, Users, Handshake, ChartLine, Lightning, ShieldCheck, HeadsetIcon as Headset, Plant, Hospital, Desktop, Lightbulb, Storefront, Buildings, Factory } from '@phosphor-icons/react/dist/ssr'
 
 export default function MaatwerkContractPage() {
   return (
@@ -241,43 +241,47 @@ export default function MaatwerkContractPage() {
                 title: 'Retail & Winkelketens',
                 desc: 'Meerdere vestigingen met uniforme energie-inkoop, centrale facturering en rapportage.',
                 verbruik: 'Typisch: 200.000+ kWh totaal',
-                icon: '🏪'
+                icon: Storefront
               },
               {
                 title: 'Vastgoedbeleggers',
                 desc: 'Portfolio met meerdere panden. Energie-inkoop voor huurders met doorbelasting en ESG-rapportage.',
                 verbruik: 'Typisch: 500.000+ kWh totaal',
-                icon: '🏢'
+                icon: Buildings
               },
               {
                 title: 'Industrie & Productie',
                 desc: 'Grootverbruikers met hoge pieken, specifieke aansluitcapaciteit en procesoptimalisatie.',
                 verbruik: 'Vanaf: 500.000+ kWh/jaar',
-                icon: '🏭'
+                icon: Factory
               },
               {
                 title: 'Glastuinbouw & Telers',
                 desc: 'Extreem hoog verbruik door assimilatiebelichting, WKK-integratie en seizoensgebonden patronen.',
                 verbruik: 'Vanaf: 1.000.000+ kWh/jaar',
-                icon: '🌱'
+                icon: Plant
               },
               {
                 title: 'Zorg & Welzijn',
                 desc: 'Zorginstellingen, ziekenhuizen of verpleeghuizen met 24/7 energiebehoefte en hoge betrouwbaarheidseisen.',
                 verbruik: 'Vanaf: 300.000+ kWh/jaar',
-                icon: '🏥'
+                icon: Hospital
               },
               {
                 title: 'Data Centers & IT',
                 desc: 'Constante hoge belasting, kritische uptime en mogelijkheden voor direct line naar opwek.',
                 verbruik: 'Vanaf: 1.000.000+ kWh/jaar',
-                icon: '💻'
+                icon: Desktop
               }
-            ].map((item, i) => (
-              <div key={i} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+            ].map((item, i) => {
+              const Icon = item.icon
+              return (
+              <div key={i} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-brand-purple-300 hover:shadow-xl transition-all">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="text-5xl">{item.icon}</div>
-                  <div className="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="w-14 h-14 bg-brand-purple-50 rounded-xl flex items-center justify-center">
+                    <Icon weight="duotone" className="w-8 h-8 text-brand-purple-500" />
+                  </div>
+                  <div className="bg-brand-purple-100 text-brand-purple-700 text-xs font-bold px-3 py-1 rounded-full">
                     Premium
                   </div>
                 </div>
@@ -287,12 +291,12 @@ export default function MaatwerkContractPage() {
                 <p className="text-gray-600 leading-relaxed mb-4">
                   {item.desc}
                 </p>
-                <div className="bg-purple-50 rounded-lg px-3 py-2 text-sm">
-                  <span className="text-gray-600">💡 </span>
-                  <span className="font-semibold text-purple-700">{item.verbruik}</span>
+                <div className="bg-brand-purple-50 rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+                  <Lightbulb weight="duotone" className="w-4 h-4 text-brand-purple-600" />
+                  <span className="font-semibold text-brand-purple-700">{item.verbruik}</span>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
           <div className="mt-12 bg-gradient-to-br from-brand-purple-500 to-brand-purple-600 text-white rounded-2xl p-8 md:p-12 text-center">

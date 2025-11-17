@@ -263,7 +263,10 @@ export default function KantorenPage() {
             <div className="flex items-start gap-3">
               <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0 mt-1" />
               <div>
-                <div className="font-semibold text-brand-navy-500 mb-2">💡 Vuistregel voor kantoren:</div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightbulb weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+                  <div className="font-semibold text-brand-navy-500">Vuistregel voor kantoren:</div>
+                </div>
                 <p className="text-sm text-gray-700">
                   Gemiddeld verbruik: <strong>2.000 - 2.500 kWh per fte per jaar</strong>. 
                   Dit omvat verlichting, computers, airco/verwarming en keukenapparatuur. 

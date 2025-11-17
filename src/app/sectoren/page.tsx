@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Storefront, Buildings, Factory, Plant, Hospital, Briefcase, ArrowRight, Lightning, Check } from '@phosphor-icons/react/dist/ssr'
+import { Storefront, Buildings, Factory, Plant, Hospital, Briefcase, ArrowRight, Lightning, Check, Target, Gear, Handshake } from '@phosphor-icons/react/dist/ssr'
 
 export default function SectorenPage() {
   const sectors = [
@@ -187,21 +187,25 @@ export default function SectorenPage() {
               {
                 title: 'Branche-kennis',
                 desc: 'We begrijpen de specifieke energiepatronen, pieken en uitdagingen van jouw sector.',
-                icon: '🎯'
+                icon: Target
               },
               {
                 title: 'Maatwerk contracten',
                 desc: 'Contracten die perfect aansluiten bij je bedrijfsvoering, openingstijden en seizoenspatronen.',
-                icon: '⚙️'
+                icon: Gear
               },
               {
                 title: 'Sector-netwerk',
                 desc: 'Door bundeling met andere bedrijven uit jouw sector krijg je volume-voordeel.',
-                icon: '🤝'
+                icon: Handshake
               }
-            ].map((benefit, i) => (
+            ].map((benefit, i) => {
+              const Icon = benefit.icon
+              return (
               <div key={i} className="text-center">
-                <div className="text-5xl mb-4">{benefit.icon}</div>
+                <div className="w-12 h-12 bg-brand-teal-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+                </div>
                 <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                   {benefit.title}
                 </h3>
@@ -209,7 +213,7 @@ export default function SectorenPage() {
                   {benefit.desc}
                 </p>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>

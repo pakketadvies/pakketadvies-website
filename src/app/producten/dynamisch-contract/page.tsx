@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Lightning, Check, ArrowRight, TrendUp, Clock, ChartLine, Coins, Calendar } from '@phosphor-icons/react/dist/ssr'
+import { Lightning, Check, ArrowRight, TrendUp, Clock, ChartLine, Coins, Calendar, Factory, ForkKnife, Lightbulb, ChartLineUp, LockOpen } from '@phosphor-icons/react/dist/ssr'
 
 export default function DynamischContractPage() {
   return (
@@ -224,36 +224,40 @@ export default function DynamischContractPage() {
               {
                 title: 'MKB met flexibel verbruik',
                 desc: 'Bedrijven die hun verbruik kunnen aanpassen aan gunstige uren, zoals productiebedrijven die \'s nachts kunnen draaien.',
-                icon: '🏭'
+                icon: Factory
               },
               {
                 title: 'Horeca',
                 desc: 'Restaurants en hotels met wisselende openingstijden die kunnen profiteren van daluren voor koeling en bereiding.',
-                icon: '🍽️'
+                icon: ForkKnife
               },
               {
                 title: 'Innovatieve bedrijven',
                 desc: 'Organisaties die actief willen meedenken over energiebesparing en duurzaamheid.',
-                icon: '💡'
+                icon: Lightbulb
               },
               {
                 title: 'Bedrijven met slimme meters',
                 desc: 'Je hebt een slimme meter nodig om per uur te kunnen afrekenen. Wij helpen je hiermee als je deze nog niet hebt.',
-                icon: '📊'
+                icon: ChartLine
               },
               {
                 title: 'Marktbewuste ondernemers',
                 desc: 'Bedrijven die de energiemarkt volgen en strategisch willen inkopen op gunstige momenten.',
-                icon: '📈'
+                icon: ChartLineUp
               },
               {
                 title: 'Bedrijven zonder binding-wens',
                 desc: 'Ondernemers die geen langdurige contracten willen en volledige flexibiliteit waarderen.',
-                icon: '🔓'
+                icon: LockOpen
               }
-            ].map((item, i) => (
+            ].map((item, i) => {
+              const Icon = item.icon
+              return (
               <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:border-brand-teal-300 hover:shadow-lg transition-all">
-                <div className="text-4xl mb-4">{item.icon}</div>
+                <div className="w-12 h-12 bg-brand-teal-50 rounded-xl flex items-center justify-center mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+                </div>
                 <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                   {item.title}
                 </h3>
@@ -261,7 +265,7 @@ export default function DynamischContractPage() {
                   {item.desc}
                 </p>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
