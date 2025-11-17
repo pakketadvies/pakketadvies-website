@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Buildings, Check, ArrowRight, Lightning, ChartLine, FileText, TrendUp, Handshake } from '@phosphor-icons/react/dist/ssr'
+import { Buildings, Check, ArrowRight, Lightning, ChartLine, FileText, TrendUp, Handshake, Lightbulb, Users, Package, ChartLineUp, House } from '@phosphor-icons/react/dist/ssr'
 
 export default function VastgoedPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-brand-purple-600 via-brand-purple-500 to-brand-purple-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-brand-purple-600 via-brand-brand-purple-500 to-brand-purple-600 text-white py-12 md:py-16 pt-32 md:pt-36 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <Image
             src="/images/office-team.jpg"
@@ -24,9 +24,9 @@ export default function VastgoedPage() {
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Energieoplossingen voor <span className="text-purple-200">vastgoedbeleggers en -beheerders</span>
+              Energieoplossingen voor <span className="text-brand-purple-200">vastgoedbeleggers en -beheerders</span>
             </h1>
-            <p className="text-lg md:text-xl text-purple-100 mb-8">
+            <p className="text-lg md:text-xl text-brand-purple-100 mb-8">
               Optimaliseer energie-inkoop over je complete vastgoedportefeuille. Centrale facturering, 
               ESG-rapportage en doorbelasting naar huurders - alles onder controle.
             </p>
@@ -85,13 +85,16 @@ export default function VastgoedPage() {
               const Icon = challenge.icon
               return (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <Icon weight="duotone" className="w-10 h-10 text-brand-purple-500 mb-4" />
+                  <Icon weight="duotone" className="w-10 h-10 text-brand-brand-purple-500 mb-4" />
                   <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
-                  <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                    <div className="text-xs font-semibold text-brand-purple-800 mb-1">💡 Oplossing:</div>
+                  <div className="bg-brand-purple-50 rounded-lg p-3 border border-brand-purple-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-purple-700" />
+                      <div className="text-xs font-semibold text-brand-purple-800">Oplossing:</div>
+                    </div>
                     <div className="text-sm text-brand-purple-700">{challenge.solution}</div>
                   </div>
                 </div>
@@ -148,7 +151,7 @@ export default function VastgoedPage() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-8 border border-purple-200">
+            <div className="bg-gradient-to-br from-brand-purple-50 to-brand-purple-100 rounded-2xl p-8 border border-brand-purple-200">
               <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-4">
                 ESG & Duurzaamheid
               </h3>
@@ -173,19 +176,33 @@ export default function VastgoedPage() {
           </div>
 
           {/* Case Study */}
-          <div className="bg-white rounded-2xl p-8 md:p-12 shadow-2xl border border-gray-200">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+            {/* Mobile-first responsive photo */}
+            <div className="relative h-56 md:h-64 lg:h-72 overflow-hidden">
+              <Image
+                src="/images/vastgoed-building.jpg"
+                alt="Modern office building"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute bottom-3 left-4 md:bottom-4 md:left-6">
+                <h3 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-white">
                   Case: Vastgoedfonds met 24 panden
                 </h3>
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 lg:p-12">
+            <div className="grid lg:grid-cols-2 gap-8 items-center">
+              <div>
                 <p className="text-gray-700 mb-6">
                   Een vastgoedfonds met 24 commerciële panden (kantoren en retail) bundelde hun complete 
                   energieportefeuille. Totaal verbruik: 950.000 kWh + 120.000 m³ gas. Door volume-inkoop, 
                   centrale facturering en geautomatiseerde doorbelasting naar huurders bespaarden ze €24.500 
                   per jaar én kregen ze complete ESG-rapportage voor hun beleggers.
                 </p>
-                <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                <div className="bg-brand-purple-50 rounded-xl p-6 border border-brand-purple-200">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-600 mb-1">Aantal panden</div>
@@ -197,7 +214,7 @@ export default function VastgoedPage() {
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Besparing/jaar</div>
-                      <div className="text-2xl font-bold text-green-600">€24.500</div>
+                      <div className="text-2xl font-bold text-brand-teal-600">€24.500</div>
                     </div>
                     <div>
                       <div className="text-gray-600 mb-1">Extra korting</div>
@@ -233,6 +250,7 @@ export default function VastgoedPage() {
                 </div>
               </div>
             </div>
+            </div>
           </div>
         </div>
       </section>
@@ -252,52 +270,56 @@ export default function VastgoedPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                icon: '📊',
+                icon: ChartLineUp,
                 title: 'Portfolio dashboard',
                 desc: 'Real-time inzicht in verbruik en kosten per pand'
               },
               {
-                icon: '🔄',
+                icon: TrendUp,
                 title: 'Automatische doorbelasting',
                 desc: 'Correcte verdeling naar huurders met specificaties'
               },
               {
-                icon: '🌱',
+                icon: FileText,
                 title: 'ESG-rapportage',
                 desc: 'Duurzaamheidsrapportage voor beleggers en stakeholders'
               },
               {
-                icon: '📈',
+                icon: ChartLine,
                 title: 'Energielabel advies',
                 desc: 'Verbeteradvies voor hogere labels en waardestijging'
               },
               {
-                icon: '💰',
+                icon: Lightning,
                 title: 'Volume voordeel',
                 desc: '15-25% extra korting door bundeling portfolio'
               },
               {
-                icon: '📝',
+                icon: FileText,
                 title: 'Contractbeheer',
                 desc: 'Centraal beheer van alle energie-contracten'
               },
               {
-                icon: '🏗️',
+                icon: House,
                 title: 'Nieuwbouw support',
                 desc: 'Energie-advisering bij nieuwbouw en renovaties'
               },
               {
-                icon: '☎️',
+                icon: Users,
                 title: 'Vaste accountmanager',
                 desc: 'Één aanspreekpunt voor je complete portfolio'
               }
-            ].map((service, i) => (
-              <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all text-center">
-                <div className="text-4xl mb-3">{service.icon}</div>
+            ].map((service, i) => {
+              const Icon = service.icon
+              return (
+              <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-brand-purple-300 hover:shadow-lg transition-all text-center">
+                <div className="w-12 h-12 bg-brand-purple-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-purple-500" />
+                </div>
                 <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
                 <div className="text-sm text-gray-600">{service.desc}</div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -333,11 +355,11 @@ export default function VastgoedPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
-          <Handshake weight="duotone" className="w-16 h-16 text-purple-200 mx-auto mb-6" />
+          <Handshake weight="duotone" className="w-16 h-16 text-brand-purple-200 mx-auto mb-6" />
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Optimaliseer energie over je complete vastgoedportefeuille
           </h2>
-          <p className="text-lg md:text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-brand-purple-100 mb-8 max-w-2xl mx-auto">
             Centrale inkoop, transparante doorbelasting, ESG-rapportage en maximaal volume-voordeel. 
             Alles onder controle met één vaste accountmanager.
           </p>
