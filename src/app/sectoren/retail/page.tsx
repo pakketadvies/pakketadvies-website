@@ -24,9 +24,9 @@ export default function RetailPage() {
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Energieoplossingen voor <span className="text-blue-200">winkels en winkelketens</span>
+              Energieoplossingen voor <span className="text-brand-navy-200">winkels en winkelketens</span>
             </h1>
-            <p className="text-lg md:text-xl text-blue-100 mb-8">
+            <p className="text-lg md:text-xl text-gray-100 mb-8">
               Optimaliseer je energiekosten over alle vestigingen met centrale inkoop, portfolio management 
               en transparante rapportage per locatie.
             </p>
@@ -90,8 +90,11 @@ export default function RetailPage() {
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
-                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                    <div className="text-xs font-semibold text-brand-navy-800 mb-1">💡 Oplossing:</div>
+                  <div className="bg-brand-navy-50 rounded-lg p-3 border border-brand-navy-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-navy-700" />
+                      <div className="text-xs font-semibold text-brand-navy-800">Oplossing:</div>
+                    </div>
                     <div className="text-sm text-brand-navy-700">{challenge.solution}</div>
                   </div>
                 </div>
@@ -131,7 +134,7 @@ export default function RetailPage() {
                     benefit: 'Tot 20% besparing'
                   }
                 ].map((contract, i) => (
-                  <div key={i} className="border-l-4 border-brand-navy-500 bg-blue-50 rounded-r-lg p-4">
+                  <div key={i} className="border-l-4 border-brand-navy-500 bg-brand-navy-50 rounded-r-lg p-4">
                     <div className="font-semibold text-brand-navy-500 mb-1">{contract.type}</div>
                     <div className="text-sm text-gray-600 mb-2">{contract.reason}</div>
                     <div className="text-xs font-bold text-brand-navy-600">→ {contract.benefit}</div>
@@ -157,10 +160,10 @@ export default function RetailPage() {
                     benefit: 'Maximaal overzicht'
                   }
                 ].map((contract, i) => (
-                  <div key={i} className="border-l-4 border-purple-500 bg-purple-50 rounded-r-lg p-4">
+                  <div key={i} className="border-l-4 border-brand-purple-500 bg-brand-purple-50 rounded-r-lg p-4">
                     <div className="font-semibold text-brand-navy-500 mb-1">{contract.type}</div>
                     <div className="text-sm text-gray-600 mb-2">{contract.reason}</div>
-                    <div className="text-xs font-bold text-purple-600">→ {contract.benefit}</div>
+                    <div className="text-xs font-bold text-brand-purple-600">→ {contract.benefit}</div>
                   </div>
                 ))}
               </div>
@@ -168,12 +171,26 @@ export default function RetailPage() {
           </div>
 
           {/* Case Study */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 md:p-12 border border-blue-200">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4">
+          <div className="bg-gradient-to-br from-brand-navy-50 to-gray-100 rounded-2xl overflow-hidden border border-brand-navy-200">
+            {/* Mobile-first responsive photo */}
+            <div className="relative h-56 md:h-64 lg:h-72 overflow-hidden">
+              <Image
+                src="/images/retail-store.jpg"
+                alt="Retail store interior"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute bottom-3 left-4 md:bottom-4 md:left-6">
+                <h3 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-white">
                   Case: Kledingketen met 8 vestigingen
                 </h3>
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 lg:p-12">
+            <div className="grid lg:grid-cols-2 gap-8 items-center">
+              <div>
                 <p className="text-gray-700 mb-6">
                   Een kledingketen bundelde het verbruik van alle 8 winkels (totaal 180.000 kWh). 
                   Door centrale inkoop en volume-voordeel bespaarden ze €6.800 per jaar. 
@@ -220,6 +237,7 @@ export default function RetailPage() {
                 </div>
               </div>
             </div>
+            </div>
           </div>
         </div>
       </section>
@@ -237,7 +255,7 @@ export default function RetailPage() {
               { type: 'Middelgrote winkel', size: '100 - 500 m²', range: '25.000 - 80.000 kWh' },
               { type: 'Grote winkel/supermarkt', size: '> 500 m²', range: '80.000 - 200.000+ kWh' }
             ].map((usage, i) => (
-              <div key={i} className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+              <div key={i} className="bg-brand-navy-50 rounded-xl p-6 border border-brand-navy-200">
                 <div className="font-semibold text-brand-navy-500 mb-2">{usage.type}</div>
                 <div className="text-sm text-gray-600 mb-3">{usage.size}</div>
                 <div>
@@ -252,7 +270,7 @@ export default function RetailPage() {
             <div className="flex items-start gap-3">
               <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0 mt-1" />
               <div>
-                <div className="font-semibold text-brand-navy-500 mb-2">💡 Besparingstip voor retail:</div>
+                <div className="font-semibold text-brand-navy-500 mb-2">Besparingstip voor retail:</div>
                 <p className="text-sm text-gray-700">
                   Koeling is vaak de grootste energieverbruiker in retail (30-40% van totaal verbruik). 
                   Met LED-verlichting, efficiënte koeling en een dynamisch contract kun je tot 35% besparen op je energiekosten.
@@ -280,30 +298,34 @@ export default function RetailPage() {
               {
                 title: 'ESG-rapportage',
                 desc: 'Duurzaamheidsrapportage per vestiging voor stakeholders',
-                icon: '📊'
+                icon: ChartLineUp
               },
               {
                 title: 'Benchmark tools',
                 desc: 'Vergelijk verbruik tussen je vestigingen en identificeer uitschieters',
-                icon: '📈'
+                icon: ChartLine
               },
               {
                 title: 'Expansie support',
                 desc: 'Nieuwe winkel openen? Wij regelen direct de energie-aansluiting',
-                icon: '🏪'
+                icon: Storefront
               },
               {
                 title: 'Energie-audit',
                 desc: 'Gratis advies over besparingsmogelijkheden per locatie',
-                icon: '🔍'
+                icon: Lightbulb
               }
-            ].map((service, i) => (
+            ].map((service, i) => {
+              const Icon = service.icon
+              return (
               <div key={i} className="text-center bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all">
-                <div className="text-4xl mb-3">{service.icon}</div>
+                <div className="w-12 h-12 bg-brand-navy-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-navy-500" />
+                </div>
                 <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
                 <div className="text-sm text-gray-600">{service.desc}</div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -313,11 +335,11 @@ export default function RetailPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
-          <Handshake weight="duotone" className="w-16 h-16 text-blue-200 mx-auto mb-6" />
+          <Handshake weight="duotone" className="w-16 h-16 text-brand-navy-200 mx-auto mb-6" />
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Optimaliseer je energiekosten over alle vestigingen
           </h2>
-          <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
             Of je nu 1 winkel of 50 vestigingen hebt - we regelen de beste energiedeal voor jouw retailbedrijf.
           </p>
           
