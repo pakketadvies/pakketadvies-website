@@ -54,41 +54,45 @@ export function VerbruikForm() {
     const adres = leveringsadressen[index]
     if (!adres.postcode || !adres.huisnummer) return
 
-    const postcodeClean = adres.postcode.replace(/\s/g, '').toUpperCase()
+    const postcodeClean = adres.postcode.replace(/\s/g, '')
     
     setLoadingAddresses({ ...loadingAddresses, [index]: true })
     
     try {
-      // Using Pro6PP API (free tier, no key required for basic lookups)
-      const response = await fetch(`https://api.pro6pp.nl/v2/autocomplete/nl?postalCode=${postcodeClean}&streetNumberAndPremise=${adres.huisnummer}${adres.toevoeging || ''}`)
+      // Call our own API route (which securely uses the API key)
+      const response = await fetch(`/api/postcode?postcode=${postcodeClean}&number=${adres.huisnummer}`)
       
       if (response.ok) {
         const data = await response.json()
         
-        if (data && data.results && data.results.length > 0) {
-          const result = data.results[0]
-          
-          const updated = [...leveringsadressen]
-          updated[index] = {
-            ...updated[index],
-            straat: result.street || '',
-            plaats: result.settlement || '',
-          }
-          setLeveringsadressen(updated)
-          setValue(`leveringsadressen.${index}.straat`, result.street || '')
-          setValue(`leveringsadressen.${index}.plaats`, result.settlement || '')
-          clearErrors(`leveringsadressen.${index}`)
-        } else {
-          // Fallback: manual entry allowed, no error
-          console.log('No address found, manual entry allowed')
+        if (data.error) {
+          // API key not configured or other error, but user can continue
+          console.warn('Postcode lookup warning:', data.error)
+          setLoadingAddresses({ ...loadingAddresses, [index]: false })
+          return
         }
+        
+        const updated = [...leveringsadressen]
+        updated[index] = {
+          ...updated[index],
+          straat: data.street || '',
+          plaats: data.city || '',
+        }
+        setLeveringsadressen(updated)
+        setValue(`leveringsadressen.${index}.straat`, data.street || '')
+        setValue(`leveringsadressen.${index}.plaats`, data.city || '')
+        clearErrors(`leveringsadressen.${index}`)
+      } else if (response.status === 404) {
+        setError(`leveringsadressen.${index}.postcode` as any, {
+          message: 'Adres niet gevonden. Controleer postcode en huisnummer.'
+        })
       } else {
-        // API failed, but allow manual continuation
-        console.log('Postcode API temporarily unavailable, manual entry allowed')
+        // Other error, but let user continue
+        console.error('Postcode API error:', response.status)
       }
     } catch (error) {
-      // Network error - silently fail and allow manual entry
-      console.log('Postcode lookup failed, manual entry allowed:', error)
+      console.error('Postcode fetch error:', error)
+      // Don't show error, just let user continue
     } finally {
       setLoadingAddresses({ ...loadingAddresses, [index]: false })
     }
