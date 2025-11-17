@@ -36,13 +36,13 @@ export function Header() {
         }`}>
           <div className="flex items-center justify-between px-6 py-4">
             {/* Logo */}
-            <Link href="/" className="group">
-              <div className="relative h-10 w-auto transition-transform duration-300 group-hover:scale-105">
+            <Link href="/" className="group flex items-center">
+              <div className="relative h-12 w-auto transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
                   alt="PakketAdvies"
-                  width={180}
-                  height={40}
+                  width={220}
+                  height={48}
                   className="object-contain"
                   priority
                 />
