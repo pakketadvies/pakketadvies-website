@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Briefcase, Check, ArrowRight, Lightning, Leaf, Shield, TrendUp, Handshake } from '@phosphor-icons/react/dist/ssr'
+import { Briefcase, Check, ArrowRight, Lightning, Leaf, Shield, TrendUp, Handshake, Lightbulb, ChartLine, FileText, Sun } from '@phosphor-icons/react/dist/ssr'
 
 export default function KantorenPage() {
   return (
@@ -91,7 +91,10 @@ export default function KantorenPage() {
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
                   <div className="bg-brand-teal-50 rounded-lg p-3 border border-brand-teal-200">
-                    <div className="text-xs font-semibold text-brand-teal-800 mb-1">💡 Oplossing:</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-teal-700" />
+                      <div className="text-xs font-semibold text-brand-teal-800">Oplossing:</div>
+                    </div>
                     <div className="text-sm text-brand-teal-700">{challenge.solution}</div>
                   </div>
                 </div>
@@ -199,30 +202,34 @@ export default function KantorenPage() {
                 {
                   title: 'Scope 2 rapportage',
                   desc: 'Complete CO₂-rapportage voor jaarverslagen en ESG-rapportages',
-                  icon: '📊'
+                  icon: ChartLine
                 },
                 {
                   title: 'Groene certificaten',
                   desc: '100% groene stroom met GvO certificaten (Garanties van Oorsprong)',
-                  icon: '🌱'
+                  icon: Leaf
                 },
                 {
                   title: 'B-Corp ready',
                   desc: 'Voldoe aan duurzaamheidseisen voor B-Corp certificering',
-                  icon: '🏆'
+                  icon: Shield
                 },
                 {
                   title: 'CO₂-neutraal',
                   desc: 'Bereik CO₂-neutraliteit voor scope 2 emissies',
-                  icon: '♻️'
+                  icon: TrendUp
                 }
-              ].map((benefit, i) => (
+              ].map((benefit, i) => {
+                const Icon = benefit.icon
+                return (
                 <div key={i} className="text-center">
-                  <div className="text-4xl mb-3">{benefit.icon}</div>
+                  <div className="w-12 h-12 bg-brand-teal-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Icon weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+                  </div>
                   <div className="font-semibold text-brand-navy-500 mb-2">{benefit.title}</div>
                   <div className="text-sm text-gray-600">{benefit.desc}</div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>
@@ -285,40 +292,44 @@ export default function KantorenPage() {
               {
                 title: 'Energie-scan',
                 desc: 'Gratis scan van je kantoor voor besparingsmogelijkheden (LED, isolatie, etc.)',
-                icon: '🔍'
+                icon: Lightbulb
               },
               {
                 title: 'Zonnepanelen advies',
                 desc: 'Is jouw dak geschikt? Wij adviseren over terugverdientijd en opbrengst',
-                icon: '☀️'
+                icon: Sun
               },
               {
                 title: 'Smart meters',
                 desc: 'Installatie en koppeling voor real-time inzicht in je verbruik',
-                icon: '📱'
+                icon: Lightbulb
               },
               {
                 title: 'ESG-rapportage',
                 desc: 'Volledige CO₂-footprint en duurzaamheidsrapportage voor scope 2',
-                icon: '📈'
+                icon: ChartLine
               },
               {
                 title: 'Groene certificaten',
                 desc: 'GvO-certificaten voor aantoonbaar groene energieafname',
-                icon: '🌱'
+                icon: Leaf
               },
               {
                 title: 'Snelle overstap',
                 desc: 'Binnen 2 weken geregeld zonder onderbreking van je bedrijf',
-                icon: '⚡'
+                icon: Lightning
               }
-            ].map((service, i) => (
+            ].map((service, i) => {
+              const Icon = service.icon
+              return (
               <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 hover:border-brand-teal-300 hover:shadow-lg transition-all">
-                <div className="text-4xl mb-3">{service.icon}</div>
+                <div className="w-12 h-12 bg-brand-teal-50 rounded-xl flex items-center justify-center mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-teal-500" />
+                </div>
                 <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
                 <div className="text-sm text-gray-600">{service.desc}</div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>

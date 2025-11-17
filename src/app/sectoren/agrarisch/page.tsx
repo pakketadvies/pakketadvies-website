@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plant, Check, ArrowRight, Lightning, Sun, Fire, TrendUp, Handshake } from '@phosphor-icons/react/dist/ssr'
+import { Plant, Check, ArrowRight, Lightning, Sun, Fire, TrendUp, Handshake, Lightbulb, Wrench, CurrencyDollar, Leaf, Gear } from '@phosphor-icons/react/dist/ssr'
 
 export default function AgrarischPage() {
   return (
@@ -24,7 +24,7 @@ export default function AgrarischPage() {
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Energieoplossingen voor <span className="text-green-200">glastuinbouw en agrarische bedrijven</span>
+              Energieoplossingen voor <span className="text-brand-teal-200">glastuinbouw en agrarische bedrijven</span>
             </h1>
             <p className="text-lg md:text-xl text-green-100 mb-8">
               Specialist in extreem hoogverbruik. Van assimilatiebelichting tot WKK-integratie - 
@@ -90,8 +90,11 @@ export default function AgrarischPage() {
                     {challenge.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{challenge.desc}</p>
-                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                    <div className="text-xs font-semibold text-brand-teal-800 mb-1">💡 Oplossing:</div>
+                  <div className="bg-brand-teal-50 rounded-lg p-3 border border-brand-teal-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Lightbulb weight="duotone" className="w-4 h-4 text-brand-teal-700" />
+                      <div className="text-xs font-semibold text-brand-teal-800">Oplossing:</div>
+                    </div>
                     <div className="text-sm text-brand-teal-700">{challenge.solution}</div>
                   </div>
                 </div>
@@ -148,7 +151,7 @@ export default function AgrarischPage() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 border border-green-200">
+            <div className="bg-gradient-to-br from-brand-teal-50 to-green-100 rounded-2xl p-8 border border-brand-teal-200">
               <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-4">
                 Case: Tomatenkwekerij 4 hectare
               </h3>
@@ -165,15 +168,15 @@ export default function AgrarischPage() {
                 Besparing: €42.000 per jaar.
               </p>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between py-2 border-b border-green-200">
+                <div className="flex justify-between py-2 border-b border-brand-teal-200">
                   <span className="text-gray-600">Oppervlakte:</span>
                   <span className="font-semibold">4 hectare kassen</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-green-200">
+                <div className="flex justify-between py-2 border-b border-brand-teal-200">
                   <span className="text-gray-600">Verbruik:</span>
                   <span className="font-semibold">2.800.000 kWh + 350k m³</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-green-200">
+                <div className="flex justify-between py-2 border-b border-brand-teal-200">
                   <span className="text-gray-600">WKK:</span>
                   <span className="font-semibold">Ja, met saldering</span>
                 </div>
@@ -192,33 +195,37 @@ export default function AgrarischPage() {
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                {
-                  title: 'WKK-optimalisatie',
-                  desc: 'Maximale saldering en teruglevering regelen',
-                  icon: '⚙️'
-                },
-                {
-                  title: 'Subsidie advies',
-                  desc: 'SDE++ en andere duurzaamheidsregelingen',
-                  icon: '💰'
-                },
-                {
-                  title: 'LED-verlichting',
-                  desc: 'Advies over overstap van SON-T naar LED',
-                  icon: '💡'
-                },
-                {
-                  title: 'CO₂-dosering',
-                  desc: 'Integratie met CO₂-installaties en optimalisatie',
-                  icon: '🌱'
-                }
-              ].map((service, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-4xl mb-3">{service.icon}</div>
-                  <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
-                  <div className="text-sm text-gray-600">{service.desc}</div>
+              {
+                title: 'WKK-optimalisatie',
+                desc: 'Maximale saldering en teruglevering regelen',
+                icon: Gear
+              },
+              {
+                title: 'Subsidie advies',
+                desc: 'SDE++ en andere duurzaamheidsregelingen',
+                icon: CurrencyDollar
+              },
+              {
+                title: 'LED-verlichting',
+                desc: 'Advies over overstap van SON-T naar LED',
+                icon: Lightbulb
+              },
+              {
+                title: 'CO₂-dosering',
+                desc: 'Integratie met CO₂-installaties en optimalisatie',
+                icon: Leaf
+              }
+            ].map((service, i) => {
+              const Icon = service.icon
+              return (
+              <div key={i} className="text-center">
+                <div className="w-12 h-12 bg-brand-teal-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Icon weight="duotone" className="w-6 h-6 text-brand-teal-500" />
                 </div>
-              ))}
+                <div className="font-semibold text-brand-navy-500 mb-2">{service.title}</div>
+                <div className="text-sm text-gray-600">{service.desc}</div>
+              </div>
+            )})}
             </div>
           </div>
         </div>
@@ -237,7 +244,7 @@ export default function AgrarischPage() {
               { size: '2-5 hectare kassen', kwh: '1.200.000 - 5.000.000', gas: '150.000 - 600.000 m³' },
               { size: '5+ hectare kassen', kwh: '5.000.000+', gas: '600.000+ m³' }
             ].map((usage, i) => (
-              <div key={i} className="bg-green-50 rounded-xl p-6 border border-green-200">
+              <div key={i} className="bg-brand-teal-50 rounded-xl p-6 border border-brand-teal-200">
                 <div className="font-semibold text-brand-navy-500 mb-3">{usage.size}</div>
                 <div className="space-y-2 text-sm">
                   <div>
@@ -257,7 +264,7 @@ export default function AgrarischPage() {
             <div className="flex items-start gap-3">
               <Lightning weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0 mt-1" />
               <div>
-                <div className="font-semibold text-brand-navy-500 mb-2">💡 Wist je dat?</div>
+                <div className="font-semibold text-brand-navy-500 mb-2">Wist je dat?</div>
                 <p className="text-sm text-gray-700 mb-3">
                   Glastuinbouw verbruikt gemiddeld <strong>1.000 kWh per m²</strong> per jaar - dat is 100x zoveel 
                   als een gemiddeld huishouden! Energie is vaak 15-30% van de totale productiekosten.
@@ -302,7 +309,7 @@ export default function AgrarischPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
-          <Handshake weight="duotone" className="w-16 h-16 text-green-200 mx-auto mb-6" />
+          <Handshake weight="duotone" className="w-16 h-16 text-brand-teal-200 mx-auto mb-6" />
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Verlaag je energiekosten per kilo product
           </h2>
