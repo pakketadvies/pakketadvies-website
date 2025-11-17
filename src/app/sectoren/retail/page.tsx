@@ -160,10 +160,10 @@ export default function RetailPage() {
                     benefit: 'Maximaal overzicht'
                   }
                 ].map((contract, i) => (
-                  <div key={i} className="border-l-4 border-brand-purple-500 bg-brand-purple-50 rounded-r-lg p-4">
+                  <div key={i} className="border-l-4 border-brand-brand-brand-purple-500 bg-brand-brand-purple-50 rounded-r-lg p-4">
                     <div className="font-semibold text-brand-navy-500 mb-1">{contract.type}</div>
                     <div className="text-sm text-gray-600 mb-2">{contract.reason}</div>
-                    <div className="text-xs font-bold text-brand-purple-600">→ {contract.benefit}</div>
+                    <div className="text-xs font-bold text-brand-brand-purple-600">→ {contract.benefit}</div>
                   </div>
                 ))}
               </div>

@@ -170,28 +170,28 @@ export default function DynamischContractPage() {
               </h3>
               
               <div className="space-y-4 mb-8">
-                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border-2 border-green-200">
+                <div className="flex items-center justify-between p-4 bg-brand-teal-50 rounded-lg border-2 border-brand-teal-200">
                   <div>
                     <div className="text-sm text-gray-600">03:00 - 06:00 uur</div>
-                    <div className="font-bold text-green-700">Daluur</div>
+                    <div className="font-bold text-brand-teal-700">Daluur</div>
                   </div>
-                  <div className="text-2xl font-bold text-green-700">€0,08</div>
+                  <div className="text-2xl font-bold text-brand-teal-700">€0,08</div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <div className="flex items-center justify-between p-4 bg-brand-navy-50 rounded-lg border-2 border-brand-navy-200">
                   <div>
                     <div className="text-sm text-gray-600">09:00 - 12:00 uur</div>
-                    <div className="font-bold text-blue-700">Normaal</div>
+                    <div className="font-bold text-brand-navy-700">Normaal</div>
                   </div>
-                  <div className="text-2xl font-bold text-blue-700">€0,12</div>
+                  <div className="text-2xl font-bold text-brand-navy-700">€0,12</div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
+                <div className="flex items-center justify-between p-4 bg-brand-teal-50 rounded-lg border-2 border-brand-teal-200">
                   <div>
                     <div className="text-sm text-gray-600">18:00 - 21:00 uur</div>
-                    <div className="font-bold text-orange-700">Piekuur</div>
+                    <div className="font-bold text-brand-teal-700">Piekuur</div>
                   </div>
-                  <div className="text-2xl font-bold text-orange-700">€0,18</div>
+                  <div className="text-2xl font-bold text-brand-teal-700">€0,18</div>
                 </div>
               </div>
 
@@ -284,7 +284,7 @@ export default function DynamischContractPage() {
                   <tr className="bg-gray-50 border-b-2 border-gray-200">
                     <th className="text-left p-6 font-semibold text-brand-navy-500">Eigenschap</th>
                     <th className="text-center p-6 font-semibold text-brand-teal-600">Dynamisch</th>
-                    <th className="text-center p-6 font-semibold text-blue-600">Vast</th>
+                    <th className="text-center p-6 font-semibold text-brand-navy-600">Vast</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

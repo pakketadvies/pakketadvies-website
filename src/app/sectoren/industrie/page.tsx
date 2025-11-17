@@ -185,7 +185,7 @@ export default function IndustriePage() {
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-brand-navy-600">Extra voordeel:</span>
-                  <span className="font-semibold text-green-600">22% volume korting</span>
+                  <span className="font-semibold text-brand-teal-600">22% volume korting</span>
                 </div>
               </div>
             </div>

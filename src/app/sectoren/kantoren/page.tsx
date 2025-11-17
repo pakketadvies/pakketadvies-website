@@ -186,7 +186,7 @@ export default function KantorenPage() {
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-gray-600">CO₂-reductie:</span>
-                  <span className="font-semibold text-green-600">100% (0 kg CO₂)</span>
+                  <span className="font-semibold text-brand-teal-600">100% (0 kg CO₂)</span>
                 </div>
               </div>
             </div>

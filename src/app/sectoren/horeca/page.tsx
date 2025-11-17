@@ -228,7 +228,7 @@ export default function HorecaPage() {
               { type: 'Restaurant', range: '40.000 - 100.000 kWh', gas: '5.000 - 15.000 m³' },
               { type: 'Hotel', range: '80.000 - 200.000+ kWh', gas: '10.000 - 30.000+ m³' }
             ].map((usage, i) => (
-              <div key={i} className="bg-orange-50 rounded-xl p-6 border border-orange-200">
+              <div key={i} className="bg-brand-teal-50 rounded-xl p-6 border border-brand-teal-200">
                 <div className="font-semibold text-brand-navy-500 mb-3">{usage.type}</div>
                 <div className="space-y-2 text-sm">
                   <div>
@@ -251,11 +251,11 @@ export default function HorecaPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
         
         <div className="container-custom text-center relative z-10">
-          <Handshake weight="duotone" className="w-16 h-16 text-orange-200 mx-auto mb-6" />
+          <Handshake weight="duotone" className="w-16 h-16 text-brand-teal-200 mx-auto mb-6" />
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Klaar voor lagere energiekosten in jouw horecabedrijf?
           </h2>
-          <p className="text-lg md:text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-brand-teal-100 mb-8 max-w-2xl mx-auto">
             Ontdek hoeveel je kunt besparen met een energiecontract dat perfect past bij jouw restaurant, hotel of café.
           </p>
           

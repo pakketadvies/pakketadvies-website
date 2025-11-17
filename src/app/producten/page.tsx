@@ -47,7 +47,7 @@ export default function ProductenPage() {
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-16">
             {/* Vast Contract */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 group">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 text-center">
+              <div className="bg-gradient-to-br from-brand-navy-50 to-brand-navy-100 p-8 text-center">
                 <div className="w-16 h-16 bg-brand-navy-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Lock weight="duotone" className="w-8 h-8 text-white" />
                 </div>
@@ -78,7 +78,7 @@ export default function ProductenPage() {
                   ))}
                 </ul>
 
-                <div className="bg-blue-50 rounded-xl p-4 mb-6">
+                <div className="bg-brand-navy-50 rounded-xl p-4 mb-6">
                   <div className="text-sm font-semibold text-brand-navy-500 mb-1">Ideaal voor:</div>
                   <p className="text-sm text-gray-700">Kantoren, retail, vastgoed - bedrijven die budgetzekerheid willen</p>
                 </div>
@@ -145,8 +145,8 @@ export default function ProductenPage() {
 
             {/* Maatwerk Contract */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 group">
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 text-center">
-                <div className="w-16 h-16 bg-brand-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <div className="bg-gradient-to-br from-brand-purple-50 to-brand-purple-100 p-8 text-center">
+                <div className="w-16 h-16 bg-brand-brand-brand-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Diamond weight="duotone" className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-2">
@@ -176,13 +176,13 @@ export default function ProductenPage() {
                   ))}
                 </ul>
 
-                <div className="bg-purple-50 rounded-xl p-4 mb-6">
+                <div className="bg-brand-purple-50 rounded-xl p-4 mb-6">
                   <div className="text-sm font-semibold text-brand-navy-500 mb-1">Ideaal voor:</div>
                   <p className="text-sm text-gray-700">Industrie, retail-ketens, vastgoedportefeuilles - vanaf 60.000 kWh of 10.000 m³</p>
                 </div>
 
                 <Link href="/producten/maatwerk-contract" className="block">
-                  <button className="w-full px-6 py-3 bg-brand-purple-500 hover:bg-brand-purple-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
+                  <button className="w-full px-6 py-3 bg-brand-brand-brand-purple-500 hover:bg-brand-brand-purple-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all">
                     Meer over maatwerk
                     <ArrowRight weight="bold" className="w-5 h-5" />
                   </button>

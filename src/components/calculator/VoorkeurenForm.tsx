@@ -114,10 +114,10 @@ export function VoorkeurenForm() {
   const getColorClasses = (color: string) => {
     const colors = {
       blue: {
-        bg: 'bg-blue-500',
-        border: 'border-blue-500',
-        text: 'text-blue-600',
-        bgLight: 'bg-blue-50',
+        bg: 'bg-brand-navy-500',
+        border: 'border-brand-navy-500',
+        text: 'text-brand-navy-600',
+        bgLight: 'bg-brand-navy-50',
       },
       teal: {
         bg: 'bg-brand-teal-500',
@@ -126,10 +126,10 @@ export function VoorkeurenForm() {
         bgLight: 'bg-brand-teal-50',
       },
       purple: {
-        bg: 'bg-purple-500',
-        border: 'border-purple-500',
-        text: 'text-purple-600',
-        bgLight: 'bg-purple-50',
+        bg: 'bg-brand-brand-purple-500',
+        border: 'border-brand-brand-purple-500',
+        text: 'text-brand-purple-600',
+        bgLight: 'bg-brand-purple-50',
       },
     }
     return colors[color as keyof typeof colors]
@@ -154,11 +154,11 @@ export function VoorkeurenForm() {
 
       {/* Maatwerk qualification badge */}
       {qualifiesForMaatwerk && (
-        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 flex items-start gap-3">
-          <Diamond weight="duotone" className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
+        <div className="bg-brand-purple-50 border-2 border-brand-purple-200 rounded-xl p-4 flex items-start gap-3">
+          <Diamond weight="duotone" className="w-6 h-6 text-brand-purple-600 flex-shrink-0 mt-0.5" />
           <div>
-            <div className="font-semibold text-purple-900 mb-1">Je komt in aanmerking voor maatwerk!</div>
-            <p className="text-sm text-purple-700">
+            <div className="font-semibold text-brand-purple-900 mb-1">Je komt in aanmerking voor maatwerk!</div>
+            <p className="text-sm text-brand-purple-700">
               Met jouw verbruik ({verbruik?.elektriciteitJaar?.toLocaleString() || 0} kWh
               {verbruik?.gasJaar ? ` + ${verbruik.gasJaar.toLocaleString()} m³` : ''}) 
               kun je profiteren van volume pooling en extra scherpe tarieven.
@@ -293,9 +293,9 @@ export function VoorkeurenForm() {
 
       {/* Info for maatwerk */}
       {isMaatwerk && (
-        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 md:p-6">
+        <div className="bg-brand-purple-50 border-2 border-brand-purple-200 rounded-xl p-4 md:p-6">
           <div className="flex items-start gap-3">
-            <Diamond weight="duotone" className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
+            <Diamond weight="duotone" className="w-6 h-6 text-brand-purple-600 flex-shrink-0 mt-0.5" />
             <div>
               <div className="font-semibold text-brand-navy-500 mb-2">
                 Maatwerk contract - persoonlijk advies
@@ -306,15 +306,15 @@ export function VoorkeurenForm() {
               </p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Check weight="bold" className="w-4 h-4 text-purple-600" />
+                  <Check weight="bold" className="w-4 h-4 text-brand-purple-600" />
                   <span>15-25% extra besparing door volume pooling</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Check weight="bold" className="w-4 h-4 text-purple-600" />
+                  <Check weight="bold" className="w-4 h-4 text-brand-purple-600" />
                   <span>Persoonlijke accountmanager</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Check weight="bold" className="w-4 h-4 text-purple-600" />
+                  <Check weight="bold" className="w-4 h-4 text-brand-purple-600" />
                   <span>Op maat gemaakte voorwaarden</span>
                 </div>
               </div>
@@ -324,21 +324,21 @@ export function VoorkeurenForm() {
       )}
 
       {/* Groene energie */}
-      <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 md:p-6">
+      <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
         <label className="flex items-start gap-3 cursor-pointer group">
           <input
             type="checkbox"
             {...register('groeneEnergie')}
-            className="mt-1 w-5 h-5 rounded border-2 border-green-300 text-green-600 focus:ring-green-500 focus:ring-offset-2 cursor-pointer"
+            className="mt-1 w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-green-500 focus:ring-offset-2 cursor-pointer"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <Leaf weight="duotone" className="w-5 h-5 text-green-600" />
-              <span className="text-base font-semibold text-green-900">
+              <Leaf weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+              <span className="text-base font-semibold text-brand-teal-900">
                 Ik wil graag groene energie
               </span>
             </div>
-            <span className="text-sm text-green-700">
+            <span className="text-sm text-brand-teal-700">
               Kies voor 100% duurzame energie uit wind, zon of water. 
               Goed voor het milieu én vaak voordeliger dan je denkt.
             </span>

@@ -26,7 +26,7 @@ export default function AgrarischPage() {
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Energieoplossingen voor <span className="text-brand-teal-200">glastuinbouw en agrarische bedrijven</span>
             </h1>
-            <p className="text-lg md:text-xl text-green-100 mb-8">
+            <p className="text-lg md:text-xl text-brand-teal-100 mb-8">
               Specialist in extreem hoogverbruik. Van assimilatiebelichting tot WKK-integratie - 
               we begrijpen de unieke energiebehoeften van de tuinbouwsector.
             </p>
@@ -151,7 +151,7 @@ export default function AgrarischPage() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-brand-teal-50 to-green-100 rounded-2xl p-8 border border-brand-teal-200">
+            <div className="bg-gradient-to-br from-brand-teal-50 to-brand-teal-100 rounded-2xl p-8 border border-brand-teal-200">
               <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-4">
                 Case: Tomatenkwekerij 4 hectare
               </h3>
@@ -295,7 +295,7 @@ export default function AgrarischPage() {
               { crop: 'Potplanten', typical: 'Seizoensgebonden piek-verbruik' },
               { crop: 'Biologische teelt', typical: 'Vaak met duurzaamheidseisen' }
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 hover:border-green-400 hover:shadow-lg transition-all">
+              <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 hover:border-brand-teal-400 hover:shadow-lg transition-all">
                 <div className="font-semibold text-brand-navy-500 mb-2">{item.crop}</div>
                 <div className="text-sm text-gray-600">{item.typical}</div>
               </div>
@@ -313,7 +313,7 @@ export default function AgrarischPage() {
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Verlaag je energiekosten per kilo product
           </h2>
-          <p className="text-lg md:text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-brand-teal-100 mb-8 max-w-2xl mx-auto">
             Specialist in glastuinbouw energie. Van WKK-integratie tot LED-belichting - 
             we helpen je met maximale besparing op je grootste kostenpost.
           </p>
