@@ -11,13 +11,23 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  const apiKey = process.env.KVK_API_KEY
+
+  if (!apiKey) {
+    console.error('KVK_API_KEY not configured')
+    return NextResponse.json(
+      { error: 'KvK API niet geconfigureerd', results: [] },
+      { status: 500 }
+    )
+  }
+
   try {
-    // Use OpenKVK search API
+    // Use Official KvK Zoeken API
     const response = await fetch(
-      `https://openkvk.nl/api/v1/search.json?query=${encodeURIComponent(query)}`,
+      `https://api.kvk.nl/api/v1/zoeken?naam=${encodeURIComponent(query)}&pagina=1&aantal=10`,
       {
         headers: {
-          'User-Agent': 'PakketAdvies/1.0',
+          'apikey': apiKey,
         },
       }
     )
@@ -28,12 +38,12 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
-    // Return max 10 results, formatted for autocomplete
-    const results = (data.results?.data || []).slice(0, 10).map((item: any) => ({
-      kvkNummer: item.dossiernummer || item.kvkNummer,
-      bedrijfsnaam: item.handelsnaam || item.naam,
+    // Return formatted results for autocomplete
+    const results = (data.resultaten || []).slice(0, 10).map((item: any) => ({
+      kvkNummer: item.kvkNummer,
+      bedrijfsnaam: item.naam || item.handelsnaam,
       plaats: item.plaats,
-      adres: item.adres,
+      adres: item.adres || `${item.straatnaam || ''} ${item.huisnummer || ''}`.trim(),
     }))
 
     return NextResponse.json({ results })

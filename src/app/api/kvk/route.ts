@@ -20,13 +20,23 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  const apiKey = process.env.KVK_API_KEY
+
+  if (!apiKey) {
+    console.error('KVK_API_KEY not configured')
+    return NextResponse.json(
+      { error: 'KvK API niet geconfigureerd' },
+      { status: 500 }
+    )
+  }
+
   try {
-    // Use Overheid.io API (free, no key required)
+    // Use Official KvK API
     const response = await fetch(
-      `https://openkvk.nl/api/v1/kvk/${kvkClean}.json`,
+      `https://api.kvk.nl/api/v1/basisprofielen/${kvkClean}`,
       {
         headers: {
-          'User-Agent': 'PakketAdvies/1.0',
+          'apikey': apiKey,
         },
       }
     )
@@ -43,21 +53,21 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
-    // Extract relevant data
+    // Extract relevant data from KvK API response
     const bedrijfsgegevens = {
-      bedrijfsnaam: data.handelsnaam || data.naam || '',
+      bedrijfsnaam: data.naam || data.handelsnaam || '',
       kvkNummer: kvkClean,
       adres: {
-        straat: data.straat || '',
+        straat: data.straatnaam || '',
         huisnummer: data.huisnummer || '',
         postcode: data.postcode || '',
         plaats: data.plaats || '',
       },
       vestigingsAdres: data.adres || '',
       rechtsvorm: data.rechtsvorm || '',
-      sbiCode: data.sbi_code || '',
-      sbiOmschrijving: data.sbi_omschrijving || '',
-      website: data.website || '',
+      sbiCode: data.sbiActiviteiten?.[0]?.sbiCode || '',
+      sbiOmschrijving: data.sbiActiviteiten?.[0]?.sbiOmschrijving || '',
+      website: data.websites?.[0] || '',
     }
 
     return NextResponse.json(bedrijfsgegevens)
