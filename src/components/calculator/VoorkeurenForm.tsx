@@ -44,6 +44,11 @@ export function VoorkeurenForm() {
     (verbruik?.elektriciteitJaar && verbruik.elektriciteitJaar >= 60000) ||
     (verbruik?.gasJaar && verbruik.gasJaar >= 10000)
 
+  // Check if user has optimal setup for dynamic contracts
+  const hasSmartMeter = verbruik?.meterType === 'slim'
+  const hasSolarPanels = verbruik?.heeftZonnepanelen
+  const idealForDynamic = hasSmartMeter || hasSolarPanels
+
   const form = useForm<VoorkeurenFormData>({
     resolver: zodResolver(createVoorkeurenSchema('vast')), // Start with vast schema
     defaultValues: {
@@ -85,14 +90,16 @@ export function VoorkeurenForm() {
       description: 'Zekerheid met een vaste prijs',
       features: ['1-5 jaar looptijd', 'Geen prijsschommelingen', 'Budgetzekerheid'],
       color: 'blue',
+      recommended: false,
     },
     {
       value: 'dynamisch' as const,
       icon: Lightning,
       title: 'Dynamisch',
-      description: 'Profiteer van lage prijzen',
+      description: idealForDynamic ? 'Aanbevolen voor jou!' : 'Profiteer van lage prijzen',
       features: ['Maandelijks opzegbaar', 'Marktprijs per uur', 'Flexibel'],
       color: 'teal',
+      recommended: idealForDynamic,
     },
     ...(qualifiesForMaatwerk ? [{
       value: 'maatwerk' as const,
@@ -101,6 +108,7 @@ export function VoorkeurenForm() {
       description: 'Volume = extra voordeel',
       features: ['Bundeling volumes', 'Beste tarieven', 'Accountmanager'],
       color: 'purple',
+      recommended: false,
     }] : [])
   ]
 
@@ -167,6 +175,24 @@ export function VoorkeurenForm() {
         </div>
       )}
 
+      {/* Dynamic contract recommendation for solar/smart meter */}
+      {idealForDynamic && !qualifiesForMaatwerk && (
+        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-start gap-3">
+          <Lightning weight="duotone" className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold text-green-900 mb-1">
+              {hasSolarPanels && hasSmartMeter && '💡 Perfect voor dynamisch!'}
+              {hasSolarPanels && !hasSmartMeter && '☀️ Ideaal met zonnepanelen!'}
+              {!hasSolarPanels && hasSmartMeter && '📱 Slimme meter gedetecteerd!'}
+            </div>
+            <p className="text-sm text-green-700">
+              {hasSolarPanels && 'Met zonnepanelen kun je optimaal profiteren van dynamische contracten door slim terug te leveren tijdens piekuren.'}
+              {!hasSolarPanels && hasSmartMeter && 'Met je slimme meter kun je real-time profiteren van lage energieprijzen met een dynamisch contract.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Contract type */}
       <div className="space-y-4">
         <label className="block text-sm md:text-base font-semibold text-brand-navy-500">
@@ -187,6 +213,7 @@ export function VoorkeurenForm() {
                     ? `${colors.border} ${colors.bgLight} shadow-lg ring-2 ring-${option.color}-500/20` 
                     : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
                   }
+                  ${option.recommended && !isSelected ? 'ring-2 ring-green-400/50' : ''}
                 `}
               >
                 <input
@@ -196,7 +223,13 @@ export function VoorkeurenForm() {
                   className="sr-only"
                 />
                 
-                <div className="flex items-start justify-between mb-3">
+                {option.recommended && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg whitespace-nowrap">
+                    ⭐ Aanbevolen
+                  </div>
+                )}
+                
+                <div className="flex items-start justify-between mb-3 mt-1">
                   <Icon 
                     weight="duotone" 
                     className={`w-7 h-7 md:w-8 md:h-8 ${isSelected ? colors.text : 'text-gray-400'}`}

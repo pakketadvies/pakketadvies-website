@@ -11,6 +11,9 @@ export interface VerbruikData {
   gasJaar: number | null
   geschat: boolean
   leveringsadressen: Leveringsadres[]
+  heeftZonnepanelen?: boolean
+  terugleveringJaar?: number // in kWh - hoeveel stroom terug leveren
+  meterType?: 'slim' | 'enkel' | 'dubbel' | 'weet_niet'
 }
 
 export interface BedrijfsGegevens {

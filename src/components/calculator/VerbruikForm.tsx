@@ -36,6 +36,9 @@ export function VerbruikForm() {
     { postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }
   ])
   const [loadingAddresses, setLoadingAddresses] = useState<{ [key: number]: boolean }>({})
+  const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
+  const [terugleveringJaar, setTerugleveringJaar] = useState('')
+  const [meterType, setMeterType] = useState<'slim' | 'enkel' | 'dubbel' | 'weet_niet'>('weet_niet')
 
   const {
     register,
@@ -121,6 +124,9 @@ export function VerbruikForm() {
       gasJaar: heeftGas ? data.gasJaar : null,
       leveringsadressen: data.leveringsadressen,
       geschat: isGeschat,
+      heeftZonnepanelen,
+      terugleveringJaar: heeftZonnepanelen && terugleveringJaar ? parseInt(terugleveringJaar) : undefined,
+      meterType: meterType !== 'weet_niet' ? meterType : undefined,
     })
     volgendeStap()
   }
@@ -338,6 +344,142 @@ export function VerbruikForm() {
             </span>
           </div>
         </label>
+      </div>
+
+      {/* Zonnepanelen */}
+      <div className="space-y-4">
+        <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-0">
+          <input
+            type="checkbox"
+            checked={heeftZonnepanelen}
+            onChange={(e) => setHeeftZonnepanelen(e.target.checked)}
+            className="w-5 h-5 md:w-5 md:h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+          />
+          <span className="text-base md:text-base font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
+            We hebben zonnepanelen
+          </span>
+        </label>
+
+        {heeftZonnepanelen && (
+          <div className="animate-slide-down bg-gray-50 border-2 border-gray-200 rounded-xl p-4 md:p-6">
+            <Input
+              label="Jaarlijkse teruglevering (kWh)"
+              type="tel"
+              inputMode="numeric"
+              placeholder="Bijv. 3000"
+              value={terugleveringJaar}
+              onChange={(e) => setTerugleveringJaar(e.target.value)}
+              helpText="Hoeveel stroom lever je gemiddeld terug per jaar?"
+            />
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-900 leading-relaxed">
+                💡 <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
+                die optimaal profiteren van je energieopbrengst en de huidige salderingsregeling. Meestal ligt dit 
+                rond de 60-80% van je totale productie.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Meter type */}
+      <div className="space-y-4">
+        <label className="block text-base md:text-lg font-semibold text-brand-navy-500">
+          Type energiemeter
+        </label>
+        <p className="text-sm text-gray-600 -mt-2">
+          Dit helpt ons de beste contractopties voor je te bepalen
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            { 
+              value: 'slim' as const, 
+              label: 'Slimme meter', 
+              description: 'Meet automatisch per uur',
+              icon: '📱'
+            },
+            { 
+              value: 'dubbel' as const, 
+              label: 'Dubbele meter', 
+              description: 'Dag- en nachttarief',
+              icon: '⚡'
+            },
+            { 
+              value: 'enkel' as const, 
+              label: 'Enkele meter', 
+              description: 'Standaard oudere meter',
+              icon: '📊'
+            },
+            { 
+              value: 'weet_niet' as const, 
+              label: 'Weet ik niet', 
+              description: 'Geen probleem',
+              icon: '🤷'
+            },
+          ].map((option) => {
+            const isSelected = meterType === option.value
+            
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setMeterType(option.value)}
+                className={`
+                  relative flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 text-left
+                  ${isSelected 
+                    ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg ring-2 ring-brand-teal-500/20' 
+                    : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
+                  }
+                `}
+              >
+                <span className="text-2xl flex-shrink-0">{option.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm md:text-base font-semibold mb-0.5 ${isSelected ? 'text-brand-teal-700' : 'text-gray-900'}`}>
+                    {option.label}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {option.description}
+                  </div>
+                </div>
+                
+                {isSelected && (
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-teal-600 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {meterType === 'slim' && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-900 leading-relaxed">
+              ✅ <strong>Perfect!</strong> Met een slimme meter kun je profiteren van dynamische contracten 
+              en real-time inzicht in je verbruik.
+            </p>
+          </div>
+        )}
+
+        {meterType === 'dubbel' && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900 leading-relaxed">
+              💡 <strong>Goed om te weten:</strong> We kunnen contracten met dag- en nachttarief voor je vinden.
+            </p>
+          </div>
+        )}
+
+        {meterType === 'enkel' && (
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-sm text-orange-900 leading-relaxed">
+              ℹ️ <strong>Tip:</strong> Overweeg een upgrade naar een slimme meter voor toegang tot dynamische 
+              contracten en betere besparingen.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Submit button */}
