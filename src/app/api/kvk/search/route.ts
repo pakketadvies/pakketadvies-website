@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Use Official KvK Zoeken API - Test Version Profile
-    // Documentation: https://developers.kvk.nl/documentation/testing
+    // Use Official KvK Zoeken API v2
+    // Documentation: https://developers.kvk.nl/nl/documentation/zoeken-api
     const response = await fetch(
-      `https://api.kvk.nl/test/api/v1/zoeken?handelsnaam=${encodeURIComponent(query)}&pagina=1&resultatenPerPagina=10`,
+      `https://api.kvk.nl/api/v2/zoeken?naam=${encodeURIComponent(query)}`,
       {
         headers: {
           'apikey': apiKey,
@@ -40,16 +40,20 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json()
-    console.log('KvK API response:', JSON.stringify(data, null, 2))
     
-    // Return formatted results for autocomplete
-    // KvK API returns: { resultaten: [...], totaal: X, pagina: Y }
-    const results = (data.resultaten || []).slice(0, 10).map((item: any) => ({
-      kvkNummer: item.kvkNummer || '',
-      bedrijfsnaam: item.handelsnaam || item.naam || '',
-      plaats: item.plaats || '',
-      adres: item.adres || `${item.straatnaam || ''} ${item.huisnummer || ''}`.trim(),
-    }))
+    // KvK API v2 returns: { resultaten: [...], totaal: X, pagina: Y }
+    // Each result has: kvkNummer, vestigingsnummer, naam, adres: { binnenlandsAdres: { straatnaam, plaats } }
+    const results = (data.resultaten || []).slice(0, 10).map((item: any) => {
+      const straatnaam = item.adres?.binnenlandsAdres?.straatnaam || ''
+      const plaats = item.adres?.binnenlandsAdres?.plaats || ''
+      
+      return {
+        kvkNummer: item.kvkNummer || '',
+        bedrijfsnaam: item.naam || '',
+        plaats: plaats,
+        adres: straatnaam ? `${straatnaam}, ${plaats}` : plaats,
+      }
+    })
 
     return NextResponse.json({ results })
   } catch (error) {
