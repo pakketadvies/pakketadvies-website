@@ -254,6 +254,45 @@ export function VerbruikForm() {
         />
       </div>
 
+      {/* Zonnepanelen - Direct na elektriciteit! */}
+      <div className="space-y-4">
+        <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-0">
+          <input
+            type="checkbox"
+            checked={heeftZonnepanelen}
+            onChange={(e) => setHeeftZonnepanelen(e.target.checked)}
+            className="w-5 h-5 md:w-5 md:h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+          />
+          <span className="text-base md:text-base font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
+            We hebben zonnepanelen
+          </span>
+        </label>
+
+        {heeftZonnepanelen && (
+          <div className="animate-slide-down bg-gray-50 border-2 border-gray-200 rounded-xl p-4 md:p-6">
+            <Input
+              label="Jaarlijkse teruglevering (kWh)"
+              type="tel"
+              inputMode="numeric"
+              placeholder="Bijv. 3000"
+              value={terugleveringJaar}
+              onChange={(e) => setTerugleveringJaar(e.target.value)}
+              helpText="Hoeveel stroom lever je gemiddeld terug per jaar?"
+            />
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Lightbulb weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-blue-900 leading-relaxed">
+                  <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
+                  die optimaal profiteren van je energieopbrengst en de huidige salderingsregeling. Meestal ligt dit 
+                  rond de 60-80% van je totale productie.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Gas toggle */}
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-0">
@@ -310,45 +349,6 @@ export function VerbruikForm() {
             </span>
           </div>
         </label>
-      </div>
-
-      {/* Zonnepanelen */}
-      <div className="space-y-4">
-        <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-0">
-          <input
-            type="checkbox"
-            checked={heeftZonnepanelen}
-            onChange={(e) => setHeeftZonnepanelen(e.target.checked)}
-            className="w-5 h-5 md:w-5 md:h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
-          />
-          <span className="text-base md:text-base font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
-            We hebben zonnepanelen
-          </span>
-        </label>
-
-        {heeftZonnepanelen && (
-          <div className="animate-slide-down bg-gray-50 border-2 border-gray-200 rounded-xl p-4 md:p-6">
-            <Input
-              label="Jaarlijkse teruglevering (kWh)"
-              type="tel"
-              inputMode="numeric"
-              placeholder="Bijv. 3000"
-              value={terugleveringJaar}
-              onChange={(e) => setTerugleveringJaar(e.target.value)}
-              helpText="Hoeveel stroom lever je gemiddeld terug per jaar?"
-            />
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start gap-2">
-                <Lightbulb weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-900 leading-relaxed">
-                  <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
-                  die optimaal profiteren van je energieopbrengst en de huidige salderingsregeling. Meestal ligt dit 
-                  rond de 60-80% van je totale productie.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Meter type */}

@@ -1,31 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const query = searchParams.get('query')
-
-  if (!query || query.length < 2) {
-    return NextResponse.json(
-      { error: 'Query moet minimaal 2 karakters bevatten' },
-      { status: 400 }
-    )
-  }
-
-  const apiKey = process.env.KVK_API_KEY
-
-  if (!apiKey) {
-    console.error('KVK_API_KEY not configured')
-    return NextResponse.json(
-      { error: 'KvK API niet geconfigureerd', results: [] },
-      { status: 500 }
-    )
-  }
-
+export async function GET(request: Request) {
   try {
-    // Use Official KvK Zoeken API v2
-    // Documentation: https://developers.kvk.nl/nl/documentation/zoeken-api
+    const { searchParams } = new URL(request.url)
+    const query = searchParams.get('query')
+
+    if (!query || query.length < 2) {
+      return NextResponse.json(
+        { error: 'Query moet minimaal 2 karakters bevatten' },
+        { status: 400 }
+      )
+    }
+
+    const apiKey = process.env.KVK_API_KEY
+    if (!apiKey) {
+      console.error('KVK_API_KEY niet geconfigureerd')
+      return NextResponse.json(
+        { error: 'KvK API niet beschikbaar' },
+        { status: 500 }
+      )
+    }
+
+    // Zoek bedrijven via KvK Zoeken API
     const response = await fetch(
-      `https://api.kvk.nl/api/v2/zoeken?naam=${encodeURIComponent(query)}`,
+      `https://api.kvk.nl/api/v1/zoeken?naam=${encodeURIComponent(query)}&pagina=1&resultatenPerPagina=10`,
       {
         headers: {
           'apikey': apiKey,
@@ -34,42 +32,32 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
-      // KvK API returns 404 when no results found (not an error, just empty)
-      if (response.status === 404) {
-        return NextResponse.json({ results: [] })
-      }
-      const errorText = await response.text()
-      console.error(`KvK API error ${response.status}:`, errorText)
-      throw new Error(`API error: ${response.status}`)
+      console.error('KvK API error:', response.status, await response.text())
+      return NextResponse.json(
+        { error: 'Kon niet zoeken in KvK register' },
+        { status: response.status }
+      )
     }
 
     const data = await response.json()
-    
-    // KvK API v2 returns: { resultaten: [...], totaal: X, pagina: Y }
-    // Each result has: kvkNummer, vestigingsnummer, naam, adres: { binnenlandsAdres: { straatnaam, plaats } }
-    const results = (data.resultaten || []).slice(0, 10).map((item: any) => {
-      const straatnaam = item.adres?.binnenlandsAdres?.straatnaam || ''
-      const plaats = item.adres?.binnenlandsAdres?.plaats || ''
-      
-      return {
-        kvkNummer: item.kvkNummer || '',
-        bedrijfsnaam: item.naam || '',
-        plaats: plaats,
-        adres: straatnaam ? `${straatnaam}, ${plaats}` : plaats,
-      }
-    })
 
-    return NextResponse.json({ results })
+    // Transformeer KvK data naar ons formaat
+    const results = data.resultaten?.map((item: any) => ({
+      kvkNummer: item.kvkNummer,
+      bedrijfsnaam: item.handelsnaam || item.naam,
+      plaats: item.plaats,
+      adres: item.adres ? `${item.adres.straatnaam} ${item.adres.huisnummer}, ${item.adres.plaats}` : '',
+    })) || []
+
+    return NextResponse.json({
+      results,
+      total: data.totaal || 0,
+    })
   } catch (error) {
-    console.error('KvK search API error:', error)
+    console.error('KvK search error:', error)
     return NextResponse.json(
-      { 
-        error: 'Kon bedrijven niet zoeken. Probeer het later opnieuw.',
-        results: [],
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Er ging iets mis bij het zoeken' },
       { status: 500 }
     )
   }
 }
-

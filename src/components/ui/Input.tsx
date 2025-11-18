@@ -30,6 +30,7 @@ export interface InputProps
   label?: string
   error?: string
   helpText?: string
+  icon?: React.ReactNode
 }
 
 export function Input({
@@ -39,6 +40,7 @@ export function Input({
   label,
   error,
   helpText,
+  icon,
   ...props
 }: InputProps) {
   const finalState = error ? 'error' : state
@@ -51,10 +53,21 @@ export function Input({
           {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-      <input
-        className={cn(inputVariants({ inputSize, state: finalState, className }))}
-        {...props}
-      />
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            {icon}
+          </div>
+        )}
+        <input
+          className={cn(
+            inputVariants({ inputSize, state: finalState }),
+            icon && 'pl-11',
+            className
+          )}
+          {...props}
+        />
+      </div>
       {error && (
         <p className="text-sm font-medium text-red-600 flex items-center gap-1">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
