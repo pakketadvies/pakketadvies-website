@@ -53,21 +53,25 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
+    // Extract address from hoofdvestiging
+    const hoofdvestiging = data._embedded?.hoofdvestiging
+    const bezoekadres = hoofdvestiging?.adressen?.find((a: any) => a.type === 'bezoekadres')
+    
     // Extract relevant data from KvK API response
     const bedrijfsgegevens = {
-      bedrijfsnaam: data.naam || data.handelsnaam || '',
+      bedrijfsnaam: data.naam || '',
       kvkNummer: kvkClean,
-      adres: {
-        straat: data.straatnaam || '',
-        huisnummer: data.huisnummer || '',
-        postcode: data.postcode || '',
-        plaats: data.plaats || '',
-      },
-      vestigingsAdres: data.adres || '',
-      rechtsvorm: data.rechtsvorm || '',
+      correspondentieAdres: bezoekadres ? {
+        straat: bezoekadres.straatnaam || '',
+        huisnummer: bezoekadres.huisnummer?.toString() || '',
+        postcode: bezoekadres.postcode || '',
+        plaats: bezoekadres.plaats || '',
+        volledigAdres: bezoekadres.volledigAdres || '',
+      } : null,
+      rechtsvorm: data._embedded?.eigenaar?.rechtsvorm || '',
       sbiCode: data.sbiActiviteiten?.[0]?.sbiCode || '',
       sbiOmschrijving: data.sbiActiviteiten?.[0]?.sbiOmschrijving || '',
-      website: data.websites?.[0] || '',
+      websites: hoofdvestiging?.websites || [],
     }
 
     return NextResponse.json(bedrijfsgegevens)

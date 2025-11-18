@@ -16,6 +16,11 @@ const bedrijfsgegevensSchema = z.object({
   email: z.string().email('Vul een geldig e-mailadres in'),
   telefoon: z.string().regex(/^[\d\s\-+()]+$/, 'Vul een geldig telefoonnummer in'),
   typeBedrijf: z.enum(['retail', 'horeca', 'kantoor', 'productie', 'gezondheidszorg', 'onderwijs', 'overig']),
+  // Correspondentieadres (optioneel, wordt auto-filled via KvK)
+  correspondentieStraat: z.string().optional(),
+  correspondentieHuisnummer: z.string().optional(),
+  correspondentiePostcode: z.string().optional(),
+  correspondentiePlaats: z.string().optional(),
 })
 
 type BedrijfsgegevensFormData = z.infer<typeof bedrijfsgegevensSchema>
@@ -182,6 +187,13 @@ export function BedrijfsgegevensForm() {
       }
       if (data.kvkNummer) {
         setValue('kvkNummer', data.kvkNummer)
+      }
+      // Auto-fill correspondentieadres
+      if (data.correspondentieAdres) {
+        setValue('correspondentieStraat', data.correspondentieAdres.straat || '')
+        setValue('correspondentieHuisnummer', data.correspondentieAdres.huisnummer || '')
+        setValue('correspondentiePostcode', data.correspondentieAdres.postcode || '')
+        setValue('correspondentiePlaats', data.correspondentieAdres.plaats || '')
       }
 
       setKvkSuccess(true)
@@ -399,6 +411,48 @@ export function BedrijfsgegevensForm() {
           {...register('telefoon')}
           required
         />
+      </div>
+
+      {/* Correspondentieadres */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Buildings weight="duotone" className="w-5 h-5 text-brand-navy-500" />
+          <h3 className="text-lg font-semibold text-brand-navy-500">Correspondentieadres</h3>
+        </div>
+        <p className="text-sm text-gray-600 -mt-2 mb-4">
+          Dit adres wordt automatisch ingevuld via KvK, maar je kunt het ook handmatig aanpassen.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Input
+              label="Straatnaam"
+              placeholder="Bijv. Weena"
+              {...register('correspondentieStraat')}
+            />
+          </div>
+          <div>
+            <Input
+              label="Huisnummer"
+              placeholder="Bijv. 664"
+              {...register('correspondentieHuisnummer')}
+            />
+          </div>
+          <div>
+            <Input
+              label="Postcode"
+              placeholder="Bijv. 3012CN"
+              {...register('correspondentiePostcode')}
+            />
+          </div>
+          <div>
+            <Input
+              label="Plaats"
+              placeholder="Bijv. Rotterdam"
+              {...register('correspondentiePlaats')}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Type bedrijf */}
