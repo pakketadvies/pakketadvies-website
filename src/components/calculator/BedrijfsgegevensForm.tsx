@@ -128,15 +128,34 @@ export function BedrijfsgegevensForm() {
   }
 
   // Select company from dropdown
-  const selectCompany = (result: KvkSearchResult) => {
+  const selectCompany = async (result: KvkSearchResult) => {
     setBedrijfsnaamInput(result.bedrijfsnaam)
     setValue('bedrijfsnaam', result.bedrijfsnaam)
     setKvkNummer(result.kvkNummer)
     setValue('kvkNummer', result.kvkNummer)
     setShowDropdown(false)
     setSearchResults([])
-    setKvkSuccess(true)
-    setTimeout(() => setKvkSuccess(false), 3000)
+    
+    // Fetch full company data including correspondentieadres
+    try {
+      const response = await fetch(`/api/kvk?kvk=${result.kvkNummer}`)
+      const data = await response.json()
+      
+      if (response.ok && data.correspondentieAdres) {
+        setValue('correspondentieStraat', data.correspondentieAdres.straat || '')
+        setValue('correspondentieHuisnummer', data.correspondentieAdres.huisnummer || '')
+        setValue('correspondentiePostcode', data.correspondentieAdres.postcode || '')
+        setValue('correspondentiePlaats', data.correspondentieAdres.plaats || '')
+      }
+      
+      setKvkSuccess(true)
+      setTimeout(() => setKvkSuccess(false), 3000)
+    } catch (error) {
+      console.error('Error fetching company details:', error)
+      // Still show success for name/kvk, but no address
+      setKvkSuccess(true)
+      setTimeout(() => setKvkSuccess(false), 3000)
+    }
   }
 
   // Handle keyboard navigation
@@ -375,44 +394,6 @@ export function BedrijfsgegevensForm() {
         </p>
       </div>
 
-      {/* Contactpersoon */}
-      <div>
-        <Input
-          label="Contactpersoon"
-          placeholder="Voor- en achternaam"
-          error={errors.contactpersoon?.message}
-          {...register('contactpersoon')}
-          required
-        />
-      </div>
-
-      {/* Email */}
-      <div>
-        <Input
-          label="E-mailadres"
-          type="email"
-          placeholder="naam@bedrijf.nl"
-          error={errors.email?.message}
-          helpText="We sturen je advies hier naartoe"
-          {...register('email')}
-          required
-        />
-      </div>
-
-      {/* Telefoon */}
-      <div>
-        <Input
-          label="Telefoonnummer"
-          type="tel"
-          inputMode="tel"
-          placeholder="06 12345678"
-          error={errors.telefoon?.message}
-          helpText="Voor eventuele vragen"
-          {...register('telefoon')}
-          required
-        />
-      </div>
-
       {/* Correspondentieadres */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
@@ -453,6 +434,44 @@ export function BedrijfsgegevensForm() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Contactpersoon */}
+      <div>
+        <Input
+          label="Contactpersoon"
+          placeholder="Voor- en achternaam"
+          error={errors.contactpersoon?.message}
+          {...register('contactpersoon')}
+          required
+        />
+      </div>
+
+      {/* Email */}
+      <div>
+        <Input
+          label="E-mailadres"
+          type="email"
+          placeholder="naam@bedrijf.nl"
+          error={errors.email?.message}
+          helpText="We sturen je advies hier naartoe"
+          {...register('email')}
+          required
+        />
+      </div>
+
+      {/* Telefoon */}
+      <div>
+        <Input
+          label="Telefoonnummer"
+          type="tel"
+          inputMode="tel"
+          placeholder="06 12345678"
+          error={errors.telefoon?.message}
+          helpText="Voor eventuele vragen"
+          {...register('telefoon')}
+          required
+        />
       </div>
 
       {/* Type bedrijf */}

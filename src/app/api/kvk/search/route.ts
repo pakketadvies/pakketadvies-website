@@ -34,6 +34,10 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
+      // KvK API returns 404 when no results found (not an error, just empty)
+      if (response.status === 404) {
+        return NextResponse.json({ results: [] })
+      }
       const errorText = await response.text()
       console.error(`KvK API error ${response.status}:`, errorText)
       throw new Error(`API error: ${response.status}`)
