@@ -6,8 +6,9 @@ import { z } from 'zod'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Lightning, MapPin, CheckCircle } from '@phosphor-icons/react'
+import { Lightning, MapPin, CheckCircle, DeviceMobile, Lightning as LightningBolt, ChartBar, Question, Lightbulb, Warning, Info } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const verbruikSchema = z.object({
   elektriciteitJaar: z.number().min(0, 'Vul een geldig verbruik in'),
@@ -29,7 +30,8 @@ const verbruikSchema = z.object({
 type VerbruikFormData = z.infer<typeof verbruikSchema>
 
 export function VerbruikForm() {
-  const { setVerbruik, volgendeStap } = useCalculatorStore()
+  const router = useRouter()
+  const { setVerbruik } = useCalculatorStore()
   const [isGeschat, setIsGeschat] = useState(false)
   const [heeftGas, setHeeftGas] = useState(true)
   const [leveringsadressen, setLeveringsadressen] = useState([
@@ -128,7 +130,8 @@ export function VerbruikForm() {
       terugleveringJaar: heeftZonnepanelen && terugleveringJaar ? parseInt(terugleveringJaar) : undefined,
       meterType: meterType !== 'weet_niet' ? meterType : undefined,
     })
-    volgendeStap()
+    // Direct naar resultaten!
+    router.push('/calculator/resultaten')
   }
 
   return (
@@ -141,74 +144,43 @@ export function VerbruikForm() {
           </div>
           <div className="min-w-0">
             <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-brand-navy-500 truncate">
-              Energieverbruik
+              Bereken je besparing
             </h2>
-            <p className="text-sm md:text-base text-gray-600">Vul je jaarverbruik in</p>
+            <p className="text-sm md:text-base text-gray-600">Direct persoonlijk advies</p>
           </div>
         </div>
       </div>
 
-      {/* Leveringsadressen */}
+      {/* Leveringsadres EERST - voor postcode API */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="block text-base md:text-lg font-semibold text-brand-navy-500">
-            Leveringsadres(sen) <span className="text-red-500">*</span>
-          </label>
-          {leveringsadressen.length < 5 && (
-            <button
-              type="button"
-              onClick={addLeveringsadres}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Adres toevoegen
-            </button>
-          )}
-        </div>
+        <label className="block text-base md:text-lg font-semibold text-brand-navy-500">
+          Leveringsadres <span className="text-red-500">*</span>
+        </label>
+        <p className="text-sm text-gray-600 -mt-2">
+          We vullen automatisch je adres in
+        </p>
 
         {leveringsadressen.map((adres, index) => (
           <div key={index} className="relative p-4 md:p-6 bg-gray-50 rounded-xl border-2 border-gray-200 space-y-4">
-            {/* Remove button (only if more than 1) */}
-            {leveringsadressen.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeLeveringsadres(index)}
-                className="absolute top-3 right-3 p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Verwijder adres"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-
-            {leveringsadressen.length > 1 && (
-              <div className="text-sm font-semibold text-gray-700 mb-3">
-                Adres {index + 1}
-              </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {/* Postcode */}
-                  <div className="md:col-span-1">
-                    <Input
-                      label="Postcode"
-                      placeholder="1234 AB"
-                      value={adres.postcode}
-                      onChange={(e) => {
-                        const updated = [...leveringsadressen]
-                        updated[index].postcode = e.target.value
-                        setLeveringsadressen(updated)
-                        setValue(`leveringsadressen.${index}.postcode`, e.target.value)
-                      }}
-                      onBlur={() => fetchAddress(index)}
-                      error={errors.leveringsadressen?.[index]?.postcode?.message}
-                      required
-                      autoFocus={index === 0}
-                    />
-                  </div>
+              {/* Postcode */}
+              <div className="md:col-span-1">
+                <Input
+                  label="Postcode"
+                  placeholder="1234 AB"
+                  value={adres.postcode}
+                  onChange={(e) => {
+                    const updated = [...leveringsadressen]
+                    updated[index].postcode = e.target.value
+                    setLeveringsadressen(updated)
+                    setValue(`leveringsadressen.${index}.postcode`, e.target.value)
+                  }}
+                  onBlur={() => fetchAddress(index)}
+                  error={errors.leveringsadressen?.[index]?.postcode?.message}
+                  required
+                  autoFocus={index === 0}
+                />
+              </div>
 
               {/* Huisnummer */}
               <div className="md:col-span-1">
@@ -265,12 +237,6 @@ export function VerbruikForm() {
             )}
           </div>
         ))}
-
-        {leveringsadressen.length > 1 && (
-          <p className="text-xs text-gray-600 mt-2">
-            Je hebt {leveringsadressen.length} leveringsadressen toegevoegd
-          </p>
-        )}
       </div>
 
       {/* Elektriciteit */}
@@ -372,11 +338,14 @@ export function VerbruikForm() {
               helpText="Hoeveel stroom lever je gemiddeld terug per jaar?"
             />
             <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs text-blue-900 leading-relaxed">
-                💡 <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
-                die optimaal profiteren van je energieopbrengst en de huidige salderingsregeling. Meestal ligt dit 
-                rond de 60-80% van je totale productie.
-              </p>
+              <div className="flex items-start gap-2">
+                <Lightbulb weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-blue-900 leading-relaxed">
+                  <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
+                  die optimaal profiteren van je energieopbrengst en de huidige salderingsregeling. Meestal ligt dit 
+                  rond de 60-80% van je totale productie.
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -397,28 +366,29 @@ export function VerbruikForm() {
               value: 'slim' as const, 
               label: 'Slimme meter', 
               description: 'Meet automatisch per uur',
-              icon: '📱'
+              Icon: DeviceMobile
             },
             { 
               value: 'dubbel' as const, 
               label: 'Dubbele meter', 
               description: 'Dag- en nachttarief',
-              icon: '⚡'
+              Icon: LightningBolt
             },
             { 
               value: 'enkel' as const, 
               label: 'Enkele meter', 
               description: 'Standaard oudere meter',
-              icon: '📊'
+              Icon: ChartBar
             },
             { 
               value: 'weet_niet' as const, 
               label: 'Weet ik niet', 
               description: 'Geen probleem',
-              icon: '🤷'
+              Icon: Question
             },
           ].map((option) => {
             const isSelected = meterType === option.value
+            const OptionIcon = option.Icon
             
             return (
               <button
@@ -433,7 +403,10 @@ export function VerbruikForm() {
                   }
                 `}
               >
-                <span className="text-2xl flex-shrink-0">{option.icon}</span>
+                <OptionIcon 
+                  weight="duotone" 
+                  className={`w-6 h-6 flex-shrink-0 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`}
+                />
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm md:text-base font-semibold mb-0.5 ${isSelected ? 'text-brand-teal-700' : 'text-gray-900'}`}>
                     {option.label}
@@ -457,34 +430,43 @@ export function VerbruikForm() {
 
         {meterType === 'slim' && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-900 leading-relaxed">
-              ✅ <strong>Perfect!</strong> Met een slimme meter kun je profiteren van dynamische contracten 
-              en real-time inzicht in je verbruik.
-            </p>
+            <div className="flex items-start gap-2">
+              <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-green-900 leading-relaxed">
+                <strong>Perfect!</strong> Met een slimme meter kun je profiteren van dynamische contracten 
+                en real-time inzicht in je verbruik.
+              </p>
+            </div>
           </div>
         )}
 
         {meterType === 'dubbel' && (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-900 leading-relaxed">
-              💡 <strong>Goed om te weten:</strong> We kunnen contracten met dag- en nachttarief voor je vinden.
-            </p>
+            <div className="flex items-start gap-2">
+              <Lightbulb weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-900 leading-relaxed">
+                <strong>Goed om te weten:</strong> We kunnen contracten met dag- en nachttarief voor je vinden.
+              </p>
+            </div>
           </div>
         )}
 
         {meterType === 'enkel' && (
           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="text-sm text-orange-900 leading-relaxed">
-              ℹ️ <strong>Tip:</strong> Overweeg een upgrade naar een slimme meter voor toegang tot dynamische 
-              contracten en betere besparingen.
-            </p>
+            <div className="flex items-start gap-2">
+              <Info weight="duotone" className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-orange-900 leading-relaxed">
+                <strong>Tip:</strong> Overweeg een upgrade naar een slimme meter voor toegang tot dynamische 
+                contracten en betere besparingen.
+              </p>
+            </div>
           </div>
         )}
       </div>
 
       {/* Submit button */}
       <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-base md:text-lg">
-        Volgende stap
+        Bekijk mijn aanbiedingen
         <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>

@@ -181,9 +181,9 @@ export function VoorkeurenForm() {
           <Lightning weight="duotone" className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
             <div className="font-semibold text-green-900 mb-1">
-              {hasSolarPanels && hasSmartMeter && '💡 Perfect voor dynamisch!'}
-              {hasSolarPanels && !hasSmartMeter && '☀️ Ideaal met zonnepanelen!'}
-              {!hasSolarPanels && hasSmartMeter && '📱 Slimme meter gedetecteerd!'}
+              {hasSolarPanels && hasSmartMeter && 'Perfect voor dynamisch!'}
+              {hasSolarPanels && !hasSmartMeter && 'Ideaal met zonnepanelen!'}
+              {!hasSolarPanels && hasSmartMeter && 'Slimme meter gedetecteerd!'}
             </div>
             <p className="text-sm text-green-700">
               {hasSolarPanels && 'Met zonnepanelen kun je optimaal profiteren van dynamische contracten door slim terug te leveren tijdens piekuren.'}
@@ -225,7 +225,7 @@ export function VoorkeurenForm() {
                 
                 {option.recommended && (
                   <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg whitespace-nowrap">
-                    ⭐ Aanbevolen
+                    Aanbevolen
                   </div>
                 )}
                 
