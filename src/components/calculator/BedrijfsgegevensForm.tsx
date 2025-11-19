@@ -8,6 +8,7 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown } from '@phosphor-icons/react'
+import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 
 const bedrijfsgegevensSchema = z.object({
   kvkNummer: z.string().optional(),
@@ -469,21 +470,22 @@ export function BedrijfsgegevensForm() {
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { value: 'kantoor', label: 'Kantoor' },
-            { value: 'retail', label: 'Retail' },
-            { value: 'horeca', label: 'Horeca' },
-            { value: 'productie', label: 'Productie' },
-            { value: 'gezondheidszorg', label: 'Zorg' },
-            { value: 'onderwijs', label: 'Onderwijs' },
-            { value: 'overig', label: 'Overig' },
+            { value: 'kantoor', label: 'Kantoor', icon: Briefcase },
+            { value: 'retail', label: 'Retail', icon: Storefront },
+            { value: 'horeca', label: 'Horeca', icon: ForkKnife },
+            { value: 'productie', label: 'Productie', icon: Factory },
+            { value: 'gezondheidszorg', label: 'Zorg', icon: FirstAid },
+            { value: 'onderwijs', label: 'Onderwijs', icon: GraduationCap },
+            { value: 'overig', label: 'Overig', icon: SquaresFour },
           ].map((option) => {
             const isSelected = typeBedrijf === option.value
+            const Icon = option.icon
             
             return (
               <label
                 key={option.value}
                 className={`
-                  relative flex items-center justify-center p-3 md:p-4 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all duration-300
+                  relative flex flex-col items-center justify-center p-4 md:p-5 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
                     ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg shadow-brand-teal-500/20' 
                     : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
@@ -496,7 +498,13 @@ export function BedrijfsgegevensForm() {
                   {...register('typeBedrijf')}
                   className="sr-only"
                 />
-                <div className={`text-sm md:text-base font-semibold ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
+                <Icon 
+                  weight="duotone" 
+                  className={`w-8 h-8 md:w-10 md:h-10 mb-2 transition-colors ${
+                    isSelected ? 'text-brand-teal-600' : 'text-gray-400'
+                  }`}
+                />
+                <div className={`text-sm md:text-base font-semibold ${isSelected ? 'text-brand-navy-500' : 'text-gray-700'}`}>
                   {option.label}
                 </div>
                 
