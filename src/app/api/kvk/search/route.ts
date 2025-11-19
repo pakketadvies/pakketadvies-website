@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const apiKey = process.env.KVK_API_KEY
+    const apiKey = process.env.KVK_API_KEY?.trim()
     if (!apiKey) {
       console.error('[KVK Search] KVK_API_KEY niet geconfigureerd')
       // Return empty results instead of error - form blijft bruikbaar
@@ -25,8 +25,15 @@ export async function GET(request: Request) {
 
     console.log(`[KVK Search] Zoeken naar: "${query}"`)
 
-    // Zoek bedrijven via KvK Zoeken API
-    const kvkUrl = `https://api.kvk.nl/api/v1/zoeken?naam=${encodeURIComponent(query)}&pagina=1&resultatenPerPagina=10`
+    // Check if query is numeric (KvK nummer) or text (bedrijfsnaam)
+    const isNumeric = /^\d+$/.test(query)
+    
+    // Build KvK API URL - gebruik kvkNummer param voor cijfers, naam voor tekst
+    const kvkUrl = isNumeric 
+      ? `https://api.kvk.nl/api/v1/zoeken?kvkNummer=${encodeURIComponent(query)}*&pagina=1&resultatenPerPagina=10`
+      : `https://api.kvk.nl/api/v1/zoeken?naam=${encodeURIComponent(query)}&pagina=1&resultatenPerPagina=10`
+    
+    console.log(`[KVK Search] Type: ${isNumeric ? 'KvK nummer' : 'bedrijfsnaam'}`)
     console.log(`[KVK Search] URL: ${kvkUrl}`)
     
     const response = await fetch(kvkUrl, {
@@ -51,6 +58,7 @@ export async function GET(request: Request) {
 
     const data = await response.json()
     console.log(`[KVK Search] Found ${data.totaal || 0} results`)
+    console.log(`[KVK Search] Raw data:`, JSON.stringify(data, null, 2))
 
     // Transformeer KvK data naar ons formaat
     const results = data.resultaten?.map((item: any) => ({
@@ -60,12 +68,16 @@ export async function GET(request: Request) {
       adres: item.adres ? `${item.adres.straatnaam} ${item.adres.huisnummer}, ${item.adres.plaats}` : '',
     })) || []
 
+    console.log(`[KVK Search] Transformed results:`, results)
+
     return NextResponse.json({
       results,
       total: data.totaal || 0,
     })
   } catch (error) {
     console.error('[KVK Search] Exception:', error)
+    console.error('[KVK Search] Exception details:', error instanceof Error ? error.message : 'Unknown error')
+    console.error('[KVK Search] Exception stack:', error instanceof Error ? error.stack : '')
     // Return empty results instead of error - form blijft bruikbaar
     return NextResponse.json({
       results: [],

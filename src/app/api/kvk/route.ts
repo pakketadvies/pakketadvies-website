@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const apiKey = process.env.KVK_API_KEY
+  const apiKey = process.env.KVK_API_KEY?.trim()
 
   if (!apiKey) {
     console.error('[KVK Lookup] KVK_API_KEY not configured')
