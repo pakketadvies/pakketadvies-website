@@ -36,10 +36,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // URL encode parameters properly
     const url = `https://postcode.tech/api/v1/postcode?postcode=${encodeURIComponent(postcodeClean)}&number=${encodeURIComponent(number)}`
-    
-    console.log('[Postcode API] Request:', { postcode: postcodeClean, number, url })
     
     const response = await fetch(url, {
       headers: {
@@ -48,20 +45,17 @@ export async function GET(request: NextRequest) {
     })
 
     if (!response.ok) {
-      console.error('[Postcode API] Error response:', response.status, await response.text())
-      
       if (response.status === 404) {
         return NextResponse.json(
           { error: 'Adres niet gevonden' },
           { status: 404 }
         )
       }
+      console.error(`Postcode API error: ${response.status}`)
       throw new Error(`API error: ${response.status}`)
     }
 
     const data = await response.json()
-    
-    console.log('[Postcode API] Success:', data)
     
     return NextResponse.json({
       street: data.street || '',
@@ -70,8 +64,7 @@ export async function GET(request: NextRequest) {
       province: data.province || '',
     })
   } catch (error) {
-    console.error('[Postcode API] Exception:', error)
-    // Return success but with empty data so user can continue
+    console.error('Postcode API exception:', error)
     return NextResponse.json({
       street: '',
       city: '',
