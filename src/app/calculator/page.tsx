@@ -6,9 +6,8 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import { ProgressBar } from '@/components/calculator/ProgressBar'
 import { VerbruikForm } from '@/components/calculator/VerbruikForm'
 import { BedrijfsgegevensForm } from '@/components/calculator/BedrijfsgegevensForm'
-import { VoorkeurenForm } from '@/components/calculator/VoorkeurenForm'
 
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 2  // Alleen verbruik en bedrijfsgegevens
 
 function CalculatorContent() {
   const searchParams = useSearchParams()
@@ -20,7 +19,7 @@ function CalculatorContent() {
     if (stapParam) {
       const stapNumber = parseInt(stapParam, 10)
       if (stapNumber >= 1 && stapNumber <= TOTAL_STEPS) {
-        setStap(stapNumber as 1 | 2 | 3)
+        setStap(stapNumber as 1 | 2)
       }
     }
   }, [searchParams, setStap])
@@ -38,7 +37,6 @@ function CalculatorContent() {
           <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-6 md:p-8 lg:p-12">
             {stap === 1 && <VerbruikForm />}
             {stap === 2 && <BedrijfsgegevensForm />}
-            {stap === 3 && <VoorkeurenForm />}
           </div>
 
           {/* Help text */}

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -34,7 +35,8 @@ interface KvkSearchResult {
 }
 
 export function BedrijfsgegevensForm() {
-  const { setBedrijfsgegevens, volgendeStap, vorigeStap, verbruik } = useCalculatorStore()
+  const router = useRouter()
+  const { setBedrijfsgegevens, vorigeStap, verbruik } = useCalculatorStore()
   
   // KvK number lookup states
   const [kvkNummer, setKvkNummer] = useState('')
@@ -331,7 +333,8 @@ export function BedrijfsgegevensForm() {
       ...data,
       kvkNummer: kvkNummer || undefined,
     })
-    volgendeStap()
+    // Ga naar bevestigingspagina (contract is al gekozen op resultaten pagina)
+    router.push('/contract/bevestiging')
   }
 
   return (

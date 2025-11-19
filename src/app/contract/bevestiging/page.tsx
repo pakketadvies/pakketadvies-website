@@ -1,16 +1,15 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useCalculatorStore } from '@/store/calculatorStore'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
-import { CheckCircle, Envelope, Phone, Lightning, CalendarCheck, Confetti } from '@phosphor-icons/react'
+import { CheckCircle, Envelope, Phone, Lightning, CalendarCheck, Confetti, Buildings, MapPin } from '@phosphor-icons/react'
 import confetti from 'canvas-confetti'
 
 function BevestigingContent() {
-  const searchParams = useSearchParams()
-  const bedrijfsnaam = searchParams?.get('bedrijf') || 'Uw bedrijf'
+  const { bedrijfsgegevens, verbruik } = useCalculatorStore()
   const [showConfetti, setShowConfetti] = useState(true)
 
   useEffect(() => {
@@ -84,11 +83,33 @@ function BevestigingContent() {
                 <span className="font-semibold text-brand-navy-500">Aanvraag details</span>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Bedrijf:</span>
-                  <span className="font-semibold text-brand-navy-500">{bedrijfsnaam}</span>
-                </div>
-                <div className="flex items-center justify-between">
+                {bedrijfsgegevens?.bedrijfsnaam && (
+                  <div className="flex items-start gap-3">
+                    <Buildings weight="duotone" className="w-5 h-5 text-gray-600 mt-0.5" />
+                    <div className="flex-1">
+                      <span className="text-gray-600 text-sm">Bedrijf:</span>
+                      <p className="font-semibold text-brand-navy-500">{bedrijfsgegevens.bedrijfsnaam}</p>
+                      {bedrijfsgegevens.kvkNummer && (
+                        <p className="text-xs text-gray-500">KvK: {bedrijfsgegevens.kvkNummer}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {verbruik?.leveringsadressen && verbruik.leveringsadressen.length > 0 && (
+                  <div className="flex items-start gap-3">
+                    <MapPin weight="duotone" className="w-5 h-5 text-gray-600 mt-0.5" />
+                    <div className="flex-1">
+                      <span className="text-gray-600 text-sm">Leveradres:</span>
+                      <p className="font-semibold text-brand-navy-500">
+                        {verbruik.leveringsadressen[0].straat} {verbruik.leveringsadressen[0].huisnummer}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {verbruik.leveringsadressen[0].postcode} {verbruik.leveringsadressen[0].plaats}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-300">
                   <span className="text-gray-600">Aanvraagnummer:</span>
                   <span className="font-mono font-semibold text-brand-navy-500">
                     #PA-{new Date().getFullYear()}-{String(Math.floor(Math.random() * 999999)).padStart(6, '0')}
@@ -281,15 +302,6 @@ function BevestigingContent() {
 
 export default function BevestigingPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 pt-32 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-brand-teal-50 border-t-brand-teal-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Laden...</p>
-        </div>
-      </div>
-    }>
-      <BevestigingContent />
-    </Suspense>
+    <BevestigingContent />
   )
 }
