@@ -105,22 +105,37 @@ export function BedrijfsgegevensForm() {
     }
   }
 
-  // Handle bedrijfsnaam input change with debounce
+  // Handle bedrijfsnaam input change with debounce and KvK number detection
   const handleBedrijfsnaamChange = (value: string) => {
     setBedrijfsnaamInput(value)
     setValue('bedrijfsnaam', value)
     setSelectedIndex(-1)
+    setKvkError(null)
+    setKvkSuccess(false)
 
     // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current)
     }
 
-    // Debounce search
-    if (value.length >= 2) {
+    // Check if input is exactly 8 digits (KvK number)
+    const isKvkNumber = /^\d{8}$/.test(value)
+    
+    if (isKvkNumber) {
+      // Direct KvK lookup
+      setKvkNummer(value)
+      setShowDropdown(false)
+      setSearchResults([])
+      
+      // Trigger KvK lookup after short delay
+      searchTimeoutRef.current = setTimeout(() => {
+        fetchKvkData()
+      }, 300)
+    } else if (value.length >= 2) {
+      // Search by company name
       searchTimeoutRef.current = setTimeout(() => {
         searchCompanies(value)
-      }, 300) // 300ms debounce
+      }, 300)
     } else {
       setSearchResults([])
       setShowDropdown(false)
@@ -253,57 +268,72 @@ export function BedrijfsgegevensForm() {
         </div>
       </div>
 
-      {/* KvK Lookup */}
+      {/* Unified KvK Search - Naam OF Nummer */}
       <div className="bg-gradient-to-br from-brand-teal-50 to-brand-navy-50 border-2 border-brand-teal-200 rounded-xl md:rounded-2xl p-4 md:p-6">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-600" />
-            <h3 className="font-semibold text-brand-navy-500">KvK-nummer (optioneel)</h3>
+            <h3 className="font-semibold text-brand-navy-500">Bedrijf opzoeken (optioneel)</h3>
           </div>
           <p className="text-sm text-gray-600">
-            Vul je KvK-nummer in en we vullen automatisch je bedrijfsgegevens in
+            Zoek op bedrijfsnaam of KvK-nummer - we vullen automatisch je gegevens in
           </p>
           
-          <div className="flex gap-2">
-            <div className="flex-1">
+          <div className="relative" ref={dropdownRef}>
+            <div className="relative">
               <input
                 type="text"
-                value={kvkNummer}
-                onChange={(e) => {
-                  setKvkNummer(e.target.value.replace(/\D/g, ''))
-                  setKvkError(null)
-                  setKvkSuccess(false)
+                value={bedrijfsnaamInput}
+                onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => {
+                  if (searchResults.length > 0) setShowDropdown(true)
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    fetchKvkData()
-                  }
-                }}
-                placeholder="12345678"
-                maxLength={8}
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
-                disabled={kvkLoading}
+                placeholder="Bedrijfsnaam of KvK-nummer (bijv. 12345678)"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
               />
-            </div>
-            <button
-              type="button"
-              onClick={fetchKvkData}
-              disabled={kvkLoading || kvkNummer.length !== 8}
-              className="px-4 md:px-6 py-3 bg-brand-teal-500 hover:bg-brand-teal-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg hover:shadow-xl disabled:shadow-none"
-            >
-              {kvkLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span className="hidden md:inline">Zoeken...</span>
-                </>
-              ) : (
-                <>
-                  <MagnifyingGlass weight="bold" className="w-5 h-5" />
-                  <span className="hidden md:inline">Opzoeken</span>
-                </>
+              {searchLoading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+                </div>
               )}
-            </button>
+              {!searchLoading && showDropdown && searchResults.length > 0 && (
+                <CaretDown weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              )}
+            </div>
+
+            {/* Dropdown */}
+            {showDropdown && searchResults.length > 0 && (
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={result.kvkNummer}
+                    type="button"
+                    onClick={() => selectCompany(result)}
+                    className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                      index === selectedIndex ? 'bg-brand-teal-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-brand-navy-500 truncate">
+                          {result.bedrijfsnaam}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-0.5">
+                          KvK: {result.kvkNummer}
+                          {result.plaats && ` • ${result.plaats}`}
+                        </div>
+                      </div>
+                      <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <p className="mt-2 text-xs text-gray-500">
+              Typ minimaal 2 tekens om te zoeken • 8 cijfers = direct KvK lookup
+            </p>
           </div>
 
           {/* Success message */}
@@ -324,73 +354,31 @@ export function BedrijfsgegevensForm() {
         </div>
       </div>
 
-      {/* Bedrijfsnaam with Autocomplete */}
-      <div className="relative" ref={dropdownRef}>
+      {/* Bedrijfsnaam field (always visible, can be manually edited) */}
+      <div>
         <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">
           Bedrijfsnaam <span className="text-red-500">*</span>
         </label>
-        <div className="relative">
-          <input
-            type="text"
-            value={bedrijfsnaamInput}
-            onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              if (searchResults.length > 0) setShowDropdown(true)
-            }}
-            placeholder="Begin met typen..."
-            className={`w-full px-4 py-3 rounded-xl border-2 ${
-              errors.bedrijfsnaam 
-                ? 'border-red-500 focus:border-red-500' 
-                : 'border-gray-300 focus:border-brand-teal-500'
-            } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500`}
-            required
-            autoFocus
-          />
-          {searchLoading && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-            </div>
-          )}
-          {showDropdown && searchResults.length > 0 && (
-            <CaretDown weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-          )}
-        </div>
-        
-        {/* Dropdown */}
-        {showDropdown && searchResults.length > 0 && (
-          <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
-            {searchResults.map((result, index) => (
-              <button
-                key={result.kvkNummer}
-                type="button"
-                onClick={() => selectCompany(result)}
-                className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                  index === selectedIndex ? 'bg-brand-teal-50' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-brand-navy-500 truncate">
-                      {result.bedrijfsnaam}
-                    </div>
-                    <div className="text-sm text-gray-600 mt-0.5">
-                      KvK: {result.kvkNummer}
-                      {result.plaats && ` • ${result.plaats}`}
-                    </div>
-                  </div>
-                  <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
+        <input
+          type="text"
+          value={bedrijfsnaamInput}
+          onChange={(e) => {
+            setBedrijfsnaamInput(e.target.value)
+            setValue('bedrijfsnaam', e.target.value)
+          }}
+          placeholder="Bijv. Bakkerij De Korenschoof"
+          className={`w-full px-4 py-3 rounded-xl border-2 ${
+            errors.bedrijfsnaam 
+              ? 'border-red-500 focus:border-red-500' 
+              : 'border-gray-300 focus:border-brand-teal-500'
+          } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500`}
+          required
+        />
         {errors.bedrijfsnaam && (
           <p className="mt-2 text-sm text-red-600">{errors.bedrijfsnaam.message}</p>
         )}
         <p className="mt-2 text-xs text-gray-500">
-          Typ minimaal 2 letters om bedrijven te zoeken in het KvK register
+          Of zoek hierboven via KvK
         </p>
       </div>
 
