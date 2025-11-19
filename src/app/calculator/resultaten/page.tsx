@@ -565,16 +565,11 @@ function ResultatenContent() {
 
                   {/* Actions */}
                   <div className="space-y-3 pt-4 border-t-2 border-gray-100">
-                    <Button 
-                      className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
-                      onClick={() => {
-                        // TODO: Implement contract selection logic
-                        // This should trigger the next step in calculator flow
-                        alert('Contract afsluiten komt binnenkort beschikbaar!')
-                      }}
-                    >
-                      Kies dit contract
-                    </Button>
+                    <Link href="/calculator?stap=2">
+                      <Button className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
+                        Bedrijfsgegevens invullen
+                      </Button>
+                    </Link>
                     <Link href={`/producten/${contract.type}-contract`}>
                       <button className="w-full text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors">
                         Meer informatie

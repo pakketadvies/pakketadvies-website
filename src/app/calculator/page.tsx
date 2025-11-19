@@ -1,5 +1,7 @@
 'use client'
 
+import { Suspense, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { ProgressBar } from '@/components/calculator/ProgressBar'
 import { VerbruikForm } from '@/components/calculator/VerbruikForm'
@@ -8,8 +10,20 @@ import { VoorkeurenForm } from '@/components/calculator/VoorkeurenForm'
 
 const TOTAL_STEPS = 3
 
-export default function CalculatorPage() {
-  const { stap } = useCalculatorStore()
+function CalculatorContent() {
+  const searchParams = useSearchParams()
+  const { stap, setStap } = useCalculatorStore()
+
+  // Check for stap query parameter and set step accordingly
+  useEffect(() => {
+    const stapParam = searchParams?.get('stap')
+    if (stapParam) {
+      const stapNumber = parseInt(stapParam, 10)
+      if (stapNumber >= 1 && stapNumber <= TOTAL_STEPS) {
+        setStap(stapNumber as 1 | 2 | 3)
+      }
+    }
+  }, [searchParams, setStap])
 
   return (
     <div className="pt-32 pb-16">
@@ -44,5 +58,13 @@ export default function CalculatorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CalculatorPage() {
+  return (
+    <Suspense fallback={<div className="pt-32 pb-16 text-center">Laden...</div>}>
+      <CalculatorContent />
+    </Suspense>
   )
 }
