@@ -69,7 +69,9 @@ export function VerbruikForm() {
     { postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }
   ])
   const [loadingAddresses, setLoadingAddresses] = useState<{ [key: number]: boolean }>({})
-  
+  const [showHelpSchatten, setShowHelpSchatten] = useState(false)
+  const [schattingVierkanteMeter, setSchattingVierkanteMeter] = useState('')
+  const [schattingType, setSchattingType] = useState<'kantoor' | 'retail' | 'horeca' | 'productie' | 'overig'>('kantoor')
   // Ref om laatste lookup te tracken (voorkomt dubbele calls)
   const lastLookup = useRef<{ [key: number]: string }>({})
   // Debounce timers
@@ -296,6 +298,40 @@ export function VerbruikForm() {
     }
   }
 
+  // Bereken geschat verbruik op basis van m² en type bedrijf
+  const berekenSchatting = () => {
+    const m2 = parseInt(schattingVierkanteMeter)
+    if (!m2 || m2 <= 0) return
+
+    // Gemiddeld verbruik per m² per bedrijfstype (kWh per m² per jaar)
+    const verbruikPerM2: Record<typeof schattingType, { elektriciteit: number; gas: number }> = {
+      kantoor: { elektriciteit: 50, gas: 25 },
+      retail: { elektriciteit: 80, gas: 20 },
+      horeca: { elektriciteit: 150, gas: 80 },
+      productie: { elektriciteit: 120, gas: 60 },
+      overig: { elektriciteit: 70, gas: 30 },
+    }
+
+    const schatting = verbruikPerM2[schattingType]
+    const geschatElektriciteit = Math.round(m2 * schatting.elektriciteit)
+    const geschatGas = Math.round(m2 * schatting.gas)
+
+    // Verdeel elektriciteit over normaal/dal (60/40 split voor dubbele meter)
+    if (!heeftEnkeleMeter) {
+      setValue('elektriciteitNormaal', Math.round(geschatElektriciteit * 0.6))
+      setValue('elektriciteitDal', Math.round(geschatElektriciteit * 0.4))
+    } else {
+      setValue('elektriciteitNormaal', geschatElektriciteit)
+      setValue('elektriciteitDal', null)
+    }
+
+    if (!geenGasaansluiting) {
+      setValue('gasJaar', geschatGas)
+    }
+
+    setShowHelpSchatten(false)
+  }
+
   const onSubmit = (data: VerbruikFormData) => {
     setVerbruik({
       elektriciteitNormaal: data.elektriciteitNormaal,
@@ -406,17 +442,26 @@ export function VerbruikForm() {
         )}
       </div>
 
-      {/* Rest blijft hetzelfde - alleen de leveringsadres sectie is aangepast */}
       {/* Elektriciteitsverbruik */}
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-            <Lightning weight="duotone" className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <Lightning weight="duotone" className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
+              <p className="text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
-            <p className="text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowHelpSchatten(true)}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
+          >
+            <Lightbulb weight="duotone" className="w-5 h-5" />
+            <span className="hidden md:inline">Help me schatten</span>
+          </button>
         </div>
 
         <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-6">
@@ -535,6 +580,15 @@ export function VerbruikForm() {
             {errors.terugleveringJaar && (
               <p className="mb-3 text-sm text-red-600">{errors.terugleveringJaar.message}</p>
             )}
+            
+            <button
+              type="button"
+              onClick={() => setShowHelpSchatten(true)}
+              className="mb-3 text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium underline inline-flex items-center gap-1"
+            >
+              <Lightbulb weight="duotone" className="w-4 h-4" />
+              Weet je het niet? Laat ons het schatten
+            </button>
 
             <div className="flex items-start gap-2 p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
               <Lightbulb weight="duotone" className="w-5 h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
@@ -661,6 +715,125 @@ export function VerbruikForm() {
           100% vrijblijvend • Direct resultaat • Geen verplichtingen
         </p>
       </div>
+
+      {/* Help Schatten Modal */}
+      {showHelpSchatten && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+                    <Lightbulb weight="duotone" className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-brand-navy-500">Help me schatten</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHelpSchatten(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <p className="text-sm text-gray-600">
+                We schatten je verbruik op basis van je bedrijfsoppervlak en type bedrijf.
+              </p>
+
+              {/* Vierkante meters */}
+              <div>
+                <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                  Hoeveel vierkante meter heeft je bedrijf? <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={schattingVierkanteMeter}
+                    onChange={(e) => setSchattingVierkanteMeter(e.target.value)}
+                    placeholder="Bijv. 250"
+                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                    m²
+                  </span>
+                </div>
+              </div>
+
+              {/* Type bedrijf */}
+              <div>
+                <label className="block text-sm font-semibold text-brand-navy-500 mb-3">
+                  Type bedrijf <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: 'kantoor' as const, label: 'Kantoor', desc: '~50 kWh/m²' },
+                    { value: 'retail' as const, label: 'Retail', desc: '~80 kWh/m²' },
+                    { value: 'horeca' as const, label: 'Horeca', desc: '~150 kWh/m²' },
+                    { value: 'productie' as const, label: 'Productie', desc: '~120 kWh/m²' },
+                    { value: 'overig' as const, label: 'Overig', desc: '~70 kWh/m²' },
+                  ].map((option) => {
+                    const isSelected = schattingType === option.value
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setSchattingType(option.value)}
+                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                          isSelected
+                            ? 'border-brand-teal-500 bg-brand-teal-50 shadow-md'
+                            : 'border-gray-200 hover:border-brand-teal-300'
+                        }`}
+                      >
+                        <div className={`text-sm font-semibold ${isSelected ? 'text-brand-teal-700' : 'text-gray-900'}`}>
+                          {option.label}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-0.5">{option.desc}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Voorbeeld berekening */}
+              {schattingVierkanteMeter && parseInt(schattingVierkanteMeter) > 0 && (
+                <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-lg p-4 animate-slide-down">
+                  <div className="text-sm font-semibold text-brand-teal-900 mb-2">Geschat verbruik:</div>
+                  <div className="space-y-1 text-sm text-brand-teal-700">
+                    <div>⚡ Elektriciteit: ~{Math.round(parseInt(schattingVierkanteMeter) * ({ kantoor: 50, retail: 80, horeca: 150, productie: 120, overig: 70 }[schattingType])).toLocaleString()} kWh/jaar</div>
+                    <div>🔥 Gas: ~{Math.round(parseInt(schattingVierkanteMeter) * ({ kantoor: 25, retail: 20, horeca: 80, productie: 60, overig: 30 }[schattingType])).toLocaleString()} m³/jaar</div>
+                  </div>
+                  <p className="text-xs text-brand-teal-600 mt-2">
+                    * Dit is een schatting. Je kunt de waarden later nog aanpassen.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowHelpSchatten(false)}
+                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+              >
+                Annuleren
+              </button>
+              <button
+                type="button"
+                onClick={berekenSchatting}
+                disabled={!schattingVierkanteMeter || parseInt(schattingVierkanteMeter) <= 0}
+                className="flex-1 px-4 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold hover:bg-brand-teal-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
+              >
+                Gebruik schatting
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   )
 }
