@@ -114,7 +114,7 @@ export function QuickCalculator() {
     return /^\d{4}[A-Z]{2}$/.test(clean)
   }
 
-  // Fetch address - exact zoals VerbruikForm
+  // Fetch address - GEEN leveringsadressen dependency om stale closures te voorkomen!
   const fetchAddress = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
     // Check of dit dezelfde lookup is als de laatste (voorkom dubbele calls)
     const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
@@ -141,8 +141,9 @@ export function QuickCalculator() {
         if (data.error) {
           // API geeft error terug (maar met 200 status)
           setAddressError(data.error)
-          setLeveringsadressen([{
-            ...leveringsadressen[0],
+          // Gebruik updater function om stale state te voorkomen
+          setLeveringsadressen(prev => [{
+            ...prev[0],
             straat: '',
             plaats: '',
           }])
@@ -150,9 +151,9 @@ export function QuickCalculator() {
           return
         }
         
-        // Update state met nieuwe data (exact zoals VerbruikForm)
-        setLeveringsadressen([{
-          ...leveringsadressen[0],
+        // Update state met nieuwe data - gebruik updater function voor meest recente state
+        setLeveringsadressen(prev => [{
+          ...prev[0],
           straat: data.street || '',
           plaats: data.city || '',
         }])
@@ -162,9 +163,9 @@ export function QuickCalculator() {
       } else if (response.status === 404) {
         const errorData = await response.json()
         setAddressError(errorData.error || 'Adres niet gevonden')
-        // Clear address fields
-        setLeveringsadressen([{
-          ...leveringsadressen[0],
+        // Clear address fields - gebruik updater function
+        setLeveringsadressen(prev => [{
+          ...prev[0],
           straat: '',
           plaats: '',
         }])
@@ -178,7 +179,7 @@ export function QuickCalculator() {
     } finally {
       setLoadingAddress(false)
     }
-  }, [leveringsadressen])
+  }, []) // LEGE dependency array - geen stale closures!
 
   // Address change handler - exact zoals VerbruikForm
   const handleAddressChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
