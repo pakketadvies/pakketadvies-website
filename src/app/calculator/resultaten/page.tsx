@@ -141,7 +141,6 @@ function ResultatenContent() {
   const [error, setError] = useState<string | null>(null)
   
   // Filter states
-  const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     type: 'alle' as 'alle' | 'vast' | 'dynamisch',
     groeneEnergie: false,
@@ -328,20 +327,54 @@ function ResultatenContent() {
             </Button>
           </div>
 
-          {/* Filters & Sort Bar */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+          {/* Filters & Sort Bar - Always Visible */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
+            {/* Top row: Quick filters + Sort */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-              {/* Filter button */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-navy-50 text-brand-navy-600 rounded-lg font-medium hover:bg-brand-navy-100 transition-colors"
-              >
-                <SlidersHorizontal weight="bold" className="w-5 h-5" />
-                <span>Filters</span>
-                {(filters.type !== 'alle' || filters.groeneEnergie || filters.minRating > 0) && (
-                  <span className="w-2 h-2 bg-brand-teal-500 rounded-full" />
-                )}
-              </button>
+              {/* Quick filter buttons */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFilters({ ...filters, type: 'alle' })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    filters.type === 'alle'
+                      ? 'bg-brand-teal-500 text-white shadow-md'
+                      : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
+                  }`}
+                >
+                  Alle contracten
+                </button>
+                <button
+                  onClick={() => setFilters({ ...filters, type: 'vast' })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    filters.type === 'vast'
+                      ? 'bg-brand-teal-500 text-white shadow-md'
+                      : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
+                  }`}
+                >
+                  Vast
+                </button>
+                <button
+                  onClick={() => setFilters({ ...filters, type: 'dynamisch' })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    filters.type === 'dynamisch'
+                      ? 'bg-brand-teal-500 text-white shadow-md'
+                      : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
+                  }`}
+                >
+                  Dynamisch
+                </button>
+                <button
+                  onClick={() => setFilters({ ...filters, groeneEnergie: !filters.groeneEnergie })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                    filters.groeneEnergie
+                      ? 'bg-green-500 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Leaf weight="duotone" className="w-4 h-4" />
+                  Groen
+                </button>
+              </div>
 
               {/* Sort dropdown */}
               <div className="flex items-center gap-2">
@@ -359,63 +392,52 @@ function ResultatenContent() {
               </div>
             </div>
 
-            {/* Filter panel */}
-            {showFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Type filter */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-2">Type contract</label>
-                  <select
-                    value={filters.type}
-                    onChange={(e) => setFilters({ ...filters, type: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
-                  >
-                    <option value="alle">Alle types</option>
-                    <option value="vast">Vast</option>
-                    <option value="dynamisch">Dynamisch</option>
-                  </select>
-                </div>
+            {/* Second row: Advanced filters */}
+            <div className="pt-3 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Rating filter */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-2">Min. beoordeling</label>
+                <select
+                  value={filters.minRating}
+                  onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
+                >
+                  <option value="0">Alle</option>
+                  <option value="4">4+ sterren</option>
+                  <option value="4.5">4.5+ sterren</option>
+                  <option value="4.8">4.8+ sterren</option>
+                </select>
+              </div>
 
-                {/* Groene energie filter */}
-                <div className="flex items-end">
-                  <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={filters.groeneEnergie}
-                      onChange={(e) => setFilters({ ...filters, groeneEnergie: e.target.checked })}
-                      className="w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                      <Leaf weight="duotone" className="w-4 h-4 text-brand-teal-600" />
-                      Alleen groene energie
-                    </span>
-                  </label>
-                </div>
+              {/* Dynamisch info link */}
+              <div className="flex items-end">
+                <Link
+                  href="/producten/dynamisch-contract"
+                  className="w-full px-4 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-colors border-2 border-brand-teal-200 hover:border-brand-teal-300 flex items-center justify-center gap-2"
+                >
+                  <Lightning weight="duotone" className="w-4 h-4" />
+                  Hoe werkt dynamisch?
+                </Link>
+              </div>
 
-                {/* Rating filter */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-2">Min. beoordeling</label>
-                  <select
-                    value={filters.minRating}
-                    onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
-                  >
-                    <option value="0">Alle</option>
-                    <option value="4">4+ sterren</option>
-                    <option value="4.5">4.5+ sterren</option>
-                    <option value="4.8">4.8+ sterren</option>
-                  </select>
-                </div>
+              {/* Reset filters */}
+              <div className="flex items-end">
+                <button
+                  onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
+                  className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <X weight="bold" className="w-4 h-4 inline mr-1" />
+                  Reset filters
+                </button>
+              </div>
+            </div>
 
-                {/* Reset filters */}
-                <div className="flex items-end">
-                  <button
-                    onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    Reset filters
-                  </button>
-                </div>
+            {/* Active filters count */}
+            {(filters.type !== 'alle' || filters.groeneEnergie || filters.minRating > 0) && (
+              <div className="pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-600">
+                  {filteredResultaten.length} {filteredResultaten.length === 1 ? 'resultaat' : 'resultaten'} gevonden
+                </p>
               </div>
             )}
           </div>
