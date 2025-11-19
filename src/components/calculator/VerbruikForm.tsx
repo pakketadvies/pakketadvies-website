@@ -134,7 +134,10 @@ export function VerbruikForm() {
         const data = await response.json()
         
         if (data.error) {
-          // API key niet geconfigureerd, maar laat gebruiker doorgaan
+          // API geeft error terug (maar met 200 status)
+          setError(`leveringsadressen.${index}.toevoeging` as any, {
+            message: data.error
+          })
           setLoadingAddresses(prev => ({ ...prev, [index]: false }))
           return
         }
@@ -157,9 +160,18 @@ export function VerbruikForm() {
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
       } else if (response.status === 404) {
-        setError(`leveringsadressen.${index}.postcode` as any, {
-          message: 'Adres niet gevonden. Controleer postcode en huisnummer.'
-        })
+        const errorData = await response.json()
+        
+        // Check of het specifiek de toevoeging is die niet bestaat
+        if (toevoeging && errorData.error && errorData.error.includes('Toevoeging')) {
+          setError(`leveringsadressen.${index}.toevoeging` as any, {
+            message: errorData.error
+          })
+        } else {
+          setError(`leveringsadressen.${index}.postcode` as any, {
+            message: errorData.error || 'Adres niet gevonden. Controleer postcode en huisnummer.'
+          })
+        }
         
         // Clear oude data
         setLeveringsadressen(prev => {
@@ -357,6 +369,7 @@ export function VerbruikForm() {
                 value={adres.toevoeging || ''}
                 onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
                 placeholder="A"
+                error={errors.leveringsadressen?.[index]?.toevoeging?.message}
               />
             </div>
 

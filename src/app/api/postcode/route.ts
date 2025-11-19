@@ -24,51 +24,65 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const apiKey = process.env.POSTCODE_API_KEY
-
-  if (!apiKey) {
-    console.error('POSTCODE_API_KEY not configured')
-    return NextResponse.json({
-      street: '',
-      city: '',
-      error: 'Adres lookup tijdelijk niet beschikbaar'
-    })
-  }
-
   try {
-    // Bouw URL met optionele toevoeging
-    let url = `https://postcode.tech/api/v1/postcode?postcode=${encodeURIComponent(postcodeClean)}&number=${encodeURIComponent(number)}`
+    // Gebruik PDOK Locatieserver API (gratis, officieel, ondersteunt toevoegingen!)
+    // Bouw exacte query voor verificatie
+    let query = `postcode:${postcodeClean} AND huisnummer:${number}`
+    
     if (addition && addition.trim()) {
-      url += `&addition=${encodeURIComponent(addition.trim())}`
+      // Als toevoeging is ingevuld, zoek exact met toevoeging
+      query += ` AND huisnummertoevoeging:${encodeURIComponent(addition.trim())}`
     }
     
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-      },
-    })
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(query)}&fq=type:adres&rows=1`
+    
+    const response = await fetch(url)
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json(
-          { error: 'Adres niet gevonden' },
-          { status: 404 }
-        )
-      }
-      console.error(`Postcode API error: ${response.status}`)
-      throw new Error(`API error: ${response.status}`)
+      console.error(`PDOK API error: ${response.status}`)
+      return NextResponse.json(
+        { error: 'Kon adres niet ophalen' },
+        { status: response.status }
+      )
     }
 
     const data = await response.json()
     
-    // Return het adres zonder waarschuwing
-    // De postcode.tech API kan toevoegingen niet verifiëren, maar als het basisadres
-    // bestaat accepteren we de toevoeging die de gebruiker invult
+    // Check of er resultaten zijn
+    if (data.response.numFound === 0) {
+      // Geen resultaten - check of het basisadres (zonder toevoeging) wel bestaat
+      if (addition && addition.trim()) {
+        const baseQuery = `postcode:${postcodeClean} AND huisnummer:${number}`
+        const baseUrl = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(baseQuery)}&fq=type:adres&rows=1`
+        
+        const baseResponse = await fetch(baseUrl)
+        if (baseResponse.ok) {
+          const baseData = await baseResponse.json()
+          if (baseData.response.numFound > 0) {
+            // Basisadres bestaat, maar toevoeging niet
+            return NextResponse.json(
+              { error: `Toevoeging '${addition}' bestaat niet voor dit adres` },
+              { status: 404 }
+            )
+          }
+        }
+      }
+      
+      // Adres bestaat helemaal niet
+      return NextResponse.json(
+        { error: 'Adres niet gevonden' },
+        { status: 404 }
+      )
+    }
+
+    // Adres gevonden!
+    const adres = data.response.docs[0]
+    
     return NextResponse.json({
-      street: data.street || '',
-      city: data.city || '',
-      municipality: data.municipality || '',
-      province: data.province || '',
+      street: adres.straatnaam || '',
+      city: adres.woonplaatsnaam || '',
+      municipality: adres.gemeentenaam || '',
+      province: adres.provincienaam || '',
     })
   } catch (error) {
     console.error('Postcode API exception:', error)
@@ -79,5 +93,3 @@ export async function GET(request: NextRequest) {
     })
   }
 }
-
-
