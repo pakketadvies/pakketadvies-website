@@ -1,203 +1,432 @@
 'use client'
 
-import { useState } from 'react'
-import { Lightning, TrendUp, CheckCircle, ArrowRight } from '@phosphor-icons/react'
+import { useState, useEffect, useRef } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useRouter } from 'next/navigation'
+import { useCalculatorStore } from '@/store/calculatorStore'
+import { Input } from '@/components/ui/Input'
+import { 
+  Lightning, 
+  MagnifyingGlass, 
+  CheckCircle, 
+  MapPin, 
+  Sun, 
+  Flame, 
+  Gauge,
+  DeviceMobile,
+  Lightbulb,
+  Info
+} from '@phosphor-icons/react'
+import type { VerbruikData } from '@/types/calculator'
+
+const verbruikSchema = z.object({
+  elektriciteitNormaal: z.number().min(1, 'Vul je verbruik in'),
+  elektriciteitDal: z.number().nullable(),
+  heeftEnkeleMeter: z.boolean(),
+  heeftZonnepanelen: z.boolean(),
+  terugleveringJaar: z.number().nullable(),
+  gasJaar: z.number().nullable(),
+  geenGasaansluiting: z.boolean(),
+  meterType: z.enum(['slim', 'oud', 'weet_niet']),
+})
 
 export function QuickCalculator() {
   const router = useRouter()
-  const [step, setStep] = useState<1 | 2>(1)
-  const [formData, setFormData] = useState({
-    stroomVerbruik: '',
-    gasVerbruik: '',
-    typeBedrijf: 'mkb' as 'mkb' | 'groot' | 'klein',
+  const { setVerbruik } = useCalculatorStore()
+  
+  // State
+  const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
+  const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
+  const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
+  const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
+  
+  // Adres state
+  const [leveringsadressen, setLeveringsadressen] = useState([{
+    postcode: '',
+    huisnummer: '',
+    toevoeging: '',
+    straat: '',
+    plaats: '',
+  }])
+  const [loadingAddress, setLoadingAddress] = useState(false)
+  
+  // Debounce refs
+  const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(verbruikSchema),
+    defaultValues: {
+      heeftEnkeleMeter: false,
+      heeftZonnepanelen: false,
+      geenGasaansluiting: false,
+      meterType: 'weet_niet' as const,
+    },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (step === 1 && formData.stroomVerbruik && formData.gasVerbruik) {
-      setStep(2)
-    } else if (step === 2) {
-      // Store data in localStorage for results page
-      const quickCalcData = {
-        verbruik: {
-          elektriciteitJaar: parseInt(formData.stroomVerbruik),
-          gasJaar: parseInt(formData.gasVerbruik),
-          postcode: '0000 XX', // Default postcode for quick calc
-          geschat: true,
-        },
-        bedrijfsgegevens: {
-          typeBedrijf: formData.typeBedrijf,
-        },
-        voorkeuren: {
-          type: 'vast' as const,
-          groeneEnergie: false,
-        },
-        fromQuickCalc: true,
-      }
-      
-      localStorage.setItem('quickcalc-data', JSON.stringify(quickCalcData))
-      
-      // Navigate directly to results with query params
-      router.push(`/calculator/resultaten?quick=true&stroom=${formData.stroomVerbruik}&gas=${formData.gasVerbruik}&type=${formData.typeBedrijf}`)
+  // Address lookup (simplified for quick calc - only first address)
+  const handleAddressChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
+    const newAdres = { ...leveringsadressen[0] }
+    newAdres[field] = value
+    
+    // Clear address when input changes
+    if (newAdres.straat || newAdres.plaats) {
+      newAdres.straat = ''
+      newAdres.plaats = ''
+    }
+    
+    setLeveringsadressen([newAdres])
+    
+    // Clear existing timeout
+    if (addressTimeoutRef.current) {
+      clearTimeout(addressTimeoutRef.current)
+    }
+    
+    // Debounce address lookup
+    const postcodeComplete = newAdres.postcode.length === 6
+    const hasHuisnummer = newAdres.huisnummer.trim().length > 0
+    
+    if (postcodeComplete && hasHuisnummer) {
+      addressTimeoutRef.current = setTimeout(() => {
+        fetchAddress(newAdres.postcode, newAdres.huisnummer, newAdres.toevoeging)
+      }, 800)
     }
   }
 
-  const calculateEstimatedSavings = () => {
-    const stroom = parseInt(formData.stroomVerbruik) || 0
-    const gas = parseInt(formData.gasVerbruik) || 0
-    const total = (stroom * 0.28 + gas * 1.15) / 1000
-    return Math.round(total * 0.35) // Estimate 35% savings
+  const fetchAddress = async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    setLoadingAddress(true)
+    
+    try {
+      const url = `/api/postcode?postcode=${encodeURIComponent(postcode)}&number=${encodeURIComponent(huisnummer)}${toevoeging ? `&addition=${encodeURIComponent(toevoeging)}` : ''}`
+      const response = await fetch(url)
+      const data = await response.json()
+      
+      if (response.ok && data.straat && data.plaats) {
+        setLeveringsadressen([{
+          ...leveringsadressen[0],
+          straat: data.straat,
+          plaats: data.plaats,
+        }])
+      }
+    } catch (error) {
+      // Silent fail for quick calc
+    } finally {
+      setLoadingAddress(false)
+    }
   }
 
+  const onSubmit = handleSubmit((data) => {
+    // Prepare verbruik data exactly like VerbruikForm
+    const verbruikData: VerbruikData = {
+      leveringsadressen: leveringsadressen.filter(a => a.postcode && a.huisnummer),
+      elektriciteitNormaal: data.elektriciteitNormaal,
+      elektriciteitDal: data.elektriciteitDal,
+      heeftEnkeleMeter: data.heeftEnkeleMeter,
+      gasJaar: data.gasJaar,
+      geenGasaansluiting: data.geenGasaansluiting,
+      heeftZonnepanelen: data.heeftZonnepanelen,
+      terugleveringJaar: data.terugleveringJaar,
+      meterType: data.meterType,
+      geschat: false, // User filled in actual data
+    }
+    
+    // Store in Zustand (same as VerbruikForm)
+    setVerbruik(verbruikData)
+    
+    // Navigate to results (same as VerbruikForm)
+    router.push('/calculator/resultaten')
+  })
+
   return (
-    <div className="bg-white rounded-2xl p-4 md:p-6 lg:p-8 shadow-xl border border-gray-100 w-full">
+    <div className="bg-white rounded-2xl p-4 md:p-5 lg:p-6 shadow-xl border border-gray-100 w-full max-h-[85vh] lg:max-h-none overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 md:w-12 md:h-12 bg-brand-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-5">
+        <div className="w-10 h-10 md:w-11 md:h-11 bg-brand-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
           <Lightning weight="duotone" className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </div>
         <div>
-          <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Bereken je besparing</h3>
-          <p className="text-xs md:text-sm text-gray-600">Gratis en vrijblijvend</p>
+          <h3 className="text-base md:text-lg lg:text-xl font-bold text-brand-navy-500">Bereken je besparing</h3>
+          <p className="text-xs text-gray-600">Gratis en vrijblijvend</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
-        {step === 1 && (
-          <>
-            {/* Energy consumption inputs */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-brand-navy-500 mb-2">
-                  Jaarverbruik stroom (kWh)
-                </label>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={formData.stroomVerbruik}
-                  onChange={(e) => setFormData({ ...formData, stroomVerbruik: e.target.value })}
-                  placeholder="Bijv. 50000"
-                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-brand-navy-500 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1.5">Te vinden op je jaarnota</p>
-              </div>
+      <form onSubmit={onSubmit} className="space-y-3 md:space-y-4">
+        {/* Leveringsadres */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600" />
+            <label className="text-xs md:text-sm font-semibold text-brand-navy-500">
+              Leveradres <span className="text-red-500">*</span>
+            </label>
+          </div>
+          
+          <div className="grid grid-cols-6 gap-1.5 md:gap-2">
+            <div className="col-span-3">
+              <input
+                type="text"
+                value={leveringsadressen[0].postcode}
+                onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
+                placeholder="1234AB"
+                maxLength={6}
+                className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
+                required
+              />
+            </div>
+            <div className="col-span-2">
+              <input
+                type="text"
+                value={leveringsadressen[0].huisnummer}
+                onChange={(e) => handleAddressChange('huisnummer', e.target.value)}
+                placeholder="12"
+                className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
+                required
+              />
+            </div>
+            <div className="col-span-1">
+              <input
+                type="text"
+                value={leveringsadressen[0].toevoeging || ''}
+                onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
+                placeholder="A"
+                maxLength={4}
+                className="w-full px-1 md:px-2 py-2 text-xs md:text-sm text-center rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
+              />
+            </div>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-brand-navy-500 mb-2">
-                  Jaarverbruik gas (m³)
-                </label>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={formData.gasVerbruik}
-                  onChange={(e) => setFormData({ ...formData, gasVerbruik: e.target.value })}
-                  placeholder="Bijv. 20000"
-                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-brand-navy-500 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1.5">Te vinden op je jaarnota</p>
+          {loadingAddress && (
+            <div className="flex items-center gap-2 text-xs text-brand-teal-600">
+              <div className="w-3 h-3 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+              <span>Adres opzoeken...</span>
+            </div>
+          )}
+
+          {leveringsadressen[0].straat && leveringsadressen[0].plaats && !loadingAddress && (
+            <div className="flex items-start gap-2 p-2 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
+              <CheckCircle weight="duotone" className="w-4 h-4 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-brand-teal-900">
+                <div className="font-semibold">
+                  {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
+                </div>
+                <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
               </div>
             </div>
+          )}
+        </div>
 
-            <button
-              type="submit"
-              className="w-full group relative px-6 py-3.5 bg-brand-teal-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:bg-brand-teal-600 transition-all duration-300"
-            >
-              <span className="flex items-center justify-center gap-2">
-                Volgende stap
-                <ArrowRight weight="bold" className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </button>
-          </>
-        )}
+        {/* Elektriciteit */}
+        <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-2.5 md:p-3 space-y-2 md:space-y-3">
+          <div className="flex items-center gap-2">
+            <Lightning weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600" />
+            <label className="text-xs md:text-sm font-semibold text-brand-navy-500">
+              Elektriciteit
+            </label>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-brand-navy-500 mb-1">
+                {heeftEnkeleMeter ? 'Totaal' : 'Normaal'} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  {...register('elektriciteitNormaal', { valueAsNumber: true })}
+                  placeholder="3500"
+                  className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                />
+                <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
+              </div>
+              {errors.elektriciteitNormaal && (
+                <p className="mt-1 text-xs text-red-600">{errors.elektriciteitNormaal.message}</p>
+              )}
+            </div>
 
-        {step === 2 && (
-          <>
-            {/* Estimated savings display */}
-            <div className="bg-brand-teal-50 border-2 border-brand-teal-500 rounded-xl p-5 md:p-6 mb-5">
-              <div className="flex items-center gap-3 mb-2">
-                <TrendUp weight="duotone" className="w-7 h-7 md:w-8 md:h-8 text-brand-teal-600" />
-                <div>
-                  <p className="text-xs md:text-sm text-brand-navy-600 font-medium">Geschatte besparing per jaar</p>
-                  <p className="text-3xl md:text-4xl font-bold text-brand-teal-600">€{calculateEstimatedSavings().toLocaleString()}</p>
+            {!heeftEnkeleMeter && (
+              <div className="animate-slide-down">
+                <label className="block text-xs font-semibold text-brand-navy-500 mb-1">
+                  Dal <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    {...register('elektriciteitDal', { valueAsNumber: true })}
+                    placeholder="2500"
+                    className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  />
+                  <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-600">*Gebaseerd op gemiddelde marktprijzen</p>
-            </div>
+            )}
+          </div>
 
-            {/* Business type selection */}
+          <label className="flex items-start gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={heeftEnkeleMeter}
+              onChange={(e) => {
+                setHeeftEnkeleMeter(e.target.checked)
+                setValue('heeftEnkeleMeter', e.target.checked)
+                if (e.target.checked) {
+                  setValue('elektriciteitDal', null)
+                }
+              }}
+              className="w-4 h-4 mt-0.5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 flex-shrink-0"
+            />
+            <span className="text-xs font-medium text-brand-navy-500">Enkele meter (geen dag/nacht tarief)</span>
+          </label>
+        </div>
+
+        {/* Zonnepanelen */}
+        <label className="flex items-center gap-2 md:gap-3 cursor-pointer p-2.5 md:p-3 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
+          <input
+            type="checkbox"
+            checked={heeftZonnepanelen}
+            onChange={(e) => {
+              setHeeftZonnepanelen(e.target.checked)
+              setValue('heeftZonnepanelen', e.target.checked)
+              if (!e.target.checked) {
+                setValue('terugleveringJaar', null)
+              }
+            }}
+            className="w-4 h-4 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 flex-shrink-0"
+          />
+          <Sun weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0" />
+          <span className="text-xs md:text-sm font-semibold text-brand-navy-500">Wij hebben zonnepanelen</span>
+        </label>
+
+        {heeftZonnepanelen && (
+          <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-2.5 md:p-3 animate-slide-down">
+            <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
+              Teruglevering per jaar <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                {...register('terugleveringJaar', { valueAsNumber: true })}
+                placeholder="3000"
+                className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+              />
+              <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
+            </div>
+          </div>
+        )}
+
+        {/* Gas */}
+        <div className="space-y-2">
+          {!geenGasaansluiting && (
             <div>
-              <label className="block text-sm font-medium text-brand-navy-500 mb-3">
-                Type bedrijf
+              <label className="block text-xs md:text-sm font-semibold text-brand-navy-500 mb-1.5">
+                <Flame weight="duotone" className="w-4 h-4 md:w-5 md:h-5 inline mr-1.5 text-brand-teal-600" />
+                Gasverbruik per jaar <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2 md:gap-3">
-                {[
-                  { value: 'klein', label: 'Klein', subtitle: '< 20' },
-                  { value: 'mkb', label: 'MKB', subtitle: '20-250' },
-                  { value: 'groot', label: 'Groot', subtitle: '> 250' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, typeBedrijf: option.value as any })}
-                    className={`p-3 rounded-lg border-2 transition-all ${
-                      formData.typeBedrijf === option.value
-                        ? 'border-brand-teal-500 bg-brand-teal-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-brand-navy-500 font-semibold text-sm">{option.label}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{option.subtitle}</div>
-                  </button>
-                ))}
+              <div className="relative">
+                <input
+                  type="number"
+                  {...register('gasJaar', { valueAsNumber: true })}
+                  placeholder="1200"
+                  className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                />
+                <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">m³</span>
               </div>
             </div>
+          )}
 
-            {/* Final CTA */}
-            <button
-              type="submit"
-              className="w-full group relative px-6 py-3.5 bg-brand-teal-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:bg-brand-teal-600 transition-all duration-300"
-            >
-              <span className="flex items-center justify-center gap-2">
-                Bekijk jouw aanbiedingen
-                <CheckCircle weight="duotone" className="w-5 h-5" />
-              </span>
-            </button>
+          <label className="flex items-start gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors border-2 border-gray-200">
+            <input
+              type="checkbox"
+              checked={geenGasaansluiting}
+              onChange={(e) => {
+                setGeenGasaansluiting(e.target.checked)
+                setValue('geenGasaansluiting', e.target.checked)
+                if (e.target.checked) {
+                  setValue('gasJaar', null)
+                }
+              }}
+              className="w-4 h-4 mt-0.5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 flex-shrink-0"
+            />
+            <span className="text-xs font-medium text-brand-navy-500">Geen gasaansluiting</span>
+          </label>
+        </div>
 
-            {/* Back button */}
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="w-full text-sm text-gray-600 hover:text-brand-navy-500 transition-colors py-2"
-            >
-              ← Terug naar verbruik
-            </button>
-          </>
-        )}
+        {/* Metertype */}
+        <div>
+          <label className="block text-xs md:text-sm font-semibold text-brand-navy-500 mb-1.5">
+            <Gauge weight="duotone" className="w-4 h-4 md:w-5 md:h-5 inline mr-1.5 text-brand-teal-600" />
+            Type meter
+          </label>
+          <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+            {[
+              { value: 'slim', label: 'Slim', icon: DeviceMobile },
+              { value: 'oud', label: 'Oud', icon: Gauge },
+              { value: 'weet_niet', label: 'Weet niet', icon: CheckCircle },
+            ].map((option) => {
+              const Icon = option.icon
+              const isSelected = meterType === option.value
+              
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setMeterType(option.value as any)
+                    setValue('meterType', option.value as any)
+                  }}
+                  className={`p-2 md:p-2.5 rounded-lg border-2 transition-all ${
+                    isSelected
+                      ? 'border-brand-teal-500 bg-brand-teal-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <Icon weight="duotone" className={`w-5 h-5 md:w-6 md:h-6 mx-auto mb-1 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`} />
+                  <div className={`text-xs font-semibold truncate ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
+                    {option.label}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          className="w-full group relative px-5 md:px-6 py-3 md:py-3.5 bg-brand-teal-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:bg-brand-teal-600 transition-all duration-300"
+        >
+          <span className="flex items-center justify-center gap-2">
+            <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="text-sm md:text-base">Bekijk mijn aanbiedingen</span>
+          </span>
+        </button>
+        <p className="text-center text-xs text-gray-500">
+          100% vrijblijvend • Direct resultaat
+        </p>
       </form>
 
       {/* Trust indicators */}
-      <div className="mt-5 pt-5 border-t border-gray-200">
+      <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200">
         <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="flex flex-col items-center gap-1.5 text-gray-600">
-            <CheckCircle weight="fill" className="w-4 h-4 text-brand-teal-500" />
-            <span className="text-center leading-tight">100% gratis</span>
+          <div className="flex flex-col items-center gap-1 md:gap-1.5 text-gray-600">
+            <CheckCircle weight="fill" className="w-3.5 h-3.5 md:w-4 md:h-4 text-brand-teal-500" />
+            <span className="text-center leading-tight text-[10px] md:text-xs">100% gratis</span>
           </div>
-          <div className="flex flex-col items-center gap-1.5 text-gray-600">
-            <CheckCircle weight="fill" className="w-4 h-4 text-brand-teal-500" />
-            <span className="text-center leading-tight">Geen verplichtingen</span>
+          <div className="flex flex-col items-center gap-1 md:gap-1.5 text-gray-600">
+            <CheckCircle weight="fill" className="w-3.5 h-3.5 md:w-4 md:h-4 text-brand-teal-500" />
+            <span className="text-center leading-tight text-[10px] md:text-xs">Geen verplichtingen</span>
           </div>
-          <div className="flex flex-col items-center gap-1.5 text-gray-600">
-            <CheckCircle weight="fill" className="w-4 h-4 text-brand-teal-500" />
-            <span className="text-center leading-tight">Privacy veilig</span>
+          <div className="flex flex-col items-center gap-1 md:gap-1.5 text-gray-600">
+            <CheckCircle weight="fill" className="w-3.5 h-3.5 md:w-4 md:h-4 text-brand-teal-500" />
+            <span className="text-center leading-tight text-[10px] md:text-xs">Privacy veilig</span>
           </div>
         </div>
       </div>
     </div>
   )
 }
-
