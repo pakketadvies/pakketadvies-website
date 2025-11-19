@@ -23,13 +23,38 @@ import type { VerbruikData } from '@/types/calculator'
 
 const verbruikSchema = z.object({
   elektriciteitNormaal: z.number().min(1, 'Vul je verbruik in'),
-  elektriciteitDal: z.number().nullable(),
+  elektriciteitDal: z.number().nullable().optional(),
   heeftEnkeleMeter: z.boolean(),
   heeftZonnepanelen: z.boolean(),
-  terugleveringJaar: z.number().nullable(),
-  gasJaar: z.number().nullable(),
+  terugleveringJaar: z.number().nullable().optional(),
+  gasJaar: z.number().nullable().optional(),
   geenGasaansluiting: z.boolean(),
   meterType: z.enum(['slim', 'oud', 'weet_niet']),
+}).refine((data) => {
+  // Als enkele meter, dan dal niet verplicht
+  if (data.heeftEnkeleMeter) return true
+  // Anders moet dal ingevuld zijn
+  return data.elektriciteitDal !== null && data.elektriciteitDal !== undefined && data.elektriciteitDal > 0
+}, {
+  message: 'Vul dal tarief in of vink "enkele meter" aan',
+  path: ['elektriciteitDal'],
+}).refine((data) => {
+  // Als zonnepanelen, dan teruglevering verplicht
+  if (data.heeftZonnepanelen) {
+    return data.terugleveringJaar !== null && data.terugleveringJaar !== undefined && data.terugleveringJaar > 0
+  }
+  return true
+}, {
+  message: 'Vul teruglevering in',
+  path: ['terugleveringJaar'],
+}).refine((data) => {
+  // Als geen gasaansluiting, dan gas niet verplicht
+  if (data.geenGasaansluiting) return true
+  // Anders moet gas ingevuld zijn
+  return data.gasJaar !== null && data.gasJaar !== undefined && data.gasJaar > 0
+}, {
+  message: 'Vul gasverbruik in of vink "geen gasaansluiting" aan',
+  path: ['gasJaar'],
 })
 
 export function QuickCalculator() {
@@ -132,12 +157,12 @@ export function QuickCalculator() {
     const verbruikData: VerbruikData = {
       leveringsadressen: leveringsadressen.filter(a => a.postcode && a.huisnummer),
       elektriciteitNormaal: data.elektriciteitNormaal,
-      elektriciteitDal: data.elektriciteitDal,
+      elektriciteitDal: data.elektriciteitDal ?? null,
       heeftEnkeleMeter: data.heeftEnkeleMeter,
-      gasJaar: data.gasJaar,
+      gasJaar: data.gasJaar ?? null,
       geenGasaansluiting: data.geenGasaansluiting,
       heeftZonnepanelen: data.heeftZonnepanelen,
-      terugleveringJaar: data.terugleveringJaar,
+      terugleveringJaar: data.terugleveringJaar ?? null,
       meterType: data.meterType,
       geschat: false, // User filled in actual data
     }
@@ -268,9 +293,16 @@ export function QuickCalculator() {
                   />
                   <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
                 </div>
+                {errors.elektriciteitDal && (
+                  <p className="mt-1 text-xs text-red-600">{errors.elektriciteitDal.message}</p>
+                )}
               </div>
             )}
           </div>
+
+          {errors.elektriciteitDal && heeftEnkeleMeter && (
+            <p className="text-xs text-red-600">{errors.elektriciteitDal.message}</p>
+          )}
 
           <label className="flex items-start gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
             <input
@@ -321,6 +353,9 @@ export function QuickCalculator() {
               />
               <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
             </div>
+            {errors.terugleveringJaar && (
+              <p className="mt-1.5 text-xs text-red-600">{errors.terugleveringJaar.message}</p>
+            )}
           </div>
         )}
 
@@ -341,7 +376,14 @@ export function QuickCalculator() {
                 />
                 <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">m³</span>
               </div>
+              {errors.gasJaar && (
+                <p className="mt-1.5 text-xs text-red-600">{errors.gasJaar.message}</p>
+              )}
             </div>
+          )}
+
+          {errors.gasJaar && geenGasaansluiting && (
+            <p className="text-xs text-red-600">{errors.gasJaar.message}</p>
           )}
 
           <label className="flex items-start gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors border-2 border-gray-200">
