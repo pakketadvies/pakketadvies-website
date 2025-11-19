@@ -350,7 +350,7 @@ export function VerbruikForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
       {/* Leveringsadres */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-4">
@@ -378,8 +378,9 @@ export function VerbruikForm() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
+            {/* Desktop: compactere grid */}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div className="md:col-span-3">
                 <Input
                   label="Postcode"
                   type="text"
@@ -390,23 +391,27 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <Input
-                label="Huisnummer"
-                type="text"
-                value={adres.huisnummer}
-                onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
-                placeholder="12"
-                error={errors.leveringsadressen?.[index]?.huisnummer?.message}
-                required
-              />
-              <Input
-                label="Toevoeging"
-                type="text"
-                value={adres.toevoeging || ''}
-                onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
-                placeholder="A"
-                error={errors.leveringsadressen?.[index]?.toevoeging?.message}
-              />
+              <div className="md:col-span-2">
+                <Input
+                  label="Huisnummer"
+                  type="text"
+                  value={adres.huisnummer}
+                  onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
+                  placeholder="12"
+                  error={errors.leveringsadressen?.[index]?.huisnummer?.message}
+                  required
+                />
+              </div>
+              <div className="md:col-span-1">
+                <Input
+                  label="Toev."
+                  type="text"
+                  value={adres.toevoeging || ''}
+                  onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
+                  placeholder="A"
+                  error={errors.leveringsadressen?.[index]?.toevoeging?.message}
+                />
+              </div>
             </div>
 
             {loadingAddresses[index] && (
@@ -464,48 +469,51 @@ export function VerbruikForm() {
           </button>
         </div>
 
-        <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-              {heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                {...register('elektriciteitNormaal', { valueAsNumber: true })}
-                placeholder="Bijv. 3500"
-                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                kWh
-              </span>
-            </div>
-            {errors.elektriciteitNormaal && (
-              <p className="mt-2 text-sm text-red-600">{errors.elektriciteitNormaal.message}</p>
-            )}
-          </div>
-
-          {!heeftEnkeleMeter && (
-            <div className="animate-slide-down">
+        <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-4 md:space-y-6">
+          {/* Desktop: grid voor normaal + dal naast elkaar */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div>
               <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                Dal tarief (nacht/weekend) <span className="text-red-500">*</span>
+                {heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="number"
-                  {...register('elektriciteitDal', { valueAsNumber: true })}
-                  placeholder="Bijv. 2500"
+                  {...register('elektriciteitNormaal', { valueAsNumber: true })}
+                  placeholder="Bijv. 3500"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
                   kWh
                 </span>
               </div>
-              {errors.elektriciteitDal && (
-                <p className="mt-2 text-sm text-red-600">{errors.elektriciteitDal.message}</p>
+              {errors.elektriciteitNormaal && (
+                <p className="mt-2 text-sm text-red-600">{errors.elektriciteitNormaal.message}</p>
               )}
             </div>
-          )}
+
+            {!heeftEnkeleMeter && (
+              <div className="animate-slide-down">
+                <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                  Dal tarief (nacht/weekend) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    {...register('elektriciteitDal', { valueAsNumber: true })}
+                    placeholder="Bijv. 2500"
+                    className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                    kWh
+                  </span>
+                </div>
+                {errors.elektriciteitDal && (
+                  <p className="mt-2 text-sm text-red-600">{errors.elektriciteitDal.message}</p>
+                )}
+              </div>
+            )}
+          </div>
 
           <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-white/50 transition-colors">
             <input
@@ -540,7 +548,7 @@ export function VerbruikForm() {
         </div>
       </div>
 
-      {/* Zonnepanelen */}
+      {/* Zonnepanelen - Desktop: checkbox + input naast elkaar */}
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-5 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
           <input
@@ -562,29 +570,31 @@ export function VerbruikForm() {
         </label>
 
         {heeftZonnepanelen && (
-          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
-            <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-              Teruglevering per jaar <span className="text-red-500">*</span>
-            </label>
-            <div className="relative mb-4">
-              <input
-                type="number"
-                {...register('terugleveringJaar', { valueAsNumber: true })}
-                placeholder="Bijv. 3000"
-                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                kWh
-              </span>
+          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                Teruglevering per jaar <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  {...register('terugleveringJaar', { valueAsNumber: true })}
+                  placeholder="Bijv. 3000"
+                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                  kWh
+                </span>
+              </div>
+              {errors.terugleveringJaar && (
+                <p className="mt-2 text-sm text-red-600">{errors.terugleveringJaar.message}</p>
+              )}
             </div>
-            {errors.terugleveringJaar && (
-              <p className="mb-3 text-sm text-red-600">{errors.terugleveringJaar.message}</p>
-            )}
             
             <button
               type="button"
               onClick={() => setShowHelpSchatten(true)}
-              className="mb-3 text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium underline inline-flex items-center gap-1"
+              className="text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium underline inline-flex items-center gap-1"
             >
               <Lightbulb weight="duotone" className="w-4 h-4" />
               Weet je het niet? Laat ons het schatten
@@ -601,7 +611,7 @@ export function VerbruikForm() {
         )}
       </div>
 
-      {/* Gasverbruik */}
+      {/* Gasverbruik - Desktop: compacter */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
@@ -613,50 +623,52 @@ export function VerbruikForm() {
           </div>
         </div>
 
-        {!geenGasaansluiting && (
-          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
-            <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-              Gasverbruik per jaar <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                {...register('gasJaar', { valueAsNumber: true })}
-                placeholder="Bijv. 1200"
-                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                m³
-              </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {!geenGasaansluiting && (
+            <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
+              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                Gasverbruik per jaar <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  {...register('gasJaar', { valueAsNumber: true })}
+                  placeholder="Bijv. 1200"
+                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                  m³
+                </span>
+              </div>
+              {errors.gasJaar && (
+                <p className="mt-2 text-sm text-red-600">{errors.gasJaar.message}</p>
+              )}
             </div>
-            {errors.gasJaar && (
-              <p className="mt-2 text-sm text-red-600">{errors.gasJaar.message}</p>
-            )}
-          </div>
-        )}
+          )}
 
-        <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
-          <input
-            type="checkbox"
-            checked={geenGasaansluiting}
-            onChange={(e) => {
-              setGeenGasaansluiting(e.target.checked)
-              setValue('geenGasaansluiting', e.target.checked)
-              if (e.target.checked) {
-                setValue('gasJaar', null)
-              }
-            }}
-            className="w-5 h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
-          />
-          <div>
-            <span className="text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
-              Wij hebben geen gasaansluiting
-            </span>
-            <p className="text-xs text-gray-600 mt-0.5">
-              Bijvoorbeeld bij volledig elektrisch verwarmen
-            </p>
-          </div>
-        </label>
+          <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
+            <input
+              type="checkbox"
+              checked={geenGasaansluiting}
+              onChange={(e) => {
+                setGeenGasaansluiting(e.target.checked)
+                setValue('geenGasaansluiting', e.target.checked)
+                if (e.target.checked) {
+                  setValue('gasJaar', null)
+                }
+              }}
+              className="w-5 h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+            />
+            <div>
+              <span className="text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
+                Wij hebben geen gasaansluiting
+              </span>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Bijvoorbeeld bij volledig elektrisch verwarmen
+              </p>
+            </div>
+          </label>
+        </div>
       </div>
 
       {/* Meter type */}

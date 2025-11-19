@@ -511,42 +511,49 @@ export function BedrijfsgegevensForm() {
         </div>
       </div>
 
-      {/* Contactpersoon */}
-      <div>
-        <Input
-          label="Contactpersoon"
-          placeholder="Voor- en achternaam"
-          error={errors.contactpersoon?.message}
-          {...register('contactpersoon')}
-          required
-        />
-      </div>
+      {/* Contactgegevens - Desktop: grid layout */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Buildings weight="duotone" className="w-5 h-5 text-brand-navy-500" />
+          <h3 className="text-lg font-semibold text-brand-navy-500">Contactgegevens</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <Input
+              label="Contactpersoon"
+              placeholder="Voor- en achternaam"
+              error={errors.contactpersoon?.message}
+              {...register('contactpersoon')}
+              required
+            />
+          </div>
 
-      {/* Email */}
-      <div>
-        <Input
-          label="E-mailadres"
-          type="email"
-          placeholder="naam@bedrijf.nl"
-          error={errors.email?.message}
-          helpText="We sturen je advies hier naartoe"
-          {...register('email')}
-          required
-        />
-      </div>
+          <div>
+            <Input
+              label="E-mailadres"
+              type="email"
+              placeholder="naam@bedrijf.nl"
+              error={errors.email?.message}
+              helpText="We sturen je advies hier naartoe"
+              {...register('email')}
+              required
+            />
+          </div>
 
-      {/* Telefoon */}
-      <div>
-        <Input
-          label="Telefoonnummer"
-          type="tel"
-          inputMode="tel"
-          placeholder="06 12345678"
-          error={errors.telefoon?.message}
-          helpText="Voor eventuele vragen"
-          {...register('telefoon')}
-          required
-        />
+          <div>
+            <Input
+              label="Telefoonnummer"
+              type="tel"
+              inputMode="tel"
+              placeholder="06 12345678"
+              error={errors.telefoon?.message}
+              helpText="Voor eventuele vragen"
+              {...register('telefoon')}
+              required
+            />
+          </div>
+        </div>
       </div>
 
       {/* Type bedrijf */}

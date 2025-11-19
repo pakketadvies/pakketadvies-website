@@ -27,14 +27,15 @@ function CalculatorContent() {
   return (
     <div className="pt-32 pb-16">
       <div className="container-custom">
-        <div className="max-w-3xl mx-auto">
+        {/* Desktop: max-w-5xl voor meer horizontale ruimte, mobiel: max-w-3xl */}
+        <div className="max-w-3xl lg:max-w-5xl mx-auto">
           {/* Progress */}
           <div className="mb-8 md:mb-12">
             <ProgressBar currentStep={stap} totalSteps={TOTAL_STEPS} />
           </div>
 
-          {/* Form Card */}
-          <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-6 md:p-8 lg:p-12">
+          {/* Form Card - Desktop: compactere padding */}
+          <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-6 md:p-8 lg:p-10">
             {stap === 1 && <VerbruikForm />}
             {stap === 2 && <BedrijfsgegevensForm />}
           </div>
