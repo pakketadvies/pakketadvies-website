@@ -4,6 +4,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const postcode = searchParams.get('postcode')
   const number = searchParams.get('number')
+  const addition = searchParams.get('addition') // Toevoeging (optioneel)
 
   if (!postcode || !number) {
     return NextResponse.json(
@@ -27,7 +28,6 @@ export async function GET(request: NextRequest) {
 
   if (!apiKey) {
     console.error('POSTCODE_API_KEY not configured')
-    // Return success but with empty data so user can continue
     return NextResponse.json({
       street: '',
       city: '',
@@ -36,7 +36,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = `https://postcode.tech/api/v1/postcode?postcode=${encodeURIComponent(postcodeClean)}&number=${encodeURIComponent(number)}`
+    // Bouw URL met optionele toevoeging
+    let url = `https://postcode.tech/api/v1/postcode?postcode=${encodeURIComponent(postcodeClean)}&number=${encodeURIComponent(number)}`
+    if (addition && addition.trim()) {
+      url += `&addition=${encodeURIComponent(addition.trim())}`
+    }
     
     const response = await fetch(url, {
       headers: {
@@ -56,6 +60,18 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json()
+    
+    // BELANGRIJK: Als toevoeging is ingevuld, waarschuw dat we deze niet kunnen verifiëren
+    // De postcode.tech API negeert gewoon een ongeldige addition parameter
+    if (addition && addition.trim()) {
+      return NextResponse.json({
+        street: data.street || '',
+        city: data.city || '',
+        municipality: data.municipality || '',
+        province: data.province || '',
+        warning: `Let op: toevoeging '${addition}' kan niet geverifieerd worden. Controleer of dit adres correct is.`
+      })
+    }
     
     return NextResponse.json({
       street: data.street || '',

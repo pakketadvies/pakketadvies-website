@@ -110,9 +110,9 @@ export function VerbruikForm() {
   }
 
   // Fetch address - memoized met useCallback
-  const fetchAddress = useCallback(async (index: number, postcode: string, huisnummer: string) => {
+  const fetchAddress = useCallback(async (index: number, postcode: string, huisnummer: string, toevoeging?: string) => {
     // Check of dit dezelfde lookup is als de laatste (voorkom dubbele calls)
-    const lookupKey = `${postcode}-${huisnummer}`
+    const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
     if (lastLookup.current[index] === lookupKey) {
       return // Skip, we hebben dit al opgezocht
     }
@@ -123,7 +123,12 @@ export function VerbruikForm() {
     clearErrors(`leveringsadressen.${index}`)
     
     try {
-      const response = await fetch(`/api/postcode?postcode=${postcodeClean}&number=${huisnummer}`)
+      let url = `/api/postcode?postcode=${postcodeClean}&number=${huisnummer}`
+      if (toevoeging && toevoeging.trim()) {
+        url += `&addition=${encodeURIComponent(toevoeging.trim())}`
+      }
+      
+      const response = await fetch(url)
       
       if (response.ok) {
         const data = await response.json()
@@ -147,7 +152,15 @@ export function VerbruikForm() {
         
         setValue(`leveringsadressen.${index}.straat`, data.street || '')
         setValue(`leveringsadressen.${index}.plaats`, data.city || '')
-        clearErrors(`leveringsadressen.${index}`)
+        
+        // Als er een warning is (toevoeging niet gevonden), toon die
+        if (data.warning) {
+          setError(`leveringsadressen.${index}.toevoeging` as any, {
+            message: data.warning
+          })
+        } else {
+          clearErrors(`leveringsadressen.${index}`)
+        }
         
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
@@ -206,8 +219,8 @@ export function VerbruikForm() {
     setLeveringsadressen(prev => {
       const updated = [...prev]
       
-      // Als postcode of huisnummer wijzigt, clear de oude adres data EN lookup key
-      if (field === 'postcode' || field === 'huisnummer') {
+      // Als postcode, huisnummer OF toevoeging wijzigt, clear de oude adres data EN lookup key
+      if (field === 'postcode' || field === 'huisnummer' || field === 'toevoeging') {
         updated[index] = {
           ...updated[index],
           [field]: value,
@@ -234,19 +247,20 @@ export function VerbruikForm() {
       delete debounceTimers.current[index]
     }
 
-    // Alleen API call als beide velden ingevuld zijn
-    if (field === 'postcode' || field === 'huisnummer') {
+    // Alleen API call als beide velden ingevuld zijn (postcode + huisnummer, toevoeging is optioneel)
+    if (field === 'postcode' || field === 'huisnummer' || field === 'toevoeging') {
       // Haal huidige waarden op
       const currentAdres = leveringsadressen[index]
       const postcode = field === 'postcode' ? value : currentAdres.postcode
       const huisnummer = field === 'huisnummer' ? value : currentAdres.huisnummer
+      const toevoeging = field === 'toevoeging' ? value : currentAdres.toevoeging
       
-      // Check of beide ingevuld zijn EN postcode is geldig
+      // Check of beide verplichte velden ingevuld zijn EN postcode is geldig
       if (postcode && huisnummer && postcode.length >= 6 && huisnummer.length >= 1) {
         if (isValidPostcode(postcode)) {
           // Start debounce timer (800ms om zeker te zijn dat gebruiker klaar is)
           debounceTimers.current[index] = setTimeout(() => {
-            fetchAddress(index, postcode, huisnummer)
+            fetchAddress(index, postcode, huisnummer, toevoeging)
           }, 800)
         }
       }
@@ -351,6 +365,7 @@ export function VerbruikForm() {
                 value={adres.toevoeging || ''}
                 onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
                 placeholder="A"
+                error={errors.leveringsadressen?.[index]?.toevoeging?.message}
               />
             </div>
 
@@ -366,7 +381,7 @@ export function VerbruikForm() {
                 <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-brand-teal-900">
                   <div className="font-semibold">
-                    {adres.straat} {adres.huisnummer}{adres.toevoeging ? `-${adres.toevoeging}` : ''}
+                    {adres.straat} {adres.huisnummer}
                   </div>
                   <div>{adres.postcode} {adres.plaats}</div>
                 </div>
