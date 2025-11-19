@@ -250,7 +250,7 @@ export function QuickCalculator() {
       </div>
 
       <form onSubmit={onSubmit} className="space-y-2.5 md:space-y-4">
-        {/* Leveringsadres - EXACT zoals VerbruikForm */}
+        {/* Leveringsadres */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600" />
@@ -259,7 +259,8 @@ export function QuickCalculator() {
             </label>
           </div>
           
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-2 md:p-4 space-y-2 md:space-y-3">
+          {/* Mobiel: geen extra container, desktop: wel grijze container */}
+          <div className="md:bg-gray-50 md:border-2 md:border-gray-200 md:rounded-xl md:p-4 space-y-2 md:space-y-3">
             <div className="grid grid-cols-6 gap-2">
               <div className="col-span-3">
                 <label className="block text-xs font-medium text-gray-700 mb-0.5">Postcode</label>
@@ -327,8 +328,8 @@ export function QuickCalculator() {
           </div>
         </div>
 
-        {/* Elektriciteit */}
-        <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-2.5 md:p-3 space-y-2 md:space-y-3">
+        {/* Elektriciteit - mobiel: geen container, desktop: teal container */}
+        <div className="md:bg-brand-teal-50/50 md:border-2 md:border-brand-teal-200 md:rounded-xl md:p-3 space-y-2 md:space-y-3">
           <div className="flex items-center gap-2">
             <Lightning weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600" />
             <label className="text-xs md:text-sm font-semibold text-brand-navy-500">
@@ -397,8 +398,8 @@ export function QuickCalculator() {
           </label>
         </div>
 
-        {/* Zonnepanelen */}
-        <label className="flex items-center gap-2 md:gap-3 cursor-pointer p-2.5 md:p-3 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
+        {/* Zonnepanelen - mobiel: simpel, desktop: teal box */}
+        <label className="flex items-center gap-2 md:gap-3 cursor-pointer p-2 md:p-3 md:bg-brand-teal-50 md:border-2 md:border-brand-teal-200 md:rounded-xl md:hover:border-brand-teal-300 transition-all">
           <input
             type="checkbox"
             checked={heeftZonnepanelen}
@@ -416,7 +417,7 @@ export function QuickCalculator() {
         </label>
 
         {heeftZonnepanelen && (
-          <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-2.5 md:p-3 animate-slide-down">
+          <div className="md:bg-brand-teal-50 md:border-2 md:border-brand-teal-200 md:rounded-xl md:p-3 animate-slide-down">
             <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
               Teruglevering per jaar <span className="text-red-500">*</span>
             </label>
