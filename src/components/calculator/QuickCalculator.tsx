@@ -167,58 +167,63 @@ export function QuickCalculator() {
             </label>
           </div>
           
-          <div className="grid grid-cols-6 gap-1.5 md:gap-2">
-            <div className="col-span-3">
-              <input
-                type="text"
-                value={leveringsadressen[0].postcode}
-                onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
-                placeholder="1234AB"
-                maxLength={6}
-                className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
-                required
-              />
-            </div>
-            <div className="col-span-2">
-              <input
-                type="text"
-                value={leveringsadressen[0].huisnummer}
-                onChange={(e) => handleAddressChange('huisnummer', e.target.value)}
-                placeholder="12"
-                className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
-                required
-              />
-            </div>
-            <div className="col-span-1">
-              <input
-                type="text"
-                value={leveringsadressen[0].toevoeging || ''}
-                onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
-                placeholder="A"
-                maxLength={4}
-                className="w-full px-1 md:px-2 py-2 text-xs md:text-sm text-center rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
-              />
-            </div>
-          </div>
-
-          {loadingAddress && (
-            <div className="flex items-center gap-2 text-xs text-brand-teal-600">
-              <div className="w-3 h-3 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-              <span>Adres opzoeken...</span>
-            </div>
-          )}
-
-          {leveringsadressen[0].straat && leveringsadressen[0].plaats && !loadingAddress && (
-            <div className="flex items-start gap-2 p-2 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
-              <CheckCircle weight="duotone" className="w-4 h-4 text-brand-teal-600 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-brand-teal-900">
-                <div className="font-semibold">
-                  {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
-                </div>
-                <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
+          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3 md:p-4 space-y-3">
+            <div className="grid grid-cols-6 gap-2">
+              <div className="col-span-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Postcode</label>
+                <input
+                  type="text"
+                  value={leveringsadressen[0].postcode}
+                  onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
+                  placeholder="1234AB"
+                  maxLength={6}
+                  className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  required
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nr.</label>
+                <input
+                  type="text"
+                  value={leveringsadressen[0].huisnummer}
+                  onChange={(e) => handleAddressChange('huisnummer', e.target.value)}
+                  placeholder="12"
+                  className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  required
+                />
+              </div>
+              <div className="col-span-1">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Toev.</label>
+                <input
+                  type="text"
+                  value={leveringsadressen[0].toevoeging || ''}
+                  onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
+                  placeholder="A"
+                  maxLength={4}
+                  className="w-full px-1 md:px-2 py-2 text-xs md:text-sm text-center rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                />
               </div>
             </div>
-          )}
+
+            {loadingAddress && (
+              <div className="flex items-center gap-2 text-xs text-brand-teal-600 animate-slide-down">
+                <div className="w-3 h-3 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+                <span>Adres opzoeken...</span>
+              </div>
+            )}
+
+            {leveringsadressen[0].straat && leveringsadressen[0].plaats && !loadingAddress && (
+              <div className="flex items-start gap-2 p-2 md:p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
+                <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs md:text-sm text-brand-teal-900">
+                  <div className="font-semibold">
+                    {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
+                  </div>
+                  <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Elektriciteit */}
