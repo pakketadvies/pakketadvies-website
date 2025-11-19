@@ -388,6 +388,7 @@ export function VerbruikForm() {
                   onChange={(e) => handleLeveringsadresChange(index, 'postcode', e.target.value)}
                   placeholder="1234 AB"
                   error={errors.leveringsadressen?.[index]?.postcode?.message}
+                  autoFocus={index === 0}
                   required
                 />
               </div>
@@ -395,6 +396,8 @@ export function VerbruikForm() {
                 <Input
                   label="Huisnummer"
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={adres.huisnummer}
                   onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
                   placeholder="12"
@@ -479,6 +482,10 @@ export function VerbruikForm() {
               <div className="relative">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   {...register('elektriciteitNormaal', { valueAsNumber: true })}
                   placeholder="Bijv. 3500"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
@@ -578,6 +585,8 @@ export function VerbruikForm() {
               <div className="relative">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   {...register('terugleveringJaar', { valueAsNumber: true })}
                   placeholder="Bijv. 3000"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
@@ -632,6 +641,8 @@ export function VerbruikForm() {
               <div className="relative">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   {...register('gasJaar', { valueAsNumber: true })}
                   placeholder="Bijv. 1200"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
