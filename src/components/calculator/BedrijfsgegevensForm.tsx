@@ -133,27 +133,34 @@ export function BedrijfsgegevensForm() {
       clearTimeout(searchTimeoutRef.current)
     }
 
-    // Check if input is exactly 8 digits (KvK number)
-    const isKvkNumber = /^\d{8}$/.test(value)
+    // Als input leeg of te kort, reset alles
+    if (value.length < 2) {
+      setSearchResults([])
+      setShowDropdown(false)
+      return
+    }
+
+    // Check if input is exactly 8 digits (KvK number) - dan direct lookup
+    const isExact8Digits = /^\d{8}$/.test(value)
     
-    if (isKvkNumber) {
-      // Direct KvK lookup
+    if (isExact8Digits) {
+      // Direct KvK lookup bij exact 8 cijfers
       setKvkNummer(value)
       setShowDropdown(false)
       setSearchResults([])
       
-      // Trigger KvK lookup after short delay
       searchTimeoutRef.current = setTimeout(() => {
         fetchKvkData()
       }, 300)
-    } else if (value.length >= 2) {
-      // Search by company name
+    } else {
+      // Voor alles anders (letters, cijfers <8, mix): search API
+      // Dit werkt voor:
+      // - Bedrijfsnamen (bijv "Coolblue")
+      // - Partial KvK nummers (bijv "80929")
+      // - Mix van beide
       searchTimeoutRef.current = setTimeout(() => {
         searchCompanies(value)
       }, 300)
-    } else {
-      setSearchResults([])
-      setShowDropdown(false)
     }
   }
 
@@ -356,7 +363,7 @@ export function BedrijfsgegevensForm() {
             )}
             
             <p className="mt-2 text-xs text-gray-500">
-              💡 Typ minimaal 2 letters voor zoeken • 8 cijfers = direct KvK lookup
+              💡 Typ 2+ tekens voor zoeken • Ook voor gedeeltelijke KvK nummers!
             </p>
           </div>
 
