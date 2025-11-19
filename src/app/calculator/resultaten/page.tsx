@@ -10,124 +10,88 @@ import { Lightning, SlidersHorizontal, X, Check, Star, ArrowsDownUp, Leaf } from
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 
-// Mock data voor demonstratie - Later vervangen met admin data
-const generateMockResultaten = (verbruikElektriciteit: number, verbruikGas: number): ContractOptie[] => {
-  const basePrice = (verbruikElektriciteit * 0.28 + verbruikGas * 1.15) / 12
+// Helper: Calculate estimated cost for contract
+const berekenContractKosten = (
+  contract: any,
+  verbruikElektriciteit: number,
+  verbruikGas: number
+): { maandbedrag: number; jaarbedrag: number; besparing: number } => {
+  let totaalJaar = 0
+
+  if (contract.type === 'vast' && contract.details_vast) {
+    const { tarief_elektriciteit_normaal, tarief_gas, vaste_kosten_maand } = contract.details_vast
+    totaalJaar = 
+      (verbruikElektriciteit * tarief_elektriciteit_normaal) +
+      (verbruikGas * (tarief_gas || 0)) +
+      ((vaste_kosten_maand || 0) * 12)
+  } else if (contract.type === 'dynamisch' && contract.details_dynamisch) {
+    const { opslag_elektriciteit_normaal, opslag_gas, vaste_kosten_maand } = contract.details_dynamisch
+    // Assume market price + surcharge (estimated market: €0.20 elec, €0.80 gas)
+    const marktPrijsElektriciteit = 0.20
+    const marktPrijsGas = 0.80
+    totaalJaar = 
+      (verbruikElektriciteit * (marktPrijsElektriciteit + opslag_elektriciteit_normaal)) +
+      (verbruikGas * (marktPrijsGas + (opslag_gas || 0))) +
+      ((vaste_kosten_maand || 0) * 12)
+  } else if (contract.type === 'maatwerk') {
+    // No price calculation for maatwerk
+    return { maandbedrag: 0, jaarbedrag: 0, besparing: 0 }
+  }
+
+  const maandbedrag = Math.round(totaalJaar / 12)
+  const jaarbedrag = Math.round(totaalJaar)
   
-  return [
-    {
-      id: '1',
-      leverancier: {
-        id: 'gs',
-        naam: 'Groene Stroom',
-        logo: '/logos/groene-stroom.svg',
-        website: 'https://groenestroom.nl',
-      },
-      type: 'vast',
-      looptijd: 3,
-      maandbedrag: Math.round(basePrice * 0.92),
-      jaarbedrag: Math.round(basePrice * 0.92 * 12),
-      tariefElektriciteit: 0.28,
-      tariefGas: 1.15,
-      groeneEnergie: true,
-      rating: 4.8,
-      aantalReviews: 253,
-      voorwaarden: ['Prijsgarantie 3 jaar', 'Geen opstapkosten', '1 maand opzegtermijn'],
-      opzegtermijn: 1,
-      bijzonderheden: ['100% Nederlandse windenergie', 'CO2-neutraal'],
-      besparing: Math.round(basePrice * 0.08),
-      aanbevolen: true,
+  // Calculate besparing vs average of all contracts (simple estimation)
+  const gemiddeldeMaandbedrag = Math.round((verbruikElektriciteit * 0.28 + verbruikGas * 1.15) / 12)
+  const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+
+  return { maandbedrag, jaarbedrag, besparing }
+}
+
+// Transform API contract to ContractOptie
+const transformContractToOptie = (
+  contract: any,
+  verbruikElektriciteit: number,
+  verbruikGas: number
+): ContractOptie | null => {
+  // Skip maatwerk contracts in standard listing
+  if (contract.type === 'maatwerk') {
+    return null
+  }
+
+  const { maandbedrag, jaarbedrag, besparing } = berekenContractKosten(
+    contract,
+    verbruikElektriciteit,
+    verbruikGas
+  )
+
+  const leverancier = contract.leverancier || {}
+  const details = contract.details_vast || contract.details_dynamisch || {}
+
+  return {
+    id: contract.id,
+    leverancier: {
+      id: leverancier.id || '',
+      naam: leverancier.naam || 'Onbekende leverancier',
+      logo: leverancier.logo_url || '',
+      website: leverancier.website || '',
     },
-    {
-      id: '2',
-      leverancier: {
-        id: 'be',
-        naam: 'Budget Energie',
-        logo: '/logos/budget-energie.svg',
-        website: 'https://budgetenergie.nl',
-      },
-      type: 'vast',
-      looptijd: 1,
-      maandbedrag: Math.round(basePrice * 0.89),
-      jaarbedrag: Math.round(basePrice * 0.89 * 12),
-      tariefElektriciteit: 0.26,
-      tariefGas: 1.10,
-      groeneEnergie: false,
-      rating: 4.5,
-      aantalReviews: 182,
-      voorwaarden: ['Prijsgarantie 1 jaar', 'Geen opstapkosten'],
-      opzegtermijn: 1,
-      bijzonderheden: ['Laagste prijs garantie'],
-      besparing: Math.round(basePrice * 0.11),
-    },
-    {
-      id: '3',
-      leverancier: {
-        id: 'eneco',
-        naam: 'Eneco Zakelijk',
-        logo: '/logos/eneco.svg',
-        website: 'https://eneco.nl',
-      },
-      type: 'dynamisch',
-      looptijd: 1,
-      maandbedrag: Math.round(basePrice * 0.95),
-      jaarbedrag: Math.round(basePrice * 0.95 * 12),
-      tariefElektriciteit: 0.29,
-      tariefGas: 1.18,
-      groeneEnergie: true,
-      rating: 4.9,
-      aantalReviews: 421,
-      voorwaarden: ['Variabel tarief', 'Geen opstapkosten', 'Maandelijks opzegbaar'],
-      opzegtermijn: 1,
-      bijzonderheden: ['Slimme laadpaal integratie', 'App voor realtime inzicht', 'Profiteer van daluren'],
-      besparing: Math.round(basePrice * 0.05),
-      populair: true,
-    },
-    {
-      id: '4',
-      leverancier: {
-        id: 've',
-        naam: 'Vattenfall',
-        logo: '/logos/vattenfall.svg',
-        website: 'https://vattenfall.nl',
-      },
-      type: 'vast',
-      looptijd: 5,
-      maandbedrag: Math.round(basePrice * 0.87),
-      jaarbedrag: Math.round(basePrice * 0.87 * 12),
-      tariefElektriciteit: 0.25,
-      tariefGas: 1.08,
-      groeneEnergie: true,
-      rating: 4.7,
-      aantalReviews: 315,
-      voorwaarden: ['Prijsgarantie 5 jaar', 'Geen opstapkosten', '2 maanden opzegtermijn'],
-      opzegtermijn: 2,
-      bijzonderheden: ['Langste zekerheid', 'Gratis energiescan'],
-      besparing: Math.round(basePrice * 0.13),
-    },
-    {
-      id: '5',
-      leverancier: {
-        id: 'es',
-        naam: 'Essent',
-        logo: '/logos/essent.svg',
-        website: 'https://essent.nl',
-      },
-      type: 'dynamisch',
-      looptijd: 1,
-      maandbedrag: Math.round(basePrice * 0.93),
-      jaarbedrag: Math.round(basePrice * 0.93 * 12),
-      tariefElektriciteit: 0.27,
-      tariefGas: 1.16,
-      groeneEnergie: false,
-      rating: 4.6,
-      aantalReviews: 198,
-      voorwaarden: ['Variabel tarief', 'Geen opstapkosten', 'Maandelijks opzegbaar'],
-      opzegtermijn: 1,
-      bijzonderheden: ['24/7 klantenservice', 'Smart meter compatible'],
-      besparing: Math.round(basePrice * 0.07),
-    },
-  ]
+    type: contract.type,
+    looptijd: contract.type === 'vast' ? details.looptijd : 1,
+    maandbedrag,
+    jaarbedrag,
+    tariefElektriciteit: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
+    tariefGas: details.tarief_gas || details.opslag_gas || 0,
+    groeneEnergie: details.groene_energie || false,
+    rating: details.rating || 0,
+    aantalReviews: details.aantal_reviews || 0,
+    voorwaarden: details.voorwaarden || [],
+    opzegtermijn: details.opzegtermijn || 1,
+    bijzonderheden: details.bijzonderheden || [],
+    besparing,
+    aanbevolen: contract.aanbevolen || false,
+    populair: contract.populair || false,
+  }
 }
 
 function ResultatenContent() {
@@ -158,9 +122,6 @@ function ResultatenContent() {
       try {
         setLoading(true)
         setError(null)
-        
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 800))
         
         let verbruikData = verbruik
         
@@ -197,18 +158,28 @@ function ResultatenContent() {
           return
         }
         
-        // Calculate total electricity
+        // Calculate total electricity and gas
         const totaalElektriciteit = verbruikData.elektriciteitNormaal + (verbruikData.elektriciteitDal || 0)
+        const totaalGas = verbruikData.gasJaar || 0
         
-        const mockData = generateMockResultaten(
-          totaalElektriciteit,
-          verbruikData.gasJaar || 0
-        )
+        // Fetch active contracts from API
+        const response = await fetch('/api/contracten/actief')
+        if (!response.ok) {
+          throw new Error('Failed to fetch contracts')
+        }
         
-        setResultaten(mockData)
-        setFilteredResultaten(mockData)
+        const { contracten } = await response.json()
+        
+        // Transform to ContractOptie format
+        const transformed = contracten
+          .map((c: any) => transformContractToOptie(c, totaalElektriciteit, totaalGas))
+          .filter((c: any) => c !== null)
+        
+        setResultaten(transformed)
+        setFilteredResultaten(transformed)
         setLoading(false)
       } catch (err) {
+        console.error('Error loading resultaten:', err)
         setError('Er ging iets mis bij het ophalen van de resultaten. Probeer het opnieuw.')
         setLoading(false)
       }

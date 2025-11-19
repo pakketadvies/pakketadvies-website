@@ -68,15 +68,6 @@ export function QuickCalculator() {
   const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
   const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
   
-  // Autofocus alleen op desktop (niet mobiel)
-  const [shouldAutoFocus, setShouldAutoFocus] = useState(false)
-  
-  useEffect(() => {
-    // Check if desktop (screen width >= 768px)
-    const isDesktop = window.matchMedia('(min-width: 768px)').matches
-    setShouldAutoFocus(isDesktop)
-  }, [])
-  
   // Adres state
   const [leveringsadressen, setLeveringsadressen] = useState([{
     postcode: '',
@@ -279,7 +270,6 @@ export function QuickCalculator() {
                   onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
                   placeholder="1234AB"
                   maxLength={6}
-                  autoFocus={shouldAutoFocus}
                   className="w-full px-3 md:px-3 py-3 md:py-2 text-sm md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                   required
                 />
@@ -288,8 +278,6 @@ export function QuickCalculator() {
                 <label className="block text-sm md:text-xs font-medium text-gray-700 mb-1.5 md:mb-0.5">Huisnr.</label>
                 <input
                   type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
                   value={leveringsadressen[0].huisnummer}
                   onChange={(e) => handleAddressChange('huisnummer', e.target.value)}
                   placeholder="12"
@@ -357,8 +345,6 @@ export function QuickCalculator() {
               <div className="relative">
                 <input
                   type="number"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
                   {...register('elektriciteitNormaal', { valueAsNumber: true })}
                   placeholder="3500"
                   className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
@@ -378,8 +364,6 @@ export function QuickCalculator() {
                 <div className="relative">
                   <input
                     type="number"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
                     {...register('elektriciteitDal', { valueAsNumber: true })}
                     placeholder="2500"
                     className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
@@ -440,8 +424,6 @@ export function QuickCalculator() {
             <div className="relative">
               <input
                 type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 {...register('terugleveringJaar', { valueAsNumber: true })}
                 placeholder="3000"
                 className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
@@ -465,8 +447,6 @@ export function QuickCalculator() {
               <div className="relative">
                 <input
                   type="number"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
                   {...register('gasJaar', { valueAsNumber: true })}
                   placeholder="1200"
                   className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"

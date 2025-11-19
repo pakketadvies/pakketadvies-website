@@ -1,0 +1,117 @@
+// Database types voor admin system
+
+export interface Leverancier {
+  id: string
+  naam: string
+  logo_url: string | null
+  website: string | null
+  actief: boolean
+  volgorde: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Contract {
+  id: string
+  leverancier_id: string
+  naam: string
+  type: 'vast' | 'dynamisch' | 'maatwerk'
+  beschrijving: string | null
+  actief: boolean
+  aanbevolen: boolean
+  populair: boolean
+  volgorde: number
+  created_at: string
+  updated_at: string
+  
+  // Relations (populated via joins)
+  leverancier?: Leverancier
+  details_vast?: ContractDetailsVast
+  details_dynamisch?: ContractDetailsDynamisch
+  details_maatwerk?: ContractDetailsMaatwerk
+}
+
+export interface ContractDetailsVast {
+  contract_id: string
+  looptijd: 1 | 2 | 3 | 5
+  
+  // Tarieven
+  tarief_elektriciteit_normaal: number
+  tarief_elektriciteit_dal: number | null
+  tarief_gas: number | null
+  vaste_kosten_maand: number | null
+  
+  // Eigenschappen
+  groene_energie: boolean
+  prijsgarantie: boolean
+  opzegtermijn: number
+  
+  // Display
+  voorwaarden: string[]
+  bijzonderheden: string[]
+  rating: number
+  aantal_reviews: number
+  
+  created_at: string
+  updated_at: string
+}
+
+export interface ContractDetailsDynamisch {
+  contract_id: string
+  
+  // Opslagen
+  opslag_elektriciteit_normaal: number
+  opslag_elektriciteit_dal: number | null
+  opslag_gas: number | null
+  vaste_kosten_maand: number | null
+  
+  // Index
+  index_naam: string
+  max_prijs_cap: number | null
+  
+  // Eigenschappen
+  groene_energie: boolean
+  opzegtermijn: number
+  
+  // Display
+  voorwaarden: string[]
+  bijzonderheden: string[]
+  rating: number
+  aantal_reviews: number
+  
+  created_at: string
+  updated_at: string
+}
+
+export interface ContractDetailsMaatwerk {
+  contract_id: string
+  
+  // Drempels
+  min_verbruik_elektriciteit: number | null
+  min_verbruik_gas: number | null
+  
+  // Contact
+  custom_tekst: string | null
+  contact_email: string | null
+  contact_telefoon: string | null
+  
+  // Display
+  voorwaarden: string[]
+  rating: number
+  aantal_reviews: number
+  
+  created_at: string
+  updated_at: string
+}
+
+// Form types voor create/edit
+export type LeverancierFormData = Omit<Leverancier, 'id' | 'created_at' | 'updated_at'>
+
+export type ContractFormData = Omit<Contract, 'id' | 'created_at' | 'updated_at' | 'leverancier'>
+
+export type ContractDetailsVastFormData = Omit<ContractDetailsVast, 'contract_id' | 'created_at' | 'updated_at'>
+
+export type ContractDetailsDynamischFormData = Omit<ContractDetailsDynamisch, 'contract_id' | 'created_at' | 'updated_at'>
+
+export type ContractDetailsMaatwerkFormData = Omit<ContractDetailsMaatwerk, 'contract_id' | 'created_at' | 'updated_at'>
+
