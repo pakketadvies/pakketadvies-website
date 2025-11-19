@@ -484,8 +484,6 @@ export function VerbruikForm() {
                   type="number"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
                   {...register('elektriciteitNormaal', { valueAsNumber: true })}
                   placeholder="Bijv. 3500"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
