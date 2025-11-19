@@ -7,13 +7,27 @@ export interface Leveringsadres {
 }
 
 export interface VerbruikData {
-  elektriciteitJaar: number
-  gasJaar: number | null
-  geschat: boolean
+  // Elektriciteit - normaal/dal split (standaard dubbele meter)
+  elektriciteitNormaal: number // kWh per jaar (dag tarief)
+  elektriciteitDal: number | null // kWh per jaar (nacht/weekend tarief), null bij enkele meter
+  heeftEnkeleMeter: boolean // true = enkele meter, false = dubbele meter
+  
+  // Gas
+  gasJaar: number | null // m³ per jaar, null als geen gasaansluiting
+  geenGasaansluiting: boolean
+  
+  // Zonnepanelen
+  heeftZonnepanelen: boolean
+  terugleveringJaar: number | null // in kWh - hoeveel stroom terug leveren per jaar
+  
+  // Meter info (optioneel, helpt voor contractadvies)
+  meterType: 'slim' | 'oud' | 'weet_niet'
+  
+  // Leveringsadressen
   leveringsadressen: Leveringsadres[]
-  heeftZonnepanelen?: boolean
-  terugleveringJaar?: number // in kWh - hoeveel stroom terug leveren
-  meterType?: 'slim' | 'enkel' | 'dubbel' | 'weet_niet'
+  
+  // Legacy
+  geschat: boolean // wordt later vervangen door "help mij schatten" feature
 }
 
 export interface BedrijfsGegevens {

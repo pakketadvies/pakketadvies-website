@@ -171,8 +171,14 @@ function ResultatenContent() {
           
           if (stroom && gas) {
             verbruikData = {
-              elektriciteitJaar: stroom,
+              elektriciteitNormaal: Math.round(stroom * 0.6), // 60% normaal
+              elektriciteitDal: Math.round(stroom * 0.4), // 40% dal (typische verdeling)
+              heeftEnkeleMeter: false,
               gasJaar: gas,
+              geenGasaansluiting: false,
+              heeftZonnepanelen: false,
+              terugleveringJaar: null,
+              meterType: 'weet_niet',
               leveringsadressen: [{ postcode: '0000 XX', huisnummer: '1' }],
               geschat: true,
             }
@@ -186,13 +192,16 @@ function ResultatenContent() {
           }
         }
         
-        if (!verbruikData?.elektriciteitJaar) {
+        if (!verbruikData?.elektriciteitNormaal) {
           router.push('/calculator')
           return
         }
         
+        // Calculate total electricity
+        const totaalElektriciteit = verbruikData.elektriciteitNormaal + (verbruikData.elektriciteitDal || 0)
+        
         const mockData = generateMockResultaten(
-          verbruikData.elektriciteitJaar,
+          totaalElektriciteit,
           verbruikData.gasJaar || 0
         )
         
@@ -293,7 +302,7 @@ function ResultatenContent() {
     )
   }
 
-  const verbruikElektriciteit = verbruik?.elektriciteitJaar || parseInt(searchParams?.get('stroom') || '0')
+  const verbruikElektriciteit = ((verbruik?.elektriciteitNormaal || 0) + (verbruik?.elektriciteitDal || 0)) || parseInt(searchParams?.get('stroom') || '0')
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-12">

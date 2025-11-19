@@ -40,8 +40,10 @@ export function VoorkeurenForm() {
   const { setVoorkeuren, vorigeStap, verbruik } = useCalculatorStore()
 
   // Check if user qualifies for maatwerk (60k kWh OR 10k m³)
+  // Calculate total electricity (normaal + dal)
+  const totaalElektriciteit = (verbruik?.elektriciteitNormaal || 0) + (verbruik?.elektriciteitDal || 0)
   const qualifiesForMaatwerk = 
-    (verbruik?.elektriciteitJaar && verbruik.elektriciteitJaar >= 60000) ||
+    (totaalElektriciteit >= 60000) ||
     (verbruik?.gasJaar && verbruik.gasJaar >= 10000)
 
   // Check if user has optimal setup for dynamic contracts
@@ -74,7 +76,7 @@ export function VoorkeurenForm() {
   const onSubmit = (data: VoorkeurenFormData) => {
     // If maatwerk selected, redirect to contact page
     if (data.type === 'maatwerk') {
-      router.push('/contact?type=maatwerk&verbruik=' + (verbruik?.elektriciteitJaar || 0))
+      router.push('/contact?type=maatwerk&verbruik=' + totaalElektriciteit)
       return
     }
     
@@ -167,7 +169,7 @@ export function VoorkeurenForm() {
           <div>
             <div className="font-semibold text-brand-purple-900 mb-1">Je komt in aanmerking voor maatwerk!</div>
             <p className="text-sm text-brand-purple-700">
-              Met jouw verbruik ({verbruik?.elektriciteitJaar?.toLocaleString() || 0} kWh
+              Met jouw verbruik ({totaalElektriciteit.toLocaleString()} kWh
               {verbruik?.gasJaar ? ` + ${verbruik.gasJaar.toLocaleString()} m³` : ''}) 
               kun je profiteren van volume pooling en extra scherpe tarieven.
             </p>
