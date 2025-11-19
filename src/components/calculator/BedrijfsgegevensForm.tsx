@@ -93,35 +93,52 @@ export function BedrijfsgegevensForm() {
 
   // Search companies by name (debounced)
   const searchCompanies = async (query: string) => {
+    console.log('🔍 [searchCompanies] START - Query:', query)
+    
     if (query.length < 2) {
+      console.log('❌ [searchCompanies] Query te kort (<2), stop')
       setSearchResults([])
       setShowDropdown(false)
       return
     }
 
+    console.log('⏳ [searchCompanies] Calling API...')
     setSearchLoading(true)
     
     try {
-      const response = await fetch(`/api/kvk/search?query=${encodeURIComponent(query)}`)
+      const url = `/api/kvk/search?query=${encodeURIComponent(query)}`
+      console.log('📡 [searchCompanies] URL:', url)
+      
+      const response = await fetch(url)
+      console.log('📥 [searchCompanies] Response status:', response.status)
+      
       const data = await response.json()
+      console.log('📦 [searchCompanies] Response data:', data)
 
       if (response.ok && data.results) {
+        console.log('✅ [searchCompanies] Success! Results count:', data.results.length)
+        console.log('📋 [searchCompanies] Results:', data.results)
         setSearchResults(data.results)
         setShowDropdown(data.results.length > 0)
+        console.log('🎯 [searchCompanies] Dropdown should be visible:', data.results.length > 0)
       } else {
+        console.log('❌ [searchCompanies] No results or error')
         setSearchResults([])
         setShowDropdown(false)
       }
     } catch (error) {
-      console.error('Search error:', error)
+      console.error('💥 [searchCompanies] Exception:', error)
       setSearchResults([])
     } finally {
       setSearchLoading(false)
+      console.log('🏁 [searchCompanies] END')
     }
   }
 
   // Handle bedrijfsnaam input change with debounce and KvK number detection
   const handleBedrijfsnaamChange = (value: string) => {
+    console.log('⌨️ [handleBedrijfsnaamChange] Input value:', value)
+    
     setBedrijfsnaamInput(value)
     setValue('bedrijfsnaam', value)
     setSelectedIndex(-1)
@@ -130,17 +147,21 @@ export function BedrijfsgegevensForm() {
 
     // Clear previous timeout
     if (searchTimeoutRef.current) {
+      console.log('⏰ [handleBedrijfsnaamChange] Clearing previous timeout')
       clearTimeout(searchTimeoutRef.current)
     }
 
     // Als input leeg of te kort, reset alles
     if (value.length < 2) {
+      console.log('❌ [handleBedrijfsnaamChange] Value te kort, reset')
       setSearchResults([])
       setShowDropdown(false)
       setKvkNummer('')
       return
     }
 
+    console.log('⏲️ [handleBedrijfsnaamChange] Setting timeout (300ms) for search')
+    
     // SIMPEL: Altijd search API aanroepen voor dropdown (werkt voor ALLES)
     // Dit toont dropdown voor:
     // - Bedrijfsnamen: "Coolblue", "Pakket"
@@ -149,6 +170,7 @@ export function BedrijfsgegevensForm() {
     setKvkNummer('') // Reset KvK nummer
     
     searchTimeoutRef.current = setTimeout(() => {
+      console.log('🚀 [handleBedrijfsnaamChange] Timeout fired! Calling searchCompanies...')
       searchCompanies(value)
     }, 300)
   }
