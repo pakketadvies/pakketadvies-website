@@ -137,30 +137,69 @@ export function BedrijfsgegevensForm() {
     if (value.length < 2) {
       setSearchResults([])
       setShowDropdown(false)
+      setKvkNummer('')
       return
     }
 
-    // Check if input is exactly 8 digits (KvK number) - dan direct lookup
-    const isExact8Digits = /^\d{8}$/.test(value)
+    // SIMPEL: Altijd search API aanroepen voor dropdown (werkt voor ALLES)
+    // Dit toont dropdown voor:
+    // - Bedrijfsnamen: "Coolblue", "Pakket"
+    // - Gedeeltelijke KvK: "88929", "8092" 
+    // - Volledige KvK: "88929280" (wordt ook gevonden in search)
+    setKvkNummer('') // Reset KvK nummer
     
-    if (isExact8Digits) {
-      // Direct KvK lookup bij exact 8 cijfers
-      setKvkNummer(value)
-      setShowDropdown(false)
-      setSearchResults([])
+    searchTimeoutRef.current = setTimeout(() => {
+      searchCompanies(value)
+    }, 300)
+  }
+  
+  // Direct KvK lookup met waarde parameter (niet state)
+  const fetchKvkDataDirect = async (kvkValue: string) => {
+    if (!kvkValue || kvkValue.length !== 8) {
+      setKvkError('Vul een geldig KvK-nummer in (8 cijfers)')
+      return
+    }
+
+    setKvkLoading(true)
+    setKvkError(null)
+    setKvkSuccess(false)
+
+    try {
+      const response = await fetch(`/api/kvk?kvk=${kvkValue}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        setKvkError(data.error || 'Kon bedrijf niet vinden')
+        setKvkLoading(false)
+        return
+      }
+
+      // Auto-fill form with KvK data
+      if (data.bedrijfsnaam) {
+        setBedrijfsnaamInput(data.bedrijfsnaam)
+        setValue('bedrijfsnaam', data.bedrijfsnaam)
+      }
+      if (data.kvkNummer) {
+        setValue('kvkNummer', data.kvkNummer)
+        setKvkNummer(data.kvkNummer)
+      }
+      // Auto-fill correspondentieadres
+      if (data.correspondentieAdres) {
+        setValue('correspondentieStraat', data.correspondentieAdres.straat || '')
+        setValue('correspondentieHuisnummer', data.correspondentieAdres.huisnummer || '')
+        setValue('correspondentiePostcode', data.correspondentieAdres.postcode || '')
+        setValue('correspondentiePlaats', data.correspondentieAdres.plaats || '')
+      }
       
-      searchTimeoutRef.current = setTimeout(() => {
-        fetchKvkData()
-      }, 300)
-    } else {
-      // Voor alles anders (letters, cijfers <8, mix): search API
-      // Dit werkt voor:
-      // - Bedrijfsnamen (bijv "Coolblue")
-      // - Partial KvK nummers (bijv "80929")
-      // - Mix van beide
-      searchTimeoutRef.current = setTimeout(() => {
-        searchCompanies(value)
-      }, 300)
+      setKvkSuccess(true)
+      setKvkLoading(false)
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => setKvkSuccess(false), 3000)
+    } catch (error) {
+      console.error('KvK fetch error:', error)
+      setKvkError('Er ging iets mis. Probeer het opnieuw.')
+      setKvkLoading(false)
     }
   }
 
