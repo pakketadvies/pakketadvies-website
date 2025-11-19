@@ -17,11 +17,11 @@ const bedrijfsgegevensSchema = z.object({
   email: z.string().email('Vul een geldig e-mailadres in'),
   telefoon: z.string().regex(/^[\d\s\-+()]+$/, 'Vul een geldig telefoonnummer in'),
   typeBedrijf: z.enum(['retail', 'horeca', 'kantoor', 'productie', 'gezondheidszorg', 'onderwijs', 'overig']),
-  // Correspondentieadres (optioneel, wordt auto-filled via KvK)
-  correspondentieStraat: z.string().optional(),
-  correspondentieHuisnummer: z.string().optional(),
-  correspondentiePostcode: z.string().optional(),
-  correspondentiePlaats: z.string().optional(),
+  // Correspondentieadres (verplicht)
+  correspondentieStraat: z.string().min(2, 'Vul een straatnaam in'),
+  correspondentieHuisnummer: z.string().min(1, 'Vul een huisnummer in'),
+  correspondentiePostcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/i, 'Vul een geldige postcode in'),
+  correspondentiePlaats: z.string().min(2, 'Vul een plaatsnaam in'),
 })
 
 type BedrijfsgegevensFormData = z.infer<typeof bedrijfsgegevensSchema>
@@ -34,7 +34,7 @@ interface KvkSearchResult {
 }
 
 export function BedrijfsgegevensForm() {
-  const { setBedrijfsgegevens, volgendeStap, vorigeStap } = useCalculatorStore()
+  const { setBedrijfsgegevens, volgendeStap, vorigeStap, verbruik } = useCalculatorStore()
   
   // KvK number lookup states
   const [kvkNummer, setKvkNummer] = useState('')
@@ -50,6 +50,9 @@ export function BedrijfsgegevensForm() {
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Correspondentieadres checkbox
+  const [zelfdeAlsLeveradres, setZelfdeAlsLeveradres] = useState(false)
 
   const {
     register,
@@ -65,6 +68,17 @@ export function BedrijfsgegevensForm() {
   })
 
   const typeBedrijf = watch('typeBedrijf')
+
+  // Copy leveradres to correspondentie when checkbox is checked
+  useEffect(() => {
+    if (zelfdeAlsLeveradres && verbruik && verbruik.leveringsadressen.length > 0) {
+      const leveradres = verbruik.leveringsadressen[0]
+      setValue('correspondentieStraat', leveradres.straat || '')
+      setValue('correspondentieHuisnummer', leveradres.huisnummer)
+      setValue('correspondentiePostcode', leveradres.postcode)
+      setValue('correspondentiePlaats', leveradres.plaats || '')
+    }
+  }, [zelfdeAlsLeveradres, verbruik, setValue])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -389,9 +403,21 @@ export function BedrijfsgegevensForm() {
           <Buildings weight="duotone" className="w-5 h-5 text-brand-navy-500" />
           <h3 className="text-lg font-semibold text-brand-navy-500">Correspondentieadres</h3>
         </div>
-        <p className="text-sm text-gray-600 -mt-2 mb-4">
-          Dit adres wordt automatisch ingevuld via KvK, maar je kunt het ook handmatig aanpassen.
-        </p>
+
+        {/* Checkbox: Zelfde als leveradres */}
+        <div className="mb-4">
+          <label className="flex items-center gap-3 cursor-pointer p-3 hover:bg-gray-50 rounded-lg transition-colors border-2 border-gray-200">
+            <input
+              type="checkbox"
+              checked={zelfdeAlsLeveradres}
+              onChange={(e) => setZelfdeAlsLeveradres(e.target.checked)}
+              className="w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              Zelfde als leveradres
+            </span>
+          </label>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -399,6 +425,8 @@ export function BedrijfsgegevensForm() {
               label="Straatnaam"
               placeholder="Bijv. Weena"
               {...register('correspondentieStraat')}
+              disabled={zelfdeAlsLeveradres}
+              required
             />
           </div>
           <div>
@@ -406,6 +434,8 @@ export function BedrijfsgegevensForm() {
               label="Huisnummer"
               placeholder="Bijv. 664"
               {...register('correspondentieHuisnummer')}
+              disabled={zelfdeAlsLeveradres}
+              required
             />
           </div>
           <div>
@@ -413,6 +443,8 @@ export function BedrijfsgegevensForm() {
               label="Postcode"
               placeholder="Bijv. 3012CN"
               {...register('correspondentiePostcode')}
+              disabled={zelfdeAlsLeveradres}
+              required
             />
           </div>
           <div>
@@ -420,6 +452,8 @@ export function BedrijfsgegevensForm() {
               label="Plaats"
               placeholder="Bijv. Rotterdam"
               {...register('correspondentiePlaats')}
+              disabled={zelfdeAlsLeveradres}
+              required
             />
           </div>
         </div>
