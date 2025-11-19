@@ -61,18 +61,9 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
-    // BELANGRIJK: Als toevoeging is ingevuld, waarschuw dat we deze niet kunnen verifiëren
-    // De postcode.tech API negeert gewoon een ongeldige addition parameter
-    if (addition && addition.trim()) {
-      return NextResponse.json({
-        street: data.street || '',
-        city: data.city || '',
-        municipality: data.municipality || '',
-        province: data.province || '',
-        warning: `Let op: toevoeging '${addition}' kan niet geverifieerd worden. Controleer of dit adres correct is.`
-      })
-    }
-    
+    // Return het adres zonder waarschuwing
+    // De postcode.tech API kan toevoegingen niet verifiëren, maar als het basisadres
+    // bestaat accepteren we de toevoeging die de gebruiker invult
     return NextResponse.json({
       street: data.street || '',
       city: data.city || '',

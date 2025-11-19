@@ -152,15 +152,7 @@ export function VerbruikForm() {
         
         setValue(`leveringsadressen.${index}.straat`, data.street || '')
         setValue(`leveringsadressen.${index}.plaats`, data.city || '')
-        
-        // Als er een warning is (toevoeging niet gevonden), toon die
-        if (data.warning) {
-          setError(`leveringsadressen.${index}.toevoeging` as any, {
-            message: data.warning
-          })
-        } else {
-          clearErrors(`leveringsadressen.${index}`)
-        }
+        clearErrors(`leveringsadressen.${index}`)
         
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
@@ -365,7 +357,6 @@ export function VerbruikForm() {
                 value={adres.toevoeging || ''}
                 onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
                 placeholder="A"
-                error={errors.leveringsadressen?.[index]?.toevoeging?.message}
               />
             </div>
 
@@ -381,7 +372,7 @@ export function VerbruikForm() {
                 <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-brand-teal-900">
                   <div className="font-semibold">
-                    {adres.straat} {adres.huisnummer}
+                    {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
                   </div>
                   <div>{adres.postcode} {adres.plaats}</div>
                 </div>
