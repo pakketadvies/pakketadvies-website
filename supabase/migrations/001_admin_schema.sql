@@ -1,8 +1,8 @@
 -- PakketAdvies Admin System
 -- Migration 001: Core schema voor leveranciers en contracten
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable UUID extension (gen_random_uuid is built-in in Postgres 13+)
+-- No need to create extension, we'll use gen_random_uuid() instead
 
 -- =====================================================
 -- USER PROFILES (voor admin role management)
@@ -54,7 +54,7 @@ CREATE TRIGGER on_auth_user_created
 -- LEVERANCIERS
 -- =====================================================
 CREATE TABLE leveranciers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   naam VARCHAR(100) NOT NULL UNIQUE,
   logo_url TEXT,
   website TEXT,
@@ -72,7 +72,7 @@ CREATE INDEX idx_leveranciers_volgorde ON leveranciers(volgorde);
 -- CONTRACTEN (basis tabel)
 -- =====================================================
 CREATE TABLE contracten (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   leverancier_id UUID NOT NULL REFERENCES leveranciers(id) ON DELETE CASCADE,
   naam VARCHAR(200) NOT NULL,
   type VARCHAR(20) NOT NULL CHECK (type IN ('vast', 'dynamisch', 'maatwerk')),
