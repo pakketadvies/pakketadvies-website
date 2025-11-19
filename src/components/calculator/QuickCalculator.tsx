@@ -358,7 +358,7 @@ export function QuickCalculator() {
 
             {!heeftEnkeleMeter && (
               <div className="animate-slide-down">
-                <label className="block text-xs font-semibold text-brand-navy-500 mb-1">
+                <label className="block text-sm md:text-xs font-semibold text-brand-navy-500 mb-1.5 md:mb-1">
                   Dal <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -381,7 +381,7 @@ export function QuickCalculator() {
             <p className="text-xs text-red-600">{errors.elektriciteitDal.message}</p>
           )}
 
-          <label className="flex items-start gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
+          <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-white hover:border-brand-teal-300 hover:bg-brand-teal-50/30 transition-all">
             <input
               type="checkbox"
               checked={heeftEnkeleMeter}
@@ -392,14 +392,14 @@ export function QuickCalculator() {
                   setValue('elektriciteitDal', null)
                 }
               }}
-              className="w-5 h-5 mt-0.5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 flex-shrink-0"
+              className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2 flex-shrink-0"
             />
             <span className="text-sm md:text-xs font-medium text-brand-navy-500">Enkele meter (geen dag/nacht tarief)</span>
           </label>
         </div>
 
-        {/* Zonnepanelen - mobiel: simpel, desktop: teal box */}
-        <label className="flex items-center gap-2.5 md:gap-3 cursor-pointer p-3 md:p-3 md:bg-brand-teal-50 md:border-2 md:border-brand-teal-200 md:rounded-xl md:hover:border-brand-teal-300 transition-all">
+        {/* Zonnepanelen */}
+        <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-white hover:border-brand-teal-300 hover:bg-brand-teal-50/30 transition-all">
           <input
             type="checkbox"
             checked={heeftZonnepanelen}
@@ -410,9 +410,9 @@ export function QuickCalculator() {
                 setValue('terugleveringJaar', null)
               }
             }}
-            className="w-5 h-5 rounded border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 flex-shrink-0"
+            className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2 flex-shrink-0"
           />
-          <Sun weight="duotone" className="w-5 h-5 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0" />
+          <Sun weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
           <span className="text-sm md:text-sm font-semibold text-brand-navy-500">Wij hebben zonnepanelen</span>
         </label>
 
