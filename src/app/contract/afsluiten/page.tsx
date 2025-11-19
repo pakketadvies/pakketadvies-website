@@ -6,7 +6,8 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
-import { Buildings, MagnifyingGlass, CheckCircle, XCircle, ShieldCheck, Phone, Envelope, User } from '@phosphor-icons/react'
+import { Buildings, MagnifyingGlass, CheckCircle, XCircle, ShieldCheck, Phone, Envelope, User, CaretDown } from '@phosphor-icons/react'
+import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 import { useCalculatorStore } from '@/store/calculatorStore'
 
 // Mock resultaten - later vervangen met echte data
@@ -127,19 +128,34 @@ function ContractAfsluitenContent() {
     }
   }
 
-  // Handle bedrijfsnaam input change with debounce
+  // Handle bedrijfsnaam input change with debounce and KvK number detection
   const handleBedrijfsnaamChange = (value: string) => {
     setBedrijfsnaamInput(value)
     setFormData({ ...formData, bedrijfsnaam: value })
     setSelectedIndex(-1)
+    setKvkError(null)
+    setKvkSuccess(false)
 
     // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current)
     }
 
-    // Debounce search
-    if (value.length >= 2) {
+    // Check if input is exactly 8 digits (KvK number)
+    const isKvkNumber = /^\d{8}$/.test(value)
+    
+    if (isKvkNumber) {
+      // Direct KvK lookup
+      setKvkNummer(value)
+      setShowDropdown(false)
+      setSearchResults([])
+      
+      // Trigger KvK lookup after short delay
+      searchTimeoutRef.current = setTimeout(() => {
+        fetchKvkData()
+      }, 300)
+    } else if (value.length >= 2) {
+      // Search by company name
       searchTimeoutRef.current = setTimeout(() => {
         searchCompanies(value)
       }, 300)
@@ -339,62 +355,78 @@ function ContractAfsluitenContent() {
               </div>
 
               <div className="space-y-6">
-                {/* KvK Lookup */}
+                {/* Unified KvK Search - Naam OF Nummer */}
                 <div className="bg-gradient-to-br from-brand-teal-50 to-brand-navy-50 border-2 border-brand-teal-200 rounded-xl p-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-600" />
-                      <h3 className="font-semibold text-brand-navy-500">KvK-nummer (optioneel)</h3>
+                      <h3 className="font-semibold text-brand-navy-500">Bedrijf opzoeken</h3>
                     </div>
                     <p className="text-sm text-gray-600">
-                      Vul je KvK-nummer in en we vullen automatisch je bedrijfsgegevens in
+                      Zoek op bedrijfsnaam of KvK-nummer (8 cijfers) - we vullen automatisch je gegevens in
                     </p>
                     
-                    <div className="flex gap-2">
-                      <div className="flex-1">
+                    <div className="relative" ref={dropdownRef}>
+                      <div className="relative">
                         <input
                           type="text"
-                          value={kvkNummer}
-                          onChange={(e) => {
-                            setKvkNummer(e.target.value.replace(/\D/g, ''))
-                            setKvkError(null)
-                            setKvkSuccess(false)
+                          value={bedrijfsnaamInput}
+                          onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          onFocus={() => {
+                            if (searchResults.length > 0) setShowDropdown(true)
                           }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              fetchKvkData()
-                            }
-                          }}
-                          placeholder="12345678"
-                          maxLength={8}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
-                          disabled={kvkLoading}
+                          placeholder="Typ bedrijfsnaam of 8-cijferig KvK-nummer..."
+                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                          required
                         />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={fetchKvkData}
-                        disabled={kvkLoading || kvkNummer.length !== 8}
-                        className="px-6 py-3 bg-brand-teal-500 hover:bg-brand-teal-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg hover:shadow-xl disabled:shadow-none"
-                      >
-                        {kvkLoading ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span className="hidden md:inline">Zoeken...</span>
-                          </>
-                        ) : (
-                          <>
-                            <MagnifyingGlass weight="bold" className="w-5 h-5" />
-                            <span className="hidden md:inline">Opzoeken</span>
-                          </>
+                        {searchLoading && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+                          </div>
                         )}
-                      </button>
+                        {!searchLoading && showDropdown && searchResults.length > 0 && (
+                          <CaretDown weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                        )}
+                      </div>
+
+                      {/* Dropdown */}
+                      {showDropdown && searchResults.length > 0 && (
+                        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
+                          {searchResults.map((result, index) => (
+                            <button
+                              key={result.kvkNummer}
+                              type="button"
+                              onClick={() => selectCompany(result)}
+                              className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                                index === selectedIndex ? 'bg-brand-teal-50' : ''
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-brand-navy-500 truncate">
+                                    {result.bedrijfsnaam}
+                                  </div>
+                                  <div className="text-sm text-gray-600 mt-0.5">
+                                    KvK: {result.kvkNummer}
+                                    {result.plaats && ` • ${result.plaats}`}
+                                  </div>
+                                </div>
+                                <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <p className="mt-2 text-xs text-gray-500">
+                        💡 Typ minimaal 2 letters voor zoeken • 8 cijfers = direct KvK lookup
+                      </p>
                     </div>
 
                     {/* Success message */}
                     {kvkSuccess && (
-                      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3 animate-slide-down">
                         <CheckCircle weight="fill" className="w-5 h-5 flex-shrink-0" />
                         <span>Bedrijfsgegevens succesvol opgehaald!</span>
                       </div>
@@ -402,71 +434,12 @@ function ContractAfsluitenContent() {
 
                     {/* Error message */}
                     {kvkError && (
-                      <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 animate-slide-down">
                         <XCircle weight="fill" className="w-5 h-5 flex-shrink-0" />
                         <span>{kvkError}</span>
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Bedrijfsnaam with Autocomplete */}
-                <div className="relative" ref={dropdownRef}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bedrijfsnaam <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={bedrijfsnaamInput}
-                      onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      onFocus={() => {
-                        if (searchResults.length > 0) setShowDropdown(true)
-                      }}
-                      placeholder="Begin met typen..."
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500"
-                      required
-                    />
-                    {searchLoading && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Dropdown */}
-                  {showDropdown && searchResults.length > 0 && (
-                    <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
-                      {searchResults.map((result, index) => (
-                        <button
-                          key={result.kvkNummer}
-                          type="button"
-                          onClick={() => selectCompany(result)}
-                          className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                            index === selectedIndex ? 'bg-brand-teal-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-brand-navy-500 truncate">
-                                {result.bedrijfsnaam}
-                              </div>
-                              <div className="text-sm text-gray-600 mt-0.5">
-                                KvK: {result.kvkNummer}
-                                {result.plaats && ` • ${result.plaats}`}
-                              </div>
-                            </div>
-                            <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  <p className="mt-2 text-xs text-gray-500">
-                    Typ minimaal 2 letters om bedrijven te zoeken in het KvK register
-                  </p>
                 </div>
 
                 {/* Adres velden (readonly als uit KvK) */}
@@ -504,30 +477,44 @@ function ContractAfsluitenContent() {
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {[
-                      { value: 'kantoor', label: 'Kantoor' },
-                      { value: 'retail', label: 'Retail' },
-                      { value: 'horeca', label: 'Horeca' },
-                      { value: 'productie', label: 'Productie' },
-                      { value: 'gezondheidszorg', label: 'Zorg' },
-                      { value: 'onderwijs', label: 'Onderwijs' },
-                      { value: 'overig', label: 'Overig' },
+                      { value: 'kantoor', label: 'Kantoor', icon: Briefcase },
+                      { value: 'retail', label: 'Retail', icon: Storefront },
+                      { value: 'horeca', label: 'Horeca', icon: ForkKnife },
+                      { value: 'productie', label: 'Productie', icon: Factory },
+                      { value: 'gezondheidszorg', label: 'Zorg', icon: FirstAid },
+                      { value: 'onderwijs', label: 'Onderwijs', icon: GraduationCap },
+                      { value: 'overig', label: 'Overig', icon: SquaresFour },
                     ].map((option) => {
                       const isSelected = formData.typeBedrijf === option.value
+                      const Icon = option.icon
                       
                       return (
                         <button
                           key={option.value}
                           type="button"
                           onClick={() => setFormData({ ...formData, typeBedrijf: option.value as any })}
-                          className={`p-3 rounded-xl border-2 transition-all ${
+                          className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
                             isSelected
-                              ? 'border-brand-teal-500 bg-brand-teal-50'
-                              : 'border-gray-200 bg-white hover:border-gray-300'
+                              ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg shadow-brand-teal-500/20'
+                              : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
                           }`}
                         >
-                          <div className={`text-sm font-semibold ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
+                          <Icon 
+                            weight="duotone" 
+                            className={`w-8 h-8 mb-2 transition-colors ${
+                              isSelected ? 'text-brand-teal-600' : 'text-gray-400'
+                            }`}
+                          />
+                          <div className={`text-sm font-semibold ${isSelected ? 'text-brand-navy-500' : 'text-gray-700'}`}>
                             {option.label}
                           </div>
+                          {isSelected && (
+                            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-teal-600 rounded-full flex items-center justify-center">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
                         </button>
                       )
                     })}
