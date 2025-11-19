@@ -119,8 +119,6 @@ export function VerbruikForm() {
 
     const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
     
-    console.log(`[Address Lookup ${index}] Start: ${postcodeClean} ${huisnummer}`)
-    
     setLoadingAddresses(prev => ({ ...prev, [index]: true }))
     clearErrors(`leveringsadressen.${index}`)
     
@@ -131,12 +129,10 @@ export function VerbruikForm() {
         const data = await response.json()
         
         if (data.error) {
-          console.warn('[Address Lookup] API warning:', data.error)
+          // API key niet geconfigureerd, maar laat gebruiker doorgaan
           setLoadingAddresses(prev => ({ ...prev, [index]: false }))
           return
         }
-        
-        console.log(`[Address Lookup ${index}] Success:`, data)
         
         // Update state met nieuwe data
         setLeveringsadressen(prev => {
@@ -156,8 +152,6 @@ export function VerbruikForm() {
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
       } else if (response.status === 404) {
-        console.log(`[Address Lookup ${index}] Not found (404)`)
-        
         setError(`leveringsadressen.${index}.postcode` as any, {
           message: 'Adres niet gevonden. Controleer postcode en huisnummer.'
         })
@@ -175,7 +169,7 @@ export function VerbruikForm() {
         setValue(`leveringsadressen.${index}.straat`, '')
         setValue(`leveringsadressen.${index}.plaats`, '')
       } else {
-        console.error(`[Address Lookup ${index}] Error:`, response.status)
+        console.error(`Postcode API error ${response.status}`)
         
         // Clear oude data
         setLeveringsadressen(prev => {
@@ -191,7 +185,7 @@ export function VerbruikForm() {
       
       setLoadingAddresses(prev => ({ ...prev, [index]: false }))
     } catch (error) {
-      console.error(`[Address Lookup ${index}] Exception:`, error)
+      console.error('Postcode API exception:', error)
       setLoadingAddresses(prev => ({ ...prev, [index]: false }))
       
       // Clear oude data
@@ -208,8 +202,6 @@ export function VerbruikForm() {
   }, [setValue, clearErrors, setError])
 
   const handleLeveringsadresChange = (index: number, field: string, value: string) => {
-    console.log(`[Input Change ${index}] ${field} = "${value}"`)
-    
     // Update state
     setLeveringsadressen(prev => {
       const updated = [...prev]
@@ -249,23 +241,14 @@ export function VerbruikForm() {
       const postcode = field === 'postcode' ? value : currentAdres.postcode
       const huisnummer = field === 'huisnummer' ? value : currentAdres.huisnummer
       
-      console.log(`[Debounce Check ${index}] Postcode: "${postcode}", Huisnummer: "${huisnummer}"`)
-      
       // Check of beide ingevuld zijn EN postcode is geldig
       if (postcode && huisnummer && postcode.length >= 6 && huisnummer.length >= 1) {
         if (isValidPostcode(postcode)) {
-          console.log(`[Debounce ${index}] Setting 800ms timer...`)
-          
           // Start debounce timer (800ms om zeker te zijn dat gebruiker klaar is)
           debounceTimers.current[index] = setTimeout(() => {
-            console.log(`[Debounce ${index}] Timer fired! Calling API...`)
             fetchAddress(index, postcode, huisnummer)
-          }, 800) // 800ms is veilig voor typen van huisnummers
-        } else {
-          console.log(`[Debounce ${index}] Postcode not valid yet, skipping`)
+          }, 800)
         }
-      } else {
-        console.log(`[Debounce ${index}] Not ready: postcode="${postcode}" (${postcode?.length}), huisnummer="${huisnummer}" (${huisnummer?.length})`)
       }
     }
   }
@@ -341,7 +324,7 @@ export function VerbruikForm() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
                 <Input
                   label="Postcode"
@@ -361,6 +344,13 @@ export function VerbruikForm() {
                 placeholder="12"
                 error={errors.leveringsadressen?.[index]?.huisnummer?.message}
                 required
+              />
+              <Input
+                label="Toevoeging"
+                type="text"
+                value={adres.toevoeging || ''}
+                onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
+                placeholder="A"
               />
             </div>
 
