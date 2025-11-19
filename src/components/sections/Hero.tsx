@@ -21,9 +21,9 @@ export function Hero() {
 
       <div className="container-custom py-8 md:py-12 lg:py-20 relative z-10 w-full">
         {/* Mobile Layout */}
-        <div className="lg:hidden space-y-8 px-4">
+        <div className="lg:hidden space-y-8 px-2">
           {/* Heading */}
-          <div className="text-center">
+          <div className="text-center px-2">
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
               Stop met te veel betalen voor{' '}
               <span className="text-brand-teal-500">energie</span>
@@ -33,7 +33,7 @@ export function Hero() {
             </p>
           </div>
 
-          {/* Calculator - Prominent on mobile */}
+          {/* Calculator - Prominent on mobile, minder marge */}
           <div className="w-full">
             <QuickCalculator />
           </div>

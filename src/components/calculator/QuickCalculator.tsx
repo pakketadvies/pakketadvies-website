@@ -237,9 +237,9 @@ export function QuickCalculator() {
   })
 
   return (
-    <div className="bg-white rounded-2xl p-4 md:p-5 lg:p-6 shadow-xl border border-gray-100 w-full max-h-[85vh] lg:max-h-none overflow-y-auto">
+    <div className="bg-white rounded-2xl p-3 md:p-5 lg:p-6 shadow-xl border border-gray-100 w-full">
       {/* Header */}
-      <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-5">
+      <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-5">
         <div className="w-10 h-10 md:w-11 md:h-11 bg-brand-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
           <Lightning weight="duotone" className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </div>
@@ -249,7 +249,7 @@ export function QuickCalculator() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-3 md:space-y-4">
+      <form onSubmit={onSubmit} className="space-y-2.5 md:space-y-4">
         {/* Leveringsadres - EXACT zoals VerbruikForm */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -259,40 +259,40 @@ export function QuickCalculator() {
             </label>
           </div>
           
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3 md:p-4 space-y-3">
+          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-2 md:p-4 space-y-2 md:space-y-3">
             <div className="grid grid-cols-6 gap-2">
               <div className="col-span-3">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Postcode</label>
+                <label className="block text-xs font-medium text-gray-700 mb-0.5">Postcode</label>
                 <input
                   type="text"
                   value={leveringsadressen[0].postcode}
                   onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
                   placeholder="1234AB"
                   maxLength={6}
-                  className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  className="w-full px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                   required
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Huisnummer</label>
+                <label className="block text-xs font-medium text-gray-700 mb-0.5">Huisnummer</label>
                 <input
                   type="text"
                   value={leveringsadressen[0].huisnummer}
                   onChange={(e) => handleAddressChange('huisnummer', e.target.value)}
                   placeholder="12"
-                  className="w-full px-2 md:px-3 py-2 text-xs md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  className="w-full px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                   required
                 />
               </div>
               <div className="col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Toev.</label>
+                <label className="block text-xs font-medium text-gray-700 mb-0.5">Toev.</label>
                 <input
                   type="text"
                   value={leveringsadressen[0].toevoeging || ''}
                   onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
                   placeholder="A"
                   maxLength={4}
-                  className="w-full px-1 md:px-2 py-2 text-xs md:text-sm text-center rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  className="w-full px-1 md:px-2 py-1.5 md:py-2 text-xs md:text-sm text-center rounded-lg border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                 />
               </div>
             </div>
@@ -346,7 +346,7 @@ export function QuickCalculator() {
                   type="number"
                   {...register('elektriciteitNormaal', { valueAsNumber: true })}
                   placeholder="3500"
-                  className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  className="w-full px-2 md:px-3 py-1.5 md:py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                 />
                 <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
               </div>
@@ -365,7 +365,7 @@ export function QuickCalculator() {
                     type="number"
                     {...register('elektriciteitDal', { valueAsNumber: true })}
                     placeholder="2500"
-                    className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                    className="w-full px-2 md:px-3 py-1.5 md:py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                   />
                   <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
                 </div>
@@ -425,7 +425,7 @@ export function QuickCalculator() {
                 type="number"
                 {...register('terugleveringJaar', { valueAsNumber: true })}
                 placeholder="3000"
-                className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                className="w-full px-2 md:px-3 py-1.5 md:py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
               />
               <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
             </div>
@@ -448,7 +448,7 @@ export function QuickCalculator() {
                   type="number"
                   {...register('gasJaar', { valueAsNumber: true })}
                   placeholder="1200"
-                  className="w-full px-2 md:px-3 py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
+                  className="w-full px-2 md:px-3 py-1.5 md:py-2 pr-11 md:pr-12 text-xs md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                 />
                 <span className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">m³</span>
               </div>
