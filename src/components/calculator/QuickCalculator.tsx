@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -77,7 +77,8 @@ export function QuickCalculator() {
   }])
   const [loadingAddress, setLoadingAddress] = useState(false)
   
-  // Debounce refs
+  // Refs voor debouncing en duplicate prevention (exact zoals VerbruikForm)
+  const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const {
@@ -96,7 +97,80 @@ export function QuickCalculator() {
     },
   })
 
-  // Address lookup (simplified for quick calc - only first address)
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (addressTimeoutRef.current) {
+        clearTimeout(addressTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Valideer of postcode compleet is (exact zoals VerbruikForm)
+  const isValidPostcode = (postcode: string): boolean => {
+    const clean = postcode.toUpperCase().replace(/\s/g, '')
+    return /^\d{4}[A-Z]{2}$/.test(clean)
+  }
+
+  // Fetch address - exact zoals VerbruikForm
+  const fetchAddress = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    // Check of dit dezelfde lookup is als de laatste (voorkom dubbele calls)
+    const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
+    if (lastLookup.current === lookupKey) {
+      return // Skip, we hebben dit al opgezocht
+    }
+
+    const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
+    
+    setLoadingAddress(true)
+    
+    try {
+      let url = `/api/postcode?postcode=${postcodeClean}&number=${huisnummer}`
+      if (toevoeging && toevoeging.trim()) {
+        url += `&addition=${encodeURIComponent(toevoeging.trim())}`
+      }
+      
+      const response = await fetch(url)
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (data.error) {
+          // API geeft error terug (maar met 200 status)
+          console.log('Address error:', data.error)
+          setLoadingAddress(false)
+          return
+        }
+        
+        // Update state met nieuwe data (exact zoals VerbruikForm)
+        setLeveringsadressen([{
+          ...leveringsadressen[0],
+          straat: data.street || '',
+          plaats: data.city || '',
+        }])
+        
+        // Sla lookup key op
+        lastLookup.current = lookupKey
+      } else if (response.status === 404) {
+        const errorData = await response.json()
+        console.log('Address not found:', errorData.error)
+        // Clear address fields
+        setLeveringsadressen([{
+          ...leveringsadressen[0],
+          straat: '',
+          plaats: '',
+        }])
+      } else {
+        console.error('Address API error:', response.status)
+      }
+    } catch (error) {
+      console.error('Address fetch exception:', error)
+    } finally {
+      setLoadingAddress(false)
+    }
+  }, [leveringsadressen])
+
+  // Address change handler - exact zoals VerbruikForm
   const handleAddressChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
     const newAdres = { ...leveringsadressen[0] }
     newAdres[field] = value
@@ -114,41 +188,15 @@ export function QuickCalculator() {
       clearTimeout(addressTimeoutRef.current)
     }
     
-    // Debounce address lookup
-    const postcodeComplete = newAdres.postcode.length === 6
+    // Validatie: postcode moet compleet zijn (6 karakters, 4 cijfers + 2 letters)
+    const postcodeComplete = isValidPostcode(newAdres.postcode)
     const hasHuisnummer = newAdres.huisnummer.trim().length > 0
     
+    // Alleen API call als postcode compleet EN huisnummer ingevuld
     if (postcodeComplete && hasHuisnummer) {
       addressTimeoutRef.current = setTimeout(() => {
         fetchAddress(newAdres.postcode, newAdres.huisnummer, newAdres.toevoeging)
-      }, 800)
-    }
-  }
-
-  const fetchAddress = async (postcode: string, huisnummer: string, toevoeging?: string) => {
-    setLoadingAddress(true)
-    
-    try {
-      const url = `/api/postcode?postcode=${encodeURIComponent(postcode)}&number=${encodeURIComponent(huisnummer)}${toevoeging ? `&addition=${encodeURIComponent(toevoeging)}` : ''}`
-      const response = await fetch(url)
-      const data = await response.json()
-      
-      // PDOK API returns 'street' and 'city', not 'straat' and 'plaats'
-      if (response.ok && data.street && data.city) {
-        setLeveringsadressen([{
-          ...leveringsadressen[0],
-          straat: data.street,
-          plaats: data.city,
-        }])
-      } else if (data.error) {
-        // Show error but don't block form
-        console.log('Address lookup:', data.error)
-      }
-    } catch (error) {
-      // Silent fail for quick calc
-      console.error('Address fetch error:', error)
-    } finally {
-      setLoadingAddress(false)
+      }, 800) // 800ms debounce zoals VerbruikForm
     }
   }
 
