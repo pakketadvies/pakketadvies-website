@@ -17,7 +17,8 @@ import {
   Info,
   Plus,
   Trash,
-  MagnifyingGlass
+  MagnifyingGlass,
+  Gauge
 } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -186,8 +187,8 @@ export function VerbruikForm() {
       {/* Leveringsadres - eerst! */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-brand-navy-500 rounded-xl flex items-center justify-center">
-            <MapPin weight="duotone" className="w-5 h-5 text-brand-teal-500" />
+          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+            <MapPin weight="duotone" className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-brand-navy-500">Waar wordt de energie geleverd?</h3>
@@ -241,9 +242,9 @@ export function VerbruikForm() {
             )}
 
             {adres.straat && adres.plaats && !loadingAddresses[index] && (
-              <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <CheckCircle weight="fill" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-green-900">
+              <div className="flex items-start gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg">
+                <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-brand-teal-900">
                   <div className="font-semibold">{adres.straat} {adres.huisnummer}</div>
                   <div>{adres.postcode} {adres.plaats}</div>
                 </div>
@@ -267,7 +268,7 @@ export function VerbruikForm() {
       {/* Elektriciteitsverbruik */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
             <Lightning weight="duotone" className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -276,10 +277,10 @@ export function VerbruikForm() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-6 space-y-6">
+        <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-6">
           {/* Normaal tarief (altijd zichtbaar) */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
               {heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -287,7 +288,7 @@ export function VerbruikForm() {
                 type="number"
                 {...register('elektriciteitNormaal', { valueAsNumber: true })}
                 placeholder="Bijv. 3500"
-                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
                 kWh
@@ -301,7 +302,7 @@ export function VerbruikForm() {
           {/* Dal tarief (alleen bij dubbele meter) */}
           {!heeftEnkeleMeter && (
             <div className="animate-slide-down">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
                 Dal tarief (nacht/weekend) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -309,7 +310,7 @@ export function VerbruikForm() {
                   type="number"
                   {...register('elektriciteitDal', { valueAsNumber: true })}
                   placeholder="Bijv. 2500"
-                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
                   kWh
@@ -345,9 +346,9 @@ export function VerbruikForm() {
             </div>
           </label>
 
-          <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <Info weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-900 leading-relaxed">
+          <div className="flex items-start gap-2 p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
+            <Info weight="duotone" className="w-5 h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-brand-navy-700 leading-relaxed">
               <strong>Tip:</strong> Bij een dubbele meter betaal je overdag een ander tarief dan 's nachts en in het weekend. 
               Bij een enkele meter is er maar één tarief.
             </p>
@@ -357,7 +358,7 @@ export function VerbruikForm() {
 
       {/* Zonnepanelen */}
       <div className="space-y-4">
-        <label className="flex items-center gap-3 cursor-pointer group p-4 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl hover:border-amber-300 transition-all">
+        <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-5 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
           <input
             type="checkbox"
             checked={heeftZonnepanelen}
@@ -368,17 +369,17 @@ export function VerbruikForm() {
                 setValue('terugleveringJaar', null)
               }
             }}
-            className="w-5 h-5 rounded-md border-2 border-amber-300 text-amber-600 focus:ring-amber-500 focus:ring-offset-2 flex-shrink-0"
+            className="w-5 h-5 rounded-md border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
           />
-          <Sun weight="duotone" className="w-6 h-6 text-amber-600 flex-shrink-0" />
-          <span className="text-base font-semibold text-brand-navy-500 group-hover:text-amber-700 transition-colors">
+          <Sun weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0" />
+          <span className="text-base font-semibold text-brand-navy-500 group-hover:text-brand-teal-700 transition-colors">
             Ja, wij hebben zonnepanelen
           </span>
         </label>
 
         {heeftZonnepanelen && (
-          <div className="animate-slide-down bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl p-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
+            <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
               Teruglevering per jaar <span className="text-red-500">*</span>
             </label>
             <div className="relative mb-4">
@@ -386,7 +387,7 @@ export function VerbruikForm() {
                 type="number"
                 {...register('terugleveringJaar', { valueAsNumber: true })}
                 placeholder="Bijv. 3000"
-                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all text-brand-navy-500 font-medium"
+                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
                 kWh
@@ -396,9 +397,9 @@ export function VerbruikForm() {
               <p className="mb-3 text-sm text-red-600">{errors.terugleveringJaar.message}</p>
             )}
 
-            <div className="flex items-start gap-2 p-3 bg-amber-100 border border-amber-300 rounded-lg">
-              <Lightbulb weight="duotone" className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-900 leading-relaxed">
+            <div className="flex items-start gap-2 p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
+              <Lightbulb weight="duotone" className="w-5 h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-brand-navy-700 leading-relaxed">
                 <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
                 die optimaal profiteren van je energieopbrengst en de salderingsregeling.
               </p>
@@ -410,7 +411,7 @@ export function VerbruikForm() {
       {/* Gasverbruik */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
             <Flame weight="duotone" className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -420,8 +421,8 @@ export function VerbruikForm() {
         </div>
 
         {!geenGasaansluiting && (
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
+            <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
               Gasverbruik per jaar <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -429,7 +430,7 @@ export function VerbruikForm() {
                 type="number"
                 {...register('gasJaar', { valueAsNumber: true })}
                 placeholder="Bijv. 1200"
-                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
                 m³
@@ -469,7 +470,7 @@ export function VerbruikForm() {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-            <DeviceMobile weight="duotone" className="w-5 h-5 text-white" />
+            <Gauge weight="duotone" className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-brand-navy-500">Type meter</h3>
@@ -480,7 +481,7 @@ export function VerbruikForm() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
             { value: 'slim', label: 'Slimme meter', icon: DeviceMobile, desc: 'Digitale uitlezing' },
-            { value: 'oud', label: 'Oude meter', icon: Lightning, desc: 'Draaiende schijf' },
+            { value: 'oud', label: 'Oude meter', icon: Gauge, desc: 'Draaiende schijf' },
             { value: 'weet_niet', label: 'Weet ik niet', icon: CheckCircle, desc: 'Standaard' },
           ].map((option) => {
             const Icon = option.icon
@@ -497,7 +498,7 @@ export function VerbruikForm() {
                 className={`p-4 rounded-xl border-2 transition-all text-left ${
                   isSelected
                     ? 'border-brand-teal-500 bg-brand-teal-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <Icon weight="duotone" className={`w-8 h-8 mb-2 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`} />
@@ -513,7 +514,7 @@ export function VerbruikForm() {
 
       {/* Submit */}
       <div className="pt-6">
-        <Button type="submit" size="lg" className="w-full">
+        <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
           <MagnifyingGlass weight="bold" className="w-5 h-5 mr-2" />
           Bekijk mijn aanbiedingen
         </Button>

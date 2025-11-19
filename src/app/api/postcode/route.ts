@@ -12,6 +12,17 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  // Clean postcode: remove all spaces and make uppercase
+  const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
+  
+  // Validate Dutch postcode format (4 digits + 2 letters)
+  if (!/^\d{4}[A-Z]{2}$/.test(postcodeClean)) {
+    return NextResponse.json(
+      { error: 'Ongeldige postcode formaat' },
+      { status: 400 }
+    )
+  }
+
   const apiKey = process.env.POSTCODE_API_KEY
 
   if (!apiKey) {
@@ -25,16 +36,20 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
-      `https://postcode.tech/api/v1/postcode?postcode=${postcode}&number=${number}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    )
+    // URL encode parameters properly
+    const url = `https://postcode.tech/api/v1/postcode?postcode=${encodeURIComponent(postcodeClean)}&number=${encodeURIComponent(number)}`
+    
+    console.log('[Postcode API] Request:', { postcode: postcodeClean, number, url })
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+    })
 
     if (!response.ok) {
+      console.error('[Postcode API] Error response:', response.status, await response.text())
+      
       if (response.status === 404) {
         return NextResponse.json(
           { error: 'Adres niet gevonden' },
@@ -46,6 +61,8 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
+    console.log('[Postcode API] Success:', data)
+    
     return NextResponse.json({
       street: data.street || '',
       city: data.city || '',
@@ -53,7 +70,7 @@ export async function GET(request: NextRequest) {
       province: data.province || '',
     })
   } catch (error) {
-    console.error('Postcode API error:', error)
+    console.error('[Postcode API] Exception:', error)
     // Return success but with empty data so user can continue
     return NextResponse.json({
       street: '',
