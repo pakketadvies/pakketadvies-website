@@ -14,32 +14,43 @@ export async function GET(request: Request) {
 
     const apiKey = process.env.KVK_API_KEY
     if (!apiKey) {
-      console.error('KVK_API_KEY niet geconfigureerd')
-      return NextResponse.json(
-        { error: 'KvK API niet beschikbaar' },
-        { status: 500 }
-      )
+      console.error('[KVK Search] KVK_API_KEY niet geconfigureerd')
+      // Return empty results instead of error - form blijft bruikbaar
+      return NextResponse.json({
+        results: [],
+        total: 0,
+        message: 'KvK zoeken tijdelijk niet beschikbaar'
+      })
     }
 
+    console.log(`[KVK Search] Zoeken naar: "${query}"`)
+
     // Zoek bedrijven via KvK Zoeken API
-    const response = await fetch(
-      `https://api.kvk.nl/api/v1/zoeken?naam=${encodeURIComponent(query)}&pagina=1&resultatenPerPagina=10`,
-      {
-        headers: {
-          'apikey': apiKey,
-        },
-      }
-    )
+    const kvkUrl = `https://api.kvk.nl/api/v1/zoeken?naam=${encodeURIComponent(query)}&pagina=1&resultatenPerPagina=10`
+    console.log(`[KVK Search] URL: ${kvkUrl}`)
+    
+    const response = await fetch(kvkUrl, {
+      headers: {
+        'apikey': apiKey,
+      },
+    })
+
+    console.log(`[KVK Search] Response status: ${response.status}`)
 
     if (!response.ok) {
-      console.error('KvK API error:', response.status, await response.text())
-      return NextResponse.json(
-        { error: 'Kon niet zoeken in KvK register' },
-        { status: response.status }
-      )
+      const errorText = await response.text()
+      console.error('[KVK Search] API error:', response.status, errorText)
+      
+      // Return empty results instead of error - form blijft bruikbaar
+      return NextResponse.json({
+        results: [],
+        total: 0,
+        message: 'Geen resultaten gevonden of KvK API tijdelijk niet beschikbaar'
+      })
     }
 
     const data = await response.json()
+    console.log(`[KVK Search] Found ${data.totaal || 0} results`)
 
     // Transformeer KvK data naar ons formaat
     const results = data.resultaten?.map((item: any) => ({
@@ -54,10 +65,12 @@ export async function GET(request: Request) {
       total: data.totaal || 0,
     })
   } catch (error) {
-    console.error('KvK search error:', error)
-    return NextResponse.json(
-      { error: 'Er ging iets mis bij het zoeken' },
-      { status: 500 }
-    )
+    console.error('[KVK Search] Exception:', error)
+    // Return empty results instead of error - form blijft bruikbaar
+    return NextResponse.json({
+      results: [],
+      total: 0,
+      message: 'Er ging iets mis bij het zoeken. Je kunt handmatig verder gaan.'
+    })
   }
 }

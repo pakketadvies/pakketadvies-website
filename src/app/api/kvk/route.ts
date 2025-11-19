@@ -23,23 +23,27 @@ export async function GET(request: NextRequest) {
   const apiKey = process.env.KVK_API_KEY
 
   if (!apiKey) {
-    console.error('KVK_API_KEY not configured')
+    console.error('[KVK Lookup] KVK_API_KEY not configured')
     return NextResponse.json(
-      { error: 'KvK API niet geconfigureerd' },
-      { status: 500 }
+      { error: 'KvK API niet geconfigureerd. Vul handmatig je bedrijfsgegevens in.' },
+      { status: 503 }
     )
   }
 
   try {
+    console.log(`[KVK Lookup] Opzoeken KvK: ${kvkClean}`)
+    
     // Use Official KvK API
-    const response = await fetch(
-      `https://api.kvk.nl/api/v1/basisprofielen/${kvkClean}`,
-      {
-        headers: {
-          'apikey': apiKey,
-        },
-      }
-    )
+    const kvkUrl = `https://api.kvk.nl/api/v1/basisprofielen/${kvkClean}`
+    console.log(`[KVK Lookup] URL: ${kvkUrl}`)
+    
+    const response = await fetch(kvkUrl, {
+      headers: {
+        'apikey': apiKey,
+      },
+    })
+
+    console.log(`[KVK Lookup] Response status: ${response.status}`)
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -48,10 +52,18 @@ export async function GET(request: NextRequest) {
           { status: 404 }
         )
       }
-      throw new Error(`API error: ${response.status}`)
+      
+      const errorText = await response.text()
+      console.error(`[KVK Lookup] API error:`, response.status, errorText)
+      
+      return NextResponse.json(
+        { error: `KvK API fout (${response.status}). Vul handmatig je gegevens in.` },
+        { status: response.status }
+      )
     }
 
     const data = await response.json()
+    console.log(`[KVK Lookup] Success: ${data.naam}`)
     
     // Extract address from hoofdvestiging
     const hoofdvestiging = data._embedded?.hoofdvestiging
@@ -76,14 +88,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(bedrijfsgegevens)
   } catch (error) {
-    console.error('KvK API error:', error)
+    console.error('[KVK Lookup] Exception:', error)
     return NextResponse.json(
       { 
-        error: 'Kon bedrijfsgegevens niet ophalen. Probeer het later opnieuw.',
+        error: 'Kon bedrijfsgegevens niet ophalen. Vul handmatig je gegevens in.',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )
   }
 }
-
