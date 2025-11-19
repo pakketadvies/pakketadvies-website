@@ -424,7 +424,7 @@ export function BedrijfsgegevensForm() {
             )}
             
             <p className="mt-2 text-xs text-gray-500">
-              💡 Voer je volledige KvK-nummer in (8 cijfers) of vul handmatig je bedrijfsnaam in
+              💡 Typ je KvK-nummer of bedrijfsnaam om te zoeken
             </p>
           </div>
 
