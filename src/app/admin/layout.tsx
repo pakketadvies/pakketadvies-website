@@ -1,11 +1,25 @@
-import { ReactNode } from 'react'
-import '../globals.css'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "../globals.css";
 
-export default function AdminRootLayout({
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "PakketAdvies Admin",
+  description: "Admin panel voor PakketAdvies",
+};
+
+export default function AdminLayout({
   children,
 }: {
-  children: ReactNode
+  children: React.ReactNode;
 }) {
-  return children
+  return (
+    <html lang="nl">
+      <body className={inter.className}>
+        {children}
+      </body>
+    </html>
+  );
 }
 
