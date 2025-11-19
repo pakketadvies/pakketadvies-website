@@ -50,14 +50,15 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Check if user has admin role
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role !== 'admin') {
-      // Redirect to home if not admin
+    // If there's an error or no profile, redirect to home
+    if (profileError || !profile || profile.role !== 'admin') {
+      console.error('Admin check failed:', profileError?.message || 'No admin role')
       const url = request.nextUrl.clone()
       url.pathname = '/'
       return NextResponse.redirect(url)
