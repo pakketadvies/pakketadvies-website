@@ -20,7 +20,7 @@ import {
   MagnifyingGlass,
   Gauge
 } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 const verbruikSchema = z.object({
@@ -69,6 +69,9 @@ export function VerbruikForm() {
     { postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }
   ])
   const [loadingAddresses, setLoadingAddresses] = useState<{ [key: number]: boolean }>({})
+  
+  // Debounce refs voor elke adres
+  const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({})
 
   const {
     register,
@@ -92,14 +95,38 @@ export function VerbruikForm() {
     },
   })
 
-  // Fetch address from postcode API
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimers.current).forEach(timer => clearTimeout(timer))
+    }
+  }, [])
+
+  // Valideer of postcode compleet is (voor client-side check)
+  const isValidPostcode = (postcode: string): boolean => {
+    const clean = postcode.toUpperCase().replace(/\s/g, '')
+    return /^\d{4}[A-Z]{2}$/.test(clean)
+  }
+
+  // Fetch address from postcode API met debouncing
   const fetchAddress = async (index: number) => {
     const adres = leveringsadressen[index]
-    if (!adres.postcode || !adres.huisnummer) return
-
-    const postcodeClean = adres.postcode.replace(/\s/g, '')
     
-    setLoadingAddresses({ ...loadingAddresses, [index]: true })
+    // Check of we genoeg info hebben
+    if (!adres.postcode || !adres.huisnummer) {
+      return
+    }
+
+    // Valideer postcode formaat VOORDAT we API aanroepen
+    if (!isValidPostcode(adres.postcode)) {
+      // Niet compleet, skip API call
+      return
+    }
+
+    const postcodeClean = adres.postcode.toUpperCase().replace(/\s/g, '')
+    
+    setLoadingAddresses(prev => ({ ...prev, [index]: true }))
+    clearErrors(`leveringsadressen.${index}`)
     
     try {
       const response = await fetch(`/api/postcode?postcode=${postcodeClean}&number=${adres.huisnummer}`)
@@ -108,11 +135,13 @@ export function VerbruikForm() {
         const data = await response.json()
         
         if (data.error) {
+          // API key niet geconfigureerd, maar laat gebruiker doorgaan
           console.warn('Postcode lookup warning:', data.error)
-          setLoadingAddresses({ ...loadingAddresses, [index]: false })
+          setLoadingAddresses(prev => ({ ...prev, [index]: false }))
           return
         }
         
+        // Update state MET nieuwe data
         const updated = [...leveringsadressen]
         updated[index] = {
           ...updated[index],
@@ -124,27 +153,83 @@ export function VerbruikForm() {
         setValue(`leveringsadressen.${index}.plaats`, data.city || '')
         clearErrors(`leveringsadressen.${index}`)
       } else if (response.status === 404) {
+        // Adres niet gevonden
         setError(`leveringsadressen.${index}.postcode` as any, {
           message: 'Adres niet gevonden. Controleer postcode en huisnummer.'
         })
+        // Clear oude data
+        const updated = [...leveringsadressen]
+        updated[index] = {
+          ...updated[index],
+          straat: '',
+          plaats: '',
+        }
+        setLeveringsadressen(updated)
+        setValue(`leveringsadressen.${index}.straat`, '')
+        setValue(`leveringsadressen.${index}.plaats`, '')
+      } else {
+        // Andere error (bijv. 400 = invalid format)
+        console.error('Postcode API error:', response.status)
+        // Clear oude data
+        const updated = [...leveringsadressen]
+        updated[index] = {
+          ...updated[index],
+          straat: '',
+          plaats: '',
+        }
+        setLeveringsadressen(updated)
       }
       
-      setLoadingAddresses({ ...loadingAddresses, [index]: false })
+      setLoadingAddresses(prev => ({ ...prev, [index]: false }))
     } catch (error) {
       console.error('Postcode API error:', error)
-      setLoadingAddresses({ ...loadingAddresses, [index]: false })
+      setLoadingAddresses(prev => ({ ...prev, [index]: false }))
+      // Clear oude data bij error
+      const updated = [...leveringsadressen]
+      updated[index] = {
+        ...updated[index],
+        straat: '',
+        plaats: '',
+      }
+      setLeveringsadressen(updated)
     }
   }
 
   const handleLeveringsadresChange = (index: number, field: string, value: string) => {
+    // Update state
     const updated = [...leveringsadressen]
-    updated[index] = { ...updated[index], [field]: value }
+    
+    // Als postcode of huisnummer wijzigt, clear de oude adres data
+    if (field === 'postcode' || field === 'huisnummer') {
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+        straat: '', // Clear oude straat
+        plaats: '', // Clear oude plaats
+      }
+      setValue(`leveringsadressen.${index}.straat`, '')
+      setValue(`leveringsadressen.${index}.plaats`, '')
+    } else {
+      updated[index] = { ...updated[index], [field]: value }
+    }
+    
     setLeveringsadressen(updated)
     setValue(`leveringsadressen.${index}.${field}` as any, value)
 
-    // Auto-fetch als postcode + huisnummer compleet zijn
+    // Clear oude timer
+    if (debounceTimers.current[index]) {
+      clearTimeout(debounceTimers.current[index])
+    }
+
+    // Auto-fetch alleen als postcode + huisnummer beide ingevuld zijn
+    // EN met debouncing (500ms wachten na laatste keystroke)
     if ((field === 'postcode' || field === 'huisnummer') && updated[index].postcode && updated[index].huisnummer) {
-      fetchAddress(index)
+      // Valideer postcode formaat eerst
+      if (isValidPostcode(updated[index].postcode)) {
+        debounceTimers.current[index] = setTimeout(() => {
+          fetchAddress(index)
+        }, 500) // 500ms debounce
+      }
     }
   }
 
@@ -158,6 +243,12 @@ export function VerbruikForm() {
 
   const verwijderLeveringsadres = (index: number) => {
     if (leveringsadressen.length > 1) {
+      // Clear timer voor dit adres
+      if (debounceTimers.current[index]) {
+        clearTimeout(debounceTimers.current[index])
+        delete debounceTimers.current[index]
+      }
+      
       const updated = leveringsadressen.filter((_, i) => i !== index)
       setLeveringsadressen(updated)
       setValue('leveringsadressen', updated)
@@ -242,12 +333,19 @@ export function VerbruikForm() {
             )}
 
             {adres.straat && adres.plaats && !loadingAddresses[index] && (
-              <div className="flex items-start gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg">
+              <div className="flex items-start gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
                 <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-brand-teal-900">
                   <div className="font-semibold">{adres.straat} {adres.huisnummer}</div>
                   <div>{adres.postcode} {adres.plaats}</div>
                 </div>
+              </div>
+            )}
+
+            {errors.leveringsadressen?.[index]?.postcode && !loadingAddresses[index] && (
+              <div className="text-sm text-gray-600 flex items-start gap-2">
+                <Info weight="duotone" className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                <span>Type verder om je adres op te zoeken...</span>
               </div>
             )}
           </div>
@@ -265,6 +363,7 @@ export function VerbruikForm() {
         )}
       </div>
 
+      {/* Rest van het formulier blijft hetzelfde... */}
       {/* Elektriciteitsverbruik */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
