@@ -141,6 +141,7 @@ function ResultatenContent() {
   const [error, setError] = useState<string | null>(null)
   
   // Filter states
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [filters, setFilters] = useState({
     type: 'alle' as 'alle' | 'vast' | 'dynamisch',
     groeneEnergie: false,
@@ -327,9 +328,9 @@ function ResultatenContent() {
             </Button>
           </div>
 
-          {/* Filters & Sort Bar - Always Visible */}
+          {/* Filters Bar - Compact by default */}
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
-            {/* Top row: Quick filters + Sort */}
+            {/* Main row: Quick filters + Sort */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               {/* Quick filter buttons */}
               <div className="flex flex-wrap gap-2">
@@ -341,7 +342,7 @@ function ResultatenContent() {
                       : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
                   }`}
                 >
-                  Alle contracten
+                  Alle
                 </button>
                 <button
                   onClick={() => setFilters({ ...filters, type: 'vast' })}
@@ -374,6 +375,24 @@ function ResultatenContent() {
                   <Leaf weight="duotone" className="w-4 h-4" />
                   Groen
                 </button>
+                
+                {/* Meer filters button */}
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-2"
+                >
+                  <SlidersHorizontal weight="bold" className="w-4 h-4" />
+                  Meer filters
+                  {showAdvancedFilters ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </button>
               </div>
 
               {/* Sort dropdown */}
@@ -392,45 +411,47 @@ function ResultatenContent() {
               </div>
             </div>
 
-            {/* Second row: Advanced filters */}
-            <div className="pt-3 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Rating filter */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-2">Min. beoordeling</label>
-                <select
-                  value={filters.minRating}
-                  onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
-                  className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
-                >
-                  <option value="0">Alle</option>
-                  <option value="4">4+ sterren</option>
-                  <option value="4.5">4.5+ sterren</option>
-                  <option value="4.8">4.8+ sterren</option>
-                </select>
-              </div>
+            {/* Advanced filters (collapsible) */}
+            {showAdvancedFilters && (
+              <div className="pt-3 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-slide-down">
+                {/* Rating filter */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Min. beoordeling</label>
+                  <select
+                    value={filters.minRating}
+                    onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
+                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
+                  >
+                    <option value="0">Alle</option>
+                    <option value="4">4+ sterren</option>
+                    <option value="4.5">4.5+ sterren</option>
+                    <option value="4.8">4.8+ sterren</option>
+                  </select>
+                </div>
 
-              {/* Dynamisch info link */}
-              <div className="flex items-end">
-                <Link
-                  href="/producten/dynamisch-contract"
-                  className="w-full px-4 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-colors border-2 border-brand-teal-200 hover:border-brand-teal-300 flex items-center justify-center gap-2"
-                >
-                  <Lightning weight="duotone" className="w-4 h-4" />
-                  Hoe werkt dynamisch?
-                </Link>
-              </div>
+                {/* Dynamisch info link */}
+                <div className="flex items-end">
+                  <Link
+                    href="/producten/dynamisch-contract"
+                    className="w-full px-4 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-colors border-2 border-brand-teal-200 hover:border-brand-teal-300 flex items-center justify-center gap-2"
+                  >
+                    <Lightning weight="duotone" className="w-4 h-4" />
+                    Hoe werkt dynamisch?
+                  </Link>
+                </div>
 
-              {/* Reset filters */}
-              <div className="flex items-end">
-                <button
-                  onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
-                  className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <X weight="bold" className="w-4 h-4 inline mr-1" />
-                  Reset filters
-                </button>
+                {/* Reset filters */}
+                <div className="flex items-end">
+                  <button
+                    onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
+                    className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <X weight="bold" className="w-4 h-4 inline mr-1" />
+                    Reset filters
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Active filters count */}
             {(filters.type !== 'alle' || filters.groeneEnergie || filters.minRating > 0) && (

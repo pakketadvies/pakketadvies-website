@@ -288,10 +288,10 @@ export function BedrijfsgegevensForm() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-600" />
-            <h3 className="font-semibold text-brand-navy-500">Bedrijf opzoeken (optioneel)</h3>
+            <h3 className="font-semibold text-brand-navy-500">Bedrijf opzoeken</h3>
           </div>
           <p className="text-sm text-gray-600">
-            Zoek op bedrijfsnaam of KvK-nummer - we vullen automatisch je gegevens in
+            Zoek op bedrijfsnaam of KvK-nummer (8 cijfers) - we vullen automatisch je gegevens in
           </p>
           
           <div className="relative" ref={dropdownRef}>
@@ -304,8 +304,13 @@ export function BedrijfsgegevensForm() {
                 onFocus={() => {
                   if (searchResults.length > 0) setShowDropdown(true)
                 }}
-                placeholder="Bedrijfsnaam of KvK-nummer (bijv. 12345678)"
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium"
+                placeholder="Typ bedrijfsnaam of 8-cijferig KvK-nummer..."
+                className={`w-full px-4 py-3 rounded-xl border-2 ${
+                  errors.bedrijfsnaam 
+                    ? 'border-red-500 focus:border-red-500' 
+                    : 'border-gray-300 focus:border-brand-teal-500'
+                } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium`}
+                required
               />
               {searchLoading && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -346,8 +351,12 @@ export function BedrijfsgegevensForm() {
               </div>
             )}
 
+            {errors.bedrijfsnaam && (
+              <p className="mt-2 text-sm text-red-600">{errors.bedrijfsnaam.message}</p>
+            )}
+            
             <p className="mt-2 text-xs text-gray-500">
-              Typ minimaal 2 tekens om te zoeken • 8 cijfers = direct KvK lookup
+              💡 Typ minimaal 2 letters voor zoeken • 8 cijfers = direct KvK lookup
             </p>
           </div>
 
@@ -367,34 +376,6 @@ export function BedrijfsgegevensForm() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Bedrijfsnaam field (always visible, can be manually edited) */}
-      <div>
-        <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-          Bedrijfsnaam <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={bedrijfsnaamInput}
-          onChange={(e) => {
-            setBedrijfsnaamInput(e.target.value)
-            setValue('bedrijfsnaam', e.target.value)
-          }}
-          placeholder="Bijv. Bakkerij De Korenschoof"
-          className={`w-full px-4 py-3 rounded-xl border-2 ${
-            errors.bedrijfsnaam 
-              ? 'border-red-500 focus:border-red-500' 
-              : 'border-gray-300 focus:border-brand-teal-500'
-          } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500`}
-          required
-        />
-        {errors.bedrijfsnaam && (
-          <p className="mt-2 text-sm text-red-600">{errors.bedrijfsnaam.message}</p>
-        )}
-        <p className="mt-2 text-xs text-gray-500">
-          Of zoek hierboven via KvK
-        </p>
       </div>
 
       {/* Correspondentieadres */}
