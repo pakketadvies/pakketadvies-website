@@ -135,15 +135,15 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
             <p>© {currentYear} PakketAdvies. Alle rechten voorbehouden.</p>
             <div className="flex gap-6">
-              <Link href="/privacy" className="hover:text-white transition-colors">
+              <span className="text-gray-500 cursor-not-allowed" title="Komt binnenkort">
                 Privacy
-              </Link>
-              <Link href="/algemene-voorwaarden" className="hover:text-white transition-colors">
+              </span>
+              <span className="text-gray-500 cursor-not-allowed" title="Komt binnenkort">
                 Algemene voorwaarden
-              </Link>
-              <Link href="/cookies" className="hover:text-white transition-colors">
+              </span>
+              <span className="text-gray-500 cursor-not-allowed" title="Komt binnenkort">
                 Cookies
-              </Link>
+              </span>
             </div>
           </div>
         </div>
