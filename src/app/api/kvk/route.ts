@@ -38,9 +38,9 @@ export async function GET(request: NextRequest) {
     console.log(`[KVK Lookup] URL: ${kvkUrl}`)
     
     const response = await fetch(kvkUrl, {
-      headers: {
-        'apikey': apiKey,
-      },
+        headers: {
+          'apikey': apiKey,
+        },
     })
 
     console.log(`[KVK Lookup] Response status: ${response.status}`)

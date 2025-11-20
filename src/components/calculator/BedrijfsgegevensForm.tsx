@@ -366,67 +366,67 @@ export function BedrijfsgegevensForm() {
           </p>
           
           <div className="relative" ref={dropdownRef}>
-            <div className="relative">
-              <input
-                type="text"
-                value={bedrijfsnaamInput}
-                onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => {
-                  if (searchResults.length > 0) setShowDropdown(true)
-                }}
+        <div className="relative">
+          <input
+            type="text"
+            value={bedrijfsnaamInput}
+            onChange={(e) => handleBedrijfsnaamChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (searchResults.length > 0) setShowDropdown(true)
+            }}
                 placeholder="Typ bedrijfsnaam of 8-cijferig KvK-nummer..."
-                className={`w-full px-4 py-3 rounded-xl border-2 ${
-                  errors.bedrijfsnaam 
-                    ? 'border-red-500 focus:border-red-500' 
-                    : 'border-gray-300 focus:border-brand-teal-500'
+            className={`w-full px-4 py-3 rounded-xl border-2 ${
+              errors.bedrijfsnaam 
+                ? 'border-red-500 focus:border-red-500' 
+                : 'border-gray-300 focus:border-brand-teal-500'
                 } focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium`}
-                required
-              />
-              {searchLoading && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-                </div>
-              )}
-              {!searchLoading && showDropdown && searchResults.length > 0 && (
-                <CaretDown weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-              )}
+            required
+          />
+          {searchLoading && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-5 h-5 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
             </div>
-
-            {/* Dropdown */}
-            {showDropdown && searchResults.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
-                {searchResults.map((result, index) => (
-                  <button
-                    key={result.kvkNummer}
-                    type="button"
-                    onClick={() => selectCompany(result)}
-                    className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                      index === selectedIndex ? 'bg-brand-teal-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-brand-navy-500 truncate">
-                          {result.bedrijfsnaam}
-                        </div>
-                        <div className="text-sm text-gray-600 mt-0.5">
-                          KvK: {result.kvkNummer}
-                          {result.plaats && ` • ${result.plaats}`}
-                        </div>
-                      </div>
-                      <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+          )}
+              {!searchLoading && showDropdown && searchResults.length > 0 && (
+            <CaretDown weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          )}
+        </div>
+        
+        {/* Dropdown */}
+        {showDropdown && searchResults.length > 0 && (
+          <div className="absolute z-50 w-full mt-2 bg-white border-2 border-brand-teal-200 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
+            {searchResults.map((result, index) => (
+              <button
+                key={result.kvkNummer}
+                type="button"
+                onClick={() => selectCompany(result)}
+                className={`w-full text-left px-4 py-3 hover:bg-brand-teal-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                  index === selectedIndex ? 'bg-brand-teal-50' : ''
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-brand-navy-500 truncate">
+                      {result.bedrijfsnaam}
                     </div>
-                  </button>
-                ))}
-              </div>
-            )}
+                    <div className="text-sm text-gray-600 mt-0.5">
+                      KvK: {result.kvkNummer}
+                      {result.plaats && ` • ${result.plaats}`}
+                    </div>
+                  </div>
+                  <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
 
-            {errors.bedrijfsnaam && (
-              <p className="mt-2 text-sm text-red-600">{errors.bedrijfsnaam.message}</p>
-            )}
+        {errors.bedrijfsnaam && (
+          <p className="mt-2 text-sm text-red-600">{errors.bedrijfsnaam.message}</p>
+        )}
             
-            <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-gray-500">
               💡 Typ je KvK-nummer of bedrijfsnaam om te zoeken
             </p>
           </div>
@@ -520,38 +520,38 @@ export function BedrijfsgegevensForm() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <Input
-              label="Contactpersoon"
-              placeholder="Voor- en achternaam"
-              error={errors.contactpersoon?.message}
-              {...register('contactpersoon')}
-              required
-            />
-          </div>
+        <Input
+          label="Contactpersoon"
+          placeholder="Voor- en achternaam"
+          error={errors.contactpersoon?.message}
+          {...register('contactpersoon')}
+          required
+        />
+      </div>
 
-          <div>
-            <Input
-              label="E-mailadres"
-              type="email"
-              placeholder="naam@bedrijf.nl"
-              error={errors.email?.message}
-              helpText="We sturen je advies hier naartoe"
-              {...register('email')}
-              required
-            />
-          </div>
+      <div>
+        <Input
+          label="E-mailadres"
+          type="email"
+          placeholder="naam@bedrijf.nl"
+          error={errors.email?.message}
+          helpText="We sturen je advies hier naartoe"
+          {...register('email')}
+          required
+        />
+      </div>
 
-          <div>
-            <Input
-              label="Telefoonnummer"
-              type="tel"
-              inputMode="tel"
-              placeholder="06 12345678"
-              error={errors.telefoon?.message}
-              helpText="Voor eventuele vragen"
-              {...register('telefoon')}
-              required
-            />
+      <div>
+        <Input
+          label="Telefoonnummer"
+          type="tel"
+          inputMode="tel"
+          placeholder="06 12345678"
+          error={errors.telefoon?.message}
+          helpText="Voor eventuele vragen"
+          {...register('telefoon')}
+          required
+        />
           </div>
         </div>
       </div>

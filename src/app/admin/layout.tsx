@@ -9,11 +9,11 @@ export const metadata: Metadata = {
   description: "Admin panel voor PakketAdvies",
 };
 
-export default function AdminLayout({
+export default function AdminRootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="nl">
       <body className={inter.className}>
