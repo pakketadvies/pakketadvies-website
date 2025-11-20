@@ -531,6 +531,9 @@ function ResultatenContent() {
                 contract={contract}
                 meterType={verbruik?.meterType || 'weet_niet'}
                 heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
+                verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
+                verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
+                verbruikGas={verbruik?.gasJaar || 0}
               />
             ))}
           </div>
