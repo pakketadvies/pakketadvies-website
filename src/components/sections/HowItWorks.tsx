@@ -9,24 +9,28 @@ const steps = [
     icon: Calculator,
     title: 'Bereken je verbruik',
     description: 'Vul in een paar minuten je energieverbruik in. Weet je het niet precies? Geen probleem, wij helpen je met een schatting.',
+    color: 'teal'
   },
   {
     number: '02',
     icon: ChatCircleDots,
     title: 'Ontvang advies op maat',
     description: 'Onze specialisten analyseren jouw situatie en presenteren de beste opties. Vast, dynamisch of een combinatie? Wij adviseren.',
+    color: 'purple'
   },
   {
     number: '03',
     icon: FileText,
     title: 'Kies je contract',
     description: 'Vergelijk alle aanbiedingen helder naast elkaar. Geen verborgen kosten, alleen transparante prijzen en voorwaarden.',
+    color: 'teal'
   },
   {
     number: '04',
     icon: CheckCircle,
     title: 'Wij regelen alles',
     description: 'Jij zegt ja, wij doen de rest. Opzeggen, aanmelden, activeren - binnen 2 weken volledig overgestapt en direct besparen.',
+    color: 'purple'
   },
 ]
 
@@ -86,12 +90,12 @@ export function HowItWorks() {
                   </div>
                   
                   {/* Icon */}
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-navy-500 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.color === 'purple' ? 'bg-brand-purple-500' : 'bg-brand-navy-500'} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon weight="duotone" className="w-8 h-8 text-white" />
                   </div>
                   
                   {/* Content */}
-                  <h3 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 group-hover:text-brand-teal-600 transition-colors">
+                  <h3 className={`font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 group-hover:${step.color === 'purple' ? 'text-brand-purple-600' : 'text-brand-teal-600'} transition-colors`}>
                     {step.title}
                   </h3>
                   

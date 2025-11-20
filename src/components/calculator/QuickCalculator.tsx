@@ -398,8 +398,12 @@ export function QuickCalculator() {
           </label>
         </div>
 
-        {/* Zonnepanelen */}
-        <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-white hover:border-brand-teal-300 hover:bg-brand-teal-50/30 transition-all">
+        {/* Zonnepanelen - Purple accent */}
+        <label className={`flex items-center gap-2.5 cursor-pointer p-3 rounded-lg transition-all ${
+          heeftZonnepanelen
+            ? 'border-2 border-brand-purple-500 bg-brand-purple-50/50'
+            : 'border-2 border-gray-200 bg-white hover:border-brand-purple-300 hover:bg-brand-purple-50/30'
+        }`}>
           <input
             type="checkbox"
             checked={heeftZonnepanelen}
@@ -410,9 +414,9 @@ export function QuickCalculator() {
                 setValue('terugleveringJaar', null)
               }
             }}
-            className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2 flex-shrink-0"
+            className="w-5 h-5 rounded border-2 border-gray-300 text-brand-purple-600 focus:ring-brand-purple-500 focus:ring-2 flex-shrink-0"
           />
-          <Sun weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
+          <Sun weight="duotone" className={`w-5 h-5 flex-shrink-0 ${heeftZonnepanelen ? 'text-brand-purple-600' : 'text-gray-400'}`} />
           <span className="text-sm md:text-sm font-semibold text-brand-navy-500">Wij hebben zonnepanelen</span>
         </label>
 

@@ -60,7 +60,7 @@ export function CTA() {
             </Link>
             
             <Link href="/contact">
-              <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-semibold text-lg border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105">
+              <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-semibold text-lg border-2 border-brand-purple-400/50 hover:bg-brand-purple-500/20 hover:border-brand-purple-400 transition-all duration-300 hover:scale-105">
                 Of neem contact op
               </button>
             </Link>

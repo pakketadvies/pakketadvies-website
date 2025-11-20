@@ -17,49 +17,57 @@ const features = [
     icon: ChartLineUp,
     title: 'Transparante vergelijking',
     description: 'Vergelijk alle beschikbare energieleveranciers in één overzicht. Geen verrassingen, alleen heldere cijfers.',
-    size: 'large'
+    size: 'large',
+    color: 'teal'
   },
   {
     icon: HandCoins,
     title: 'Direct besparen',
     description: 'Gemiddeld 30-40% besparing op je energiekosten',
-    size: 'small'
+    size: 'small',
+    color: 'teal'
   },
   {
     icon: Lightning,
     title: 'Snel geregeld',
     description: 'Binnen 2 weken volledig overgestapt',
-    size: 'small'
+    size: 'small',
+    color: 'teal'
   },
   {
     icon: ShieldCheck,
     title: 'Volledig ontzorgd',
     description: 'Wij regelen alles voor je, van opzeggen tot activeren. Jij hoeft nergens meer aan te denken.',
-    size: 'medium'
+    size: 'medium',
+    color: 'teal'
   },
   {
     icon: Users,
     title: 'Persoonlijk advies',
     description: 'Geen bots of formulieren. Altijd contact met een echte specialist.',
-    size: 'medium'
+    size: 'medium',
+    color: 'purple'
   },
   {
     icon: ClockClockwise,
     title: '24/7 support',
     description: 'Vragen? We staan altijd voor je klaar',
-    size: 'small'
+    size: 'small',
+    color: 'purple'
   },
   {
     icon: Leaf,
     title: 'Groene energie opties',
     description: 'Stap over naar duurzame energie zonder gedoe',
-    size: 'small'
+    size: 'small',
+    color: 'teal'
   },
   {
     icon: Lightbulb,
     title: 'Slimme contracten',
     description: 'We kiezen het perfecte contract voor jouw situatie. Vast, dynamisch of een combinatie - wij weten wat het beste werkt.',
-    size: 'large'
+    size: 'large',
+    color: 'purple'
   },
 ]
 
@@ -107,12 +115,12 @@ export function Features() {
                 {/* Content */}
                 <div className="relative z-10 h-full flex flex-col">
                   {/* Icon */}
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-teal-500 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${feature.color === 'purple' ? 'bg-brand-purple-500' : 'bg-brand-teal-500'} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon weight="duotone" className="w-7 h-7 text-white" />
                   </div>
                   
                   {/* Title */}
-                  <h3 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-3 group-hover:text-brand-teal-600 transition-colors">
+                  <h3 className={`text-xl md:text-2xl font-bold text-brand-navy-500 mb-3 group-hover:${feature.color === 'purple' ? 'text-brand-purple-600' : 'text-brand-teal-600'} transition-colors`}>
                     {feature.title}
                   </h3>
                   
