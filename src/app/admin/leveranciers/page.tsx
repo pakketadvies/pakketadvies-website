@@ -28,18 +28,18 @@ export default async function LeveranciersPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        {/* Header - Mobile optimized */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-brand-navy-500 mb-2">Leveranciers</h1>
-            <p className="text-gray-600">Beheer energieleveranciers en hun logo's</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-navy-500 mb-2">Leveranciers</h1>
+            <p className="text-sm sm:text-base text-gray-600">Beheer energieleveranciers en hun logo's</p>
           </div>
           <Link
             href="/admin/leveranciers/nieuw"
-            className="flex items-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
           >
             <Plus size={20} weight="bold" />
-            Nieuwe leverancier
+            <span className="sm:inline">Nieuwe leverancier</span>
           </Link>
         </div>
 
@@ -63,12 +63,12 @@ export default async function LeveranciersPage() {
           </div>
         </div>
 
-        {/* Leveranciers List */}
+        {/* Leveranciers List - Card layout op mobiel, table op desktop */}
         {leveranciers.length === 0 ? (
-          <div className="bg-white rounded-xl border-2 border-gray-200 p-12 text-center">
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-8 sm:p-12 text-center">
             <Buildings size={48} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Nog geen leveranciers</h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 mb-6">
               Voeg je eerste energieleverancier toe om te beginnen
             </p>
             <Link
@@ -80,89 +80,164 @@ export default async function LeveranciersPage() {
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Logo</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Naam</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Website</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Volgorde</th>
-                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Acties</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {leveranciers.map((leverancier) => (
-                    <tr key={leverancier.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        {leverancier.logo_url ? (
-                          <div className="w-12 h-12 relative rounded-lg overflow-hidden border border-gray-200">
-                            <Image
-                              src={leverancier.logo_url}
-                              alt={leverancier.naam}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <Buildings size={24} className="text-gray-400" />
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-brand-navy-500">{leverancier.naam}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        {leverancier.website ? (
-                          <a
-                            href={leverancier.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-brand-teal-600 hover:underline text-sm"
-                          >
-                            {new URL(leverancier.website).hostname}
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-sm">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
+          <>
+            {/* Mobile Card Layout */}
+            <div className="sm:hidden space-y-4">
+              {leveranciers.map((leverancier) => (
+                <div key={leverancier.id} className="bg-white rounded-xl border-2 border-gray-200 p-4 hover:border-brand-teal-300 transition-all">
+                  <div className="flex items-start gap-4">
+                    {/* Logo */}
+                    <div className="flex-shrink-0">
+                      {leverancier.logo_url ? (
+                        <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200">
+                          <Image
+                            src={leverancier.logo_url}
+                            alt={leverancier.naam}
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Buildings size={28} className="text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="font-bold text-brand-navy-500 text-lg truncate">{leverancier.naam}</h3>
                         {leverancier.actief ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
-                            <CheckCircle size={14} weight="fill" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full flex-shrink-0">
+                            <CheckCircle size={12} weight="fill" />
                             Actief
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                            <XCircle size={14} weight="fill" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full flex-shrink-0">
+                            <XCircle size={12} weight="fill" />
                             Inactief
                           </span>
                         )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-600">{leverancier.volgorde}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/admin/leveranciers/${leverancier.id}`}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="Bewerken"
-                          >
-                            <Pencil size={18} className="text-gray-600" />
-                          </Link>
-                          <DeleteLeverancierButton id={leverancier.id} naam={leverancier.naam} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                      
+                      {leverancier.website && (
+                        <a
+                          href={leverancier.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand-teal-600 hover:underline text-sm block truncate mb-2"
+                        >
+                          {new URL(leverancier.website).hostname}
+                        </a>
+                      )}
+                      
+                      <div className="text-xs text-gray-500 mb-3">
+                        Volgorde: {leverancier.volgorde}
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/admin/leveranciers/${leverancier.id}`}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brand-teal-50 hover:bg-brand-teal-100 text-brand-teal-700 font-medium rounded-lg transition-colors text-sm"
+                        >
+                          <Pencil size={16} weight="bold" />
+                          Bewerken
+                        </Link>
+                        <DeleteLeverancierButton id={leverancier.id} naam={leverancier.naam} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden sm:block bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Logo</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Naam</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Website</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Volgorde</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {leveranciers.map((leverancier) => (
+                      <tr key={leverancier.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          {leverancier.logo_url ? (
+                            <div className="w-12 h-12 relative rounded-lg overflow-hidden border border-gray-200">
+                              <Image
+                                src={leverancier.logo_url}
+                                alt={leverancier.naam}
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <Buildings size={24} className="text-gray-400" />
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-brand-navy-500">{leverancier.naam}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          {leverancier.website ? (
+                            <a
+                              href={leverancier.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-brand-teal-600 hover:underline text-sm"
+                            >
+                              {new URL(leverancier.website).hostname}
+                            </a>
+                          ) : (
+                            <span className="text-gray-400 text-sm">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {leverancier.actief ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
+                              <CheckCircle size={14} weight="fill" />
+                              Actief
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                              <XCircle size={14} weight="fill" />
+                              Inactief
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-gray-600">{leverancier.volgorde}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              href={`/admin/leveranciers/${leverancier.id}`}
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Bewerken"
+                            >
+                              <Pencil size={18} className="text-gray-600" />
+                            </Link>
+                            <DeleteLeverancierButton id={leverancier.id} naam={leverancier.naam} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </AdminLayout>
