@@ -247,125 +247,252 @@ export default function ContractCard({
                 )}
                 
                 {breakdown && !loading && (
-                  <>
-                    {/* KOSTENBREAKDOWN */}
-                    <div className="bg-brand-teal-50 border border-brand-teal-200 rounded-lg p-4 space-y-2">
-                      <h4 className="font-semibold text-brand-navy-500 text-sm mb-3">Opbouw maandbedrag</h4>
+                  <div className="space-y-4">
+                    {/* STROOM SECTIE */}
+                    <div>
+                      <h4 className="font-bold text-brand-navy-500 mb-3">Stroom</h4>
                       
-                      {/* Leverancier */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between items-center text-xs text-gray-600">
-                          <span>Elektriciteit ({totaalElektriciteit.toLocaleString()} kWh)</span>
-                          <span>€{Math.round(breakdown.leverancier.elektriciteit / 12)}/mnd</span>
-                        </div>
-                        {verbruikGas > 0 && (
-                          <div className="flex justify-between items-center text-xs text-gray-600">
-                            <span>Gas ({verbruikGas.toLocaleString()} m³)</span>
-                            <span>€{Math.round(breakdown.leverancier.gas / 12)}/mnd</span>
+                      {/* Variabele kosten */}
+                      <div className="mb-2">
+                        <p className="text-xs font-semibold text-gray-600 mb-1.5">Variabele kosten</p>
+                        <div className="space-y-1">
+                          {/* Leveringskosten normaal */}
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">
+                              Leveringskosten normaal{' '}
+                              <span className="text-xs text-gray-500">
+                                {verbruikElektriciteitNormaal.toLocaleString()} kWh × €{contract.tariefElektriciteit?.toFixed(5) || '0'}
+                              </span>
+                            </span>
+                            <span className="font-medium">€{(breakdown.leverancier.elektriciteit * (verbruikElektriciteitNormaal / totaalElektriciteit)).toFixed(2)}</span>
                           </div>
-                        )}
-                        <div className="flex justify-between items-center text-xs text-gray-600">
-                          <span>Vastrecht</span>
-                          <span>€{Math.round(breakdown.leverancier.vastrecht / 12)}/mnd</span>
-                        </div>
-                      </div>
-                      
-                      <div className="border-t border-brand-teal-300 pt-2 flex justify-between items-center text-xs font-semibold text-brand-teal-900">
-                        <span>Subtotaal leverancier</span>
-                        <span>€{Math.round(breakdown.leverancier.subtotaal / 12)}/mnd</span>
-                      </div>
-                      
-                      {/* Energiebelasting */}
-                      <div className="pt-2 border-t border-brand-teal-200 space-y-1.5">
-                        <div className="flex justify-between items-center text-xs text-gray-600">
-                          <span>Energiebelasting elektriciteit</span>
-                          <span>€{Math.round(breakdown.energiebelasting.elektriciteit / 12)}/mnd</span>
-                        </div>
-                        {verbruikGas > 0 && (
-                          <div className="flex justify-between items-center text-xs text-gray-600">
-                            <span>Energiebelasting gas</span>
-                            <span>€{Math.round(breakdown.energiebelasting.gas / 12)}/mnd</span>
+                          
+                          {/* Leveringskosten dal */}
+                          {verbruikElektriciteitDal > 0 && (
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-600">
+                                Leveringskosten dal{' '}
+                                <span className="text-xs text-gray-500">
+                                  {verbruikElektriciteitDal.toLocaleString()} kWh × €{contract.tariefElektriciteitDal?.toFixed(5) || '0'}
+                                </span>
+                              </span>
+                              <span className="font-medium">€{(breakdown.leverancier.elektriciteit * (verbruikElektriciteitDal / totaalElektriciteit)).toFixed(2)}</span>
+                            </div>
+                          )}
+                          
+                          {/* Terugleverkosten (altijd 0) */}
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">
+                              Terugleverkosten{' '}
+                              <span className="text-xs text-gray-500">0 kWh × €0,00000</span>
+                            </span>
+                            <span className="font-medium">€0,00</span>
                           </div>
-                        )}
-                        <div className="flex justify-between items-center text-xs text-green-700">
-                          <span>Vermindering energiebelasting</span>
-                          <span>-€{Math.round(breakdown.energiebelasting.vermindering / 12)}/mnd</span>
-                        </div>
-                      </div>
-                      
-                      {/* Netbeheer (apart elektriciteit en gas) */}
-                      <div className="pt-2 border-t border-brand-teal-200 space-y-1.5">
-                        <div className="flex justify-between items-center text-xs text-gray-600">
-                          <span>Netbeheer elektriciteit ({breakdown.netbeheer.netbeheerder})</span>
-                          <span>€{Math.round(breakdown.netbeheer.elektriciteit / 12)}/mnd</span>
-                        </div>
-                        {verbruikGas > 0 && (
-                          <div className="flex justify-between items-center text-xs text-gray-600">
-                            <span>Netbeheer gas</span>
-                            <span>€{Math.round(breakdown.netbeheer.gas / 12)}/mnd</span>
+                          
+                          {/* Overheidsheffingen - Schijf 1 */}
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">
+                              Overheidsheffingen{' '}
+                              <span className="text-xs text-gray-500">
+                                0 - {Math.min(2900, totaalElektriciteit).toLocaleString()} kWh × €0,10154
+                              </span>
+                            </span>
+                            <span className="font-medium">
+                              €{(Math.min(2900, totaalElektriciteit) * 0.10154).toFixed(2)}
+                            </span>
                           </div>
-                        )}
+                          
+                          {/* Overheidsheffingen - Schijf 2 (als > 2900 kWh) */}
+                          {totaalElektriciteit > 2900 && (
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-600">
+                                Overheidsheffingen{' '}
+                                <span className="text-xs text-gray-500">
+                                  2.901 - {totaalElektriciteit.toLocaleString()} kWh × €0,10154
+                                </span>
+                              </span>
+                              <span className="font-medium">
+                                €{((totaalElektriciteit - 2900) * 0.10154).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       
-                      {/* Totaal */}
-                      <div className="pt-2 border-t-2 border-brand-teal-400 flex justify-between items-center text-sm font-bold text-brand-navy-500">
-                        <span>Totaal per maand (excl. btw)</span>
-                        <span>€{Math.round(breakdown.totaal.maandExclBtw)}</span>
+                      {/* Leveringstarief normaal */}
+                      <div className="mt-3 pt-2 border-t border-gray-200">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="font-semibold text-brand-navy-500">
+                            Leveringstarief normaal{' '}
+                            <span className="text-xs text-gray-500 font-normal">Leveringstarief + Energiebelasting</span>
+                          </span>
+                          <span className="font-bold text-brand-navy-500">€{(contract.tariefElektriciteit || 0 + 0.10154).toFixed(5)}</span>
+                        </div>
                       </div>
                       
-                      <p className="text-xs text-gray-500 pt-1">
-                        Dit is een berekening op basis van jouw exacte verbruik, aansluitwaarden en netbeheerder.
-                      </p>
+                      {/* Leveringstarief dal */}
+                      {verbruikElektriciteitDal > 0 && (
+                        <div className="mt-2">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="font-semibold text-brand-navy-500">
+                              Leveringstarief dal{' '}
+                              <span className="text-xs text-gray-500 font-normal">Leveringstarief + Energiebelasting</span>
+                            </span>
+                            <span className="font-bold text-brand-navy-500">€{(contract.tariefElektriciteitDal || 0 + 0.10154).toFixed(5)}</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Vaste kosten */}
+                      <div className="mt-3 pt-2 border-t border-gray-200">
+                        <p className="text-xs font-semibold text-gray-600 mb-1.5">Vaste kosten</p>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">Vaste leveringskosten</span>
+                            <span className="font-medium">€{breakdown.leverancier.vastrecht.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">Vermindering energiebelasting</span>
+                            <span className="font-medium text-green-600">€ - {breakdown.energiebelasting.vermindering.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">
+                              Netbeheerkosten ({breakdown.netbeheer.netbeheerder} {aansluitwaardeElektriciteit})
+                            </span>
+                            <span className="font-medium">€{breakdown.netbeheer.elektriciteit.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Totale kosten stroom */}
+                      <div className="mt-3 pt-2 border-t-2 border-gray-300">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-brand-navy-500">Totale kosten stroom</span>
+                          <span className="font-bold text-brand-navy-500">
+                            €{(breakdown.leverancier.elektriciteit + 
+                               breakdown.energiebelasting.elektriciteit + 
+                               breakdown.netbeheer.elektriciteit + 
+                               breakdown.leverancier.vastrecht - 
+                               breakdown.energiebelasting.vermindering).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                     
-                    {/* TARIEVEN (oorspronkelijke sectie) */}
-                    <div className="pt-3 border-t border-gray-200 space-y-2">
-                      <h4 className="font-semibold text-brand-navy-500 text-sm mb-2">Leverancierstarieven</h4>
-                      
-                      {/* Enkeltarief */}
-                      {toonEnkeltarief && contract.tariefElektriciteitEnkel && (
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">Stroom (enkel)</span>
-                          <span className="font-semibold text-brand-navy-500">€{contract.tariefElektriciteitEnkel.toFixed(4)}/kWh</span>
+                    {/* GAS SECTIE */}
+                    {verbruikGas > 0 && (
+                      <div className="pt-4 border-t-2 border-gray-200">
+                        <h4 className="font-bold text-brand-navy-500 mb-3">Gas</h4>
+                        
+                        {/* Variabele kosten */}
+                        <div className="mb-2">
+                          <p className="text-xs font-semibold text-gray-600 mb-1.5">Variabele kosten</p>
+                          <div className="space-y-1">
+                            {/* Leveringskosten gas */}
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-600">
+                                Leveringskosten o.b.v. gasregio 4 (G1){' '}
+                                <span className="text-xs text-gray-500">
+                                  {verbruikGas.toLocaleString()} m³ × €{contract.tariefGas?.toFixed(5) || '0'}
+                                </span>
+                              </span>
+                              <span className="font-medium">€{breakdown.leverancier.gas.toFixed(2)}</span>
+                            </div>
+                            
+                            {/* Overheidsheffingen gas - Schijf 1 */}
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-600">
+                                Overheidsheffingen{' '}
+                                <span className="text-xs text-gray-500">
+                                  {Math.min(1000, verbruikGas).toLocaleString()} m³ × €0,57816
+                                </span>
+                              </span>
+                              <span className="font-medium">
+                                €{(Math.min(1000, verbruikGas) * 0.57816).toFixed(2)}
+                              </span>
+                            </div>
+                            
+                            {/* Overheidsheffingen gas - Schijf 2 (als > 1000 m³) */}
+                            {verbruikGas > 1000 && (
+                              <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-600">
+                                  Overheidsheffingen{' '}
+                                  <span className="text-xs text-gray-500">
+                                    {(verbruikGas - 1000).toLocaleString()} m³ × €0,57816
+                                  </span>
+                                </span>
+                                <span className="font-medium">
+                                  €{((verbruikGas - 1000) * 0.57816).toFixed(2)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Normaal tarief */}
-                      {toonDubbelTarief && contract.tariefElektriciteit && (
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">Stroom (normaal)</span>
-                          <span className="font-semibold text-brand-navy-500">€{contract.tariefElektriciteit.toFixed(4)}/kWh</span>
+                        
+                        {/* Leveringstarief */}
+                        <div className="mt-3 pt-2 border-t border-gray-200">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="font-semibold text-brand-navy-500">
+                              Leveringstarief{' '}
+                              <span className="text-xs text-gray-500 font-normal">Leveringstarief + Energiebelasting</span>
+                            </span>
+                            <span className="font-bold text-brand-navy-500">€{((contract.tariefGas || 0) + 0.57816).toFixed(5)}</span>
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Dal tarief */}
-                      {toonDubbelTarief && contract.tariefElektriciteitDal && (
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">Stroom (dal)</span>
-                          <span className="font-semibold text-brand-navy-500">€{contract.tariefElektriciteitDal.toFixed(4)}/kWh</span>
+                        
+                        {/* Vaste kosten */}
+                        <div className="mt-3 pt-2 border-t border-gray-200">
+                          <p className="text-xs font-semibold text-gray-600 mb-1.5">Vaste kosten</p>
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-600">
+                                Netbeheerkosten ({breakdown.netbeheer.netbeheerder} t/m {aansluitwaardeGas}, 500 &lt; verbruik &lt; 4000)
+                              </span>
+                              <span className="font-medium">€{breakdown.netbeheer.gas.toFixed(2)}</span>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Gas */}
-                      {contract.tariefGas && contract.tariefGas > 0 && (
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">Gas</span>
-                          <span className="font-semibold text-brand-navy-500">€{contract.tariefGas.toFixed(4)}/m³</span>
+                        
+                        {/* Totale kosten gas */}
+                        <div className="mt-3 pt-2 border-t-2 border-gray-300">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-brand-navy-500">Totale kosten gas</span>
+                            <span className="font-bold text-brand-navy-500">
+                              €{(breakdown.leverancier.gas + 
+                                 breakdown.energiebelasting.gas + 
+                                 breakdown.netbeheer.gas).toFixed(2)}
+                            </span>
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Looptijd */}
-                      <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-100">
-                        <span className="text-gray-600">Looptijd</span>
-                        <span className="font-semibold text-brand-navy-500">{contract.looptijd} jaar</span>
                       </div>
-                      
-                      {/* Disclaimer */}
-                      <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                        De leverancierstarieven zijn excl. 21% btw. Energiebelasting en netbeheerkosten zijn hierboven apart weergegeven.
-                      </p>
+                    )}
+                    
+                    {/* TOTAAL SECTIE */}
+                    <div className="pt-4 border-t-2 border-gray-300 bg-yellow-50 -mx-4 -mb-4 px-4 py-4 rounded-b-lg">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-lg text-brand-navy-500">Totaal jaarlijks excl. btw</span>
+                          <span className="font-bold text-lg text-brand-navy-500">€{breakdown.totaal.jaarExclBtw.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm text-gray-600 pt-2 border-t border-yellow-200">
+                          <span>Btw</span>
+                          <span>€{(breakdown.totaal.jaarExclBtw * 0.21).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center font-bold pt-2 border-t-2 border-yellow-300">
+                          <span className="text-brand-navy-500">Geschatte maandelijkse kosten excl. btw</span>
+                          <span className="text-brand-navy-500">€{breakdown.totaal.maandExclBtw.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm text-gray-600">
+                          <span>Totaal jaarlijks incl. btw</span>
+                          <span>€{(breakdown.totaal.jaarExclBtw * 1.21).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm text-gray-600">
+                          <span>Geschatte maandelijkse kosten incl. btw</span>
+                          <span>€{(breakdown.totaal.maandExclBtw * 1.21).toFixed(2)}</span>
+                        </div>
+                      </div>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )}
