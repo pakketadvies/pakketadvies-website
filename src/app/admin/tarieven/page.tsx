@@ -19,10 +19,25 @@ import {
 interface OverheidsTarief {
   id: string
   jaar: number
-  btw_percentage: number
-  vermindering_eb_elektriciteit: number
+  // Energiebelasting elektriciteit
+  eb_elektriciteit_gv_schijf1_max: number
+  eb_elektriciteit_gv_schijf1: number
+  eb_elektriciteit_gv_schijf2_max: number
+  eb_elektriciteit_gv_schijf2: number
+  eb_elektriciteit_gv_schijf3_max: number
+  eb_elektriciteit_gv_schijf3: number
+  eb_elektriciteit_gv_schijf4: number
+  // Energiebelasting gas
+  eb_gas_schijf1_max: number
+  eb_gas_schijf1: number
+  eb_gas_schijf2: number
+  // ODE
   ode_elektriciteit: number
   ode_gas: number
+  // BTW en vermindering
+  btw_percentage: number
+  vermindering_eb_elektriciteit: number
+  // Status
   actief: boolean
   ingangsdatum: string
   einddatum: string | null
@@ -161,10 +176,10 @@ export default function TarievenPage() {
                   <thead className="bg-gray-50 border-b-2 border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Jaar</th>
+                      <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">EB Stroom</th>
+                      <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">EB Gas</th>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">BTW</th>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Vermindering EB</th>
-                      <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">ODE Stroom</th>
-                      <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">ODE Gas</th>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Status</th>
                       <th className="px-6 py-4 text-right text-sm font-bold text-gray-700">Acties</th>
                     </tr>
@@ -176,16 +191,24 @@ export default function TarievenPage() {
                           <span className="font-bold text-brand-navy-500 text-lg">{tarief.jaar}</span>
                         </td>
                         <td className="px-6 py-4">
+                          <div className="text-xs space-y-1">
+                            <div>0-{(tarief.eb_elektriciteit_gv_schijf1_max / 1000).toFixed(0)}k: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf1.toFixed(5)}</span></div>
+                            <div>{((tarief.eb_elektriciteit_gv_schijf1_max + 1) / 1000).toFixed(0)}-{(tarief.eb_elektriciteit_gv_schijf2_max / 1000).toFixed(0)}k: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf2.toFixed(5)}</span></div>
+                            <div>{((tarief.eb_elektriciteit_gv_schijf2_max + 1) / 1000).toFixed(0)}-{(tarief.eb_elektriciteit_gv_schijf3_max / 1000000).toFixed(0)}M: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf3.toFixed(5)}</span></div>
+                            <div>&gt;{(tarief.eb_elektriciteit_gv_schijf3_max / 1000000).toFixed(0)}M: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf4.toFixed(5)}</span></div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-xs space-y-1">
+                            <div>0-{(tarief.eb_gas_schijf1_max / 1000).toFixed(0)}k: <span className="font-semibold">€{tarief.eb_gas_schijf1.toFixed(5)}</span></div>
+                            <div>&gt;{(tarief.eb_gas_schijf1_max / 1000).toFixed(0)}k: <span className="font-semibold">€{tarief.eb_gas_schijf2.toFixed(5)}</span></div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
                           <span className="text-gray-700">{tarief.btw_percentage}%</span>
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-gray-700">€{tarief.vermindering_eb_elektriciteit.toFixed(2)}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-700">€{tarief.ode_elektriciteit.toFixed(5)}/kWh</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-700">€{tarief.ode_gas.toFixed(5)}/m³</span>
                         </td>
                         <td className="px-6 py-4">
                           {tarief.actief ? (
@@ -202,13 +225,13 @@ export default function TarievenPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              disabled
-                              className="p-2 bg-gray-100 rounded-lg cursor-not-allowed opacity-50"
-                              title="Binnenkort beschikbaar"
+                            <Link
+                              href={`/admin/tarieven/overheid/${tarief.id}`}
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Bewerken"
                             >
-                              <Pencil size={20} className="text-gray-400" />
-                            </button>
+                              <Pencil size={20} className="text-gray-600" />
+                            </Link>
                           </div>
                         </td>
                       </tr>
@@ -236,16 +259,37 @@ export default function TarievenPage() {
                           Inactief
                         </span>
                       )}
-                      <button
-                        disabled
-                        className="p-2 bg-gray-100 rounded-lg cursor-not-allowed opacity-50"
-                        title="Binnenkort beschikbaar"
+                      <Link
+                        href={`/admin/tarieven/overheid/${tarief.id}`}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Bewerken"
                       >
-                        <Pencil size={20} className="text-gray-400" />
-                      </button>
+                        <Pencil size={20} className="text-gray-600" />
+                      </Link>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                  
+                  {/* Energiebelasting Stroom */}
+                  <div className="mb-3">
+                    <span className="text-gray-500 text-xs font-semibold mb-1 block">Energiebelasting Stroom</span>
+                    <div className="text-xs space-y-0.5 text-gray-700">
+                      <div>0-{(tarief.eb_elektriciteit_gv_schijf1_max / 1000).toFixed(0)}k kWh: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf1.toFixed(5)}/kWh</span></div>
+                      <div>{((tarief.eb_elektriciteit_gv_schijf1_max + 1) / 1000).toFixed(0)}-{(tarief.eb_elektriciteit_gv_schijf2_max / 1000).toFixed(0)}k kWh: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf2.toFixed(5)}/kWh</span></div>
+                      <div>{((tarief.eb_elektriciteit_gv_schijf2_max + 1) / 1000).toFixed(0)}k-{(tarief.eb_elektriciteit_gv_schijf3_max / 1000000).toFixed(0)}M kWh: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf3.toFixed(5)}/kWh</span></div>
+                      <div>&gt;{(tarief.eb_elektriciteit_gv_schijf3_max / 1000000).toFixed(0)}M kWh: <span className="font-semibold">€{tarief.eb_elektriciteit_gv_schijf4.toFixed(5)}/kWh</span></div>
+                    </div>
+                  </div>
+                  
+                  {/* Energiebelasting Gas */}
+                  <div className="mb-3">
+                    <span className="text-gray-500 text-xs font-semibold mb-1 block">Energiebelasting Gas</span>
+                    <div className="text-xs space-y-0.5 text-gray-700">
+                      <div>0-{(tarief.eb_gas_schijf1_max / 1000).toFixed(0)}k m³: <span className="font-semibold">€{tarief.eb_gas_schijf1.toFixed(5)}/m³</span></div>
+                      <div>&gt;{(tarief.eb_gas_schijf1_max / 1000).toFixed(0)}k m³: <span className="font-semibold">€{tarief.eb_gas_schijf2.toFixed(5)}/m³</span></div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm pt-3 border-t border-gray-200">
                     <div>
                       <span className="text-gray-500 text-xs">BTW</span>
                       <p className="font-semibold text-gray-700">{tarief.btw_percentage}%</p>
