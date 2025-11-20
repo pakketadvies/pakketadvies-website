@@ -95,6 +95,11 @@ export async function POST(request: Request) {
     }
     
     // 3. NETBEHEERTARIEVEN ophalen
+    console.log('🔍 Zoek netbeheertarief elektriciteit:', {
+      netbeheerderId,
+      aansluitwaarde: aansluitwaardeElektriciteit
+    })
+    
     const { data: elektriciteitTarief, error: elektraError } = await supabase
       .from('netbeheer_tarieven_elektriciteit')
       .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_elektriciteit(code, omschrijving)')
@@ -104,12 +109,22 @@ export async function POST(request: Request) {
       .eq('aansluitwaarden_elektriciteit.code', aansluitwaardeElektriciteit)
       .single()
     
+    console.log('📊 Netbeheertarief elektriciteit result:', {
+      data: elektriciteitTarief,
+      error: elektraError
+    })
+    
     let netbeheerElektriciteit = elektriciteitTarief?.all_in_tarief_jaar || 0
     if (elektraError) {
-      console.warn(`Geen netbeheertarief elektriciteit gevonden voor ${aansluitwaardeElektriciteit}:`, elektraError)
+      console.warn(`⚠️ Geen netbeheertarief elektriciteit gevonden voor ${aansluitwaardeElektriciteit}:`, elektraError)
       // Fallback naar gemiddelde
       netbeheerElektriciteit = 430
     }
+    
+    console.log('🔍 Zoek netbeheertarief gas:', {
+      netbeheerderId,
+      aansluitwaarde: aansluitwaardeGas
+    })
     
     const { data: gasTarief, error: gasError } = await supabase
       .from('netbeheer_tarieven_gas')
@@ -120,12 +135,23 @@ export async function POST(request: Request) {
       .eq('aansluitwaarden_gas.code', aansluitwaardeGas || 'G6')
       .single()
     
+    console.log('📊 Netbeheertarief gas result:', {
+      data: gasTarief,
+      error: gasError
+    })
+    
     let netbeheerGas = gasTarief?.all_in_tarief_jaar || 0
     if (gasError && totaalGas > 0) {
-      console.warn(`Geen netbeheertarief gas gevonden voor ${aansluitwaardeGas}:`, gasError)
+      console.warn(`⚠️ Geen netbeheertarief gas gevonden voor ${aansluitwaardeGas}:`, gasError)
       // Fallback naar gemiddelde
       netbeheerGas = 245
     }
+    
+    console.log('💰 Netbeheerkosten totaal:', {
+      elektriciteit: netbeheerElektriciteit,
+      gas: netbeheerGas,
+      totaal: netbeheerElektriciteit + netbeheerGas
+    })
     
     // 4. LEVERANCIERSKOSTEN BEREKENEN
     let kostenElektriciteit = 0
