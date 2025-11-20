@@ -78,6 +78,8 @@ export interface ContractOptie {
   maandbedrag: number
   jaarbedrag: number
   tariefElektriciteit: number
+  tariefElektriciteitEnkel?: number // Voor enkele meters
+  tariefElektriciteitDal?: number // Voor dubbele meters (nacht)
   tariefGas?: number
   groeneEnergie: boolean
   rating: number

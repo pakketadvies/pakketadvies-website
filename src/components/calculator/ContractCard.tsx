@@ -10,14 +10,20 @@ import type { ContractOptie } from '@/types/calculator'
 
 interface ContractCardProps {
   contract: ContractOptie
+  meterType: 'slim' | 'oud' | 'weet_niet'
+  heeftEnkeleMeter: boolean
 }
 
-export default function ContractCard({ contract }: ContractCardProps) {
+export default function ContractCard({ contract, meterType, heeftEnkeleMeter }: ContractCardProps) {
   const [openAccordion, setOpenAccordion] = useState<'prijsdetails' | 'voorwaarden' | 'over' | null>(null)
 
   const toggleAccordion = (section: 'prijsdetails' | 'voorwaarden' | 'over') => {
     setOpenAccordion(openAccordion === section ? null : section)
   }
+
+  // Bepaal welke tarieven te tonen op basis van metertype
+  const toonEnkeltarief = heeftEnkeleMeter || meterType === 'weet_niet'
+  const toonDubbelTarief = !heeftEnkeleMeter || meterType === 'weet_niet'
 
   return (
     <Card
@@ -114,22 +120,47 @@ export default function ContractCard({ contract }: ContractCardProps) {
             </button>
             {openAccordion === 'prijsdetails' && (
               <div className="p-4 bg-white space-y-3 animate-slide-down">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Stroom (normaal)</span>
-                  <span className="font-semibold text-brand-navy-500">€ {contract.tariefElektriciteit.toFixed(4)}/kWh</span>
-                </div>
+                {/* Enkeltarief (voor enkele meter OF weet_niet) */}
+                {toonEnkeltarief && contract.tariefElektriciteitEnkel && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Stroom (enkel)</span>
+                    <span className="font-semibold text-brand-navy-500">€ {contract.tariefElektriciteitEnkel.toFixed(4)}/kWh</span>
+                  </div>
+                )}
+                
+                {/* Normaal tarief (voor dubbele meter OF weet_niet) */}
+                {toonDubbelTarief && contract.tariefElektriciteit && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Stroom (normaal)</span>
+                    <span className="font-semibold text-brand-navy-500">€ {contract.tariefElektriciteit.toFixed(4)}/kWh</span>
+                  </div>
+                )}
+                
+                {/* Dal tarief (voor dubbele meter OF weet_niet) */}
+                {toonDubbelTarief && contract.tariefElektriciteitDal && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Stroom (dal)</span>
+                    <span className="font-semibold text-brand-navy-500">€ {contract.tariefElektriciteitDal.toFixed(4)}/kWh</span>
+                  </div>
+                )}
+                
+                {/* Gas */}
                 {contract.tariefGas && contract.tariefGas > 0 && (
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Gas</span>
                     <span className="font-semibold text-brand-navy-500">€ {contract.tariefGas.toFixed(4)}/m³</span>
                   </div>
                 )}
+                
+                {/* Looptijd */}
                 <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-100">
                   <span className="text-gray-600">Looptijd</span>
                   <span className="font-semibold text-brand-navy-500">{contract.looptijd} jaar</span>
                 </div>
+                
+                {/* Disclaimer - EXCLUSIEF BTW voor zakelijk */}
                 <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                  De tarieven zijn incl. 21% btw, en overheidsheffingen van 2025
+                  De tarieven zijn excl. 21% btw, en overheidsheffingen van 2025
                 </p>
               </div>
             )}

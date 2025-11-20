@@ -81,6 +81,8 @@ const transformContractToOptie = (
     maandbedrag,
     jaarbedrag,
     tariefElektriciteit: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
+    tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || undefined,
+    tariefElektriciteitDal: details.tarief_elektriciteit_dal || undefined,
     tariefGas: details.tarief_gas || details.opslag_gas || 0,
     groeneEnergie: details.groene_energie || false,
     rating: details.rating || 0,
@@ -446,7 +448,12 @@ function ResultatenContent() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredResultaten.map((contract) => (
-              <ContractCard key={contract.id} contract={contract} />
+              <ContractCard 
+                key={contract.id} 
+                contract={contract}
+                meterType={verbruik?.meterType || 'weet_niet'}
+                heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
+              />
             ))}
           </div>
         )}
