@@ -515,6 +515,9 @@ function ResultatenContent() {
                 verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
                 verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
                 verbruikGas={verbruik?.gasJaar || 0}
+                aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
+                aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
+                postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
               />
             ))}
           </div>
