@@ -1,9 +1,10 @@
 import AdminLayout from '@/components/admin/AdminLayout'
-import { Plus, Buildings, Pencil, Trash, CheckCircle, XCircle } from '@phosphor-icons/react/dist/ssr'
+import { Plus, Buildings, Pencil, CheckCircle, XCircle } from '@phosphor-icons/react/dist/ssr'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { Leverancier } from '@/types/admin'
 import Image from 'next/image'
+import { DeleteLeverancierButton } from '@/components/admin/DeleteLeverancierButton'
 
 async function getLeveranciers() {
   const supabase = await createClient()
@@ -153,12 +154,7 @@ export default async function LeveranciersPage() {
                           >
                             <Pencil size={18} className="text-gray-600" />
                           </Link>
-                          <button
-                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Verwijderen"
-                          >
-                            <Trash size={18} className="text-red-600" />
-                          </button>
+                          <DeleteLeverancierButton id={leverancier.id} naam={leverancier.naam} />
                         </div>
                       </td>
                     </tr>
