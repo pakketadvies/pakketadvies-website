@@ -77,7 +77,14 @@ export default function ContractCard({
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
-  // BEREKEN KOSTEN VIA API (alleen als prijsdetails wordt geopend)
+  // BEREKEN KOSTEN VIA API (direct bij mount voor hoofdbedrag)
+  useEffect(() => {
+    if (!breakdown && !loading) {
+      berekenKosten()
+    }
+  }, []) // Empty deps = run once on mount
+
+  // Re-bereken als accordion wordt geopend (voor extra zekerheid)
   useEffect(() => {
     if (openAccordion === 'prijsdetails' && !breakdown && !loading) {
       berekenKosten()
@@ -175,12 +182,12 @@ export default function ContractCard({
         <div className="mb-6 pb-6 border-b-2 border-gray-100">
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-4xl font-bold text-brand-navy-500">
-              €{contract.maandbedrag}
+              €{breakdown ? Math.round(breakdown.totaal.maandExclBtw) : contract.maandbedrag}
             </span>
             <span className="text-gray-500">/maand</span>
           </div>
           <div className="text-sm text-gray-500 mb-3">
-            €{contract.jaarbedrag.toLocaleString()} per jaar
+            €{breakdown ? Math.round(breakdown.totaal.jaarExclBtw).toLocaleString() : contract.jaarbedrag.toLocaleString()} per jaar
           </div>
           {contract.besparing && contract.besparing > 0 && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm">
