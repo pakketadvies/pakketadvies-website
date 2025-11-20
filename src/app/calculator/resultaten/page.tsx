@@ -47,22 +47,25 @@ const berekenContractKostenVereenvoudigd = (
         ((vaste_kosten_maand || 0) * 12)
     }
     
-    // EXACTE tarieven op basis van Sepa Green offerte 2025:
-    // - EB elektriciteit: €0.10154/kWh (NIET gestaffeld voor kleinverbruik)
-    // - EB gas: €0.57816/m³ (NIET gestaffeld)
-    // - Vermindering EB: €524.95/jaar (exact)
-    // - Netbeheer Enexis: €393.32 elektriciteit + €203.38 gas = €596.70/jaar
+    // EXACTE tarieven 2025 (na database migration):
+    // - EB elektriciteit: €0.10154/kWh (alle staffels)
+    // - EB gas: €0.57816/m³ (alle staffels)
+    // - Vermindering EB: €524.95/jaar
+    // - Netbeheer Enexis: €430 elektra (3x25A) + €245 gas (G6)
     const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
     
-    // Energiebelasting (geen staffels zoals in Sepa offerte)
+    // Energiebelasting 2025
     const ebElektriciteit = totaalElektriciteit * 0.10154
     const ebGas = verbruikGas * 0.57816
     
-    // Vermindering
+    // Vermindering 2025
     const vermindering = 524.95
     
-    // Netbeheerkosten (Enexis 3x25A + G6)
-    const netbeheerKosten = 393.32 + 203.38 // €596.70
+    // Netbeheerkosten Enexis (default aansluitwaarden)
+    // 3x25A elektriciteit + G6 gas
+    const netbeheerElektriciteit = 430.00
+    const netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
@@ -78,11 +81,13 @@ const berekenContractKostenVereenvoudigd = (
       (verbruikGas * (marktPrijsGas + (opslag_gas || 0))) +
       ((vaste_kosten_maand || 0) * 12)
       
-    // EXACTE tarieven op basis van Sepa Green offerte 2025
+    // Energiebelasting en netbeheer toevoegen
     const ebElektriciteit = totaalElektriciteit * 0.10154
     const ebGas = verbruikGas * 0.57816
     const vermindering = 524.95
-    const netbeheerKosten = 393.32 + 203.38 // €596.70
+    const netbeheerElektriciteit = 430.00
+    const netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
