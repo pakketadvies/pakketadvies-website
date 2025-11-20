@@ -269,7 +269,12 @@ function ResultatenContent() {
           gas: aansluitwaardeGas,
           vanData: {
             elektriciteit: verbruikData.aansluitwaardeElektriciteit,
-            gas: verbruikData.aansluitwaardeGas
+            elektriciteitType: typeof verbruikData.aansluitwaardeElektriciteit,
+            gas: verbruikData.aansluitwaardeGas,
+            gasType: typeof verbruikData.aansluitwaardeGas,
+            gasIsEmpty: verbruikData.aansluitwaardeGas === '',
+            gasIsUndefined: verbruikData.aansluitwaardeGas === undefined,
+            gasIsNull: verbruikData.aansluitwaardeGas === null,
           }
         })
         
