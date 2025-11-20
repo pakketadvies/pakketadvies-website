@@ -160,7 +160,7 @@ export default function ContractCard({ contract, meterType, heeftEnkeleMeter }: 
                 
                 {/* Disclaimer - EXCLUSIEF BTW voor zakelijk */}
                 <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                  De tarieven zijn excl. 21% btw, en overheidsheffingen van 2025
+                  De tarieven zijn excl. 21% btw en energiebelasting van 2025
                 </p>
               </div>
             )}

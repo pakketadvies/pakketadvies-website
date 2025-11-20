@@ -141,7 +141,7 @@ export default function TarievenPage() {
               Overheidstarieven
             </h2>
             <p className="text-sm text-gray-600">
-              Energiebelasting, ODE, BTW en verminderingen per jaar
+              Energiebelasting, BTW en vermindering per jaar
             </p>
           </div>
           <button
@@ -297,14 +297,6 @@ export default function TarievenPage() {
                     <div>
                       <span className="text-gray-500 text-xs">Vermindering EB</span>
                       <p className="font-semibold text-gray-700">€{tarief.vermindering_eb_elektriciteit.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 text-xs">ODE Stroom</span>
-                      <p className="font-semibold text-gray-700">€{tarief.ode_elektriciteit.toFixed(5)}/kWh</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 text-xs">ODE Gas</span>
-                      <p className="font-semibold text-gray-700">€{tarief.ode_gas.toFixed(5)}/m³</p>
                     </div>
                   </div>
                 </div>
