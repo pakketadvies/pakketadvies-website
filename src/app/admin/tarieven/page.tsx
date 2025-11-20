@@ -129,26 +129,28 @@ export default function TarievenPage() {
               Energiebelasting, ODE, BTW en verminderingen per jaar
             </p>
           </div>
-          <Link
-            href="/admin/tarieven/overheid/nieuw"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all"
+          <button
+            disabled
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gray-300 text-gray-500 font-semibold rounded-lg cursor-not-allowed opacity-50"
+            title="Binnenkort beschikbaar"
           >
             <Plus size={20} weight="bold" />
-            Nieuw Jaar
-          </Link>
+            Nieuw Jaar (binnenkort)
+          </button>
         </div>
 
         {overheidsTarieven.length === 0 ? (
           <div className="bg-white rounded-xl border-2 border-gray-200 p-8 text-center">
             <CurrencyEur size={48} weight="duotone" className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 mb-4">Nog geen overheidstarieven ingevoerd</p>
-            <Link
-              href="/admin/tarieven/overheid/nieuw"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all"
+            <button
+              disabled
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-300 text-gray-500 font-semibold rounded-lg cursor-not-allowed opacity-50"
+              title="Binnenkort beschikbaar"
             >
               <Plus size={20} weight="bold" />
-              Eerste Jaar Toevoegen
-            </Link>
+              Eerste Jaar Toevoegen (binnenkort)
+            </button>
           </div>
         ) : (
           <>
@@ -200,13 +202,13 @@ export default function TarievenPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <Link
-                              href={`/admin/tarieven/overheid/${tarief.id}`}
-                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Bewerken"
+                            <button
+                              disabled
+                              className="p-2 bg-gray-100 rounded-lg cursor-not-allowed opacity-50"
+                              title="Binnenkort beschikbaar"
                             >
-                              <Pencil size={20} className="text-gray-600" />
-                            </Link>
+                              <Pencil size={20} className="text-gray-400" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -234,13 +236,13 @@ export default function TarievenPage() {
                           Inactief
                         </span>
                       )}
-                      <Link
-                        href={`/admin/tarieven/overheid/${tarief.id}`}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Bewerken"
+                      <button
+                        disabled
+                        className="p-2 bg-gray-100 rounded-lg cursor-not-allowed opacity-50"
+                        title="Binnenkort beschikbaar"
                       >
-                        <Pencil size={20} className="text-gray-600" />
-                      </Link>
+                        <Pencil size={20} className="text-gray-400" />
+                      </button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">

@@ -35,9 +35,10 @@ export interface ContractDetailsVast {
   contract_id: string
   looptijd: 1 | 2 | 3 | 5
   
-  // Tarieven
-  tarief_elektriciteit_normaal: number
-  tarief_elektriciteit_dal: number | null
+  // Tarieven (altijd alle 3 invullen)
+  tarief_elektriciteit_enkel: number | null // Voor enkele meters
+  tarief_elektriciteit_normaal: number | null // Voor dubbele meters (dag)
+  tarief_elektriciteit_dal: number | null // Voor dubbele meters (nacht)
   tarief_gas: number | null
   vaste_kosten_maand: number | null
   

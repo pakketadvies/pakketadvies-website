@@ -22,9 +22,8 @@ const vastContractSchema = z.object({
 
   // Vast contract specifiek
   looptijd: z.enum(['1', '2', '3', '5']),
-  heeft_dubbele_meter: z.boolean(), // NIEUW: enkele vs dubbele meter
-  tarief_elektriciteit_enkel: z.number().min(0, 'Tarief moet positief zijn').nullable(), // NIEUW: enkeltarief
-  tarief_elektriciteit_normaal: z.number().min(0, 'Tarief moet positief zijn').nullable(), // Nu nullable
+  tarief_elektriciteit_enkel: z.number().min(0, 'Tarief moet positief zijn').nullable(),
+  tarief_elektriciteit_normaal: z.number().min(0, 'Tarief moet positief zijn').nullable(),
   tarief_elektriciteit_dal: z.number().min(0).nullable(),
   tarief_gas: z.number().min(0).nullable(),
   vaste_kosten_maand: z.number().min(0).nullable(),
@@ -33,21 +32,7 @@ const vastContractSchema = z.object({
   opzegtermijn: z.number().int().min(0),
   rating: z.number().min(0).max(5),
   aantal_reviews: z.number().int().min(0),
-}).refine(
-  (data) => {
-    // Als dubbele meter: normaal EN dal vereist
-    // Als enkele meter: enkel vereist
-    if (data.heeft_dubbele_meter) {
-      return data.tarief_elektriciteit_normaal !== null && data.tarief_elektriciteit_dal !== null
-    } else {
-      return data.tarief_elektriciteit_enkel !== null
-    }
-  },
-  {
-    message: 'Vul de juiste elektriciteits tarieven in (enkel OF normaal+dal)',
-    path: ['tarief_elektriciteit_enkel'],
-  }
-)
+})
 
 type VastContractFormData = z.infer<typeof vastContractSchema>
 
@@ -83,8 +68,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
       looptijd: (contract?.details_vast?.looptijd?.toString() || '1') as '1' | '2' | '3' | '5',
-      heeft_dubbele_meter: contract?.details_vast?.tarief_elektriciteit_dal !== null,
-      tarief_elektriciteit_enkel: contract?.details_vast?.tarief_elektriciteit_normaal || null,
+      tarief_elektriciteit_enkel: contract?.details_vast?.tarief_elektriciteit_enkel || null,
       tarief_elektriciteit_normaal: contract?.details_vast?.tarief_elektriciteit_normaal || null,
       tarief_elektriciteit_dal: contract?.details_vast?.tarief_elektriciteit_dal || null,
       tarief_gas: contract?.details_vast?.tarief_gas || null,
@@ -96,8 +80,6 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       aantal_reviews: contract?.details_vast?.aantal_reviews || 0,
     },
   })
-
-  const heeftDubbeleMeter = watch('heeft_dubbele_meter')
 
   // Fetch leveranciers
   useEffect(() => {
@@ -318,93 +300,84 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
               </select>
             </div>
 
-            {/* Enkele vs Dubbele Meter Toggle */}
-            <div className="space-y-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register('heeft_dubbele_meter')}
-                  className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
-                  disabled={loading}
-                />
-                <div>
-                  <span className="font-semibold text-brand-navy-500">Dubbele meter (dag/nacht tarief)</span>
-                  <p className="text-xs text-gray-600">Vink aan als contract verschillende dag- en nachttarieven heeft</p>
-                </div>
-              </label>
+            {/* Info Box */}
+            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900">
+                <strong>💡 Let op:</strong> Vul altijd alle 3 de tarieven in (enkeltarief, normaal én dal). De klant kiest later welk tarief bij zijn/haar meter past.
+              </p>
             </div>
 
-            {/* Elektriciteits Tarieven */}
+            {/* Elektriciteits Tarieven - ALLE 3 ALTIJD ZICHTBAAR */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Enkeltarief */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Elektriciteit enkeltarief (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_elektriciteit_enkel', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  placeholder="0.122940"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Voor enkele meters</p>
+                {errors.tarief_elektriciteit_enkel && (
+                  <p className="text-sm text-red-600">{errors.tarief_elektriciteit_enkel.message}</p>
+                )}
+              </div>
+
+              {/* Normaal Tarief */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Elektriciteit normaal/dag (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_elektriciteit_normaal', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  placeholder="0.140000"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Voor dubbele meters (dag)</p>
+                {errors.tarief_elektriciteit_normaal && (
+                  <p className="text-sm text-red-600">{errors.tarief_elektriciteit_normaal.message}</p>
+                )}
+              </div>
+
+              {/* Dal Tarief */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Elektriciteit dal/nacht (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_elektriciteit_dal', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  placeholder="0.110000"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Voor dubbele meters (nacht)</p>
+                {errors.tarief_elektriciteit_dal && (
+                  <p className="text-sm text-red-600">{errors.tarief_elektriciteit_dal.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Gas en Vaste Kosten */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {!heeftDubbeleMeter ? (
-                // ENKELTARIEF
-                <div className="md:col-span-2 space-y-2">
-                  <label className="block text-sm font-semibold text-brand-navy-500">
-                    Elektriciteit enkeltarief (€/kWh) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    {...register('tarief_elektriciteit_enkel', { 
-                      valueAsNumber: true,
-                      setValueAs: (v) => v === '' ? null : parseFloat(v)
-                    })}
-                    type="number"
-                    step="0.000001"
-                    placeholder="0.12294"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
-                    disabled={loading}
-                  />
-                  <p className="text-xs text-gray-500">Bijvoorbeeld: 0,12294 (tot 6 decimalen mogelijk)</p>
-                  {errors.tarief_elektriciteit_enkel && (
-                    <p className="text-sm text-red-600">{errors.tarief_elektriciteit_enkel.message}</p>
-                  )}
-                </div>
-              ) : (
-                // NORMAAL + DAL TARIEF
-                <>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-brand-navy-500">
-                      Elektriciteit normaal/dag (€/kWh) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      {...register('tarief_elektriciteit_normaal', { 
-                        valueAsNumber: true,
-                        setValueAs: (v) => v === '' ? null : parseFloat(v)
-                      })}
-                      type="number"
-                      step="0.000001"
-                      placeholder="0.12294"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
-                      disabled={loading}
-                    />
-                    <p className="text-xs text-gray-500">Dagtarief (bijv. 06:00-23:00)</p>
-                    {errors.tarief_elektriciteit_normaal && (
-                      <p className="text-sm text-red-600">{errors.tarief_elektriciteit_normaal.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-brand-navy-500">
-                      Elektriciteit dal/nacht (€/kWh) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      {...register('tarief_elektriciteit_dal', { 
-                        valueAsNumber: true,
-                        setValueAs: (v) => v === '' ? null : parseFloat(v)
-                      })}
-                      type="number"
-                      step="0.000001"
-                      placeholder="0.11000"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
-                      disabled={loading}
-                    />
-                    <p className="text-xs text-gray-500">Nachttarief (bijv. 23:00-06:00)</p>
-                    {errors.tarief_elektriciteit_dal && (
-                      <p className="text-sm text-red-600">{errors.tarief_elektriciteit_dal.message}</p>
-                    )}
-                  </div>
-                </>
-              )}
-
               {/* Gas */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-brand-navy-500">
