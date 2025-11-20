@@ -60,7 +60,7 @@ export default function ContractCard({
   postcode
 }: ContractCardProps) {
   const [openAccordion, setOpenAccordion] = useState<'prijsdetails' | 'voorwaarden' | 'over' | null>(null)
-  const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(null)
+  const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

@@ -90,6 +90,7 @@ export interface ContractOptie {
   besparing?: number
   aanbevolen?: boolean
   populair?: boolean
+  breakdown?: any // Kosten breakdown voor prijsdetails (optioneel)
 }
 
 export interface Leverancier {

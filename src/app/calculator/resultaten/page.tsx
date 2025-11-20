@@ -174,6 +174,7 @@ const transformContractToOptie = (
     besparing,
     aanbevolen: contract.aanbevolen || false,
     populair: contract.populair || false,
+    breakdown: contract.breakdown || undefined, // Breakdown voor prijsdetails
   }
 }
 
@@ -295,6 +296,7 @@ function ResultatenContent() {
                   ...contract,
                   exactMaandbedrag: Math.round(breakdown.totaal.maandExclBtw),
                   exactJaarbedrag: Math.round(breakdown.totaal.jaarExclBtw),
+                  breakdown: breakdown, // Bewaar hele breakdown voor prijsdetails
                 }
               }
             } catch (err) {
