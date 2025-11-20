@@ -4,7 +4,7 @@ import { berekenEnergieKosten, EnergieKostenInput } from '@/lib/energie-berekeni
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const body = await request.json()
 
     const input: EnergieKostenInput = {

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Zoek netbeheerder op basis van postcode range
     const { data, error } = await supabase
