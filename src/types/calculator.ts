@@ -95,5 +95,6 @@ export interface Leverancier {
   naam: string
   logo: string
   website: string
+  overLeverancier?: string // Beschrijving voor "Over leverancier" tab
 }
 

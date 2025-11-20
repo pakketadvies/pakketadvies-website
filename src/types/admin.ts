@@ -5,6 +5,7 @@ export interface Leverancier {
   naam: string
   logo_url: string | null
   website: string | null
+  over_leverancier: string | null // Beschrijving voor "Over leverancier" tab
   actief: boolean
   volgorde: number
   created_at: string

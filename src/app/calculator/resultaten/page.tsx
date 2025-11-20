@@ -2,11 +2,10 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import ContractCard from '@/components/calculator/ContractCard'
 import { useCalculatorStore } from '@/store/calculatorStore'
-import { Lightning, SlidersHorizontal, X, Check, Star, ArrowsDownUp, Leaf, CaretDown, CaretUp } from '@phosphor-icons/react'
+import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 
@@ -75,6 +74,7 @@ const transformContractToOptie = (
       naam: leverancier.naam || 'Onbekende leverancier',
       logo: leverancier.logo_url || '',
       website: leverancier.website || '',
+      overLeverancier: leverancier.over_leverancier || undefined,
     },
     type: contract.type,
     looptijd: contract.type === 'vast' ? details.looptijd : 1,
@@ -113,8 +113,6 @@ function ResultatenContent() {
     minRating: 0,
   })
   const [sortBy, setSortBy] = useState<'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating'>('besparing')
-  const [expandedContract, setExpandedContract] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<{ [key: string]: 'prijsdetails' | 'voorwaarden' | 'leverancier' }>({})
 
   // Check if coming from quick calculator
   const isQuickCalc = searchParams?.get('quick') === 'true'
@@ -448,264 +446,7 @@ function ResultatenContent() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredResultaten.map((contract) => (
-              <Card
-                key={contract.id}
-                className={`relative hover:shadow-xl transition-shadow duration-300 ${
-                  contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
-                }`}
-              >
-                {/* Badges */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                  {contract.aanbevolen && (
-                    <Badge variant="success" className="shadow-lg">
-                      <Check weight="bold" className="w-3 h-3 mr-1" />
-                      Aanbevolen
-                    </Badge>
-                  )}
-                  {contract.populair && (
-                    <Badge variant="info" className="shadow-lg">
-                      <Star weight="fill" className="w-3 h-3 mr-1" />
-                      Populair
-                    </Badge>
-                  )}
-                  {contract.groeneEnergie && (
-                    <Badge className="bg-green-100 text-green-700 border-green-200">
-                      <Leaf weight="duotone" className="w-3 h-3 mr-1" />
-                      Groen
-                    </Badge>
-                  )}
-                </div>
-
-                <CardContent className="pt-6">
-                  {/* Leverancier */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-brand-navy-500">
-                      {contract.leverancier.naam}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'} • {contract.looptijd} jaar
-                    </p>
-                  </div>
-
-                  {/* Prijs */}
-                  <div className="mb-6 pb-6 border-b-2 border-gray-100">
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-4xl font-bold text-brand-navy-500">
-                        €{contract.maandbedrag}
-                      </span>
-                      <span className="text-gray-500">/maand</span>
-                    </div>
-                    <div className="text-sm text-gray-500 mb-3">
-                      €{contract.jaarbedrag.toLocaleString()} per jaar
-                    </div>
-                    {contract.besparing && contract.besparing > 0 && (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm">
-                        <Check weight="bold" className="w-4 h-4" />
-                        <span>€{contract.besparing} besparing/maand</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          weight={i < Math.floor(contract.rating) ? 'fill' : 'regular'}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(contract.rating)
-                              ? 'text-yellow-500'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600 font-medium">
-                      {contract.rating} ({contract.aantalReviews})
-                    </span>
-                  </div>
-
-                  {/* Features */}
-                  <div className="space-y-2 mb-6">
-                    {contract.voorwaarden.slice(0, 3).map((vw, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                        <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
-                        <span>{vw}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="space-y-3 pt-4 border-t-2 border-gray-100">
-                    <Link href="/calculator?stap=2">
-                      <Button className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
-                        Bedrijfsgegevens invullen
-                      </Button>
-                    </Link>
-                    
-                    {/* Expandable More Info */}
-                    <button
-                      onClick={() => {
-                        const isOpen = expandedContract === contract.id
-                        setExpandedContract(isOpen ? null : contract.id)
-                        if (!isOpen && !activeTab[contract.id]) {
-                          setActiveTab({ ...activeTab, [contract.id]: 'prijsdetails' })
-                        }
-                      }}
-                      className="w-full flex items-center justify-center gap-2 text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors"
-                    >
-                      {expandedContract === contract.id ? (
-                        <>
-                          Minder informatie
-                          <CaretUp weight="bold" className="w-4 h-4" />
-                        </>
-                      ) : (
-                        <>
-                          Meer informatie
-                          <CaretDown weight="bold" className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-
-                    {/* Expanded Content with Tabs */}
-                    {expandedContract === contract.id && (
-                      <div className="pt-4 border-t-2 border-gray-100 space-y-4">
-                        {/* Tab Buttons */}
-                        <div className="flex gap-2 border-b-2 border-gray-100">
-                          <button
-                            onClick={() => setActiveTab({ ...activeTab, [contract.id]: 'prijsdetails' })}
-                            className={`flex-1 pb-3 text-sm font-semibold transition-all border-b-2 ${
-                              (activeTab[contract.id] || 'prijsdetails') === 'prijsdetails'
-                                ? 'border-brand-teal-500 text-brand-teal-600'
-                                : 'border-transparent text-gray-600 hover:text-brand-teal-600'
-                            }`}
-                          >
-                            Prijsdetails
-                          </button>
-                          <button
-                            onClick={() => setActiveTab({ ...activeTab, [contract.id]: 'voorwaarden' })}
-                            className={`flex-1 pb-3 text-sm font-semibold transition-all border-b-2 ${
-                              activeTab[contract.id] === 'voorwaarden'
-                                ? 'border-brand-teal-500 text-brand-teal-600'
-                                : 'border-transparent text-gray-600 hover:text-brand-teal-600'
-                            }`}
-                          >
-                            Voorwaarden
-                          </button>
-                          <button
-                            onClick={() => setActiveTab({ ...activeTab, [contract.id]: 'leverancier' })}
-                            className={`flex-1 pb-3 text-sm font-semibold transition-all border-b-2 ${
-                              activeTab[contract.id] === 'leverancier'
-                                ? 'border-brand-teal-500 text-brand-teal-600'
-                                : 'border-transparent text-gray-600 hover:text-brand-teal-600'
-                            }`}
-                          >
-                            Over leverancier
-                          </button>
-                        </div>
-
-                        {/* Tab Content */}
-                        <div className="text-sm">
-                          {/* Prijsdetails Tab */}
-                          {(activeTab[contract.id] || 'prijsdetails') === 'prijsdetails' && (
-                            <div className="space-y-3">
-                              <div className="flex justify-between py-2">
-                                <span className="text-gray-600">Maandbedrag</span>
-                                <span className="font-bold text-brand-navy-500">€{contract.maandbedrag}</span>
-                              </div>
-                              <div className="flex justify-between py-2">
-                                <span className="text-gray-600">Jaarbedrag</span>
-                                <span className="font-bold text-brand-navy-500">€{contract.jaarbedrag}</span>
-                              </div>
-                              {contract.looptijd && (
-                                <div className="flex justify-between py-2">
-                                  <span className="text-gray-600">Looptijd</span>
-                                  <span className="font-semibold text-brand-navy-500">{contract.looptijd} jaar</span>
-                                </div>
-                              )}
-                              {contract.besparing && contract.besparing > 0 && (
-                                <div className="flex justify-between py-2 bg-green-50 px-3 rounded-lg">
-                                  <span className="text-green-700 font-medium">Besparing per maand</span>
-                                  <span className="font-bold text-green-700">€{contract.besparing}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Voorwaarden Tab */}
-                          {activeTab[contract.id] === 'voorwaarden' && (
-                            <div className="space-y-3">
-                              {contract.voorwaarden && contract.voorwaarden.length > 0 ? (
-                                contract.voorwaarden.map((vw, i) => (
-                                  <div key={i} className="flex items-start gap-2 py-1">
-                                    <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
-                                    <span className="text-gray-700">{vw}</span>
-                                  </div>
-                                ))
-                              ) : (
-                                <p className="text-gray-600 italic">Geen voorwaarden beschikbaar</p>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Over Leverancier Tab */}
-                          {activeTab[contract.id] === 'leverancier' && (
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3 mb-3">
-                                {contract.leverancier.logo && (
-                                  <img 
-                                    src={contract.leverancier.logo} 
-                                    alt={contract.leverancier.naam}
-                                    className="w-16 h-16 object-contain"
-                                  />
-                                )}
-                                <div>
-                                  <h4 className="font-bold text-brand-navy-500">{contract.leverancier.naam}</h4>
-                                  {contract.leverancier.website && (
-                                    <a 
-                                      href={contract.leverancier.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-brand-teal-600 hover:underline"
-                                    >
-                                      Website bezoeken
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
-                              {contract.groeneEnergie && (
-                                <div className="flex items-center gap-2 text-green-700 bg-green-50 px-3 py-2 rounded-lg">
-                                  <Leaf weight="fill" className="w-5 h-5" />
-                                  <span className="font-medium">100% groene energie</span>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-2 pt-2">
-                                <div className="flex gap-0.5">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      weight={i < Math.floor(contract.rating) ? 'fill' : 'regular'}
-                                      className={`w-4 h-4 ${
-                                        i < Math.floor(contract.rating)
-                                          ? 'text-yellow-500'
-                                          : 'text-gray-300'
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-sm text-gray-600 font-medium">
-                                  {contract.rating} ({contract.aantalReviews} reviews)
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <ContractCard key={contract.id} contract={contract} />
             ))}
           </div>
         )}

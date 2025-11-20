@@ -14,6 +14,7 @@ import type { Leverancier } from '@/types/admin'
 const leverancierSchema = z.object({
   naam: z.string().min(1, 'Naam is verplicht'),
   website: z.string().url('Vul een geldige URL in').optional().or(z.literal('')),
+  over_leverancier: z.string().optional(),
   actief: z.boolean(),
   volgorde: z.number().int().min(0),
 })
@@ -41,6 +42,7 @@ export default function LeverancierForm({ leverancier }: LeverancierFormProps) {
     defaultValues: {
       naam: leverancier?.naam || '',
       website: leverancier?.website || '',
+      over_leverancier: leverancier?.over_leverancier || '',
       actief: leverancier?.actief ?? true,
       volgorde: leverancier?.volgorde || 0,
     },
@@ -93,6 +95,7 @@ export default function LeverancierForm({ leverancier }: LeverancierFormProps) {
       const leverancierData = {
         naam: data.naam,
         website: data.website || null,
+        over_leverancier: data.over_leverancier || null,
         logo_url,
         actief: data.actief,
         volgorde: data.volgorde,
@@ -214,6 +217,19 @@ export default function LeverancierForm({ leverancier }: LeverancierFormProps) {
             {errors.website && (
               <p className="text-sm text-red-600">{errors.website.message}</p>
             )}
+          </div>
+
+          {/* Over leverancier */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-brand-navy-500">Over leverancier</label>
+            <textarea
+              {...register('over_leverancier')}
+              rows={5}
+              placeholder="Korte beschrijving over de leverancier (wordt getoond in 'Over leverancier' tab)"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all resize-none"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500">Deze tekst wordt getoond bij de contractresultaten</p>
           </div>
 
           {/* Volgorde */}
