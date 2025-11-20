@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     const cleanedPostcode = postcode.replace(/\s/g, '').toUpperCase()
     const { data: postcodeData, error: postcodeError } = await supabase
       .from('postcode_netbeheerders')
-      .select('netbeheerder_id, netbeheerder:netbeheerders(naam)')
+      .select('netbeheerder_id')
       .lte('postcode_van', cleanedPostcode)
       .gte('postcode_tot', cleanedPostcode)
       .limit(1)
@@ -68,7 +68,15 @@ export async function POST(request: Request) {
     }
     
     const netbeheerderId = postcodeData.netbeheerder_id
-    const netbeheerderNaam = postcodeData.netbeheerder?.naam || 'Onbekend'
+    
+    // Haal netbeheerder naam op
+    const { data: netbeheerderData } = await supabase
+      .from('netbeheerders')
+      .select('naam')
+      .eq('id', netbeheerderId)
+      .single()
+    
+    const netbeheerderNaam = netbeheerderData?.naam || 'Onbekend'
     
     // 2. OVERHEIDSTARIEVEN 2025
     const { data: overheidsTarieven, error: tarievenError } = await supabase
