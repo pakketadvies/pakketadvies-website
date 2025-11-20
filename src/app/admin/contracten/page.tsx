@@ -96,18 +96,18 @@ export default async function ContractenPage() {
           </div>
         </div>
 
-        {/* Filter Tabs - Smaller on mobile */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
-          <button className="px-3 sm:px-4 py-2 bg-brand-teal-50 text-brand-teal-700 font-medium rounded-lg border-2 border-brand-teal-200 text-sm whitespace-nowrap flex-shrink-0">
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button className="px-3 sm:px-4 py-2 bg-brand-teal-50 text-brand-teal-700 font-medium rounded-lg border-2 border-brand-teal-200 text-sm">
             Alle ({contracten.length})
           </button>
-          <button className="px-3 sm:px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-200 transition-colors text-sm whitespace-nowrap flex-shrink-0">
+          <button className="px-3 sm:px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-200 transition-colors text-sm">
             Vast ({contracten.filter((c) => c.type === 'vast').length})
           </button>
-          <button className="px-3 sm:px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-200 transition-colors text-sm whitespace-nowrap flex-shrink-0">
+          <button className="px-3 sm:px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-200 transition-colors text-sm">
             Dynamisch ({contracten.filter((c) => c.type === 'dynamisch').length})
           </button>
-          <button className="px-3 sm:px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-200 transition-colors text-sm whitespace-nowrap flex-shrink-0">
+          <button className="px-3 sm:px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-200 transition-colors text-sm">
             Maatwerk ({contracten.filter((c) => c.type === 'maatwerk').length})
           </button>
         </div>
