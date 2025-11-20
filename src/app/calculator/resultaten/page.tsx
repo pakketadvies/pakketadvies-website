@@ -261,6 +261,16 @@ function ResultatenContent() {
         const aansluitwaardeElektriciteit = verbruikData.aansluitwaardeElektriciteit || '3x25A'
         const aansluitwaardeGas = verbruikData.aansluitwaardeGas || 'G6'
         
+        // Debug log
+        console.log('🔧 Aansluitwaarden voor berekening:', {
+          elektriciteit: aansluitwaardeElektriciteit,
+          gas: aansluitwaardeGas,
+          vanData: {
+            elektriciteit: verbruikData.aansluitwaardeElektriciteit,
+            gas: verbruikData.aansluitwaardeGas
+          }
+        })
+        
         const contractenMetKosten = await Promise.all(
           contracten.map(async (contract: any) => {
             try {
