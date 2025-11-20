@@ -77,10 +77,12 @@ export default function ContractCard({
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
-  // BEREKEN KOSTEN VIA API direct bij mount voor correct hoofdbedrag
+  // BEREKEN KOSTEN VIA API alleen voor prijsdetails breakdown
   useEffect(() => {
-    berekenKosten()
-  }, []) // Run once on mount
+    if (openAccordion === 'prijsdetails' && !breakdown && !loading) {
+      berekenKosten()
+    }
+  }, [openAccordion])
 
   const berekenKosten = async () => {
     setLoading(true)
@@ -159,41 +161,46 @@ export default function ContractCard({
       </div>
 
       <CardContent className="pt-6">
-        {/* Leverancier */}
-        <div className="mb-6">
-          <h3 className="text-xl font-bold text-brand-navy-500">
-            {contract.leverancier.naam}
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'} • {contract.looptijd} jaar
-          </p>
+        {/* Leverancier met logo */}
+        <div className="mb-6 flex items-start gap-4">
+          {/* Logo */}
+          {contract.leverancier.logo && (
+            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg border-2 border-gray-100 p-2 flex items-center justify-center">
+              <img 
+                src={contract.leverancier.logo} 
+                alt={`${contract.leverancier.naam} logo`}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          )}
+          
+          {/* Naam en details */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1">
+              {contract.leverancier.naam}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'} • {contract.looptijd} jaar
+            </p>
+          </div>
         </div>
 
         {/* Prijs */}
         <div className="mb-6 pb-6 border-b-2 border-gray-100">
-          {!breakdown ? (
-            <div className="flex items-center gap-3 py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-teal-600"></div>
-              <span className="text-gray-500">Berekenen...</span>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-4xl font-bold text-brand-navy-500">
+              €{contract.maandbedrag}
+            </span>
+            <span className="text-gray-500">/maand</span>
+          </div>
+          <div className="text-sm text-gray-500 mb-3">
+            €{contract.jaarbedrag.toLocaleString()} per jaar
+          </div>
+          {contract.besparing && contract.besparing > 0 && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm">
+              <Check weight="bold" className="w-4 h-4" />
+              <span>€{contract.besparing} besparing/maand</span>
             </div>
-          ) : (
-            <>
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-4xl font-bold text-brand-navy-500">
-                  €{Math.round(breakdown.totaal.maandExclBtw)}
-                </span>
-                <span className="text-gray-500">/maand</span>
-              </div>
-              <div className="text-sm text-gray-500 mb-3">
-                €{Math.round(breakdown.totaal.jaarExclBtw).toLocaleString()} per jaar
-              </div>
-              {contract.besparing && contract.besparing > 0 && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm">
-                  <Check weight="bold" className="w-4 h-4" />
-                  <span>€{contract.besparing} besparing/maand</span>
-                </div>
-              )}
-            </>
           )}
         </div>
 

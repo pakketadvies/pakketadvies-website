@@ -120,15 +120,33 @@ const transformContractToOptie = (
     return null
   }
 
-  const { maandbedrag, jaarbedrag, besparing } = berekenContractKostenVereenvoudigd(
-    contract,
-    verbruikElektriciteitNormaal,
-    verbruikElektriciteitDal,
-    verbruikGas
-  )
+  // Gebruik exacte bedragen als beschikbaar, anders fallback naar vereenvoudigde berekening
+  let maandbedrag: number
+  let jaarbedrag: number
+  
+  if (contract.exactMaandbedrag && contract.exactJaarbedrag) {
+    // Exacte berekening al gedaan op resultaten pagina
+    maandbedrag = contract.exactMaandbedrag
+    jaarbedrag = contract.exactJaarbedrag
+  } else {
+    // Fallback naar vereenvoudigde berekening
+    const berekend = berekenContractKostenVereenvoudigd(
+      contract,
+      verbruikElektriciteitNormaal,
+      verbruikElektriciteitDal,
+      verbruikGas
+    )
+    maandbedrag = berekend.maandbedrag
+    jaarbedrag = berekend.jaarbedrag
+  }
 
   const leverancier = contract.leverancier || {}
   const details = contract.details_vast || contract.details_dynamisch || {}
+  
+  // Calculate besparing
+  const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+  const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35) + (verbruikGas * 1.50) + 700) / 12)
+  const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
 
   return {
     id: contract.id,
@@ -236,10 +254,65 @@ function ResultatenContent() {
         
         const { contracten } = await response.json()
         
+        // Bereken EXACTE kosten voor alle contracten via API
+        // Dit voorkomt dat elke card apart een API call moet doen
+        const postcode = verbruikData.leveringsadressen?.[0]?.postcode || '0000AA'
+        const aansluitwaardeElektriciteit = verbruikData.aansluitwaardeElektriciteit || '3x25A'
+        const aansluitwaardeGas = verbruikData.aansluitwaardeGas || 'G6'
+        
+        const contractenMetKosten = await Promise.all(
+          contracten.map(async (contract: any) => {
+            try {
+              // Skip maatwerk
+              if (contract.type === 'maatwerk') return null
+              
+              const details = contract.details_vast || contract.details_dynamisch || {}
+              
+              // Bereken exacte kosten via API
+              const kostenResponse = await fetch('/api/energie/bereken-contract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  elektriciteitNormaal,
+                  elektriciteitDal,
+                  gas: totaalGas,
+                  aansluitwaardeElektriciteit,
+                  aansluitwaardeGas,
+                  postcode,
+                  contractType: contract.type,
+                  tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
+                  tariefElektriciteitDal: details.tarief_elektriciteit_dal || 0,
+                  tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
+                  tariefGas: details.tarief_gas || details.opslag_gas || 0,
+                  vastrechtMaand: details.vaste_kosten_maand || 8.25,
+                  heeftDubbeleMeter: details.heeft_dubbele_meter !== false,
+                }),
+              })
+              
+              if (kostenResponse.ok) {
+                const { breakdown } = await kostenResponse.json()
+                return {
+                  ...contract,
+                  exactMaandbedrag: Math.round(breakdown.totaal.maandExclBtw),
+                  exactJaarbedrag: Math.round(breakdown.totaal.jaarExclBtw),
+                }
+              }
+            } catch (err) {
+              console.error('Error calculating costs for contract:', contract.id, err)
+            }
+            
+            // Fallback naar vereenvoudigde berekening
+            return contract
+          })
+        )
+        
+        // Filter null values (maatwerk)
+        const validContracten = contractenMetKosten.filter((c: any) => c !== null)
+        
         // Transform to ContractOptie format
-        const transformed = contracten
+        const transformed = validContracten
           .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas))
-          .filter((c: any) => c !== null)
+          .filter((c: any) => c !== null) as ContractOptie[]
         
         setResultaten(transformed)
         setFilteredResultaten(transformed)
