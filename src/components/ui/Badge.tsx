@@ -12,6 +12,7 @@ const badgeVariants = cva(
         error: 'bg-error-50 text-error-700',
         info: 'bg-brand-teal-50 text-brand-teal-500',
         neutral: 'bg-gray-50 text-gray-500',
+        premium: 'bg-brand-purple-50 text-brand-purple-700',
       },
     },
     defaultVariants: {
