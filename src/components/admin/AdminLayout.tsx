@@ -12,6 +12,7 @@ import {
   SignOut,
   List,
   X,
+  CurrencyEur,
 } from '@phosphor-icons/react'
 
 interface AdminLayoutProps {
@@ -50,6 +51,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/contracten',
       icon: FileText,
       active: pathname.startsWith('/admin/contracten'),
+    },
+    {
+      name: 'Tarieven',
+      href: '/admin/tarieven',
+      icon: CurrencyEur,
+      active: pathname.startsWith('/admin/tarieven'),
     },
   ]
 
