@@ -256,7 +256,7 @@ export default function ContractCard({
                       <div className="mb-2">
                         <p className="text-xs font-semibold text-gray-600 mb-1.5">Variabele kosten</p>
                         <div className="space-y-1">
-                          {/* Leveringskosten normaal */}
+                          {/* Leveringskosten normaal - ALLEEN LEVERINGSTARIEF */}
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-600">
                               Leveringskosten normaal{' '}
@@ -264,10 +264,10 @@ export default function ContractCard({
                                 {verbruikElektriciteitNormaal.toLocaleString()} kWh × €{contract.tariefElektriciteit?.toFixed(5) || '0'}
                               </span>
                             </span>
-                            <span className="font-medium">€{(breakdown.leverancier.elektriciteit * (verbruikElektriciteitNormaal / totaalElektriciteit)).toFixed(2)}</span>
+                            <span className="font-medium">€{(verbruikElektriciteitNormaal * (contract.tariefElektriciteit || 0)).toFixed(2)}</span>
                           </div>
                           
-                          {/* Leveringskosten dal */}
+                          {/* Leveringskosten dal - ALLEEN LEVERINGSTARIEF */}
                           {verbruikElektriciteitDal > 0 && (
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-600">
@@ -276,7 +276,7 @@ export default function ContractCard({
                                   {verbruikElektriciteitDal.toLocaleString()} kWh × €{contract.tariefElektriciteitDal?.toFixed(5) || '0'}
                                 </span>
                               </span>
-                              <span className="font-medium">€{(breakdown.leverancier.elektriciteit * (verbruikElektriciteitDal / totaalElektriciteit)).toFixed(2)}</span>
+                              <span className="font-medium">€{(verbruikElektriciteitDal * (contract.tariefElektriciteitDal || 0)).toFixed(2)}</span>
                             </div>
                           )}
                           
@@ -326,7 +326,7 @@ export default function ContractCard({
                             Leveringstarief normaal{' '}
                             <span className="text-xs text-gray-500 font-normal">Leveringstarief + Energiebelasting</span>
                           </span>
-                          <span className="font-bold text-brand-navy-500">€{(contract.tariefElektriciteit || 0 + 0.10154).toFixed(5)}</span>
+                          <span className="font-bold text-brand-navy-500">€{((contract.tariefElektriciteit || 0) + 0.10154).toFixed(5)}</span>
                         </div>
                       </div>
                       
@@ -338,7 +338,7 @@ export default function ContractCard({
                               Leveringstarief dal{' '}
                               <span className="text-xs text-gray-500 font-normal">Leveringstarief + Energiebelasting</span>
                             </span>
-                            <span className="font-bold text-brand-navy-500">€{(contract.tariefElektriciteitDal || 0 + 0.10154).toFixed(5)}</span>
+                            <span className="font-bold text-brand-navy-500">€{((contract.tariefElektriciteitDal || 0) + 0.10154).toFixed(5)}</span>
                           </div>
                         </div>
                       )}
@@ -388,7 +388,7 @@ export default function ContractCard({
                         <div className="mb-2">
                           <p className="text-xs font-semibold text-gray-600 mb-1.5">Variabele kosten</p>
                           <div className="space-y-1">
-                            {/* Leveringskosten gas */}
+                            {/* Leveringskosten gas - ALLEEN LEVERINGSTARIEF */}
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-600">
                                 Leveringskosten o.b.v. gasregio 4 (G1){' '}
@@ -396,7 +396,7 @@ export default function ContractCard({
                                   {verbruikGas.toLocaleString()} m³ × €{contract.tariefGas?.toFixed(5) || '0'}
                                 </span>
                               </span>
-                              <span className="font-medium">€{breakdown.leverancier.gas.toFixed(2)}</span>
+                              <span className="font-medium">€{(verbruikGas * (contract.tariefGas || 0)).toFixed(2)}</span>
                             </div>
                             
                             {/* Overheidsheffingen gas - Schijf 1 */}
