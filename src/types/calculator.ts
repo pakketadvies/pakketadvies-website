@@ -23,6 +23,10 @@ export interface VerbruikData {
   // Meter info (optioneel, helpt voor contractadvies)
   meterType: 'slim' | 'oud' | 'weet_niet'
   
+  // Aansluitwaarden (NIEUW - voor nauwkeurige netbeheerkosten berekening)
+  aansluitwaardeElektriciteit?: string // '1x25A', '3x25A', '3x35A', '3x80A', etc.
+  aansluitwaardeGas?: string // 'G4', 'G6', 'G10', 'G25', etc.
+  
   // Leveringsadressen
   leveringsadressen: Leveringsadres[]
   
