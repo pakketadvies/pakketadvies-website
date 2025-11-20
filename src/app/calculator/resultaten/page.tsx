@@ -47,30 +47,22 @@ const berekenContractKostenVereenvoudigd = (
         ((vaste_kosten_maand || 0) * 12)
     }
     
-    // TODO: Add simplified estimates for taxes and netbeheer
-    // For now, add rough estimates based on 2025 tarieven:
-    // - Energiebelasting elektriciteit kleinverbruik: €0.14649/kWh (0-10.000 kWh)
-    // - Energiebelasting gas: €0.57816/m³ (0-1000 m³), €0.31718/m³ (>1000 m³)
-    // - Vermindering EB: €542.04/jaar (alleen kleinverbruik)
-    // - Netbeheer: depends on netbeheerder and aansluitwaarde
+    // EXACTE tarieven op basis van Sepa Green offerte 2025:
+    // - EB elektriciteit: €0.10154/kWh (NIET gestaffeld voor kleinverbruik)
+    // - EB gas: €0.57816/m³ (NIET gestaffeld)
+    // - Vermindering EB: €524.95/jaar (exact)
+    // - Netbeheer Enexis: €393.32 elektriciteit + €203.38 gas = €596.70/jaar
     const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
     
-    // Energiebelasting elektriciteit (kleinverbruik staffel)
-    const ebElektriciteit = totaalElektriciteit <= 10000 
-      ? totaalElektriciteit * 0.14649
-      : (10000 * 0.14649) + ((totaalElektriciteit - 10000) * 0.06277)
+    // Energiebelasting (geen staffels zoals in Sepa offerte)
+    const ebElektriciteit = totaalElektriciteit * 0.10154
+    const ebGas = verbruikGas * 0.57816
     
-    // Energiebelasting gas (2 staffels)
-    const ebGas = verbruikGas <= 1000
-      ? verbruikGas * 0.57816
-      : (1000 * 0.57816) + ((verbruikGas - 1000) * 0.31718)
+    // Vermindering
+    const vermindering = 524.95
     
-    // Vermindering (alleen kleinverbruik <10.000 kWh)
-    const vermindering = totaalElektriciteit <= 10000 ? 542.04 : 0
-    
-    // Netbeheerkosten (rough average - echt moet dit per netbeheerder + aansluitwaarde)
-    // Voor 3x25A + G6: ongeveer €430 + €245 = €675/jaar
-    const netbeheerKosten = 675
+    // Netbeheerkosten (Enexis 3x25A + G6)
+    const netbeheerKosten = 393.32 + 203.38 // €596.70
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
@@ -86,22 +78,11 @@ const berekenContractKostenVereenvoudigd = (
       (verbruikGas * (marktPrijsGas + (opslag_gas || 0))) +
       ((vaste_kosten_maand || 0) * 12)
       
-    // Add same estimates for taxes and netbeheer
-    // Energiebelasting elektriciteit (kleinverbruik staffel)
-    const ebElektriciteit = totaalElektriciteit <= 10000 
-      ? totaalElektriciteit * 0.14649
-      : (10000 * 0.14649) + ((totaalElektriciteit - 10000) * 0.06277)
-    
-    // Energiebelasting gas (2 staffels)
-    const ebGas = verbruikGas <= 1000
-      ? verbruikGas * 0.57816
-      : (1000 * 0.57816) + ((verbruikGas - 1000) * 0.31718)
-    
-    // Vermindering (alleen kleinverbruik <10.000 kWh)
-    const vermindering = totaalElektriciteit <= 10000 ? 542.04 : 0
-    
-    // Netbeheerkosten (rough average)
-    const netbeheerKosten = 675
+    // EXACTE tarieven op basis van Sepa Green offerte 2025
+    const ebElektriciteit = totaalElektriciteit * 0.10154
+    const ebGas = verbruikGas * 0.57816
+    const vermindering = 524.95
+    const netbeheerKosten = 393.32 + 203.38 // €596.70
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten

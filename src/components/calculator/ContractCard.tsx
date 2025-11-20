@@ -60,20 +60,20 @@ export default function ContractCard({
   const kostenVastrecht = 99 // Geschat vastrecht per jaar (€99 zoals in veel contracten)
   const totaalLeverancier = kostenLeverancierElektriciteit + kostenLeverancierGas + kostenVastrecht
   
-  // 2. Energiebelasting (kleinverbruik staffels 2025)
-  const ebElektriciteit = totaalElektriciteit <= 10000 
-    ? totaalElektriciteit * 0.14649
-    : (10000 * 0.14649) + ((totaalElektriciteit - 10000) * 0.06277)
+  // 2. Energiebelasting (op basis van Sepa Green offerte 2025)
+  // EB Elektriciteit: €0,10154/kWh voor ALLE verbruik (kleinverbruik)
+  const ebElektriciteit = totaalElektriciteit * 0.10154
   
-  const ebGas = verbruikGas <= 1000
-    ? verbruikGas * 0.57816
-    : (1000 * 0.57816) + ((verbruikGas - 1000) * 0.31718)
+  // EB Gas: €0,57816/m³ voor ALLE verbruik (niet 2 staffels zoals belastingdienst!)
+  const ebGas = verbruikGas * 0.57816
   
-  const verminderingEB = totaalElektriciteit <= 10000 ? 542.04 : 0
+  const verminderingEB = 524.95 // Exact zoals in Sepa offerte
   const totaalEnergiebelasting = ebElektriciteit + ebGas - verminderingEB
   
-  // 3. Netbeheerkosten (gemiddeld - later per netbeheerder)
-  const netbeheerKosten = 675 // Gemiddeld voor 3x25A + G6
+  // 3. Netbeheerkosten (exact zoals Sepa offerte - Enexis 3x25A + G6)
+  const netbeheerElektriciteit = 393.32
+  const netbeheerGas = 203.38
+  const netbeheerKosten = netbeheerElektriciteit + netbeheerGas // €596,70
   
   // 4. Totalen
   const totaalJaarExclBtw = totaalLeverancier + totaalEnergiebelasting + netbeheerKosten
@@ -219,10 +219,18 @@ export default function ContractCard({
                     </div>
                   </div>
                   
-                  {/* Netbeheer */}
-                  <div className="pt-2 border-t border-brand-teal-200 flex justify-between items-center text-xs text-gray-600">
-                    <span>Netbeheerkosten</span>
-                    <span>€{Math.round(netbeheerKosten / 12)}/mnd</span>
+                  {/* Netbeheer (apart elektriciteit en gas) */}
+                  <div className="pt-2 border-t border-brand-teal-200 space-y-1.5">
+                    <div className="flex justify-between items-center text-xs text-gray-600">
+                      <span>Netbeheer elektriciteit</span>
+                      <span>€{Math.round(netbeheerElektriciteit / 12)}/mnd</span>
+                    </div>
+                    {verbruikGas > 0 && (
+                      <div className="flex justify-between items-center text-xs text-gray-600">
+                        <span>Netbeheer gas</span>
+                        <span>€{Math.round(netbeheerGas / 12)}/mnd</span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Totaal */}
