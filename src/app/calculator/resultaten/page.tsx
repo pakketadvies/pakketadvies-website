@@ -10,28 +10,102 @@ import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 
 // Helper: Calculate estimated cost for contract
-const berekenContractKosten = (
+// NOTE: This is a SIMPLIFIED calculation for the results page
+// It calculates ONLY the leverancier costs (excl. taxes, netbeheer)
+// For the FULL calculation with all costs, the energie-berekening.ts would be used
+// But that requires netbeheerder lookup which is async and heavy for list pages
+const berekenContractKostenVereenvoudigd = (
   contract: any,
-  verbruikElektriciteit: number,
+  verbruikElektriciteitNormaal: number,
+  verbruikElektriciteitDal: number,
   verbruikGas: number
 ): { maandbedrag: number; jaarbedrag: number; besparing: number } => {
   let totaalJaar = 0
 
   if (contract.type === 'vast' && contract.details_vast) {
-    const { tarief_elektriciteit_normaal, tarief_gas, vaste_kosten_maand } = contract.details_vast
-    totaalJaar = 
-      (verbruikElektriciteit * tarief_elektriciteit_normaal) +
-      (verbruikGas * (tarief_gas || 0)) +
-      ((vaste_kosten_maand || 0) * 12)
+    const { 
+      tarief_elektriciteit_enkel,
+      tarief_elektriciteit_normaal, 
+      tarief_elektriciteit_dal,
+      tarief_gas, 
+      vaste_kosten_maand,
+      heeft_dubbele_meter
+    } = contract.details_vast
+    
+    // Leverancierskosten
+    if (heeft_dubbele_meter) {
+      totaalJaar = 
+        (verbruikElektriciteitNormaal * (tarief_elektriciteit_normaal || 0)) +
+        (verbruikElektriciteitDal * (tarief_elektriciteit_dal || 0)) +
+        (verbruikGas * (tarief_gas || 0)) +
+        ((vaste_kosten_maand || 0) * 12)
+    } else {
+      const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      totaalJaar = 
+        (totaalElektriciteit * (tarief_elektriciteit_enkel || 0)) +
+        (verbruikGas * (tarief_gas || 0)) +
+        ((vaste_kosten_maand || 0) * 12)
+    }
+    
+    // TODO: Add simplified estimates for taxes and netbeheer
+    // For now, add rough estimates based on 2025 tarieven:
+    // - Energiebelasting elektriciteit kleinverbruik: €0.14649/kWh (0-10.000 kWh)
+    // - Energiebelasting gas: €0.57816/m³ (0-1000 m³), €0.31718/m³ (>1000 m³)
+    // - Vermindering EB: €542.04/jaar (alleen kleinverbruik)
+    // - Netbeheer: depends on netbeheerder and aansluitwaarde
+    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    
+    // Energiebelasting elektriciteit (kleinverbruik staffel)
+    const ebElektriciteit = totaalElektriciteit <= 10000 
+      ? totaalElektriciteit * 0.14649
+      : (10000 * 0.14649) + ((totaalElektriciteit - 10000) * 0.06277)
+    
+    // Energiebelasting gas (2 staffels)
+    const ebGas = verbruikGas <= 1000
+      ? verbruikGas * 0.57816
+      : (1000 * 0.57816) + ((verbruikGas - 1000) * 0.31718)
+    
+    // Vermindering (alleen kleinverbruik <10.000 kWh)
+    const vermindering = totaalElektriciteit <= 10000 ? 542.04 : 0
+    
+    // Netbeheerkosten (rough average - echt moet dit per netbeheerder + aansluitwaarde)
+    // Voor 3x25A + G6: ongeveer €430 + €245 = €675/jaar
+    const netbeheerKosten = 675
+    
+    const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
+    totaalJaar += geschatteExtraKosten
+    
   } else if (contract.type === 'dynamisch' && contract.details_dynamisch) {
     const { opslag_elektriciteit_normaal, opslag_gas, vaste_kosten_maand } = contract.details_dynamisch
     // Assume market price + surcharge (estimated market: €0.20 elec, €0.80 gas)
     const marktPrijsElektriciteit = 0.20
     const marktPrijsGas = 0.80
+    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
     totaalJaar = 
-      (verbruikElektriciteit * (marktPrijsElektriciteit + opslag_elektriciteit_normaal)) +
+      (totaalElektriciteit * (marktPrijsElektriciteit + opslag_elektriciteit_normaal)) +
       (verbruikGas * (marktPrijsGas + (opslag_gas || 0))) +
       ((vaste_kosten_maand || 0) * 12)
+      
+    // Add same estimates for taxes and netbeheer
+    // Energiebelasting elektriciteit (kleinverbruik staffel)
+    const ebElektriciteit = totaalElektriciteit <= 10000 
+      ? totaalElektriciteit * 0.14649
+      : (10000 * 0.14649) + ((totaalElektriciteit - 10000) * 0.06277)
+    
+    // Energiebelasting gas (2 staffels)
+    const ebGas = verbruikGas <= 1000
+      ? verbruikGas * 0.57816
+      : (1000 * 0.57816) + ((verbruikGas - 1000) * 0.31718)
+    
+    // Vermindering (alleen kleinverbruik <10.000 kWh)
+    const vermindering = totaalElektriciteit <= 10000 ? 542.04 : 0
+    
+    // Netbeheerkosten (rough average)
+    const netbeheerKosten = 675
+    
+    const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
+    totaalJaar += geschatteExtraKosten
+    
   } else if (contract.type === 'maatwerk') {
     // No price calculation for maatwerk
     return { maandbedrag: 0, jaarbedrag: 0, besparing: 0 }
@@ -41,7 +115,8 @@ const berekenContractKosten = (
   const jaarbedrag = Math.round(totaalJaar)
   
   // Calculate besparing vs average of all contracts (simple estimation)
-  const gemiddeldeMaandbedrag = Math.round((verbruikElektriciteit * 0.28 + verbruikGas * 1.15) / 12)
+  const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+  const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35) + (verbruikGas * 1.50) + 700) / 12)
   const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
 
   return { maandbedrag, jaarbedrag, besparing }
@@ -50,7 +125,8 @@ const berekenContractKosten = (
 // Transform API contract to ContractOptie
 const transformContractToOptie = (
   contract: any,
-  verbruikElektriciteit: number,
+  verbruikElektriciteitNormaal: number,
+  verbruikElektriciteitDal: number,
   verbruikGas: number
 ): ContractOptie | null => {
   // Skip maatwerk contracts in standard listing
@@ -58,9 +134,10 @@ const transformContractToOptie = (
     return null
   }
 
-  const { maandbedrag, jaarbedrag, besparing } = berekenContractKosten(
+  const { maandbedrag, jaarbedrag, besparing } = berekenContractKostenVereenvoudigd(
     contract,
-    verbruikElektriciteit,
+    verbruikElektriciteitNormaal,
+    verbruikElektriciteitDal,
     verbruikGas
   )
 
@@ -161,7 +238,8 @@ function ResultatenContent() {
         }
         
         // Calculate total electricity and gas
-        const totaalElektriciteit = verbruikData.elektriciteitNormaal + (verbruikData.elektriciteitDal || 0)
+        const elektriciteitNormaal = verbruikData.elektriciteitNormaal
+        const elektriciteitDal = verbruikData.elektriciteitDal || 0
         const totaalGas = verbruikData.gasJaar || 0
         
         // Fetch active contracts from API
@@ -174,7 +252,7 @@ function ResultatenContent() {
         
         // Transform to ContractOptie format
         const transformed = contracten
-          .map((c: any) => transformContractToOptie(c, totaalElektriciteit, totaalGas))
+          .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas))
           .filter((c: any) => c !== null)
         
         setResultaten(transformed)
