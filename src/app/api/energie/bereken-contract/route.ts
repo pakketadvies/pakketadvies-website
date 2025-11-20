@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     
     const { data: elektriciteitTarief, error: elektraError } = await supabase
       .from('netbeheer_tarieven_elektriciteit')
-      .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_elektriciteit(code, omschrijving)')
+      .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_elektriciteit(code, beschrijving)')
       .eq('netbeheerder_id', netbeheerderId)
       .eq('jaar', 2025)
       .eq('actief', true)
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     
     const { data: gasTarief, error: gasError } = await supabase
       .from('netbeheer_tarieven_gas')
-      .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_gas(code, omschrijving)')
+      .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_gas(code, beschrijving)')
       .eq('netbeheerder_id', netbeheerderId)
       .eq('jaar', 2025)
       .eq('actief', true)
