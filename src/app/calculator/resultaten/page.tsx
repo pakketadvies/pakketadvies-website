@@ -209,6 +209,8 @@ function ResultatenContent() {
         
         let verbruikData = verbruik
         
+        console.log('🔍 DEBUG - Verbruik data from store:', verbruikData)
+        
         // If coming from quick calc, use query params or localStorage
         if (isQuickCalc) {
           const stroom = parseInt(searchParams?.get('stroom') || '0')

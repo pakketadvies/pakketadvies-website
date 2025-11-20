@@ -25,12 +25,27 @@ function CalculatorContent() {
   }, [searchParams, setStap])
 
   return (
-    <div className="pt-32 pb-16">
+    <div className="pt-24 pb-12 md:pt-28 md:pb-16">
       <div className="container-custom">
+        {/* Hero tekst - compact */}
+        <div className="text-center mb-6 md:mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-brand-teal-500 rounded-2xl mb-4">
+            <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand-navy-500 mb-2">
+            Bereken je besparing
+          </h1>
+          <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
+            In een paar minuten weten hoeveel je kunt besparen met een beter energiecontract
+          </p>
+        </div>
+
         {/* Desktop: max-w-5xl voor meer horizontale ruimte, mobiel: max-w-3xl */}
         <div className="max-w-3xl lg:max-w-5xl mx-auto">
           {/* Progress */}
-          <div className="mb-8 md:mb-12">
+          <div className="mb-6 md:mb-8">
             <ProgressBar currentStep={stap} totalSteps={TOTAL_STEPS} />
           </div>
 
