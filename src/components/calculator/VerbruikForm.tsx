@@ -18,10 +18,12 @@ import {
   Plus,
   Trash,
   MagnifyingGlass,
-  Gauge
+  Gauge,
+  Plugs
 } from '@phosphor-icons/react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
 
 const verbruikSchema = z.object({
   // Elektriciteit
@@ -39,6 +41,10 @@ const verbruikSchema = z.object({
   
   // Meter type
   meterType: z.enum(['slim', 'oud', 'weet_niet']),
+  
+  // Aansluitwaarden (NIEUW)
+  aansluitwaardeElektriciteit: z.string().optional(),
+  aansluitwaardeGas: z.string().optional(),
   
   // Leveringsadressen
   leveringsadressen: z.array(z.object({
@@ -72,10 +78,16 @@ export function VerbruikForm() {
   const [showHelpSchatten, setShowHelpSchatten] = useState(false)
   const [schattingVierkanteMeter, setSchattingVierkanteMeter] = useState('')
   const [schattingType, setSchattingType] = useState<'kantoor' | 'retail' | 'horeca' | 'productie' | 'overig'>('kantoor')
+  // Aansluitwaarden (automatisch geschat, door klant aanpasbaar)
+  const [aansluitwaardeElektriciteit, setAansluitwaardeElektriciteit] = useState('')
+  const [aansluitwaardeGas, setAansluitwaardeGas] = useState('')
+  const [showAansluitwaardeInfo, setShowAansluitwaardeInfo] = useState(false)
   // Ref om laatste lookup te tracken (voorkomt dubbele calls)
   const lastLookup = useRef<{ [key: number]: string }>({})
   // Debounce timers
   const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({})
+  // Debounce timer voor aansluitwaarde schatting
+  const aansluitwaardeTimer = useRef<NodeJS.Timeout | null>(null)
 
   const {
     register,
@@ -94,6 +106,8 @@ export function VerbruikForm() {
       elektriciteitDal: null,
       gasJaar: null,
       terugleveringJaar: null,
+      aansluitwaardeElektriciteit: '',
+      aansluitwaardeGas: '',
       leveringsadressen: [{ postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }],
     },
   })
@@ -102,8 +116,38 @@ export function VerbruikForm() {
   useEffect(() => {
     return () => {
       Object.values(debounceTimers.current).forEach(timer => clearTimeout(timer))
+      if (aansluitwaardeTimer.current) clearTimeout(aansluitwaardeTimer.current)
     }
   }, [])
+
+  // Schat aansluitwaarden automatisch op basis van verbruik
+  const [verbruikWatched, setVerbruikWatched] = useState({ elektriciteitNormaal: 0, elektriciteitDal: 0, gasJaar: 0 })
+
+  useEffect(() => {
+    const totaalElektriciteit = verbruikWatched.elektriciteitNormaal + verbruikWatched.elektriciteitDal
+    const gasJaar = geenGasaansluiting ? 0 : verbruikWatched.gasJaar
+
+    // Debounce (wacht tot gebruiker klaar is met typen)
+    if (aansluitwaardeTimer.current) {
+      clearTimeout(aansluitwaardeTimer.current)
+    }
+
+    if (totaalElektriciteit > 0) {
+      aansluitwaardeTimer.current = setTimeout(() => {
+        const schatting = schatAansluitwaarden(totaalElektriciteit, gasJaar > 0 ? gasJaar : null)
+        
+        // Alleen automatisch invullen als nog leeg (niet overschrijven van handmatige aanpassing)
+        if (!aansluitwaardeElektriciteit) {
+          setAansluitwaardeElektriciteit(schatting.elektriciteit)
+          setValue('aansluitwaardeElektriciteit', schatting.elektriciteit)
+        }
+        if (!aansluitwaardeGas && !geenGasaansluiting) {
+          setAansluitwaardeGas(schatting.gas)
+          setValue('aansluitwaardeGas', schatting.gas)
+        }
+      }, 1000) // 1 seconde debounce
+    }
+  }, [verbruikWatched, geenGasaansluiting, aansluitwaardeElektriciteit, aansluitwaardeGas, setValue])
 
   // Valideer of postcode compleet is
   const isValidPostcode = (postcode: string): boolean => {
@@ -342,6 +386,8 @@ export function VerbruikForm() {
       heeftZonnepanelen,
       terugleveringJaar: heeftZonnepanelen ? data.terugleveringJaar : null,
       meterType: data.meterType,
+      aansluitwaardeElektriciteit: aansluitwaardeElektriciteit,
+      aansluitwaardeGas: aansluitwaardeGas,
       leveringsadressen: data.leveringsadressen,
       geschat: false,
     })
@@ -479,7 +525,10 @@ export function VerbruikForm() {
               <div className="relative">
                 <input
                   type="number"
-                  {...register('elektriciteitNormaal', { valueAsNumber: true })}
+                  {...register('elektriciteitNormaal', { 
+                    valueAsNumber: true,
+                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
+                  })}
                   placeholder="Bijv. 3500"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                 />
@@ -500,7 +549,10 @@ export function VerbruikForm() {
                 <div className="relative">
                   <input
                     type="number"
-                    {...register('elektriciteitDal', { valueAsNumber: true })}
+                    {...register('elektriciteitDal', { 
+                      valueAsNumber: true,
+                      onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
+                    })}
                     placeholder="Bijv. 2500"
                     className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                   />
@@ -632,7 +684,10 @@ export function VerbruikForm() {
               <div className="relative">
                 <input
                   type="number"
-                  {...register('gasJaar', { valueAsNumber: true })}
+                  {...register('gasJaar', { 
+                    valueAsNumber: true,
+                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
+                  })}
                   placeholder="Bijv. 1200"
                   className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                 />
@@ -714,6 +769,104 @@ export function VerbruikForm() {
               </button>
             )
           })}
+        </div>
+      </div>
+
+      {/* Aansluitwaarden (Automatisch geschat, aanpasbaar) */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
+            <Plugs weight="duotone" className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
+            <p className="text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
+          </div>
+        </div>
+
+        <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-4 md:p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Elektriciteit Aansluitwaarde */}
+            <div>
+              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                Elektriciteit <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={aansluitwaardeElektriciteit}
+                onChange={(e) => {
+                  setAansluitwaardeElektriciteit(e.target.value)
+                  setValue('aansluitwaardeElektriciteit', e.target.value)
+                }}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+              >
+                <option value="">Selecteer aansluitwaarde</option>
+                <option value="3x25A">3x25A (kleinverbruik tot ~5.000 kWh/jaar)</option>
+                <option value="3x35A">3x35A (klein zakelijk ~5.000-15.000 kWh/jaar)</option>
+                <option value="3x50A">3x50A (middelgroot zakelijk ~15.000-30.000 kWh/jaar)</option>
+                <option value="3x63A">3x63A (groot zakelijk ~30.000-50.000 kWh/jaar)</option>
+                <option value="3x80A">3x80A (zeer groot zakelijk &gt;50.000 kWh/jaar)</option>
+              </select>
+            </div>
+
+            {/* Gas Aansluitwaarde */}
+            {!geenGasaansluiting && (
+              <div>
+                <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                  Gas <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={aansluitwaardeGas}
+                  onChange={(e) => {
+                    setAansluitwaardeGas(e.target.value)
+                    setValue('aansluitwaardeGas', e.target.value)
+                  }}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                >
+                  <option value="">Selecteer aansluitwaarde</option>
+                  <option value="G4">G4 (kleinverbruik tot ~2.500 m³/jaar)</option>
+                  <option value="G6">G6 (kleinverbruik tot ~2.500 m³/jaar)</option>
+                  <option value="G10">G10 (klein zakelijk ~2.500-10.000 m³/jaar)</option>
+                  <option value="G16">G16 (middelgroot zakelijk ~10.000-25.000 m³/jaar)</option>
+                  <option value="G25">G25 (groot zakelijk &gt;25.000 m³/jaar)</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-start gap-2 p-3 bg-brand-purple-100 border border-brand-purple-300 rounded-lg">
+            <Info weight="duotone" className="w-5 h-5 text-brand-purple-700 flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-brand-purple-900 leading-relaxed">
+              <strong>Automatisch geschat:</strong> We hebben de aansluitwaarden automatisch geschat op basis van je verbruik. 
+              Dit is meestal correct, maar je kunt het handmatig aanpassen als je zeker bent van een andere waarde. 
+              De aansluitwaarde staat op je meterkast en beïnvloedt de netbeheerkosten.
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAansluitwaardeInfo(!showAansluitwaardeInfo)}
+            className="text-sm text-brand-purple-600 hover:text-brand-purple-700 font-medium underline inline-flex items-center gap-1"
+          >
+            <Info weight="duotone" className="w-4 h-4" />
+            Waar vind ik mijn aansluitwaarde?
+          </button>
+
+          {showAansluitwaardeInfo && (
+            <div className="bg-white border-2 border-brand-purple-300 rounded-lg p-4 space-y-2 animate-slide-down">
+              <h4 className="font-semibold text-brand-navy-500 text-sm">Elektriciteit aansluitwaarde vinden:</h4>
+              <ul className="text-xs text-gray-700 space-y-1 ml-4 list-disc">
+                <li>Kijk op de hoofdzekering in je meterkast (bijv. "3x25A")</li>
+                <li>Staat op je aansluitovereenkomst van de netbeheerder</li>
+                <li>Neem contact op met je netbeheerder (Liander, Stedin, Enexis, etc.)</li>
+              </ul>
+              <h4 className="font-semibold text-brand-navy-500 text-sm mt-4">Gas aansluitwaarde vinden:</h4>
+              <ul className="text-xs text-gray-700 space-y-1 ml-4 list-disc">
+                <li>Kijk op de gasmeter (bijv. "G6" of "G4")</li>
+                <li>Staat op je aansluitovereenkomst</li>
+                <li>De meeste huishoudens hebben G4 of G6</li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 

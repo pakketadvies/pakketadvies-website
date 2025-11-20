@@ -18,9 +18,11 @@ import {
   DeviceMobile,
   Lightbulb,
   Info,
-  XCircle
+  XCircle,
+  Plugs
 } from '@phosphor-icons/react'
 import type { VerbruikData } from '@/types/calculator'
+import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
 
 const verbruikSchema = z.object({
   elektriciteitNormaal: z.number().min(1, 'Vul je verbruik in'),
@@ -31,6 +33,8 @@ const verbruikSchema = z.object({
   gasJaar: z.number().nullable().optional(),
   geenGasaansluiting: z.boolean(),
   meterType: z.enum(['slim', 'oud', 'weet_niet']),
+  aansluitwaardeElektriciteit: z.string().optional(),
+  aansluitwaardeGas: z.string().optional(),
 }).refine((data) => {
   // Als enkele meter, dan dal niet verplicht
   if (data.heeftEnkeleMeter) return true
@@ -68,6 +72,11 @@ export function QuickCalculator() {
   const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
   const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
   
+  // Aansluitwaarden
+  const [aansluitwaardeElektriciteit, setAansluitwaardeElektriciteit] = useState('')
+  const [aansluitwaardeGas, setAansluitwaardeGas] = useState('')
+  const [showAansluitwaardeInfo, setShowAansluitwaardeInfo] = useState(false)
+  
   // Adres state
   const [leveringsadressen, setLeveringsadressen] = useState([{
     postcode: '',
@@ -82,6 +91,10 @@ export function QuickCalculator() {
   // Refs voor debouncing en duplicate prevention (exact zoals VerbruikForm)
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const aansluitwaardeTimer = useRef<NodeJS.Timeout | null>(null)
+  
+  // Verbruik voor aansluitwaarde schatting
+  const [verbruikWatched, setVerbruikWatched] = useState({ elektriciteitNormaal: 0, elektriciteitDal: 0, gasJaar: 0 })
 
   const {
     register,
@@ -105,8 +118,38 @@ export function QuickCalculator() {
       if (addressTimeoutRef.current) {
         clearTimeout(addressTimeoutRef.current)
       }
+      if (aansluitwaardeTimer.current) {
+        clearTimeout(aansluitwaardeTimer.current)
+      }
     }
   }, [])
+
+  // Schat aansluitwaarden automatisch op basis van verbruik
+  useEffect(() => {
+    const totaalElektriciteit = verbruikWatched.elektriciteitNormaal + verbruikWatched.elektriciteitDal
+    const gasJaar = geenGasaansluiting ? 0 : verbruikWatched.gasJaar
+
+    // Debounce (wacht tot gebruiker klaar is met typen)
+    if (aansluitwaardeTimer.current) {
+      clearTimeout(aansluitwaardeTimer.current)
+    }
+
+    if (totaalElektriciteit > 0) {
+      aansluitwaardeTimer.current = setTimeout(() => {
+        const schatting = schatAansluitwaarden(totaalElektriciteit, gasJaar > 0 ? gasJaar : null)
+        
+        // Alleen automatisch invullen als nog leeg (niet overschrijven van handmatige aanpassing)
+        if (!aansluitwaardeElektriciteit) {
+          setAansluitwaardeElektriciteit(schatting.elektriciteit)
+          setValue('aansluitwaardeElektriciteit', schatting.elektriciteit)
+        }
+        if (!aansluitwaardeGas && !geenGasaansluiting) {
+          setAansluitwaardeGas(schatting.gas)
+          setValue('aansluitwaardeGas', schatting.gas)
+        }
+      }, 1000) // 1 seconde debounce
+    }
+  }, [verbruikWatched, geenGasaansluiting, aansluitwaardeElektriciteit, aansluitwaardeGas, setValue])
 
   // Valideer of postcode compleet is (exact zoals VerbruikForm)
   const isValidPostcode = (postcode: string): boolean => {
@@ -226,6 +269,8 @@ export function QuickCalculator() {
       heeftZonnepanelen: data.heeftZonnepanelen,
       terugleveringJaar: data.terugleveringJaar ?? null,
       meterType: data.meterType,
+      aansluitwaardeElektriciteit: aansluitwaardeElektriciteit,
+      aansluitwaardeGas: aansluitwaardeGas,
       geschat: false, // User filled in actual data
     }
     
@@ -345,7 +390,10 @@ export function QuickCalculator() {
               <div className="relative">
                 <input
                   type="number"
-                  {...register('elektriciteitNormaal', { valueAsNumber: true })}
+                  {...register('elektriciteitNormaal', { 
+                    valueAsNumber: true,
+                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
+                  })}
                   placeholder="3500"
                   className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                 />
@@ -364,7 +412,10 @@ export function QuickCalculator() {
                 <div className="relative">
                   <input
                     type="number"
-                    {...register('elektriciteitDal', { valueAsNumber: true })}
+                    {...register('elektriciteitDal', { 
+                      valueAsNumber: true,
+                      onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
+                    })}
                     placeholder="2500"
                     className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                   />
@@ -451,7 +502,10 @@ export function QuickCalculator() {
               <div className="relative">
                 <input
                   type="number"
-                  {...register('gasJaar', { valueAsNumber: true })}
+                  {...register('gasJaar', { 
+                    valueAsNumber: true,
+                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
+                  })}
                   placeholder="1200"
                   className="w-full px-3 md:px-3 py-3 md:py-2 pr-12 md:pr-12 text-sm md:text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                 />
@@ -521,6 +575,66 @@ export function QuickCalculator() {
               )
             })}
           </div>
+        </div>
+
+        {/* Aansluitwaarden (Automatisch geschat, compacter voor QuickCalc) */}
+        <div className="bg-brand-purple-50 border border-brand-purple-200 rounded-lg p-3 space-y-2">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Plugs weight="duotone" className="w-4 h-4 text-brand-purple-600" />
+            <span className="text-xs font-semibold text-brand-navy-500">Aansluitwaarden (automatisch geschat)</span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={aansluitwaardeElektriciteit}
+              onChange={(e) => {
+                setAansluitwaardeElektriciteit(e.target.value)
+                setValue('aansluitwaardeElektriciteit', e.target.value)
+              }}
+              className="w-full px-2 py-2 text-xs rounded-md border border-gray-300 focus:border-brand-purple-500 focus:ring-1 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+            >
+              <option value="">Elektriciteit</option>
+              <option value="3x25A">3x25A</option>
+              <option value="3x35A">3x35A</option>
+              <option value="3x50A">3x50A</option>
+              <option value="3x63A">3x63A</option>
+              <option value="3x80A">3x80A</option>
+            </select>
+
+            {!geenGasaansluiting && (
+              <select
+                value={aansluitwaardeGas}
+                onChange={(e) => {
+                  setAansluitwaardeGas(e.target.value)
+                  setValue('aansluitwaardeGas', e.target.value)
+                }}
+                className="w-full px-2 py-2 text-xs rounded-md border border-gray-300 focus:border-brand-purple-500 focus:ring-1 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+              >
+                <option value="">Gas</option>
+                <option value="G4">G4</option>
+                <option value="G6">G6</option>
+                <option value="G10">G10</option>
+                <option value="G16">G16</option>
+                <option value="G25">G25</option>
+              </select>
+            )}
+          </div>
+          
+          <button
+            type="button"
+            onClick={() => setShowAansluitwaardeInfo(!showAansluitwaardeInfo)}
+            className="text-[10px] text-brand-purple-600 hover:text-brand-purple-700 font-medium underline inline-flex items-center gap-1"
+          >
+            <Info weight="duotone" className="w-3 h-3" />
+            Waar vind ik dit?
+          </button>
+
+          {showAansluitwaardeInfo && (
+            <div className="bg-white border border-brand-purple-300 rounded-md p-2 space-y-1 text-[10px] text-gray-700 animate-slide-down">
+              <p><strong>Elektriciteit:</strong> Staat op je meterkast (bijv. 3x25A)</p>
+              <p><strong>Gas:</strong> Staat op je gasmeter (bijv. G6)</p>
+            </div>
+          )}
         </div>
 
         {/* Submit */}
