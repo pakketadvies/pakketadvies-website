@@ -227,6 +227,31 @@ export async function POST(request: Request) {
       totaalElektriciteit
     })
     
+    // STRICT VALIDATIE: Zorg dat de juiste tarieven beschikbaar zijn
+    if (!heeftDubbeleMeter && !tariefElektriciteitEnkel) {
+      console.error('❌ FOUT: Enkele meter geselecteerd maar geen enkeltarief beschikbaar!', {
+        heeftDubbeleMeter,
+        tariefElektriciteitEnkel,
+        tariefElektriciteitNormaal
+      })
+      return NextResponse.json(
+        { error: 'Enkeltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 400 }
+      )
+    }
+    
+    if (heeftDubbeleMeter && (!tariefElektriciteitNormaal || !tariefElektriciteitDal)) {
+      console.error('❌ FOUT: Dubbele meter geselecteerd maar normaal of dal tarief ontbreekt!', {
+        heeftDubbeleMeter,
+        tariefElektriciteitNormaal,
+        tariefElektriciteitDal
+      })
+      return NextResponse.json(
+        { error: 'Normaal- en daltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 400 }
+      )
+    }
+    
     // Prioriteit: Check eerst of het een enkele meter is en enkeltarief gebruikt moet worden
     if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
       // ENKELE METER: gebruik enkeltarief
@@ -272,10 +297,10 @@ export async function POST(request: Request) {
         }
       }
     } else if (tariefElektriciteitEnkel) {
-      // Fallback 1: gebruik enkeltarief
+      // Fallback 1: gebruik enkeltarief (voor als metertype onbekend is)
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
       
-      console.log('⚠️ Fallback ENKELTARIEF:', {
+      console.log('⚠️ Fallback ENKELTARIEF (metertype onbekend):', {
         kwh: totaalElektriciteit,
         tarief: tariefElektriciteitEnkel,
         kosten: kostenElektriciteit
@@ -290,10 +315,10 @@ export async function POST(request: Request) {
         }
       }
     } else if (tariefElektriciteitNormaal) {
-      // Fallback 2: gebruik normaal tarief voor alles
+      // Fallback 2: gebruik normaal tarief voor alles (laatste redmiddel)
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitNormaal
       
-      console.log('⚠️ Fallback NORMAAL TARIEF:', {
+      console.log('⚠️ Fallback NORMAAL TARIEF (laatste redmiddel):', {
         kwh: totaalElektriciteit,
         tarief: tariefElektriciteitNormaal,
         kosten: kostenElektriciteit
@@ -307,6 +332,17 @@ export async function POST(request: Request) {
           bedrag: kostenElektriciteit
         }
       }
+    } else {
+      // Geen enkel tarief beschikbaar - dit zou nooit moeten gebeuren
+      console.error('❌ KRITIEKE FOUT: Geen enkele tarief beschikbaar!', {
+        tariefElektriciteitEnkel,
+        tariefElektriciteitNormaal,
+        tariefElektriciteitDal
+      })
+      return NextResponse.json(
+        { error: 'Geen tarieven beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 500 }
+      )
     }
     
     const kostenGas = totaalGas * (tariefGas || 0)
