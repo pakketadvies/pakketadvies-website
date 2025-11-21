@@ -27,6 +27,8 @@ interface KostenBreakdown {
   leverancier: {
     elektriciteit: number
     gas: number
+    vastrechtStroom: number
+    vastrechtGas: number
     vastrecht: number
     subtotaal: number
   }
@@ -35,6 +37,12 @@ interface KostenBreakdown {
     gas: number
     vermindering: number
     subtotaal: number
+    staffels?: {
+      schijf1?: { kwh: number; tarief: number; bedrag: number }
+      schijf2?: { kwh: number; tarief: number; bedrag: number }
+      schijf3?: { kwh: number; tarief: number; bedrag: number }
+      schijf4?: { kwh: number; tarief: number; bedrag: number }
+    }
   }
   netbeheer: {
     elektriciteit: number
@@ -280,14 +288,46 @@ export default function ContractCard({
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-gray-700">
                             Energiebelasting
-                            <span className="text-xs text-gray-500 ml-1">
-                              (staffel: €0,10154/kWh)
-                            </span>
                           </span>
                           <span className="font-medium">
                             €{breakdown.energiebelasting.elektriciteit.toFixed(2)}
                           </span>
                         </div>
+                        
+                        {/* Energiebelasting staffels uitklapper */}
+                        {breakdown.energiebelasting.staffels && (
+                          <details className="ml-4 text-xs text-gray-600">
+                            <summary className="cursor-pointer hover:text-brand-teal-600 font-medium">
+                              Bekijk staffels
+                            </summary>
+                            <div className="mt-2 space-y-1 pl-2 border-l-2 border-gray-200">
+                              {breakdown.energiebelasting.staffels.schijf1 && (
+                                <div className="flex justify-between">
+                                  <span>0-{breakdown.energiebelasting.staffels.schijf1.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf1.tarief.toFixed(5)}</span>
+                                  <span>€{breakdown.energiebelasting.staffels.schijf1.bedrag.toFixed(2)}</span>
+                                </div>
+                              )}
+                              {breakdown.energiebelasting.staffels.schijf2 && (
+                                <div className="flex justify-between">
+                                  <span>{(breakdown.energiebelasting.staffels.schijf1?.kwh || 0).toLocaleString()}-{breakdown.energiebelasting.staffels.schijf2.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf2.tarief.toFixed(5)}</span>
+                                  <span>€{breakdown.energiebelasting.staffels.schijf2.bedrag.toFixed(2)}</span>
+                                </div>
+                              )}
+                              {breakdown.energiebelasting.staffels.schijf3 && (
+                                <div className="flex justify-between">
+                                  <span>{(breakdown.energiebelasting.staffels.schijf2?.kwh || 0).toLocaleString()}-{breakdown.energiebelasting.staffels.schijf3.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf3.tarief.toFixed(5)}</span>
+                                  <span>€{breakdown.energiebelasting.staffels.schijf3.bedrag.toFixed(2)}</span>
+                                </div>
+                              )}
+                              {breakdown.energiebelasting.staffels.schijf4 && (
+                                <div className="flex justify-between">
+                                  <span>>{(breakdown.energiebelasting.staffels.schijf3?.kwh || 0).toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf4.tarief.toFixed(5)}</span>
+                                  <span>€{breakdown.energiebelasting.staffels.schijf4.bedrag.toFixed(2)}</span>
+                                </div>
+                              )}
+                            </div>
+                          </details>
+                        )}
                       </div>
                       
                       {/* Vaste kosten stroom */}
@@ -296,7 +336,7 @@ export default function ContractCard({
                         
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-gray-700">Vastrecht</span>
-                          <span className="font-medium">€{breakdown.leverancier.vastrecht.toFixed(2)}</span>
+                          <span className="font-medium">€{breakdown.leverancier.vastrechtStroom.toFixed(2)}</span>
                         </div>
                         
                         <div className="flex justify-between items-center text-sm">
@@ -323,7 +363,7 @@ export default function ContractCard({
                             €{(breakdown.leverancier.elektriciteit + 
                                breakdown.energiebelasting.elektriciteit + 
                                breakdown.netbeheer.elektriciteit + 
-                               breakdown.leverancier.vastrecht - 
+                               breakdown.leverancier.vastrechtStroom - 
                                breakdown.energiebelasting.vermindering).toFixed(2)}
                           </span>
                         </div>
@@ -371,6 +411,11 @@ export default function ContractCard({
                           <p className="text-xs font-semibold text-gray-500 mb-1">Vaste kosten</p>
                           
                           <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">Vastrecht</span>
+                            <span className="font-medium">€{breakdown.leverancier.vastrechtGas.toFixed(2)}</span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-700">
                               Netbeheerkosten
                               <span className="text-xs text-gray-500 ml-1">
@@ -388,7 +433,8 @@ export default function ContractCard({
                             <span className="font-bold text-brand-navy-500">
                               €{(breakdown.leverancier.gas + 
                                  breakdown.energiebelasting.gas + 
-                                 breakdown.netbeheer.gas).toFixed(2)}
+                                 breakdown.netbeheer.gas +
+                                 breakdown.leverancier.vastrechtGas).toFixed(2)}
                             </span>
                           </div>
                         </div>

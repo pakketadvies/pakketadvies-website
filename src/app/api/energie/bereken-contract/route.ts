@@ -252,23 +252,79 @@ export async function POST(request: Request) {
     const schijf2Max = overheidsTarieven.eb_elektriciteit_gv_schijf2_max || 10000
     const schijf3Max = overheidsTarieven.eb_elektriciteit_gv_schijf3_max || 50000
     
+    // Voor breakdown: track welke staffels zijn gebruikt
+    const staffelDetails: any = {}
+    
     if (totaalElektriciteit <= schijf1Max) {
       ebElektriciteit = totaalElektriciteit * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      staffelDetails.schijf1 = {
+        kwh: totaalElektriciteit,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf1,
+        bedrag: ebElektriciteit
+      }
     } else if (totaalElektriciteit <= schijf2Max) {
-      ebElektriciteit =
-        schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
-        (totaalElektriciteit - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      const bedrag2 = (totaalElektriciteit - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      ebElektriciteit = bedrag1 + bedrag2
+      
+      staffelDetails.schijf1 = {
+        kwh: schijf1Max,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf1,
+        bedrag: bedrag1
+      }
+      staffelDetails.schijf2 = {
+        kwh: totaalElektriciteit,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf2,
+        bedrag: bedrag2
+      }
     } else if (totaalElektriciteit <= schijf3Max) {
-      ebElektriciteit =
-        schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
-        (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2 +
-        (totaalElektriciteit - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
+      const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      const bedrag2 = (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      const bedrag3 = (totaalElektriciteit - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
+      ebElektriciteit = bedrag1 + bedrag2 + bedrag3
+      
+      staffelDetails.schijf1 = {
+        kwh: schijf1Max,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf1,
+        bedrag: bedrag1
+      }
+      staffelDetails.schijf2 = {
+        kwh: schijf2Max,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf2,
+        bedrag: bedrag2
+      }
+      staffelDetails.schijf3 = {
+        kwh: totaalElektriciteit,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf3,
+        bedrag: bedrag3
+      }
     } else {
-      ebElektriciteit =
-        schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
-        (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2 +
-        (schijf3Max - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3 +
-        (totaalElektriciteit - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
+      const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      const bedrag2 = (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      const bedrag3 = (schijf3Max - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
+      const bedrag4 = (totaalElektriciteit - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
+      ebElektriciteit = bedrag1 + bedrag2 + bedrag3 + bedrag4
+      
+      staffelDetails.schijf1 = {
+        kwh: schijf1Max,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf1,
+        bedrag: bedrag1
+      }
+      staffelDetails.schijf2 = {
+        kwh: schijf2Max,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf2,
+        bedrag: bedrag2
+      }
+      staffelDetails.schijf3 = {
+        kwh: schijf3Max,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf3,
+        bedrag: bedrag3
+      }
+      staffelDetails.schijf4 = {
+        kwh: totaalElektriciteit,
+        tarief: overheidsTarieven.eb_elektriciteit_gv_schijf4,
+        bedrag: bedrag4
+      }
     }
     
     // Energiebelasting gas (2 schijven)
@@ -321,6 +377,7 @@ export async function POST(request: Request) {
           gas: ebGas,
           vermindering: verminderingEB,
           subtotaal: subtotaalEnergiebelasting,
+          staffels: staffelDetails,
         },
         netbeheer: {
           elektriciteit: netbeheerElektriciteit,
