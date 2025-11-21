@@ -800,11 +800,11 @@ export function VerbruikForm() {
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
               >
                 <option value="">Selecteer aansluitwaarde</option>
-                <option value="3x25A">3x25A (kleinverbruik tot ~5.000 kWh/jaar)</option>
-                <option value="3x35A">3x35A (klein zakelijk ~5.000-15.000 kWh/jaar)</option>
-                <option value="3x50A">3x50A (middelgroot zakelijk ~15.000-30.000 kWh/jaar)</option>
-                <option value="3x63A">3x63A (groot zakelijk ~30.000-50.000 kWh/jaar)</option>
-                <option value="3x80A">3x80A (zeer groot zakelijk &gt;50.000 kWh/jaar)</option>
+                <option value="3x25A">3x25A</option>
+                <option value="3x35A">3x35A</option>
+                <option value="3x50A">3x50A</option>
+                <option value="3x63A">3x63A</option>
+                <option value="3x80A">3x80A</option>
               </select>
             </div>
 
@@ -823,11 +823,10 @@ export function VerbruikForm() {
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                 >
                   <option value="">Selecteer aansluitwaarde</option>
-                  <option value="G4">G4 (kleinverbruik tot ~2.500 m³/jaar)</option>
-                  <option value="G6">G6 (kleinverbruik tot ~2.500 m³/jaar)</option>
-                  <option value="G10">G10 (klein zakelijk ~2.500-10.000 m³/jaar)</option>
-                  <option value="G16">G16 (middelgroot zakelijk ~10.000-25.000 m³/jaar)</option>
-                  <option value="G25">G25 (groot zakelijk &gt;25.000 m³/jaar)</option>
+                  <option value="G6">G6</option>
+                  <option value="G10">G10</option>
+                  <option value="G16">G16</option>
+                  <option value="G25">G25</option>
                 </select>
               </div>
             )}
