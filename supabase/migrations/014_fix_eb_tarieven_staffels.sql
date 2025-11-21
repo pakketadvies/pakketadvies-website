@@ -37,7 +37,7 @@ WHERE jaar = 2025 AND actief = true;
 -- ============================================================
 SELECT 
   'Kleinverbruik schijf 1' as staffel,
-  eb_elektriciteit_kv_schijf1 as tarief,
+  eb_elektriciteit_kv_schijf1::text as tarief,
   '0.10154 verwacht' as check
 FROM tarieven_overheid WHERE jaar = 2025
 UNION ALL
