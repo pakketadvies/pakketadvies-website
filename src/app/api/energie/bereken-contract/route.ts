@@ -237,8 +237,14 @@ export async function POST(request: Request) {
     const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht
     
     // 5. ENERGIEBELASTING BEREKENEN (correct gestaffeld)
-    // Bepaal of grootverbruik (>10.000 kWh)
-    const isGrootverbruikElektriciteit = totaalElektriciteit > 10000
+    // Bepaal grootverbruik op basis van AANSLUITWAARDE (niet verbruik!)
+    // Elektra: > 3x80A = grootverbruik
+    // Gas: > G25 = grootverbruik
+    // 3x63A en G16 zijn dus KLEINVERBRUIK!
+    const grootverbruikAansluitwaardenElektra = ['3x100A', '3x125A', '3x160A', '3x200A']
+    const grootverbruikAansluitwaardenGas = ['G40', 'G65', 'G100', 'G160', 'G250']
+    const isGrootverbruikElektriciteit = grootverbruikAansluitwaardenElektra.includes(aansluitwaardeElektriciteit)
+    const isGrootverbruikGas = grootverbruikAansluitwaardenGas.includes(aansluitwaardeGas || '')
     
     let ebElektriciteit = 0
     if (isGrootverbruikElektriciteit) {
