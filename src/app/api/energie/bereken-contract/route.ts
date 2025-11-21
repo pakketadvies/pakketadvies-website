@@ -217,10 +217,26 @@ export async function POST(request: Request) {
     let kostenElektriciteit = 0
     let elektriciteitBreakdown: any = {}
     
+    console.log('💡 Elektriciteit tarieven ontvangen:', {
+      heeftDubbeleMeter,
+      tariefElektriciteitEnkel,
+      tariefElektriciteitNormaal,
+      tariefElektriciteitDal,
+      elektriciteitNormaal,
+      elektriciteitDal,
+      totaalElektriciteit
+    })
+    
     // Prioriteit: Check eerst of het een enkele meter is en enkeltarief gebruikt moet worden
     if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
       // ENKELE METER: gebruik enkeltarief
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
+      
+      console.log('✅ Gebruik ENKELTARIEF:', {
+        kwh: totaalElektriciteit,
+        tarief: tariefElektriciteitEnkel,
+        kosten: kostenElektriciteit
+      })
       
       elektriciteitBreakdown = {
         type: 'enkel',
@@ -235,6 +251,12 @@ export async function POST(request: Request) {
       const kostenNormaal = elektriciteitNormaal * tariefElektriciteitNormaal
       const kostenDal = (elektriciteitDal || 0) * tariefElektriciteitDal
       kostenElektriciteit = kostenNormaal + kostenDal
+      
+      console.log('✅ Gebruik DUBBEL TARIEF:', {
+        normaal: { kwh: elektriciteitNormaal, tarief: tariefElektriciteitNormaal, kosten: kostenNormaal },
+        dal: { kwh: elektriciteitDal, tarief: tariefElektriciteitDal, kosten: kostenDal },
+        totaal: kostenElektriciteit
+      })
       
       elektriciteitBreakdown = {
         type: 'dubbel',
@@ -253,6 +275,12 @@ export async function POST(request: Request) {
       // Fallback 1: gebruik enkeltarief
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
       
+      console.log('⚠️ Fallback ENKELTARIEF:', {
+        kwh: totaalElektriciteit,
+        tarief: tariefElektriciteitEnkel,
+        kosten: kostenElektriciteit
+      })
+      
       elektriciteitBreakdown = {
         type: 'enkel',
         enkel: {
@@ -264,6 +292,12 @@ export async function POST(request: Request) {
     } else if (tariefElektriciteitNormaal) {
       // Fallback 2: gebruik normaal tarief voor alles
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitNormaal
+      
+      console.log('⚠️ Fallback NORMAAL TARIEF:', {
+        kwh: totaalElektriciteit,
+        tarief: tariefElektriciteitNormaal,
+        kosten: kostenElektriciteit
+      })
       
       elektriciteitBreakdown = {
         type: 'enkel',
