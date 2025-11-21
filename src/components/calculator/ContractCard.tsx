@@ -26,7 +26,18 @@ interface ContractCardProps {
 interface KostenBreakdown {
   leverancier: {
     elektriciteit: number
+    elektriciteitDetails?: {
+      type: 'enkel' | 'dubbel'
+      enkel?: { kwh: number; tarief: number; bedrag: number }
+      normaal?: { kwh: number; tarief: number; bedrag: number }
+      dal?: { kwh: number; tarief: number; bedrag: number }
+    }
     gas: number
+    gasDetails?: {
+      m3: number
+      tarief: number
+      bedrag: number
+    } | null
     vastrechtStroom: number
     vastrechtGas: number
     vastrecht: number
@@ -271,18 +282,62 @@ export default function ContractCard({
                       <div className="space-y-1.5 mb-3">
                         <p className="text-xs font-semibold text-gray-500 mb-1">Variabele kosten</p>
                         
-                        {/* Leveringskosten stroom (gesommeerd) */}
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-700">
-                            Leveringskosten stroom
-                            <span className="text-xs text-gray-500 ml-1">
-                              ({totaalElektriciteit.toLocaleString()} kWh)
+                        {/* Leveringskosten stroom - met tarief details */}
+                        {breakdown.leverancier.elektriciteitDetails?.type === 'dubbel' && (
+                          <>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-700">
+                                Leveringskosten normaal
+                                <span className="text-xs text-gray-500 ml-1">
+                                  ({breakdown.leverancier.elektriciteitDetails.normaal?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
+                                </span>
+                              </span>
+                              <span className="font-medium">
+                                €{breakdown.leverancier.elektriciteitDetails.normaal?.bedrag.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-700">
+                                Leveringskosten dal
+                                <span className="text-xs text-gray-500 ml-1">
+                                  ({breakdown.leverancier.elektriciteitDetails.dal?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
+                                </span>
+                              </span>
+                              <span className="font-medium">
+                                €{breakdown.leverancier.elektriciteitDetails.dal?.bedrag.toFixed(2)}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                        
+                        {breakdown.leverancier.elektriciteitDetails?.type === 'enkel' && (
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">
+                              Leveringskosten stroom
+                              <span className="text-xs text-gray-500 ml-1">
+                                ({breakdown.leverancier.elektriciteitDetails.enkel?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
+                              </span>
                             </span>
-                          </span>
-                          <span className="font-medium">
-                            €{breakdown.leverancier.elektriciteit.toFixed(2)}
-                          </span>
-                        </div>
+                            <span className="font-medium">
+                              €{breakdown.leverancier.elektriciteitDetails.enkel?.bedrag.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Fallback als er geen details zijn */}
+                        {!breakdown.leverancier.elektriciteitDetails && (
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">
+                              Leveringskosten stroom
+                              <span className="text-xs text-gray-500 ml-1">
+                                ({totaalElektriciteit.toLocaleString()} kWh)
+                              </span>
+                            </span>
+                            <span className="font-medium">
+                              €{breakdown.leverancier.elektriciteit.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
                         
                         {/* Energiebelasting stroom */}
                         <div className="flex justify-between items-center text-sm">
@@ -341,9 +396,9 @@ export default function ContractCard({
                         
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-gray-700">
-                            Netbeheerkosten
+                            Netbeheerkosten {aansluitwaardeElektriciteit}
                             <span className="text-xs text-gray-500 ml-1">
-                              ({breakdown.netbeheer.netbeheerder} {aansluitwaardeElektriciteit})
+                              ({breakdown.netbeheer.netbeheerder})
                             </span>
                           </span>
                           <span className="font-medium">€{breakdown.netbeheer.elektriciteit.toFixed(2)}</span>
@@ -379,18 +434,32 @@ export default function ContractCard({
                         <div className="space-y-1.5 mb-3">
                           <p className="text-xs font-semibold text-gray-500 mb-1">Variabele kosten</p>
                           
-                          {/* Leveringskosten gas */}
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-700">
-                              Leveringskosten gas
-                              <span className="text-xs text-gray-500 ml-1">
-                                ({verbruikGas.toLocaleString()} m³)
+                          {/* Leveringskosten gas - met tarief details */}
+                          {breakdown.leverancier.gasDetails ? (
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-700">
+                                Leveringskosten gas
+                                <span className="text-xs text-gray-500 ml-1">
+                                  ({breakdown.leverancier.gasDetails.m3.toLocaleString()} m³ × €{breakdown.leverancier.gasDetails.tarief.toFixed(6)})
+                                </span>
                               </span>
-                            </span>
-                            <span className="font-medium">
-                              €{breakdown.leverancier.gas.toFixed(2)}
-                            </span>
-                          </div>
+                              <span className="font-medium">
+                                €{breakdown.leverancier.gasDetails.bedrag.toFixed(2)}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-700">
+                                Leveringskosten gas
+                                <span className="text-xs text-gray-500 ml-1">
+                                  ({verbruikGas.toLocaleString()} m³)
+                                </span>
+                              </span>
+                              <span className="font-medium">
+                                €{breakdown.leverancier.gas.toFixed(2)}
+                              </span>
+                            </div>
+                          )}
                           
                           {/* Energiebelasting gas */}
                           <div className="flex justify-between items-center text-sm">
@@ -417,9 +486,9 @@ export default function ContractCard({
                           
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-700">
-                              Netbeheerkosten
+                              Netbeheerkosten {aansluitwaardeGas}
                               <span className="text-xs text-gray-500 ml-1">
-                                ({breakdown.netbeheer.netbeheerder} {aansluitwaardeGas})
+                                ({breakdown.netbeheer.netbeheerder})
                               </span>
                             </span>
                             <span className="font-medium">€{breakdown.netbeheer.gas.toFixed(2)}</span>

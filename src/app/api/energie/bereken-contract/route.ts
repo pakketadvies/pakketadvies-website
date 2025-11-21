@@ -215,18 +215,57 @@ export async function POST(request: Request) {
     
     // 4. LEVERANCIERSKOSTEN BEREKENEN
     let kostenElektriciteit = 0
+    let elektriciteitBreakdown: any = {}
+    
     if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
-      kostenElektriciteit = 
-        (elektriciteitNormaal * tariefElektriciteitNormaal) +
-        ((elektriciteitDal || 0) * tariefElektriciteitDal)
+      const kostenNormaal = elektriciteitNormaal * tariefElektriciteitNormaal
+      const kostenDal = (elektriciteitDal || 0) * tariefElektriciteitDal
+      kostenElektriciteit = kostenNormaal + kostenDal
+      
+      elektriciteitBreakdown = {
+        type: 'dubbel',
+        normaal: {
+          kwh: elektriciteitNormaal,
+          tarief: tariefElektriciteitNormaal,
+          bedrag: kostenNormaal
+        },
+        dal: {
+          kwh: elektriciteitDal || 0,
+          tarief: tariefElektriciteitDal,
+          bedrag: kostenDal
+        }
+      }
     } else if (tariefElektriciteitEnkel) {
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
+          kwh: totaalElektriciteit,
+          tarief: tariefElektriciteitEnkel,
+          bedrag: kostenElektriciteit
+        }
+      }
     } else if (tariefElektriciteitNormaal) {
       // Fallback: gebruik normaal tarief voor alles
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitNormaal
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
+          kwh: totaalElektriciteit,
+          tarief: tariefElektriciteitNormaal,
+          bedrag: kostenElektriciteit
+        }
+      }
     }
     
     const kostenGas = totaalGas * (tariefGas || 0)
+    const gasBreakdown = totaalGas > 0 ? {
+      m3: totaalGas,
+      tarief: tariefGas || 0,
+      bedrag: kostenGas
+    } : null
     
     // Vastrecht: €8.25/maand voor STROOM + €8.25/maand voor GAS (alleen als er gas is)
     // Standaard Sepa: €99/jaar stroom + €99/jaar gas = €198/jaar totaal
@@ -366,7 +405,9 @@ export async function POST(request: Request) {
       breakdown: {
         leverancier: {
           elektriciteit: kostenElektriciteit,
+          elektriciteitDetails: elektriciteitBreakdown,
           gas: kostenGas,
+          gasDetails: gasBreakdown,
           vastrechtStroom: vastrechtStroom,
           vastrechtGas: vastrechtGas,
           vastrecht: kostenVastrecht,
