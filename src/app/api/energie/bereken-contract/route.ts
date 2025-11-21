@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { converteerGasAansluitwaardeVoorDatabase } from '@/lib/aansluitwaarde-schatting'
 
 /**
  * POST /api/energie/bereken-contract
@@ -123,7 +124,18 @@ export async function POST(request: Request) {
     
     console.log('🔍 Zoek netbeheertarief gas:', {
       netbeheerderId,
-      aansluitwaarde: aansluitwaardeGas
+      aansluitwaardeInput: aansluitwaardeGas,
+      gasVerbruik: totaalGas
+    })
+    
+    // Converteer G6 naar de juiste variant op basis van verbruik
+    const gasAansluitwaardeVoorDatabase = aansluitwaardeGas 
+      ? converteerGasAansluitwaardeVoorDatabase(aansluitwaardeGas, totaalGas)
+      : converteerGasAansluitwaardeVoorDatabase('G6', totaalGas)
+    
+    console.log('🔄 Gas aansluitwaarde conversie:', {
+      origineel: aansluitwaardeGas || 'G6',
+      geconverteerd: gasAansluitwaardeVoorDatabase
     })
     
     const { data: gasTarief, error: gasError } = await supabase
@@ -132,7 +144,7 @@ export async function POST(request: Request) {
       .eq('netbeheerder_id', netbeheerderId)
       .eq('jaar', 2025)
       .eq('actief', true)
-      .eq('aansluitwaarden_gas.code', aansluitwaardeGas || 'G6')
+      .eq('aansluitwaarden_gas.code', gasAansluitwaardeVoorDatabase)
       .single()
     
     console.log('📊 Netbeheertarief gas result:', {

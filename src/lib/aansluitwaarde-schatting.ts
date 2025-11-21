@@ -59,7 +59,7 @@ export function schatElektriciteitAansluitwaarde(jaarverbruikKwh: number): {
  * Schat de gas aansluitwaarde op basis van jaarverbruik
  * 
  * Formule: Aansluitwaarde gebaseerd op m³ per jaar
- * - Tot 2.500 m³: G4 of G6 (kleinverbruik particulier)
+ * - Tot 2.500 m³: G6 (kleinverbruik particulier)
  * - 2.501 - 10.000 m³: G10 (klein zakelijk)
  * - 10.001 - 25.000 m³: G16 (middelgroot zakelijk)
  * - Boven 25.000 m³: G25 (groot zakelijk)
@@ -88,6 +88,35 @@ export function schatGasAansluitwaarde(jaarverbruikM3: number): {
       waarde: 'G25',
       toelichting: 'Groot zakelijk (bijv. grote productie)',
     }
+  }
+}
+
+/**
+ * Converteert een G6 aansluitwaarde naar de juiste database variant
+ * op basis van het jaarverbruik.
+ * 
+ * G6 heeft 3 tarieven:
+ * - G6_LAAG: <500 m³/jaar
+ * - G6_MIDDEN: 500-4000 m³/jaar  
+ * - G6_HOOG: >4000 m³/jaar
+ * 
+ * Voor andere aansluitwaarden wordt de waarde ongewijzigd teruggegeven.
+ */
+export function converteerGasAansluitwaardeVoorDatabase(
+  aansluitwaarde: string,
+  jaarverbruikM3: number
+): string {
+  // Alleen G6 heeft meerdere varianten
+  if (aansluitwaarde !== 'G6') {
+    return aansluitwaarde
+  }
+
+  if (jaarverbruikM3 < 500) {
+    return 'G6_LAAG'
+  } else if (jaarverbruikM3 <= 4000) {
+    return 'G6_MIDDEN'
+  } else {
+    return 'G6_HOOG'
   }
 }
 
