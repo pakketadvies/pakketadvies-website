@@ -217,7 +217,21 @@ export async function POST(request: Request) {
     let kostenElektriciteit = 0
     let elektriciteitBreakdown: any = {}
     
-    if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
+    // Prioriteit: Check eerst of het een enkele meter is en enkeltarief gebruikt moet worden
+    if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
+      // ENKELE METER: gebruik enkeltarief
+      kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
+          kwh: totaalElektriciteit,
+          tarief: tariefElektriciteitEnkel,
+          bedrag: kostenElektriciteit
+        }
+      }
+    } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
+      // DUBBELE METER: gebruik normaal + dal tarieven
       const kostenNormaal = elektriciteitNormaal * tariefElektriciteitNormaal
       const kostenDal = (elektriciteitDal || 0) * tariefElektriciteitDal
       kostenElektriciteit = kostenNormaal + kostenDal
@@ -236,6 +250,7 @@ export async function POST(request: Request) {
         }
       }
     } else if (tariefElektriciteitEnkel) {
+      // Fallback 1: gebruik enkeltarief
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
       
       elektriciteitBreakdown = {
@@ -247,7 +262,7 @@ export async function POST(request: Request) {
         }
       }
     } else if (tariefElektriciteitNormaal) {
-      // Fallback: gebruik normaal tarief voor alles
+      // Fallback 2: gebruik normaal tarief voor alles
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitNormaal
       
       elektriciteitBreakdown = {
