@@ -313,7 +313,7 @@ export default function ContractCard({
                         {breakdown.leverancier.elektriciteitDetails?.type === 'enkel' && (
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-700">
-                              Leveringskosten stroom
+                              Leveringskosten enkeltarief
                               <span className="text-xs text-gray-500 ml-1">
                                 ({breakdown.leverancier.elektriciteitDetails.enkel?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
                               </span>
