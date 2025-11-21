@@ -303,7 +303,7 @@ function ResultatenContent() {
                   tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
                   tariefGas: details.tarief_gas || details.opslag_gas || 0,
                   vastrechtMaand: details.vaste_kosten_maand || 8.25,
-                  heeftDubbeleMeter: details.heeft_dubbele_meter !== false,
+                  heeftDubbeleMeter: !verbruikData.heeftEnkeleMeter, // Gebruik data van gebruiker, niet van contract!
                 }),
               })
               
