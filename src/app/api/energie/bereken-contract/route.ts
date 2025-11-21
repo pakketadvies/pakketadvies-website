@@ -101,23 +101,43 @@ export async function POST(request: Request) {
       aansluitwaarde: aansluitwaardeElektriciteit
     })
     
+    // STAP 1: Haal eerst de aansluitwaarde_id op
+    const { data: elektraAansluitwaarde, error: elektraAansluitwaardeError } = await supabase
+      .from('aansluitwaarden_elektriciteit')
+      .select('id')
+      .eq('code', aansluitwaardeElektriciteit)
+      .single()
+    
+    if (elektraAansluitwaardeError || !elektraAansluitwaarde) {
+      console.error('❌ Aansluitwaarde elektriciteit niet gevonden:', aansluitwaardeElektriciteit, elektraAansluitwaardeError)
+      return NextResponse.json(
+        { error: `Ongeldige aansluitwaarde elektriciteit: ${aansluitwaardeElektriciteit}` },
+        { status: 400 }
+      )
+    }
+    
+    // STAP 2: Haal tarief op met aansluitwaarde_id
     const { data: elektriciteitTarief, error: elektraError } = await supabase
       .from('netbeheer_tarieven_elektriciteit')
-      .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_elektriciteit(code, beschrijving)')
+      .select('all_in_tarief_jaar')
       .eq('netbeheerder_id', netbeheerderId)
       .eq('jaar', 2025)
       .eq('actief', true)
-      .eq('aansluitwaarden_elektriciteit.code', aansluitwaardeElektriciteit)
+      .eq('aansluitwaarde_id', elektraAansluitwaarde.id)
       .single()
     
     console.log('📊 Netbeheertarief elektriciteit result:', {
+      aansluitwaardeId: elektraAansluitwaarde.id,
       data: elektriciteitTarief,
       error: elektraError
     })
     
     let netbeheerElektriciteit = elektriciteitTarief?.all_in_tarief_jaar || 0
-    if (elektraError) {
-      console.warn(`⚠️ Geen netbeheertarief elektriciteit gevonden voor ${aansluitwaardeElektriciteit}:`, elektraError)
+    if (elektraError || !elektriciteitTarief) {
+      console.error(`❌ KRITIEKE FOUT: Geen netbeheertarief elektriciteit gevonden voor ${aansluitwaardeElektriciteit}:`, elektraError)
+      console.error('   Netbeheerder:', netbeheerderId)
+      console.error('   Aansluitwaarde ID:', elektraAansluitwaarde.id)
+      console.error('   Dit betekent dat de database nog niet correct is gevuld!')
       // Fallback naar gemiddelde
       netbeheerElektriciteit = 430
     }
@@ -138,25 +158,53 @@ export async function POST(request: Request) {
       geconverteerd: gasAansluitwaardeVoorDatabase
     })
     
-    const { data: gasTarief, error: gasError } = await supabase
-      .from('netbeheer_tarieven_gas')
-      .select('all_in_tarief_jaar, aansluitwaarde:aansluitwaarden_gas(code, beschrijving)')
-      .eq('netbeheerder_id', netbeheerderId)
-      .eq('jaar', 2025)
-      .eq('actief', true)
-      .eq('aansluitwaarden_gas.code', gasAansluitwaardeVoorDatabase)
+    // STAP 1: Haal eerst de aansluitwaarde_id op
+    const { data: gasAansluitwaarde, error: gasAansluitwaardeError } = await supabase
+      .from('aansluitwaarden_gas')
+      .select('id')
+      .eq('code', gasAansluitwaardeVoorDatabase)
       .single()
     
-    console.log('📊 Netbeheertarief gas result:', {
-      data: gasTarief,
-      error: gasError
-    })
+    if (gasAansluitwaardeError || !gasAansluitwaarde) {
+      console.error('❌ Aansluitwaarde gas niet gevonden:', gasAansluitwaardeVoorDatabase, gasAansluitwaardeError)
+      // Voor gas is het OK als er geen aansluiting is
+      if (totaalGas === 0) {
+        console.log('   Gas verbruik is 0, geen probleem')
+      } else {
+        return NextResponse.json(
+          { error: `Ongeldige aansluitwaarde gas: ${gasAansluitwaardeVoorDatabase}` },
+          { status: 400 }
+        )
+      }
+    }
     
-    let netbeheerGas = gasTarief?.all_in_tarief_jaar || 0
-    if (gasError && totaalGas > 0) {
-      console.warn(`⚠️ Geen netbeheertarief gas gevonden voor ${aansluitwaardeGas}:`, gasError)
-      // Fallback naar gemiddelde
-      netbeheerGas = 245
+    // STAP 2: Haal tarief op met aansluitwaarde_id (alleen als we gas hebben)
+    let netbeheerGas = 0
+    if (totaalGas > 0 && gasAansluitwaarde) {
+      const { data: gasTarief, error: gasError } = await supabase
+        .from('netbeheer_tarieven_gas')
+        .select('all_in_tarief_jaar')
+        .eq('netbeheerder_id', netbeheerderId)
+        .eq('jaar', 2025)
+        .eq('actief', true)
+        .eq('aansluitwaarde_id', gasAansluitwaarde.id)
+        .single()
+      
+      console.log('📊 Netbeheertarief gas result:', {
+        aansluitwaardeId: gasAansluitwaarde.id,
+        data: gasTarief,
+        error: gasError
+      })
+      
+      netbeheerGas = gasTarief?.all_in_tarief_jaar || 0
+      if (gasError || !gasTarief) {
+        console.error(`❌ KRITIEKE FOUT: Geen netbeheertarief gas gevonden voor ${gasAansluitwaardeVoorDatabase}:`, gasError)
+        console.error('   Netbeheerder:', netbeheerderId)
+        console.error('   Aansluitwaarde ID:', gasAansluitwaarde.id)
+        console.error('   Dit betekent dat de database nog niet correct is gevuld!')
+        // Fallback naar gemiddelde
+        netbeheerGas = 245
+      }
     }
     
     console.log('💰 Netbeheerkosten totaal:', {
