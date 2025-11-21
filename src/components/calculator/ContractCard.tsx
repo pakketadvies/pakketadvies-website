@@ -321,7 +321,7 @@ export default function ContractCard({
                               )}
                               {breakdown.energiebelasting.staffels.schijf4 && (
                                 <div className="flex justify-between">
-                                  <span>>{(breakdown.energiebelasting.staffels.schijf3?.kwh || 0).toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf4.tarief.toFixed(5)}</span>
+                                  <span>&gt;{(breakdown.energiebelasting.staffels.schijf3?.kwh || 0).toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf4.tarief.toFixed(5)}</span>
                                   <span>€{breakdown.energiebelasting.staffels.schijf4.bedrag.toFixed(2)}</span>
                                 </div>
                               )}
