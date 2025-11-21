@@ -56,6 +56,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<VastContractFormData>({
     resolver: zodResolver(vastContractSchema),
@@ -95,6 +96,13 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
     }
     fetchLeveranciers()
   }, [])
+
+  // Set leverancier_id after leveranciers are loaded (for edit mode)
+  useEffect(() => {
+    if (isEdit && contract?.leverancier_id && leveranciers.length > 0) {
+      setValue('leverancier_id', contract.leverancier_id)
+    }
+  }, [isEdit, contract?.leverancier_id, leveranciers, setValue])
 
   const addVoorwaarde = () => {
     if (newVoorwaarde.trim()) {
@@ -162,6 +170,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       const detailsData = {
         contract_id: contractId,
         looptijd: parseInt(data.looptijd),
+        tarief_elektriciteit_enkel: data.tarief_elektriciteit_enkel,
         tarief_elektriciteit_normaal: data.tarief_elektriciteit_normaal,
         tarief_elektriciteit_dal: data.tarief_elektriciteit_dal,
         tarief_gas: data.tarief_gas,
@@ -321,7 +330,6 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                   })}
                   type="number"
                   step="0.000001"
-                  placeholder="0.122940"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -343,7 +351,6 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                   })}
                   type="number"
                   step="0.000001"
-                  placeholder="0.140000"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -365,7 +372,6 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                   })}
                   type="number"
                   step="0.000001"
-                  placeholder="0.110000"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -390,7 +396,6 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                   })}
                   type="number"
                   step="0.000001"
-                  placeholder="0.44746"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -409,7 +414,6 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                   })}
                   type="number"
                   step="0.01"
-                  placeholder="8.25"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
