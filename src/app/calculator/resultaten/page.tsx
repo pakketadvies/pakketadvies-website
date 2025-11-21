@@ -4,10 +4,11 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import ContractCard from '@/components/calculator/ContractCard'
+import EditVerbruikPanel from '@/components/calculator/EditVerbruikPanel'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
 import Link from 'next/link'
-import type { ContractOptie } from '@/types/calculator'
+import type { ContractOptie, VerbruikData } from '@/types/calculator'
 
 // Helper: Calculate estimated cost for contract
 // NOTE: This is a SIMPLIFIED calculation for the results page
@@ -193,12 +194,13 @@ const transformContractToOptie = (
 function ResultatenContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { verbruik, voorkeuren, reset } = useCalculatorStore()
+  const { verbruik, setVerbruik, voorkeuren, reset } = useCalculatorStore()
   
   const [resultaten, setResultaten] = useState<ContractOptie[]>([])
   const [filteredResultaten, setFilteredResultaten] = useState<ContractOptie[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
   
   // Filter states
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
@@ -213,136 +215,160 @@ function ResultatenContent() {
   // Check if coming from quick calculator
   const isQuickCalc = searchParams?.get('quick') === 'true'
   
-  useEffect(() => {
-    const loadResultaten = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        let verbruikData = verbruik
-        
-        console.log('🔍 DEBUG - Verbruik data from store:', verbruikData)
-        
-        // If coming from quick calc, data should be in store (set by QuickCalculator)
-        // No longer use query params fallback - we always use the store
-        if (isQuickCalc) {
-          // Fallback to localStorage if store is empty
-          const quickData = localStorage.getItem('quickcalc-data')
-          if (quickData && !verbruikData?.elektriciteitNormaal) {
-            const parsed = JSON.parse(quickData)
-            verbruikData = parsed.verbruik
-          }
-        }
-        
-        if (!verbruikData?.elektriciteitNormaal) {
-          router.push('/calculator')
-          return
-        }
-        
-        // Calculate total electricity and gas
-        const elektriciteitNormaal = verbruikData.elektriciteitNormaal
-        const elektriciteitDal = verbruikData.elektriciteitDal || 0
-        const totaalGas = verbruikData.gasJaar || 0
-        
-        // Fetch active contracts from API
-        const response = await fetch('/api/contracten/actief')
-        if (!response.ok) {
-          throw new Error('Failed to fetch contracts')
-        }
-        
-        const { contracten } = await response.json()
-        
-        // Bereken EXACTE kosten voor alle contracten via API
-        // Dit voorkomt dat elke card apart een API call moet doen
-        const postcode = verbruikData.leveringsadressen?.[0]?.postcode || '0000AA'
-        const aansluitwaardeElektriciteit = verbruikData.aansluitwaardeElektriciteit || '3x25A'
-        const aansluitwaardeGas = verbruikData.aansluitwaardeGas || 'G6'
-        
-        // Debug log
-        console.log('🔧 Aansluitwaarden voor berekening:', {
-          elektriciteit: aansluitwaardeElektriciteit,
-          gas: aansluitwaardeGas,
-          vanData: {
-            elektriciteit: verbruikData.aansluitwaardeElektriciteit,
-            elektriciteitType: typeof verbruikData.aansluitwaardeElektriciteit,
-            gas: verbruikData.aansluitwaardeGas,
-            gasType: typeof verbruikData.aansluitwaardeGas,
-            gasIsEmpty: verbruikData.aansluitwaardeGas === '',
-            gasIsUndefined: verbruikData.aansluitwaardeGas === undefined,
-            gasIsNull: verbruikData.aansluitwaardeGas === null,
-          }
-        })
-        
-        const contractenMetKosten = await Promise.all(
-          contracten.map(async (contract: any) => {
-            try {
-              // Skip maatwerk
-              if (contract.type === 'maatwerk') return null
-              
-              const details = contract.details_vast || contract.details_dynamisch || {}
-              
-              // Bereken exacte kosten via API
-              // BELANGRIJK: gebruik USER input voor metertype, niet contract details!
-              const heeftDubbeleMeter = verbruikData?.heeftEnkeleMeter === true ? false : !verbruikData?.heeftEnkeleMeter
-              
-              const kostenResponse = await fetch('/api/energie/bereken-contract', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  elektriciteitNormaal,
-                  elektriciteitDal,
-                  gas: totaalGas,
-                  aansluitwaardeElektriciteit,
-                  aansluitwaardeGas,
-                  postcode,
-                  contractType: contract.type,
-                  tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
-                  tariefElektriciteitDal: details.tarief_elektriciteit_dal || 0,
-                  tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
-                  tariefGas: details.tarief_gas || details.opslag_gas || 0,
-                  vastrechtMaand: details.vaste_kosten_maand || 8.25,
-                  heeftDubbeleMeter: heeftDubbeleMeter,
-                }),
-              })
-              
-              if (kostenResponse.ok) {
-                const { breakdown } = await kostenResponse.json()
-                return {
-                  ...contract,
-                  exactMaandbedrag: Math.round(breakdown.totaal.maandExclBtw),
-                  exactJaarbedrag: Math.round(breakdown.totaal.jaarExclBtw),
-                  breakdown: breakdown, // Bewaar hele breakdown voor prijsdetails
-                }
-              }
-            } catch (err) {
-              console.error('Error calculating costs for contract:', contract.id, err)
-            }
-            
-            // Fallback naar vereenvoudigde berekening
-            return contract
-          })
-        )
-        
-        // Filter null values (maatwerk)
-        const validContracten = contractenMetKosten.filter((c: any) => c !== null)
-        
-        // Transform to ContractOptie format
-        const transformed = validContracten
-          .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas, verbruikData?.heeftEnkeleMeter || false))
-          .filter((c: any) => c !== null) as ContractOptie[]
-        
-        setResultaten(transformed)
-        setFilteredResultaten(transformed)
-        setLoading(false)
-      } catch (err) {
-        console.error('Error loading resultaten:', err)
-        setError('Er ging iets mis bij het ophalen van de resultaten. Probeer het opnieuw.')
-        setLoading(false)
-      }
+  // Handler for updating verbruik from EditPanel
+  const handleVerbruikUpdate = async (newVerbruikData: VerbruikData) => {
+    setIsUpdating(true)
+    try {
+      // Update store
+      setVerbruik(newVerbruikData)
+      
+      // Reload resultaten with new data
+      await loadResultaten(newVerbruikData)
+      
+      // Smooth scroll to results
+      setTimeout(() => {
+        window.scrollTo({ top: 400, behavior: 'smooth' })
+      }, 300)
+    } catch (err) {
+      console.error('Error updating verbruik:', err)
+      setError('Er ging iets mis bij het herberekenen. Probeer het opnieuw.')
+    } finally {
+      setIsUpdating(false)
     }
-    
+  }
+  
+  const loadResultaten = async (verbruikData?: VerbruikData) => {
+  const loadResultaten = async (verbruikData?: VerbruikData) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      let data = verbruikData || verbruik
+      
+      console.log('🔍 DEBUG - Verbruik data from store:', data)
+      
+      // If coming from quick calc, data should be in store (set by QuickCalculator)
+      // No longer use query params fallback - we always use the store
+      if (!data && isQuickCalc) {
+        // Fallback to localStorage if store is empty
+        const quickData = localStorage.getItem('quickcalc-data')
+        if (quickData) {
+          const parsed = JSON.parse(quickData)
+          data = parsed.verbruik
+        }
+      }
+      
+      if (!data?.elektriciteitNormaal) {
+        router.push('/calculator')
+        return
+      }
+      
+      // Calculate total electricity and gas
+      const elektriciteitNormaal = data.elektriciteitNormaal
+      const elektriciteitDal = data.elektriciteitDal || 0
+      const totaalGas = data.gasJaar || 0
+      
+      // Fetch active contracts from API
+      const response = await fetch('/api/contracten/actief')
+      if (!response.ok) {
+        throw new Error('Failed to fetch contracts')
+      }
+      
+      const { contracten } = await response.json()
+      
+      // Bereken EXACTE kosten voor alle contracten via API
+      // Dit voorkomt dat elke card apart een API call moet doen
+      const postcode = data.leveringsadressen?.[0]?.postcode || '0000AA'
+      const aansluitwaardeElektriciteit = data.aansluitwaardeElektriciteit || '3x25A'
+      const aansluitwaardeGas = data.aansluitwaardeGas || 'G6'
+      
+      // Debug log
+      console.log('🔧 Aansluitwaarden voor berekening:', {
+        elektriciteit: aansluitwaardeElektriciteit,
+        gas: aansluitwaardeGas,
+        vanData: {
+          elektriciteit: data.aansluitwaardeElektriciteit,
+          elektriciteitType: typeof data.aansluitwaardeElektriciteit,
+          gas: data.aansluitwaardeGas,
+          gasType: typeof data.aansluitwaardeGas,
+          gasIsEmpty: data.aansluitwaardeGas === '',
+          gasIsUndefined: data.aansluitwaardeGas === undefined,
+          gasIsNull: data.aansluitwaardeGas === null,
+        }
+      })
+      
+      const contractenMetKosten = await Promise.all(
+        contracten.map(async (contract: any) => {
+          try {
+            // Skip maatwerk
+            if (contract.type === 'maatwerk') return null
+            
+            const details = contract.details_vast || contract.details_dynamisch || {}
+            
+            // Bereken exacte kosten via API
+            // BELANGRIJK: gebruik USER input voor metertype, niet contract details!
+            const heeftDubbeleMeter = data?.heeftEnkeleMeter === true ? false : !data?.heeftEnkeleMeter
+            
+            const kostenResponse = await fetch('/api/energie/bereken-contract', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                elektriciteitNormaal,
+                elektriciteitDal,
+                gas: totaalGas,
+                aansluitwaardeElektriciteit,
+                aansluitwaardeGas,
+                postcode,
+                contractType: contract.type,
+                tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
+                tariefElektriciteitDal: details.tarief_elektriciteit_dal || 0,
+                tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
+                tariefGas: details.tarief_gas || details.opslag_gas || 0,
+                vastrechtMaand: details.vaste_kosten_maand || 8.25,
+                heeftDubbeleMeter: heeftDubbeleMeter,
+              }),
+            })
+            
+            if (kostenResponse.ok) {
+              const { breakdown } = await kostenResponse.json()
+              return {
+                ...contract,
+                exactMaandbedrag: Math.round(breakdown.totaal.maandExclBtw),
+                exactJaarbedrag: Math.round(breakdown.totaal.jaarExclBtw),
+                breakdown: breakdown, // Bewaar hele breakdown voor prijsdetails
+              }
+            }
+          } catch (err) {
+            console.error('Error calculating costs for contract:', contract.id, err)
+          }
+          
+          // Fallback naar vereenvoudigde berekening
+          return contract
+        })
+      )
+      
+      // Filter null values (maatwerk)
+      const validContracten = contractenMetKosten.filter((c: any) => c !== null)
+      
+      // Transform to ContractOptie format
+      const transformed = validContracten
+        .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas, data?.heeftEnkeleMeter || false))
+        .filter((c: any) => c !== null) as ContractOptie[]
+      
+      setResultaten(transformed)
+      setFilteredResultaten(transformed)
+      setLoading(false)
+    } catch (err) {
+      console.error('Error loading resultaten:', err)
+      setError('Er ging iets mis bij het ophalen van de resultaten. Probeer het opnieuw.')
+      setLoading(false)
+    }
+  }
+  
+  // Load resultaten on mount
+  useEffect(() => {
     loadResultaten()
-  }, [verbruik, isQuickCalc, searchParams, router])
+  }, [isQuickCalc, searchParams, router])
 
   // Apply filters and sorting
   useEffect(() => {
@@ -454,6 +480,17 @@ function ResultatenContent() {
               Start opnieuw
             </Button>
           </div>
+
+          {/* Edit Verbruik Panel */}
+          {verbruik && (
+            <div className="mb-6">
+              <EditVerbruikPanel
+                currentData={verbruik}
+                onUpdate={handleVerbruikUpdate}
+                isUpdating={isUpdating}
+              />
+            </div>
+          )}
 
           {/* Filters Bar - Compact by default */}
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
