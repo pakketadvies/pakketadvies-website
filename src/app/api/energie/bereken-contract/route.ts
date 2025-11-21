@@ -227,7 +227,13 @@ export async function POST(request: Request) {
     }
     
     const kostenGas = totaalGas * (tariefGas || 0)
-    const kostenVastrecht = (vastrechtMaand || 0) * 12
+    
+    // Vastrecht: €8.25/maand voor STROOM + €8.25/maand voor GAS (alleen als er gas is)
+    // Standaard Sepa: €99/jaar stroom + €99/jaar gas = €198/jaar totaal
+    const vastrechtStroom = (vastrechtMaand || 8.25) * 12
+    const vastrechtGas = totaalGas > 0 ? (vastrechtMaand || 8.25) * 12 : 0
+    const kostenVastrecht = vastrechtStroom + vastrechtGas
+    
     const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht
     
     // 5. ENERGIEBELASTING BEREKENEN (correct gestaffeld)
@@ -311,6 +317,8 @@ export async function POST(request: Request) {
         leverancier: {
           elektriciteit: kostenElektriciteit,
           gas: kostenGas,
+          vastrechtStroom: vastrechtStroom,
+          vastrechtGas: vastrechtGas,
           vastrecht: kostenVastrecht,
           subtotaal: subtotaalLeverancier,
         },
