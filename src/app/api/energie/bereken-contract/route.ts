@@ -238,53 +238,37 @@ export async function POST(request: Request) {
     
     // 5. ENERGIEBELASTING BEREKENEN (correct gestaffeld)
     // 
-    // BELANGRIJK: 2 verschillende definities!
-    // 1. Grootverbruik AANSLUITWAARDE (> 3x80A of > G25): bepaalt of er EB VERMINDERING is
-    // 2. Grootverbruik VERBRUIK (> 10.000 kWh): bepaalt welke EB STAFFELS gebruikt worden
+    // BELANGRIJK: 
+    // - EB STAFFELS worden ALTIJD gebruikt (ongeacht aansluitwaarde)
+    // - EB VERMINDERING hangt af van aansluitwaarde (alleen bij ≤ 3x80A)
     //
+    // Grootverbruik aansluitwaarde (> 3x80A of > G25): GEEN EB vermindering
     const grootverbruikAansluitwaardenElektra = ['3x100A', '3x125A', '3x160A', '3x200A']
-    const grootverbruikAansluitwaardenGas = ['G40', 'G65', 'G100', 'G160', 'G250']
     const isGrootverbruikAansluitwaarde = grootverbruikAansluitwaardenElektra.includes(aansluitwaardeElektriciteit)
     
-    // Voor EB staffels: gebruik grootverbruik staffels als verbruik > 10.000 kWh
-    const gebruikGrootverbruikStaffels = totaalElektriciteit > 10000
-    
+    // EB STAFFELS ELEKTRICITEIT (ALTIJD 4 staffels gebruiken)
     let ebElektriciteit = 0
-    if (gebruikGrootverbruikStaffels) {
-      // Grootverbruik staffels: 4 schijven (bij verbruik > 10.000 kWh)
-      const schijf1Max = overheidsTarieven.eb_elektriciteit_gv_schijf1_max || 2900
-      const schijf2Max = overheidsTarieven.eb_elektriciteit_gv_schijf2_max || 10000
-      const schijf3Max = overheidsTarieven.eb_elektriciteit_gv_schijf3_max || 50000
-      
-      if (totaalElektriciteit <= schijf1Max) {
-        ebElektriciteit = totaalElektriciteit * overheidsTarieven.eb_elektriciteit_gv_schijf1
-      } else if (totaalElektriciteit <= schijf2Max) {
-        ebElektriciteit =
-          schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
-          (totaalElektriciteit - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
-      } else if (totaalElektriciteit <= schijf3Max) {
-        ebElektriciteit =
-          schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
-          (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2 +
-          (totaalElektriciteit - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
-      } else {
-        ebElektriciteit =
-          schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
-          (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2 +
-          (schijf3Max - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3 +
-          (totaalElektriciteit - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
-      }
+    const schijf1Max = overheidsTarieven.eb_elektriciteit_gv_schijf1_max || 2900
+    const schijf2Max = overheidsTarieven.eb_elektriciteit_gv_schijf2_max || 10000
+    const schijf3Max = overheidsTarieven.eb_elektriciteit_gv_schijf3_max || 50000
+    
+    if (totaalElektriciteit <= schijf1Max) {
+      ebElektriciteit = totaalElektriciteit * overheidsTarieven.eb_elektriciteit_gv_schijf1
+    } else if (totaalElektriciteit <= schijf2Max) {
+      ebElektriciteit =
+        schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
+        (totaalElektriciteit - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+    } else if (totaalElektriciteit <= schijf3Max) {
+      ebElektriciteit =
+        schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
+        (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2 +
+        (totaalElektriciteit - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
     } else {
-      // Kleinverbruik: 2 schijven
-      const schijf1Max = overheidsTarieven.eb_elektriciteit_kv_schijf1_max || 10000
-      
-      if (totaalElektriciteit <= schijf1Max) {
-        ebElektriciteit = totaalElektriciteit * overheidsTarieven.eb_elektriciteit_kv_schijf1
-      } else {
-        ebElektriciteit =
-          schijf1Max * overheidsTarieven.eb_elektriciteit_kv_schijf1 +
-          (totaalElektriciteit - schijf1Max) * overheidsTarieven.eb_elektriciteit_kv_schijf2
-      }
+      ebElektriciteit =
+        schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1 +
+        (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2 +
+        (schijf3Max - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3 +
+        (totaalElektriciteit - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
     }
     
     // Energiebelasting gas (2 schijven)
