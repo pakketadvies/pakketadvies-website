@@ -238,7 +238,6 @@ function ResultatenContent() {
   }
   
   const loadResultaten = async (verbruikData?: VerbruikData) => {
-  const loadResultaten = async (verbruikData?: VerbruikData) => {
     try {
       setLoading(true)
       setError(null)
