@@ -237,18 +237,21 @@ export async function POST(request: Request) {
     const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht
     
     // 5. ENERGIEBELASTING BEREKENEN (correct gestaffeld)
-    // Bepaal grootverbruik op basis van AANSLUITWAARDE (niet verbruik!)
-    // Elektra: > 3x80A = grootverbruik
-    // Gas: > G25 = grootverbruik
-    // 3x63A en G16 zijn dus KLEINVERBRUIK!
+    // 
+    // BELANGRIJK: 2 verschillende definities!
+    // 1. Grootverbruik AANSLUITWAARDE (> 3x80A of > G25): bepaalt of er EB VERMINDERING is
+    // 2. Grootverbruik VERBRUIK (> 10.000 kWh): bepaalt welke EB STAFFELS gebruikt worden
+    //
     const grootverbruikAansluitwaardenElektra = ['3x100A', '3x125A', '3x160A', '3x200A']
     const grootverbruikAansluitwaardenGas = ['G40', 'G65', 'G100', 'G160', 'G250']
-    const isGrootverbruikElektriciteit = grootverbruikAansluitwaardenElektra.includes(aansluitwaardeElektriciteit)
-    const isGrootverbruikGas = grootverbruikAansluitwaardenGas.includes(aansluitwaardeGas || '')
+    const isGrootverbruikAansluitwaarde = grootverbruikAansluitwaardenElektra.includes(aansluitwaardeElektriciteit)
+    
+    // Voor EB staffels: gebruik grootverbruik staffels als verbruik > 10.000 kWh
+    const gebruikGrootverbruikStaffels = totaalElektriciteit > 10000
     
     let ebElektriciteit = 0
-    if (isGrootverbruikElektriciteit) {
-      // Grootverbruik: 4 schijven
+    if (gebruikGrootverbruikStaffels) {
+      // Grootverbruik staffels: 4 schijven (bij verbruik > 10.000 kWh)
       const schijf1Max = overheidsTarieven.eb_elektriciteit_gv_schijf1_max || 2900
       const schijf2Max = overheidsTarieven.eb_elektriciteit_gv_schijf2_max || 10000
       const schijf3Max = overheidsTarieven.eb_elektriciteit_gv_schijf3_max || 50000
@@ -298,8 +301,9 @@ export async function POST(request: Request) {
       }
     }
     
-    // Vermindering (alleen kleinverbruik)
-    const verminderingEB = !isGrootverbruikElektriciteit 
+    // Vermindering EB: ALLEEN bij kleinverbruik AANSLUITWAARDE (niet verbruik!)
+    // 3x63A krijgt WEL vermindering (want ≤ 3x80A)
+    const verminderingEB = !isGrootverbruikAansluitwaarde 
       ? overheidsTarieven.vermindering_eb_elektriciteit 
       : 0
     
