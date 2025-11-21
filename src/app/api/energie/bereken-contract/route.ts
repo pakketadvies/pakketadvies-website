@@ -348,7 +348,7 @@ export async function POST(request: Request) {
           gas: aansluitwaardeGas || 'N/A',
         },
         netbeheerder: netbeheerderNaam,
-        isGrootverbruik: isGrootverbruikElektriciteit,
+        isGrootverbruik: isGrootverbruikAansluitwaarde,
       },
     })
     
