@@ -18,7 +18,8 @@ const berekenContractKostenVereenvoudigd = (
   contract: any,
   verbruikElektriciteitNormaal: number,
   verbruikElektriciteitDal: number,
-  verbruikGas: number
+  verbruikGas: number,
+  heeftEnkeleMeter: boolean = false
 ): { maandbedrag: number; jaarbedrag: number; besparing: number } => {
   let totaalJaar = 0
 
@@ -29,20 +30,29 @@ const berekenContractKostenVereenvoudigd = (
       tarief_elektriciteit_dal,
       tarief_gas, 
       vaste_kosten_maand,
-      heeft_dubbele_meter
     } = contract.details_vast
     
-    // Leverancierskosten
-    if (heeft_dubbele_meter) {
+    // Leverancierskosten - gebruik USER input voor metertype!
+    if (heeftEnkeleMeter && tarief_elektriciteit_enkel) {
+      // ENKELE METER: gebruik enkeltarief
+      const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
       totaalJaar = 
-        (verbruikElektriciteitNormaal * (tarief_elektriciteit_normaal || 0)) +
-        (verbruikElektriciteitDal * (tarief_elektriciteit_dal || 0)) +
+        (totaalElektriciteit * tarief_elektriciteit_enkel) +
+        (verbruikGas * (tarief_gas || 0)) +
+        ((vaste_kosten_maand || 0) * 12)
+    } else if (!heeftEnkeleMeter && tarief_elektriciteit_normaal && tarief_elektriciteit_dal) {
+      // DUBBELE METER: gebruik normaal + dal tarieven
+      totaalJaar = 
+        (verbruikElektriciteitNormaal * tarief_elektriciteit_normaal) +
+        (verbruikElektriciteitDal * tarief_elektriciteit_dal) +
         (verbruikGas * (tarief_gas || 0)) +
         ((vaste_kosten_maand || 0) * 12)
     } else {
+      // Fallback: gebruik enkeltarief of normaal tarief
       const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      const tariefElektriciteit = tarief_elektriciteit_enkel || tarief_elektriciteit_normaal || 0
       totaalJaar = 
-        (totaalElektriciteit * (tarief_elektriciteit_enkel || 0)) +
+        (totaalElektriciteit * tariefElektriciteit) +
         (verbruikGas * (tarief_gas || 0)) +
         ((vaste_kosten_maand || 0) * 12)
     }
@@ -113,7 +123,8 @@ const transformContractToOptie = (
   contract: any,
   verbruikElektriciteitNormaal: number,
   verbruikElektriciteitDal: number,
-  verbruikGas: number
+  verbruikGas: number,
+  heeftEnkeleMeter: boolean = false
 ): ContractOptie | null => {
   // Skip maatwerk contracts in standard listing
   if (contract.type === 'maatwerk') {
@@ -134,7 +145,8 @@ const transformContractToOptie = (
       contract,
       verbruikElektriciteitNormaal,
       verbruikElektriciteitDal,
-      verbruikGas
+      verbruikGas,
+      heeftEnkeleMeter
     )
     maandbedrag = berekend.maandbedrag
     jaarbedrag = berekend.jaarbedrag
@@ -211,31 +223,14 @@ function ResultatenContent() {
         
         console.log('🔍 DEBUG - Verbruik data from store:', verbruikData)
         
-        // If coming from quick calc, use query params or localStorage
+        // If coming from quick calc, data should be in store (set by QuickCalculator)
+        // No longer use query params fallback - we always use the store
         if (isQuickCalc) {
-          const stroom = parseInt(searchParams?.get('stroom') || '0')
-          const gas = parseInt(searchParams?.get('gas') || '0')
-          
-          if (stroom && gas) {
-            verbruikData = {
-              elektriciteitNormaal: Math.round(stroom * 0.6), // 60% normaal
-              elektriciteitDal: Math.round(stroom * 0.4), // 40% dal (typische verdeling)
-              heeftEnkeleMeter: false,
-              gasJaar: gas,
-              geenGasaansluiting: false,
-              heeftZonnepanelen: false,
-              terugleveringJaar: null,
-              meterType: 'weet_niet',
-              leveringsadressen: [{ postcode: '0000 XX', huisnummer: '1' }],
-              geschat: true,
-            }
-          } else {
-            // Fallback to localStorage
-            const quickData = localStorage.getItem('quickcalc-data')
-            if (quickData) {
-              const parsed = JSON.parse(quickData)
-              verbruikData = parsed.verbruik
-            }
+          // Fallback to localStorage if store is empty
+          const quickData = localStorage.getItem('quickcalc-data')
+          if (quickData && !verbruikData?.elektriciteitNormaal) {
+            const parsed = JSON.parse(quickData)
+            verbruikData = parsed.verbruik
           }
         }
         
@@ -287,6 +282,9 @@ function ResultatenContent() {
               const details = contract.details_vast || contract.details_dynamisch || {}
               
               // Bereken exacte kosten via API
+              // BELANGRIJK: gebruik USER input voor metertype, niet contract details!
+              const heeftDubbeleMeter = verbruikData?.heeftEnkeleMeter === true ? false : !verbruikData?.heeftEnkeleMeter
+              
               const kostenResponse = await fetch('/api/energie/bereken-contract', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -303,7 +301,7 @@ function ResultatenContent() {
                   tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
                   tariefGas: details.tarief_gas || details.opslag_gas || 0,
                   vastrechtMaand: details.vaste_kosten_maand || 8.25,
-                  heeftDubbeleMeter: details.heeft_dubbele_meter !== false,
+                  heeftDubbeleMeter: heeftDubbeleMeter,
                 }),
               })
               
@@ -330,7 +328,7 @@ function ResultatenContent() {
         
         // Transform to ContractOptie format
         const transformed = validContracten
-          .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas))
+          .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas, verbruikData?.heeftEnkeleMeter || false))
           .filter((c: any) => c !== null) as ContractOptie[]
         
         setResultaten(transformed)
