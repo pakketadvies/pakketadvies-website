@@ -349,6 +349,7 @@ function ResultatenContent() {
                 elektriciteitNormaal,
                 elektriciteitDal,
                 gas: totaalGas,
+                terugleveringJaar: data?.terugleveringJaar || 0, // NIEUW: teruglevering
                 aansluitwaardeElektriciteit,
                 aansluitwaardeGas,
                 postcode,
@@ -357,6 +358,7 @@ function ResultatenContent() {
                 tariefElektriciteitDal: details.tarief_elektriciteit_dal || 0,
                 tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
                 tariefGas: details.tarief_gas || details.opslag_gas || 0,
+                tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0, // NIEUW: teruglevertarief
                 vastrechtStroomMaand: details.vastrecht_stroom_maand || 4.00,
                 vastrechtGasMaand: details.vastrecht_gas_maand || 4.00,
                 heeftDubbeleMeter: heeftDubbeleMeter,
