@@ -26,6 +26,7 @@ const vastContractSchema = z.object({
   tarief_elektriciteit_normaal: z.number().min(0, 'Tarief moet positief zijn').nullable(),
   tarief_elektriciteit_dal: z.number().min(0).nullable(),
   tarief_gas: z.number().min(0).nullable(),
+  tarief_teruglevering_kwh: z.number().min(0, 'Teruglevertarief moet positief zijn'),
   
   // Vastrechten (apart voor stroom en gas)
   vastrecht_stroom_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
@@ -77,6 +78,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       tarief_elektriciteit_normaal: contract?.details_vast?.tarief_elektriciteit_normaal || null,
       tarief_elektriciteit_dal: contract?.details_vast?.tarief_elektriciteit_dal || null,
       tarief_gas: contract?.details_vast?.tarief_gas || null,
+      tarief_teruglevering_kwh: contract?.details_vast?.tarief_teruglevering_kwh || 0.00,
       vastrecht_stroom_maand: contract?.details_vast?.vastrecht_stroom_maand || 4.00,
       vastrecht_gas_maand: contract?.details_vast?.vastrecht_gas_maand || 4.00,
       groene_energie: contract?.details_vast?.groene_energie ?? false,
@@ -179,6 +181,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
         tarief_elektriciteit_normaal: data.tarief_elektriciteit_normaal,
         tarief_elektriciteit_dal: data.tarief_elektriciteit_dal,
         tarief_gas: data.tarief_gas,
+        tarief_teruglevering_kwh: data.tarief_teruglevering_kwh,
         vastrecht_stroom_maand: data.vastrecht_stroom_maand,
         vastrecht_gas_maand: data.vastrecht_gas_maand,
         groene_energie: data.groene_energie,
@@ -388,8 +391,8 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
               </div>
             </div>
 
-            {/* Gas en Vaste Kosten */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Gas en Vastrechten */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Gas */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-brand-navy-500">
@@ -407,6 +410,30 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                 />
                 <p className="text-xs text-gray-500">Laat leeg als geen gas</p>
               </div>
+              
+              {/* Teruglevering */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Teruglevering (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_teruglevering_kwh', { 
+                    valueAsNumber: true
+                  })}
+                  type="number"
+                  step="0.000001"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Kosten voor teruglevering aan net</p>
+                {errors.tarief_teruglevering_kwh && (
+                  <p className="text-sm text-red-600">{errors.tarief_teruglevering_kwh.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Vastrechten */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Vastrecht Stroom */}
               <div className="space-y-2">

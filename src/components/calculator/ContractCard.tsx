@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Check, Star, Leaf, CaretDown, CaretUp } from '@phosphor-icons/react'
+import { Check, Star, Leaf, CaretDown, CaretUp, Sun } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 
@@ -16,6 +16,7 @@ interface ContractCardProps {
   verbruikElektriciteitNormaal: number
   verbruikElektriciteitDal: number
   verbruikGas: number
+  terugleveringJaar?: number // NIEUW: voor saldering
   // Aansluitwaarden
   aansluitwaardeElektriciteit: string
   aansluitwaardeGas: string
@@ -35,6 +36,12 @@ interface KostenBreakdown {
     gas: number
     gasDetails?: {
       m3: number
+      tarief: number
+      bedrag: number
+    } | null
+    teruglevering?: number // NIEUW
+    terugleveringDetails?: { // NIEUW
+      kwh: number
       tarief: number
       bedrag: number
     } | null
@@ -74,6 +81,7 @@ export default function ContractCard({
   verbruikElektriciteitNormaal,
   verbruikElektriciteitDal,
   verbruikGas,
+  terugleveringJaar,
   aansluitwaardeElektriciteit,
   aansluitwaardeGas,
   postcode
@@ -116,6 +124,7 @@ export default function ContractCard({
           elektriciteitNormaal: verbruikElektriciteitNormaal,
           elektriciteitDal: verbruikElektriciteitDal,
           gas: verbruikGas,
+          terugleveringJaar: terugleveringJaar || 0, // NIEUW
           
           // Aansluitwaarden
           aansluitwaardeElektriciteit,
@@ -130,6 +139,7 @@ export default function ContractCard({
           tariefElektriciteitDal: contract.tariefElektriciteitDal,
           tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
           tariefGas: contract.tariefGas,
+          tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0, // NIEUW
           vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
           vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
           heeftDubbeleMeter: !heeftEnkeleMeter,
@@ -507,6 +517,38 @@ export default function ContractCard({
                                  breakdown.leverancier.vastrechtGas).toFixed(2)}
                             </span>
                           </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Teruglevering (zonnepanelen) */}
+                    {breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && (
+                      <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
+                        <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
+                          <Sun weight="duotone" className="w-5 h-5 text-orange-600" />
+                          Teruglevering (Zonnepanelen)
+                        </h4>
+                        
+                        {/* Terugleverkosten */}
+                        <div className="space-y-1.5 mb-3">
+                          <p className="text-xs font-semibold text-gray-500 mb-1">Terugleverkosten</p>
+                          
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">
+                              Kosten teruglevering
+                              <span className="text-xs text-gray-500 ml-1">
+                                ({breakdown.leverancier.terugleveringDetails.kwh.toLocaleString()} kWh × €{breakdown.leverancier.terugleveringDetails.tarief.toFixed(6)})
+                              </span>
+                            </span>
+                            <span className="font-medium text-orange-700">
+                              €{breakdown.leverancier.terugleveringDetails.bedrag.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Info box */}
+                        <div className="mt-3 p-2 bg-orange-100 rounded text-xs text-orange-900">
+                          <strong>ℹ️ Salderingsregeling:</strong> Je verbruik is al verrekend met je teruglevering. Bovenstaande kosten zijn de administratiekosten die de leverancier rekent voor het innemen van stroom.
                         </div>
                       </div>
                     )}

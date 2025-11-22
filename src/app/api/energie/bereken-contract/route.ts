@@ -20,6 +20,7 @@ export async function POST(request: Request) {
       elektriciteitNormaal,
       elektriciteitDal,
       gas,
+      terugleveringJaar, // NIEUW: voor salderingsregeling
       
       // Aansluitwaarden
       aansluitwaardeElektriciteit,
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
       tariefElektriciteitDal,
       tariefElektriciteitEnkel,
       tariefGas,
+      tariefTerugleveringKwh, // NIEUW: kosten voor teruglevering
       vastrechtStroomMaand,
       vastrechtGasMaand,
       heeftDubbeleMeter,
@@ -48,7 +50,46 @@ export async function POST(request: Request) {
     }
     
     const supabase = await createClient()
-    const totaalElektriciteit = elektriciteitNormaal + (elektriciteitDal || 0)
+    
+    // ============================================
+    // STAP 0: SALDERINGSREGELING TOEPASSEN
+    // ============================================
+    // Als er teruglevering is (zonnepanelen), dan moet dit van het verbruik af
+    const terugleveringKwh = terugleveringJaar || 0
+    let nettoElektriciteitNormaal = elektriciteitNormaal
+    let nettoElektriciteitDal = elektriciteitDal || 0
+    
+    if (terugleveringKwh > 0) {
+      if (!heeftDubbeleMeter) {
+        // ENKELE METER: Teruglevering volledig aftrekken van totaal verbruik
+        const totaalVerbruik = elektriciteitNormaal
+        nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringKwh)
+        console.log('🔋 Saldering enkele meter:', {
+          verbruik: totaalVerbruik,
+          teruglevering: terugleveringKwh,
+          netto: nettoElektriciteitNormaal
+        })
+      } else {
+        // DUBBELE METER: Teruglevering 50/50 verdelen tussen normaal en dal
+        const terugleveringNormaal = terugleveringKwh / 2
+        const terugleveringDal = terugleveringKwh / 2
+        
+        nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - terugleveringNormaal)
+        nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - terugleveringDal)
+        
+        console.log('🔋 Saldering dubbele meter:', {
+          verbruikNormaal: elektriciteitNormaal,
+          verbruikDal: elektriciteitDal || 0,
+          teruglevering: terugleveringKwh,
+          terugleveringNormaal,
+          terugleveringDal,
+          nettoNormaal: nettoElektriciteitNormaal,
+          nettoDal: nettoElektriciteitDal
+        })
+      }
+    }
+    
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
     const totaalGas = gas || 0
     
     // 1. NETBEHEERDER LOOKUP op basis van postcode
@@ -255,10 +296,10 @@ export async function POST(request: Request) {
     
     // Prioriteit: Check eerst of het een enkele meter is en enkeltarief gebruikt moet worden
     if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
-      // ENKELE METER: gebruik enkeltarief
+      // ENKELE METER: gebruik enkeltarief met NETTO verbruik (na saldering)
       kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
       
-      console.log('✅ Gebruik ENKELTARIEF:', {
+      console.log('✅ Gebruik ENKELTARIEF (na saldering):', {
         kwh: totaalElektriciteit,
         tarief: tariefElektriciteitEnkel,
         kosten: kostenElektriciteit
@@ -273,26 +314,26 @@ export async function POST(request: Request) {
         }
       }
     } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
-      // DUBBELE METER: gebruik normaal + dal tarieven
-      const kostenNormaal = elektriciteitNormaal * tariefElektriciteitNormaal
-      const kostenDal = (elektriciteitDal || 0) * tariefElektriciteitDal
+      // DUBBELE METER: gebruik normaal + dal tarieven met NETTO verbruik (na saldering)
+      const kostenNormaal = nettoElektriciteitNormaal * tariefElektriciteitNormaal
+      const kostenDal = nettoElektriciteitDal * tariefElektriciteitDal
       kostenElektriciteit = kostenNormaal + kostenDal
       
-      console.log('✅ Gebruik DUBBEL TARIEF:', {
-        normaal: { kwh: elektriciteitNormaal, tarief: tariefElektriciteitNormaal, kosten: kostenNormaal },
-        dal: { kwh: elektriciteitDal, tarief: tariefElektriciteitDal, kosten: kostenDal },
+      console.log('✅ Gebruik DUBBEL TARIEF (na saldering):', {
+        normaal: { kwh: nettoElektriciteitNormaal, tarief: tariefElektriciteitNormaal, kosten: kostenNormaal },
+        dal: { kwh: nettoElektriciteitDal, tarief: tariefElektriciteitDal, kosten: kostenDal },
         totaal: kostenElektriciteit
       })
       
       elektriciteitBreakdown = {
         type: 'dubbel',
         normaal: {
-          kwh: elektriciteitNormaal,
+          kwh: nettoElektriciteitNormaal,
           tarief: tariefElektriciteitNormaal,
           bedrag: kostenNormaal
         },
         dal: {
-          kwh: elektriciteitDal || 0,
+          kwh: nettoElektriciteitDal,
           tarief: tariefElektriciteitDal,
           bedrag: kostenDal
         }
@@ -353,6 +394,24 @@ export async function POST(request: Request) {
       bedrag: kostenGas
     } : null
     
+    // TERUGLEVERKOSTEN (alleen bij vaste contracten met zonnepanelen)
+    // Deze kosten worden berekend over de VOLLEDIGE teruglevering, niet netto
+    const kostenTeruglevering = terugleveringKwh > 0 && tariefTerugleveringKwh 
+      ? terugleveringKwh * tariefTerugleveringKwh 
+      : 0
+    
+    const terugleveringBreakdown = terugleveringKwh > 0 ? {
+      kwh: terugleveringKwh,
+      tarief: tariefTerugleveringKwh || 0,
+      bedrag: kostenTeruglevering
+    } : null
+    
+    console.log('💰 Terugleverkosten:', {
+      teruglevering: terugleveringKwh,
+      tarief: tariefTerugleveringKwh,
+      kosten: kostenTeruglevering
+    })
+    
     // Vastrecht: €8.25/maand voor STROOM + €8.25/maand voor GAS (alleen als er gas is)
     // 6. VASTRECHT (apart voor stroom en gas)
     // Standaard: €4/maand per aansluiting = €48/jaar
@@ -360,7 +419,7 @@ export async function POST(request: Request) {
     const vastrechtGas = totaalGas > 0 ? (vastrechtGasMaand || 4.00) * 12 : 0
     const kostenVastrecht = vastrechtStroom + vastrechtGas
     
-    const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht
+    const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht + kostenTeruglevering
     
     // 5. ENERGIEBELASTING BEREKENEN (correct gestaffeld)
     // 
@@ -495,6 +554,8 @@ export async function POST(request: Request) {
           elektriciteitDetails: elektriciteitBreakdown,
           gas: kostenGas,
           gasDetails: gasBreakdown,
+          teruglevering: kostenTeruglevering,
+          terugleveringDetails: terugleveringBreakdown,
           vastrechtStroom: vastrechtStroom,
           vastrechtGas: vastrechtGas,
           vastrecht: kostenVastrecht,
@@ -524,9 +585,10 @@ export async function POST(request: Request) {
       metadata: {
         verbruik: {
           elektriciteitTotaal: totaalElektriciteit,
-          elektriciteitNormaal,
-          elektriciteitDal: elektriciteitDal || 0,
+          elektriciteitNormaal: nettoElektriciteitNormaal,
+          elektriciteitDal: nettoElektriciteitDal,
           gas: totaalGas,
+          teruglevering: terugleveringKwh,
         },
         aansluitwaarden: {
           elektriciteit: aansluitwaardeElektriciteit,

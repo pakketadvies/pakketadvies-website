@@ -41,6 +41,7 @@ export interface ContractDetailsVast {
   tarief_elektriciteit_normaal: number | null // Voor dubbele meters (dag)
   tarief_elektriciteit_dal: number | null // Voor dubbele meters (nacht)
   tarief_gas: number | null
+  tarief_teruglevering_kwh: number // Kosten per kWh teruglevering (voor zonnepanelen)
   
   // Vastrechten (apart voor stroom en gas)
   vastrecht_stroom_maand: number
