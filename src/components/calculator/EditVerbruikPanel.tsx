@@ -159,7 +159,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
       {/* Header - Altijd zichtbaar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors group"
+        className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors group focus:outline-none"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center group-hover:bg-brand-teal-200 transition-colors">
@@ -196,7 +196,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
         <div className="px-4 md:px-6 pb-6 space-y-5 animate-slide-down border-t-2 border-gray-100 pt-6">
           
           {/* 1. LEVERADRES - Altijd bovenaan, full width */}
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5">
+          <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <MapPin weight="duotone" className="w-5 h-5 text-brand-teal-600" />
               <h4 className="text-base font-bold text-brand-navy-500">Leveradres</h4>
@@ -274,7 +274,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             
             {/* 2. Elektriciteit */}
-            <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-5">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Lightning weight="duotone" className="w-5 h-5 text-brand-teal-600" />
                 <h4 className="text-base font-bold text-brand-navy-500">Elektriciteit</h4>
@@ -282,7 +282,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
               
               <div className="space-y-3">
                 {/* Enkele meter toggle */}
-                <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-white bg-white hover:border-brand-teal-300 transition-all">
+                <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-gray-50 hover:border-brand-teal-300 hover:bg-brand-teal-50 transition-all">
                   <input
                     type="checkbox"
                     checked={formData.heeftEnkeleMeter}
@@ -337,14 +337,14 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
             </div>
 
             {/* 3. Zonnepanelen */}
-            <div className="bg-brand-purple-50 border-2 border-brand-purple-200 rounded-xl p-5">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Sun weight="duotone" className="w-5 h-5 text-brand-purple-600" />
+                <Sun weight="duotone" className="w-5 h-5 text-amber-600" />
                 <h4 className="text-base font-bold text-brand-navy-500">Zonnepanelen</h4>
               </div>
               
               <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border-2 border-white bg-white hover:border-brand-purple-300 transition-all">
+                <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-gray-50 hover:border-amber-300 hover:bg-amber-50 transition-all">
                   <input
                     type="checkbox"
                     checked={formData.heeftZonnepanelen}
@@ -354,7 +354,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                         handleFieldChange('terugleveringJaar', null)
                       }
                     }}
-                    className="w-5 h-5 rounded border-2 border-gray-300 text-brand-purple-600 focus:ring-brand-purple-500 focus:ring-2"
+                    className="w-5 h-5 rounded border-2 border-gray-300 text-amber-600 focus:ring-amber-500 focus:ring-2"
                   />
                   <span className="text-sm font-medium text-brand-navy-500">Wij hebben zonnepanelen</span>
                 </label>
@@ -370,7 +370,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                         value={formData.terugleveringJaar || ''}
                         onChange={(e) => handleFieldChange('terugleveringJaar', Number(e.target.value) || 0)}
                         placeholder="3000"
-                        className="w-full px-3 py-2.5 pr-12 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all bg-white"
+                        className="w-full px-3 py-2.5 pr-12 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
                     </div>
@@ -392,7 +392,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             
             {/* 4. Gas */}
-            <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-5">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Flame weight="duotone" className="w-5 h-5 text-orange-600" />
                 <h4 className="text-base font-bold text-brand-navy-500">Gas</h4>
@@ -410,14 +410,14 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                         value={formData.gasJaar || ''}
                         onChange={(e) => handleFieldChange('gasJaar', Number(e.target.value) || 0)}
                         placeholder="1200"
-                        className="w-full px-3 py-2.5 pr-12 text-sm rounded-lg border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all bg-white"
+                        className="w-full px-3 py-2.5 pr-12 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">m³</span>
                     </div>
                   </div>
                 )}
 
-                <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-white bg-white hover:border-orange-300 transition-all">
+                <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50 transition-all">
                   <input
                     type="checkbox"
                     checked={formData.geenGasaansluiting}
@@ -435,9 +435,9 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
             </div>
 
             {/* 5. Aansluitwaarden */}
-            <div className="bg-brand-purple-50 border-2 border-brand-purple-200 rounded-xl p-5">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Plugs weight="duotone" className="w-5 h-5 text-brand-purple-600" />
+                <Plugs weight="duotone" className="w-5 h-5 text-brand-navy-500" />
                 <h4 className="text-base font-bold text-brand-navy-500">Aansluitwaarden</h4>
               </div>
               
@@ -449,7 +449,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                   <select
                     value={formData.aansluitwaardeElektriciteit || '3x25A'}
                     onChange={(e) => handleFieldChange('aansluitwaardeElektriciteit', e.target.value)}
-                    className="w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                    className="w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                   >
                     <option value="3x25A">3x25A</option>
                     <option value="3x35A">3x35A</option>
@@ -467,7 +467,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                     <select
                       value={formData.aansluitwaardeGas || 'G6'}
                       onChange={(e) => handleFieldChange('aansluitwaardeGas', e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                      className="w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                     >
                       <option value="G4">G4</option>
                       <option value="G6">G6</option>
