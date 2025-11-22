@@ -9,10 +9,11 @@ interface EditVerbruikPanelProps {
   currentData: VerbruikData
   onUpdate: (newData: VerbruikData) => void
   isUpdating: boolean
+  forceOpen?: boolean // For modal mode
 }
 
-export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }: EditVerbruikPanelProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating, forceOpen = false }: EditVerbruikPanelProps) {
+  const [isOpen, setIsOpen] = useState(forceOpen)
   const [formData, setFormData] = useState<VerbruikData>(currentData)
   const [hasChanges, setHasChanges] = useState(false)
   
@@ -27,6 +28,13 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
     setFormData(currentData)
     setHasChanges(false)
   }, [currentData])
+
+  // Force open state when in modal mode
+  useEffect(() => {
+    if (forceOpen) {
+      setIsOpen(true)
+    }
+  }, [forceOpen])
 
   // Cleanup
   useEffect(() => {
@@ -155,45 +163,47 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
   const totaalElektriciteit = formData.elektriciteitNormaal + (formData.elektriciteitDal || 0)
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300">
-      {/* Header - Altijd zichtbaar */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors group focus:outline-none"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center group-hover:bg-brand-teal-200 transition-colors">
-            <PencilSimple weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+    <div className={`bg-white overflow-hidden transition-all duration-300 ${forceOpen ? '' : 'rounded-2xl shadow-lg border-2 border-gray-200'}`}>
+      {/* Header - Only show when NOT in modal mode */}
+      {!forceOpen && (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors group focus:outline-none"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center group-hover:bg-brand-teal-200 transition-colors">
+              <PencilSimple weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
+              <p className="text-sm text-gray-600">
+                {totaalElektriciteit.toLocaleString()} kWh stroom
+                {formData.heeftZonnepanelen && formData.terugleveringJaar ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering` : ''}
+                {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
+                {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
+              </p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
-            <p className="text-sm text-gray-600">
-              {totaalElektriciteit.toLocaleString()} kWh stroom
-              {formData.heeftZonnepanelen && formData.terugleveringJaar ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering` : ''}
-              {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
-              {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
-            </p>
+          
+          <div className="flex items-center gap-3">
+            {hasChanges && !isOpen && (
+              <span className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">
+                <PencilSimple weight="bold" className="w-4 h-4" />
+                Niet opgeslagen
+              </span>
+            )}
+            {isOpen ? (
+              <CaretUp weight="bold" className="w-6 h-6 text-gray-400" />
+            ) : (
+              <CaretDown weight="bold" className="w-6 h-6 text-gray-400" />
+            )}
           </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {hasChanges && !isOpen && (
-            <span className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">
-              <PencilSimple weight="bold" className="w-4 h-4" />
-              Niet opgeslagen
-            </span>
-          )}
-          {isOpen ? (
-            <CaretUp weight="bold" className="w-6 h-6 text-gray-400" />
-          ) : (
-            <CaretDown weight="bold" className="w-6 h-6 text-gray-400" />
-          )}
-        </div>
-      </button>
+        </button>
+      )}
 
-      {/* Edit Form - Collapsible */}
+      {/* Edit Form - Collapsible or always open in modal */}
       {isOpen && (
-        <div className="px-4 md:px-6 pb-6 space-y-5 animate-slide-down border-t-2 border-gray-100 pt-6">
+        <div className={`px-4 md:px-6 pb-6 space-y-5 animate-slide-down pt-6 ${forceOpen ? '' : 'border-t-2 border-gray-100'}`}>
           
           {/* 1. LEVERADRES - Altijd bovenaan, full width */}
           <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
