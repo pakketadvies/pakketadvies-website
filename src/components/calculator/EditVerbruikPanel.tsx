@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Lightning, Flame, MapPin, Plugs, PencilSimple, Check, X, CaretDown, CaretUp } from '@phosphor-icons/react'
+import { Lightning, Flame, MapPin, Plugs, PencilSimple, Check, X, CaretDown, CaretUp, Sun } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
 import type { VerbruikData } from '@/types/calculator'
 
@@ -169,6 +169,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
             <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
             <p className="text-sm text-gray-600">
               {totaalElektriciteit.toLocaleString()} kWh stroom
+              {formData.heeftZonnepanelen && formData.terugleveringJaar ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering` : ''}
               {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
               {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
             </p>
@@ -258,6 +259,50 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* Zonnepanelen */}
+              <div className="bg-brand-purple-50 border-2 border-brand-purple-200 rounded-xl p-4">
+                <div className="space-y-3">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.heeftZonnepanelen}
+                      onChange={(e) => {
+                        handleFieldChange('heeftZonnepanelen', e.target.checked)
+                        if (!e.target.checked) {
+                          handleFieldChange('terugleveringJaar', null)
+                        }
+                      }}
+                      className="w-5 h-5 mt-0.5 rounded border-2 border-gray-300 text-brand-purple-600 focus:ring-brand-purple-500 focus:ring-2"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Sun weight="duotone" className="w-5 h-5 text-brand-purple-600 flex-shrink-0" />
+                      <span className="text-sm font-semibold text-brand-navy-500">Wij hebben zonnepanelen</span>
+                    </div>
+                  </label>
+
+                  {formData.heeftZonnepanelen && (
+                    <div className="animate-slide-down">
+                      <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
+                        Teruglevering per jaar
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={formData.terugleveringJaar || ''}
+                          onChange={(e) => handleFieldChange('terugleveringJaar', Number(e.target.value) || 0)}
+                          placeholder="3000"
+                          className="w-full px-3 py-2.5 pr-12 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all bg-white"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1.5">
+                        Hoeveel stroom lever je terug aan het net?
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
