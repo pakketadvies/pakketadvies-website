@@ -658,18 +658,18 @@ function ResultatenContent() {
               </div>
             )}
           </div>
-
-          {/* Edit Verbruik Panel - Sticky onder navbar */}
-          {verbruik && (
-            <div className="sticky top-24 z-[45] mb-6 bg-gray-50 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 py-4 -mt-4">
-              <EditVerbruikPanel
-                currentData={verbruik}
-                onUpdate={handleVerbruikUpdate}
-                isUpdating={isUpdating}
-              />
-            </div>
-          )}
         </div>
+
+        {/* Edit Verbruik Panel - Sticky onder navbar */}
+        {verbruik && (
+          <div className="sticky top-24 z-[45] mb-6 bg-gray-50 pb-4">
+            <EditVerbruikPanel
+              currentData={verbruik}
+              onUpdate={handleVerbruikUpdate}
+              isUpdating={isUpdating}
+            />
+          </div>
+        )}
 
         {/* Results grid */}
         {filteredResultaten.length === 0 ? (
