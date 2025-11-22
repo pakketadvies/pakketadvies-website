@@ -20,42 +20,74 @@ const berekenContractKostenVereenvoudigd = (
   verbruikElektriciteitNormaal: number,
   verbruikElektriciteitDal: number,
   verbruikGas: number,
-  heeftEnkeleMeter: boolean = false
+  heeftEnkeleMeter: boolean = false,
+  terugleveringJaar: number = 0 // NIEUW: voor saldering
 ): { maandbedrag: number; jaarbedrag: number; besparing: number } => {
   let totaalJaar = 0
+  
+  // ============================================
+  // STAP 1: SALDERINGSREGELING TOEPASSEN
+  // ============================================
+  let nettoElektriciteitNormaal = verbruikElektriciteitNormaal
+  let nettoElektriciteitDal = verbruikElektriciteitDal
+  
+  if (terugleveringJaar > 0) {
+    if (heeftEnkeleMeter) {
+      // ENKELE METER: Teruglevering volledig aftrekken van totaal verbruik
+      const totaalVerbruik = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      const nettoTotaal = Math.max(0, totaalVerbruik - terugleveringJaar)
+      nettoElektriciteitNormaal = nettoTotaal
+      nettoElektriciteitDal = 0
+    } else {
+      // DUBBELE METER: Teruglevering 50/50 verdelen tussen normaal en dal
+      const terugleveringNormaal = terugleveringJaar / 2
+      const terugleveringDal = terugleveringJaar / 2
+      
+      nettoElektriciteitNormaal = Math.max(0, verbruikElektriciteitNormaal - terugleveringNormaal)
+      nettoElektriciteitDal = Math.max(0, verbruikElektriciteitDal - terugleveringDal)
+    }
+  }
 
   if (contract.type === 'vast' && contract.details_vast) {
     const { 
       tarief_elektriciteit_enkel,
       tarief_elektriciteit_normaal, 
       tarief_elektriciteit_dal,
-      tarief_gas, 
+      tarief_gas,
+      tarief_teruglevering_kwh, // NIEUW
+      vastrecht_stroom_maand,
+      vastrecht_gas_maand,
       vaste_kosten_maand,
     } = contract.details_vast
     
-    // Leverancierskosten - gebruik USER input voor metertype!
+    // Leverancierskosten - gebruik NETTO verbruik na saldering
     if (heeftEnkeleMeter && tarief_elektriciteit_enkel) {
       // ENKELE METER: gebruik enkeltarief
-      const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
       totaalJaar = 
         (totaalElektriciteit * tarief_elektriciteit_enkel) +
         (verbruikGas * (tarief_gas || 0)) +
-        ((vaste_kosten_maand || 0) * 12)
+        ((vastrecht_stroom_maand || vaste_kosten_maand || 4) * 12)
     } else if (!heeftEnkeleMeter && tarief_elektriciteit_normaal && tarief_elektriciteit_dal) {
       // DUBBELE METER: gebruik normaal + dal tarieven
       totaalJaar = 
-        (verbruikElektriciteitNormaal * tarief_elektriciteit_normaal) +
-        (verbruikElektriciteitDal * tarief_elektriciteit_dal) +
+        (nettoElektriciteitNormaal * tarief_elektriciteit_normaal) +
+        (nettoElektriciteitDal * tarief_elektriciteit_dal) +
         (verbruikGas * (tarief_gas || 0)) +
-        ((vaste_kosten_maand || 0) * 12)
+        ((vastrecht_stroom_maand || vaste_kosten_maand || 4) * 12)
     } else {
       // Fallback: gebruik enkeltarief of normaal tarief
-      const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
       const tariefElektriciteit = tarief_elektriciteit_enkel || tarief_elektriciteit_normaal || 0
       totaalJaar = 
         (totaalElektriciteit * tariefElektriciteit) +
         (verbruikGas * (tarief_gas || 0)) +
-        ((vaste_kosten_maand || 0) * 12)
+        ((vastrecht_stroom_maand || vaste_kosten_maand || 4) * 12)
+    }
+    
+    // TERUGLEVERKOSTEN toevoegen (berekend over VOLLEDIGE teruglevering)
+    if (terugleveringJaar > 0 && tarief_teruglevering_kwh) {
+      totaalJaar += terugleveringJaar * tarief_teruglevering_kwh
     }
     
     // EXACTE tarieven 2025 (na database migration):
@@ -63,9 +95,9 @@ const berekenContractKostenVereenvoudigd = (
     // - EB gas: €0.57816/m³ (alle staffels)
     // - Vermindering EB: €524.95/jaar
     // - Netbeheer Enexis: €430 elektra (3x25A) + €245 gas (G6)
-    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal // NETTO na saldering
     
-    // Energiebelasting 2025
+    // Energiebelasting 2025 (over NETTO verbruik)
     const ebElektriciteit = totaalElektriciteit * 0.10154
     const ebGas = verbruikGas * 0.57816
     
@@ -86,7 +118,7 @@ const berekenContractKostenVereenvoudigd = (
     // Assume market price + surcharge (estimated market: €0.20 elec, €0.80 gas)
     const marktPrijsElektriciteit = 0.20
     const marktPrijsGas = 0.80
-    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal // NETTO na saldering
     totaalJaar = 
       (totaalElektriciteit * (marktPrijsElektriciteit + opslag_elektriciteit_normaal)) +
       (verbruikGas * (marktPrijsGas + (opslag_gas || 0))) +
@@ -125,7 +157,8 @@ const transformContractToOptie = (
   verbruikElektriciteitNormaal: number,
   verbruikElektriciteitDal: number,
   verbruikGas: number,
-  heeftEnkeleMeter: boolean = false
+  heeftEnkeleMeter: boolean = false,
+  terugleveringJaar: number = 0 // NIEUW
 ): ContractOptie | null => {
   // Skip maatwerk contracts in standard listing
   if (contract.type === 'maatwerk') {
@@ -147,7 +180,8 @@ const transformContractToOptie = (
       verbruikElektriciteitNormaal,
       verbruikElektriciteitDal,
       verbruikGas,
-      heeftEnkeleMeter
+      heeftEnkeleMeter,
+      terugleveringJaar // NIEUW: teruglevering meegeven
     )
     maandbedrag = berekend.maandbedrag
     jaarbedrag = berekend.jaarbedrag
@@ -352,7 +386,14 @@ function ResultatenContent() {
       
       // Transform to ContractOptie format
       const transformed = validContracten
-        .map((c: any) => transformContractToOptie(c, elektriciteitNormaal, elektriciteitDal, totaalGas, data?.heeftEnkeleMeter || false))
+        .map((c: any) => transformContractToOptie(
+          c, 
+          elektriciteitNormaal, 
+          elektriciteitDal, 
+          totaalGas, 
+          data?.heeftEnkeleMeter || false,
+          data?.terugleveringJaar || 0 // NIEUW: teruglevering meegeven
+        ))
         .filter((c: any) => c !== null) as ContractOptie[]
       
       setResultaten(transformed)
