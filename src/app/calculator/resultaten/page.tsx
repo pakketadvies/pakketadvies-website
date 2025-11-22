@@ -661,14 +661,12 @@ function ResultatenContent() {
 
           {/* Edit Verbruik Panel - Sticky onder navbar */}
           {verbruik && (
-            <div className="sticky top-20 z-30 mb-6 transition-shadow">
-              <div className="bg-gradient-to-b from-gray-50 to-transparent pt-2 -mt-2">
-                <EditVerbruikPanel
-                  currentData={verbruik}
-                  onUpdate={handleVerbruikUpdate}
-                  isUpdating={isUpdating}
-                />
-              </div>
+            <div className="sticky top-32 z-40 mb-6">
+              <EditVerbruikPanel
+                currentData={verbruik}
+                onUpdate={handleVerbruikUpdate}
+                isUpdating={isUpdating}
+              />
             </div>
           )}
         </div>
