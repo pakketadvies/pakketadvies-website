@@ -26,7 +26,11 @@ const vastContractSchema = z.object({
   tarief_elektriciteit_normaal: z.number().min(0, 'Tarief moet positief zijn').nullable(),
   tarief_elektriciteit_dal: z.number().min(0).nullable(),
   tarief_gas: z.number().min(0).nullable(),
-  vaste_kosten_maand: z.number().min(0).nullable(),
+  
+  // Vastrechten (apart voor stroom en gas)
+  vastrecht_stroom_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
+  vastrecht_gas_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
+  
   groene_energie: z.boolean(),
   prijsgarantie: z.boolean(),
   opzegtermijn: z.number().int().min(0),
@@ -73,7 +77,8 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       tarief_elektriciteit_normaal: contract?.details_vast?.tarief_elektriciteit_normaal || null,
       tarief_elektriciteit_dal: contract?.details_vast?.tarief_elektriciteit_dal || null,
       tarief_gas: contract?.details_vast?.tarief_gas || null,
-      vaste_kosten_maand: contract?.details_vast?.vaste_kosten_maand || null,
+      vastrecht_stroom_maand: contract?.details_vast?.vastrecht_stroom_maand || 4.00,
+      vastrecht_gas_maand: contract?.details_vast?.vastrecht_gas_maand || 4.00,
       groene_energie: contract?.details_vast?.groene_energie ?? false,
       prijsgarantie: contract?.details_vast?.prijsgarantie ?? false,
       opzegtermijn: contract?.details_vast?.opzegtermijn || 1,
@@ -174,7 +179,8 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
         tarief_elektriciteit_normaal: data.tarief_elektriciteit_normaal,
         tarief_elektriciteit_dal: data.tarief_elektriciteit_dal,
         tarief_gas: data.tarief_gas,
-        vaste_kosten_maand: data.vaste_kosten_maand,
+        vastrecht_stroom_maand: data.vastrecht_stroom_maand,
+        vastrecht_gas_maand: data.vastrecht_gas_maand,
         groene_energie: data.groene_energie,
         prijsgarantie: data.prijsgarantie,
         opzegtermijn: data.opzegtermijn,
@@ -402,22 +408,42 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                 <p className="text-xs text-gray-500">Laat leeg als geen gas</p>
               </div>
 
-              {/* Vaste Kosten */}
+              {/* Vastrecht Stroom */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-brand-navy-500">
-                  Vastrecht per maand (€)
+                  Vastrecht Stroom per maand (€) *
                 </label>
                 <input
-                  {...register('vaste_kosten_maand', { 
-                    valueAsNumber: true,
-                    setValueAs: (v) => v === '' ? null : parseFloat(v)
-                  })}
+                  {...register('vastrecht_stroom_maand', { valueAsNumber: true })}
                   type="number"
                   step="0.01"
+                  placeholder="4.00"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
-                <p className="text-xs text-gray-500">Bijv. €99/jaar = €8,25/maand</p>
+                {errors.vastrecht_stroom_maand && (
+                  <p className="text-sm text-red-600">{errors.vastrecht_stroom_maand.message}</p>
+                )}
+                <p className="text-xs text-gray-500">Bijv. €48/jaar = €4,00/maand</p>
+              </div>
+
+              {/* Vastrecht Gas */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Vastrecht Gas per maand (€) *
+                </label>
+                <input
+                  {...register('vastrecht_gas_maand', { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="4.00"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                {errors.vastrecht_gas_maand && (
+                  <p className="text-sm text-red-600">{errors.vastrecht_gas_maand.message}</p>
+                )}
+                <p className="text-xs text-gray-500">Bijv. €48/jaar = €4,00/maand</p>
               </div>
             </div>
           </div>

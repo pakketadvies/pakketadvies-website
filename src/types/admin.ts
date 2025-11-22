@@ -41,7 +41,11 @@ export interface ContractDetailsVast {
   tarief_elektriciteit_normaal: number | null // Voor dubbele meters (dag)
   tarief_elektriciteit_dal: number | null // Voor dubbele meters (nacht)
   tarief_gas: number | null
-  vaste_kosten_maand: number | null
+  
+  // Vastrechten (apart voor stroom en gas)
+  vastrecht_stroom_maand: number
+  vastrecht_gas_maand: number
+  vaste_kosten_maand: number | null // Deprecated, gebruik vastrecht_stroom_maand + vastrecht_gas_maand
   
   // Eigenschappen
   groene_energie: boolean
@@ -65,7 +69,11 @@ export interface ContractDetailsDynamisch {
   opslag_elektriciteit_normaal: number
   opslag_elektriciteit_dal: number | null
   opslag_gas: number | null
-  vaste_kosten_maand: number | null
+  
+  // Vastrechten (apart voor stroom en gas)
+  vastrecht_stroom_maand: number
+  vastrecht_gas_maand: number
+  vaste_kosten_maand: number | null // Deprecated, gebruik vastrecht_stroom_maand + vastrecht_gas_maand
   
   // Index
   index_naam: string
@@ -91,6 +99,11 @@ export interface ContractDetailsMaatwerk {
   // Drempels
   min_verbruik_elektriciteit: number | null
   min_verbruik_gas: number | null
+  
+  // Vastrechten (apart voor stroom en gas) - optioneel voor maatwerk
+  vastrecht_stroom_maand: number | null
+  vastrecht_gas_maand: number | null
+  vaste_kosten_maand: number | null // Deprecated
   
   // Contact
   custom_tekst: string | null

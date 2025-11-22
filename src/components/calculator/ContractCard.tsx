@@ -130,7 +130,8 @@ export default function ContractCard({
           tariefElektriciteitDal: contract.tariefElektriciteitDal,
           tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
           tariefGas: contract.tariefGas,
-          vastrechtMaand: details?.vaste_kosten_maand || 8.25,
+          vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
+          vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
           heeftDubbeleMeter: !heeftEnkeleMeter,
         }),
       })

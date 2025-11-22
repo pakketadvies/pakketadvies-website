@@ -34,7 +34,8 @@ export async function POST(request: Request) {
       tariefElektriciteitDal,
       tariefElektriciteitEnkel,
       tariefGas,
-      vastrechtMaand,
+      vastrechtStroomMaand,
+      vastrechtGasMaand,
       heeftDubbeleMeter,
     } = body
     
@@ -353,9 +354,10 @@ export async function POST(request: Request) {
     } : null
     
     // Vastrecht: €8.25/maand voor STROOM + €8.25/maand voor GAS (alleen als er gas is)
-    // Standaard Sepa: €99/jaar stroom + €99/jaar gas = €198/jaar totaal
-    const vastrechtStroom = (vastrechtMaand || 8.25) * 12
-    const vastrechtGas = totaalGas > 0 ? (vastrechtMaand || 8.25) * 12 : 0
+    // 6. VASTRECHT (apart voor stroom en gas)
+    // Standaard: €4/maand per aansluiting = €48/jaar
+    const vastrechtStroom = (vastrechtStroomMaand || 4.00) * 12
+    const vastrechtGas = totaalGas > 0 ? (vastrechtGasMaand || 4.00) * 12 : 0
     const kostenVastrecht = vastrechtStroom + vastrechtGas
     
     const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht

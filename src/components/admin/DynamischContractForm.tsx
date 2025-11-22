@@ -22,7 +22,8 @@ const dynamischContractSchema = z.object({
   opslag_elektriciteit_normaal: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_elektriciteit_dal: z.number().min(0).nullable(),
   opslag_gas: z.number().min(0).nullable(),
-  vaste_kosten_maand: z.number().min(0).nullable(),
+  vastrecht_stroom_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
+  vastrecht_gas_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
   index_naam: z.string().min(1, 'Index naam is verplicht'),
   max_prijs_cap: z.number().min(0).nullable(),
   groene_energie: z.boolean(),
@@ -65,7 +66,8 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       opslag_elektriciteit_normaal: contract?.details_dynamisch?.opslag_elektriciteit_normaal || 0,
       opslag_elektriciteit_dal: contract?.details_dynamisch?.opslag_elektriciteit_dal || null,
       opslag_gas: contract?.details_dynamisch?.opslag_gas || null,
-      vaste_kosten_maand: contract?.details_dynamisch?.vaste_kosten_maand || null,
+      vastrecht_stroom_maand: contract?.details_dynamisch?.vastrecht_stroom_maand || 4.00,
+      vastrecht_gas_maand: contract?.details_dynamisch?.vastrecht_gas_maand || 4.00,
       index_naam: contract?.details_dynamisch?.index_naam || 'EPEX Day-Ahead',
       max_prijs_cap: contract?.details_dynamisch?.max_prijs_cap || null,
       groene_energie: contract?.details_dynamisch?.groene_energie ?? false,
@@ -151,7 +153,8 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         opslag_elektriciteit_normaal: data.opslag_elektriciteit_normaal,
         opslag_elektriciteit_dal: data.opslag_elektriciteit_dal,
         opslag_gas: data.opslag_gas,
-        vaste_kosten_maand: data.vaste_kosten_maand,
+        vastrecht_stroom_maand: data.vastrecht_stroom_maand,
+        vastrecht_gas_maand: data.vastrecht_gas_maand,
         index_naam: data.index_naam,
         max_prijs_cap: data.max_prijs_cap,
         groene_energie: data.groene_energie,
@@ -252,9 +255,18 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
               <input {...register('opslag_gas', { valueAsNumber: true, setValueAs: (v) => v === '' ? null : parseFloat(v) })} type="number" step="0.0001" placeholder="0.0500" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
             </div>
 
+            {/* Vastrecht Stroom */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-brand-navy-500">Vaste kosten per maand (€)</label>
-              <input {...register('vaste_kosten_maand', { valueAsNumber: true, setValueAs: (v) => v === '' ? null : parseFloat(v) })} type="number" step="0.01" placeholder="12.00" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <label className="block text-sm font-semibold text-brand-navy-500">Vastrecht Stroom per maand (€) *</label>
+              <input {...register('vastrecht_stroom_maand', { valueAsNumber: true })} type="number" step="0.01" placeholder="4.00" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              {errors.vastrecht_stroom_maand && <p className="text-sm text-red-600">{errors.vastrecht_stroom_maand.message}</p>}
+            </div>
+
+            {/* Vastrecht Gas */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">Vastrecht Gas per maand (€) *</label>
+              <input {...register('vastrecht_gas_maand', { valueAsNumber: true })} type="number" step="0.01" placeholder="4.00" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              {errors.vastrecht_gas_maand && <p className="text-sm text-red-600">{errors.vastrecht_gas_maand.message}</p>}
             </div>
 
             <div className="space-y-2">
