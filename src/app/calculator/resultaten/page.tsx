@@ -662,12 +662,16 @@ function ResultatenContent() {
 
         {/* Edit Verbruik Panel - Sticky onder navbar */}
         {verbruik && (
-          <div className="sticky top-24 z-[45] mb-6 bg-gray-50 pb-4">
-            <EditVerbruikPanel
-              currentData={verbruik}
-              onUpdate={handleVerbruikUpdate}
-              isUpdating={isUpdating}
-            />
+          <div className="sticky top-24 z-[45] mb-6">
+            <div className="relative">
+              <EditVerbruikPanel
+                currentData={verbruik}
+                onUpdate={handleVerbruikUpdate}
+                isUpdating={isUpdating}
+              />
+              {/* Subtle bottom fade */}
+              <div className="absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-gray-50/80 to-transparent pointer-events-none" />
+            </div>
           </div>
         )}
 
