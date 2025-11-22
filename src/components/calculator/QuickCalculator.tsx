@@ -306,7 +306,7 @@ export function QuickCalculator() {
           
           {/* Mobiel: geen extra container, desktop: wel grijze container */}
           <div className="md:bg-gray-50 md:border-2 md:border-gray-200 md:rounded-xl md:p-4 space-y-3 md:space-y-3">
-            <div className="grid grid-cols-7 gap-2 md:gap-2">
+            <div className="grid grid-cols-8 gap-2 md:gap-2">
               <div className="col-span-4">
                 <label className="block text-sm md:text-xs font-medium text-gray-700 mb-1.5 md:mb-0.5">Postcode</label>
                 <input
@@ -319,7 +319,7 @@ export function QuickCalculator() {
                   required
                 />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-2">
                 <label className="block text-sm md:text-xs font-medium text-gray-700 mb-1.5 md:mb-0.5">Huisnr.</label>
                 <input
                   type="text"
@@ -330,19 +330,17 @@ export function QuickCalculator() {
                   required
                 />
               </div>
-            </div>
-            
-            {/* Toevoeging op aparte rij voor betere touch target */}
-            <div>
-              <label className="block text-sm md:text-xs font-medium text-gray-700 mb-1.5 md:mb-0.5">Toevoeging (optioneel)</label>
-              <input
-                type="text"
-                value={leveringsadressen[0].toevoeging || ''}
-                onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
-                placeholder="Bijvoorbeeld: A, B, 1"
-                maxLength={4}
-                className="w-full px-3.5 md:px-3 py-3.5 md:py-2 text-sm md:text-sm rounded-xl border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
-              />
+              <div className="col-span-2">
+                <label className="block text-sm md:text-xs font-medium text-gray-700 mb-1.5 md:mb-0.5">Toev.</label>
+                <input
+                  type="text"
+                  value={leveringsadressen[0].toevoeging || ''}
+                  onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
+                  placeholder="A"
+                  maxLength={4}
+                  className="w-full px-3.5 md:px-3 py-3.5 md:py-2 text-sm md:text-sm rounded-xl border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white text-center"
+                />
+              </div>
             </div>
 
             {loadingAddress && (
@@ -661,11 +659,11 @@ export function QuickCalculator() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full group relative px-6 md:px-6 py-4.5 md:py-3.5 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-xl md:rounded-lg font-bold shadow-lg hover:shadow-xl hover:from-brand-teal-600 hover:to-brand-teal-700 active:scale-[0.99] transition-all duration-300 mt-2"
+          className="w-full group relative px-6 md:px-6 py-5 md:py-3.5 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-2xl md:rounded-lg font-bold text-lg md:text-base shadow-lg hover:shadow-xl hover:from-brand-teal-600 hover:to-brand-teal-700 active:scale-[0.99] transition-all duration-300 mt-2"
         >
           <span className="flex items-center justify-center gap-2.5 md:gap-2">
             <MagnifyingGlass weight="bold" className="w-6 h-6 md:w-5 md:h-5" />
-            <span className="text-lg md:text-base">Bekijk mijn aanbiedingen</span>
+            <span>Bekijk mijn aanbiedingen</span>
           </span>
         </button>
         <p className="text-center text-sm md:text-xs text-gray-500 -mt-1">
