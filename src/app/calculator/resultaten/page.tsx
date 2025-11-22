@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import ContractCard from '@/components/calculator/ContractCard'
 import EditVerbruikPanel from '@/components/calculator/EditVerbruikPanel'
-import VerbruikStickyBar from '@/components/calculator/VerbruikStickyBar'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
 import Link from 'next/link'
@@ -239,7 +238,6 @@ function ResultatenContent() {
   
   // Filter states
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
   const [filters, setFilters] = useState({
     type: 'alle' as 'alle' | 'vast' | 'dynamisch',
     groeneEnergie: false,
@@ -254,7 +252,6 @@ function ResultatenContent() {
   // Handler for updating verbruik from EditPanel
   const handleVerbruikUpdate = async (newVerbruikData: VerbruikData) => {
     setIsUpdating(true)
-    setShowEditModal(false) // Close modal
     try {
       // Update store
       setVerbruik(newVerbruikData)
@@ -505,52 +502,6 @@ function ResultatenContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-12">
-      {/* Sticky Bar - Only on mobile, appears after scroll */}
-      {verbruik && (
-        <div className="block md:hidden">
-          <VerbruikStickyBar 
-            verbruikData={verbruik}
-            onEdit={() => setShowEditModal(true)}
-          />
-        </div>
-      )}
-
-      {/* Edit Modal - Full screen on mobile */}
-      {showEditModal && verbruik && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center"
-          onClick={(e) => {
-            // Close on backdrop click
-            if (e.target === e.currentTarget) {
-              setShowEditModal(false)
-            }
-          }}
-        >
-          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full md:max-w-4xl max-h-[90vh] overflow-y-auto animate-slide-up">
-            {/* Close button - Mobile only (top right) */}
-            <div className="sticky top-0 z-10 bg-white border-b-2 border-gray-100 px-4 py-3 flex items-center justify-between md:hidden">
-              <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X weight="bold" className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-
-            {/* Edit Panel */}
-            <div className="md:p-4">
-              <EditVerbruikPanel
-                currentData={verbruik}
-                onUpdate={handleVerbruikUpdate}
-                isUpdating={isUpdating}
-                forceOpen={true}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="container-custom max-w-7xl">
         {/* Header */}
         <div className="mb-6 md:mb-8">
@@ -573,19 +524,8 @@ function ResultatenContent() {
             </Button>
           </div>
 
-          {/* Edit Verbruik Panel - Desktop only, mobile uses sticky bar + modal */}
-          {verbruik && (
-            <div className="mb-6 hidden md:block">
-              <EditVerbruikPanel
-                currentData={verbruik}
-                onUpdate={handleVerbruikUpdate}
-                isUpdating={isUpdating}
-              />
-            </div>
-          )}
-
           {/* Filters Bar - Compact by default */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4 mb-6">
             {/* Main row: Quick filters + Sort */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               {/* Quick filter buttons */}
@@ -718,6 +658,19 @@ function ResultatenContent() {
               </div>
             )}
           </div>
+
+          {/* Edit Verbruik Panel - Sticky onder navbar */}
+          {verbruik && (
+            <div className="sticky top-20 z-30 mb-6 transition-shadow">
+              <div className="bg-gradient-to-b from-gray-50 to-transparent pt-2 -mt-2">
+                <EditVerbruikPanel
+                  currentData={verbruik}
+                  onUpdate={handleVerbruikUpdate}
+                  isUpdating={isUpdating}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Results grid */}
