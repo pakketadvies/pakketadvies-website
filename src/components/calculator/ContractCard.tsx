@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Check, Star, Leaf, CaretDown, CaretUp, Sun } from '@phosphor-icons/react'
+import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
+import Tooltip from '@/components/ui/Tooltip'
 
 interface ContractCardProps {
   contract: ContractOptie
@@ -236,10 +237,44 @@ export default function ContractCard({
             €{contract.jaarbedrag.toLocaleString()} per jaar
           </div>
           {contract.besparing && contract.besparing > 0 && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm">
-              <Check weight="bold" className="w-4 h-4" />
-              <span>€{contract.besparing} besparing/maand</span>
-            </div>
+            <Tooltip
+              title="Indicatie besparing"
+              content={
+                <div className="space-y-4">
+                  {/* Cost comparison */}
+                  <div className="space-y-2.5">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Jaarkosten Eneco</span>
+                      <span className="font-semibold text-brand-navy-600">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
+                      <span className="font-semibold text-brand-navy-600">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="border-t-2 border-brand-teal-200 pt-2.5 mt-2.5 flex justify-between items-center">
+                      <span className="font-bold text-brand-teal-600 text-sm">Besparing per jaar</span>
+                      <span className="font-bold text-brand-teal-600 text-sm">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                  {/* Explanation */}
+                  <div className="pt-3 border-t border-gray-200 space-y-2 text-xs text-gray-600 leading-relaxed">
+                    <p>
+                      Wij berekenen de besparing met het standaard variabele contract van Eneco omdat u deze tarieven waarschijnlijk in rekening gebracht krijgt als uw vaste contract inmiddels is verlopen, of gaat krijgen zolang u niet overstapt.
+                    </p>
+                    <p className="font-semibold text-brand-navy-600">
+                      Een standaard variabel contract is een flexibel energiecontract voor onbepaalde tijd met variabele tarieven.
+                    </p>
+                  </div>
+                </div>
+              }
+              position="bottom"
+            >
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm cursor-help hover:bg-green-100 transition-colors">
+                <Check weight="bold" className="w-4 h-4" />
+                <span>€{contract.besparing} besparing/maand</span>
+                <Info weight="fill" className="w-4 h-4 text-green-600 opacity-70" />
+              </div>
+            </Tooltip>
           )}
         </div>
 
