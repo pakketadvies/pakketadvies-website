@@ -196,9 +196,9 @@ export default function ContractCard({
         )}
       </div>
 
-      <CardContent className="pt-6 flex flex-col">
-        {/* Leverancier met logo - minimale hoogte zodat prijs altijd opzelfde lijn staat op desktop */}
-        <div className="mb-6 flex items-start gap-4 pr-24 sm:pr-32 min-h-[140px] lg:min-h-[160px]">
+      <CardContent className="pt-6">
+        {/* Leverancier met logo */}
+        <div className="mb-6 flex items-start gap-4 pr-24 sm:pr-32">
           {/* Logo */}
           {contract.leverancier.logo && (
             <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg border-2 border-gray-100 p-2 flex items-center justify-center">
@@ -309,7 +309,7 @@ export default function ContractCard({
                               <span className="text-gray-700">
                                 Leveringskosten normaal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({breakdown.leverancier.elektriciteitDetails.normaal?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
+                                  ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
                                 </span>
                               </span>
                               <span className="font-medium">
@@ -320,7 +320,7 @@ export default function ContractCard({
                               <span className="text-gray-700">
                                 Leveringskosten dal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({breakdown.leverancier.elektriciteitDetails.dal?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
+                                  ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
                                 </span>
                               </span>
                               <span className="font-medium">
@@ -335,7 +335,7 @@ export default function ContractCard({
                             <span className="text-gray-700">
                               Leveringskosten enkeltarief
                               <span className="text-xs text-gray-500 ml-1">
-                                ({breakdown.leverancier.elektriciteitDetails.enkel?.kwh.toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
+                                ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
                               </span>
                             </span>
                             <span className="font-medium">
