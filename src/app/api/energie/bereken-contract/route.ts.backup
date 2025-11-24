@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { converteerGasAansluitwaardeVoorDatabase } from '@/lib/aansluitwaarde-schatting'
 import { getCurrentDynamicPrices } from '@/lib/dynamic-pricing/database'
-import { calculateDynamicContract } from '@/lib/dynamic-pricing/calculate-dynamic-contract'
 
 /**
  * POST /api/energie/bereken-contract
@@ -37,11 +36,7 @@ export async function POST(request: Request) {
       tariefElektriciteitDal,
       tariefElektriciteitEnkel,
       tariefGas,
-      tariefTerugleveringKwh, // NIEUW: kosten voor teruglevering (alleen vast)
-      // Dynamische contract opslagen
-      opslagElektriciteit, // Opslag stroom voor dynamisch (was: opslag_elektriciteit_normaal)
-      opslagGas, // Opslag gas voor dynamisch
-      opslagTeruglevering, // Opslag teruglevering voor dynamisch
+      tariefTerugleveringKwh, // NIEUW: kosten voor teruglevering
       vastrechtStroomMaand,
       vastrechtGasMaand,
       heeftDubbeleMeter,
@@ -57,9 +52,46 @@ export async function POST(request: Request) {
     
     const supabase = await createClient()
     
+    // ============================================
+    // STAP 0: SALDERINGSREGELING TOEPASSEN
+    // ============================================
+    // Als er teruglevering is (zonnepanelen), dan moet dit van het verbruik af
     const terugleveringKwh = terugleveringJaar || 0
+    let nettoElektriciteitNormaal = elektriciteitNormaal
+    let nettoElektriciteitDal = elektriciteitDal || 0
+    
+    if (terugleveringKwh > 0) {
+      if (!heeftDubbeleMeter) {
+        // ENKELE METER: Teruglevering volledig aftrekken van totaal verbruik
+        const totaalVerbruik = elektriciteitNormaal
+        nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringKwh)
+        console.log('🔋 Saldering enkele meter:', {
+          verbruik: totaalVerbruik,
+          teruglevering: terugleveringKwh,
+          netto: nettoElektriciteitNormaal
+        })
+      } else {
+        // DUBBELE METER: Teruglevering 50/50 verdelen tussen normaal en dal
+        const terugleveringNormaal = terugleveringKwh / 2
+        const terugleveringDal = terugleveringKwh / 2
+        
+        nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - terugleveringNormaal)
+        nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - terugleveringDal)
+        
+        console.log('🔋 Saldering dubbele meter:', {
+          verbruikNormaal: elektriciteitNormaal,
+          verbruikDal: elektriciteitDal || 0,
+          teruglevering: terugleveringKwh,
+          terugleveringNormaal,
+          terugleveringDal,
+          nettoNormaal: nettoElektriciteitNormaal,
+          nettoDal: nettoElektriciteitDal
+        })
+      }
+    }
+    
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
     const totaalGas = gas || 0
-    const isDynamisch = contractType === 'dynamisch'
     
     // 1. NETBEHEERDER LOOKUP op basis van postcode
     const cleanedPostcode = postcode.replace(/\s/g, '').toUpperCase()
@@ -224,190 +256,244 @@ export async function POST(request: Request) {
       totaal: netbeheerElektriciteit + netbeheerGas
     })
     
-    // ============================================
     // 4. LEVERANCIERSKOSTEN BEREKENEN
-    // ============================================
-    // Variables die we nodig hebben voor beide paden
     let kostenElektriciteit = 0
-    let kostenGas = 0
-    let nettoKwh = 0 // Voor energiebelasting (na saldering)
-    let overschotKwh = 0 // Overschot teruglevering (alleen dynamisch)
-    let opbrengstOverschot = 0 // Opbrengst van overschot (alleen dynamisch)
-    let kostenTeruglevering = 0 // Terugleverkosten (alleen vast)
     let elektriciteitBreakdown: any = {}
-    let gasBreakdown: any | null = null
-    let terugleveringBreakdown: any | null = null
+    
+    // ============================================
+    // DYNAMISCHE CONTRACTEN: MARKTPRIJZEN OPHALEN
+    // ============================================
+    const isDynamisch = contractType === 'dynamisch'
+    
+    let S_dag = 0 // Spotprijs dag
+    let S_nacht = 0 // Spotprijs nacht  
+    let S_enkel = 0 // Spotprijs gemiddeld (dag + nacht) / 2
+    let P_gas = 0 // Spotprijs gas
+    let dynamicPriceSource = ''
+    
+    // Tarieven voor berekening (spotprijs + opslag voor dynamisch, anders gewoon tarieven)
+    let P_dag = 0
+    let P_nacht = 0
+    let P_enkel = 0
+    let P_gas_tarief = 0
+    let P_teruglever = 0
     
     if (isDynamisch) {
-      // ============================================
-      // DYNAMISCH CONTRACT BEREKENING
-      // ============================================
-      console.log('💱 DYNAMISCH CONTRACT - Berekenen met marktprijzen...')
+      console.log('💱 DYNAMISCH CONTRACT - Ophalen marktprijzen...')
       
       try {
-        const dynamicPricesData = await getCurrentDynamicPrices()
+        const dynamicPrices = await getCurrentDynamicPrices()
         
-        // Converteren naar het formaat dat de helper functie verwacht
-        const dynamicPrices = {
-          elektriciteit_gemiddeld_dag: dynamicPricesData.electricityDay,
-          elektriciteit_gemiddeld_nacht: dynamicPricesData.electricityNight,
-          gas_gemiddeld: dynamicPricesData.gas,
-        }
+        S_dag = dynamicPrices.electricityDay
+        S_nacht = dynamicPrices.electricityNight
+        S_enkel = (S_dag + S_nacht) / 2
+        P_gas = dynamicPrices.gas
+        dynamicPriceSource = dynamicPrices.source
         
         console.log('✅ Marktprijzen opgehaald:', {
-          dag: dynamicPrices.elektriciteit_gemiddeld_dag.toFixed(5),
-          nacht: dynamicPrices.elektriciteit_gemiddeld_nacht.toFixed(5),
-          gas: dynamicPrices.gas_gemiddeld.toFixed(5),
-          source: dynamicPricesData.source,
+          S_dag: S_dag.toFixed(5),
+          S_nacht: S_nacht.toFixed(5),
+          S_enkel: S_enkel.toFixed(5),
+          P_gas: P_gas.toFixed(5),
+          source: dynamicPrices.source
         })
         
-        // Gebruik helper functie voor berekening
-        const result = calculateDynamicContract({
-          elektriciteitNormaal,
-          elektriciteitDal,
-          gas,
-          terugleveringJaar: terugleveringKwh,
-          heeftDubbeleMeter,
-          opslagElektriciteit: opslagElektriciteit || 0,
-          opslagGas,
-          opslagTeruglevering,
-          dynamicPrices,
-          vastrechtStroomMaand: vastrechtStroomMaand || 4.00,
-          vastrechtGasMaand,
-        })
+        // BELANGRIJK: Bij dynamisch zijn de "tarieven" in de database OPSLAGEN
+        const opslag_elektriciteit = tariefElektriciteitNormaal || 0 // Komt van contract_details_dynamisch.opslag_elektriciteit
+        const opslag_gas = tariefGas || 0 // Komt van contract_details_dynamisch.opslag_gas
+        const opslag_teruglevering = tariefTerugleveringKwh || 0 // Komt van contract_details_dynamisch.opslag_teruglevering
         
-        kostenElektriciteit = result.kostenElektriciteit
-        kostenGas = result.kostenGas
-        nettoKwh = result.nettoKwh
-        overschotKwh = result.overschotKwh
-        opbrengstOverschot = result.opbrengstOverschot
-        elektriciteitBreakdown = result.elektriciteitBreakdown
-        gasBreakdown = result.gasBreakdown
-        terugleveringBreakdown = result.terugleveringBreakdown
+        // Bereken totale tarieven (spotprijs + opslag)
+        P_dag = S_dag + opslag_elektriciteit
+        P_nacht = S_nacht + opslag_elektriciteit
+        P_enkel = S_enkel + opslag_elektriciteit
+        P_gas_tarief = P_gas + opslag_gas
+        P_teruglever = S_enkel + opslag_teruglevering
         
-        console.log('📊 Dynamisch contract berekening:', {
-          kostenElektriciteit,
-          kostenGas,
-          nettoKwh,
-          overschotKwh,
-          opbrengstOverschot,
+        console.log('📊 Dynamische tarieven (spot + opslag):', {
+          P_dag: P_dag.toFixed(5),
+          P_nacht: P_nacht.toFixed(5),
+          P_enkel: P_enkel.toFixed(5),
+          P_gas: P_gas_tarief.toFixed(5),
+          P_teruglever: P_teruglever.toFixed(5),
+          opslag_elektriciteit: opslag_elektriciteit.toFixed(5),
+          opslag_gas: opslag_gas.toFixed(5),
+          opslag_teruglevering: opslag_teruglevering.toFixed(5)
         })
       } catch (error) {
-        console.error('❌ Kon dynamische contract niet berekenen:', error)
+        console.error('❌ Kon dynamische prijzen niet ophalen:', error)
         return NextResponse.json(
-          { error: 'Kon dynamische prijzen niet ophalen. Probeer het later opnieuw.' },
+          { error: 'Kon actuele energieprijzen niet ophalen voor dynamisch contract' },
           { status: 500 }
         )
       }
     } else {
-    
-      // ============================================
-      // VAST CONTRACT BEREKENING
-      // ============================================
-      console.log('📋 VAST CONTRACT - Berekenen met vaste tarieven...')
-      
-      // SALDERINGSREGELING voor vaste contracten
-      let nettoElektriciteitNormaal = elektriciteitNormaal
-      let nettoElektriciteitDal = elektriciteitDal || 0
-      
-      if (terugleveringKwh > 0) {
-        if (!heeftDubbeleMeter) {
-          // ENKELE METER: Teruglevering volledig aftrekken van totaal verbruik
-          const totaalVerbruik = elektriciteitNormaal
-          nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringKwh)
-          nettoKwh = nettoElektriciteitNormaal
-        } else {
-          // DUBBELE METER: Teruglevering 50/50 verdelen tussen normaal en dal
-          const terugleveringNormaal = terugleveringKwh / 2
-          const terugleveringDal = terugleveringKwh / 2
-          
-          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - terugleveringNormaal)
-          nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - terugleveringDal)
-          nettoKwh = nettoElektriciteitNormaal + nettoElektriciteitDal
-        }
-      } else {
-        nettoKwh = elektriciteitNormaal + (elektriciteitDal || 0)
-      }
-      
-      // STRICT VALIDATIE: Zorg dat de juiste tarieven beschikbaar zijn
-      if (!heeftDubbeleMeter && !tariefElektriciteitEnkel) {
-        console.error('❌ FOUT: Enkele meter geselecteerd maar geen enkeltarief beschikbaar!')
-        return NextResponse.json(
-          { error: 'Enkeltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
-          { status: 400 }
-        )
-      }
-      
-      if (heeftDubbeleMeter && (!tariefElektriciteitNormaal || !tariefElektriciteitDal)) {
-        console.error('❌ FOUT: Dubbele meter geselecteerd maar normaal of dal tarief ontbreekt!')
-        return NextResponse.json(
-          { error: 'Normaal- en daltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
-          { status: 400 }
-        )
-      }
-      
-      // BEREKEN LEVERANCIERSKOSTEN
-      if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
-        // ENKELE METER: gebruik enkeltarief met NETTO verbruik (na saldering)
-        kostenElektriciteit = nettoKwh * tariefElektriciteitEnkel
-        
-        elektriciteitBreakdown = {
-          type: 'enkel',
-          enkel: {
-            kwh: nettoKwh,
-            tarief: tariefElektriciteitEnkel,
-            bedrag: kostenElektriciteit
-          }
-        }
-      } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
-        // DUBBELE METER: gebruik normaal + dal tarieven met NETTO verbruik (na saldering)
-        const kostenNormaal = nettoElektriciteitNormaal * tariefElektriciteitNormaal
-        const kostenDal = nettoElektriciteitDal * tariefElektriciteitDal
-        kostenElektriciteit = kostenNormaal + kostenDal
-        
-        elektriciteitBreakdown = {
-          type: 'dubbel',
-          normaal: {
-            kwh: nettoElektriciteitNormaal,
-            tarief: tariefElektriciteitNormaal,
-            bedrag: kostenNormaal
-          },
-          dal: {
-            kwh: nettoElektriciteitDal,
-            tarief: tariefElektriciteitDal,
-            bedrag: kostenDal
-          }
-        }
-      } else {
-        console.error('❌ FOUT: Geen tarieven beschikbaar!')
-        return NextResponse.json(
-          { error: 'Geen tarieven beschikbaar voor dit contract.' },
-          { status: 400 }
-        )
-      }
-      
-      // GAS BEREKENING
-      kostenGas = totaalGas * (tariefGas || 0)
-      gasBreakdown = totaalGas > 0 ? {
-        m3: totaalGas,
-        tarief: tariefGas || 0,
-        bedrag: kostenGas
-      } : null
-      
-      // TERUGLEVERKOSTEN (alleen bij vaste contracten)
-      // Deze kosten worden berekend over de VOLLEDIGE teruglevering
-      kostenTeruglevering = terugleveringKwh > 0 && tariefTerugleveringKwh 
-        ? terugleveringKwh * tariefTerugleveringKwh 
-        : 0
-      
-      terugleveringBreakdown = terugleveringKwh > 0 && tariefTerugleveringKwh ? {
-        kwh: terugleveringKwh,
-        tarief: tariefTerugleveringKwh,
-        bedrag: kostenTeruglevering
-      } : null
+      // VAST CONTRACT: Gebruik gewoon de tarieven uit de database
+      P_dag = tariefElektriciteitNormaal || 0
+      P_nacht = tariefElektriciteitDal || 0
+      P_enkel = tariefElektriciteitEnkel || 0
+      P_gas_tarief = tariefGas || 0
+      // Bij vast: tariefTerugleveringKwh is de KOSTEN per kWh teruglevering (klant betaalt)
+      // Bij dynamisch: is het de OPBRENGST per kWh (klant krijgt)
     }
     
-    // VASTRECHT (voor beide types)
+    console.log('💡 Elektriciteit tarieven ontvangen:', {
+      heeftDubbeleMeter,
+      isDynamisch,
+      tariefElektriciteitEnkel: actualElektricityTariffEnkel,
+      tariefElektriciteitNormaal: actualElektricityTariff,
+      tariefElektriciteitDal: actualElektricityTariffDal,
+      elektriciteitNormaal,
+      elektriciteitDal,
+      totaalElektriciteit
+    })
+    
+    // STRICT VALIDATIE: Zorg dat de juiste tarieven beschikbaar zijn
+    if (!heeftDubbeleMeter && !actualElektricityTariffEnkel) {
+      console.error('❌ FOUT: Enkele meter geselecteerd maar geen enkeltarief beschikbaar!', {
+        heeftDubbeleMeter,
+        tariefElektriciteitEnkel,
+        tariefElektriciteitNormaal
+      })
+      return NextResponse.json(
+        { error: 'Enkeltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 400 }
+      )
+    }
+    
+    if (heeftDubbeleMeter && (!tariefElektriciteitNormaal || !tariefElektriciteitDal)) {
+      console.error('❌ FOUT: Dubbele meter geselecteerd maar normaal of dal tarief ontbreekt!', {
+        heeftDubbeleMeter,
+        tariefElektriciteitNormaal,
+        tariefElektriciteitDal
+      })
+      return NextResponse.json(
+        { error: 'Normaal- en daltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 400 }
+      )
+    }
+    
+    // Prioriteit: Check eerst of het een enkele meter is en enkeltarief gebruikt moet worden
+    if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
+      // ENKELE METER: gebruik enkeltarief met NETTO verbruik (na saldering)
+      kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
+      
+      console.log('✅ Gebruik ENKELTARIEF (na saldering):', {
+        kwh: totaalElektriciteit,
+        tarief: tariefElektriciteitEnkel,
+        kosten: kostenElektriciteit
+      })
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
+          kwh: totaalElektriciteit,
+          tarief: tariefElektriciteitEnkel,
+          bedrag: kostenElektriciteit
+        }
+      }
+    } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
+      // DUBBELE METER: gebruik normaal + dal tarieven met NETTO verbruik (na saldering)
+      const kostenNormaal = nettoElektriciteitNormaal * tariefElektriciteitNormaal
+      const kostenDal = nettoElektriciteitDal * tariefElektriciteitDal
+      kostenElektriciteit = kostenNormaal + kostenDal
+      
+      console.log('✅ Gebruik DUBBEL TARIEF (na saldering):', {
+        normaal: { kwh: nettoElektriciteitNormaal, tarief: tariefElektriciteitNormaal, kosten: kostenNormaal },
+        dal: { kwh: nettoElektriciteitDal, tarief: tariefElektriciteitDal, kosten: kostenDal },
+        totaal: kostenElektriciteit
+      })
+      
+      elektriciteitBreakdown = {
+        type: 'dubbel',
+        normaal: {
+          kwh: nettoElektriciteitNormaal,
+          tarief: tariefElektriciteitNormaal,
+          bedrag: kostenNormaal
+        },
+        dal: {
+          kwh: nettoElektriciteitDal,
+          tarief: tariefElektriciteitDal,
+          bedrag: kostenDal
+        }
+      }
+    } else if (tariefElektriciteitEnkel) {
+      // Fallback 1: gebruik enkeltarief (voor als metertype onbekend is)
+      kostenElektriciteit = totaalElektriciteit * tariefElektriciteitEnkel
+      
+      console.log('⚠️ Fallback ENKELTARIEF (metertype onbekend):', {
+        kwh: totaalElektriciteit,
+        tarief: tariefElektriciteitEnkel,
+        kosten: kostenElektriciteit
+      })
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
+          kwh: totaalElektriciteit,
+          tarief: tariefElektriciteitEnkel,
+          bedrag: kostenElektriciteit
+        }
+      }
+    } else if (tariefElektriciteitNormaal) {
+      // Fallback 2: gebruik normaal tarief voor alles (laatste redmiddel)
+      kostenElektriciteit = totaalElektriciteit * tariefElektriciteitNormaal
+      
+      console.log('⚠️ Fallback NORMAAL TARIEF (laatste redmiddel):', {
+        kwh: totaalElektriciteit,
+        tarief: tariefElektriciteitNormaal,
+        kosten: kostenElektriciteit
+      })
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
+          kwh: totaalElektriciteit,
+          tarief: tariefElektriciteitNormaal,
+          bedrag: kostenElektriciteit
+        }
+      }
+    } else {
+      // Geen enkel tarief beschikbaar - dit zou nooit moeten gebeuren
+      console.error('❌ KRITIEKE FOUT: Geen enkele tarief beschikbaar!', {
+        tariefElektriciteitEnkel,
+        tariefElektriciteitNormaal,
+        tariefElektriciteitDal
+      })
+      return NextResponse.json(
+        { error: 'Geen tarieven beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 500 }
+      )
+    }
+    
+    const kostenGas = totaalGas * (tariefGas || 0)
+    const gasBreakdown = totaalGas > 0 ? {
+      m3: totaalGas,
+      tarief: tariefGas || 0,
+      bedrag: kostenGas
+    } : null
+    
+    // TERUGLEVERKOSTEN (alleen bij vaste contracten met zonnepanelen)
+    // Deze kosten worden berekend over de VOLLEDIGE teruglevering, niet netto
+    const kostenTeruglevering = terugleveringKwh > 0 && tariefTerugleveringKwh 
+      ? terugleveringKwh * tariefTerugleveringKwh 
+      : 0
+    
+    const terugleveringBreakdown = terugleveringKwh > 0 ? {
+      kwh: terugleveringKwh,
+      tarief: tariefTerugleveringKwh || 0,
+      bedrag: kostenTeruglevering
+    } : null
+    
+    console.log('💰 Terugleverkosten:', {
+      teruglevering: terugleveringKwh,
+      tarief: tariefTerugleveringKwh,
+      kosten: kostenTeruglevering
+    })
+    
+    // Vastrecht: €8.25/maand voor STROOM + €8.25/maand voor GAS (alleen als er gas is)
+    // 6. VASTRECHT (apart voor stroom en gas)
+    // Standaard: €4/maand per aansluiting = €48/jaar
     const vastrechtStroom = (vastrechtStroomMaand || 4.00) * 12
     const vastrechtGas = totaalGas > 0 ? (vastrechtGasMaand || 4.00) * 12 : 0
     const kostenVastrecht = vastrechtStroom + vastrechtGas
@@ -417,7 +503,6 @@ export async function POST(request: Request) {
     // 5. ENERGIEBELASTING BEREKENEN (correct gestaffeld)
     // 
     // BELANGRIJK: 
-    // - EB wordt berekend over NETTO kWh (na saldering)
     // - EB STAFFELS worden ALTIJD gebruikt (ongeacht aansluitwaarde)
     // - EB VERMINDERING hangt af van aansluitwaarde (alleen bij ≤ 3x80A)
     //
@@ -426,7 +511,6 @@ export async function POST(request: Request) {
     const isGrootverbruikAansluitwaarde = grootverbruikAansluitwaardenElektra.includes(aansluitwaardeElektriciteit)
     
     // EB STAFFELS ELEKTRICITEIT (ALTIJD 4 staffels gebruiken)
-    // Gebruik NETTO kWh voor EB berekening (na saldering)
     let ebElektriciteit = 0
     const schijf1Max = overheidsTarieven.eb_elektriciteit_gv_schijf1_max || 2900
     const schijf2Max = overheidsTarieven.eb_elektriciteit_gv_schijf2_max || 10000
@@ -435,16 +519,16 @@ export async function POST(request: Request) {
     // Voor breakdown: track welke staffels zijn gebruikt
     const staffelDetails: any = {}
     
-    if (nettoKwh <= schijf1Max) {
-      ebElektriciteit = nettoKwh * overheidsTarieven.eb_elektriciteit_gv_schijf1
+    if (totaalElektriciteit <= schijf1Max) {
+      ebElektriciteit = totaalElektriciteit * overheidsTarieven.eb_elektriciteit_gv_schijf1
       staffelDetails.schijf1 = {
-        kwh: nettoKwh,
+        kwh: totaalElektriciteit,
         tarief: overheidsTarieven.eb_elektriciteit_gv_schijf1,
         bedrag: ebElektriciteit
       }
-    } else if (nettoKwh <= schijf2Max) {
+    } else if (totaalElektriciteit <= schijf2Max) {
       const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
-      const bedrag2 = (nettoKwh - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      const bedrag2 = (totaalElektriciteit - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
       ebElektriciteit = bedrag1 + bedrag2
       
       staffelDetails.schijf1 = {
@@ -453,14 +537,14 @@ export async function POST(request: Request) {
         bedrag: bedrag1
       }
       staffelDetails.schijf2 = {
-        kwh: nettoKwh,
+        kwh: totaalElektriciteit,
         tarief: overheidsTarieven.eb_elektriciteit_gv_schijf2,
         bedrag: bedrag2
       }
-    } else if (nettoKwh <= schijf3Max) {
+    } else if (totaalElektriciteit <= schijf3Max) {
       const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
       const bedrag2 = (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
-      const bedrag3 = (nettoKwh - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
+      const bedrag3 = (totaalElektriciteit - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
       ebElektriciteit = bedrag1 + bedrag2 + bedrag3
       
       staffelDetails.schijf1 = {
@@ -474,7 +558,7 @@ export async function POST(request: Request) {
         bedrag: bedrag2
       }
       staffelDetails.schijf3 = {
-        kwh: nettoKwh,
+        kwh: totaalElektriciteit,
         tarief: overheidsTarieven.eb_elektriciteit_gv_schijf3,
         bedrag: bedrag3
       }
@@ -482,7 +566,7 @@ export async function POST(request: Request) {
       const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
       const bedrag2 = (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
       const bedrag3 = (schijf3Max - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
-      const bedrag4 = (nettoKwh - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
+      const bedrag4 = (totaalElektriciteit - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
       ebElektriciteit = bedrag1 + bedrag2 + bedrag3 + bedrag4
       
       staffelDetails.schijf1 = {
@@ -501,7 +585,7 @@ export async function POST(request: Request) {
         bedrag: bedrag3
       }
       staffelDetails.schijf4 = {
-        kwh: nettoKwh,
+        kwh: totaalElektriciteit,
         tarief: overheidsTarieven.eb_elektriciteit_gv_schijf4,
         bedrag: bedrag4
       }
@@ -551,9 +635,6 @@ export async function POST(request: Request) {
           gasDetails: gasBreakdown,
           teruglevering: kostenTeruglevering,
           terugleveringDetails: terugleveringBreakdown,
-          // Dynamisch contract overschot info
-          overschotKwh: overschotKwh || 0,
-          opbrengstOverschot: opbrengstOverschot || 0,
           vastrechtStroom: vastrechtStroom,
           vastrechtGas: vastrechtGas,
           vastrecht: kostenVastrecht,
@@ -582,11 +663,9 @@ export async function POST(request: Request) {
       },
       metadata: {
         verbruik: {
-          elektriciteitTotaal: elektriciteitNormaal + (elektriciteitDal || 0),
-          elektriciteitNormaal: elektriciteitNormaal,
-          elektriciteitDal: elektriciteitDal || 0,
-          nettoKwh: nettoKwh, // Na saldering
-          overschotKwh: overschotKwh || 0, // Overschot teruglevering (alleen dynamisch)
+          elektriciteitTotaal: totaalElektriciteit,
+          elektriciteitNormaal: nettoElektriciteitNormaal,
+          elektriciteitDal: nettoElektriciteitDal,
           gas: totaalGas,
           teruglevering: terugleveringKwh,
         },
@@ -596,7 +675,6 @@ export async function POST(request: Request) {
         },
         netbeheerder: netbeheerderNaam,
         isGrootverbruik: isGrootverbruikAansluitwaarde,
-        contractType: contractType,
       },
     })
     

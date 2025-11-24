@@ -410,7 +410,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                 />
                 <p className="text-xs text-gray-500">Laat leeg als geen gas</p>
               </div>
-              
+
               {/* Teruglevering */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-brand-navy-500">

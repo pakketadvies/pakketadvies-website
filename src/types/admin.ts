@@ -66,15 +66,14 @@ export interface ContractDetailsVast {
 export interface ContractDetailsDynamisch {
   contract_id: string
   
-  // Opslagen
-  opslag_elektriciteit_normaal: number
-  opslag_elektriciteit_dal: number | null
+  // Opslagen bovenop spotprijs
+  opslag_elektriciteit: number // Opslag voor stroom (geldt voor zowel dag als nacht)
   opslag_gas: number | null
+  opslag_teruglevering: number // Opslag voor teruglevering (€/kWh, meestal negatief of 0)
   
   // Vastrechten (apart voor stroom en gas)
   vastrecht_stroom_maand: number
   vastrecht_gas_maand: number
-  vaste_kosten_maand: number | null // Deprecated, gebruik vastrecht_stroom_maand + vastrecht_gas_maand
   
   // Index
   index_naam: string

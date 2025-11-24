@@ -19,9 +19,9 @@ const dynamischContractSchema = z.object({
   populair: z.boolean(),
   volgorde: z.number().int().min(0),
   
-  opslag_elektriciteit_normaal: z.number().min(0, 'Opslag moet positief zijn'),
-  opslag_elektriciteit_dal: z.number().min(0).nullable(),
+  opslag_elektriciteit: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_gas: z.number().min(0).nullable(),
+  opslag_teruglevering: z.number().nullable(), // Kan negatief zijn, meestal 0
   vastrecht_stroom_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
   vastrecht_gas_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
   index_naam: z.string().min(1, 'Index naam is verplicht'),
@@ -63,9 +63,9 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       aanbevolen: contract?.aanbevolen ?? false,
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
-      opslag_elektriciteit_normaal: contract?.details_dynamisch?.opslag_elektriciteit_normaal || 0,
-      opslag_elektriciteit_dal: contract?.details_dynamisch?.opslag_elektriciteit_dal || null,
+      opslag_elektriciteit: contract?.details_dynamisch?.opslag_elektriciteit || 0,
       opslag_gas: contract?.details_dynamisch?.opslag_gas || null,
+      opslag_teruglevering: contract?.details_dynamisch?.opslag_teruglevering || 0,
       vastrecht_stroom_maand: contract?.details_dynamisch?.vastrecht_stroom_maand || 4.00,
       vastrecht_gas_maand: contract?.details_dynamisch?.vastrecht_gas_maand || 4.00,
       index_naam: contract?.details_dynamisch?.index_naam || 'EPEX Day-Ahead',
@@ -150,9 +150,9 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
 
       const detailsData = {
         contract_id: contractId,
-        opslag_elektriciteit_normaal: data.opslag_elektriciteit_normaal,
-        opslag_elektriciteit_dal: data.opslag_elektriciteit_dal,
+        opslag_elektriciteit: data.opslag_elektriciteit,
         opslag_gas: data.opslag_gas,
+        opslag_teruglevering: data.opslag_teruglevering || 0,
         vastrecht_stroom_maand: data.vastrecht_stroom_maand,
         vastrecht_gas_maand: data.vastrecht_gas_maand,
         index_naam: data.index_naam,
@@ -239,20 +239,22 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">
-                Opslag elektriciteit normaal (€/kWh) <span className="text-red-500">*</span>
+                Opslag elektriciteit (€/kWh) <span className="text-red-500">*</span>
               </label>
-              <input {...register('opslag_elektriciteit_normaal', { valueAsNumber: true })} type="number" step="0.0001" placeholder="0.0200" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
-              {errors.opslag_elektriciteit_normaal && <p className="text-sm text-red-600">{errors.opslag_elektriciteit_normaal.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-brand-navy-500">Opslag elektriciteit dal (€/kWh)</label>
-              <input {...register('opslag_elektriciteit_dal', { valueAsNumber: true, setValueAs: (v) => v === '' ? null : parseFloat(v) })} type="number" step="0.0001" placeholder="0.0200" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <input {...register('opslag_elektriciteit', { valueAsNumber: true })} type="number" step="0.0001" placeholder="0.0200" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <p className="text-xs text-gray-500">Opslag bovenop spotprijs voor stroom (geldt voor zowel dag als nacht)</p>
+              {errors.opslag_elektriciteit && <p className="text-sm text-red-600">{errors.opslag_elektriciteit.message}</p>}
             </div>
 
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">Opslag gas (€/m³)</label>
               <input {...register('opslag_gas', { valueAsNumber: true, setValueAs: (v) => v === '' ? null : parseFloat(v) })} type="number" step="0.0001" placeholder="0.0500" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">Opslag teruglevering (€/kWh)</label>
+              <input {...register('opslag_teruglevering', { valueAsNumber: true, setValueAs: (v) => v === '' ? 0 : parseFloat(v) })} type="number" step="0.0001" placeholder="0.0000" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <p className="text-xs text-gray-500">Opslag voor teruglevering. Meestal 0 of negatief. Wordt gebruikt: P_teruglever = S_enkel + opslag_teruglevering</p>
             </div>
 
             {/* Vastrecht Stroom */}

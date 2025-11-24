@@ -374,11 +374,15 @@ function ResultatenContent() {
                 aansluitwaardeGas,
                 postcode,
                 contractType: contract.type,
-                tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
+                tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || details.opslag_elektriciteit || 0,
                 tariefElektriciteitDal: details.tarief_elektriciteit_dal || 0,
                 tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
                 tariefGas: details.tarief_gas || details.opslag_gas || 0,
-                tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0, // NIEUW: teruglevertarief
+                tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0, // NIEUW: teruglevertarief (alleen vast)
+                // Dynamische contract opslagen
+                opslagElektriciteit: details.opslag_elektriciteit || details.opslag_elektriciteit_normaal || 0,
+                opslagGas: details.opslag_gas || 0,
+                opslagTeruglevering: details.opslag_teruglevering || 0, // NIEUW: opslag teruglevering (alleen dynamisch)
                 vastrechtStroomMaand: details.vastrecht_stroom_maand || 4.00,
                 vastrechtGasMaand: details.vastrecht_gas_maand || 4.00,
                 heeftDubbeleMeter: heeftDubbeleMeter,

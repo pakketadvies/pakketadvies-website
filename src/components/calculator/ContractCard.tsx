@@ -45,6 +45,8 @@ interface KostenBreakdown {
       tarief: number
       bedrag: number
     } | null
+    overschotKwh?: number // NIEUW: overschot teruglevering (alleen dynamisch)
+    opbrengstOverschot?: number // NIEUW: opbrengst van overschot (alleen dynamisch)
     vastrechtStroom: number
     vastrechtGas: number
     vastrecht: number
@@ -139,7 +141,11 @@ export default function ContractCard({
           tariefElektriciteitDal: contract.tariefElektriciteitDal,
           tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
           tariefGas: contract.tariefGas,
-          tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0, // NIEUW
+          tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0, // NIEUW (alleen vast)
+          // Dynamische contract opslagen
+          opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
+          opslagGas: details?.opslag_gas || 0,
+          opslagTeruglevering: details?.opslag_teruglevering || 0, // NIEUW (alleen dynamisch)
           vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
           vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
           heeftDubbeleMeter: !heeftEnkeleMeter,
@@ -521,8 +527,8 @@ export default function ContractCard({
                       </div>
                     )}
                     
-                    {/* Teruglevering (zonnepanelen) */}
-                    {breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && (
+                    {/* Teruglevering (zonnepanelen) - VASTE CONTRACTEN */}
+                    {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && (
                       <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
                         <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                           <Sun weight="duotone" className="w-5 h-5 text-orange-600" />
@@ -549,6 +555,37 @@ export default function ContractCard({
                         {/* Info box */}
                         <div className="mt-3 p-2 bg-orange-100 rounded text-xs text-orange-900">
                           <strong>ℹ️ Salderingsregeling:</strong> Je verbruik is al verrekend met je teruglevering. Bovenstaande kosten zijn de administratiekosten die de leverancier rekent voor het innemen van stroom.
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Opbrengst extra teruglevering - DYNAMISCHE CONTRACTEN */}
+                    {contract.type === 'dynamisch' && breakdown.leverancier.overschotKwh && breakdown.leverancier.overschotKwh > 0 && breakdown.leverancier.opbrengstOverschot && (
+                      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                        <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
+                          <Sun weight="duotone" className="w-5 h-5 text-green-600" />
+                          Opbrengst Extra Teruglevering
+                        </h4>
+                        
+                        <div className="space-y-1.5 mb-3">
+                          <p className="text-xs font-semibold text-gray-500 mb-1">Opbrengst</p>
+                          
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">
+                              Opbrengst extra teruglevering
+                              <span className="text-xs text-gray-500 ml-1">
+                                ({breakdown.leverancier.overschotKwh.toLocaleString()} kWh)
+                              </span>
+                            </span>
+                            <span className="font-medium text-green-700">
+                              − €{breakdown.leverancier.opbrengstOverschot.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Info box */}
+                        <div className="mt-3 p-2 bg-green-100 rounded text-xs text-green-900">
+                          <strong>ℹ️ Salderingsregeling:</strong> Je hebt meer stroom teruggeleverd dan verbruikt. Je krijgt voor de overschot teruglevering een vergoeding van je leverancier.
                         </div>
                       </div>
                     )}
