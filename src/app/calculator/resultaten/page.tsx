@@ -408,7 +408,22 @@ function ResultatenContent() {
       )
       
       // Filter null values (maatwerk)
-      const validContracten = contractenMetKosten.filter((c: any) => c !== null)
+      let validContracten = contractenMetKosten.filter((c: any) => c !== null)
+      
+      // Filter op basis van teruglevering
+      const heeftTeruglevering = (data?.terugleveringJaar || 0) > 0
+      validContracten = validContracten.filter((c: any) => {
+        // Als zichtbaar_bij_teruglevering NULL is, altijd tonen
+        if (c.zichtbaar_bij_teruglevering === null || c.zichtbaar_bij_teruglevering === undefined) {
+          return true
+        }
+        // Als TRUE: alleen tonen bij teruglevering
+        if (c.zichtbaar_bij_teruglevering === true) {
+          return heeftTeruglevering
+        }
+        // Als FALSE: alleen tonen zonder teruglevering
+        return !heeftTeruglevering
+      })
       
       // Transform to ContractOptie format
       const transformed = validContracten

@@ -22,6 +22,7 @@ export interface Contract {
   aanbevolen: boolean
   populair: boolean
   volgorde: number
+  zichtbaar_bij_teruglevering: boolean | null // NULL = altijd tonen, TRUE = alleen bij teruglevering, FALSE = alleen zonder teruglevering
   created_at: string
   updated_at: string
   

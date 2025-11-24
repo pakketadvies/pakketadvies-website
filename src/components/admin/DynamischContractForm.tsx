@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
@@ -18,6 +18,7 @@ const dynamischContractSchema = z.object({
   aanbevolen: z.boolean(),
   populair: z.boolean(),
   volgorde: z.number().int().min(0),
+  zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
   
   opslag_elektriciteit: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_gas: z.number().min(0).nullable(),
@@ -52,6 +53,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<DynamischContractFormData>({
     resolver: zodResolver(dynamischContractSchema),
@@ -63,6 +65,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       aanbevolen: contract?.aanbevolen ?? false,
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
+      zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
       opslag_elektriciteit: contract?.details_dynamisch?.opslag_elektriciteit || 0,
       opslag_gas: contract?.details_dynamisch?.opslag_gas || null,
       opslag_teruglevering: contract?.details_dynamisch?.opslag_teruglevering || 0,
@@ -128,6 +131,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         aanbevolen: data.aanbevolen,
         populair: data.populair,
         volgorde: data.volgorde,
+        zichtbaar_bij_teruglevering: data.zichtbaar_bij_teruglevering,
       }
 
       let contractId = contract?.id
@@ -362,6 +366,34 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">Volgorde</label>
               <input {...register('volgorde', { valueAsNumber: true })} type="number" min="0" placeholder="0" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+            </div>
+
+            {/* Zichtbaar bij teruglevering */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Zichtbaarheid bij teruglevering
+              </label>
+              <Controller
+                name="zichtbaar_bij_teruglevering"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    value={field.value === null ? 'null' : field.value ? 'true' : 'false'}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      field.onChange(value === 'null' ? null : value === 'true')
+                    }}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                    disabled={loading}
+                  >
+                    <option value="null">Altijd tonen</option>
+                    <option value="true">Alleen tonen bij teruglevering (zonnepanelen)</option>
+                    <option value="false">Alleen tonen zonder teruglevering</option>
+                  </select>
+                )}
+              />
+              <p className="text-xs text-gray-500">Bepaalt wanneer dit contract zichtbaar is op basis van teruglevering</p>
             </div>
           </div>
 
