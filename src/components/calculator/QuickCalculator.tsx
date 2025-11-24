@@ -64,7 +64,7 @@ const verbruikSchema = z.object({
 
 export function QuickCalculator() {
   const router = useRouter()
-  const { setVerbruik } = useCalculatorStore()
+  const { setVerbruik, verbruik } = useCalculatorStore()
   
   // State
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
@@ -111,6 +111,62 @@ export function QuickCalculator() {
       meterType: 'weet_niet' as const,
     },
   })
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    if (verbruik) {
+      // Set form values
+      setValue('elektriciteitNormaal', verbruik.elektriciteitNormaal || 0)
+      setValue('elektriciteitDal', verbruik.elektriciteitDal || 0)
+      setValue('gasJaar', verbruik.gasJaar || 0)
+      setValue('terugleveringJaar', verbruik.terugleveringJaar || 0)
+      
+      // Set checkboxes
+      setHeeftEnkeleMeter(verbruik.heeftEnkeleMeter || false)
+      setValue('heeftEnkeleMeter', verbruik.heeftEnkeleMeter || false)
+      
+      setHeeftZonnepanelen(verbruik.heeftZonnepanelen || false)
+      setValue('heeftZonnepanelen', verbruik.heeftZonnepanelen || false)
+      
+      setGeenGasaansluiting(verbruik.geenGasaansluiting || false)
+      setValue('geenGasaansluiting', verbruik.geenGasaansluiting || false)
+      
+      // Set meter type
+      if (verbruik.meterType) {
+        setMeterType(verbruik.meterType)
+        setValue('meterType', verbruik.meterType)
+      }
+      
+      // Set aansluitwaarden
+      if (verbruik.aansluitwaardeElektriciteit) {
+        setAansluitwaardeElektriciteit(verbruik.aansluitwaardeElektriciteit)
+        setValue('aansluitwaardeElektriciteit', verbruik.aansluitwaardeElektriciteit)
+      }
+      
+      if (verbruik.aansluitwaardeGas) {
+        setAansluitwaardeGas(verbruik.aansluitwaardeGas)
+        setValue('aansluitwaardeGas', verbruik.aansluitwaardeGas)
+      }
+      
+      // Set adres
+      if (verbruik.leveringsadressen && verbruik.leveringsadressen.length > 0) {
+        setLeveringsadressen(verbruik.leveringsadressen.map(adres => ({
+          postcode: adres.postcode,
+          huisnummer: adres.huisnummer,
+          toevoeging: adres.toevoeging || '',
+          straat: adres.straat || '',
+          plaats: adres.plaats || '',
+        })))
+      }
+      
+      // Set verbruikWatched for aansluitwaarde estimation
+      setVerbruikWatched({
+        elektriciteitNormaal: verbruik.elektriciteitNormaal || 0,
+        elektriciteitDal: verbruik.elektriciteitDal || 0,
+        gasJaar: verbruik.gasJaar || 0,
+      })
+    }
+  }, []) // Only run on mount
 
   // Cleanup timer on unmount
   useEffect(() => {

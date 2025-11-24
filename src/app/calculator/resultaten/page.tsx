@@ -507,10 +507,10 @@ function ResultatenContent() {
   const verbruikElektriciteit = ((verbruik?.elektriciteitNormaal || 0) + (verbruik?.elektriciteitDal || 0)) || parseInt(searchParams?.get('stroom') || '0')
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-12">
+    <div className="min-h-screen bg-gray-50 pb-12">
       <div className="container-custom max-w-7xl">
         {/* Header */}
-        <div className="mb-6 md:mb-8">
+        <div className="mb-6 md:mb-8 pt-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand-navy-500 mb-2">

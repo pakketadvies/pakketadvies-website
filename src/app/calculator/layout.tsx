@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import { Lightning } from '@phosphor-icons/react'
 
 export default function CalculatorLayout({
@@ -8,6 +9,9 @@ export default function CalculatorLayout({
 }: {
   children: ReactNode
 }) {
+  const pathname = usePathname()
+  const isResultatenPage = pathname?.includes('/resultaten')
+  
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Hero Section */}
@@ -25,14 +29,28 @@ export default function CalculatorLayout({
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-              Bereken je{' '}
-              <span className="text-brand-teal-500">
-                besparing
-              </span>
+              {isResultatenPage ? (
+                <>
+                  Jouw{' '}
+                  <span className="text-brand-teal-500">
+                    resultaten
+                  </span>
+                </>
+              ) : (
+                <>
+                  Bereken je{' '}
+                  <span className="text-brand-teal-500">
+                    besparing
+                  </span>
+                </>
+              )}
             </h1>
             
             <p className="text-xl text-gray-300 leading-relaxed">
-              In een paar minuten weten hoeveel je kunt besparen met een beter energiecontract
+              {isResultatenPage 
+                ? 'Vergelijk de beste energiecontracten op basis van jouw verbruik'
+                : 'In een paar minuten weten hoeveel je kunt besparen met een beter energiecontract'
+              }
             </p>
           </div>
         </div>
