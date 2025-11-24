@@ -130,15 +130,30 @@ export function calculateDynamicContract(
     const E_tot = elektriciteitNormaal + (elektriciteitDal || 0)
 
     if (Z_kWh <= E_tot) {
-      // Geen overschot: verdeel teruglevering naar verhouding
-      const r_normaal = elektriciteitNormaal / E_tot
-      const r_dal = (elektriciteitDal || 0) / E_tot
+      // Geen overschot: verdeel teruglevering 50/50
+      const Z_normaal = Z_kWh / 2
+      const Z_dal = Z_kWh / 2
 
-      const Z_normaal = Z_kWh * r_normaal
-      const Z_dal = Z_kWh * r_dal
+      // Trek teruglevering af van beide tarieven
+      let E_normaal_na_aftrek = elektriciteitNormaal - Z_normaal
+      let E_dal_na_aftrek = (elektriciteitDal || 0) - Z_dal
 
-      const E_normaal_netto = Math.max(elektriciteitNormaal - Z_normaal, 0)
-      const E_dal_netto = Math.max((elektriciteitDal || 0) - Z_dal, 0)
+      // Als een van beide negatief wordt, gebruik overschot om andere verder te verminderen
+      if (E_normaal_na_aftrek < 0) {
+        // Overschot bij normaal, haal af van dal
+        const overschot_normaal = -E_normaal_na_aftrek
+        E_dal_na_aftrek = Math.max(0, E_dal_na_aftrek - overschot_normaal)
+        E_normaal_na_aftrek = 0
+      } else if (E_dal_na_aftrek < 0) {
+        // Overschot bij dal, haal af van normaal
+        const overschot_dal = -E_dal_na_aftrek
+        E_normaal_na_aftrek = Math.max(0, E_normaal_na_aftrek - overschot_dal)
+        E_dal_na_aftrek = 0
+      }
+
+      // Zet beide op minimum 0 (extra veiligheid)
+      const E_normaal_netto = Math.max(0, E_normaal_na_aftrek)
+      const E_dal_netto = Math.max(0, E_dal_na_aftrek)
 
       nettoKwh = E_normaal_netto + E_dal_netto
       overschotKwh = 0

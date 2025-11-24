@@ -322,8 +322,26 @@ export async function POST(request: Request) {
           const terugleveringNormaal = terugleveringKwh / 2
           const terugleveringDal = terugleveringKwh / 2
           
-          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - terugleveringNormaal)
-          nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - terugleveringDal)
+          // Trek teruglevering af van beide tarieven
+          let normaal_na_aftrek = elektriciteitNormaal - terugleveringNormaal
+          let dal_na_aftrek = (elektriciteitDal || 0) - terugleveringDal
+          
+          // Als een van beide negatief wordt, gebruik overschot om andere verder te verminderen
+          if (normaal_na_aftrek < 0) {
+            // Overschot bij normaal, haal af van dal
+            const overschot_normaal = -normaal_na_aftrek
+            dal_na_aftrek = Math.max(0, dal_na_aftrek - overschot_normaal)
+            normaal_na_aftrek = 0
+          } else if (dal_na_aftrek < 0) {
+            // Overschot bij dal, haal af van normaal
+            const overschot_dal = -dal_na_aftrek
+            normaal_na_aftrek = Math.max(0, normaal_na_aftrek - overschot_dal)
+            dal_na_aftrek = 0
+          }
+          
+          // Zet beide op minimum 0 (extra veiligheid)
+          nettoElektriciteitNormaal = Math.max(0, normaal_na_aftrek)
+          nettoElektriciteitDal = Math.max(0, dal_na_aftrek)
           nettoKwh = nettoElektriciteitNormaal + nettoElektriciteitDal
         }
       } else {
