@@ -54,19 +54,19 @@ export default function Tooltip({ content, children, className, position = 'bott
   }, [isMobileOpen])
 
   const positionClasses = {
-    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+    top: 'bottom-full left-1/2 -translate-x-1/2 mb-3',
+    bottom: 'top-full left-1/2 -translate-x-1/2 mt-3',
+    left: 'right-full top-1/2 -translate-y-1/2 mr-3',
+    right: 'left-full top-1/2 -translate-y-1/2 ml-3',
   }
 
   const arrowClasses = {
-    top: 'bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-l-transparent border-r-transparent border-b-transparent border-t-brand-teal-200',
-    bottom: 'top-0 left-1/2 -translate-x-1/2 -translate-y-full border-l-transparent border-r-transparent border-t-transparent border-b-brand-teal-200',
-    left: 'right-0 top-1/2 -translate-y-1/2 translate-x-full border-t-transparent border-b-transparent border-r-transparent border-l-brand-teal-200',
-    right: 'left-0 top-1/2 -translate-y-1/2 -translate-x-full border-t-transparent border-b-transparent border-l-transparent border-r-brand-teal-200',
+    top: 'bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-l-transparent border-r-transparent border-b-transparent border-t-white',
+    bottom: 'top-0 left-1/2 -translate-x-1/2 -translate-y-full border-l-transparent border-r-transparent border-t-transparent border-b-white',
+    left: 'right-0 top-1/2 -translate-y-1/2 translate-x-full border-t-transparent border-b-transparent border-r-transparent border-l-white',
+    right: 'left-0 top-1/2 -translate-y-1/2 -translate-x-full border-t-transparent border-b-transparent border-l-transparent border-r-white',
   }
-
+  
   return (
     <>
       <div className={cn('relative inline-flex', className)}>
@@ -81,63 +81,58 @@ export default function Tooltip({ content, children, className, position = 'bott
           {children}
         </div>
 
-        {/* Desktop Tooltip (hover) */}
+        {/* Desktop Tooltip (hover) - Elegant and minimal */}
         <div
           className={cn(
-            'absolute z-50 hidden lg:block pointer-events-none transition-opacity duration-200',
+            'absolute z-50 hidden lg:block pointer-events-none transition-all duration-200',
             positionClasses[position],
-            isVisible ? 'opacity-100' : 'opacity-0'
+            isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'
           )}
         >
-        <div className="bg-white border-2 border-brand-teal-200 rounded-xl shadow-xl max-w-sm p-4">
-          <div className="relative">
-            {/* Arrow */}
-            <div className={cn('absolute w-0 h-0 border-4', arrowClasses[position])} />
-            {content}
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm p-5">
+            <div className="relative">
+              {/* Arrow */}
+              <div className={cn('absolute w-0 h-0 border-[7px] pointer-events-none z-10', arrowClasses[position])} />
+              {content}
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
-      {/* Mobile Modal (tap/click) */}
+      {/* Mobile Modal - Elegant bottom sheet */}
       {isMobileOpen && (
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
             onClick={() => setIsMobileOpen(false)}
           />
           {/* Modal */}
           <div
             ref={tooltipRef}
-            className="fixed z-50 lg:hidden bottom-0 left-0 right-0 bg-white border-t-2 border-brand-teal-200 rounded-t-2xl shadow-2xl animate-slide-up max-h-[75vh] overflow-y-auto"
+            className="fixed z-50 lg:hidden bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl animate-slide-up max-h-[85vh] overflow-hidden flex flex-col"
           >
+            {/* Drag handle */}
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-4" />
+            
             {/* Header */}
             {title && (
-              <div className="sticky top-0 bg-brand-teal-50 border-b-2 border-brand-teal-200 px-6 py-4 flex items-center justify-between z-10">
-                <h3 className="font-bold text-brand-navy-500 text-base">{title}</h3>
-                <button
-                  onClick={() => setIsMobileOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/80 active:bg-white transition-colors"
-                  aria-label="Sluiten"
-                >
-                  <X weight="bold" className="w-5 h-5 text-gray-600" />
-                </button>
+              <div className="px-6 pb-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-brand-navy-500">{title}</h3>
+                  <button
+                    onClick={() => setIsMobileOpen(false)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                    aria-label="Sluiten"
+                  >
+                    <X weight="bold" className="w-5 h-5 text-gray-500" />
+                  </button>
+                </div>
               </div>
             )}
-            {!title && (
-              <div className="sticky top-0 bg-white px-6 py-4 flex items-center justify-end border-b border-gray-200 z-10">
-                <button
-                  onClick={() => setIsMobileOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                  aria-label="Sluiten"
-                >
-                  <X weight="bold" className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-            )}
+            
             {/* Content */}
-            <div className="p-6">
+            <div className="flex-1 overflow-y-auto px-6 py-5 scrollbar-thin">
               {content}
             </div>
           </div>
@@ -146,4 +141,3 @@ export default function Tooltip({ content, children, className, position = 'bott
     </>
   )
 }
-

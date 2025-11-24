@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info } from '@phosphor-icons/react'
+import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info, FilePdf } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 import Tooltip from '@/components/ui/Tooltip'
@@ -242,26 +242,26 @@ export default function ContractCard({
               content={
                 <div className="space-y-4">
                   {/* Cost comparison */}
-                  <div className="space-y-2.5">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Jaarkosten Eneco</span>
-                      <span className="font-semibold text-brand-navy-600">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start gap-4">
+                      <span className="text-sm text-gray-600 leading-relaxed">Jaarkosten Eneco</span>
+                      <span className="text-sm font-semibold text-brand-navy-700 whitespace-nowrap">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
-                      <span className="font-semibold text-brand-navy-600">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="flex justify-between items-start gap-4">
+                      <span className="text-sm text-gray-600 leading-relaxed">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
+                      <span className="text-sm font-semibold text-brand-navy-700 whitespace-nowrap">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="border-t-2 border-brand-teal-200 pt-2.5 mt-2.5 flex justify-between items-center">
-                      <span className="font-bold text-brand-teal-600 text-sm">Besparing per jaar</span>
-                      <span className="font-bold text-brand-teal-600 text-sm">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="pt-3 mt-3 border-t border-gray-200 flex justify-between items-center">
+                      <span className="text-sm font-bold text-green-600">Besparing per jaar</span>
+                      <span className="text-sm font-bold text-green-600">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                   {/* Explanation */}
-                  <div className="pt-3 border-t border-gray-200 space-y-2 text-xs text-gray-600 leading-relaxed">
-                    <p>
+                  <div className="pt-4 border-t border-gray-100 space-y-2.5">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       Wij berekenen de besparing met het standaard variabele contract van Eneco omdat u deze tarieven waarschijnlijk in rekening gebracht krijgt als uw vaste contract inmiddels is verlopen, of gaat krijgen zolang u niet overstapt.
                     </p>
-                    <p className="font-semibold text-brand-navy-600">
+                    <p className="text-xs font-medium text-gray-700 leading-relaxed">
                       Een standaard variabel contract is een flexibel energiecontract voor onbepaalde tijd met variabele tarieven.
                     </p>
                   </div>
@@ -269,10 +269,10 @@ export default function ContractCard({
               }
               position="bottom"
             >
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm cursor-help hover:bg-green-100 transition-colors">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm cursor-pointer hover:bg-green-100 active:bg-green-200 transition-colors group">
                 <Check weight="bold" className="w-4 h-4" />
                 <span>€{contract.besparing} besparing/maand</span>
-                <Info weight="fill" className="w-4 h-4 text-green-600 opacity-70" />
+                <Info weight="fill" className="w-4 h-4 text-green-600 opacity-60 group-hover:opacity-100 transition-opacity" />
               </div>
             </Tooltip>
           )}
@@ -667,12 +667,60 @@ export default function ContractCard({
             {openAccordion === 'voorwaarden' && (
               <div className="p-4 bg-white space-y-2 animate-slide-down">
                 {contract.voorwaarden && contract.voorwaarden.length > 0 ? (
-                  contract.voorwaarden.map((vw, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                      <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
-                      <span>{vw}</span>
-                    </div>
-                  ))
+                  contract.voorwaarden.map((vw, i) => {
+                    // Handle both string format (legacy) and object format (with PDF URLs)
+                    let voorwaardeText: string
+                    let voorwaardeUrl: string | null = null
+                    let isPdf = false
+
+                    if (typeof vw === 'string') {
+                      // Try to parse as JSON (for new format)
+                      try {
+                        const parsed = JSON.parse(vw) as { naam?: string; url?: string; type?: string }
+                        if (parsed && typeof parsed === 'object' && parsed.naam) {
+                          voorwaardeText = parsed.naam
+                          voorwaardeUrl = parsed.url || null
+                          isPdf = parsed.type === 'pdf'
+                        } else {
+                          voorwaardeText = vw
+                        }
+                      } catch {
+                        // Legacy string format
+                        voorwaardeText = vw
+                      }
+                    } else if (vw && typeof vw === 'object' && 'naam' in vw) {
+                      // Already an object
+                      const vwObj = vw as { naam: string; url?: string; type?: string }
+                      voorwaardeText = vwObj.naam || String(vw)
+                      voorwaardeUrl = vwObj.url || null
+                      isPdf = vwObj.type === 'pdf'
+                    } else {
+                      // Fallback
+                      voorwaardeText = String(vw)
+                    }
+
+                    return (
+                      <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        {isPdf ? (
+                          <FilePdf weight="bold" className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        {voorwaardeUrl ? (
+                          <a
+                            href={voorwaardeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-teal-600 hover:text-brand-teal-700 hover:underline font-medium"
+                          >
+                            {voorwaardeText}
+                          </a>
+                        ) : (
+                          <span>{voorwaardeText}</span>
+                        )}
+                      </div>
+                    )
+                  })
                 ) : (
                   <p className="text-sm text-gray-500">Geen specifieke voorwaarden beschikbaar</p>
                 )}
