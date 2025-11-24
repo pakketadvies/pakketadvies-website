@@ -216,10 +216,14 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 type="checkbox"
                 checked={formData.heeftEnkeleMeter}
                 onChange={(e) => {
-                  handleFieldChange('heeftEnkeleMeter', e.target.checked)
-                  if (e.target.checked) {
-                    handleFieldChange('elektriciteitDal', null)
+                  const checked = e.target.checked
+                  const newData = { 
+                    ...formData, 
+                    heeftEnkeleMeter: checked,
+                    elektriciteitDal: checked ? null : formData.elektriciteitDal
                   }
+                  setFormData(newData)
+                  onChange(newData)
                 }}
                 className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
               />
@@ -278,10 +282,14 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 type="checkbox"
                 checked={formData.heeftZonnepanelen}
                 onChange={(e) => {
-                  handleFieldChange('heeftZonnepanelen', e.target.checked)
-                  if (!e.target.checked) {
-                    handleFieldChange('terugleveringJaar', null)
+                  const checked = e.target.checked
+                  const newData = { 
+                    ...formData, 
+                    heeftZonnepanelen: checked,
+                    terugleveringJaar: checked ? formData.terugleveringJaar : null
                   }
+                  setFormData(newData)
+                  onChange(newData)
                 }}
                 className="w-5 h-5 rounded border-2 border-gray-300 text-amber-600 focus:ring-amber-500 focus:ring-2"
               />
@@ -351,10 +359,14 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 type="checkbox"
                 checked={formData.geenGasaansluiting}
                 onChange={(e) => {
-                  handleFieldChange('geenGasaansluiting', e.target.checked)
-                  if (e.target.checked) {
-                    handleFieldChange('gasJaar', null)
+                  const checked = e.target.checked
+                  const newData = { 
+                    ...formData, 
+                    geenGasaansluiting: checked,
+                    gasJaar: checked ? null : formData.gasJaar
                   }
+                  setFormData(newData)
+                  onChange(newData)
                 }}
                 className="w-5 h-5 rounded border-2 border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2"
               />
