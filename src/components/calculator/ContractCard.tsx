@@ -698,7 +698,7 @@ export default function ContractCard({
         <div className="space-y-3 pt-4 border-t-2 border-gray-100">
           <Link href="/calculator?stap=2">
             <Button className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
-              Bedrijfsgegevens invullen
+              Aanvragen
             </Button>
           </Link>
           <button className="w-full text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors">
