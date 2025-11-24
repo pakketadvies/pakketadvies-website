@@ -170,7 +170,7 @@ export default function ContractCard({
 
   return (
     <Card
-      className={`relative hover:shadow-xl transition-shadow duration-300 ${
+      className={`relative hover:shadow-xl transition-shadow duration-300 flex flex-col h-full ${
         contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
       }`}
     >
@@ -196,36 +196,38 @@ export default function ContractCard({
         )}
       </div>
 
-      <CardContent className="pt-6">
-        {/* Leverancier met logo */}
-        <div className="mb-6 flex items-start gap-4 pr-24 sm:pr-32">
-          {/* Logo */}
-          {contract.leverancier.logo && (
-            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg border-2 border-gray-100 p-2 flex items-center justify-center">
-              <img 
-                src={contract.leverancier.logo} 
-                alt={`${contract.leverancier.naam} logo`}
-                className="w-full h-full object-contain"
-              />
+      <CardContent className="pt-6 flex flex-col h-full">
+        {/* Header + Prijs wrapper - fixed height on desktop for alignment */}
+        <div className="lg:min-h-[280px] flex flex-col">
+          {/* Leverancier met logo */}
+          <div className="mb-6 flex items-start gap-4 pr-24 sm:pr-32">
+            {/* Logo */}
+            {contract.leverancier.logo && (
+              <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg border-2 border-gray-100 p-2 flex items-center justify-center">
+                <img 
+                  src={contract.leverancier.logo} 
+                  alt={`${contract.leverancier.naam} logo`}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+            
+            {/* Naam en details */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1 break-words">
+                {contract.leverancier.naam}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {contract.type === 'vast' 
+                  ? `Vast contract • ${contract.looptijd} jaar`
+                  : 'Dynamisch contract • Maandelijks opzegbaar'
+                }
+              </p>
             </div>
-          )}
-          
-          {/* Naam en details */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1 break-words">
-              {contract.leverancier.naam}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {contract.type === 'vast' 
-                ? `Vast contract • ${contract.looptijd} jaar`
-                : 'Dynamisch contract • Maandelijks opzegbaar'
-              }
-            </p>
           </div>
-        </div>
 
-        {/* Prijs */}
-        <div className="mb-6 pb-6 border-b-2 border-gray-100">
+          {/* Prijs - always at same position on desktop */}
+          <div className="mb-6 pb-6 border-b-2 border-gray-100 lg:mt-auto">
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-4xl font-bold text-brand-navy-500">
               €{contract.maandbedrag}
@@ -241,6 +243,7 @@ export default function ContractCard({
               <span>€{contract.besparing} besparing/maand</span>
             </div>
           )}
+        </div>
         </div>
 
         {/* Rating */}
