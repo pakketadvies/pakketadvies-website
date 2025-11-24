@@ -118,7 +118,7 @@ export function calculateDynamicContract(
     elektriciteitBreakdown = {
       type: 'enkel',
       enkel: {
-        kwh: E_enkel,
+        kwh: nettoKwh, // Netto kWh na saldering (voor weergave)
         nettoKwh,
         overschotKwh,
         tarief: P_enkel,
@@ -163,14 +163,14 @@ export function calculateDynamicContract(
       elektriciteitBreakdown = {
         type: 'dubbel',
         normaal: {
-          kwh: elektriciteitNormaal,
+          kwh: E_normaal_netto, // Netto kWh na saldering (voor weergave)
           nettoKwh: E_normaal_netto,
           teruglevering: Z_normaal,
           tarief: P_dag,
           bedrag: E_normaal_netto * P_dag,
         },
         dal: {
-          kwh: elektriciteitDal || 0,
+          kwh: E_dal_netto, // Netto kWh na saldering (voor weergave)
           nettoKwh: E_dal_netto,
           teruglevering: Z_dal,
           tarief: P_nacht,
