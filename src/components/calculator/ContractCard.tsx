@@ -240,28 +240,28 @@ export default function ContractCard({
             <Tooltip
               title="Indicatie besparing"
               content={
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {/* Cost comparison */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start gap-4">
-                      <span className="text-sm text-gray-600 leading-relaxed">Jaarkosten Eneco</span>
-                      <span className="text-sm font-semibold text-brand-navy-700 whitespace-nowrap">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-gray-700">Jaarkosten Eneco</span>
+                      <span className="text-base font-semibold text-brand-navy-700">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="flex justify-between items-start gap-4">
-                      <span className="text-sm text-gray-600 leading-relaxed">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
-                      <span className="text-sm font-semibold text-brand-navy-700 whitespace-nowrap">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-gray-700">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
+                      <span className="text-base font-semibold text-brand-navy-700">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="pt-3 mt-3 border-t border-gray-200 flex justify-between items-center">
-                      <span className="text-sm font-bold text-green-600">Besparing per jaar</span>
-                      <span className="text-sm font-bold text-green-600">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="pt-3 mt-2 border-t-2 border-gray-200 flex justify-between items-center">
+                      <span className="text-base font-bold text-green-600">Besparing per jaar</span>
+                      <span className="text-base font-bold text-green-600">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                   {/* Explanation */}
-                  <div className="pt-4 border-t border-gray-100 space-y-2.5">
-                    <p className="text-xs text-gray-600 leading-relaxed">
+                  <div className="pt-4 border-t border-gray-100 space-y-3">
+                    <p className="text-sm text-gray-600 leading-relaxed">
                       Wij berekenen de besparing met het standaard variabele contract van Eneco omdat u deze tarieven waarschijnlijk in rekening gebracht krijgt als uw vaste contract inmiddels is verlopen, of gaat krijgen zolang u niet overstapt.
                     </p>
-                    <p className="text-xs font-medium text-gray-700 leading-relaxed">
+                    <p className="text-sm font-medium text-gray-700 leading-relaxed">
                       Een standaard variabel contract is een flexibel energiecontract voor onbepaalde tijd met variabele tarieven.
                     </p>
                   </div>

@@ -28,10 +28,11 @@ export default function Tooltip({ content, children, className, position = 'bott
         !triggerRef.current.contains(event.target as Node)
       ) {
         setIsMobileOpen(false)
+        setIsVisible(false)
       }
     }
 
-    if (isMobileOpen) {
+    if (isMobileOpen || isVisible) {
       document.addEventListener('mousedown', handleClickOutside)
       document.addEventListener('touchstart', handleClickOutside)
       return () => {
@@ -39,7 +40,7 @@ export default function Tooltip({ content, children, className, position = 'bott
         document.removeEventListener('touchstart', handleClickOutside)
       }
     }
-  }, [isMobileOpen])
+  }, [isMobileOpen, isVisible])
 
   // Prevent body scroll when mobile tooltip is open
   useEffect(() => {
@@ -53,20 +54,18 @@ export default function Tooltip({ content, children, className, position = 'bott
     }
   }, [isMobileOpen])
 
-  const positionClasses = {
-    top: 'bottom-full left-1/2 -translate-x-1/2 mb-3',
-    bottom: 'top-full left-1/2 -translate-x-1/2 mt-3',
-    left: 'right-full top-1/2 -translate-y-1/2 mr-3',
-    right: 'left-full top-1/2 -translate-y-1/2 ml-3',
-  }
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileOpen(false)
+        setIsVisible(false)
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [])
 
-  const arrowClasses = {
-    top: 'bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-l-transparent border-r-transparent border-b-transparent border-t-white',
-    bottom: 'top-0 left-1/2 -translate-x-1/2 -translate-y-full border-l-transparent border-r-transparent border-t-transparent border-b-white',
-    left: 'right-0 top-1/2 -translate-y-1/2 translate-x-full border-t-transparent border-b-transparent border-r-transparent border-l-white',
-    right: 'left-0 top-1/2 -translate-y-1/2 -translate-x-full border-t-transparent border-b-transparent border-l-transparent border-r-white',
-  }
-  
   return (
     <>
       <div className={cn('relative inline-flex', className)}>
@@ -81,58 +80,72 @@ export default function Tooltip({ content, children, className, position = 'bott
           {children}
         </div>
 
-        {/* Desktop Tooltip (hover) - Elegant and minimal */}
-        <div
-          className={cn(
-            'absolute z-50 hidden lg:block pointer-events-none transition-all duration-200',
-            positionClasses[position],
-            isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'
-          )}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm p-5">
-            <div className="relative">
-              {/* Arrow */}
-              <div className={cn('absolute w-0 h-0 border-[7px] pointer-events-none z-10', arrowClasses[position])} />
-              {content}
+        {/* Desktop Tooltip - Centered modal style */}
+        {isVisible && (
+          <div
+            className="fixed inset-0 z-50 hidden lg:flex items-center justify-center pointer-events-none"
+            onClick={() => setIsVisible(false)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
+            
+            {/* Modal - Better centered and sized */}
+            <div
+              ref={tooltipRef}
+              className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-6 p-6 pointer-events-auto animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setIsVisible(false)}
+                className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors z-10"
+                aria-label="Sluiten"
+              >
+                <X weight="bold" className="w-5 h-5 text-gray-500" />
+              </button>
+
+              {/* Content */}
+              {title && (
+                <h3 className="text-xl font-bold text-brand-navy-500 mb-5 pr-10">{title}</h3>
+              )}
+              <div className="max-h-[75vh] overflow-y-auto scrollbar-thin pr-1">
+                {content}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Mobile Modal - Elegant bottom sheet */}
+      {/* Mobile Modal - Fullscreen overlay */}
       {isMobileOpen && (
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden animate-fade-in"
             onClick={() => setIsMobileOpen(false)}
           />
-          {/* Modal */}
+          {/* Fullscreen Modal */}
           <div
             ref={tooltipRef}
-            className="fixed z-50 lg:hidden bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl animate-slide-up max-h-[85vh] overflow-hidden flex flex-col"
+            className="fixed inset-0 z-50 lg:hidden bg-white flex flex-col animate-fade-in"
           >
-            {/* Drag handle */}
-            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-4" />
-            
             {/* Header */}
-            {title && (
-              <div className="px-6 pb-4 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-brand-navy-500">{title}</h3>
-                  <button
-                    onClick={() => setIsMobileOpen(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                    aria-label="Sluiten"
-                  >
-                    <X weight="bold" className="w-5 h-5 text-gray-500" />
-                  </button>
-                </div>
-              </div>
-            )}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white">
+              {title && (
+                <h3 className="text-xl font-bold text-brand-navy-500">{title}</h3>
+              )}
+              {!title && <div />}
+              <button
+                onClick={() => setIsMobileOpen(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                aria-label="Sluiten"
+              >
+                <X weight="bold" className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
             
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 scrollbar-thin">
+            <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-thin">
               {content}
             </div>
           </div>

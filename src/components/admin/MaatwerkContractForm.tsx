@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, CheckCircle, Plus, X } from '@phosphor-icons/react'
+import { ArrowLeft, CheckCircle, Plus, X, File, FilePdf, Upload } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { Leverancier, Contract, ContractDetailsMaatwerk } from '@/types/admin'
 
@@ -41,8 +41,23 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [leveranciers, setLeveranciers] = useState<Leverancier[]>([])
-  const [voorwaarden, setVoorwaarden] = useState<string[]>(contract?.details_maatwerk?.voorwaarden || [])
+  // Voorwaarden kunnen strings zijn (oude formaat) of objecten {naam: string, url?: string, type: 'text' | 'pdf'}
+  type VoorwaardeType = string | { naam: string; url?: string; type: 'text' | 'pdf' }
+  const [voorwaarden, setVoorwaarden] = useState<VoorwaardeType[]>(() => {
+    if (!contract?.details_maatwerk?.voorwaarden) return []
+    // Convert old string format to new format for display
+    return contract.details_maatwerk.voorwaarden.map(v => {
+      try {
+        const parsed = JSON.parse(v)
+        if (parsed.naam) return parsed
+        return v // Legacy string format
+      } catch {
+        return v // Legacy string format
+      }
+    })
+  })
   const [newVoorwaarde, setNewVoorwaarde] = useState('')
+  const [uploadingPdf, setUploadingPdf] = useState(false)
 
   const {
     register,
@@ -85,12 +100,96 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
 
   const addVoorwaarde = () => {
     if (newVoorwaarde.trim()) {
-      setVoorwaarden([...voorwaarden, newVoorwaarde.trim()])
+      setVoorwaarden([...voorwaarden, { naam: newVoorwaarde.trim(), type: 'text' }])
       setNewVoorwaarde('')
     }
   }
 
-  const removeVoorwaarde = (index: number) => {
+  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== 'application/pdf') {
+      setError('Alleen PDF bestanden zijn toegestaan')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      setError('Bestand is te groot. Maximum 10MB')
+      return
+    }
+
+    setUploadingPdf(true)
+    setError(null)
+
+    try {
+      const supabase = createClient()
+      const fileExt = file.name.split('.').pop()
+      const fileName = `voorwaarden_${Date.now()}.${fileExt}`
+      const filePath = `contracten/${fileName}`
+
+      // Upload to storage - try 'documents' bucket first, fallback to 'logos'
+      let bucket = 'documents'
+      let { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file, {
+          contentType: 'application/pdf',
+        })
+
+      // Fallback to logos bucket if documents doesn't exist
+      if (uploadError && uploadError.message?.includes('Bucket not found')) {
+        bucket = 'logos'
+        const retryResult = await supabase.storage
+          .from(bucket)
+          .upload(filePath, file, {
+            contentType: 'application/pdf',
+          })
+        uploadError = retryResult.error
+      }
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath)
+
+      // Add to voorwaarden
+      setVoorwaarden([...voorwaarden, {
+        naam: file.name.replace('.pdf', ''),
+        url: urlData.publicUrl,
+        type: 'pdf'
+      }])
+    } catch (err: any) {
+      setError(err.message || 'Upload mislukt')
+    } finally {
+      setUploadingPdf(false)
+      // Reset file input
+      event.target.value = ''
+    }
+  }
+
+  const removeVoorwaarde = async (index: number) => {
+    const voorwaarde = voorwaarden[index]
+    
+    // If it's a PDF, delete from storage
+    if (typeof voorwaarde === 'object' && voorwaarde.type === 'pdf' && voorwaarde.url) {
+      try {
+        const supabase = createClient()
+        // Extract path from URL
+        const url = new URL(voorwaarde.url)
+        // Extract bucket name and path from URL
+        const match = url.pathname.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)/)
+        if (match) {
+          const bucketName = match[1]
+          const filePath = match[2]
+          await supabase.storage.from(bucketName).remove([filePath])
+        }
+      } catch (err) {
+        console.error('Error deleting PDF from storage:', err)
+        // Continue with removal even if delete fails
+      }
+    }
+    
     setVoorwaarden(voorwaarden.filter((_, i) => i !== index))
   }
 
@@ -131,6 +230,14 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         contractId = newContract.id
       }
 
+      // Convert voorwaarden to database format (JSON strings for objects, plain strings for legacy)
+      const voorwaardenForDb = voorwaarden.map(v => {
+        if (typeof v === 'object' && v !== null) {
+          return JSON.stringify(v)
+        }
+        return String(v)
+      })
+
       const detailsData = {
         contract_id: contractId,
         min_verbruik_elektriciteit: data.min_verbruik_elektriciteit,
@@ -138,7 +245,7 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         custom_tekst: data.custom_tekst || null,
         contact_email: data.contact_email || null,
         contact_telefoon: data.contact_telefoon || null,
-        voorwaarden,
+        voorwaarden: voorwaardenForDb,
         rating: data.rating,
         aantal_reviews: data.aantal_reviews,
       }
@@ -255,21 +362,88 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
           <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Voorwaarden</h2>
           <div className="space-y-3">
+            {/* Text input voor tekstvoorwaarden */}
             <div className="flex gap-2">
-              <input type="text" value={newVoorwaarde} onChange={(e) => setNewVoorwaarde(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addVoorwaarde())} placeholder="Voeg voorwaarde toe" className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
-              <button type="button" onClick={addVoorwaarde} className="px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg transition-colors" disabled={loading}>
+              <input
+                type="text"
+                value={newVoorwaarde}
+                onChange={(e) => setNewVoorwaarde(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addVoorwaarde())}
+                placeholder="Voeg tekstvoorwaarde toe"
+                className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading || uploadingPdf}
+              />
+              <button
+                type="button"
+                onClick={addVoorwaarde}
+                className="px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                disabled={loading || uploadingPdf}
+              >
                 <Plus size={20} weight="bold" />
               </button>
             </div>
+
+            {/* PDF upload button */}
+            <label className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-brand-teal-300 rounded-lg hover:bg-brand-teal-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handlePdfUpload}
+                className="hidden"
+                disabled={loading || uploadingPdf}
+              />
+              {uploadingPdf ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-teal-600"></div>
+                  <span className="text-sm text-brand-navy-600">Uploaden...</span>
+                </>
+              ) : (
+                <>
+                  <Upload size={18} className="text-brand-teal-600" />
+                  <span className="text-sm text-brand-navy-600 font-medium">PDF uploaden</span>
+                </>
+              )}
+            </label>
+
+            {/* Lijst van voorwaarden */}
             <ul className="space-y-2">
-              {voorwaarden.map((v, i) => (
-                <li key={i} className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-700">{v}</span>
-                  <button type="button" onClick={() => removeVoorwaarde(i)} className="p-1 hover:bg-red-100 rounded transition-colors" disabled={loading}>
-                    <X size={16} className="text-red-600" />
-                  </button>
-                </li>
-              ))}
+              {voorwaarden.map((voorwaarde, index) => {
+                const isPdf = typeof voorwaarde === 'object' && voorwaarde.type === 'pdf'
+                const naam = typeof voorwaarde === 'object' ? voorwaarde.naam : voorwaarde
+                const url = typeof voorwaarde === 'object' ? voorwaarde.url : null
+
+                return (
+                  <li key={index} className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {isPdf ? (
+                        <FilePdf size={16} className="text-red-600 flex-shrink-0" />
+                      ) : (
+                        <File size={16} className="text-gray-400 flex-shrink-0" />
+                      )}
+                      <span className="text-sm text-gray-700 truncate">{naam}</span>
+                      {isPdf && url && (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-medium ml-auto flex-shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Bekijk
+                        </a>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeVoorwaarde(index)}
+                      className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+                      disabled={loading || uploadingPdf}
+                    >
+                      <X size={16} className="text-red-600" />
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         </div>
