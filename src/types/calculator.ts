@@ -74,7 +74,7 @@ export interface ContractOptie {
   id: string
   leverancier: Leverancier
   type: 'vast' | 'dynamisch'
-  looptijd: number
+  looptijd?: number // Optional: only for vast contracts, undefined for dynamic
   maandbedrag: number
   jaarbedrag: number
   tariefElektriciteit: number

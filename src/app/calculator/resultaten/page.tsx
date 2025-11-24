@@ -229,7 +229,7 @@ const transformContractToOptie = (
       overLeverancier: leverancier.over_leverancier || undefined,
     },
     type: contract.type,
-    looptijd: contract.type === 'vast' ? details.looptijd : 1,
+    looptijd: contract.type === 'vast' ? details.looptijd : undefined,
     maandbedrag,
     jaarbedrag,
     tariefElektriciteit: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,

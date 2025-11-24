@@ -216,7 +216,10 @@ export default function ContractCard({
               {contract.leverancier.naam}
             </h3>
             <p className="text-sm text-gray-600">
-              {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'} • {contract.looptijd} jaar
+              {contract.type === 'vast' 
+                ? `Vast contract • ${contract.looptijd} jaar`
+                : 'Dynamisch contract • Maandelijks opzegbaar'
+              }
             </p>
           </div>
         </div>

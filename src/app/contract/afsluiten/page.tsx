@@ -311,7 +311,10 @@ function ContractAfsluitenContent() {
                   )}
                 </div>
                 <p className="text-gray-600 mb-3">
-                  {contract.type === 'vast' ? 'Vast contract' : 'Dynamisch contract'} • {contract.looptijd} jaar
+                  {contract.type === 'vast' 
+                    ? `Vast contract • ${contract.looptijd} jaar`
+                    : 'Dynamisch contract • Maandelijks opzegbaar'
+                  }
                 </p>
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-bold text-brand-navy-500">€{contract.maandbedrag}</span>
