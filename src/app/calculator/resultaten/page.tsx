@@ -117,9 +117,13 @@ const berekenContractKostenVereenvoudigd = (
     
   } else if (contract.type === 'dynamisch' && contract.details_dynamisch) {
     const { opslag_elektriciteit_normaal, opslag_gas, vaste_kosten_maand } = contract.details_dynamisch
-    // Assume market price + surcharge (estimated market: €0.20 elec, €0.80 gas)
-    const marktPrijsElektriciteit = 0.20
+    
+    // NOTE: Dit is een vereenvoudigde berekening voor de lijst
+    // Voor accurate berekening wordt de API gebruikt (via loadResultaten)
+    // Gebruik conservatieve schattingen voor marktprijzen
+    const marktPrijsElektriciteit = 0.20  // Geschatte marktprijs
     const marktPrijsGas = 0.80
+    
     const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal // NETTO na saldering
     totaalJaar = 
       (totaalElektriciteit * (marktPrijsElektriciteit + opslag_elektriciteit_normaal)) +

@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { converteerGasAansluitwaardeVoorDatabase } from '@/lib/aansluitwaarde-schatting'
+import { getCurrentDynamicPrices } from '@/lib/dynamic-pricing/database'
 
 /**
  * POST /api/energie/bereken-contract
  * 
  * Berekent de VOLLEDIGE energiekosten voor een specifiek contract inclusief:
- * - Leverancierstarieven
+ * - Leverancierstarieven (vast OF dynamisch)
  * - Energiebelasting (correct gestaffeld)
  * - Netbeheerkosten (per netbeheerder + aansluitwaarde)
  * - EB vermindering
@@ -259,18 +260,68 @@ export async function POST(request: Request) {
     let kostenElektriciteit = 0
     let elektriciteitBreakdown: any = {}
     
+    // ============================================
+    // DYNAMISCHE CONTRACTEN: MARKTPRIJZEN OPHALEN
+    // ============================================
+    // Als tarieven zeer laag zijn (< €0.01), dan is het waarschijnlijk een opslag
+    // voor een dynamisch contract. We halen dan de actuele marktprijzen op.
+    const isDynamisch = contractType === 'dynamisch' || 
+                        (tariefElektriciteitNormaal > 0 && tariefElektriciteitNormaal < 0.01) ||
+                        (tariefElektriciteitEnkel > 0 && tariefElektriciteitEnkel < 0.01)
+    
+    let actualElektricityTariff = tariefElektriciteitNormaal
+    let actualElektricityTariffDal = tariefElektriciteitDal
+    let actualElektricityTariffEnkel = tariefElektriciteitEnkel
+    let actualGasTariff = tariefGas
+    let dynamicPriceSource = ''
+    
+    if (isDynamisch) {
+      console.log('💱 DYNAMISCH CONTRACT GEDETECTEERD - Ophalen marktprijzen...')
+      
+      try {
+        const dynamicPrices = await getCurrentDynamicPrices()
+        
+        console.log('✅ Marktprijzen opgehaald:', {
+          electricity: dynamicPrices.electricity.toFixed(5),
+          electricityDay: dynamicPrices.electricityDay.toFixed(5),
+          electricityNight: dynamicPrices.electricityNight.toFixed(5),
+          gas: dynamicPrices.gas.toFixed(5),
+          source: dynamicPrices.source,
+          lastUpdated: dynamicPrices.lastUpdated
+        })
+        
+        // Marktprijs + opslag van leverancier
+        actualElektricityTariff = dynamicPrices.electricityDay + (tariefElektriciteitNormaal || 0)
+        actualElektricityTariffDal = dynamicPrices.electricityNight + (tariefElektriciteitDal || 0)
+        actualElektricityTariffEnkel = dynamicPrices.electricity + (tariefElektriciteitEnkel || 0)
+        actualGasTariff = dynamicPrices.gas + (tariefGas || 0)
+        dynamicPriceSource = dynamicPrices.source
+        
+        console.log('📊 Totale tarieven (markt + opslag):', {
+          elektriciteitNormaal: actualElektricityTariff.toFixed(5),
+          elektriciteitDal: actualElektricityTariffDal.toFixed(5),
+          elektriciteitEnkel: actualElektricityTariffEnkel.toFixed(5),
+          gas: actualGasTariff.toFixed(5)
+        })
+      } catch (error) {
+        console.error('❌ Kon dynamische prijzen niet ophalen, gebruik vaste tarieven:', error)
+        // Fallback: gebruik de oorspronkelijke tarieven (opslag)
+      }
+    }
+    
     console.log('💡 Elektriciteit tarieven ontvangen:', {
       heeftDubbeleMeter,
-      tariefElektriciteitEnkel,
-      tariefElektriciteitNormaal,
-      tariefElektriciteitDal,
+      isDynamisch,
+      tariefElektriciteitEnkel: actualElektricityTariffEnkel,
+      tariefElektriciteitNormaal: actualElektricityTariff,
+      tariefElektriciteitDal: actualElektricityTariffDal,
       elektriciteitNormaal,
       elektriciteitDal,
       totaalElektriciteit
     })
     
     // STRICT VALIDATIE: Zorg dat de juiste tarieven beschikbaar zijn
-    if (!heeftDubbeleMeter && !tariefElektriciteitEnkel) {
+    if (!heeftDubbeleMeter && !actualElektricityTariffEnkel) {
       console.error('❌ FOUT: Enkele meter geselecteerd maar geen enkeltarief beschikbaar!', {
         heeftDubbeleMeter,
         tariefElektriciteitEnkel,

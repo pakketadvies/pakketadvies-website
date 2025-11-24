@@ -4,6 +4,13 @@
     "deploymentEnabled": {
       "main": true
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/update-dynamic-prices",
+      "schedule": "0 14 * * *"
+    }
+  ]
 }
+
 
