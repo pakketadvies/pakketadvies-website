@@ -255,20 +255,30 @@ function ResultatenContent() {
   // Handler for updating verbruik from EditPanel
   const handleVerbruikUpdate = async (newVerbruikData: VerbruikData) => {
     setIsUpdating(true)
+    
+    // Scroll to top BEFORE closing modal (prevents footer jump)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    
     try {
       // Update store
       setVerbruik(newVerbruikData)
       
-      // Reload resultaten with new data
-      await loadResultaten(newVerbruikData)
-      
       // Close modal if open (for mobile)
       setIsModalOpen(false)
       
-      // Smooth scroll to results
+      // Reload resultaten with new data
+      await loadResultaten(newVerbruikData)
+      
+      // Small delay to let content render, then smooth scroll to results section
       setTimeout(() => {
-        window.scrollTo({ top: 400, behavior: 'smooth' })
-      }, 300)
+        const resultsSection = document.querySelector('[data-results-section]')
+        if (resultsSection) {
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        } else {
+          // Fallback: scroll to a reasonable position
+          window.scrollTo({ top: 300, behavior: 'smooth' })
+        }
+      }, 100)
     } catch (err) {
       console.error('Error updating verbruik:', err)
       setError('Er ging iets mis bij het herberekenen. Probeer het opnieuw.')
@@ -559,7 +569,7 @@ function ResultatenContent() {
           )}
 
           {/* Filters Bar - Compact by default */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4" data-results-section>
             {/* Main row: Quick filters + Sort */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               {/* Quick filter buttons */}
