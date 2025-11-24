@@ -254,11 +254,12 @@ export async function POST(request: Request) {
           gas_gemiddeld: dynamicPricesData.gas,
         }
         
-        console.log('✅ Marktprijzen opgehaald:', {
+        console.log('✅ Marktprijzen opgehaald (30-dagen gemiddelde voor stroom):', {
           dag: dynamicPrices.elektriciteit_gemiddeld_dag.toFixed(5),
           nacht: dynamicPrices.elektriciteit_gemiddeld_nacht.toFixed(5),
           gas: dynamicPrices.gas_gemiddeld.toFixed(5),
           source: dynamicPricesData.source,
+          note: 'Elektriciteit = 30-dagen gemiddelde, Gas = dagelijks',
         })
         
         // Gebruik helper functie voor berekening

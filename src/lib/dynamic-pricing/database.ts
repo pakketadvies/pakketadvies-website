@@ -24,9 +24,111 @@ export interface DynamicPriceRecord {
 }
 
 /**
+ * Calculate 30-day rolling average for electricity prices
+ * Used for stable, predictable pricing instead of daily fluctuations
+ */
+async function get30DayAverageElectricityPrices(): Promise<{
+  day: number
+  night: number
+  single: number
+  source: string
+  daysUsed: number
+}> {
+  const supabase = await createClient()
+  const now = new Date()
+  const thirtyDaysAgo = new Date(now)
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+  // Get last 30 days of price records
+  const { data, error } = await supabase
+    .from('dynamic_prices')
+    .select('elektriciteit_gemiddeld_dag, elektriciteit_gemiddeld_nacht, bron')
+    .gte('datum', thirtyDaysAgo.toISOString().split('T')[0])
+    .lte('datum', now.toISOString().split('T')[0])
+    .order('datum', { ascending: true })
+
+  if (error || !data || data.length === 0) {
+    console.warn('⚠️ No 30-day price history available, using most recent price')
+    
+    // Fallback to most recent price
+    const { data: recentData } = await supabase
+      .from('dynamic_prices')
+      .select('elektriciteit_gemiddeld_dag, elektriciteit_gemiddeld_nacht, bron')
+      .order('datum', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (recentData) {
+      const dayPrice = recentData.elektriciteit_gemiddeld_dag
+      const nightPrice = recentData.elektriciteit_gemiddeld_nacht || dayPrice * 0.8
+      const singlePrice = (dayPrice + nightPrice) / 2
+
+      return {
+        day: dayPrice,
+        night: nightPrice,
+        single: singlePrice,
+        source: recentData.bron + '_FALLBACK',
+        daysUsed: 1,
+      }
+    }
+
+    // Ultimate fallback
+    throw new Error('No electricity price data available')
+  }
+
+  // Calculate averages over 30 days
+  const validDays = data.filter(d => d.elektriciteit_gemiddeld_dag != null)
+  
+  if (validDays.length === 0) {
+    throw new Error('No valid electricity price data in 30-day period')
+  }
+
+  const avgDay = validDays.reduce((sum, d) => sum + d.elektriciteit_gemiddeld_dag, 0) / validDays.length
+  
+  // For night: use provided night prices or estimate from day prices
+  const nightPrices = validDays
+    .filter(d => d.elektriciteit_gemiddeld_nacht != null)
+    .map(d => d.elektriciteit_gemiddeld_nacht!)
+  const avgNight = nightPrices.length > 0
+    ? nightPrices.reduce((sum, price) => sum + price, 0) / nightPrices.length
+    : avgDay * 0.8 // Estimate: night ~20% cheaper
+
+  // Single tariff = average of day and night
+  const avgSingle = (avgDay + avgNight) / 2
+
+  // Determine source (most common in dataset)
+  const sourceCounts: Record<string, number> = {}
+  validDays.forEach(d => {
+    sourceCounts[d.bron] = (sourceCounts[d.bron] || 0) + 1
+  })
+  const mostCommonSource = Object.entries(sourceCounts).reduce((a, b) => 
+    sourceCounts[a[0]] > sourceCounts[b[0]] ? a : b
+  )[0]
+
+  console.log(`✅ Calculated 30-day average electricity prices`, {
+    daysUsed: validDays.length,
+    avgDay: avgDay.toFixed(5),
+    avgNight: avgNight.toFixed(5),
+    avgSingle: avgSingle.toFixed(5),
+    source: mostCommonSource,
+  })
+
+  return {
+    day: avgDay,
+    night: avgNight,
+    single: avgSingle,
+    source: mostCommonSource,
+    daysUsed: validDays.length,
+  }
+}
+
+/**
  * Get current dynamic prices with intelligent caching
  * 
  * Strategy:
+ * - Electricity: 30-day rolling average for stable pricing
+ * - Gas: Daily price (most recent)
+ * 
  * 1. Try to get from database (fastest)
  * 2. Check if data is fresh (< 24 hours old)
  * 3. If stale, fetch from API and update database
@@ -42,75 +144,102 @@ export async function getCurrentDynamicPrices(): Promise<{
   isFresh: boolean
 }> {
   const supabase = await createClient()
+  const now = new Date()
 
-  // Get most recent price record
-  const { data, error } = await supabase
+  // Get most recent price record for gas (daily price)
+  const { data: gasData, error: gasError } = await supabase
     .from('dynamic_prices')
     .select('*')
     .order('datum', { ascending: false })
     .limit(1)
     .single()
 
-  // Check if we have data and if it's fresh
-  const now = new Date()
-  const isFresh = data && 
-    (now.getTime() - new Date(data.laatst_geupdate).getTime() < 24 * 60 * 60 * 1000) &&
-    data.datum >= now.toISOString().split('T')[0]
-
-  if (isFresh && data) {
-    console.log('✅ Using cached dynamic prices from database', {
-      date: data.datum,
-      source: data.bron,
-      age: Math.round((now.getTime() - new Date(data.laatst_geupdate).getTime()) / (60 * 1000)) + ' minutes'
-    })
-
-    return {
-      electricity: data.elektriciteit_gemiddeld_dag,
-      electricityDay: data.elektriciteit_gemiddeld_dag,
-      electricityNight: data.elektriciteit_gemiddeld_nacht || data.elektriciteit_gemiddeld_dag * 0.8,
-      gas: data.gas_gemiddeld,
-      source: data.bron,
-      lastUpdated: new Date(data.laatst_geupdate),
-      isFresh: true,
+  // Get 30-day average for electricity
+  let electricity30Day: { day: number; night: number; single: number; source: string; daysUsed: number }
+  
+  try {
+    electricity30Day = await get30DayAverageElectricityPrices()
+  } catch (error) {
+    console.error('❌ Failed to calculate 30-day average, fetching fresh data...', error)
+    
+    // Fallback: fetch fresh data and use it
+    try {
+      const freshPrices = await fetchDayAheadPrices(now)
+      await saveDynamicPrices(freshPrices)
+      
+      electricity30Day = {
+        day: freshPrices.electricity.day,
+        night: freshPrices.electricity.night,
+        single: freshPrices.electricity.average,
+        source: freshPrices.source,
+        daysUsed: 1,
+      }
+    } catch (fetchError) {
+      console.error('❌ Failed to fetch fresh prices', fetchError)
+      
+      // Ultimate fallback: use gasData if available
+      if (gasData) {
+        electricity30Day = {
+          day: gasData.elektriciteit_gemiddeld_dag,
+          night: gasData.elektriciteit_gemiddeld_nacht || gasData.elektriciteit_gemiddeld_dag * 0.8,
+          single: (gasData.elektriciteit_gemiddeld_dag + (gasData.elektriciteit_gemiddeld_nacht || gasData.elektriciteit_gemiddeld_dag * 0.8)) / 2,
+          source: gasData.bron + '_FALLBACK',
+          daysUsed: 1,
+        }
+      } else {
+        throw new Error('No electricity price data available')
+      }
     }
   }
 
-  // Data is stale or missing, fetch fresh data
-  console.warn('⚠️ Cached prices stale or missing, fetching fresh data...')
+  // Check if gas data is fresh
+  const isGasFresh = gasData && 
+    (now.getTime() - new Date(gasData.laatst_geupdate).getTime() < 24 * 60 * 60 * 1000) &&
+    gasData.datum >= now.toISOString().split('T')[0]
 
-  try {
-    const freshPrices = await fetchDayAheadPrices(now)
+  let gasPrice: number
+  let gasSource: string
+  let gasLastUpdated: Date
 
-    // Store in database for future queries
-    await saveDynamicPrices(freshPrices)
-
-    return {
-      electricity: freshPrices.electricity.average,
-      electricityDay: freshPrices.electricity.day,
-      electricityNight: freshPrices.electricity.night,
-      gas: freshPrices.gas.average,
-      source: freshPrices.source,
-      lastUpdated: now,
-      isFresh: true,
-    }
-  } catch (error) {
-    console.error('❌ Failed to fetch fresh prices, using stale data if available', error)
-
-    // Use stale data as last resort
-    if (data) {
-      return {
-        electricity: data.elektriciteit_gemiddeld_dag,
-        electricityDay: data.elektriciteit_gemiddeld_dag,
-        electricityNight: data.elektriciteit_gemiddeld_nacht || data.elektriciteit_gemiddeld_dag * 0.8,
-        gas: data.gas_gemiddeld,
-        source: data.bron + '_STALE',
-        lastUpdated: new Date(data.laatst_geupdate),
-        isFresh: false,
+  if (isGasFresh && gasData) {
+    gasPrice = gasData.gas_gemiddeld
+    gasSource = gasData.bron
+    gasLastUpdated = new Date(gasData.laatst_geupdate)
+  } else {
+    // Gas data is stale, fetch fresh
+    console.warn('⚠️ Gas price stale or missing, fetching fresh data...')
+    
+    try {
+      const freshPrices = await fetchDayAheadPrices(now)
+      await saveDynamicPrices(freshPrices)
+      
+      gasPrice = freshPrices.gas.average
+      gasSource = freshPrices.source
+      gasLastUpdated = now
+    } catch (error) {
+      console.error('❌ Failed to fetch fresh gas price, using stale data if available', error)
+      
+      if (gasData) {
+        gasPrice = gasData.gas_gemiddeld
+        gasSource = gasData.bron + '_STALE'
+        gasLastUpdated = new Date(gasData.laatst_geupdate)
+      } else {
+        throw new Error('No gas price data available')
       }
     }
+  }
 
-    // Ultimate fallback
-    throw new Error('No dynamic prices available and API fetch failed')
+  // Combine sources
+  const combinedSource = `${electricity30Day.source}_30D+${gasSource}_DAILY`
+
+  return {
+    electricity: electricity30Day.single, // Single tariff average for backward compatibility
+    electricityDay: electricity30Day.day,
+    electricityNight: electricity30Day.night,
+    gas: gasPrice,
+    source: combinedSource,
+    lastUpdated: gasLastUpdated, // Use gas lastUpdated as primary timestamp
+    isFresh: isGasFresh,
   }
 }
 
