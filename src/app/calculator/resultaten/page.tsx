@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import ContractCard from '@/components/calculator/ContractCard'
 import EditVerbruikPanel from '@/components/calculator/EditVerbruikPanel'
+import FloatingEditButton from '@/components/calculator/FloatingEditButton'
+import EditVerbruikModal from '@/components/calculator/EditVerbruikModal'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
 import Link from 'next/link'
@@ -235,6 +237,7 @@ function ResultatenContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   
   // Filter states
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
@@ -258,6 +261,9 @@ function ResultatenContent() {
       
       // Reload resultaten with new data
       await loadResultaten(newVerbruikData)
+      
+      // Close modal if open (for mobile)
+      setIsModalOpen(false)
       
       // Smooth scroll to results
       setTimeout(() => {
@@ -524,8 +530,36 @@ function ResultatenContent() {
             </Button>
           </div>
 
+          {/* Edit Verbruik Panel - Desktop only */}
+          {verbruik && (
+            <div className="mb-6 hidden lg:block">
+              <EditVerbruikPanel
+                currentData={verbruik}
+                onUpdate={handleVerbruikUpdate}
+                isUpdating={isUpdating}
+              />
+            </div>
+          )}
+
+          {/* Floating Edit Button - Mobile only */}
+          {verbruik && (
+            <>
+              <div className="lg:hidden">
+                <FloatingEditButton onClick={() => setIsModalOpen(true)} />
+              </div>
+              
+              <EditVerbruikModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                currentData={verbruik}
+                onSave={handleVerbruikUpdate}
+                isUpdating={isUpdating}
+              />
+            </>
+          )}
+
           {/* Filters Bar - Compact by default */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4 mb-6">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
             {/* Main row: Quick filters + Sort */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               {/* Quick filter buttons */}
@@ -659,21 +693,6 @@ function ResultatenContent() {
             )}
           </div>
         </div>
-
-        {/* Edit Verbruik Panel - Sticky onder navbar */}
-        {verbruik && (
-          <div className="sticky top-24 z-[45] mb-6">
-            <div className="relative">
-              <EditVerbruikPanel
-                currentData={verbruik}
-                onUpdate={handleVerbruikUpdate}
-                isUpdating={isUpdating}
-              />
-              {/* Subtle bottom fade */}
-              <div className="absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-gray-50/80 to-transparent pointer-events-none" />
-            </div>
-          </div>
-        )}
 
         {/* Results grid */}
         {filteredResultaten.length === 0 ? (
