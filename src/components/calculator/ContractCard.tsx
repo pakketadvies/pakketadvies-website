@@ -531,7 +531,7 @@ export default function ContractCard({
                     )}
                     
                     {/* Teruglevering (zonnepanelen) - VASTE CONTRACTEN */}
-                    {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && (
+                    {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && breakdown.leverancier.terugleveringDetails.bedrag > 0 && (
                       <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
                         <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                           <Sun weight="duotone" className="w-5 h-5 text-orange-600" />
@@ -563,7 +563,7 @@ export default function ContractCard({
                     )}
                     
                     {/* Opbrengst extra teruglevering - DYNAMISCHE CONTRACTEN */}
-                    {contract.type === 'dynamisch' && breakdown.leverancier.overschotKwh && breakdown.leverancier.overschotKwh > 0 && breakdown.leverancier.opbrengstOverschot && (
+                    {contract.type === 'dynamisch' && breakdown.leverancier.overschotKwh && breakdown.leverancier.overschotKwh > 0 && breakdown.leverancier.opbrengstOverschot && breakdown.leverancier.opbrengstOverschot > 0 && (
                       <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                         <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                           <Sun weight="duotone" className="w-5 h-5 text-green-600" />
