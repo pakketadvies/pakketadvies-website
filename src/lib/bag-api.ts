@@ -83,7 +83,7 @@ export class BagApiService {
 
       let audienceType: 'particulier' | 'zakelijk';
       if (gebruiksdoelen.includes('woonfunctie')) {
-        const otherFunctions = gebruiksdoelen.filter(f => f !== 'woonfunctie');
+        const otherFunctions = gebruiksdoelen.filter((f: string) => f !== 'woonfunctie');
         audienceType = otherFunctions.length === 0 ? 'particulier' : 'zakelijk';
       } else {
         audienceType = 'zakelijk';

@@ -6,14 +6,15 @@ import { z } from 'zod'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { 
-  Lightning, 
-  MapPin, 
-  CheckCircle, 
-  Sun, 
-  Flame, 
-  DeviceMobile, 
-  Lightbulb, 
+import {
+  Lightning,
+  MapPin,
+  CheckCircle,
+  XCircle,
+  Sun,
+  Flame,
+  DeviceMobile,
+  Lightbulb,
   Info,
   Plus,
   Trash,
@@ -58,6 +59,9 @@ const verbruikSchema = z.object({
     straat: z.string().optional(),
     plaats: z.string().optional(),
   })).min(1, 'Voeg minimaal één leveringsadres toe'),
+
+  // NIEUW: Address type van BAG API
+  addressType: z.enum(['particulier', 'zakelijk']).nullable().optional(),
 })
 
 type VerbruikFormData = z.infer<typeof verbruikSchema>
@@ -116,6 +120,7 @@ export function VerbruikForm() {
       aansluitwaardeElektriciteit: '',
       aansluitwaardeGas: '',
       leveringsadressen: [{ postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }],
+      addressType: null, // NIEUW: default value voor address type
     },
   })
 
