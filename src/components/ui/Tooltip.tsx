@@ -45,18 +45,28 @@ export default function Tooltip({ content, children, className, position = 'bott
 
   // Prevent body scroll when mobile tooltip is open
   useEffect(() => {
-    if (isMobileOpen) {
-      // Prevent scrolling on body
+    if (isMobileOpen && typeof window !== 'undefined') {
+      // Store original values and scroll position
+      const scrollY = window.scrollY
       const originalOverflow = document.body.style.overflow
       const originalPosition = document.body.style.position
+      const originalTop = document.body.style.top
+      const originalWidth = document.body.style.width
+
+      // Prevent scrolling - critical for mobile
       document.body.style.overflow = 'hidden'
-      // Also prevent scroll on iOS Safari
       document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
       document.body.style.width = '100%'
+
       return () => {
+        // Restore all original values
         document.body.style.overflow = originalOverflow
         document.body.style.position = originalPosition
-        document.body.style.width = ''
+        document.body.style.top = originalTop
+        document.body.style.width = originalWidth
+        // Restore scroll position
+        window.scrollTo(0, scrollY)
       }
     }
   }, [isMobileOpen])
@@ -75,19 +85,21 @@ export default function Tooltip({ content, children, className, position = 'bott
 
   // Mobile modal rendered via portal to body (completely separate from card)
   const mobileModal = isMobileOpen && typeof window !== 'undefined' ? createPortal(
-    <>
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[99999] lg:hidden">
+      {/* Backdrop - click to close */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] lg:hidden animate-fade-in"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
         onClick={() => setIsMobileOpen(false)}
+        aria-hidden="true"
       />
       {/* Fullscreen Modal */}
       <div
         ref={tooltipRef}
-        className="fixed inset-0 z-[9999] lg:hidden bg-white flex flex-col animate-fade-in"
+        className="absolute inset-0 bg-white flex flex-col animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white sticky top-0">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white flex-shrink-0">
           {title && (
             <h3 className="text-xl font-bold text-brand-navy-500">{title}</h3>
           )}
@@ -101,12 +113,12 @@ export default function Tooltip({ content, children, className, position = 'bott
           </button>
         </div>
         
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-thin">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-6 scrollbar-thin">
           {content}
         </div>
       </div>
-    </>,
+    </div>,
     document.body
   ) : null
 
