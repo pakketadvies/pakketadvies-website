@@ -538,7 +538,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                     setValueAs: (v) => v === '' ? null : parseFloat(v)
                   })}
                   type="number"
-                  step="0.000001"
+                  step="0.00000001"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -559,7 +559,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                     setValueAs: (v) => v === '' ? null : parseFloat(v)
                   })}
                   type="number"
-                  step="0.000001"
+                  step="0.00000001"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -580,7 +580,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                     setValueAs: (v) => v === '' ? null : parseFloat(v)
                   })}
                   type="number"
-                  step="0.000001"
+                  step="0.00000001"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -604,7 +604,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                     setValueAs: (v) => v === '' ? null : parseFloat(v)
                   })}
                   type="number"
-                  step="0.000001"
+                  step="0.00000001"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
@@ -621,7 +621,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                     valueAsNumber: true
                   })}
                   type="number"
-                  step="0.000001"
+                  step="0.00000001"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
                   disabled={loading}
                 />
