@@ -51,38 +51,37 @@ export default function Tooltip({ content, children, className, position = 'bott
       
       // Store original values
       const originalBodyOverflow = document.body.style.overflow
-      const originalBodyPosition = document.body.style.position
-      const originalBodyTop = document.body.style.top
-      const originalBodyLeft = document.body.style.left
-      const originalBodyWidth = document.body.style.width
       const originalHtmlOverflow = document.documentElement.style.overflow
       
-      // Prevent scroll: use position fixed with negative top to maintain visual position
+      // Store scroll position on html element to maintain it
+      document.documentElement.style.scrollBehavior = 'auto'
+      
+      // Prevent scrolling WITHOUT moving the page
+      // Only use overflow hidden, don't change position
       document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.left = '0'
-      document.body.style.width = '100%'
       document.documentElement.style.overflow = 'hidden'
+      
+      // Set scroll position explicitly to maintain current view
+      document.documentElement.scrollTop = scrollY
+      window.scrollTo(0, scrollY)
 
       return () => {
-        // Restore all original values FIRST
+        // Restore original values
         document.body.style.overflow = originalBodyOverflow
-        document.body.style.position = originalBodyPosition
-        document.body.style.top = originalBodyTop
-        document.body.style.left = originalBodyLeft
-        document.body.style.width = originalBodyWidth
         document.documentElement.style.overflow = originalHtmlOverflow
+        document.documentElement.style.scrollBehavior = ''
         
-        // Then restore scroll position WITHOUT any animation
-        // Use requestAnimationFrame to ensure DOM updates are complete
-        requestAnimationFrame(() => {
+        // Ensure scroll position is maintained (should already be, but double-check)
+        // Don't scroll again if we're already at the right position
+        const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
+        if (Math.abs(currentScrollY - scrollY) > 1) {
+          // Only restore if position is significantly different
           window.scrollTo({
             top: scrollY,
             left: 0,
-            behavior: 'auto' as ScrollBehavior
+            behavior: 'auto'
           })
-        })
+        }
       }
     }
   }, [isMobileOpen])
