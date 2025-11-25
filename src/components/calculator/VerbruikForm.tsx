@@ -513,26 +513,17 @@ export function VerbruikForm() {
               </div>
             </div>
 
-            {loadingAddresses[index] && (
+            {/* Gecombineerde loading state: zichtbaar zolang één van beide API calls bezig is */}
+            {(loadingAddresses[index] || checkingAddressType) && (
               <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
                 <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-                <span>Adres opzoeken...</span>
-              </div>
-            )}
-
-            {/* Loading state voor postcode API */}
-            {loadingAddresses[index] && !checkingAddressType && (
-              <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
-                <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-                <span>Adres opzoeken...</span>
-              </div>
-            )}
-
-            {/* Loading state voor BAG API check */}
-            {checkingAddressType && (
-              <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
-                <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
-                <span>Bezig met adrescontrole...</span>
+                <span>
+                  {loadingAddresses[index] && !checkingAddressType 
+                    ? 'Adres opzoeken...' 
+                    : checkingAddressType 
+                    ? 'Adres controleren...' 
+                    : 'Adres controleren...'}
+                </span>
               </div>
             )}
 
