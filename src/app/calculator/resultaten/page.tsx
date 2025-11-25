@@ -755,7 +755,7 @@ function ResultatenContent() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredResultaten.map((contract) => (
+            {filteredResultaten.map((contract, index) => (
               <ContractCard 
                 key={contract.id} 
                 contract={contract}
@@ -768,6 +768,7 @@ function ResultatenContent() {
                 aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
                 aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
                 postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
+                position={index + 1}
               />
             ))}
           </div>

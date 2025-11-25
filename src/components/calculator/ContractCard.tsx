@@ -23,6 +23,8 @@ interface ContractCardProps {
   aansluitwaardeGas: string
   // Postcode (voor netbeheerder)
   postcode: string
+  // Position number (1-based index)
+  position?: number
 }
 
 interface KostenBreakdown {
@@ -87,7 +89,8 @@ export default function ContractCard({
   terugleveringJaar,
   aansluitwaardeElektriciteit,
   aansluitwaardeGas,
-  postcode
+  postcode,
+  position
 }: ContractCardProps) {
   const [openAccordion, setOpenAccordion] = useState<'prijsdetails' | 'voorwaarden' | 'over' | null>(null)
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
@@ -175,7 +178,16 @@ export default function ContractCard({
         contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
       }`}
     >
-      {/* Badges */}
+      {/* Position Number - Linksboven */}
+      {position !== undefined && (
+        <div className="absolute top-4 left-4 z-10">
+          <div className="w-10 h-10 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 text-white rounded-full flex items-center justify-center shadow-lg font-bold text-lg border-2 border-white">
+            {position}
+          </div>
+        </div>
+      )}
+
+      {/* Badges - Rechtsboven */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 items-end z-10">
         {contract.aanbevolen && (
           <Badge variant="success" className="shadow-lg">
