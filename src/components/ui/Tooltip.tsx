@@ -46,42 +46,18 @@ export default function Tooltip({ content, children, className, position = 'bott
   // Prevent body scroll when mobile tooltip is open (without scrolling to top)
   useEffect(() => {
     if (isMobileOpen && typeof window !== 'undefined') {
-      // Get current scroll position BEFORE making any changes
-      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
-      
-      // Store original values
+      // Simply prevent scroll - same approach as EditVerbruikModal
+      // This should maintain scroll position naturally without jumping
       const originalBodyOverflow = document.body.style.overflow
-      const originalHtmlOverflow = document.documentElement.style.overflow
       
-      // Store scroll position on html element to maintain it
-      document.documentElement.style.scrollBehavior = 'auto'
-      
-      // Prevent scrolling WITHOUT moving the page
-      // Only use overflow hidden, don't change position
+      // Just prevent overflow - no position fixed, no scroll manipulation
+      // This maintains the visual scroll position
       document.body.style.overflow = 'hidden'
-      document.documentElement.style.overflow = 'hidden'
-      
-      // Set scroll position explicitly to maintain current view
-      document.documentElement.scrollTop = scrollY
-      window.scrollTo(0, scrollY)
 
       return () => {
-        // Restore original values
+        // Restore original value
         document.body.style.overflow = originalBodyOverflow
-        document.documentElement.style.overflow = originalHtmlOverflow
-        document.documentElement.style.scrollBehavior = ''
-        
-        // Ensure scroll position is maintained (should already be, but double-check)
-        // Don't scroll again if we're already at the right position
-        const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
-        if (Math.abs(currentScrollY - scrollY) > 1) {
-          // Only restore if position is significantly different
-          window.scrollTo({
-            top: scrollY,
-            left: 0,
-            behavior: 'auto'
-          })
-        }
+        // No need to restore scroll position - it should stay naturally
       }
     }
   }, [isMobileOpen])
