@@ -470,23 +470,52 @@ function ResultatenContent() {
             const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
             
             // Filter maatwerkcontracten op minimale drempelwaarden
+            // Contract is zichtbaar als aan MINSTENS ÉÉN van beide drempelwaarden wordt voldaan (OR logica)
             if (contract.type === 'maatwerk' && contract.details_maatwerk) {
               const maatwerkDetails = contract.details_maatwerk
               const totaalElektriciteit = elektriciteitNormaal + elektriciteitDal
               
-              // Check minimale drempelwaarde elektriciteit
-              if (maatwerkDetails.min_verbruik_elektriciteit !== null && 
-                  maatwerkDetails.min_verbruik_elektriciteit !== undefined &&
-                  totaalElektriciteit < maatwerkDetails.min_verbruik_elektriciteit) {
-                return null // Contract niet zichtbaar, klant voldoet niet aan minimale drempel
-              }
+              // Check of elektriciteit drempelwaarde is ingesteld
+              const heeftElektriciteitDrempel = maatwerkDetails.min_verbruik_elektriciteit !== null && 
+                                                maatwerkDetails.min_verbruik_elektriciteit !== undefined
               
-              // Check minimale drempelwaarde gas
-              if (maatwerkDetails.min_verbruik_gas !== null && 
-                  maatwerkDetails.min_verbruik_gas !== undefined &&
-                  totaalGas > 0 && // Alleen checken als er gasverbruik is
-                  totaalGas < maatwerkDetails.min_verbruik_gas) {
-                return null // Contract niet zichtbaar, klant voldoet niet aan minimale drempel
+              // Check of gas drempelwaarde is ingesteld
+              const heeftGasDrempel = maatwerkDetails.min_verbruik_gas !== null && 
+                                      maatwerkDetails.min_verbruik_gas !== undefined
+              
+              // Als er geen drempelwaarden zijn ingesteld, altijd tonen
+              if (!heeftElektriciteitDrempel && !heeftGasDrempel) {
+                // Geen drempelwaarden, contract is altijd zichtbaar
+              } else {
+                // Check of aan minstens één drempelwaarde wordt voldaan
+                let voldoetElektriciteit = false
+                let voldoetGas = false
+                
+                // Check elektriciteit drempelwaarde
+                if (heeftElektriciteitDrempel) {
+                  voldoetElektriciteit = totaalElektriciteit >= maatwerkDetails.min_verbruik_elektriciteit!
+                }
+                
+                // Check gas drempelwaarde (alleen als er gasverbruik is OF als er een gas drempelwaarde is ingesteld)
+                if (heeftGasDrempel) {
+                  if (totaalGas > 0) {
+                    // Er is gasverbruik, check of het voldoet
+                    voldoetGas = totaalGas >= maatwerkDetails.min_verbruik_gas!
+                  } else {
+                    // Geen gasverbruik, maar er is wel een gas drempelwaarde
+                    // Als er geen gas is, voldoet het niet aan de gas drempelwaarde
+                    voldoetGas = false
+                  }
+                }
+                
+                // Als er geen drempelwaarde is ingesteld, beschouwen we dat als "voldoen"
+                if (!heeftElektriciteitDrempel) voldoetElektriciteit = true
+                if (!heeftGasDrempel) voldoetGas = true
+                
+                // Contract is alleen zichtbaar als aan MINSTENS ÉÉN drempelwaarde wordt voldaan
+                if (!voldoetElektriciteit && !voldoetGas) {
+                  return null // Contract niet zichtbaar, klant voldoet niet aan minimaal één drempelwaarde
+                }
               }
             }
             
