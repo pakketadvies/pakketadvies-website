@@ -112,10 +112,10 @@ export async function POST(request: Request) {
       aansluitwaarde: aansluitwaardeElektriciteit
     })
     
-    // STAP 1: Haal eerst de aansluitwaarde_id op
+    // STAP 1: Haal eerst de aansluitwaarde op (met is_kleinverbruik flag)
     const { data: elektraAansluitwaarde, error: elektraAansluitwaardeError } = await supabase
       .from('aansluitwaarden_elektriciteit')
-      .select('id')
+      .select('id, is_kleinverbruik')
       .eq('code', aansluitwaardeElektriciteit)
       .single()
     
@@ -440,9 +440,10 @@ export async function POST(request: Request) {
     // - EB STAFFELS worden ALTIJD gebruikt (ongeacht aansluitwaarde)
     // - EB VERMINDERING hangt af van aansluitwaarde (alleen bij ≤ 3x80A)
     //
-    // Grootverbruik aansluitwaarde (> 3x80A of > G25): GEEN EB vermindering
-    const grootverbruikAansluitwaardenElektra = ['3x100A', '3x125A', '3x160A', '3x200A']
-    const isGrootverbruikAansluitwaarde = grootverbruikAansluitwaardenElektra.includes(aansluitwaardeElektriciteit)
+    // Grootverbruik aansluitwaarde: bepaald door is_kleinverbruik flag uit database
+    // Als is_kleinverbruik = false, dan is het grootverbruik (GEEN EB vermindering)
+    const isGrootverbruikAansluitwaardeElektra = elektraAansluitwaarde ? !elektraAansluitwaarde.is_kleinverbruik : false
+    const isGrootverbruikAansluitwaardeGas = gasAansluitwaarde ? !gasAansluitwaarde.is_kleinverbruik : false
     
     // EB STAFFELS ELEKTRICITEIT (ALTIJD 4 staffels gebruiken)
     // Gebruik NETTO kWh voor EB berekening (na saldering)
