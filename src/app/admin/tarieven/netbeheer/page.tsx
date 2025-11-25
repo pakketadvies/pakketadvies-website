@@ -59,7 +59,7 @@ export default function NetbeheerTarievenPage() {
   }, [selectedNetbeheerder, viewType])
 
   async function fetchNetbeheerders() {
-    const supabase = await createClient()
+    const supabase = createClient()
     const { data } = await supabase
       .from('netbeheerders')
       .select('*')
@@ -77,7 +77,7 @@ export default function NetbeheerTarievenPage() {
     if (!selectedNetbeheerder) return
 
     setLoading(true)
-    const supabase = await createClient()
+    const supabase = createClient()
     const table = viewType === 'elektriciteit' 
       ? 'netbeheer_tarieven_elektriciteit'
       : 'netbeheer_tarieven_gas'
