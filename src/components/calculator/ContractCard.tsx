@@ -178,10 +178,10 @@ export default function ContractCard({
         contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
       }`}
     >
-      {/* Position Number - Linksboven */}
+      {/* Position Number - Linksboven (corner positioned) */}
       {position !== undefined && (
-        <div className="absolute top-4 left-4 z-10">
-          <div className="w-10 h-10 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 text-white rounded-full flex items-center justify-center shadow-lg font-bold text-lg border-2 border-white">
+        <div className="absolute -top-3 -left-3 z-10">
+          <div className="w-8 h-8 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 text-white rounded-full flex items-center justify-center shadow-lg font-bold text-base border-2 border-white">
             {position}
           </div>
         </div>
