@@ -46,43 +46,42 @@ export default function Tooltip({ content, children, className, position = 'bott
   // Prevent body scroll when mobile tooltip is open (without scrolling to top)
   useEffect(() => {
     if (isMobileOpen && typeof window !== 'undefined') {
-      // Store current scroll position BEFORE any changes
+      // Get current scroll position BEFORE making any changes
       const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
       
       // Store original values
-      const originalOverflow = document.body.style.overflow
-      const originalPosition = document.body.style.position
-      const originalTop = document.body.style.top
-      const originalLeft = document.body.style.left
-      const originalWidth = document.body.style.width
+      const originalBodyOverflow = document.body.style.overflow
+      const originalBodyPosition = document.body.style.position
+      const originalBodyTop = document.body.style.top
+      const originalBodyLeft = document.body.style.left
+      const originalBodyWidth = document.body.style.width
+      const originalHtmlOverflow = document.documentElement.style.overflow
       
-      // Lock scroll position using position fixed (but keep visual position)
+      // Prevent scroll: use position fixed with negative top to maintain visual position
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollY}px`
       document.body.style.left = '0'
       document.body.style.width = '100%'
-      
-      // Also lock html scroll
       document.documentElement.style.overflow = 'hidden'
-      document.documentElement.style.position = 'relative'
 
       return () => {
-        // Restore all original values
-        document.body.style.overflow = originalOverflow
-        document.body.style.position = originalPosition
-        document.body.style.top = originalTop
-        document.body.style.left = originalLeft
-        document.body.style.width = originalWidth
+        // Restore all original values FIRST
+        document.body.style.overflow = originalBodyOverflow
+        document.body.style.position = originalBodyPosition
+        document.body.style.top = originalBodyTop
+        document.body.style.left = originalBodyLeft
+        document.body.style.width = originalBodyWidth
+        document.documentElement.style.overflow = originalHtmlOverflow
         
-        document.documentElement.style.overflow = ''
-        document.documentElement.style.position = ''
-        
-        // Restore scroll position WITHOUT scrolling animation
-        window.scrollTo({
-          top: scrollY,
-          left: 0,
-          behavior: 'instant'
+        // Then restore scroll position WITHOUT any animation
+        // Use requestAnimationFrame to ensure DOM updates are complete
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: scrollY,
+            left: 0,
+            behavior: 'auto' as ScrollBehavior
+          })
         })
       }
     }
