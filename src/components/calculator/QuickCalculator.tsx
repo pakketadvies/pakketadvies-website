@@ -35,6 +35,7 @@ const verbruikSchema = z.object({
   meterType: z.enum(['slim', 'oud', 'weet_niet']),
   aansluitwaardeElektriciteit: z.string().optional(),
   aansluitwaardeGas: z.string().optional(),
+  addressType: z.enum(['particulier', 'zakelijk']).nullable().optional(), // NIEUW: address type van BAG API
 }).refine((data) => {
   // Als enkele meter, dan dal niet verplicht
   if (data.heeftEnkeleMeter) return true
@@ -116,6 +117,7 @@ export function QuickCalculator() {
       heeftZonnepanelen: false,
       geenGasaansluiting: false,
       meterType: 'weet_niet' as const,
+      addressType: null, // NIEUW: default value voor address type
     },
   })
 
