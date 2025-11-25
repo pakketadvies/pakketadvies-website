@@ -8,6 +8,7 @@ import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info, FilePdf, FileText } f
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 import Tooltip from '@/components/ui/Tooltip'
+import { getFriendlyDocumentUrl } from '@/lib/document-url'
 
 interface ContractCardProps {
   contract: ContractOptie
@@ -723,7 +724,7 @@ export default function ContractCard({
                           <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                         )}
                         <a
-                          href={vw.url}
+                          href={getFriendlyDocumentUrl(vw.url)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-brand-teal-600 hover:text-brand-teal-700 hover:underline font-medium"
