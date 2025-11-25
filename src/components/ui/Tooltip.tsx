@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode, useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
@@ -45,12 +46,18 @@ export default function Tooltip({ content, children, className, position = 'bott
   // Prevent body scroll when mobile tooltip is open
   useEffect(() => {
     if (isMobileOpen) {
+      // Prevent scrolling on body
+      const originalOverflow = document.body.style.overflow
+      const originalPosition = document.body.style.position
       document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
+      // Also prevent scroll on iOS Safari
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+      return () => {
+        document.body.style.overflow = originalOverflow
+        document.body.style.position = originalPosition
+        document.body.style.width = ''
+      }
     }
   }, [isMobileOpen])
 
@@ -65,6 +72,43 @@ export default function Tooltip({ content, children, className, position = 'bott
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [])
+
+  // Mobile modal rendered via portal to body (completely separate from card)
+  const mobileModal = isMobileOpen && typeof window !== 'undefined' ? createPortal(
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] lg:hidden animate-fade-in"
+        onClick={() => setIsMobileOpen(false)}
+      />
+      {/* Fullscreen Modal */}
+      <div
+        ref={tooltipRef}
+        className="fixed inset-0 z-[9999] lg:hidden bg-white flex flex-col animate-fade-in"
+      >
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white sticky top-0">
+          {title && (
+            <h3 className="text-xl font-bold text-brand-navy-500">{title}</h3>
+          )}
+          {!title && <div />}
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+            aria-label="Sluiten"
+          >
+            <X weight="bold" className="w-6 h-6 text-gray-600" />
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-thin">
+          {content}
+        </div>
+      </div>
+    </>,
+    document.body
+  ) : null
 
   return (
     <>
@@ -81,9 +125,9 @@ export default function Tooltip({ content, children, className, position = 'bott
         </div>
 
         {/* Desktop Tooltip - Centered modal style */}
-        {isVisible && (
+        {isVisible && typeof window !== 'undefined' && createPortal(
           <div
-            className="fixed inset-0 z-50 hidden lg:flex items-center justify-center pointer-events-none"
+            className="fixed inset-0 z-[9999] hidden lg:flex items-center justify-center pointer-events-none"
             onClick={() => setIsVisible(false)}
           >
             {/* Backdrop */}
@@ -112,45 +156,13 @@ export default function Tooltip({ content, children, className, position = 'bott
                 {content}
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
 
-      {/* Mobile Modal - Fullscreen overlay */}
-      {isMobileOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden animate-fade-in"
-            onClick={() => setIsMobileOpen(false)}
-          />
-          {/* Fullscreen Modal */}
-          <div
-            ref={tooltipRef}
-            className="fixed inset-0 z-50 lg:hidden bg-white flex flex-col animate-fade-in"
-          >
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-white">
-              {title && (
-                <h3 className="text-xl font-bold text-brand-navy-500">{title}</h3>
-              )}
-              {!title && <div />}
-              <button
-                onClick={() => setIsMobileOpen(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                aria-label="Sluiten"
-              >
-                <X weight="bold" className="w-6 h-6 text-gray-600" />
-              </button>
-            </div>
-            
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-thin">
-              {content}
-            </div>
-          </div>
-        </>
-      )}
+      {/* Mobile Modal - Rendered via portal, completely separate from card */}
+      {mobileModal}
     </>
   )
 }
