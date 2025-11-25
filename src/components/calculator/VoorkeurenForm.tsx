@@ -20,7 +20,7 @@ const createVoorkeurenSchema = (type?: string) => {
   if (type === 'vast') {
     return z.object({
       ...baseSchema,
-      looptijd: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(5)]),
+      looptijd: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
     })
   }
 
@@ -114,7 +114,7 @@ export function VoorkeurenForm() {
     }] : [])
   ]
 
-  const looptijden = [1, 2, 3, 5]
+  const looptijden = [1, 2, 3, 4, 5]
 
   // Determine if we should show looptijd section
   const showLooptijd = type === 'vast'

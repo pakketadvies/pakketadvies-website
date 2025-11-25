@@ -57,7 +57,7 @@ export type TypeBedrijf =
 
 export interface ContractVoorkeuren {
   type: 'vast' | 'dynamisch' | 'beide' | 'maatwerk'
-  looptijd?: 1 | 2 | 3 | 5
+  looptijd?: 1 | 2 | 3 | 4 | 5
   groeneEnergie: boolean
   opmerkingen?: string
 }

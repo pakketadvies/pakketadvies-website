@@ -22,7 +22,7 @@ const vastContractSchema = z.object({
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
 
   // Vast contract specifiek
-  looptijd: z.enum(['1', '2', '3', '5']),
+  looptijd: z.enum(['1', '2', '3', '4', '5']),
   tarief_elektriciteit_enkel: z.number().min(0, 'Tarief moet positief zijn').nullable(),
   tarief_elektriciteit_normaal: z.number().min(0, 'Tarief moet positief zijn').nullable(),
   tarief_elektriciteit_dal: z.number().min(0).nullable(),
@@ -95,7 +95,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
-      looptijd: (contract?.details_vast?.looptijd?.toString() || '1') as '1' | '2' | '3' | '5',
+      looptijd: (contract?.details_vast?.looptijd?.toString() || '1') as '1' | '2' | '3' | '4' | '5',
       tarief_elektriciteit_enkel: contract?.details_vast?.tarief_elektriciteit_enkel || null,
       tarief_elektriciteit_normaal: contract?.details_vast?.tarief_elektriciteit_normaal || null,
       tarief_elektriciteit_dal: contract?.details_vast?.tarief_elektriciteit_dal || null,
@@ -513,6 +513,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                 <option value="1">1 jaar</option>
                 <option value="2">2 jaar</option>
                 <option value="3">3 jaar</option>
+                <option value="4">4 jaar</option>
                 <option value="5">5 jaar</option>
               </select>
             </div>

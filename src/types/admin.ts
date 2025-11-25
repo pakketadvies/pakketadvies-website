@@ -35,7 +35,7 @@ export interface Contract {
 
 export interface ContractDetailsVast {
   contract_id: string
-  looptijd: 1 | 2 | 3 | 5
+  looptijd: 1 | 2 | 3 | 4 | 5
   
   // Tarieven (altijd alle 3 invullen)
   tarief_elektriciteit_enkel: number | null // Voor enkele meters
@@ -98,7 +98,7 @@ export interface ContractDetailsMaatwerk {
   contract_id: string
   
   // Identiek aan vast contract
-  looptijd: 1 | 2 | 3 | 5
+  looptijd: 1 | 2 | 3 | 4 | 5
   
   // Tarieven (altijd alle 3 invullen)
   tarief_elektriciteit_enkel: number | null // Voor enkele meters
