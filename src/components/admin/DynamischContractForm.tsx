@@ -114,92 +114,142 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
   }, [])
 
   const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const files = event.target.files
+    if (!files || files.length === 0) return
 
-    // Check file type - allow PDF and DOC/DOCX
     const allowedTypes = [
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ]
     const allowedExtensions = ['.pdf', '.doc', '.docx']
-    const fileExt = file.name.split('.').pop()?.toLowerCase()
-    
-    if (!fileExt || !allowedExtensions.includes(`.${fileExt}`)) {
-      setError('Alleen PDF en Word bestanden (.pdf, .doc, .docx) zijn toegestaan')
+    const validFiles: File[] = []
+    const invalidFiles: string[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const fileExt = file.name.split('.').pop()?.toLowerCase()
+
+      if (!fileExt || !allowedExtensions.includes(`.${fileExt}`)) {
+        invalidFiles.push(file.name)
+        continue
+      }
+
+      if (!allowedTypes.includes(file.type) && fileExt) {
+        if (!allowedExtensions.includes(`.${fileExt}`)) {
+          invalidFiles.push(file.name)
+          continue
+        }
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        invalidFiles.push(`${file.name} (te groot)`)
+        continue
+      }
+
+      validFiles.push(file)
+    }
+
+    if (invalidFiles.length > 0) {
+      setError(`De volgende bestanden kunnen niet worden geüpload: ${invalidFiles.join(', ')}. Alleen PDF en Word bestanden (.pdf, .doc, .docx) tot 10MB zijn toegestaan.`)
+      event.target.value = ''
       return
     }
 
-    if (!allowedTypes.includes(file.type) && fileExt) {
-      // Fallback: check extension if MIME type is not recognized
-      if (!allowedExtensions.includes(`.${fileExt}`)) {
-        setError('Alleen PDF en Word bestanden (.pdf, .doc, .docx) zijn toegestaan')
-        return
-      }
-    }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      setError('Bestand is te groot. Maximum 10MB')
+    if (validFiles.length === 0) {
+      event.target.value = ''
       return
     }
 
     setUploadingDocument(true)
     setError(null)
 
-    try {
-      const supabase = createClient()
-      const fileName = `voorwaarden_${Date.now()}.${fileExt}`
-      const filePath = `contracten/${fileName}`
-
-      // Determine document type
-      const docType: 'pdf' | 'doc' = fileExt === 'pdf' ? 'pdf' : 'doc'
-      
-      // Determine content type
-      const contentType = file.type || (
-        docType === 'pdf' ? 'application/pdf' :
-        fileExt === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
-        'application/msword'
-      )
-
-      // Upload to storage - try 'documents' bucket first, fallback to 'logos'
-      let bucket = 'documents'
-      let { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          contentType,
-        })
-
-      // Fallback to logos bucket if documents doesn't exist
-      if (uploadError && uploadError.message?.includes('Bucket not found')) {
-        bucket = 'logos'
-        const retryResult = await supabase.storage
-          .from(bucket)
-          .upload(filePath, file, {
-            contentType,
-          })
-        uploadError = retryResult.error
-      }
-
-      if (uploadError) throw uploadError
-
-      const { data: urlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath)
-
-      // Add to voorwaarden
-      setVoorwaarden([...voorwaarden, {
-        naam: file.name.replace(/\.(pdf|doc|docx)$/i, ''),
-        url: urlData.publicUrl,
-        type: docType
-      }])
-    } catch (err: any) {
-      setError(err.message || 'Upload mislukt')
-    } finally {
+    const supabase = createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      setError('Je bent niet ingelogd. Log opnieuw in en probeer het opnieuw.')
       setUploadingDocument(false)
-      // Reset file input
       event.target.value = ''
+      return
     }
+
+    const uploadedVoorwaarden: { naam: string; url: string; type: 'pdf' | 'doc' }[] = []
+    const failedUploads: string[] = []
+
+    for (const file of validFiles) {
+      try {
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || ''
+        const timestamp = Date.now() + Math.random()
+        const fileName = `voorwaarden_${timestamp}.${fileExt}`
+        const filePath = `contracten/${fileName}`
+        const docType: 'pdf' | 'doc' = fileExt === 'pdf' ? 'pdf' : 'doc'
+        const contentType = file.type || (
+          docType === 'pdf' ? 'application/pdf' :
+          fileExt === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
+          'application/msword'
+        )
+
+        let bucket = 'documents'
+        let uploadData: any = null
+        let uploadError: any = null
+
+        try {
+          const uploadResult = await supabase.storage
+            .from(bucket)
+            .upload(filePath, file, { contentType, upsert: false })
+          uploadData = uploadResult.data
+          uploadError = uploadResult.error
+        } catch (err: any) {
+          uploadError = err
+        }
+
+        if (uploadError) {
+          if (uploadError.message?.includes('Bucket not found') ||
+              uploadError.message?.includes('not found') ||
+              uploadError.statusCode === '404' ||
+              uploadError.status === 404) {
+            bucket = 'logos'
+            try {
+              const retryResult = await supabase.storage
+                .from(bucket)
+                .upload(filePath, file, { contentType, upsert: false })
+              uploadError = retryResult.error
+              uploadData = retryResult.data
+            } catch (retryErr: any) {
+              uploadError = retryErr
+            }
+          }
+        }
+
+        if (uploadError || !uploadData || !uploadData.path) {
+          failedUploads.push(file.name)
+          continue
+        }
+
+        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath)
+        uploadedVoorwaarden.push({
+          naam: file.name.replace(/\.(pdf|doc|docx)$/i, ''),
+          url: urlData.publicUrl,
+          type: docType
+        })
+      } catch (err: any) {
+        failedUploads.push(file.name)
+      }
+    }
+
+    if (uploadedVoorwaarden.length > 0) {
+      setVoorwaarden([...voorwaarden, ...uploadedVoorwaarden])
+    }
+
+    if (failedUploads.length > 0) {
+      setError(`${failedUploads.length} bestand(en) konden niet worden geüpload: ${failedUploads.join(', ')}${uploadedVoorwaarden.length > 0 ? '. De rest is wel toegevoegd.' : ''}`)
+    } else if (uploadedVoorwaarden.length === 0) {
+      setError('Geen bestanden konden worden geüpload.')
+    }
+
+    setUploadingDocument(false)
+    event.target.value = ''
   }
 
   const removeVoorwaarde = async (index: number) => {
@@ -440,6 +490,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
               <label className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-brand-teal-300 rounded-lg hover:bg-brand-teal-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                 <input
                   type="file"
+                  multiple
                   accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={handleDocumentUpload}
                   className="hidden"
