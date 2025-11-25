@@ -19,7 +19,8 @@ const dynamischContractSchema = z.object({
   populair: z.boolean(),
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
-  
+  target_audience: z.enum(['particulier', 'zakelijk', 'both']), // NIEUW: address type targeting
+
   opslag_elektriciteit: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_gas: z.number().min(0).nullable(),
   opslag_teruglevering: z.number().nullable(), // Kan negatief zijn, meestal 0
@@ -86,6 +87,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
+      target_audience: (contract?.target_audience as 'particulier' | 'zakelijk' | 'both') || 'both',
       opslag_elektriciteit: contract?.details_dynamisch?.opslag_elektriciteit || 0,
       opslag_gas: contract?.details_dynamisch?.opslag_gas || null,
       opslag_teruglevering: contract?.details_dynamisch?.opslag_teruglevering || 0,
@@ -305,6 +307,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         populair: data.populair,
         volgorde: data.volgorde,
         zichtbaar_bij_teruglevering: data.zichtbaar_bij_teruglevering,
+        target_audience: data.target_audience,
       }
 
       let contractId = contract?.id
@@ -409,6 +412,25 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">Beschrijving</label>
               <textarea {...register('beschrijving')} rows={3} placeholder="Korte beschrijving" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all resize-none" disabled={loading} />
+            </div>
+
+            {/* NIEUW: Target Audience */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Doelgroep <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register('target_audience')}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              >
+                <option value="both">Alle adressen (particulier & zakelijk)</option>
+                <option value="particulier">Alleen particulier (woonfunctie)</option>
+                <option value="zakelijk">Alleen zakelijk (andere functie)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Bepaal voor welke doelgroep dit contract wordt getoond op basis van adrescheck (BAG API).
+              </p>
             </div>
           </div>
         </div>

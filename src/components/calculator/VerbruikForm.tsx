@@ -89,6 +89,13 @@ export function VerbruikForm() {
   // Debounce timer voor aansluitwaarde schatting
   const aansluitwaardeTimer = useRef<NodeJS.Timeout | null>(null)
 
+  // NIEUW: State voor address type check
+  const [addressTypeResult, setAddressTypeResult] = useState<{
+    type: 'particulier' | 'zakelijk' | 'error';
+    message: string;
+  } | null>(null);
+  const [checkingAddressType, setCheckingAddressType] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -202,9 +209,12 @@ export function VerbruikForm() {
         setValue(`leveringsadressen.${index}.straat`, data.street || '')
         setValue(`leveringsadressen.${index}.plaats`, data.city || '')
         clearErrors(`leveringsadressen.${index}`)
-        
+
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
+
+        // NIEUW: BAG API woonfunctie check
+        await checkAddressType(postcode, huisnummer, toevoeging)
       } else if (response.status === 404) {
         const errorData = await response.json()
         
@@ -263,6 +273,37 @@ export function VerbruikForm() {
       })
     }
   }, [setValue, clearErrors, setError])
+
+  // NIEUW: BAG API functie voor woonfunctie check
+  const checkAddressType = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    setCheckingAddressType(true);
+    setAddressTypeResult(null);
+
+    try {
+      const response = await fetch('/api/adres-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postcode, huisnummer, toevoeging })
+      });
+
+      const result = await response.json();
+      setAddressTypeResult(result);
+
+      // Als het een geldig adres is, sla het type op in de form state
+      if (result.type !== 'error') {
+        // Update de verbruik data met address type
+        setValue('addressType', result.type);
+      }
+    } catch (error) {
+      console.error('Address type check error:', error);
+      setAddressTypeResult({
+        type: 'error',
+        message: 'Kon adres type niet controleren'
+      });
+    } finally {
+      setCheckingAddressType(false);
+    }
+  }, [setValue]);
 
   const handleLeveringsadresChange = (index: number, field: string, value: string) => {
     // Update state
@@ -389,9 +430,10 @@ export function VerbruikForm() {
       aansluitwaardeElektriciteit: aansluitwaardeElektriciteit,
       aansluitwaardeGas: aansluitwaardeGas,
       leveringsadressen: data.leveringsadressen,
+      addressType: data.addressType || null, // NIEUW: address type toevoegen
       geschat: false,
     })
-    
+
     router.push('/calculator/resultaten')
   }
 
@@ -475,6 +517,41 @@ export function VerbruikForm() {
                     {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
                   </div>
                   <div>{adres.postcode} {adres.plaats}</div>
+                </div>
+              </div>
+            )}
+
+            {/* NIEUW: Address type check resultaten */}
+            {checkingAddressType && (
+              <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
+                <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+                <span>Bezig met adrescontrole...</span>
+              </div>
+            )}
+
+            {addressTypeResult && !checkingAddressType && (
+              <div className={`flex items-start gap-2 p-3 rounded-lg animate-slide-down ${
+                addressTypeResult.type === 'error'
+                  ? 'bg-red-50 border border-red-200'
+                  : addressTypeResult.type === 'particulier'
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-blue-50 border border-blue-200'
+              }`}>
+                {addressTypeResult.type === 'error' ? (
+                  <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                ) : addressTypeResult.type === 'particulier' ? (
+                  <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                )}
+                <div className={`text-sm ${
+                  addressTypeResult.type === 'error'
+                    ? 'text-red-900'
+                    : addressTypeResult.type === 'particulier'
+                    ? 'text-green-900'
+                    : 'text-blue-900'
+                }`}>
+                  {addressTypeResult.message}
                 </div>
               </div>
             )}

@@ -586,6 +586,23 @@ function ResultatenContent() {
         // Als FALSE: alleen tonen zonder teruglevering
         return !heeftTeruglevering
       })
+
+      // NIEUW: Filter op basis van address type (woonfunctie check)
+      const addressType = data?.addressType
+      if (addressType) {
+        validContracten = validContracten.filter((c: any) => {
+          const targetAudience = c.target_audience
+
+          // Als target_audience niet is ingesteld, altijd tonen (backward compatibility)
+          if (!targetAudience) return true
+
+          // Als target_audience 'both' is, altijd tonen
+          if (targetAudience === 'both') return true
+
+          // Anders alleen tonen als het overeenkomt met address type
+          return targetAudience === addressType
+        })
+      }
       
       // Transform to ContractOptie format
       const transformed = validContracten
@@ -617,20 +634,28 @@ function ResultatenContent() {
   // Apply filters and sorting
   useEffect(() => {
     let filtered = [...resultaten]
-    
+
+    // NIEUW: Filter by address type (particulier/zakelijk)
+    if (verbruik?.addressType) {
+      // We moeten contracten ophalen met target_audience informatie
+      // Voor nu: filteren we niet actief, maar tonen we alleen contracten die geschikt zijn
+      // Dit wordt later uitgebreid met database filtering
+      console.log('Address type filtering:', verbruik.addressType)
+    }
+
     // Filter by type
     if (filters.type !== 'alle') {
       filtered = filtered.filter(r => r.type === filters.type)
     }
-    
+
     // Filter by groene energie
     if (filters.groeneEnergie) {
       filtered = filtered.filter(r => r.groeneEnergie)
     }
-    
+
     // Filter by max price
     filtered = filtered.filter(r => r.maandbedrag <= filters.maxPrijs)
-    
+
     // Filter by min rating
     filtered = filtered.filter(r => r.rating >= filters.minRating)
     
