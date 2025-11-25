@@ -376,7 +376,7 @@ export function QuickCalculator() {
     
     // Store in Zustand (same as VerbruikForm)
     setVerbruik(verbruikData)
-
+    
     // Navigate to results (same as VerbruikForm)
     router.push('/calculator/resultaten')
   })
@@ -443,26 +443,15 @@ export function QuickCalculator() {
               </div>
             </div>
 
-            {loadingAddress && (
+            {/* Loading state voor postcode API */}
+            {loadingAddress && !checkingAddressType && (
               <div className="flex items-center gap-2 text-xs text-brand-teal-600 animate-slide-down">
                 <div className="w-3 h-3 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
                 <span>Adres opzoeken...</span>
               </div>
             )}
 
-            {leveringsadressen[0].straat && leveringsadressen[0].plaats && !loadingAddress && (
-              <div className="flex items-start gap-2 p-2 md:p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
-                <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
-                <div className="text-xs md:text-sm text-brand-teal-900">
-                  <div className="font-semibold">
-                    {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
-                  </div>
-                  <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
-                </div>
-              </div>
-            )}
-
-            {/* NIEUW: Address type check resultaten */}
+            {/* Loading state voor BAG API check */}
             {checkingAddressType && (
               <div className="flex items-center gap-2 text-xs text-brand-teal-600 animate-slide-down">
                 <div className="w-3 h-3 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
@@ -470,33 +459,58 @@ export function QuickCalculator() {
               </div>
             )}
 
-            {addressTypeResult && !checkingAddressType && (
-              <div className={`flex items-start gap-2 p-2 md:p-3 rounded-lg animate-slide-down ${
-                addressTypeResult.type === 'error'
-                  ? 'bg-red-50 border border-red-200'
-                  : addressTypeResult.type === 'particulier'
-                  ? 'bg-green-50 border border-green-200'
-                  : 'bg-blue-50 border border-blue-200'
-              }`}>
-                {addressTypeResult.type === 'error' ? (
-                  <XCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                ) : addressTypeResult.type === 'particulier' ? (
-                  <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            {/* Gecombineerde status: BAG API resultaat (prioriteit) of postcode API success */}
+            {!checkingAddressType && !loadingAddress && (
+              <>
+                {/* BAG API resultaat heeft prioriteit */}
+                {addressTypeResult ? (
+                  <div className={`flex items-start gap-2 p-2 md:p-3 rounded-lg animate-slide-down ${
+                    addressTypeResult.type === 'error'
+                      ? 'bg-red-50 border border-red-200'
+                      : addressTypeResult.type === 'particulier'
+                      ? 'bg-green-50 border border-green-200'
+                      : 'bg-blue-50 border border-blue-200'
+                  }`}>
+                    {addressTypeResult.type === 'error' ? (
+                      <XCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    ) : addressTypeResult.type === 'particulier' ? (
+                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div className={`text-xs md:text-sm ${
+                      addressTypeResult.type === 'error'
+                        ? 'text-red-900'
+                        : addressTypeResult.type === 'particulier'
+                        ? 'text-green-900'
+                        : 'text-blue-900'
+                    }`}>
+                      {/* Toon adres als beschikbaar */}
+                      {(leveringsadressen[0].straat && leveringsadressen[0].plaats) && (
+                        <div className="font-semibold mb-1">
+                          {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}, {leveringsadressen[0].postcode} {leveringsadressen[0].plaats}
+                        </div>
+                      )}
+                      <div>{addressTypeResult.message}</div>
+                    </div>
+                  </div>
                 ) : (
-                  <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  /* Fallback: alleen postcode API success (als BAG check nog niet gedaan) */
+                  leveringsadressen[0].straat && leveringsadressen[0].plaats && (
+                    <div className="flex items-start gap-2 p-2 md:p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
+                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs md:text-sm text-brand-teal-900">
+                        <div className="font-semibold">
+                          {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
+                        </div>
+                        <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
+                      </div>
+                    </div>
+                  )
                 )}
-                <div className={`text-xs md:text-sm ${
-                  addressTypeResult.type === 'error'
-                    ? 'text-red-900'
-                    : addressTypeResult.type === 'particulier'
-                    ? 'text-green-900'
-                    : 'text-blue-900'
-                }`}>
-                  {addressTypeResult.message}
-                </div>
-              </div>
+              </>
             )}
-
+            
             {addressError && (
               <div className="flex items-start gap-2 p-2 md:p-3 bg-red-50 border border-red-200 rounded-lg animate-slide-down">
                 <XCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-red-600 flex-shrink-0 mt-0.5" />

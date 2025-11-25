@@ -11,28 +11,28 @@ export interface VerbruikData {
   elektriciteitNormaal: number // kWh per jaar (dag tarief)
   elektriciteitDal: number | null // kWh per jaar (nacht/weekend tarief), null bij enkele meter
   heeftEnkeleMeter: boolean // true = enkele meter, false = dubbele meter
-
+  
   // Gas
   gasJaar: number | null // m³ per jaar, null als geen gasaansluiting
   geenGasaansluiting: boolean
-
+  
   // Zonnepanelen
   heeftZonnepanelen: boolean
   terugleveringJaar: number | null // in kWh - hoeveel stroom terug leveren per jaar
-
+  
   // Meter info (optioneel, helpt voor contractadvies)
   meterType: 'slim' | 'oud' | 'weet_niet'
-
+  
   // Aansluitwaarden (NIEUW - voor nauwkeurige netbeheerkosten berekening)
   aansluitwaardeElektriciteit?: string // '1x25A', '3x25A', '3x35A', '3x80A', etc.
   aansluitwaardeGas?: string // 'G4', 'G6', 'G10', 'G25', etc.
-
+  
   // Leveringsadressen
   leveringsadressen: Leveringsadres[]
 
   // NIEUW: Address type (woonfunctie check via BAG API)
   addressType?: 'particulier' | 'zakelijk' | null // null = nog niet gecontroleerd
-
+  
   // Legacy
   geschat: boolean // wordt later vervangen door "help mij schatten" feature
 }

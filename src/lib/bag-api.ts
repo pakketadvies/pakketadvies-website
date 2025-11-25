@@ -24,11 +24,15 @@ export class BagApiService {
       let addressUrl = `${this.BASE_URL}/adressen?postcode=${cleanPostcode}&huisnummer=${parsedHuisnummer}`;
 
       // 3. Toevoeging parameter (exact zoals oude code)
-      if (toevoeging) {
-        if (/^[a-zA-Z]$/.test(toevoeging)) {
-          addressUrl += `&huisletter=${toevoeging}`;
-        } else if (/^\d+$/.test(toevoeging)) {
-          addressUrl += `&huisnummertoevoeging=${toevoeging}`;
+      const trimmedToevoeging = toevoeging?.trim();
+      if (trimmedToevoeging) {
+        // Test eerst of het een enkele letter is (huisletter)
+        if (/^[a-zA-Z]$/.test(trimmedToevoeging)) {
+          addressUrl += `&huisletter=${trimmedToevoeging.toUpperCase()}`;
+        } 
+        // Anders is het een huisnummertoevoeging (cijfers of combinatie)
+        else if (/^[a-zA-Z0-9]+$/.test(trimmedToevoeging)) {
+          addressUrl += `&huisnummertoevoeging=${trimmedToevoeging}`;
         }
       }
 
@@ -40,20 +44,61 @@ export class BagApiService {
       });
 
       if (!addressResponse.ok) {
-        return { type: 'error', message: 'Adres niet gevonden' };
+        const errorText = await addressResponse.text();
+        console.error(`BAG API Error (${addressResponse.status}):`, errorText);
+        return { 
+          type: 'error', 
+          message: addressResponse.status === 404 
+            ? 'Adres niet gevonden in BAG database' 
+            : `BAG API fout (${addressResponse.status})` 
+        };
       }
 
       const addressData = await addressResponse.json();
 
-      if (!addressData._embedded?.adresssen?.[0]) {
+      // Debug logging (alleen in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('BAG API Address Response:', JSON.stringify(addressData, null, 2));
+      }
+
+      // Check response structuur (kan _embedded.adressen of _embedded.adressen zijn)
+      const adressen = addressData._embedded?.adressen || addressData._embedded?.adresssen;
+      
+      if (!adressen || !Array.isArray(adressen) || adressen.length === 0) {
+        console.error('BAG API: Geen adressen gevonden in response', addressData);
         return { type: 'error', message: 'Adres niet gevonden' };
       }
 
-      const address = addressData._embedded.adressen[0];
+      let address = adressen[0];
 
-      // 4. Check voor vereiste toevoeging
-      if (!toevoeging && (address.huisletter || address.huisnummertoevoeging)) {
-        return { type: 'error', message: 'Toevoeging vereist' };
+      // 4. Check voor vereiste toevoeging (maar alleen als er meerdere adressen zijn)
+      // Als er maar 1 adres is, kunnen we doorgaan zonder toevoeging
+      if (!trimmedToevoeging && adressen.length > 1) {
+        // Er zijn meerdere adressen, toevoeging is waarschijnlijk nodig
+        // Maar we proberen eerst met het eerste adres
+        console.warn('BAG API: Meerdere adressen gevonden, maar geen toevoeging opgegeven. Gebruik eerste resultaat.');
+      }
+      
+      // Als er wel een toevoeging is opgegeven, check of deze matcht
+      if (trimmedToevoeging) {
+        const hasHuisletter = address.huisletter && address.huisletter.toUpperCase() === trimmedToevoeging.toUpperCase();
+        const hasToevoeging = address.huisnummertoevoeging && address.huisnummertoevoeging === trimmedToevoeging;
+        
+        if (!hasHuisletter && !hasToevoeging && adressen.length > 1) {
+          // Toevoeging komt niet overeen, probeer andere adressen
+          const matchingAddress = adressen.find((addr: any) => {
+            const addrLetter = addr.huisletter?.toUpperCase();
+            const addrToevoeging = addr.huisnummertoevoeging;
+            return addrLetter === trimmedToevoeging.toUpperCase() || addrToevoeging === trimmedToevoeging;
+          });
+          
+          if (matchingAddress) {
+            // Gebruik het matching adres
+            address = matchingAddress;
+          } else {
+            return { type: 'error', message: `Toevoeging '${trimmedToevoeging}' komt niet overeen met adres` };
+          }
+        }
       }
 
       // 5. Tweede API call: Verblijfsobject

@@ -26,7 +26,7 @@ export interface Contract {
   target_audience: 'particulier' | 'zakelijk' | 'both' // NIEUW: Bepaalt voor welke doelgroep het contract wordt getoond
   created_at: string
   updated_at: string
-
+  
   // Relations (populated via joins)
   leverancier?: Leverancier
   details_vast?: ContractDetailsVast

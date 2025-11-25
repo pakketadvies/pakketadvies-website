@@ -20,7 +20,7 @@ const dynamischContractSchema = z.object({
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
   target_audience: z.enum(['particulier', 'zakelijk', 'both']), // NIEUW: address type targeting
-
+  
   opslag_elektriciteit: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_gas: z.number().min(0).nullable(),
   opslag_teruglevering: z.number().nullable(), // Kan negatief zijn, meestal 0

@@ -586,7 +586,7 @@ function ResultatenContent() {
         // Als FALSE: alleen tonen zonder teruglevering
         return !heeftTeruglevering
       })
-
+      
       // NIEUW: Filter op basis van address type (woonfunctie check)
       const addressType = data?.addressType
       if (addressType) {
@@ -642,20 +642,20 @@ function ResultatenContent() {
       // Dit wordt later uitgebreid met database filtering
       console.log('Address type filtering:', verbruik.addressType)
     }
-
+    
     // Filter by type
     if (filters.type !== 'alle') {
       filtered = filtered.filter(r => r.type === filters.type)
     }
-
+    
     // Filter by groene energie
     if (filters.groeneEnergie) {
       filtered = filtered.filter(r => r.groeneEnergie)
     }
-
+    
     // Filter by max price
     filtered = filtered.filter(r => r.maandbedrag <= filters.maxPrijs)
-
+    
     // Filter by min rating
     filtered = filtered.filter(r => r.rating >= filters.minRating)
     

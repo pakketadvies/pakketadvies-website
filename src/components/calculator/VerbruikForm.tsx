@@ -6,15 +6,15 @@ import { z } from 'zod'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import {
-  Lightning,
-  MapPin,
-  CheckCircle,
+import { 
+  Lightning, 
+  MapPin, 
+  CheckCircle, 
   XCircle,
-  Sun,
-  Flame,
-  DeviceMobile,
-  Lightbulb,
+  Sun, 
+  Flame, 
+  DeviceMobile, 
+  Lightbulb, 
   Info,
   Plus,
   Trash,
@@ -214,7 +214,7 @@ export function VerbruikForm() {
         setValue(`leveringsadressen.${index}.straat`, data.street || '')
         setValue(`leveringsadressen.${index}.plaats`, data.city || '')
         clearErrors(`leveringsadressen.${index}`)
-
+        
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
 
@@ -438,7 +438,7 @@ export function VerbruikForm() {
       addressType: data.addressType || null, // NIEUW: address type toevoegen
       geschat: false,
     })
-
+    
     router.push('/calculator/resultaten')
   }
 
@@ -514,19 +514,15 @@ export function VerbruikForm() {
               </div>
             )}
 
-            {adres.straat && adres.plaats && !loadingAddresses[index] && (
-              <div className="flex items-start gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
-                <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-brand-teal-900">
-                  <div className="font-semibold">
-                    {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
-                  </div>
-                  <div>{adres.postcode} {adres.plaats}</div>
-                </div>
+            {/* Loading state voor postcode API */}
+            {loadingAddresses[index] && !checkingAddressType && (
+              <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
+                <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+                <span>Adres opzoeken...</span>
               </div>
             )}
 
-            {/* NIEUW: Address type check resultaten */}
+            {/* Loading state voor BAG API check */}
             {checkingAddressType && (
               <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
                 <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
@@ -534,31 +530,56 @@ export function VerbruikForm() {
               </div>
             )}
 
-            {addressTypeResult && !checkingAddressType && (
-              <div className={`flex items-start gap-2 p-3 rounded-lg animate-slide-down ${
-                addressTypeResult.type === 'error'
-                  ? 'bg-red-50 border border-red-200'
-                  : addressTypeResult.type === 'particulier'
-                  ? 'bg-green-50 border border-green-200'
-                  : 'bg-blue-50 border border-blue-200'
-              }`}>
-                {addressTypeResult.type === 'error' ? (
-                  <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                ) : addressTypeResult.type === 'particulier' ? (
-                  <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            {/* Gecombineerde status: BAG API resultaat (prioriteit) of postcode API success */}
+            {!checkingAddressType && !loadingAddresses[index] && (
+              <>
+                {/* BAG API resultaat heeft prioriteit */}
+                {addressTypeResult ? (
+                  <div className={`flex items-start gap-2 p-3 rounded-lg animate-slide-down ${
+                    addressTypeResult.type === 'error'
+                      ? 'bg-red-50 border border-red-200'
+                      : addressTypeResult.type === 'particulier'
+                      ? 'bg-green-50 border border-green-200'
+                      : 'bg-blue-50 border border-blue-200'
+                  }`}>
+                    {addressTypeResult.type === 'error' ? (
+                      <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    ) : addressTypeResult.type === 'particulier' ? (
+                      <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div className={`text-sm ${
+                      addressTypeResult.type === 'error'
+                        ? 'text-red-900'
+                        : addressTypeResult.type === 'particulier'
+                        ? 'text-green-900'
+                        : 'text-blue-900'
+                    }`}>
+                      {/* Toon adres als beschikbaar */}
+                      {(adres.straat && adres.plaats) && (
+                        <div className="font-semibold mb-1">
+                          {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}, {adres.postcode} {adres.plaats}
+                        </div>
+                      )}
+                      <div>{addressTypeResult.message}</div>
+                    </div>
+                  </div>
                 ) : (
-                  <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  /* Fallback: alleen postcode API success (als BAG check nog niet gedaan) */
+                  adres.straat && adres.plaats && (
+                    <div className="flex items-start gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
+                      <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-brand-teal-900">
+                        <div className="font-semibold">
+                          {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
+                        </div>
+                        <div>{adres.postcode} {adres.plaats}</div>
+                      </div>
+                    </div>
+                  )
                 )}
-                <div className={`text-sm ${
-                  addressTypeResult.type === 'error'
-                    ? 'text-red-900'
-                    : addressTypeResult.type === 'particulier'
-                    ? 'text-green-900'
-                    : 'text-blue-900'
-                }`}>
-                  {addressTypeResult.message}
-                </div>
-              </div>
+              </>
             )}
           </div>
         ))}
