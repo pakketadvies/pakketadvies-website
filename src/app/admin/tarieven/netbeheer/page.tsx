@@ -75,6 +75,7 @@ export default function NetbeheerTarievenPage() {
   async function fetchTarieven() {
     if (!selectedNetbeheerder) return
 
+    setLoading(true)
     const supabase = await createClient()
     const table = viewType === 'elektriciteit' 
       ? 'netbeheer_tarieven_elektriciteit'
@@ -84,6 +85,41 @@ export default function NetbeheerTarievenPage() {
       ? 'aansluitwaarden_elektriciteit'
       : 'aansluitwaarden_gas'
 
+    console.log('🔍 Fetching tarieven:', {
+      table,
+      aansluitTable,
+      netbeheerder_id: selectedNetbeheerder,
+      jaar: 2025
+    })
+
+    // First, try without join to see if data exists
+    const { data: rawData, error: rawError } = await supabase
+      .from(table)
+      .select('*')
+      .eq('netbeheerder_id', selectedNetbeheerder)
+      .eq('jaar', 2025)
+      .eq('actief', true)
+
+    console.log('📊 Raw query result:', {
+      count: rawData?.length || 0,
+      error: rawError,
+      sample: rawData?.[0]
+    })
+
+    if (rawError) {
+      console.error('❌ Error fetching raw tarieven:', rawError)
+      setLoading(false)
+      return
+    }
+
+    if (!rawData || rawData.length === 0) {
+      console.warn('⚠️ No tarieven found for this netbeheerder/year/actief combination')
+      setTarieven([])
+      setLoading(false)
+      return
+    }
+
+    // Now fetch with join
     const { data, error } = await supabase
       .from(table)
       .select(`
@@ -93,16 +129,49 @@ export default function NetbeheerTarievenPage() {
       .eq('netbeheerder_id', selectedNetbeheerder)
       .eq('jaar', 2025)
       .eq('actief', true)
-      .order('aansluitwaarde.volgorde', { ascending: true })
+    
+    console.log('📊 Query with join result:', {
+      count: data?.length || 0,
+      error: error,
+      sample: data?.[0]
+    })
     
     if (error) {
-      console.error('Error fetching tarieven:', error)
+      console.error('❌ Error fetching tarieven with join:', error)
+      // Fallback: use raw data and fetch aansluitwaarden separately
+      const aansluitwaardeIds = rawData.map((t: any) => t.aansluitwaarde_id)
+      const { data: aansluitwaardenData } = await supabase
+        .from(aansluitTable)
+        .select('*')
+        .in('id', aansluitwaardeIds)
+      
+      const tarievenWithAansluitwaarde = rawData.map((tarief: any) => ({
+        ...tarief,
+        aansluitwaarde: aansluitwaardenData?.find((a: any) => a.id === tarief.aansluitwaarde_id)
+      })).sort((a: any, b: any) => {
+        const aVolgorde = a.aansluitwaarde?.volgorde || 0
+        const bVolgorde = b.aansluitwaarde?.volgorde || 0
+        return aVolgorde - bVolgorde
+      })
+      
+      setTarieven(tarievenWithAansluitwaarde as any)
+      setLoading(false)
       return
     }
 
     if (data) {
-      setTarieven(data as any)
+      // Sort by volgorde if available
+      const sorted = [...data].sort((a: any, b: any) => {
+        const aVolgorde = a.aansluitwaarde?.volgorde || 0
+        const bVolgorde = b.aansluitwaarde?.volgorde || 0
+        return aVolgorde - bVolgorde
+      })
+      setTarieven(sorted as any)
+    } else {
+      setTarieven([])
     }
+    
+    setLoading(false)
   }
 
   const selectedNetbeheerderData = netbeheerders.find(n => n.id === selectedNetbeheerder)
