@@ -23,9 +23,10 @@ export interface Contract {
   populair: boolean
   volgorde: number
   zichtbaar_bij_teruglevering: boolean | null // NULL = altijd tonen, TRUE = alleen bij teruglevering, FALSE = alleen zonder teruglevering
+  target_audience: 'particulier' | 'zakelijk' | 'both' // NIEUW: Bepaalt voor welke doelgroep het contract wordt getoond
   created_at: string
   updated_at: string
-  
+
   // Relations (populated via joins)
   leverancier?: Leverancier
   details_vast?: ContractDetailsVast
@@ -139,7 +140,7 @@ export interface ContractDetailsMaatwerk {
 // Form types voor create/edit
 export type LeverancierFormData = Omit<Leverancier, 'id' | 'created_at' | 'updated_at'>
 
-export type ContractFormData = Omit<Contract, 'id' | 'created_at' | 'updated_at' | 'leverancier'>
+export type ContractFormData = Omit<Contract, 'id' | 'created_at' | 'updated_at' | 'leverancier' | 'details_vast' | 'details_dynamisch' | 'details_maatwerk'>
 
 export type ContractDetailsVastFormData = Omit<ContractDetailsVast, 'contract_id' | 'created_at' | 'updated_at'>
 
