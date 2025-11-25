@@ -275,8 +275,8 @@ export default function NetbeheerTarievenPage() {
             onClick={() => setViewType('gas')}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
               viewType === 'gas'
-                ? 'bg-orange-500 text-white'
-                : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-orange-300'
+                ? 'bg-brand-teal-500 text-white'
+                : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-brand-teal-300'
             }`}
           >
             <Flame size={20} weight={viewType === 'gas' ? 'fill' : 'regular'} />

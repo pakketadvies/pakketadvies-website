@@ -28,9 +28,9 @@ export default function ContractenList({ contracten }: ContractenListProps) {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'vast': return 'bg-blue-50 text-blue-700'
-      case 'dynamisch': return 'bg-purple-50 text-purple-700'
-      case 'maatwerk': return 'bg-orange-50 text-orange-700'
+      case 'vast': return 'bg-brand-navy-50 text-brand-navy-700'  // Navy = foundation/authority
+      case 'dynamisch': return 'bg-brand-teal-50 text-brand-teal-700'  // Teal = action/energy
+      case 'maatwerk': return 'bg-brand-purple-50 text-brand-purple-700'  // Purple = premium
       default: return 'bg-gray-50 text-gray-700'
     }
   }
@@ -149,7 +149,7 @@ export default function ContractenList({ contracten }: ContractenListProps) {
                             </span>
                           )}
                           {contract.populair && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 text-xs font-medium rounded-full">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-teal-50 text-brand-teal-700 text-xs font-medium rounded-full">
                               Populair
                             </span>
                           )}
@@ -218,7 +218,7 @@ export default function ContractenList({ contracten }: ContractenListProps) {
                       </span>
                     )}
                     {contract.populair && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 text-xs font-medium rounded-full">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-teal-50 text-brand-teal-700 text-xs font-medium rounded-full">
                         Populair
                       </span>
                     )}

@@ -518,8 +518,8 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
             </div>
 
             {/* Info Box */}
-            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-900">
+            <div className="p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg">
+              <p className="text-sm text-brand-teal-900">
                 <strong>💡 Let op:</strong> Vul altijd alle 3 de tarieven in (enkeltarief, normaal én dal). De klant kiest later welk tarief bij zijn/haar meter past.
               </p>
             </div>
@@ -773,7 +773,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
                           {isPdf ? (
                             <FilePdf size={16} className="text-red-600 flex-shrink-0" />
                           ) : isDoc ? (
-                            <FileText size={16} className="text-blue-600 flex-shrink-0" />
+                            <FileText size={16} className="text-brand-teal-600 flex-shrink-0" />
                           ) : (
                             <File size={16} className="text-gray-400 flex-shrink-0" />
                           )}

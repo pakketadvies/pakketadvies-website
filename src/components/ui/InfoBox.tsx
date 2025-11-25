@@ -7,15 +7,15 @@ interface InfoBoxProps {
 
 export default function InfoBox({ children, variant = 'info' }: InfoBoxProps) {
   const colors = {
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-orange-50 border-orange-200 text-orange-800',
-    success: 'bg-green-50 border-green-200 text-green-800',
+    info: 'bg-brand-teal-50 border-brand-teal-200 text-brand-teal-800',  // Info = TEAL
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',  // Warning blijft yellow (buiten brand systeem)
+    success: 'bg-brand-teal-50 border-brand-teal-200 text-brand-teal-800',  // Success = TEAL
   }
 
   const iconColors = {
-    info: 'text-blue-500',
-    warning: 'text-orange-500',
-    success: 'text-green-500',
+    info: 'text-brand-teal-500',
+    warning: 'text-yellow-500',  // Warning blijft yellow
+    success: 'text-brand-teal-500',
   }
 
   return (

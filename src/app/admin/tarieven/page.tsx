@@ -347,7 +347,7 @@ export default function TarievenPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Flame size={20} weight="duotone" className="text-orange-600" />
+                    <Flame size={20} weight="duotone" className="text-brand-teal-600" />
                     <span className="text-sm text-gray-600">Gas</span>
                   </div>
                   <span className="font-bold text-brand-navy-500">{count.gas_count}</span>

@@ -177,7 +177,7 @@ function BevestigingContent() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-brand-navy-500">Binnen 1 werkdag</h3>
-                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                    <span className="text-xs px-2 py-0.5 bg-brand-teal-100 text-brand-teal-700 rounded-full font-medium">
                       Persoonlijk contact
                     </span>
                   </div>

@@ -20,7 +20,7 @@ export default function NieuwContractPage() {
         'Looptijd van 1-5 jaar',
         'Eenvoudig te vergelijken',
       ],
-      color: 'blue',
+      color: 'navy',  // Vast = foundation = navy
       href: '/admin/contracten/nieuw/vast',
     },
     {
@@ -48,7 +48,7 @@ export default function NieuwContractPage() {
         'Direct contact met leverancier',
         'Flexibele voorwaarden',
       ],
-      color: 'orange',
+      color: 'purple',  // Maatwerk = premium = purple
       href: '/admin/contracten/nieuw/maatwerk',
     },
   ]
@@ -82,8 +82,16 @@ export default function NieuwContractPage() {
               >
                 <div className="space-y-4">
                   {/* Icon */}
-                  <div className={`w-14 h-14 rounded-xl bg-${contractType.color}-50 flex items-center justify-center group-hover:bg-brand-teal-50 transition-colors`}>
-                    <Icon size={28} weight="fill" className={`text-${contractType.color}-600 group-hover:text-brand-teal-600`} />
+                  <div className={`w-14 h-14 rounded-xl ${
+                    contractType.color === 'navy' ? 'bg-brand-navy-50' :
+                    contractType.color === 'purple' ? 'bg-brand-purple-50' :
+                    'bg-gray-50'
+                  } flex items-center justify-center group-hover:bg-brand-teal-50 transition-colors`}>
+                    <Icon size={28} weight="fill" className={`${
+                      contractType.color === 'navy' ? 'text-brand-navy-600' :
+                      contractType.color === 'purple' ? 'text-brand-purple-600' :
+                      'text-gray-600'
+                    } group-hover:text-brand-teal-600`} />
                   </div>
 
                   {/* Title & Description */}

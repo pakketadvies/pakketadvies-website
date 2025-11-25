@@ -524,7 +524,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
                           {isPdf ? (
                             <FilePdf size={16} className="text-red-600 flex-shrink-0" />
                           ) : isDoc ? (
-                            <FileText size={16} className="text-blue-600 flex-shrink-0" />
+                            <FileText size={16} className="text-brand-teal-600 flex-shrink-0" />
                           ) : (
                             <File size={16} className="text-gray-400 flex-shrink-0" />
                           )}

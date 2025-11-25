@@ -90,12 +90,12 @@ export function HowItWorks() {
                   </div>
                   
                   {/* Icon */}
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.color === 'purple' ? 'bg-brand-purple-500' : 'bg-brand-navy-500'} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.color === 'purple' ? 'bg-brand-purple-500' : step.color === 'teal' ? 'bg-brand-teal-500' : 'bg-brand-navy-500'} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon weight="duotone" className="w-8 h-8 text-white" />
                   </div>
                   
                   {/* Content */}
-                  <h3 className={`font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 group-hover:${step.color === 'purple' ? 'text-brand-purple-600' : 'text-brand-teal-600'} transition-colors`}>
+                  <h3 className={`font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 group-hover:${step.color === 'purple' ? 'text-brand-purple-600' : step.color === 'teal' ? 'text-brand-teal-600' : 'text-brand-navy-600'} transition-colors`}>
                     {step.title}
                   </h3>
                   

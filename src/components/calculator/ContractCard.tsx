@@ -580,9 +580,9 @@ export default function ContractCard({
                     
                     {/* Teruglevering (zonnepanelen) - VASTE CONTRACTEN */}
                     {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && breakdown.leverancier.terugleveringDetails.bedrag > 0 && (
-                      <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
+                      <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg p-4">
                         <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-                          <Sun weight="duotone" className="w-5 h-5 text-orange-600" />
+                          <Sun weight="duotone" className="w-5 h-5 text-brand-teal-600" />
                           Teruglevering (Zonnepanelen)
                         </h4>
                         
@@ -597,14 +597,14 @@ export default function ContractCard({
                                 ({breakdown.leverancier.terugleveringDetails.kwh.toLocaleString()} kWh × €{breakdown.leverancier.terugleveringDetails.tarief.toFixed(6)})
                               </span>
                             </span>
-                            <span className="font-medium text-orange-700">
+                            <span className="font-medium text-brand-teal-700">
                               €{breakdown.leverancier.terugleveringDetails.bedrag.toFixed(2)}
                             </span>
                           </div>
                         </div>
                         
                         {/* Info box */}
-                        <div className="mt-3 p-2 bg-orange-100 rounded text-xs text-orange-900">
+                        <div className="mt-3 p-2 bg-brand-teal-100 rounded text-xs text-brand-teal-900">
                           <strong>ℹ️ Salderingsregeling:</strong> Je verbruik is al verrekend met je teruglevering. Bovenstaande kosten zijn de administratiekosten die de leverancier rekent voor het innemen van stroom.
                         </div>
                       </div>
@@ -719,7 +719,7 @@ export default function ContractCard({
                         {isPdf ? (
                           <FilePdf weight="bold" className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                         ) : isDoc ? (
-                          <FileText weight="bold" className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <FileText weight="bold" className="w-4 h-4 text-brand-teal-600 flex-shrink-0 mt-0.5" />
                         ) : (
                           <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                         )}
@@ -743,7 +743,7 @@ export default function ContractCard({
                     <p className="text-xs font-semibold text-gray-600 mb-2">Bijzonderheden:</p>
                     {contract.bijzonderheden.map((bz, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                        <Check weight="bold" className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                         <span>{bz}</span>
                       </div>
                     ))}

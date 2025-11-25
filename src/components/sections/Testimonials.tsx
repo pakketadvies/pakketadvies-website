@@ -126,7 +126,7 @@ export function Testimonials() {
             <div className="text-gray-600 font-medium">Totaal bespaard</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold text-brand-purple-600 mb-2">
+            <div className="text-4xl md:text-5xl font-bold text-brand-teal-600 mb-2">
               4.9
             </div>
             <div className="text-gray-600 font-medium">Gemiddelde score</div>

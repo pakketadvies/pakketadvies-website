@@ -331,7 +331,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         {/* 4. Gas */}
         <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Flame weight="duotone" className="w-5 h-5 text-orange-600" />
+            <Flame weight="duotone" className="w-5 h-5 text-brand-teal-600" />
             <h4 className="text-base font-bold text-brand-navy-500">Gas</h4>
           </div>
           
@@ -354,7 +354,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               </div>
             )}
 
-            <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50 transition-all">
+            <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border-2 border-gray-200 bg-gray-50 hover:border-brand-teal-300 hover:bg-brand-teal-50 transition-all">
               <input
                 type="checkbox"
                 checked={formData.geenGasaansluiting}
@@ -368,7 +368,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                   setFormData(newData)
                   onChange(newData)
                 }}
-                className="w-5 h-5 rounded border-2 border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
               />
               <span className="text-sm font-medium text-brand-navy-500">Geen gasaansluiting</span>
             </label>

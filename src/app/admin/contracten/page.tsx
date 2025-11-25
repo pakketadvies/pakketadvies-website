@@ -65,7 +65,7 @@ export default async function ContractenPage() {
           </div>
           <div className="bg-white rounded-xl border-2 border-gray-200 p-4">
             <p className="text-sm text-gray-600 mb-1">Populair</p>
-            <p className="text-2xl font-bold text-orange-600">
+            <p className="text-2xl font-bold text-brand-purple-600">
               {contracten.filter((c) => c.populair).length}
             </p>
           </div>
