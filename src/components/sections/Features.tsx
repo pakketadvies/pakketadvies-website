@@ -120,7 +120,11 @@ export function Features() {
                   </div>
                   
                   {/* Title */}
-                  <h3 className={`text-xl md:text-2xl font-bold text-brand-navy-500 mb-3 group-hover:${feature.color === 'purple' ? 'text-brand-purple-600' : 'text-brand-teal-600'} transition-colors`}>
+                  <h3 className={`text-xl md:text-2xl font-bold text-brand-navy-500 mb-3 ${
+                    feature.color === 'purple' 
+                      ? 'group-hover:text-brand-purple-600' 
+                      : 'group-hover:text-brand-teal-600'
+                  } transition-colors`}>
                     {feature.title}
                   </h3>
                   
