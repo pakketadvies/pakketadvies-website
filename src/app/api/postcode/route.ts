@@ -30,8 +30,15 @@ export async function GET(request: NextRequest) {
     let query = `postcode:${postcodeClean} AND huisnummer:${number}`
     
     if (addition && addition.trim()) {
-      // Als toevoeging is ingevuld, zoek exact met toevoeging
-      query += ` AND huisnummertoevoeging:${encodeURIComponent(addition.trim())}`
+      const trimmedAddition = addition.trim()
+      // Check of toevoeging een enkele letter is (huisletter) of cijfer/combinatie (huisnummertoevoeging)
+      if (/^[a-zA-Z]$/.test(trimmedAddition)) {
+        // Enkele letter = huisletter
+        query += ` AND huisletter:${trimmedAddition.toUpperCase()}`
+      } else {
+        // Cijfer of combinatie = huisnummertoevoeging
+        query += ` AND huisnummertoevoeging:${encodeURIComponent(trimmedAddition)}`
+      }
     }
     
     const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(query)}&fq=type:adres&rows=1`
@@ -52,18 +59,43 @@ export async function GET(request: NextRequest) {
     if (data.response.numFound === 0) {
       // Geen resultaten - check of het basisadres (zonder toevoeging) wel bestaat
       if (addition && addition.trim()) {
+        const trimmedAddition = addition.trim()
         const baseQuery = `postcode:${postcodeClean} AND huisnummer:${number}`
-        const baseUrl = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(baseQuery)}&fq=type:adres&rows=1`
+        const baseUrl = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(baseQuery)}&fq=type:adres&rows=20`
         
         const baseResponse = await fetch(baseUrl)
         if (baseResponse.ok) {
           const baseData = await baseResponse.json()
           if (baseData.response.numFound > 0) {
-            // Basisadres bestaat, maar toevoeging niet
-            return NextResponse.json(
-              { error: `Toevoeging '${addition}' bestaat niet voor dit adres` },
-              { status: 404 }
-            )
+            // Basisadres bestaat - zoek exacte match met toevoeging
+            const matchingDoc = baseData.response.docs.find((doc: any) => {
+              const docLetter = doc.huisletter?.toUpperCase()
+              const docToevoeging = doc.huisnummertoevoeging
+              
+              if (/^[a-zA-Z]$/.test(trimmedAddition)) {
+                // Check huisletter (case-insensitive)
+                return docLetter === trimmedAddition.toUpperCase()
+              } else {
+                // Check huisnummertoevoeging (exact match)
+                return docToevoeging === trimmedAddition
+              }
+            })
+            
+            if (matchingDoc) {
+              // Match gevonden! Gebruik dit adres
+              return NextResponse.json({
+                street: matchingDoc.straatnaam || '',
+                city: matchingDoc.woonplaatsnaam || '',
+                municipality: matchingDoc.gemeentenaam || '',
+                province: matchingDoc.provincienaam || '',
+              })
+            } else {
+              // Basisadres bestaat, maar toevoeging niet
+              return NextResponse.json(
+                { error: `Toevoeging '${trimmedAddition}' bestaat niet voor dit adres` },
+                { status: 404 }
+              )
+            }
           }
         }
       }
