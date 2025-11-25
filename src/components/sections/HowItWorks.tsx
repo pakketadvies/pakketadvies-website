@@ -83,14 +83,14 @@ export function HowItWorks() {
                 {/* Card */}
                 <div className="relative bg-white rounded-3xl p-8 md:p-10 border border-gray-200 hover-lift hover:border-brand-teal-500/50 transition-all duration-300 h-full">
                   {/* Number badge */}
-                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-teal-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-teal-500 group-hover:bg-brand-purple-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
                     <span className="font-display text-2xl font-bold text-white">
                       {step.number}
                     </span>
                   </div>
                   
                   {/* Icon */}
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.color === 'purple' ? 'bg-brand-purple-500' : step.color === 'teal' ? 'bg-brand-teal-500' : 'bg-brand-navy-500'} shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-navy-500 group-hover:bg-brand-purple-500 shadow-lg mb-6 group-hover:scale-110 transition-all duration-300">
                     <Icon weight="duotone" className="w-8 h-8 text-white" />
                   </div>
                   
