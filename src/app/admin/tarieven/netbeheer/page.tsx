@@ -46,6 +46,7 @@ export default function NetbeheerTarievenPage() {
   const [viewType, setViewType] = useState<ViewType>('elektriciteit')
   const [tarieven, setTarieven] = useState<NetbeheerTarief[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchNetbeheerders()
@@ -138,12 +139,22 @@ export default function NetbeheerTarievenPage() {
     
     if (error) {
       console.error('❌ Error fetching tarieven with join:', error)
+      setError(`Error: ${error.message}`)
+      
       // Fallback: use raw data and fetch aansluitwaarden separately
       const aansluitwaardeIds = rawData.map((t: any) => t.aansluitwaarde_id)
-      const { data: aansluitwaardenData } = await supabase
+      const { data: aansluitwaardenData, error: aansluitError } = await supabase
         .from(aansluitTable)
         .select('*')
         .in('id', aansluitwaardeIds)
+      
+      if (aansluitError) {
+        console.error('❌ Error fetching aansluitwaarden:', aansluitError)
+        setError(`Error fetching aansluitwaarden: ${aansluitError.message}`)
+        setTarieven([])
+        setLoading(false)
+        return
+      }
       
       const tarievenWithAansluitwaarde = rawData.map((tarief: any) => ({
         ...tarief,
@@ -155,6 +166,7 @@ export default function NetbeheerTarievenPage() {
       })
       
       setTarieven(tarievenWithAansluitwaarde as any)
+      setError(null)
       setLoading(false)
       return
     }
@@ -167,6 +179,7 @@ export default function NetbeheerTarievenPage() {
         return aVolgorde - bVolgorde
       })
       setTarieven(sorted as any)
+      setError(null)
     } else {
       setTarieven([])
     }
@@ -207,6 +220,20 @@ export default function NetbeheerTarievenPage() {
           Beheer tarieven per netbeheerder en aansluitwaarde
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-lg text-sm text-red-700 font-medium">
+          <div className="flex items-start gap-2">
+            <XCircle size={20} className="flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold mb-1">Fout bij ophalen tarieven</p>
+              <p>{error}</p>
+              <p className="mt-2 text-xs text-red-600">Controleer de browser console voor meer details.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Netbeheerder Selector */}
       <div className="mb-6">
