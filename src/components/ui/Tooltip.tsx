@@ -43,30 +43,38 @@ export default function Tooltip({ content, children, className, position = 'bott
     }
   }, [isMobileOpen, isVisible])
 
-  // Prevent body scroll when mobile tooltip is open
+  // Prevent body scroll when mobile tooltip is open (without scrolling to top)
   useEffect(() => {
     if (isMobileOpen && typeof window !== 'undefined') {
-      // Store original values and scroll position
-      const scrollY = window.scrollY
+      // Store original values
       const originalOverflow = document.body.style.overflow
-      const originalPosition = document.body.style.position
-      const originalTop = document.body.style.top
-      const originalWidth = document.body.style.width
-
-      // Prevent scrolling - critical for mobile
+      const originalPaddingRight = document.body.style.paddingRight
+      
+      // Get current scroll position BEFORE making changes
+      const scrollY = window.scrollY
+      
+      // Calculate scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      
+      // Prevent scrolling without jumping
       document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
+      document.body.style.paddingRight = `${scrollbarWidth}px`
+      
+      // Set the scroll position on html element to maintain visual position
+      document.documentElement.style.scrollBehavior = 'auto'
+      document.documentElement.scrollTop = scrollY
 
       return () => {
-        // Restore all original values
+        // Restore original values
         document.body.style.overflow = originalOverflow
-        document.body.style.position = originalPosition
-        document.body.style.top = originalTop
-        document.body.style.width = originalWidth
-        // Restore scroll position
-        window.scrollTo(0, scrollY)
+        document.body.style.paddingRight = originalPaddingRight
+        document.documentElement.style.scrollBehavior = ''
+        
+        // Restore scroll position (no need to scrollTo as we maintained it via html)
+        // Just ensure it's at the right position
+        if (scrollY !== window.scrollY) {
+          window.scrollTo(0, scrollY)
+        }
       }
     }
   }, [isMobileOpen])
