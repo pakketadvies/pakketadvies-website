@@ -296,7 +296,19 @@ const transformContractToOptie = (
   }
 
   const leverancier = contract.leverancier || {}
-  const details = contract.details_vast || contract.details_dynamisch || {}
+  const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
+  
+  // Get looptijd: voor vast en maatwerk contracten
+  let contractLooptijd: number | undefined = undefined
+  if (contract.type === 'vast' && contract.details_vast) {
+    contractLooptijd = contract.details_vast.looptijd
+  } else if (contract.type === 'maatwerk' && contract.details_maatwerk) {
+    contractLooptijd = contract.details_maatwerk.looptijd
+  }
+  
+  // Get rating en aantalReviews
+  const contractRating = details.rating || 0
+  const contractAantalReviews = details.aantal_reviews || 0
   
   // Calculate besparing
   const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
@@ -313,7 +325,7 @@ const transformContractToOptie = (
       overLeverancier: leverancier.over_leverancier || undefined,
     },
     type: contract.type === 'maatwerk' ? 'vast' : contract.type, // Maatwerk wordt getoond als vast
-    looptijd: (contract.type === 'vast' || contract.type === 'maatwerk') ? details.looptijd : undefined,
+    looptijd: contractLooptijd,
     maandbedrag,
     jaarbedrag,
     tariefElektriciteit: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
