@@ -16,7 +16,7 @@ const steps = [
     icon: ChatCircleDots,
     title: 'Ontvang advies op maat',
     description: 'Onze specialisten analyseren jouw situatie en presenteren de beste opties. Vast, dynamisch of een combinatie? Wij adviseren.',
-    color: 'purple'
+    color: 'teal'
   },
   {
     number: '03',
@@ -30,7 +30,7 @@ const steps = [
     icon: CheckCircle,
     title: 'Wij regelen alles',
     description: 'Jij zegt ja, wij doen de rest. Opzeggen, aanmelden, activeren - binnen 2 weken volledig overgestapt en direct besparen.',
-    color: 'purple'
+    color: 'teal'
   },
 ]
 
@@ -95,13 +95,7 @@ export function HowItWorks() {
                   </div>
                   
                   {/* Content */}
-                  <h3 className={`font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 ${
-                    step.color === 'purple' 
-                      ? 'group-hover:text-brand-purple-600' 
-                      : step.color === 'teal' 
-                      ? 'group-hover:text-brand-teal-600' 
-                      : 'group-hover:text-brand-navy-600'
-                  } transition-colors`}>
+                  <h3 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4 group-hover:text-brand-teal-600 transition-colors">
                     {step.title}
                   </h3>
                   
