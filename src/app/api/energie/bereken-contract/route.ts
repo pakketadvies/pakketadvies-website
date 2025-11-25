@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       .from('aansluitwaarden_elektriciteit')
       .select('id, is_kleinverbruik')
       .eq('code', aansluitwaardeElektriciteit)
-      .single()
+      .single() as { data: { id: string; is_kleinverbruik: boolean } | null; error: any }
     
     if (elektraAansluitwaardeError || !elektraAansluitwaarde) {
       console.error('❌ Aansluitwaarde elektriciteit niet gevonden:', aansluitwaardeElektriciteit, elektraAansluitwaardeError)
@@ -169,10 +169,10 @@ export async function POST(request: Request) {
       geconverteerd: gasAansluitwaardeVoorDatabase
     })
     
-    // STAP 1: Haal eerst de aansluitwaarde_id op
+    // STAP 1: Haal eerst de aansluitwaarde op (met is_kleinverbruik flag)
     const { data: gasAansluitwaarde, error: gasAansluitwaardeError } = await supabase
       .from('aansluitwaarden_gas')
-      .select('id')
+      .select('id, is_kleinverbruik')
       .eq('code', gasAansluitwaardeVoorDatabase)
       .single()
     
@@ -542,8 +542,8 @@ export async function POST(request: Request) {
     }
     
     // Vermindering EB: ALLEEN bij kleinverbruik AANSLUITWAARDE (niet verbruik!)
-    // 3x63A krijgt WEL vermindering (want ≤ 3x80A)
-    const verminderingEB = !isGrootverbruikAansluitwaarde 
+    // 3x80A krijgt WEL vermindering (want ≤ 3x80A is kleinverbruik)
+    const verminderingEB = !isGrootverbruikAansluitwaardeElektra 
       ? overheidsTarieven.vermindering_eb_elektriciteit 
       : 0
     
@@ -615,7 +615,7 @@ export async function POST(request: Request) {
           gas: aansluitwaardeGas || 'N/A',
         },
         netbeheerder: netbeheerderNaam,
-        isGrootverbruik: isGrootverbruikAansluitwaarde,
+        isGrootverbruik: isGrootverbruikAansluitwaardeElektra,
         contractType: contractType,
       },
     })
