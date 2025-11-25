@@ -264,8 +264,8 @@ export async function POST(request: Request) {
         
         // Gebruik helper functie voor berekening
         const result = calculateDynamicContract({
-          elektriciteitNormaal,
-          elektriciteitDal,
+      elektriciteitNormaal,
+      elektriciteitDal,
           gas,
           terugleveringJaar: terugleveringKwh,
           heeftDubbeleMeter,
@@ -347,72 +347,72 @@ export async function POST(request: Request) {
       } else {
         nettoKwh = elektriciteitNormaal + (elektriciteitDal || 0)
       }
-      
-      // STRICT VALIDATIE: Zorg dat de juiste tarieven beschikbaar zijn
-      if (!heeftDubbeleMeter && !tariefElektriciteitEnkel) {
+    
+    // STRICT VALIDATIE: Zorg dat de juiste tarieven beschikbaar zijn
+    if (!heeftDubbeleMeter && !tariefElektriciteitEnkel) {
         console.error('❌ FOUT: Enkele meter geselecteerd maar geen enkeltarief beschikbaar!')
-        return NextResponse.json(
-          { error: 'Enkeltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
-          { status: 400 }
-        )
-      }
-      
-      if (heeftDubbeleMeter && (!tariefElektriciteitNormaal || !tariefElektriciteitDal)) {
+      return NextResponse.json(
+        { error: 'Enkeltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 400 }
+      )
+    }
+    
+    if (heeftDubbeleMeter && (!tariefElektriciteitNormaal || !tariefElektriciteitDal)) {
         console.error('❌ FOUT: Dubbele meter geselecteerd maar normaal of dal tarief ontbreekt!')
-        return NextResponse.json(
-          { error: 'Normaal- en daltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
-          { status: 400 }
-        )
-      }
-      
+      return NextResponse.json(
+        { error: 'Normaal- en daltarief niet beschikbaar voor dit contract. Neem contact op met support.' },
+        { status: 400 }
+      )
+    }
+    
       // BEREKEN LEVERANCIERSKOSTEN
-      if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
+    if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
         // ENKELE METER: gebruik enkeltarief met NETTO verbruik (na saldering)
         kostenElektriciteit = nettoKwh * tariefElektriciteitEnkel
-        
-        elektriciteitBreakdown = {
-          type: 'enkel',
-          enkel: {
+      
+      elektriciteitBreakdown = {
+        type: 'enkel',
+        enkel: {
             kwh: nettoKwh,
-            tarief: tariefElektriciteitEnkel,
-            bedrag: kostenElektriciteit
-          }
+          tarief: tariefElektriciteitEnkel,
+          bedrag: kostenElektriciteit
         }
-      } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
+      }
+    } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
         // DUBBELE METER: gebruik normaal + dal tarieven met NETTO verbruik (na saldering)
         const kostenNormaal = nettoElektriciteitNormaal * tariefElektriciteitNormaal
         const kostenDal = nettoElektriciteitDal * tariefElektriciteitDal
-        kostenElektriciteit = kostenNormaal + kostenDal
-        
-        elektriciteitBreakdown = {
-          type: 'dubbel',
-          normaal: {
+      kostenElektriciteit = kostenNormaal + kostenDal
+      
+      elektriciteitBreakdown = {
+        type: 'dubbel',
+        normaal: {
             kwh: nettoElektriciteitNormaal,
-            tarief: tariefElektriciteitNormaal,
-            bedrag: kostenNormaal
-          },
-          dal: {
+          tarief: tariefElektriciteitNormaal,
+          bedrag: kostenNormaal
+        },
+        dal: {
             kwh: nettoElektriciteitDal,
-            tarief: tariefElektriciteitDal,
-            bedrag: kostenDal
-          }
+          tarief: tariefElektriciteitDal,
+          bedrag: kostenDal
         }
-      } else {
+      }
+    } else {
         console.error('❌ FOUT: Geen tarieven beschikbaar!')
-        return NextResponse.json(
+      return NextResponse.json(
           { error: 'Geen tarieven beschikbaar voor dit contract.' },
           { status: 400 }
-        )
-      }
-      
+      )
+    }
+    
       // GAS BEREKENING
       kostenGas = totaalGas * (tariefGas || 0)
       gasBreakdown = totaalGas > 0 ? {
-        m3: totaalGas,
-        tarief: tariefGas || 0,
-        bedrag: kostenGas
-      } : null
-      
+      m3: totaalGas,
+      tarief: tariefGas || 0,
+      bedrag: kostenGas
+    } : null
+    
       // TERUGLEVERKOSTEN (alleen bij vaste contracten)
       // Deze kosten worden berekend over de VOLLEDIGE teruglevering
       kostenTeruglevering = terugleveringKwh > 0 && tariefTerugleveringKwh 

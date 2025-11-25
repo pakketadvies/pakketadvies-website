@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info, FilePdf } from '@phosphor-icons/react'
+import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info, FilePdf, FileText } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 import Tooltip from '@/components/ui/Tooltip'
@@ -678,63 +678,63 @@ export default function ContractCard({
             </button>
             {openAccordion === 'voorwaarden' && (
               <div className="p-4 bg-white space-y-2 animate-slide-down">
-                {contract.voorwaarden && contract.voorwaarden.length > 0 ? (
-                  contract.voorwaarden.map((vw, i) => {
-                    // Handle both string format (legacy) and object format (with PDF URLs)
-                    let voorwaardeText: string
-                    let voorwaardeUrl: string | null = null
-                    let isPdf = false
+                {contract.voorwaarden && contract.voorwaarden.length > 0 ? (() => {
+                  // Filter alleen documenten (PDF/DOC met URL), negeer tekstvoorwaarden
+                  const documenten = contract.voorwaarden
+                    .map(vw => {
+                      let voorwaardeObj: { naam?: string; url?: string; type?: string } | null = null
 
-                    if (typeof vw === 'string') {
-                      // Try to parse as JSON (for new format)
-                      try {
-                        const parsed = JSON.parse(vw) as { naam?: string; url?: string; type?: string }
-                        if (parsed && typeof parsed === 'object' && parsed.naam) {
-                          voorwaardeText = parsed.naam
-                          voorwaardeUrl = parsed.url || null
-                          isPdf = parsed.type === 'pdf'
-                        } else {
-                          voorwaardeText = vw
+                      if (typeof vw === 'string') {
+                        // Try to parse as JSON
+                        try {
+                          const parsed = JSON.parse(vw) as { naam?: string; url?: string; type?: string }
+                          if (parsed && typeof parsed === 'object' && parsed.url && (parsed.type === 'pdf' || parsed.type === 'doc')) {
+                            voorwaardeObj = parsed
+                          }
+                        } catch {
+                          // Legacy string format - ignore (tekstvoorwaarde)
                         }
-                      } catch {
-                        // Legacy string format
-                        voorwaardeText = vw
+                      } else if (vw && typeof vw === 'object' && 'naam' in vw) {
+                        const vwObj = vw as { naam?: string; url?: string; type?: string }
+                        if (vwObj.url && (vwObj.type === 'pdf' || vwObj.type === 'doc')) {
+                          voorwaardeObj = vwObj
+                        }
                       }
-                    } else if (vw && typeof vw === 'object' && 'naam' in vw) {
-                      // Already an object
-                      const vwObj = vw as { naam: string; url?: string; type?: string }
-                      voorwaardeText = vwObj.naam || String(vw)
-                      voorwaardeUrl = vwObj.url || null
-                      isPdf = vwObj.type === 'pdf'
-                    } else {
-                      // Fallback
-                      voorwaardeText = String(vw)
-                    }
+
+                      return voorwaardeObj
+                    })
+                    .filter((v): v is { naam: string; url: string; type: 'pdf' | 'doc' } => v !== null)
+
+                  if (documenten.length === 0) {
+                    return <p className="text-sm text-gray-500">Geen voorwaarden beschikbaar</p>
+                  }
+
+                  return documenten.map((vw, i) => {
+                    const isPdf = vw.type === 'pdf'
+                    const isDoc = vw.type === 'doc'
 
                     return (
                       <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
                         {isPdf ? (
                           <FilePdf weight="bold" className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                        ) : isDoc ? (
+                          <FileText weight="bold" className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                         ) : (
                           <Check weight="bold" className="w-4 h-4 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                         )}
-                        {voorwaardeUrl ? (
-                          <a
-                            href={voorwaardeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-brand-teal-600 hover:text-brand-teal-700 hover:underline font-medium"
-                          >
-                            {voorwaardeText}
-                          </a>
-                        ) : (
-                          <span>{voorwaardeText}</span>
-                        )}
+                        <a
+                          href={vw.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand-teal-600 hover:text-brand-teal-700 hover:underline font-medium"
+                        >
+                          {vw.naam || 'Download voorwaarden'}
+                        </a>
                       </div>
                     )
                   })
-                ) : (
-                  <p className="text-sm text-gray-500">Geen specifieke voorwaarden beschikbaar</p>
+                })() : (
+                  <p className="text-sm text-gray-500">Geen voorwaarden beschikbaar</p>
                 )}
                 {contract.bijzonderheden && contract.bijzonderheden.length > 0 && (
                   <>
