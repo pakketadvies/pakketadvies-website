@@ -10,7 +10,9 @@ import { ArrowLeft, CheckCircle, Plus, X, File, FilePdf, FileText, Upload } from
 import Link from 'next/link'
 import type { Leverancier, Contract, ContractDetailsMaatwerk } from '@/types/admin'
 
+// Identiek aan vast contract schema, maar met min_verbruik velden toegevoegd
 const maatwerkContractSchema = z.object({
+  // Basis contract info
   leverancier_id: z.string().min(1, 'Selecteer een leverancier'),
   naam: z.string().min(1, 'Naam is verplicht'),
   beschrijving: z.string().optional(),
@@ -19,12 +21,27 @@ const maatwerkContractSchema = z.object({
   populair: z.boolean(),
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
+
+  // Identiek aan vast contract
+  looptijd: z.enum(['1', '2', '3', '5']),
+  tarief_elektriciteit_enkel: z.number().min(0, 'Tarief moet positief zijn').nullable(),
+  tarief_elektriciteit_normaal: z.number().min(0, 'Tarief moet positief zijn').nullable(),
+  tarief_elektriciteit_dal: z.number().min(0).nullable(),
+  tarief_gas: z.number().min(0).nullable(),
+  tarief_teruglevering_kwh: z.number().min(0, 'Teruglevertarief moet positief zijn'),
   
+  // Vastrechten (apart voor stroom en gas)
+  vastrecht_stroom_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
+  vastrecht_gas_maand: z.number().min(0, 'Vastrecht moet positief zijn'),
+  
+  groene_energie: z.boolean(),
+  prijsgarantie: z.boolean(),
+  opzegtermijn: z.number().int().min(0),
+  
+  // Maatwerk specifiek: minimale drempelwaarden
   min_verbruik_elektriciteit: z.number().int().min(0).nullable(),
   min_verbruik_gas: z.number().int().min(0).nullable(),
-  custom_tekst: z.string().optional(),
-  contact_email: z.string().email('Ongeldig e-mailadres').optional().or(z.literal('')),
-  contact_telefoon: z.string().optional(),
+  
   rating: z.number().min(0).max(5),
   aantal_reviews: z.number().int().min(0),
 })
@@ -62,12 +79,16 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       })
       .filter((v): v is VoorwaardeType => v !== null)
   })
+  const [bijzonderheden, setBijzonderheden] = useState<string[]>(contract?.details_maatwerk?.bijzonderheden || [])
+  const [newBijzonderheid, setNewBijzonderheid] = useState('')
   const [uploadingDocument, setUploadingDocument] = useState(false)
 
   const {
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<MaatwerkContractFormData>({
     resolver: zodResolver(maatwerkContractSchema),
@@ -80,16 +101,25 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
+      looptijd: (contract?.details_maatwerk?.looptijd?.toString() || '1') as '1' | '2' | '3' | '5',
+      tarief_elektriciteit_enkel: contract?.details_maatwerk?.tarief_elektriciteit_enkel || null,
+      tarief_elektriciteit_normaal: contract?.details_maatwerk?.tarief_elektriciteit_normaal || null,
+      tarief_elektriciteit_dal: contract?.details_maatwerk?.tarief_elektriciteit_dal || null,
+      tarief_gas: contract?.details_maatwerk?.tarief_gas || null,
+      tarief_teruglevering_kwh: contract?.details_maatwerk?.tarief_teruglevering_kwh || 0.00,
+      vastrecht_stroom_maand: contract?.details_maatwerk?.vastrecht_stroom_maand || 4.00,
+      vastrecht_gas_maand: contract?.details_maatwerk?.vastrecht_gas_maand || 4.00,
+      groene_energie: contract?.details_maatwerk?.groene_energie ?? false,
+      prijsgarantie: contract?.details_maatwerk?.prijsgarantie ?? false,
+      opzegtermijn: contract?.details_maatwerk?.opzegtermijn || 1,
       min_verbruik_elektriciteit: contract?.details_maatwerk?.min_verbruik_elektriciteit || null,
       min_verbruik_gas: contract?.details_maatwerk?.min_verbruik_gas || null,
-      custom_tekst: contract?.details_maatwerk?.custom_tekst || '',
-      contact_email: contract?.details_maatwerk?.contact_email || '',
-      contact_telefoon: contract?.details_maatwerk?.contact_telefoon || '',
       rating: contract?.details_maatwerk?.rating || 0,
       aantal_reviews: contract?.details_maatwerk?.aantal_reviews || 0,
     },
   })
 
+  // Fetch leveranciers
   useEffect(() => {
     const fetchLeveranciers = async () => {
       const supabase = createClient()
@@ -98,15 +128,24 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         .select('*')
         .eq('actief', true)
         .order('naam')
+
       if (data) setLeveranciers(data)
     }
     fetchLeveranciers()
   }, [])
 
+  // Set leverancier_id after leveranciers are loaded (for edit mode)
+  useEffect(() => {
+    if (isEdit && contract?.leverancier_id && leveranciers.length > 0) {
+      setValue('leverancier_id', contract.leverancier_id)
+    }
+  }, [isEdit, contract?.leverancier_id, leveranciers, setValue])
+
   const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
 
+    // Validate all files first
     const allowedTypes = [
       'application/pdf',
       'application/msword',
@@ -156,6 +195,7 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
 
     const supabase = createClient()
     
+    // Check authentication once
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       setError('Je bent niet ingelogd. Log opnieuw in en probeer het opnieuw.')
@@ -164,7 +204,10 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       return
     }
 
-    const uploadedVoorwaarden: { naam: string; url: string; type: 'pdf' | 'doc' }[] = []
+    console.log(`📤 Starting upload of ${validFiles.length} file(s)...`)
+
+    // Upload all files
+    const uploadedVoorwaarden: VoorwaardeType[] = []
     const failedUploads: string[] = []
 
     for (const file of validFiles) {
@@ -267,6 +310,17 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
     setVoorwaarden(voorwaarden.filter((_, i) => i !== index))
   }
 
+  const addBijzonderheid = () => {
+    if (newBijzonderheid.trim()) {
+      setBijzonderheden([...bijzonderheden, newBijzonderheid.trim()])
+      setNewBijzonderheid('')
+    }
+  }
+
+  const removeBijzonderheid = (index: number) => {
+    setBijzonderheden(bijzonderheden.filter((_, i) => i !== index))
+  }
+
   const onSubmit = async (data: MaatwerkContractFormData) => {
     setLoading(true)
     setError(null)
@@ -289,17 +343,21 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       let contractId = contract?.id
 
       if (isEdit && contractId) {
+        // Update contract
         const { error: contractError } = await supabase
           .from('contracten')
           .update(contractData)
           .eq('id', contractId)
+
         if (contractError) throw contractError
       } else {
+        // Create new contract
         const { data: newContract, error: contractError } = await supabase
           .from('contracten')
           .insert(contractData)
           .select()
           .single()
+
         if (contractError) throw contractError
         contractId = newContract.id
       }
@@ -307,14 +365,25 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       // Convert voorwaarden to database format (JSON strings)
       const voorwaardenForDb = voorwaarden.map(v => JSON.stringify(v))
 
+      // Insert/update details - identiek aan vast contract + min_verbruik velden
       const detailsData = {
         contract_id: contractId,
+        looptijd: parseInt(data.looptijd),
+        tarief_elektriciteit_enkel: data.tarief_elektriciteit_enkel,
+        tarief_elektriciteit_normaal: data.tarief_elektriciteit_normaal,
+        tarief_elektriciteit_dal: data.tarief_elektriciteit_dal,
+        tarief_gas: data.tarief_gas,
+        tarief_teruglevering_kwh: data.tarief_teruglevering_kwh,
+        vastrecht_stroom_maand: data.vastrecht_stroom_maand,
+        vastrecht_gas_maand: data.vastrecht_gas_maand,
+        groene_energie: data.groene_energie,
+        prijsgarantie: data.prijsgarantie,
+        opzegtermijn: data.opzegtermijn,
+        // Maatwerk specifiek
         min_verbruik_elektriciteit: data.min_verbruik_elektriciteit,
         min_verbruik_gas: data.min_verbruik_gas,
-        custom_tekst: data.custom_tekst || null,
-        contact_email: data.contact_email || null,
-        contact_telefoon: data.contact_telefoon || null,
         voorwaarden: voorwaardenForDb,
+        bijzonderheden,
         rating: data.rating,
         aantal_reviews: data.aantal_reviews,
       }
@@ -336,8 +405,12 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/admin/contracten" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <Link
+          href="/admin/contracten"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
           <ArrowLeft size={24} />
         </Link>
         <div>
@@ -345,180 +418,540 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
             {isEdit ? 'Maatwerk contract bewerken' : 'Nieuw maatwerk contract'}
           </h1>
           <p className="text-gray-600">
-            {isEdit ? 'Pas de gegevens aan' : 'Voeg een nieuw maatwerk contract toe voor specifieke klanten'}
+            {isEdit ? 'Pas de gegevens aan' : 'Voeg een nieuw maatwerk contract toe - identiek aan vast contract met minimale drempelwaarden'}
           </p>
         </div>
       </div>
 
+      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</div>
+          <div className="p-4 bg-red-50 border-2 border-red-300 rounded-lg text-sm text-red-700 font-medium">
+            <div className="flex items-start gap-2">
+              <span className="text-red-600 font-bold">⚠️</span>
+              <div className="flex-1">
+                <strong>Fout:</strong> {error}
+                <br />
+                <span className="text-xs text-red-600 mt-1 block">Check de browser console (F12 → Console tab) voor meer details</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="text-red-600 hover:text-red-800"
+                aria-label="Sluiten"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
         )}
 
-        {/* Basis */}
+        {/* Basis Informatie */}
         <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
           <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Basis informatie</h2>
           <div className="space-y-4">
+            {/* Leverancier */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">
                 Leverancier <span className="text-red-500">*</span>
               </label>
-              <select {...register('leverancier_id')} className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading}>
+              <select
+                {...register('leverancier_id')}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              >
                 <option value="">Selecteer een leverancier</option>
                 {leveranciers.map((lev) => (
-                  <option key={lev.id} value={lev.id}>{lev.naam}</option>
+                  <option key={lev.id} value={lev.id}>
+                    {lev.naam}
+                  </option>
                 ))}
               </select>
-              {errors.leverancier_id && <p className="text-sm text-red-600">{errors.leverancier_id.message}</p>}
+              {errors.leverancier_id && (
+                <p className="text-sm text-red-600">{errors.leverancier_id.message}</p>
+              )}
             </div>
 
+            {/* Naam */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">
                 Contract naam <span className="text-red-500">*</span>
               </label>
-              <input {...register('naam')} type="text" placeholder="Bijv. Zakelijk Op Maat" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
-              {errors.naam && <p className="text-sm text-red-600">{errors.naam.message}</p>}
+              <input
+                {...register('naam')}
+                type="text"
+                placeholder="Bijv. Maatwerk Zakelijk 3 jaar"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              />
+              {errors.naam && (
+                <p className="text-sm text-red-600">{errors.naam.message}</p>
+              )}
             </div>
 
+            {/* Beschrijving */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-brand-navy-500">Beschrijving</label>
-              <textarea {...register('beschrijving')} rows={3} placeholder="Korte beschrijving" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all resize-none" disabled={loading} />
+              <textarea
+                {...register('beschrijving')}
+                rows={3}
+                placeholder="Korte beschrijving van het contract"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all resize-none"
+                disabled={loading}
+              />
             </div>
           </div>
         </div>
 
-        {/* Vereisten & Contact */}
+        {/* Tarieven - Identiek aan vast contract */}
         <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Vereisten & contact</h2>
+          <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Tarieven (exclusief belastingen)</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            ⚠️ Vul alle tarieven <strong>exclusief</strong> energiebelasting, ODE, netbeheerkosten en BTW in. Het systeem berekent deze automatisch.
+          </p>
+          
           <div className="space-y-4">
+            {/* Looptijd */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Looptijd <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register('looptijd')}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              >
+                <option value="1">1 jaar</option>
+                <option value="2">2 jaar</option>
+                <option value="3">3 jaar</option>
+                <option value="5">5 jaar</option>
+              </select>
+            </div>
+
+            {/* Info Box */}
+            <div className="p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg">
+              <p className="text-sm text-brand-teal-900">
+                <strong>💡 Let op:</strong> Vul altijd alle 3 de tarieven in (enkeltarief, normaal én dal). De klant kiest later welk tarief bij zijn/haar meter past.
+              </p>
+            </div>
+
+            {/* Elektriciteits Tarieven - ALLE 3 ALTIJD ZICHTBAAR */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Enkeltarief */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Elektriciteit enkeltarief (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_elektriciteit_enkel', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Voor enkele meters</p>
+                {errors.tarief_elektriciteit_enkel && (
+                  <p className="text-sm text-red-600">{errors.tarief_elektriciteit_enkel.message}</p>
+                )}
+              </div>
+
+              {/* Normaal Tarief */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Elektriciteit normaal/dag (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_elektriciteit_normaal', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Voor dubbele meters (dag)</p>
+                {errors.tarief_elektriciteit_normaal && (
+                  <p className="text-sm text-red-600">{errors.tarief_elektriciteit_normaal.message}</p>
+                )}
+              </div>
+
+              {/* Dal Tarief */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Elektriciteit dal/nacht (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_elektriciteit_dal', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Voor dubbele meters (nacht)</p>
+                {errors.tarief_elektriciteit_dal && (
+                  <p className="text-sm text-red-600">{errors.tarief_elektriciteit_dal.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Gas en Vastrechten */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Gas */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Gas (€/m³)
+                </label>
+                <input
+                  {...register('tarief_gas', { 
+                    valueAsNumber: true,
+                    setValueAs: (v) => v === '' ? null : parseFloat(v)
+                  })}
+                  type="number"
+                  step="0.000001"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Laat leeg als geen gas</p>
+              </div>
+
+              {/* Teruglevering */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-brand-navy-500">
+                  Teruglevering (€/kWh) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register('tarief_teruglevering_kwh', { 
+                    valueAsNumber: true
+                  })}
+                  type="number"
+                  step="0.000001"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                <p className="text-xs text-gray-500">Kosten voor teruglevering aan net</p>
+                {errors.tarief_teruglevering_kwh && (
+                  <p className="text-sm text-red-600">{errors.tarief_teruglevering_kwh.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Vastrechten */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Vastrecht Stroom */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-brand-navy-500">
-                  Minimaal elektriciteit verbruik (kWh/jaar)
+                  Vastrecht Stroom per maand (€) *
                 </label>
-                <input {...register('min_verbruik_elektriciteit', { valueAsNumber: true, setValueAs: (v) => v === '' ? null : parseInt(v) })} type="number" placeholder="10000" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
-                <p className="text-xs text-gray-500">Minimaal verbruik om in aanmerking te komen</p>
+                <input
+                  {...register('vastrecht_stroom_maand', { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="4.00"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                {errors.vastrecht_stroom_maand && (
+                  <p className="text-sm text-red-600">{errors.vastrecht_stroom_maand.message}</p>
+                )}
+                <p className="text-xs text-gray-500">Bijv. €48/jaar = €4,00/maand</p>
               </div>
 
+              {/* Vastrecht Gas */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-brand-navy-500">
-                  Minimaal gas verbruik (m³/jaar)
+                  Vastrecht Gas per maand (€) *
                 </label>
-                <input {...register('min_verbruik_gas', { valueAsNumber: true, setValueAs: (v) => v === '' ? null : parseInt(v) })} type="number" placeholder="5000" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+                <input
+                  {...register('vastrecht_gas_maand', { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  placeholder="4.00"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all font-mono"
+                  disabled={loading}
+                />
+                {errors.vastrecht_gas_maand && (
+                  <p className="text-sm text-red-600">{errors.vastrecht_gas_maand.message}</p>
+                )}
+                <p className="text-xs text-gray-500">Bijv. €48/jaar = €4,00/maand</p>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-brand-navy-500">Contact e-mail</label>
-                <input {...register('contact_email')} type="email" placeholder="maatwerk@leverancier.nl" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
-                {errors.contact_email && <p className="text-sm text-red-600">{errors.contact_email.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-brand-navy-500">Contact telefoon</label>
-                <input {...register('contact_telefoon')} type="tel" placeholder="088 123 4567" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
-              </div>
+        {/* Minimale Drempelwaarden - UNIEK VOOR MAATWERK */}
+        <div className="bg-white rounded-xl border-2 border-brand-purple-200 p-6">
+          <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Minimale drempelwaarden</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            ⚠️ Dit contract wordt alleen getoond als de klant minstens dit verbruik heeft. Laat leeg voor geen drempel.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Minimaal elektriciteit verbruik (kWh/jaar)
+              </label>
+              <input
+                {...register('min_verbruik_elektriciteit', { 
+                  valueAsNumber: true,
+                  setValueAs: (v) => v === '' ? null : parseInt(v)
+                })}
+                type="number"
+                step="1"
+                placeholder="Bijv. 10000"
+                className="w-full px-4 py-3 border-2 border-brand-purple-200 rounded-lg focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 outline-none transition-all"
+                disabled={loading}
+              />
+              <p className="text-xs text-gray-500">Contract is alleen zichtbaar vanaf dit verbruik</p>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-brand-navy-500">Custom tekst</label>
-              <textarea {...register('custom_tekst')} rows={4} placeholder="Specifieke informatie over dit maatwerk contract..." className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all resize-none" disabled={loading} />
-              <p className="text-xs text-gray-500">Deze tekst wordt getoond op de website</p>
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Minimaal gas verbruik (m³/jaar)
+              </label>
+              <input
+                {...register('min_verbruik_gas', { 
+                  valueAsNumber: true,
+                  setValueAs: (v) => v === '' ? null : parseInt(v)
+                })}
+                type="number"
+                step="1"
+                placeholder="Bijv. 5000"
+                className="w-full px-4 py-3 border-2 border-brand-purple-200 rounded-lg focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 outline-none transition-all"
+                disabled={loading}
+              />
+              <p className="text-xs text-gray-500">Contract is alleen zichtbaar vanaf dit verbruik</p>
             </div>
           </div>
         </div>
 
-        {/* Voorwaarden */}
+        {/* Contract Eigenschappen - Identiek aan vast contract */}
         <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Voorwaarden</h2>
-          <div className="space-y-3">
-            {/* Document upload button (PDF of Word) */}
-            <label className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-brand-teal-300 rounded-lg hover:bg-brand-teal-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+          <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Contract eigenschappen</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Opzegtermijn */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Opzegtermijn (maanden)
+              </label>
               <input
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                onChange={handleDocumentUpload}
-                className="hidden"
-                disabled={loading || uploadingDocument}
+                {...register('opzegtermijn', { valueAsNumber: true })}
+                type="number"
+                min="0"
+                placeholder="1"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
               />
-              {uploadingDocument ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-teal-600"></div>
-                  <span className="text-sm text-brand-navy-600">Uploaden...</span>
-                </>
-              ) : (
-                <>
-                  <Upload size={18} className="text-brand-teal-600" />
-                  <span className="text-sm text-brand-navy-600 font-medium">PDF of Word bestand uploaden</span>
-                </>
-              )}
-            </label>
+            </div>
+          </div>
 
-            {/* Lijst van voorwaarden (alleen documenten) */}
-            <ul className="space-y-2">
-              {voorwaarden.length === 0 ? (
-                <li className="text-sm text-gray-500 italic py-2">Nog geen voorwaarden toegevoegd</li>
-              ) : (
-                voorwaarden.map((voorwaarde, index) => {
-                  const isPdf = voorwaarde.type === 'pdf'
-                  const isDoc = voorwaarde.type === 'doc'
+          {/* Checkboxes */}
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <input
+                {...register('groene_energie')}
+                type="checkbox"
+                id="groene_energie_maat"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
+                disabled={loading}
+              />
+              <label htmlFor="groene_energie_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
+                100% groene energie
+              </label>
+            </div>
 
-                  return (
-                    <li key={index} className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {isPdf ? (
-                          <FilePdf size={16} className="text-red-600 flex-shrink-0" />
-                        ) : isDoc ? (
-                          <FileText size={16} className="text-brand-teal-600 flex-shrink-0" />
-                        ) : (
-                          <File size={16} className="text-gray-400 flex-shrink-0" />
-                        )}
-                        <span className="text-sm text-gray-700 truncate">{voorwaarde.naam}</span>
-                        {voorwaarde.url && (
-                          <a
-                            href={voorwaarde.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-medium ml-auto flex-shrink-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Bekijk
-                          </a>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeVoorwaarde(index)}
-                        className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
-                        disabled={loading || uploadingDocument}
-                      >
-                        <X size={16} className="text-red-600" />
-                      </button>
-                    </li>
-                  )
-                })
-              )}
-            </ul>
+            <div className="flex items-center gap-3">
+              <input
+                {...register('prijsgarantie')}
+                type="checkbox"
+                id="prijsgarantie_maat"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
+                disabled={loading}
+              />
+              <label htmlFor="prijsgarantie_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
+                Prijsgarantie tijdens looptijd
+              </label>
+            </div>
           </div>
         </div>
 
-        {/* Reviews & Display */}
+        {/* Voorwaarden & Bijzonderheden - Identiek aan vast contract */}
+        <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Voorwaarden & bijzonderheden</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Voorwaarden */}
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-brand-navy-500">Voorwaarden</label>
+              
+              {/* Document upload button (PDF of Word) - Multiple files supported */}
+              <label className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-brand-teal-300 rounded-lg hover:bg-brand-teal-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={handleDocumentUpload}
+                  className="hidden"
+                  disabled={loading || uploadingDocument}
+                />
+                {uploadingDocument ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-teal-600"></div>
+                    <span className="text-sm text-brand-navy-600">Uploaden...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={18} className="text-brand-teal-600" />
+                    <span className="text-sm text-brand-navy-600 font-medium">PDF of Word bestand(en) uploaden</span>
+                  </>
+                )}
+              </label>
+              <p className="text-xs text-gray-500">Je kunt meerdere bestanden tegelijk selecteren</p>
+
+              {/* Lijst van voorwaarden (alleen documenten) */}
+              <ul className="space-y-2">
+                {voorwaarden.length === 0 ? (
+                  <li className="text-sm text-gray-500 italic py-2">Nog geen voorwaarden toegevoegd</li>
+                ) : (
+                  voorwaarden.map((voorwaarde, index) => {
+                    const isPdf = voorwaarde.type === 'pdf'
+                    const isDoc = voorwaarde.type === 'doc'
+
+                    return (
+                      <li key={index} className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {isPdf ? (
+                            <FilePdf size={16} className="text-red-600 flex-shrink-0" />
+                          ) : isDoc ? (
+                            <FileText size={16} className="text-brand-navy-600 flex-shrink-0" />
+                          ) : (
+                            <File size={16} className="text-gray-400 flex-shrink-0" />
+                          )}
+                          <span className="text-sm text-gray-700 truncate">{voorwaarde.naam}</span>
+                          {voorwaarde.url && (
+                            <a
+                              href={voorwaarde.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-medium ml-auto flex-shrink-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Bekijk
+                            </a>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeVoorwaarde(index)}
+                          className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+                          disabled={loading || uploadingDocument}
+                        >
+                          <X size={16} className="text-red-600" />
+                        </button>
+                      </li>
+                    )
+                  })
+                )}
+              </ul>
+            </div>
+
+            {/* Bijzonderheden */}
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-brand-navy-500">Bijzonderheden</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newBijzonderheid}
+                  onChange={(e) => setNewBijzonderheid(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBijzonderheid())}
+                  placeholder="Voeg bijzonderheid toe"
+                  className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={addBijzonderheid}
+                  className="px-4 py-2 bg-brand-teal-600 hover:bg-brand-teal-700 text-white rounded-lg transition-colors"
+                  disabled={loading}
+                >
+                  <Plus size={20} weight="bold" />
+                </button>
+              </div>
+              <ul className="space-y-2">
+                {bijzonderheden.map((bijzonderheid, index) => (
+                  <li key={index} className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-700">{bijzonderheid}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeBijzonderheid(index)}
+                      className="p-1 hover:bg-red-100 rounded transition-colors"
+                      disabled={loading}
+                    >
+                      <X size={16} className="text-red-600" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews & Display - Identiek aan vast contract */}
         <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
           <h2 className="text-xl font-bold text-brand-navy-500 mb-4">Reviews & weergave</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Rating */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-brand-navy-500">Rating (0-5)</label>
-              <input {...register('rating', { valueAsNumber: true })} type="number" step="0.1" min="0" max="5" placeholder="4.5" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Rating (0-5)
+              </label>
+              <input
+                {...register('rating', { valueAsNumber: true })}
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+                placeholder="4.5"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              />
             </div>
 
+            {/* Aantal reviews */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-brand-navy-500">Aantal reviews</label>
-              <input {...register('aantal_reviews', { valueAsNumber: true })} type="number" min="0" placeholder="123" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Aantal reviews
+              </label>
+              <input
+                {...register('aantal_reviews', { valueAsNumber: true })}
+                type="number"
+                min="0"
+                placeholder="123"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              />
             </div>
 
+            {/* Volgorde */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-brand-navy-500">Volgorde</label>
-              <input {...register('volgorde', { valueAsNumber: true })} type="number" min="0" placeholder="0" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all" disabled={loading} />
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Volgorde
+              </label>
+              <input
+                {...register('volgorde', { valueAsNumber: true })}
+                type="number"
+                min="0"
+                placeholder="0"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              />
+              <p className="text-xs text-gray-500">Lagere nummers verschijnen eerst</p>
             </div>
 
             {/* Zichtbaar bij teruglevering */}
@@ -550,27 +983,56 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
             </div>
           </div>
 
+          {/* Status checkboxes */}
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-3">
-              <input {...register('actief')} type="checkbox" id="actief_maat" className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2" disabled={loading} />
-              <label htmlFor="actief_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">Contract is actief (zichtbaar op website)</label>
+              <input
+                {...register('actief')}
+                type="checkbox"
+                id="actief_maat"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
+                disabled={loading}
+              />
+              <label htmlFor="actief_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
+                Contract is actief (zichtbaar op website)
+              </label>
             </div>
 
             <div className="flex items-center gap-3">
-              <input {...register('aanbevolen')} type="checkbox" id="aanbevolen_maat" className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2" disabled={loading} />
-              <label htmlFor="aanbevolen_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">Markeer als aanbevolen contract</label>
+              <input
+                {...register('aanbevolen')}
+                type="checkbox"
+                id="aanbevolen_maat"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
+                disabled={loading}
+              />
+              <label htmlFor="aanbevolen_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
+                Markeer als aanbevolen contract
+              </label>
             </div>
 
             <div className="flex items-center gap-3">
-              <input {...register('populair')} type="checkbox" id="populair_maat" className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2" disabled={loading} />
-              <label htmlFor="populair_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">Markeer als populair contract</label>
+              <input
+                {...register('populair')}
+                type="checkbox"
+                id="populair_maat"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
+                disabled={loading}
+              />
+              <label htmlFor="populair_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
+                Markeer als populair contract
+              </label>
             </div>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-4 bg-white rounded-xl border-2 border-gray-200 p-6">
-          <button type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50"
+          >
             {loading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -583,7 +1045,10 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
               </>
             )}
           </button>
-          <Link href="/admin/contracten" className="px-6 py-3 text-gray-700 hover:bg-gray-100 font-medium rounded-lg transition-all">
+          <Link
+            href="/admin/contracten"
+            className="px-6 py-3 text-gray-700 hover:bg-gray-100 font-medium rounded-lg transition-all"
+          >
             Annuleren
           </Link>
         </div>
@@ -591,4 +1056,3 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
     </div>
   )
 }
-

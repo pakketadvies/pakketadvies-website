@@ -97,22 +97,38 @@ export interface ContractDetailsDynamisch {
 export interface ContractDetailsMaatwerk {
   contract_id: string
   
-  // Drempels
-  min_verbruik_elektriciteit: number | null
-  min_verbruik_gas: number | null
+  // Identiek aan vast contract
+  looptijd: 1 | 2 | 3 | 5
   
-  // Vastrechten (apart voor stroom en gas) - optioneel voor maatwerk
-  vastrecht_stroom_maand: number | null
-  vastrecht_gas_maand: number | null
-  vaste_kosten_maand: number | null // Deprecated
+  // Tarieven (altijd alle 3 invullen)
+  tarief_elektriciteit_enkel: number | null // Voor enkele meters
+  tarief_elektriciteit_normaal: number | null // Voor dubbele meters (dag)
+  tarief_elektriciteit_dal: number | null // Voor dubbele meters (nacht)
+  tarief_gas: number | null
+  tarief_teruglevering_kwh: number // Kosten per kWh teruglevering (voor zonnepanelen)
   
-  // Contact
+  // Vastrechten (apart voor stroom en gas)
+  vastrecht_stroom_maand: number
+  vastrecht_gas_maand: number
+  vaste_kosten_maand: number | null // Deprecated, gebruik vastrecht_stroom_maand + vastrecht_gas_maand
+  
+  // Eigenschappen
+  groene_energie: boolean
+  prijsgarantie: boolean
+  opzegtermijn: number
+  
+  // Drempels (uniek voor maatwerk)
+  min_verbruik_elektriciteit: number | null // Minimaal verbruik in kWh/jaar om zichtbaar te zijn
+  min_verbruik_gas: number | null // Minimaal verbruik in m³/jaar om zichtbaar te zijn
+  
+  // Contact (optioneel, voor maatwerk specifiek)
   custom_tekst: string | null
   contact_email: string | null
   contact_telefoon: string | null
   
   // Display
   voorwaarden: string[]
+  bijzonderheden: string[]
   rating: number
   aantal_reviews: number
   

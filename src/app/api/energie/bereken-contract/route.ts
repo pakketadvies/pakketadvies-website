@@ -60,6 +60,8 @@ export async function POST(request: Request) {
     const terugleveringKwh = terugleveringJaar || 0
     const totaalGas = gas || 0
     const isDynamisch = contractType === 'dynamisch'
+    // Maatwerkcontracten worden behandeld als vaste contracten (met alle tarieven)
+    const isVastOfMaatwerk = contractType === 'vast' || contractType === 'maatwerk'
     
     // 1. NETBEHEERDER LOOKUP op basis van postcode
     const cleanedPostcode = postcode.replace(/\s/g, '').toUpperCase()
@@ -300,12 +302,12 @@ export async function POST(request: Request) {
           { status: 500 }
         )
       }
-    } else {
+    } else if (isVastOfMaatwerk) {
     
       // ============================================
-      // VAST CONTRACT BEREKENING
+      // VAST OF MAATWERK CONTRACT BEREKENING
       // ============================================
-      console.log('📋 VAST CONTRACT - Berekenen met vaste tarieven...')
+      console.log(`📋 ${contractType === 'maatwerk' ? 'MAATWERK' : 'VAST'} CONTRACT - Berekenen met vaste tarieven...`)
       
       // SALDERINGSREGELING voor vaste contracten
       let nettoElektriciteitNormaal = elektriciteitNormaal

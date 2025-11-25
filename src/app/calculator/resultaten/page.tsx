@@ -159,9 +159,96 @@ const berekenContractKostenVereenvoudigd = (
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
     
-  } else if (contract.type === 'maatwerk') {
-    // No price calculation for maatwerk
-    return { maandbedrag: 0, jaarbedrag: 0, besparing: 0 }
+  } else if (contract.type === 'maatwerk' && contract.details_maatwerk) {
+    // Maatwerkcontracten worden behandeld als vaste contracten
+    const details = contract.details_maatwerk
+    const tarief_elektriciteit_enkel = details.tarief_elektriciteit_enkel
+    const tarief_elektriciteit_normaal = details.tarief_elektriciteit_normaal
+    const tarief_elektriciteit_dal = details.tarief_elektriciteit_dal
+    const tarief_gas = details.tarief_gas
+    const tarief_teruglevering_kwh = details.tarief_teruglevering_kwh || 0
+    const vastrecht_stroom_maand = details.vastrecht_stroom_maand || 4.00
+    const vastrecht_gas_maand = details.vastrecht_gas_maand || 4.00
+    
+    // SALDERING (identiek aan vast contract)
+    let nettoElektriciteitNormaal = verbruikElektriciteitNormaal
+    let nettoElektriciteitDal = verbruikElektriciteitDal || 0
+    
+    if (terugleveringJaar > 0) {
+      if (heeftEnkeleMeter) {
+        const totaalVerbruik = verbruikElektriciteitNormaal
+        nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringJaar)
+      } else {
+        const terugleveringNormaal = terugleveringJaar / 2
+        const terugleveringDal = terugleveringJaar / 2
+        
+        let normaal_na_aftrek = verbruikElektriciteitNormaal - terugleveringNormaal
+        let dal_na_aftrek = (verbruikElektriciteitDal || 0) - terugleveringDal
+        
+        if (normaal_na_aftrek < 0) {
+          const overschot_normaal = -normaal_na_aftrek
+          dal_na_aftrek = Math.max(0, dal_na_aftrek - overschot_normaal)
+          normaal_na_aftrek = 0
+        } else if (dal_na_aftrek < 0) {
+          const overschot_dal = -dal_na_aftrek
+          normaal_na_aftrek = Math.max(0, normaal_na_aftrek - overschot_dal)
+          dal_na_aftrek = 0
+        }
+        
+        nettoElektriciteitNormaal = Math.max(0, normaal_na_aftrek)
+        nettoElektriciteitDal = Math.max(0, dal_na_aftrek)
+      }
+    }
+    
+    // BEREKEN KOSTEN (identiek aan vast contract)
+    let totaalJaar = 0
+    
+    if (heeftEnkeleMeter && tarief_elektriciteit_enkel) {
+      totaalJaar = 
+        (nettoElektriciteitNormaal * tarief_elektriciteit_enkel) +
+        (verbruikGas * (tarief_gas || 0)) +
+        ((vastrecht_stroom_maand * 12)) +
+        (verbruikGas > 0 ? (vastrecht_gas_maand * 12) : 0)
+    } else if (!heeftEnkeleMeter && tarief_elektriciteit_normaal && tarief_elektriciteit_dal) {
+      totaalJaar = 
+        (nettoElektriciteitNormaal * tarief_elektriciteit_normaal) +
+        (nettoElektriciteitDal * tarief_elektriciteit_dal) +
+        (verbruikGas * (tarief_gas || 0)) +
+        ((vastrecht_stroom_maand * 12)) +
+        (verbruikGas > 0 ? (vastrecht_gas_maand * 12) : 0)
+    } else {
+      const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
+      const tariefElektriciteit = tarief_elektriciteit_enkel || tarief_elektriciteit_normaal || 0
+      totaalJaar = 
+        (totaalElektriciteit * tariefElektriciteit) +
+        (verbruikGas * (tarief_gas || 0)) +
+        ((vastrecht_stroom_maand * 12)) +
+        (verbruikGas > 0 ? (vastrecht_gas_maand * 12) : 0)
+    }
+    
+    // TERUGLEVERKOSTEN toevoegen
+    if (terugleveringJaar > 0 && tarief_teruglevering_kwh) {
+      totaalJaar += terugleveringJaar * tarief_teruglevering_kwh
+    }
+    
+    // Energiebelasting en netbeheerkosten (vereenvoudigd)
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
+    const ebElektriciteit = totaalElektriciteit * 0.10154
+    const ebGas = verbruikGas * 0.57816
+    const vermindering = 524.95
+    const netbeheerElektriciteit = 430.00
+    const netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
+    const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
+    totaalJaar += geschatteExtraKosten
+    
+    const maandbedrag = Math.round(totaalJaar / 12)
+    const jaarbedrag = Math.round(totaalJaar)
+    const totaalElektriciteitVoorBesparing = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteitVoorBesparing * 0.35) + (verbruikGas * 1.50) + 700) / 12)
+    const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+    
+    return { maandbedrag, jaarbedrag, besparing }
   }
 
   const maandbedrag = Math.round(totaalJaar / 12)
@@ -184,10 +271,7 @@ const transformContractToOptie = (
   heeftEnkeleMeter: boolean = false,
   terugleveringJaar: number = 0 // NIEUW
 ): ContractOptie | null => {
-  // Skip maatwerk contracts in standard listing
-  if (contract.type === 'maatwerk') {
-    return null
-  }
+  // Maatwerkcontracten worden nu getoond, maar worden gefilterd op min_verbruik in loadResultaten
 
   // Gebruik exacte bedragen als beschikbaar, anders fallback naar vereenvoudigde berekening
   let maandbedrag: number
@@ -228,8 +312,8 @@ const transformContractToOptie = (
       website: leverancier.website || '',
       overLeverancier: leverancier.over_leverancier || undefined,
     },
-    type: contract.type,
-    looptijd: contract.type === 'vast' ? details.looptijd : undefined,
+    type: contract.type === 'maatwerk' ? 'vast' : contract.type, // Maatwerk wordt getoond als vast
+    looptijd: (contract.type === 'vast' || contract.type === 'maatwerk') ? details.looptijd : undefined,
     maandbedrag,
     jaarbedrag,
     tariefElektriciteit: details.tarief_elektriciteit_normaal || details.opslag_elektriciteit_normaal || 0,
@@ -371,10 +455,29 @@ function ResultatenContent() {
       const contractenMetKosten = await Promise.all(
         contracten.map(async (contract: any) => {
           try {
-            // Skip maatwerk
-            if (contract.type === 'maatwerk') return null
+            const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
             
-            const details = contract.details_vast || contract.details_dynamisch || {}
+            // Filter maatwerkcontracten op minimale drempelwaarden
+            if (contract.type === 'maatwerk' && contract.details_maatwerk) {
+              const maatwerkDetails = contract.details_maatwerk
+              const totaalElektriciteit = elektriciteitNormaal + elektriciteitDal
+              
+              // Check minimale drempelwaarde elektriciteit
+              if (maatwerkDetails.min_verbruik_elektriciteit !== null && 
+                  maatwerkDetails.min_verbruik_elektriciteit !== undefined &&
+                  totaalElektriciteit < maatwerkDetails.min_verbruik_elektriciteit) {
+                return null // Contract niet zichtbaar, klant voldoet niet aan minimale drempel
+              }
+              
+              // Check minimale drempelwaarde gas
+              if (maatwerkDetails.min_verbruik_gas !== null && 
+                  maatwerkDetails.min_verbruik_gas !== undefined &&
+                  totaalGas > 0 && // Alleen checken als er gasverbruik is
+                  totaalGas < maatwerkDetails.min_verbruik_gas) {
+                return null // Contract niet zichtbaar, klant voldoet niet aan minimale drempel
+              }
+            }
+            
             
             // Bereken exacte kosten via API
             // BELANGRIJK: gebruik USER input voor metertype, niet contract details!
@@ -396,7 +499,7 @@ function ResultatenContent() {
                 tariefElektriciteitDal: details.tarief_elektriciteit_dal || 0,
                 tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel || 0,
                 tariefGas: details.tarief_gas || details.opslag_gas || 0,
-                tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0, // NIEUW: teruglevertarief (alleen vast)
+                tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0, // Teruglevertarief (vast en maatwerk)
                 // Dynamische contract opslagen
                 opslagElektriciteit: details.opslag_elektriciteit || details.opslag_elektriciteit_normaal || 0,
                 opslagGas: details.opslag_gas || 0,
@@ -425,7 +528,7 @@ function ResultatenContent() {
         })
       )
       
-      // Filter null values (maatwerk)
+      // Filter null values (maatwerk die niet voldoen aan drempelwaarden)
       let validContracten = contractenMetKosten.filter((c: any) => c !== null)
       
       // Filter op basis van teruglevering
