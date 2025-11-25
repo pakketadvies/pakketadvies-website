@@ -86,11 +86,13 @@ export default function TarievenPage() {
               .from('netbeheer_tarieven_elektriciteit')
               .select('id', { count: 'exact', head: true })
               .eq('netbeheerder_id', nb.id)
+              .eq('jaar', 2025)
               .eq('actief', true),
             supabase
               .from('netbeheer_tarieven_gas')
               .select('id', { count: 'exact', head: true })
               .eq('netbeheerder_id', nb.id)
+              .eq('jaar', 2025)
               .eq('actief', true),
           ])
 

@@ -84,7 +84,7 @@ export default function NetbeheerTarievenPage() {
       ? 'aansluitwaarden_elektriciteit'
       : 'aansluitwaarden_gas'
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from(table)
       .select(`
         *,
@@ -92,7 +92,13 @@ export default function NetbeheerTarievenPage() {
       `)
       .eq('netbeheerder_id', selectedNetbeheerder)
       .eq('jaar', 2025)
+      .eq('actief', true)
       .order('aansluitwaarde.volgorde', { ascending: true })
+    
+    if (error) {
+      console.error('Error fetching tarieven:', error)
+      return
+    }
 
     if (data) {
       setTarieven(data as any)
