@@ -182,39 +182,123 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
         'application/msword'
       )
 
+      console.log('📤 Starting upload:', { fileName, filePath, fileSize: file.size, contentType, docType })
+
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        console.error('❌ Not authenticated:', authError)
+        throw new Error('Je bent niet ingelogd. Log opnieuw in en probeer het opnieuw.')
+      }
+      console.log('✅ User authenticated:', user.email)
+
       // Upload to storage - try 'documents' bucket first, fallback to 'logos'
       let bucket = 'documents'
-      let { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          contentType,
-        })
-
-      // Fallback to logos bucket if documents doesn't exist
-      if (uploadError && uploadError.message?.includes('Bucket not found')) {
-        bucket = 'logos'
-        const retryResult = await supabase.storage
+      let uploadData: any = null
+      let uploadError: any = null
+      
+      try {
+        const uploadResult = await supabase.storage
           .from(bucket)
           .upload(filePath, file, {
             contentType,
+            upsert: false,
           })
-        uploadError = retryResult.error
+        
+        uploadData = uploadResult.data
+        uploadError = uploadResult.error
+        console.log('📤 Upload result (documents bucket):', { uploadData, uploadError })
+      } catch (err: any) {
+        uploadError = err
+        console.error('❌ Upload exception (documents bucket):', err)
       }
 
-      if (uploadError) throw uploadError
+      // Fallback to logos bucket if documents doesn't exist
+      if (uploadError) {
+        console.log('⚠️ Upload error detected:', {
+          message: uploadError.message,
+          statusCode: uploadError.statusCode,
+          error: uploadError
+        })
+        
+        if (uploadError.message?.includes('Bucket not found') || 
+            uploadError.message?.includes('not found') ||
+            uploadError.statusCode === '404' ||
+            uploadError.message?.includes('The resource was not found')) {
+          console.log('🔄 Falling back to logos bucket...')
+          bucket = 'logos'
+          
+          try {
+            const retryResult = await supabase.storage
+              .from(bucket)
+              .upload(filePath, file, {
+                contentType,
+                upsert: false,
+              })
+            uploadError = retryResult.error
+            uploadData = retryResult.data
+            console.log('📤 Upload result (logos bucket):', { uploadData, uploadError })
+          } catch (retryErr: any) {
+            uploadError = retryErr
+            console.error('❌ Retry upload exception:', retryErr)
+          }
+        }
+      }
+
+      if (uploadError) {
+        console.error('❌ Upload failed:', {
+          message: uploadError.message,
+          statusCode: uploadError.statusCode,
+          statusCode_alt: uploadError.status,
+          error: uploadError,
+          name: uploadError.name,
+          stack: uploadError.stack
+        })
+        
+        // Try to extract more detailed error message
+        let errorMsg = uploadError.message || uploadError.error || 'Onbekende fout'
+        
+        // Check for common error codes
+        if (uploadError.statusCode === 400 || uploadError.status === 400) {
+          errorMsg = `Bad Request (400): ${errorMsg}. Mogelijke oorzaken: bucket bestaat niet, RLS policy blokkeert upload, of bestandstype niet toegestaan.`
+        } else if (uploadError.statusCode === 403 || uploadError.status === 403) {
+          errorMsg = `Forbidden (403): ${errorMsg}. Je hebt mogelijk geen rechten om te uploaden.`
+        } else if (uploadError.statusCode === 404 || uploadError.status === 404) {
+          errorMsg = `Not Found (404): ${errorMsg}. De bucket bestaat mogelijk niet.`
+        }
+        
+        throw new Error(`Upload mislukt: ${errorMsg}`)
+      }
+
+      if (!uploadData || !uploadData.path) {
+        console.error('❌ No upload data returned:', uploadData)
+        throw new Error('Upload mislukt: Geen data ontvangen van server')
+      }
 
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath)
 
+      console.log('✅ Upload successful!', { url: urlData.publicUrl, bucket, filePath })
+
       // Add to voorwaarden
-      setVoorwaarden([...voorwaarden, {
+      const newVoorwaarde = {
         naam: file.name.replace(/\.(pdf|doc|docx)$/i, ''),
         url: urlData.publicUrl,
         type: docType
-      }])
+      }
+      
+      console.log('➕ Adding to voorwaarden:', newVoorwaarde)
+      setVoorwaarden([...voorwaarden, newVoorwaarde])
+      console.log('✅ Voorwaarde toegevoegd aan lijst. Totaal voorwaarden:', voorwaarden.length + 1)
     } catch (err: any) {
-      setError(err.message || 'Upload mislukt')
+      console.error('❌ Upload error caught:', err)
+      const errorMessage = err?.message || err?.error?.message || 'Upload mislukt. Controleer de browser console voor meer details.'
+      setError(errorMessage)
+      // Keep error visible for a bit longer
+      setTimeout(() => {
+        // Error will stay visible until next upload or manual clear
+      }, 5000)
     } finally {
       setUploadingDocument(false)
       // Reset file input
@@ -360,8 +444,23 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-            {error}
+          <div className="p-4 bg-red-50 border-2 border-red-300 rounded-lg text-sm text-red-700 font-medium">
+            <div className="flex items-start gap-2">
+              <span className="text-red-600 font-bold">⚠️</span>
+              <div className="flex-1">
+                <strong>Fout:</strong> {error}
+                <br />
+                <span className="text-xs text-red-600 mt-1 block">Check de browser console (F12 → Console tab) voor meer details</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="text-red-600 hover:text-red-800"
+                aria-label="Sluiten"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
         )}
 
