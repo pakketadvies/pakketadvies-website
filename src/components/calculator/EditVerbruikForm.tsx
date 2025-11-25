@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Lightning, Flame, MapPin, Plugs, Sun, Check, X } from '@phosphor-icons/react'
+import { Lightning, Flame, MapPin, Plugs, Sun, Check, X, CheckCircle, XCircle } from '@phosphor-icons/react'
 import type { VerbruikData } from '@/types/calculator'
 
 interface EditVerbruikFormProps {
@@ -15,6 +15,11 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   // Address lookup states
   const [loadingAddress, setLoadingAddress] = useState(false)
   const [addressError, setAddressError] = useState<string>('')
+  const [checkingAddressType, setCheckingAddressType] = useState(false)
+  const [addressTypeResult, setAddressTypeResult] = useState<{
+    type: 'particulier' | 'zakelijk' | 'error';
+    message: string;
+  } | null>(null)
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -49,6 +54,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     }
     
     setAddressError('')
+    setAddressTypeResult(null) // Clear BAG API result
     // Clear addressType omdat adres is gewijzigd
     const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
     setFormData(newData)
@@ -97,6 +103,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         
         if (data.error) {
           setAddressError(data.error)
+          setAddressTypeResult(null) // Clear BAG API result
           // Clear addressType bij error
           const newData = { ...formData, addressType: null }
           setFormData(newData)
@@ -116,6 +123,9 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
           lastLookup.current = lookupKey
 
           // NIEUW: BAG API woonfunctie check
+          setCheckingAddressType(true);
+          setAddressTypeResult(null);
+          
           try {
             const bagResponse = await fetch('/api/adres-check', {
               method: 'POST',
@@ -124,6 +134,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
             });
 
             const bagResult = await bagResponse.json();
+            setAddressTypeResult(bagResult);
             
             // Update addressType in formData
             if (bagResult.type !== 'error') {
@@ -137,14 +148,21 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
             }
           } catch (error) {
             console.error('BAG API check error:', error);
+            setAddressTypeResult({
+              type: 'error',
+              message: 'Kon adres type niet controleren'
+            });
             // Bij error, clear addressType
             const updatedData = { ...newData, addressType: null };
             setFormData(updatedData);
             onChange(updatedData);
+          } finally {
+            setCheckingAddressType(false);
           }
         }
       } else {
         setAddressError('Adres niet gevonden')
+        setAddressTypeResult(null) // Clear BAG API result
         // Clear addressType bij error
         const newData = { ...formData, addressType: null }
         setFormData(newData)
@@ -210,21 +228,71 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
             </div>
           </div>
 
-          {loadingAddress && (
+          {/* Loading state voor postcode API */}
+          {loadingAddress && !checkingAddressType && (
             <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
               <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
               <span>Adres opzoeken...</span>
             </div>
           )}
 
-          {formData.leveringsadressen[0]?.straat && formData.leveringsadressen[0]?.plaats && !loadingAddress && (
-            <div className="flex items-center gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg text-sm animate-slide-down">
-              <Check weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
-              <span className="text-brand-teal-900 font-medium">
-                {formData.leveringsadressen[0].straat} {formData.leveringsadressen[0].huisnummer}
-                {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
-              </span>
+          {/* Loading state voor BAG API check */}
+          {checkingAddressType && (
+            <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
+              <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+              <span>Bezig met adrescontrole...</span>
             </div>
+          )}
+
+          {/* Gecombineerde status: BAG API resultaat (prioriteit) of postcode API success */}
+          {!checkingAddressType && !loadingAddress && (
+            <>
+              {/* BAG API resultaat heeft prioriteit */}
+              {addressTypeResult ? (
+                <div className={`flex items-start gap-2 p-3 rounded-lg animate-slide-down ${
+                  addressTypeResult.type === 'error'
+                    ? 'bg-red-50 border border-red-200'
+                    : addressTypeResult.type === 'particulier'
+                    ? 'bg-green-50 border border-green-200'
+                    : 'bg-blue-50 border border-blue-200'
+                }`}>
+                  {addressTypeResult.type === 'error' ? (
+                    <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  ) : addressTypeResult.type === 'particulier' ? (
+                    <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  )}
+                  <div className={`text-sm ${
+                    addressTypeResult.type === 'error'
+                      ? 'text-red-900'
+                      : addressTypeResult.type === 'particulier'
+                      ? 'text-green-900'
+                      : 'text-blue-900'
+                  }`}>
+                    {/* Toon adres als beschikbaar */}
+                    {(formData.leveringsadressen[0]?.straat && formData.leveringsadressen[0]?.plaats) && (
+                      <div className="font-semibold mb-1">
+                        {formData.leveringsadressen[0].straat} {formData.leveringsadressen[0].huisnummer}
+                        {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
+                      </div>
+                    )}
+                    <div>{addressTypeResult.message}</div>
+                  </div>
+                </div>
+              ) : (
+                /* Fallback: alleen postcode API success (als BAG check nog niet gedaan) */
+                formData.leveringsadressen[0]?.straat && formData.leveringsadressen[0]?.plaats && (
+                  <div className="flex items-center gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg text-sm animate-slide-down">
+                    <Check weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
+                    <span className="text-brand-teal-900 font-medium">
+                      {formData.leveringsadressen[0].straat} {formData.leveringsadressen[0].huisnummer}
+                      {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
+                    </span>
+                  </div>
+                )
+              )}
+            </>
           )}
 
           {addressError && (
