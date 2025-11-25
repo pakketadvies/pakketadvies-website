@@ -100,6 +100,9 @@ export function QuickCalculator() {
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const aansluitwaardeTimer = useRef<NodeJS.Timeout | null>(null)
+  // Request counters voor race condition preventie
+  const requestCounter = useRef<number>(0)
+  const bagRequestCounter = useRef<number>(0)
   
   // Verbruik voor aansluitwaarde schatting
   const [verbruikWatched, setVerbruikWatched] = useState({ elektriciteitNormaal: 0, elektriciteitDal: 0, gasJaar: 0 })
@@ -230,6 +233,10 @@ export function QuickCalculator() {
       return // Skip, we hebben dit al opgezocht
     }
 
+    // Genereer unieke request ID voor race condition preventie
+    const currentRequestId = requestCounter.current + 1
+    requestCounter.current = currentRequestId
+
     const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
     
     setLoadingAddress(true)
@@ -245,6 +252,12 @@ export function QuickCalculator() {
       
       if (response.ok) {
         const data = await response.json()
+        
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current !== currentRequestId) {
+          console.log('Ignoring stale postcode API response')
+          return
+        }
         
         if (data.error) {
           // API geeft error terug (maar met 200 status)
@@ -271,10 +284,19 @@ export function QuickCalculator() {
         // Sla lookup key op
         lastLookup.current = lookupKey
 
-        // NIEUW: BAG API woonfunctie check
-        await checkAddressType(postcode, huisnummer, toevoeging)
+        // NIEUW: BAG API woonfunctie check (alleen als dit nog steeds de laatste request is)
+        if (requestCounter.current === currentRequestId) {
+          await checkAddressType(postcode, huisnummer, toevoeging)
+        }
       } else if (response.status === 404) {
         const errorData = await response.json()
+        
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current !== currentRequestId) {
+          console.log('Ignoring stale postcode API 404 response')
+          return
+        }
+        
         setAddressError(errorData.error || 'Adres niet gevonden')
         // Clear BAG API result omdat adres niet geldig is
         setAddressTypeResult(null)
@@ -286,18 +308,37 @@ export function QuickCalculator() {
         }])
       } else {
         console.error('Address API error:', response.status)
+        
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current !== currentRequestId) {
+          return
+        }
+        
         setAddressError('Kon adres niet ophalen')
       }
     } catch (error) {
       console.error('Address fetch exception:', error)
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (requestCounter.current !== currentRequestId) {
+        return
+      }
+      
       setAddressError('Fout bij ophalen adres')
     } finally {
-      setLoadingAddress(false)
+      // Alleen loading state updaten als dit nog steeds de laatste request is
+      if (requestCounter.current === currentRequestId) {
+        setLoadingAddress(false)
+      }
     }
   }, []) // LEGE dependency array - geen stale closures!
 
   // NIEUW: BAG API functie voor woonfunctie check
   const checkAddressType = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    // Genereer unieke request ID voor race condition preventie
+    const currentBagRequestId = bagRequestCounter.current + 1
+    bagRequestCounter.current = currentBagRequestId
+
     setCheckingAddressType(true);
     setAddressTypeResult(null);
 
@@ -309,6 +350,13 @@ export function QuickCalculator() {
       });
 
       const result = await response.json();
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (bagRequestCounter.current !== currentBagRequestId) {
+        console.log('Ignoring stale BAG API response')
+        return
+      }
+      
       setAddressTypeResult(result);
 
       // Als het een geldig adres is, sla het type op in de form state
@@ -318,12 +366,21 @@ export function QuickCalculator() {
       }
     } catch (error) {
       console.error('Address type check error:', error);
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (bagRequestCounter.current !== currentBagRequestId) {
+        return
+      }
+      
       setAddressTypeResult({
         type: 'error',
         message: 'Kon adres type niet controleren'
       });
     } finally {
-      setCheckingAddressType(false);
+      // Alleen loading state updaten als dit nog steeds de laatste request is
+      if (bagRequestCounter.current === currentBagRequestId) {
+        setCheckingAddressType(false);
+      }
     }
   }, [setValue]);
 

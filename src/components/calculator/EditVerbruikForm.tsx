@@ -22,6 +22,9 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   } | null>(null)
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  // Request counters voor race condition preventie
+  const requestCounter = useRef<number>(0)
+  const bagRequestCounter = useRef<number>(0)
 
   // Update form when currentData changes
   useEffect(() => {
@@ -86,6 +89,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
     if (lastLookup.current === lookupKey) return
 
+    // Genereer unieke request ID voor race condition preventie
+    const currentRequestId = requestCounter.current + 1
+    requestCounter.current = currentRequestId
+
     const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
     setLoadingAddress(true)
     setAddressError('')
@@ -100,6 +107,12 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
       
       if (response.ok) {
         const data = await response.json()
+        
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current !== currentRequestId) {
+          console.log('Ignoring stale postcode API response')
+          return
+        }
         
         if (data.error) {
           setAddressError(data.error)
@@ -122,45 +135,73 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
           onChange(newData)
           lastLookup.current = lookupKey
 
-          // NIEUW: BAG API woonfunctie check
-          setCheckingAddressType(true);
-          setAddressTypeResult(null);
-          
-          try {
-            const bagResponse = await fetch('/api/adres-check', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ postcode, huisnummer, toevoeging })
-            });
+          // NIEUW: BAG API woonfunctie check (alleen als dit nog steeds de laatste request is)
+          if (requestCounter.current === currentRequestId) {
+            // Genereer unieke request ID voor BAG API race condition preventie
+            const currentBagRequestId = bagRequestCounter.current + 1
+            bagRequestCounter.current = currentBagRequestId
 
-            const bagResult = await bagResponse.json();
-            setAddressTypeResult(bagResult);
+            setCheckingAddressType(true);
+            setAddressTypeResult(null);
             
-            // Update addressType in formData
-            if (bagResult.type !== 'error') {
-              const updatedData = { ...newData, addressType: bagResult.type };
-              setFormData(updatedData);
-              onChange(updatedData);
-            } else {
+            try {
+              const bagResponse = await fetch('/api/adres-check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postcode, huisnummer, toevoeging })
+              });
+
+              const bagResult = await bagResponse.json();
+              
+              // Check of dit nog steeds de laatste BAG request is (race condition preventie)
+              if (bagRequestCounter.current !== currentBagRequestId) {
+                console.log('Ignoring stale BAG API response')
+                return
+              }
+              
+              setAddressTypeResult(bagResult);
+              
+              // Update addressType in formData
+              if (bagResult.type !== 'error') {
+                const updatedData = { ...newData, addressType: bagResult.type };
+                setFormData(updatedData);
+                onChange(updatedData);
+              } else {
+                const updatedData = { ...newData, addressType: null };
+                setFormData(updatedData);
+                onChange(updatedData);
+              }
+            } catch (error) {
+              console.error('BAG API check error:', error);
+              
+              // Check of dit nog steeds de laatste BAG request is (race condition preventie)
+              if (bagRequestCounter.current !== currentBagRequestId) {
+                return
+              }
+              
+              setAddressTypeResult({
+                type: 'error',
+                message: 'Kon adres type niet controleren'
+              });
+              // Bij error, clear addressType
               const updatedData = { ...newData, addressType: null };
               setFormData(updatedData);
               onChange(updatedData);
+            } finally {
+              // Alleen loading state updaten als dit nog steeds de laatste request is
+              if (bagRequestCounter.current === currentBagRequestId) {
+                setCheckingAddressType(false);
+              }
             }
-          } catch (error) {
-            console.error('BAG API check error:', error);
-            setAddressTypeResult({
-              type: 'error',
-              message: 'Kon adres type niet controleren'
-            });
-            // Bij error, clear addressType
-            const updatedData = { ...newData, addressType: null };
-            setFormData(updatedData);
-            onChange(updatedData);
-          } finally {
-            setCheckingAddressType(false);
           }
         }
       } else {
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current !== currentRequestId) {
+          console.log('Ignoring stale postcode API error response')
+          return
+        }
+        
         setAddressError('Adres niet gevonden')
         setAddressTypeResult(null) // Clear BAG API result
         // Clear addressType bij error
@@ -170,9 +211,18 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
       }
     } catch (error) {
       console.error('Address lookup error:', error)
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (requestCounter.current !== currentRequestId) {
+        return
+      }
+      
       setAddressError('Er ging iets mis bij het opzoeken van het adres')
     } finally {
-      setLoadingAddress(false)
+      // Alleen loading state updaten als dit nog steeds de laatste request is
+      if (requestCounter.current === currentRequestId) {
+        setLoadingAddress(false)
+      }
     }
   }
 

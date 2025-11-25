@@ -90,6 +90,10 @@ export function VerbruikForm() {
   const lastLookup = useRef<{ [key: number]: string }>({})
   // Debounce timers
   const debounceTimers = useRef<{ [key: number]: NodeJS.Timeout }>({})
+  // Request counter voor race condition preventie (unieke ID per API call)
+  const requestCounter = useRef<{ [key: number]: number }>({})
+  // Request counter voor BAG API calls (race condition preventie)
+  const bagRequestCounter = useRef<{ [key: number]: number }>({})
   // Debounce timer voor aansluitwaarde schatting
   const aansluitwaardeTimer = useRef<NodeJS.Timeout | null>(null)
 
@@ -175,6 +179,10 @@ export function VerbruikForm() {
       return // Skip, we hebben dit al opgezocht
     }
 
+    // Genereer unieke request ID voor race condition preventie
+    const currentRequestId = (requestCounter.current[index] || 0) + 1
+    requestCounter.current[index] = currentRequestId
+
     const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
     
     setLoadingAddresses(prev => ({ ...prev, [index]: true }))
@@ -190,6 +198,12 @@ export function VerbruikForm() {
       
       if (response.ok) {
         const data = await response.json()
+        
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current[index] !== currentRequestId) {
+          console.log('Ignoring stale postcode API response')
+          return
+        }
         
         if (data.error) {
           // API geeft error terug (maar met 200 status)
@@ -220,10 +234,18 @@ export function VerbruikForm() {
         // Sla lookup key op
         lastLookup.current[index] = lookupKey
 
-        // NIEUW: BAG API woonfunctie check
-        await checkAddressType(postcode, huisnummer, toevoeging)
+        // NIEUW: BAG API woonfunctie check (alleen als dit nog steeds de laatste request is)
+        if (requestCounter.current[index] === currentRequestId) {
+          await checkAddressType(index, postcode, huisnummer, toevoeging)
+        }
       } else if (response.status === 404) {
         const errorData = await response.json()
+        
+        // Check of dit nog steeds de laatste request is (race condition preventie)
+        if (requestCounter.current[index] !== currentRequestId) {
+          console.log('Ignoring stale postcode API 404 response')
+          return
+        }
         
         // Check of het specifiek de toevoeging is die niet bestaat
         if (toevoeging && errorData.error && errorData.error.includes('Toevoeging')) {
@@ -264,9 +286,19 @@ export function VerbruikForm() {
         })
       }
       
-      setLoadingAddresses(prev => ({ ...prev, [index]: false }))
+      // Alleen loading state updaten als dit nog steeds de laatste request is
+      if (requestCounter.current[index] === currentRequestId) {
+        setLoadingAddresses(prev => ({ ...prev, [index]: false }))
+      }
     } catch (error) {
       console.error('Postcode API exception:', error)
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (requestCounter.current[index] !== currentRequestId) {
+        console.log('Ignoring stale postcode API exception')
+        return
+      }
+      
       setLoadingAddresses(prev => ({ ...prev, [index]: false }))
       
       // Clear oude data
@@ -283,7 +315,11 @@ export function VerbruikForm() {
   }, [setValue, clearErrors, setError])
 
   // NIEUW: BAG API functie voor woonfunctie check
-  const checkAddressType = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+  const checkAddressType = useCallback(async (index: number, postcode: string, huisnummer: string, toevoeging?: string) => {
+    // Genereer unieke request ID voor race condition preventie
+    const currentBagRequestId = (bagRequestCounter.current[index] || 0) + 1
+    bagRequestCounter.current[index] = currentBagRequestId
+
     setCheckingAddressType(true);
     setAddressTypeResult(null);
 
@@ -295,6 +331,13 @@ export function VerbruikForm() {
       });
 
       const result = await response.json();
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (bagRequestCounter.current[index] !== currentBagRequestId) {
+        console.log('Ignoring stale BAG API response')
+        return
+      }
+      
       setAddressTypeResult(result);
 
       // Als het een geldig adres is, sla het type op in de form state
@@ -304,12 +347,21 @@ export function VerbruikForm() {
       }
     } catch (error) {
       console.error('Address type check error:', error);
+      
+      // Check of dit nog steeds de laatste request is (race condition preventie)
+      if (bagRequestCounter.current[index] !== currentBagRequestId) {
+        return
+      }
+      
       setAddressTypeResult({
         type: 'error',
         message: 'Kon adres type niet controleren'
       });
     } finally {
-      setCheckingAddressType(false);
+      // Alleen loading state updaten als dit nog steeds de laatste request is
+      if (bagRequestCounter.current[index] === currentBagRequestId) {
+        setCheckingAddressType(false);
+      }
     }
   }, [setValue]);
 
