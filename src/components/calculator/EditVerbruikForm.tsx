@@ -49,7 +49,8 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     }
     
     setAddressError('')
-    const newData = { ...formData, leveringsadressen: [newAdres] }
+    // Clear addressType omdat adres is gewijzigd
+    const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
     setFormData(newData)
     onChange(newData)
     
@@ -96,11 +97,15 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         
         if (data.error) {
           setAddressError(data.error)
-        } else if (data.straat && data.plaats) {
+          // Clear addressType bij error
+          const newData = { ...formData, addressType: null }
+          setFormData(newData)
+          onChange(newData)
+        } else if (data.street && data.city) {
           const newAdres = { 
             ...formData.leveringsadressen[0],
-            straat: data.straat,
-            plaats: data.plaats,
+            straat: data.street,
+            plaats: data.city,
             postcode: postcodeClean,
             huisnummer: huisnummer,
             toevoeging: toevoeging || ''
@@ -109,9 +114,41 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
           setFormData(newData)
           onChange(newData)
           lastLookup.current = lookupKey
+
+          // NIEUW: BAG API woonfunctie check
+          try {
+            const bagResponse = await fetch('/api/adres-check', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ postcode, huisnummer, toevoeging })
+            });
+
+            const bagResult = await bagResponse.json();
+            
+            // Update addressType in formData
+            if (bagResult.type !== 'error') {
+              const updatedData = { ...newData, addressType: bagResult.type };
+              setFormData(updatedData);
+              onChange(updatedData);
+            } else {
+              const updatedData = { ...newData, addressType: null };
+              setFormData(updatedData);
+              onChange(updatedData);
+            }
+          } catch (error) {
+            console.error('BAG API check error:', error);
+            // Bij error, clear addressType
+            const updatedData = { ...newData, addressType: null };
+            setFormData(updatedData);
+            onChange(updatedData);
+          }
         }
       } else {
         setAddressError('Adres niet gevonden')
+        // Clear addressType bij error
+        const newData = { ...formData, addressType: null }
+        setFormData(newData)
+        onChange(newData)
       }
     } catch (error) {
       console.error('Address lookup error:', error)

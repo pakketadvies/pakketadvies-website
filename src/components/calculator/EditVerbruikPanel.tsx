@@ -53,7 +53,12 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
     }
     
     setAddressError('')
-    setFormData(prev => ({ ...prev, leveringsadressen: [newAdres] }))
+    // Clear addressType omdat adres is gewijzigd
+    setFormData(prev => ({ 
+      ...prev, 
+      leveringsadressen: [newAdres],
+      addressType: null 
+    }))
     setHasChanges(true)
     
     // Clear existing timeout
@@ -105,7 +110,8 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
               ...prev.leveringsadressen[0],
               straat: '',
               plaats: '',
-            }]
+            }],
+            addressType: null, // Clear address type bij error
           }))
           setLoadingAddress(false)
           return
@@ -121,6 +127,37 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
         }))
         
         lastLookup.current = lookupKey
+
+        // NIEUW: BAG API woonfunctie check
+        try {
+          const bagResponse = await fetch('/api/adres-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postcode, huisnummer, toevoeging })
+          });
+
+          const bagResult = await bagResponse.json();
+          
+          // Update addressType in formData
+          if (bagResult.type !== 'error') {
+            setFormData(prev => ({
+              ...prev,
+              addressType: bagResult.type
+            }));
+          } else {
+            setFormData(prev => ({
+              ...prev,
+              addressType: null
+            }));
+          }
+        } catch (error) {
+          console.error('BAG API check error:', error);
+          // Bij error, clear addressType
+          setFormData(prev => ({
+            ...prev,
+            addressType: null
+          }));
+        }
       } else if (response.status === 404) {
         const errorData = await response.json()
         setAddressError(errorData.error || 'Adres niet gevonden')
@@ -130,7 +167,8 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
             ...prev.leveringsadressen[0],
             straat: '',
             plaats: '',
-          }]
+          }],
+          addressType: null, // Clear address type bij error
         }))
       }
     } catch (error) {

@@ -196,6 +196,8 @@ export function VerbruikForm() {
           setError(`leveringsadressen.${index}.toevoeging` as any, {
             message: data.error
           })
+          // Clear BAG API result omdat adres niet geldig is
+          setAddressTypeResult(null)
           setLoadingAddresses(prev => ({ ...prev, [index]: false }))
           return
         }
@@ -234,7 +236,8 @@ export function VerbruikForm() {
           })
         }
         
-        // Clear oude data
+        // Clear oude data EN BAG API result omdat adres niet geldig is
+        setAddressTypeResult(null)
         setLeveringsadressen(prev => {
           const updated = [...prev]
           updated[index] = {
@@ -325,6 +328,9 @@ export function VerbruikForm() {
         }
         setValue(`leveringsadressen.${index}.straat`, '')
         setValue(`leveringsadressen.${index}.plaats`, '')
+        
+        // Clear BAG API result omdat adres is gewijzigd
+        setAddressTypeResult(null)
         
         // Reset lookup key zodat we opnieuw kunnen zoeken
         delete lastLookup.current[index]

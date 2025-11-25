@@ -249,6 +249,8 @@ export function QuickCalculator() {
         if (data.error) {
           // API geeft error terug (maar met 200 status)
           setAddressError(data.error)
+          // Clear BAG API result omdat adres niet geldig is
+          setAddressTypeResult(null)
           // Gebruik updater function om stale state te voorkomen
           setLeveringsadressen(prev => [{
             ...prev[0],
@@ -274,6 +276,8 @@ export function QuickCalculator() {
       } else if (response.status === 404) {
         const errorData = await response.json()
         setAddressError(errorData.error || 'Adres niet gevonden')
+        // Clear BAG API result omdat adres niet geldig is
+        setAddressTypeResult(null)
         // Clear address fields - gebruik updater function
         setLeveringsadressen(prev => [{
           ...prev[0],
@@ -336,6 +340,9 @@ export function QuickCalculator() {
     
     // Clear error when input changes
     setAddressError('')
+    
+    // Clear BAG API result omdat adres is gewijzigd
+    setAddressTypeResult(null)
     
     setLeveringsadressen([newAdres])
     
