@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { X, Download } from '@phosphor-icons/react'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -12,6 +13,10 @@ export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+  const pathname = usePathname()
+  const engagementTimer = useRef<NodeJS.Timeout | null>(null)
+  const scrollDepth = useRef(0)
+  const hasScrolled = useRef(false)
 
   useEffect(() => {
     // Check if app is already installed
@@ -20,28 +25,80 @@ export function InstallPrompt() {
       return
     }
 
-    // Check if already dismissed (localStorage)
-    const dismissed = localStorage.getItem('pwa-install-dismissed')
-    if (dismissed) {
+    // Check if already dismissed PERMANENTLY (localStorage)
+    const dismissed = localStorage.getItem('pwa-install-dismissed-permanent')
+    if (dismissed === 'true') {
       return
     }
+
+    // Check if dismissed temporarily (30 days)
+    const dismissedTemporary = localStorage.getItem('pwa-install-dismissed-temporary')
+    if (dismissedTemporary) {
+      const dismissedDate = parseInt(dismissedTemporary, 10)
+      const now = Date.now()
+      // If less than 30 days ago, don't show
+      if (now - dismissedDate < 30 * 24 * 60 * 60 * 1000) {
+        return
+      }
+      // If more than 30 days, remove the flag and allow showing again
+      localStorage.removeItem('pwa-install-dismissed-temporary')
+    }
+
+    // Don't show on calculator pages (users are busy filling forms)
+    if (pathname?.startsWith('/calculator')) {
+      return
+    }
+
+    // Track user engagement: scroll depth and time on site
+    const handleScroll = () => {
+      if (!hasScrolled.current) {
+        hasScrolled.current = true
+        const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
+        scrollDepth.current = Math.max(scrollDepth.current, scrollPercent)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Show prompt after a delay (better UX)
+      
+      // Only show after user has engaged:
+      // - At least 30 seconds on the site
+      // - AND (scrolled at least 25% OR been on site for 60 seconds)
+      let timeOnSite = 0
+      const checkEngagement = setInterval(() => {
+        timeOnSite += 1
+        
+        // Check engagement criteria
+        const hasEngaged = 
+          timeOnSite >= 30 && // At least 30 seconds
+          (scrollDepth.current >= 25 || timeOnSite >= 60) // Scrolled 25% OR 60 seconds total
+        
+        if (hasEngaged && !showPrompt) {
+          clearInterval(checkEngagement)
+          setShowPrompt(true)
+        }
+      }, 1000) // Check every second
+
+      // Cleanup after 5 minutes (don't show if user hasn't engaged)
       setTimeout(() => {
-        setShowPrompt(true)
-      }, 3000)
+        clearInterval(checkEngagement)
+      }, 5 * 60 * 1000)
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('scroll', handleScroll)
+      if (engagementTimer.current) {
+        clearInterval(engagementTimer.current)
+      }
     }
-  }, [])
+  }, [pathname, showPrompt])
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
@@ -58,6 +115,8 @@ export function InstallPrompt() {
       console.log('User accepted the install prompt')
       setShowPrompt(false)
       setDeferredPrompt(null)
+      // Mark as permanently dismissed (user installed it)
+      localStorage.setItem('pwa-install-dismissed-permanent', 'true')
     } else {
       console.log('User dismissed the install prompt')
       handleDismiss()
@@ -66,11 +125,8 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false)
-    localStorage.setItem('pwa-install-dismissed', 'true')
-    // Reset after 7 days
-    setTimeout(() => {
-      localStorage.removeItem('pwa-install-dismissed')
-    }, 7 * 24 * 60 * 60 * 1000)
+    // Store dismissal with timestamp (30 days)
+    localStorage.setItem('pwa-install-dismissed-temporary', Date.now().toString())
   }
 
   if (isInstalled || !showPrompt || !deferredPrompt) {
