@@ -609,6 +609,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                     <option value="3x50A">3x50A</option>
                     <option value="3x63A">3x63A</option>
                     <option value="3x80A">3x80A</option>
+                    <option value=">3x80A">Grootverbruik</option>
                   </select>
                 </div>
 
@@ -627,6 +628,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                       <option value="G10">G10</option>
                       <option value="G16">G16</option>
                       <option value="G25">G25</option>
+                      <option value=">G25">Grootverbruik</option>
                     </select>
                   </div>
                 )}
