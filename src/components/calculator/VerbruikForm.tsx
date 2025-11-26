@@ -603,12 +603,12 @@ export function VerbruikForm() {
           <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-            </div>
-            <div>
+          </div>
+          <div>
               <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Waar wordt de energie geleverd?</h3>
               <p className="text-xs md:text-sm text-gray-600">Vul je postcode en huisnummer in</p>
-            </div>
           </div>
+        </div>
 
         {leveringsadressen.map((adres, index) => (
           <div key={index} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3 md:p-6 space-y-3 md:space-y-4">
@@ -761,21 +761,21 @@ export function VerbruikForm() {
             <div className="flex items-center gap-2 md:gap-3">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
                 <Lightning weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-              </div>
-              <div>
+            </div>
+            <div>
                 <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
                 <p className="text-xs md:text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
-              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowHelpSchatten(true)}
-              className="flex items-center gap-1.5 md:gap-2 px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
-            >
-              <Lightbulb weight="duotone" className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="hidden md:inline">Help me schatten</span>
-            </button>
           </div>
+          <button
+            type="button"
+            onClick={() => setShowHelpSchatten(true)}
+              className="flex items-center gap-1.5 md:gap-2 px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
+          >
+              <Lightbulb weight="duotone" className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden md:inline">Help me schatten</span>
+          </button>
+        </div>
 
           <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
           {/* Desktop: grid voor normaal + dal naast elkaar */}
@@ -847,18 +847,18 @@ export function VerbruikForm() {
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
         <div className="space-y-3 md:space-y-4">
           <label className="flex items-center gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
-            <input
-              type="checkbox"
-              checked={heeftZonnepanelen}
-              onChange={(e) => {
-                setHeeftZonnepanelen(e.target.checked)
-                setValue('heeftZonnepanelen', e.target.checked)
-                if (!e.target.checked) {
-                  setValue('terugleveringJaar', null)
-                }
-              }}
+          <input
+            type="checkbox"
+            checked={heeftZonnepanelen}
+            onChange={(e) => {
+              setHeeftZonnepanelen(e.target.checked)
+              setValue('heeftZonnepanelen', e.target.checked)
+              if (!e.target.checked) {
+                setValue('terugleveringJaar', null)
+              }
+            }}
               className="w-4 h-4 md:w-5 md:h-5 rounded-md border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
-            />
+          />
           <Sun weight="duotone" className="w-5 h-5 md:w-6 md:h-6 text-brand-teal-600 flex-shrink-0" />
           <span className="text-sm md:text-base font-semibold text-brand-navy-500 group-hover:text-brand-teal-700 transition-colors">
             Ja, wij hebben zonnepanelen
@@ -903,16 +903,16 @@ export function VerbruikForm() {
           <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <Flame weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-            </div>
-            <div>
+          </div>
+          <div>
               <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Gasverbruik</h3>
               <p className="text-xs md:text-sm text-gray-600">Ook te vinden op je jaarafrekening</p>
-            </div>
           </div>
+        </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            {!geenGasaansluiting && (
-              <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
+          {!geenGasaansluiting && (
+            <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
                 <Input
                   label="Gasverbruik per jaar"
                   type="number"
@@ -959,12 +959,12 @@ export function VerbruikForm() {
           <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <Gauge weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-            </div>
-            <div>
+          </div>
+          <div>
               <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Type meter</h3>
               <p className="text-xs md:text-sm text-gray-600">Helpt ons de beste contracten te vinden</p>
-            </div>
           </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
           {[
@@ -1007,12 +1007,12 @@ export function VerbruikForm() {
           <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
               <Plugs weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-            </div>
-            <div>
+          </div>
+          <div>
               <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
               <p className="text-xs md:text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
-            </div>
           </div>
+        </div>
 
           <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">

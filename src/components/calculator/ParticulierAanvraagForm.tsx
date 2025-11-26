@@ -90,9 +90,9 @@ const particulierAanvraagSchema = z.object({
   correspondentiePostcode: z.string().optional(),
   correspondentiePlaats: z.string().optional(),
   
-  // Akkoorden
-  voorwaarden: z.boolean().refine(val => val === true, 'Je moet akkoord gaan met de voorwaarden'),
-  privacy: z.boolean().refine(val => val === true, 'Je moet akkoord gaan met het privacybeleid'),
+  // Akkoorden (automatisch true, geen checkboxes meer nodig)
+  voorwaarden: z.boolean().optional(),
+  privacy: z.boolean().optional(),
   herinneringContract: z.boolean(),
   nieuwsbrief: z.boolean(),
 }).refine(data => data.emailadres === data.herhaalEmailadres, {
@@ -185,8 +185,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       wanneerOverstappen: 'zo_snel_mogelijk',
       rekeningOpAndereNaam: false,
       anderCorrespondentieadres: false,
-      voorwaarden: false,
-      privacy: false,
+      voorwaarden: true,
+      privacy: true,
       herinneringContract: false,
       nieuwsbrief: false,
     },
@@ -1073,45 +1073,28 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
           </div>
 
           <div className="space-y-3 md:space-y-4">
-            {/* Checkboxes - alleen zichtbaar op desktop */}
-            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
-              <input
-                type="checkbox"
-                {...register('voorwaarden')}
-                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
-              />
-              <div>
-                <span className="text-xs md:text-sm font-medium text-brand-navy-500">
-                  Door aan te melden gaat u akkoord met de voorwaarden en sluit u een overeenkomst met betalingsverplichting met {leverancierNaam}. 
-                  U heeft 14 kalenderdagen bedenktijd na ontvangst contract leverancier.
-                </span>
+            {/* Akkoord tekst - zonder checkboxes, zichtbaar op mobiel en desktop */}
+            <div className="p-3 md:p-4 rounded-xl bg-gray-50 border border-gray-200">
+              <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
+                Door aan te melden gaat u akkoord met de{' '}
                 <button
                   type="button"
-                  className="block text-xs text-brand-teal-500 hover:underline mt-1"
+                  className="text-brand-teal-600 hover:underline font-medium"
                 >
-                  Lees algemene voorwaarden
+                  algemene voorwaarden
                 </button>
-              </div>
-            </label>
-
-            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
-              <input
-                type="checkbox"
-                {...register('privacy')}
-                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
-              />
-              <div>
-                <span className="text-xs md:text-sm font-medium text-brand-navy-500">
-                  Ik geef toestemming voor verwerking van mijn gegevens conform het privacybeleid
-                </span>
+                {' '}en sluit u een overeenkomst met betalingsverplichting met {leverancierNaam}. 
+                U heeft 14 kalenderdagen bedenktijd na ontvangst contract leverancier. 
+                U geeft tevens toestemming voor verwerking van uw gegevens conform het{' '}
                 <button
                   type="button"
-                  className="block text-xs text-brand-teal-500 hover:underline mt-1"
+                  className="text-brand-teal-600 hover:underline font-medium"
                 >
-                  Lees privacybeleid
+                  privacybeleid
                 </button>
-              </div>
-            </label>
+                .
+              </p>
+            </div>
 
             {/* Aanmelden button - boven security card op mobiel, naast terug op desktop */}
             <div className="md:hidden mb-3">

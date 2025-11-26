@@ -83,9 +83,9 @@ const bedrijfsgegevensSchema = z.object({
   correspondentiePostcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/i, 'Vul een geldige postcode in'),
   correspondentiePlaats: z.string().min(2, 'Vul een plaatsnaam in'),
   
-  // Akkoorden
-  voorwaarden: z.boolean().refine(val => val === true, 'Je moet akkoord gaan met de voorwaarden'),
-  privacy: z.boolean().refine(val => val === true, 'Je moet akkoord gaan met het privacybeleid'),
+  // Akkoorden (automatisch true, geen checkboxes meer nodig)
+  voorwaarden: z.boolean().optional(),
+  privacy: z.boolean().optional(),
   herinneringContract: z.boolean(),
   nieuwsbrief: z.boolean(),
 }).refine(data => data.email === data.herhaalEmail, {
@@ -198,8 +198,8 @@ function BedrijfsgegevensFormContent() {
       heeftVerblijfsfunctie: true,
       gaatVerhuizen: false,
       wanneerOverstappen: 'zo_snel_mogelijk',
-      voorwaarden: false,
-      privacy: false,
+      voorwaarden: true,
+      privacy: true,
       herinneringContract: false,
       nieuwsbrief: false,
     },
@@ -468,16 +468,16 @@ function BedrijfsgegevensFormContent() {
     setIsSubmitting(true)
     try {
       // Transform form data to BedrijfsGegevens format
-      setBedrijfsgegevens({
+    setBedrijfsgegevens({
         bedrijfsnaam: data.bedrijfsnaam,
         contactpersoon: `${data.voornaam} ${data.tussenvoegsel ? data.tussenvoegsel + ' ' : ''}${data.achternaam}`.trim(),
         email: data.email,
         telefoon: data.telefoon,
         kvkNummer: kvkNummer || data.kvkNummer || undefined,
         typeBedrijf: data.typeBedrijf || 'overig',
-      })
-      // Ga naar bevestigingspagina (contract is al gekozen op resultaten pagina)
-      router.push('/contract/bevestiging')
+    })
+    // Ga naar bevestigingspagina (contract is al gekozen op resultaten pagina)
+    router.push('/contract/bevestiging')
     } catch (error) {
       console.error('Error submitting form:', error)
     } finally {
@@ -499,12 +499,12 @@ function BedrijfsgegevensFormContent() {
       <div className="text-center mb-4 md:mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2">
           Meld u nu aan bij {leverancierNaam}
-        </h2>
+            </h2>
         <p className="text-sm md:text-base text-gray-600">
           Meld u nu aan voor {contractNaam}. {leverancierNaam} verzorgt uw volledige overstap. 
           Uw bedrijf komt geen moment zonder stroom en gas te zitten.
         </p>
-      </div>
+          </div>
 
       {/* Bent u momenteel klant? */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
@@ -738,8 +738,8 @@ function BedrijfsgegevensFormContent() {
               <User weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
             <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Uw gegevens</h2>
-          </div>
-
+        </div>
+        
           <div className="space-y-3 md:space-y-4">
             {/* Aanhef */}
             <div>
@@ -1169,45 +1169,28 @@ function BedrijfsgegevensFormContent() {
           </div>
 
           <div className="space-y-3 md:space-y-4">
-            {/* Checkboxes - alleen zichtbaar op desktop */}
-            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
-              <input
-                type="checkbox"
-                {...register('voorwaarden')}
-                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
-              />
-              <div>
-                <span className="text-xs md:text-sm font-medium text-brand-navy-500">
-                  Door aan te melden gaat u akkoord met de voorwaarden en sluit u een overeenkomst met betalingsverplichting met {leverancierNaam}. 
-                  U heeft 14 kalenderdagen bedenktijd na ontvangst contract leverancier.
-                </span>
+            {/* Akkoord tekst - zonder checkboxes, zichtbaar op mobiel en desktop */}
+            <div className="p-3 md:p-4 rounded-xl bg-gray-50 border border-gray-200">
+              <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
+                Door aan te melden gaat u akkoord met de{' '}
                 <button
                   type="button"
-                  className="block text-xs text-brand-teal-500 hover:underline mt-1"
+                  className="text-brand-teal-600 hover:underline font-medium"
                 >
-                  Lees algemene voorwaarden
+                  algemene voorwaarden
                 </button>
-              </div>
-            </label>
-
-            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
-              <input
-                type="checkbox"
-                {...register('privacy')}
-                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
-              />
-              <div>
-                <span className="text-xs md:text-sm font-medium text-brand-navy-500">
-                  Ik geef toestemming voor verwerking van mijn gegevens conform het privacybeleid
-                </span>
+                {' '}en sluit u een overeenkomst met betalingsverplichting met {leverancierNaam}. 
+                U heeft 14 kalenderdagen bedenktijd na ontvangst contract leverancier. 
+                U geeft tevens toestemming voor verwerking van uw gegevens conform het{' '}
                 <button
                   type="button"
-                  className="block text-xs text-brand-teal-500 hover:underline mt-1"
+                  className="text-brand-teal-600 hover:underline font-medium"
                 >
-                  Lees privacybeleid
+                  privacybeleid
                 </button>
-              </div>
-            </label>
+                .
+              </p>
+            </div>
 
             {/* Aanmelden button - boven security card op mobiel, naast terug op desktop */}
             <div className="md:hidden mb-3">
