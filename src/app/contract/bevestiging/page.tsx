@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useCalculatorStore } from '@/store/calculatorStore'
-import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import { CheckCircle, Envelope, Phone, Lightning, CalendarCheck, Confetti, Buildings, MapPin } from '@phosphor-icons/react'
@@ -51,44 +50,44 @@ function BevestigingContent() {
   }, [showConfetti])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-white to-brand-navy-50 py-12 pt-32 md:pt-36">
+    <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-white to-brand-navy-50 py-8 md:py-12 pt-24 md:pt-32">
       <div className="container-custom max-w-3xl">
         {/* Success Card */}
-        <Card className="border-2 border-green-200 shadow-2xl">
-          <CardContent className="pt-12 pb-8 text-center">
+        <div className="bg-white rounded-xl md:rounded-2xl border border-gray-200 shadow-sm md:shadow-lg p-6 md:p-8 mb-6 md:mb-8">
+          <div className="text-center">
             {/* Success icon met animatie */}
-            <div className="relative mb-6 inline-block">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center animate-scale-in shadow-lg">
-                <CheckCircle weight="fill" className="w-14 h-14 text-white" />
+            <div className="relative mb-4 md:mb-6 inline-block">
+              <div className="w-20 h-20 md:w-24 md:h-24 mx-auto bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-full flex items-center justify-center animate-scale-in shadow-lg">
+                <CheckCircle weight="fill" className="w-12 h-12 md:w-14 md:h-14 text-white" />
               </div>
-              <div className="absolute -top-2 -right-2 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce-slow">
-                <Confetti weight="fill" className="w-6 h-6 text-yellow-700" />
+              <div className="absolute -top-2 -right-2 w-10 h-10 md:w-12 md:h-12 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce-slow">
+                <Confetti weight="fill" className="w-5 h-5 md:w-6 md:h-6 text-yellow-700" />
               </div>
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4 animate-slide-up">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand-navy-500 mb-3 md:mb-4 animate-slide-up">
               Gelukt! 🎉
             </h1>
 
             {/* Description */}
-            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto animate-slide-up-delay">
+            <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto animate-slide-up-delay">
               Je aanvraag voor een nieuw energiecontract is succesvol ingediend. We nemen zo snel mogelijk contact met je op!
             </p>
 
             {/* Contract details */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl p-6 mb-8 text-left max-w-md mx-auto shadow-inner">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-300">
-                <CheckCircle weight="duotone" className="w-5 h-5 text-green-600" />
-                <span className="font-semibold text-brand-navy-500">Aanvraag details</span>
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl md:rounded-2xl p-4 md:p-6 mb-6 md:mb-8 text-left max-w-md mx-auto">
+              <div className="flex items-center gap-2 mb-3 md:mb-4 pb-3 border-b border-gray-300">
+                <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600" />
+                <span className="text-sm md:text-base font-semibold text-brand-navy-500">Aanvraag details</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 md:space-y-4">
                 {bedrijfsgegevens?.bedrijfsnaam && (
-                  <div className="flex items-start gap-3">
-                    <Buildings weight="duotone" className="w-5 h-5 text-gray-600 mt-0.5" />
+                  <div className="flex items-start gap-2 md:gap-3">
+                    <Buildings weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-gray-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <span className="text-gray-600 text-sm">Bedrijf:</span>
-                      <p className="font-semibold text-brand-navy-500">{bedrijfsgegevens.bedrijfsnaam}</p>
+                      <span className="text-gray-600 text-xs md:text-sm">Bedrijf:</span>
+                      <p className="text-sm md:text-base font-semibold text-brand-navy-500">{bedrijfsgegevens.bedrijfsnaam}</p>
                       {bedrijfsgegevens.kvkNummer && (
                         <p className="text-xs text-gray-500">KvK: {bedrijfsgegevens.kvkNummer}</p>
                       )}
@@ -96,12 +95,13 @@ function BevestigingContent() {
                   </div>
                 )}
                 {verbruik?.leveringsadressen && verbruik.leveringsadressen.length > 0 && (
-                  <div className="flex items-start gap-3">
-                    <MapPin weight="duotone" className="w-5 h-5 text-gray-600 mt-0.5" />
+                  <div className="flex items-start gap-2 md:gap-3">
+                    <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-gray-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <span className="text-gray-600 text-sm">Leveradres:</span>
-                      <p className="font-semibold text-brand-navy-500">
+                      <span className="text-gray-600 text-xs md:text-sm">Leveradres:</span>
+                      <p className="text-sm md:text-base font-semibold text-brand-navy-500">
                         {verbruik.leveringsadressen[0].straat} {verbruik.leveringsadressen[0].huisnummer}
+                        {verbruik.leveringsadressen[0].toevoeging ? ` ${verbruik.leveringsadressen[0].toevoeging}` : ''}
                       </p>
                       <p className="text-xs text-gray-500">
                         {verbruik.leveringsadressen[0].postcode} {verbruik.leveringsadressen[0].plaats}
@@ -110,15 +110,15 @@ function BevestigingContent() {
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-300">
-                  <span className="text-gray-600">Aanvraagnummer:</span>
-                  <span className="font-mono font-semibold text-brand-navy-500">
+                  <span className="text-gray-600 text-xs md:text-sm">Aanvraagnummer:</span>
+                  <span className="font-mono text-xs md:text-sm font-semibold text-brand-navy-500">
                     #PA-{new Date().getFullYear()}-{String(Math.floor(Math.random() * 999999)).padStart(6, '0')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Status:</span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-gray-600 text-xs md:text-sm">Status:</span>
+                  <span className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1 bg-brand-teal-100 text-brand-teal-700 rounded-full text-xs md:text-sm font-semibold">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-brand-teal-500 rounded-full animate-pulse" />
                     In behandeling
                   </span>
                 </div>
@@ -126,121 +126,119 @@ function BevestigingContent() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/">
-                <Button size="lg" className="w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+              <Link href="/" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-brand-teal-500 hover:bg-brand-teal-600">
                   Terug naar home
                 </Button>
               </Link>
-              <Link href="/calculator">
+              <Link href="/calculator" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   Nieuwe berekening
                 </Button>
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Next steps */}
-        <Card className="mt-8 border-2 border-brand-teal-100">
-          <CardContent className="pt-8">
-            <h2 className="text-2xl font-bold text-brand-navy-500 mb-2 flex items-center gap-3">
-              <CalendarCheck weight="duotone" className="w-8 h-8 text-brand-teal-500" />
-              Wat gebeurt er nu?
-            </h2>
-            <p className="text-gray-600 mb-6">We gaan direct voor je aan de slag:</p>
+        <div className="bg-white rounded-xl md:rounded-2xl border border-gray-200 shadow-sm md:shadow-lg p-6 md:p-8 mb-6 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <CalendarCheck weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500">Wat gebeurt er nu?</h2>
+          </div>
+          <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">We gaan direct voor je aan de slag:</p>
 
-            <div className="space-y-6">
-              {/* Stap 1 */}
-              <div className="flex gap-4 group hover:bg-gray-50 p-4 rounded-xl transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-teal-400 to-brand-teal-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
-                  <Envelope weight="duotone" className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-brand-navy-500">Binnen 1 uur</h3>
-                    <span className="text-xs px-2 py-0.5 bg-brand-teal-100 text-brand-teal-700 rounded-full font-medium">
-                      Bevestiging
-                    </span>
-                  </div>
-                  <p className="text-gray-600">
-                    Je ontvangt een bevestigingsmail met alle details van je aanvraag en je persoonlijke contactpersoon.
-                  </p>
-                </div>
+          <div className="space-y-4 md:space-y-6">
+            {/* Stap 1 */}
+            <div className="flex gap-3 md:gap-4 group hover:bg-gray-50 p-4 md:p-5 rounded-xl transition-colors">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                <Envelope weight="duotone" className="w-5 h-5 md:w-6 md:h-6" />
               </div>
-
-              {/* Stap 2 */}
-              <div className="flex gap-4 group hover:bg-gray-50 p-4 rounded-xl transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
-                  <Phone weight="duotone" className="w-6 h-6" />
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5 md:mb-2">
+                  <h3 className="text-base md:text-lg font-semibold text-brand-navy-500">Binnen 1 uur</h3>
+                  <span className="text-xs px-2 py-0.5 bg-brand-teal-100 text-brand-teal-700 rounded-full font-medium">
+                    Bevestiging
+                  </span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-brand-navy-500">Binnen 1 werkdag</h3>
-                    <span className="text-xs px-2 py-0.5 bg-brand-teal-100 text-brand-teal-700 rounded-full font-medium">
-                      Persoonlijk contact
-                    </span>
-                  </div>
-                  <p className="text-gray-600">
-                    Een energiespecialist neemt contact met je op om je aanvraag door te nemen en eventuele vragen te beantwoorden.
-                  </p>
-                </div>
-              </div>
-
-              {/* Stap 3 */}
-              <div className="flex gap-4 group hover:bg-gray-50 p-4 rounded-xl transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
-                  <Lightning weight="duotone" className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-brand-navy-500">Binnen 2-3 weken</h3>
-                    <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
-                      Contract actief
-                    </span>
-                  </div>
-                  <p className="text-gray-600">
-                    Na akkoord regelen wij de overstap. Je nieuwe contract gaat in en je begint te besparen!
-                  </p>
-                </div>
+                <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                  Je ontvangt een bevestigingsmail met alle details van je aanvraag en je persoonlijke contactpersoon.
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Stap 2 */}
+            <div className="flex gap-3 md:gap-4 group hover:bg-gray-50 p-4 md:p-5 rounded-xl transition-colors">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                <Phone weight="duotone" className="w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5 md:mb-2">
+                  <h3 className="text-base md:text-lg font-semibold text-brand-navy-500">Binnen 1 werkdag</h3>
+                  <span className="text-xs px-2 py-0.5 bg-brand-teal-100 text-brand-teal-700 rounded-full font-medium">
+                    Persoonlijk contact
+                  </span>
+                </div>
+                <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                  Een energiespecialist neemt contact met je op om je aanvraag door te nemen en eventuele vragen te beantwoorden.
+                </p>
+              </div>
+            </div>
+
+            {/* Stap 3 */}
+            <div className="flex gap-3 md:gap-4 group hover:bg-gray-50 p-4 md:p-5 rounded-xl transition-colors">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                <Lightning weight="duotone" className="w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5 md:mb-2">
+                  <h3 className="text-base md:text-lg font-semibold text-brand-navy-500">Binnen 2-3 weken</h3>
+                  <span className="text-xs px-2 py-0.5 bg-brand-teal-100 text-brand-teal-700 rounded-full font-medium">
+                    Contract actief
+                  </span>
+                </div>
+                <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                  Na akkoord regelen wij de overstap. Je nieuwe contract gaat in en je begint te besparen!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Support Card */}
-        <Card className="mt-8 bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 border-0 text-white">
-          <CardContent className="pt-8">
-            <div className="text-center">
-              <h3 className="text-xl font-bold mb-2">Heb je nog vragen?</h3>
-              <p className="text-brand-navy-100 mb-6">
-                Ons team staat voor je klaar om je te helpen
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="mailto:info@pakketadvies.nl">
-                  <Button 
-                    variant="secondary" 
-                    size="lg" 
-                    className="w-full sm:w-auto bg-white text-brand-navy-500 hover:bg-gray-100"
-                  >
-                    <Envelope weight="duotone" className="w-5 h-5 mr-2" />
-                    Email ons
-                  </Button>
-                </Link>
-                <Link href="tel:0850606969">
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    className="w-full sm:w-auto border-white text-white hover:bg-white/10"
-                  >
-                    <Phone weight="duotone" className="w-5 h-5 mr-2" />
-                    Bel ons
-                  </Button>
-                </Link>
-              </div>
+        <div className="bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 rounded-xl md:rounded-2xl border-0 text-white p-6 md:p-8">
+          <div className="text-center">
+            <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3">Heb je nog vragen?</h3>
+            <p className="text-sm md:text-base text-brand-navy-100 mb-4 md:mb-6">
+              Ons team staat voor je klaar om je te helpen
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+              <Link href="mailto:info@pakketadvies.nl" className="w-full sm:w-auto">
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="w-full sm:w-auto bg-white text-brand-navy-500 hover:bg-gray-100"
+                >
+                  <Envelope weight="duotone" className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                  Email ons
+                </Button>
+              </Link>
+              <Link href="tel:0850477065" className="w-full sm:w-auto">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full sm:w-auto border-white text-white hover:bg-white/10"
+                >
+                  <Phone weight="duotone" className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                  Bel ons
+                </Button>
+              </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <style jsx global>{`
