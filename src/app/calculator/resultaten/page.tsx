@@ -681,7 +681,15 @@ function ResultatenContent() {
       
       // NIEUW: Filter op basis van address type (woonfunctie check)
       const addressType = data?.addressType
-      if (addressType) {
+      console.log('🔍 loadResultaten - Address type from data:', addressType)
+      console.log('🔍 loadResultaten - Verbruik from store:', verbruik?.addressType)
+      
+      // Gebruik addressType uit data, of fallback naar verbruik uit store
+      const effectiveAddressType = addressType || verbruik?.addressType
+      console.log('🔍 loadResultaten - Effective address type:', effectiveAddressType)
+      
+      if (effectiveAddressType) {
+        const beforeFilter = validContracten.length
         validContracten = validContracten.filter((c: any) => {
           const targetAudience = c.target_audience
 
@@ -692,8 +700,11 @@ function ResultatenContent() {
           if (targetAudience === 'both') return true
 
           // Anders alleen tonen als het overeenkomt met address type
-          return targetAudience === addressType
+          return targetAudience === effectiveAddressType
         })
+        console.log(`🔍 loadResultaten - Filtered contracts: ${beforeFilter} -> ${validContracten.length} (addressType: ${effectiveAddressType})`)
+      } else {
+        console.log('🔍 loadResultaten - No address type, showing all contracts')
       }
       
       // Transform to ContractOptie format
@@ -720,10 +731,10 @@ function ResultatenContent() {
     }
   }
   
-  // Load resultaten on mount
+  // Load resultaten on mount and when verbruik changes
   useEffect(() => {
     loadResultaten()
-  }, [isQuickCalc, searchParams, router])
+  }, [isQuickCalc, searchParams, router, verbruik?.addressType]) // NIEUW: Re-run when addressType changes
 
   // Apply filters and sorting
   useEffect(() => {

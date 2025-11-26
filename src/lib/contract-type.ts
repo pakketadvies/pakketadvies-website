@@ -20,12 +20,15 @@ export function bepaalContractType(
       return 'zakelijk'
     }
     // Als 'both', gebruik addressType uit verbruik
-    if (contract.targetAudience === 'both' && verbruik?.addressType) {
-      return verbruik.addressType
+    if (contract.targetAudience === 'both') {
+      if (verbruik?.addressType) {
+        return verbruik.addressType
+      }
+      // Als 'both' maar geen addressType, gebruik fallback naar verbruik.addressType
     }
   }
 
-  // Prioriteit 2: addressType uit verbruik
+  // Prioriteit 2: addressType uit verbruik (ook als contract 'both' is maar geen addressType)
   if (verbruik?.addressType) {
     return verbruik.addressType
   }

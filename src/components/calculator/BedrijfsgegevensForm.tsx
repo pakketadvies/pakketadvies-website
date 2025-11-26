@@ -80,8 +80,14 @@ function BedrijfsgegevensFormContent() {
   const contractId = searchParams?.get('contract')
   const contract = selectedContract || (contractId && resultaten?.find(c => c.id === contractId)) || null
   
+  // Debug logging
+  console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
+  console.log('🔍 BedrijfsgegevensForm - Verbruik:', verbruik ? { addressType: verbruik.addressType } : 'null')
+  
   // Bepaal contract type
   const contractType = bepaalContractType(contract, verbruik)
+  
+  console.log('🔍 BedrijfsgegevensForm - Bepaald contract type:', contractType)
   
   // Als particulier, render particulier formulier
   if (contractType === 'particulier') {
