@@ -26,6 +26,8 @@ import {
 } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
 import { IbanCalculator } from '@/components/ui/IbanCalculator'
+import { DatePicker } from '@/components/ui/DatePicker'
+import { validatePhoneNumber } from '@/lib/phone-validation'
 
 const particulierAanvraagSchema = z.object({
   // Klant check
@@ -37,19 +39,49 @@ const particulierAanvraagSchema = z.object({
   voorletters: z.string().optional(),
   tussenvoegsel: z.string().optional(),
   achternaam: z.string().min(2, 'Vul je achternaam in'),
-  geboortedatum: z.string().regex(/^\d{2}-\d{2}-\d{4}$/, 'Vul een geldige geboortedatum in (dd-mm-jjjj)'),
-  telefoonnummer: z.string().min(10, 'Vul een geldig telefoonnummer in'),
+  geboortedatum: z.string().refine((val) => {
+    if (!val) return false
+    // Accept various formats: dd-mm-yyyy, d-m-yyyy, etc.
+    const cleaned = val.trim().replace(/\s+/g, '')
+    const patterns = [
+      /^(\d{1,2})-(\d{1,2})-(\d{4})$/,
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/,
+      /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/,
+    ]
+    for (const pattern of patterns) {
+      const match = cleaned.match(pattern)
+      if (match) {
+        const day = parseInt(match[1], 10)
+        const month = parseInt(match[2], 10)
+        const year = parseInt(match[3], 10)
+        if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= new Date().getFullYear()) {
+          const date = new Date(year, month - 1, day)
+          return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year
+        }
+      }
+    }
+    return false
+  }, 'Vul een geldige geboortedatum in (bijv. 18-07-1992)'),
+  telefoonnummer: z.string().refine((val: string) => {
+    const result = validatePhoneNumber(val)
+    return result.valid
+  }, {
+    message: 'Vul een geldig telefoonnummer in',
+  }),
   emailadres: z.string().email('Vul een geldig e-mailadres in'),
   herhaalEmailadres: z.string().email('Vul een geldig e-mailadres in'),
   
   // IBAN
   iban: z.string().min(15, 'Vul een geldig IBAN in'),
   rekeningOpAndereNaam: z.boolean(),
+  rekeninghouderNaam: z.string().optional(),
   
   // Levering
   heeftVerblijfsfunctie: z.boolean(),
   gaatVerhuizen: z.boolean(),
-  wanneerOverstappen: z.enum(['zo_snel_mogelijk', 'na_contract_verlopen']),
+  wanneerOverstappen: z.enum(['zo_snel_mogelijk', 'na_contract_verlopen']).optional(),
+  ingangsdatum: z.string().optional(),
+  contractEinddatum: z.string().optional(),
   
   // Correspondentieadres (optioneel)
   anderCorrespondentieadres: z.boolean(),
@@ -66,6 +98,42 @@ const particulierAanvraagSchema = z.object({
 }).refine(data => data.emailadres === data.herhaalEmailadres, {
   message: 'E-mailadressen komen niet overeen',
   path: ['herhaalEmailadres'],
+}).refine(data => {
+  // Als rekeningOpAndereNaam true is, dan rekeninghouderNaam verplicht
+  if (data.rekeningOpAndereNaam) {
+    return data.rekeninghouderNaam && data.rekeninghouderNaam.length >= 2
+  }
+  return true
+}, {
+  message: 'Vul de naam van de rekeninghouder in',
+  path: ['rekeninghouderNaam'],
+}).refine(data => {
+  // Als gaatVerhuizen false is, dan wanneerOverstappen verplicht
+  if (data.gaatVerhuizen === false) {
+    return data.wanneerOverstappen !== undefined
+  }
+  return true
+}, {
+  message: 'Selecteer wanneer u wilt overstappen',
+  path: ['wanneerOverstappen'],
+}).refine(data => {
+  // Als gaatVerhuizen true is, dan ingangsdatum verplicht
+  if (data.gaatVerhuizen === true) {
+    return data.ingangsdatum && data.ingangsdatum.length > 0
+  }
+  return true
+}, {
+  message: 'Vul de ingangsdatum in',
+  path: ['ingangsdatum'],
+}).refine(data => {
+  // Als wanneerOverstappen === 'na_contract_verlopen', dan contractEinddatum verplicht
+  if (data.wanneerOverstappen === 'na_contract_verlopen') {
+    return data.contractEinddatum && data.contractEinddatum.length > 0
+  }
+  return true
+}, {
+  message: 'Vul de einddatum van uw contract in',
+  path: ['contractEinddatum'],
 })
 
 type ParticulierAanvraagFormData = z.infer<typeof particulierAanvraagSchema>
@@ -127,6 +195,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   const heeftVerblijfsfunctie = watch('heeftVerblijfsfunctie')
   const anderCorrespondentieadres = watch('anderCorrespondentieadres')
   const gaatVerhuizen = watch('gaatVerhuizen')
+  const rekeningOpAndereNaam = watch('rekeningOpAndereNaam')
+  const wanneerOverstappen = watch('wanneerOverstappen')
 
   // Haal leveringsadres op uit verbruik
   const leveringsadres = verbruik?.leveringsadressen?.[0] || null
@@ -697,13 +767,13 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
             />
 
             {/* Geboortedatum */}
-            <Input
+            <DatePicker
               label="Geboortedatum"
-              {...register('geboortedatum')}
+              value={watch('geboortedatum')}
+              onChange={(value) => setValue('geboortedatum', value)}
               error={errors.geboortedatum?.message}
-              placeholder="bijv. 15-01-1970"
+              placeholder="bijv. 18-07-1992"
               required
-              icon={<Calendar weight="duotone" className="w-5 h-5" />}
             />
 
             {/* Telefoonnummer */}
@@ -787,6 +857,19 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
                 De rekening staat op een andere naam
               </span>
             </label>
+
+            {/* Rekeninghouder naam (als checkbox aangevinkt) */}
+            {rekeningOpAndereNaam && (
+              <div className="animate-slide-down">
+                <Input
+                  label="Naam rekeninghouder"
+                  {...register('rekeninghouderNaam')}
+                  error={errors.rekeninghouderNaam?.message}
+                  placeholder="Bijv. Jan Jansen"
+                  required
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -870,8 +953,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </div>
             </div>
 
-            {/* Wanneer wilt u overstappen? */}
-            {!gaatVerhuizen && (
+            {/* Wanneer wilt u overstappen? (alleen als gaatVerhuizen === false) */}
+            {gaatVerhuizen === false && (
               <div>
                 <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                   Wanneer wilt u overstappen? <span className="text-red-500">*</span>
@@ -907,6 +990,19 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
                       <div className="text-xs md:text-sm text-gray-600">
                         Stap pas over nadat het vaste contract afloopt en voorkom een opzegboete
                       </div>
+                      {/* Uitklapbaar veld voor contract einddatum */}
+                      {wanneerOverstappen === 'na_contract_verlopen' && (
+                        <div className="mt-3 animate-slide-down">
+                          <DatePicker
+                            label="De einddatum van mijn contract"
+                            value={watch('contractEinddatum')}
+                            onChange={(value) => setValue('contractEinddatum', value)}
+                            error={errors.contractEinddatum?.message}
+                            placeholder="bijv. 31-12-2025"
+                            required
+                          />
+                        </div>
+                      )}
                     </div>
                   </label>
                 </div>
@@ -922,6 +1018,20 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
                     Van de energieleverancier ontvangt u een contractbevestiging. Hierin vindt u de exacte startdatum.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Ingangsdatum (alleen als gaatVerhuizen === true) */}
+            {gaatVerhuizen === true && (
+              <div className="animate-slide-down">
+                <DatePicker
+                  label="Ingangsdatum"
+                  value={watch('ingangsdatum')}
+                  onChange={(value) => setValue('ingangsdatum', value)}
+                  error={errors.ingangsdatum?.message}
+                  placeholder="bijv. 01-01-2025"
+                  required
+                />
               </div>
             )}
 
