@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import type { CreateAanvraagRequest, CreateAanvraagResponse } from '@/types/aanvragen'
 
 /**
  * POST /api/aanvragen/create
  * 
  * Creates a new contract application (aanvraag) with a unique aanvraagnummer
+ * Uses service role key to bypass RLS for public form submissions
  */
 export async function POST(request: Request) {
   try {
@@ -22,7 +23,17 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = await createClient()
+    // Use service role key for public inserts (bypasses RLS)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
     
     // Genereer uniek aanvraagnummer via database functie
     const { data: nummerData, error: nummerError } = await supabase
