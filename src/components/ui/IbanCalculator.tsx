@@ -215,38 +215,23 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bankcode <span className="text-red-500">*</span>
+                Bank <span className="text-red-500">*</span>
               </label>
-              <div className="space-y-2">
-                <Input
-                  value={bankCode}
-                  onChange={(e) => {
-                    setBankCode(e.target.value.toUpperCase().slice(0, 4))
-                    setResult(null)
-                  }}
-                  placeholder="Bijv. INGB, RABO, ABNA"
-                  maxLength={4}
-                  className="uppercase"
-                />
-                <div className="text-xs text-gray-500">
-                  Veelgebruikte bankcodes:
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {commonBanks.slice(0, 8).map((bank) => (
-                    <button
-                      key={bank.code}
-                      type="button"
-                      onClick={() => {
-                        setBankCode(bank.code)
-                        setResult(null)
-                      }}
-                      className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-brand-teal-100 hover:text-brand-teal-700 rounded-lg transition-colors border border-gray-200 hover:border-brand-teal-300"
-                    >
-                      {bank.code} - {bank.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <select
+                value={bankCode}
+                onChange={(e) => {
+                  setBankCode(e.target.value)
+                  setResult(null)
+                }}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all text-brand-navy-500 font-medium bg-white"
+              >
+                <option value="">Selecteer je bank</option>
+                {commonBanks.map((bank) => (
+                  <option key={bank.code} value={bank.code}>
+                    {bank.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

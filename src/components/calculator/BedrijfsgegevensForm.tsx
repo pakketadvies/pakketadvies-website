@@ -3,13 +3,13 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useRef, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
-import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone } from '@phosphor-icons/react'
+import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone, ArrowsClockwise } from '@phosphor-icons/react'
 import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 import { bepaalContractType } from '@/lib/contract-type'
 import { ParticulierAanvraagForm } from './ParticulierAanvraagForm'
@@ -74,7 +74,7 @@ interface KvkSearchResult {
 function BedrijfsgegevensFormContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { setBedrijfsgegevens, vorigeStap, verbruik, selectedContract, resultaten } = useCalculatorStore()
+  const { setBedrijfsgegevens, vorigeStap, verbruik, selectedContract, resultaten, setVerbruik, setAddressType } = useCalculatorStore()
   
   // Haal contract op uit query param of store
   const contractId = searchParams?.get('contract')
