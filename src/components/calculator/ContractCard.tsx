@@ -9,6 +9,7 @@ import Link from 'next/link'
 import type { ContractOptie } from '@/types/calculator'
 import Tooltip from '@/components/ui/Tooltip'
 import { getFriendlyDocumentUrl } from '@/lib/document-url'
+import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
 
 interface ContractCardProps {
   contract: ContractOptie
@@ -474,6 +475,15 @@ export default function ContractCard({
                           <span className="font-medium">€{breakdown.netbeheer.elektriciteit.toFixed(2)}</span>
                         </div>
                         
+                        {/* Melding voor grootverbruik elektriciteit */}
+                        {isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit) && (
+                          <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                            <p className="text-xs text-blue-700 leading-relaxed">
+                              <strong>Let op:</strong> Bij grootverbruik aansluitingen (&gt;3x80A) worden de netbeheerkosten apart door de netbeheerder in rekening gebracht en zijn daarom niet opgenomen in dit maandbedrag.
+                            </p>
+                          </div>
+                        )}
+                        
                         <div className="flex justify-between items-center text-sm text-green-700">
                           <span>Vermindering EB</span>
                           <span className="font-medium">-€{breakdown.energiebelasting.vermindering.toFixed(2)}</span>
@@ -563,6 +573,15 @@ export default function ContractCard({
                             </span>
                             <span className="font-medium">€{breakdown.netbeheer.gas.toFixed(2)}</span>
                           </div>
+                          
+                          {/* Melding voor grootverbruik gas */}
+                          {isGrootverbruikGasAansluitwaarde(aansluitwaardeGas) && (
+                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                              <p className="text-xs text-blue-700 leading-relaxed">
+                                <strong>Let op:</strong> Bij grootverbruik aansluitingen (&gt;G25) worden de netbeheerkosten apart door de netbeheerder in rekening gebracht en zijn daarom niet opgenomen in dit maandbedrag.
+                              </p>
+                            </div>
+                          )}
                         </div>
                         
                         {/* Subtotaal gas */}
