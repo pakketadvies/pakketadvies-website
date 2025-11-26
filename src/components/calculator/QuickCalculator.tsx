@@ -168,13 +168,32 @@ export function QuickCalculator() {
       
       // Set adres
       if (verbruik.leveringsadressen && verbruik.leveringsadressen.length > 0) {
-        setLeveringsadressen(verbruik.leveringsadressen.map(adres => ({
+        const adres = verbruik.leveringsadressen[0]
+        setLeveringsadressen([{
           postcode: adres.postcode,
           huisnummer: adres.huisnummer,
           toevoeging: adres.toevoeging || '',
           straat: adres.straat || '',
           plaats: adres.plaats || '',
-        })))
+        }])
+        
+        // NIEUW: Als addressType al bekend is in verbruik, laad die ook
+        if (verbruik.addressType) {
+          setValue('addressType', verbruik.addressType)
+          setAddressType(verbruik.addressType)
+          
+          // Vul addressTypeResult met bekende waarde
+          const message = verbruik.addressType === 'particulier'
+            ? 'Particulier adres - geschikt voor consumentencontracten'
+            : 'Zakelijk adres - geschikt voor zakelijke contracten'
+          
+          setAddressTypeResult({
+            type: verbruik.addressType,
+            message,
+            street: adres.straat,
+            city: adres.plaats,
+          })
+        }
       }
       
       // Set verbruikWatched for aansluitwaarde estimation
@@ -184,7 +203,28 @@ export function QuickCalculator() {
         gasJaar: verbruik.gasJaar || 0,
       })
     }
-  }, []) // Only run on mount
+  }, [setValue, setAddressType]) // Only run on mount
+  
+  // NIEUW: Voer BAG API check uit wanneer adres compleet is geladen
+  useEffect(() => {
+    if (verbruik && verbruik.leveringsadressen && verbruik.leveringsadressen.length > 0) {
+      const adres = verbruik.leveringsadressen[0]
+      
+      // Als adres compleet is (postcode, huisnummer, straat, plaats) EN addressType nog niet bekend
+      if (adres.postcode && adres.huisnummer && adres.straat && adres.plaats && !verbruik.addressType) {
+        // Check of postcode geldig is
+        const postcodeClean = adres.postcode.toUpperCase().replace(/\s/g, '')
+        if (/^\d{4}[A-Z]{2}$/.test(postcodeClean)) {
+          // Voer BAG API check uit na korte delay (om race conditions te voorkomen)
+          const timer = setTimeout(() => {
+            checkAddressType(adres.postcode, adres.huisnummer, adres.toevoeging)
+          }, 200)
+          
+          return () => clearTimeout(timer)
+        }
+      }
+    }
+  }, [verbruik, checkAddressType]) // Run when verbruik changes
 
   // Cleanup timer on unmount
   useEffect(() => {
