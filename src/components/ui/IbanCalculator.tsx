@@ -44,7 +44,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     setResult({
       iban: formatted,
       valid: true,
-      bankName: bankName ?? undefined,
+      bankName: bankName ? bankName : undefined,
     })
   }
 
@@ -69,7 +69,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     setResult({
       iban: formatted,
       valid: true,
-      bankName: bankName ?? undefined,
+      bankName: bankName ? bankName : undefined,
     })
   }
 
