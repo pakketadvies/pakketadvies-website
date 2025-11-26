@@ -204,27 +204,6 @@ export function QuickCalculator() {
       })
     }
   }, [setValue, setAddressType]) // Only run on mount
-  
-  // NIEUW: Voer BAG API check uit wanneer adres compleet is geladen
-  useEffect(() => {
-    if (verbruik && verbruik.leveringsadressen && verbruik.leveringsadressen.length > 0) {
-      const adres = verbruik.leveringsadressen[0]
-      
-      // Als adres compleet is (postcode, huisnummer, straat, plaats) EN addressType nog niet bekend
-      if (adres.postcode && adres.huisnummer && adres.straat && adres.plaats && !verbruik.addressType) {
-        // Check of postcode geldig is
-        const postcodeClean = adres.postcode.toUpperCase().replace(/\s/g, '')
-        if (/^\d{4}[A-Z]{2}$/.test(postcodeClean)) {
-          // Voer BAG API check uit na korte delay (om race conditions te voorkomen)
-          const timer = setTimeout(() => {
-            checkAddressType(adres.postcode, adres.huisnummer, adres.toevoeging)
-          }, 200)
-          
-          return () => clearTimeout(timer)
-        }
-      }
-    }
-  }, [verbruik, checkAddressType]) // Run when verbruik changes
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -462,6 +441,27 @@ export function QuickCalculator() {
       }
     }
   }, [setValue, manualAddressTypeOverride, addressTypeResult, setAddressType]);
+  
+  // NIEUW: Voer BAG API check uit wanneer adres compleet is geladen (na definitie van checkAddressType)
+  useEffect(() => {
+    if (verbruik && verbruik.leveringsadressen && verbruik.leveringsadressen.length > 0) {
+      const adres = verbruik.leveringsadressen[0]
+      
+      // Als adres compleet is (postcode, huisnummer, straat, plaats) EN addressType nog niet bekend
+      if (adres.postcode && adres.huisnummer && adres.straat && adres.plaats && !verbruik.addressType) {
+        // Check of postcode geldig is
+        const postcodeClean = adres.postcode.toUpperCase().replace(/\s/g, '')
+        if (/^\d{4}[A-Z]{2}$/.test(postcodeClean)) {
+          // Voer BAG API check uit na korte delay (om race conditions te voorkomen)
+          const timer = setTimeout(() => {
+            checkAddressType(adres.postcode, adres.huisnummer, adres.toevoeging)
+          }, 200)
+          
+          return () => clearTimeout(timer)
+        }
+      }
+    }
+  }, [verbruik, checkAddressType]) // Run when verbruik changes
 
   // Handler voor handmatige address type switch
   const handleManualAddressTypeSwitch = () => {
