@@ -39,12 +39,12 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     }
 
     const formatted = formatIBAN(calculated.iban)
-    const bankName = getBankNameFromIBAN(calculated.iban)
+    const bankNameResult = getBankNameFromIBAN(calculated.iban)
 
     setResult({
       iban: formatted,
       valid: true,
-      bankName: bankName ? bankName : undefined,
+      ...(bankNameResult && { bankName: bankNameResult }),
     })
   }
 
@@ -64,12 +64,12 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     }
 
     const formatted = formatIBAN(ibanInput)
-    const bankName = getBankNameFromIBAN(ibanInput)
+    const bankNameResult = getBankNameFromIBAN(ibanInput)
 
     setResult({
       iban: formatted,
       valid: true,
-      bankName: bankName ? bankName : undefined,
+      ...(bankNameResult && { bankName: bankNameResult }),
     })
   }
 
