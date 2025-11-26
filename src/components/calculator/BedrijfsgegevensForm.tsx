@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Card, CardContent } from '@/components/ui/Card'
 import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone, ArrowsClockwise } from '@phosphor-icons/react'
 import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 import { bepaalContractType } from '@/lib/contract-type'
@@ -432,8 +431,8 @@ function BedrijfsgegevensFormContent() {
       </div>
 
       {/* Bent u momenteel klant? */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Bent u momenteel klant bij {leverancierNaam}?
@@ -461,12 +460,12 @@ function BedrijfsgegevensFormContent() {
               </label>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Leveringsadres */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <MapPin weight="duotone" className="w-5 h-5 text-white" />
@@ -495,8 +494,8 @@ function BedrijfsgegevensFormContent() {
               <p className="text-red-700">Geen leveringsadres gevonden. Ga terug naar stap 1 om een adres in te vullen.</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Unified KvK Search - Naam OF Nummer */}
       <div className="bg-gradient-to-br from-brand-teal-50 to-brand-navy-50 border-2 border-brand-teal-200 rounded-xl md:rounded-2xl p-4 md:p-6">
@@ -656,8 +655,8 @@ function BedrijfsgegevensFormContent() {
       </div>
 
       {/* Uw gegevens - Persoonlijke gegevens */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <User weight="duotone" className="w-5 h-5 text-white" />
@@ -772,8 +771,8 @@ function BedrijfsgegevensFormContent() {
               icon={<Envelope weight="duotone" className="w-5 h-5" />}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Type bedrijf */}
       <div className="space-y-4">
@@ -834,8 +833,8 @@ function BedrijfsgegevensFormContent() {
       </div>
 
       {/* Maandelijkse betaling */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <CreditCard weight="duotone" className="w-5 h-5 text-white" />
@@ -867,12 +866,12 @@ function BedrijfsgegevensFormContent() {
               </button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Levering */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <House weight="duotone" className="w-5 h-5 text-white" />
@@ -1028,12 +1027,12 @@ function BedrijfsgegevensFormContent() {
               </label>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Akkoord en privacyverklaring */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <ShieldCheck weight="duotone" className="w-5 h-5 text-white" />
@@ -1097,8 +1096,8 @@ function BedrijfsgegevensFormContent() {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 md:gap-4">

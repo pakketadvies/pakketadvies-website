@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/Card'
 import { 
   Lightning, 
   MapPin, 
@@ -595,18 +596,19 @@ export function VerbruikForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Leveringsadres */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-            <MapPin weight="duotone" className="w-5 h-5 text-white" />
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <MapPin weight="duotone" className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-brand-navy-500">Waar wordt de energie geleverd?</h3>
+              <p className="text-sm text-gray-600">Vul je postcode en huisnummer in</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-brand-navy-500">Waar wordt de energie geleverd?</h3>
-            <p className="text-sm text-gray-600">Vul je postcode en huisnummer in</p>
-          </div>
-        </div>
 
         {leveringsadressen.map((adres, index) => (
           <div key={index} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 md:p-6 space-y-4">
@@ -749,78 +751,60 @@ export function VerbruikForm() {
             Extra leveringsadres toevoegen
           </button>
         )}
+        </div>
       </div>
 
       {/* Elektriciteitsverbruik */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <Lightning weight="duotone" className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
-              <p className="text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowHelpSchatten(true)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
-          >
-            <Lightbulb weight="duotone" className="w-5 h-5" />
-            <span className="hidden md:inline">Help me schatten</span>
-          </button>
-        </div>
-
-        <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-4 md:space-y-6">
-          {/* Desktop: grid voor normaal + dal naast elkaar */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                {heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'} <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  {...register('elektriciteitNormaal', { 
-                    valueAsNumber: true,
-                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
-                  })}
-                  placeholder="Bijv. 3500"
-                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                  kWh
-                </span>
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+                <Lightning weight="duotone" className="w-5 h-5 text-white" />
               </div>
-              {errors.elektriciteitNormaal && (
-                <p className="mt-2 text-sm text-red-600">{errors.elektriciteitNormaal.message}</p>
-              )}
+              <div>
+                <h3 className="text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
+                <p className="text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowHelpSchatten(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
+            >
+              <Lightbulb weight="duotone" className="w-5 h-5" />
+              <span className="hidden md:inline">Help me schatten</span>
+            </button>
+          </div>
+
+          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-6 space-y-4">
+          {/* Desktop: grid voor normaal + dal naast elkaar */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label={heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'}
+              type="number"
+              {...register('elektriciteitNormaal', { 
+                valueAsNumber: true,
+                onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
+              })}
+              placeholder="Bijv. 3500"
+              error={errors.elektriciteitNormaal?.message}
+              required
+            />
 
             {!heeftEnkeleMeter && (
               <div className="animate-slide-down">
-                <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                  Dal tarief (nacht/weekend) <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    {...register('elektriciteitDal', { 
-                      valueAsNumber: true,
-                      onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
-                    })}
-                    placeholder="Bijv. 2500"
-                    className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                    kWh
-                  </span>
-                </div>
-                {errors.elektriciteitDal && (
-                  <p className="mt-2 text-sm text-red-600">{errors.elektriciteitDal.message}</p>
-                )}
+                <Input
+                  label="Dal tarief (nacht/weekend)"
+                  type="number"
+                  {...register('elektriciteitDal', { 
+                    valueAsNumber: true,
+                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
+                  })}
+                  placeholder="Bijv. 2500"
+                  error={errors.elektriciteitDal?.message}
+                  required
+                />
               </div>
             )}
           </div>
@@ -856,11 +840,13 @@ export function VerbruikForm() {
             </p>
           </div>
         </div>
+        </div>
       </div>
 
-      {/* Zonnepanelen - Desktop: checkbox + input naast elkaar */}
-      <div className="space-y-4">
-        <label className="flex items-center gap-3 cursor-pointer group p-4 md:p-5 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
+      {/* Zonnepanelen */}
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+        <div className="space-y-4">
+          <label className="flex items-center gap-3 cursor-pointer group p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
           <input
             type="checkbox"
             checked={heeftZonnepanelen}
@@ -880,26 +866,15 @@ export function VerbruikForm() {
         </label>
 
         {heeftZonnepanelen && (
-          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                Teruglevering per jaar <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  {...register('terugleveringJaar', { valueAsNumber: true })}
-                  placeholder="Bijv. 3000"
-                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                  kWh
-                </span>
-              </div>
-              {errors.terugleveringJaar && (
-                <p className="mt-2 text-sm text-red-600">{errors.terugleveringJaar.message}</p>
-              )}
-            </div>
+          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-6 space-y-4">
+            <Input
+              label="Teruglevering per jaar"
+              type="number"
+              {...register('terugleveringJaar', { valueAsNumber: true })}
+              placeholder="Bijv. 3000"
+              error={errors.terugleveringJaar?.message}
+              required
+            />
             
             <button
               type="button"
@@ -919,45 +894,38 @@ export function VerbruikForm() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
-      {/* Gasverbruik - Desktop: compacter */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-            <Flame weight="duotone" className="w-5 h-5 text-white" />
+      {/* Gasverbruik */}
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <Flame weight="duotone" className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-brand-navy-500">Gasverbruik</h3>
+              <p className="text-sm text-gray-600">Ook te vinden op je jaarafrekening</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-brand-navy-500">Gasverbruik</h3>
-            <p className="text-sm text-gray-600">Ook te vinden op je jaarafrekening</p>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {!geenGasaansluiting && (
-            <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
-              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                Gasverbruik per jaar <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {!geenGasaansluiting && (
+              <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-6">
+                <Input
+                  label="Gasverbruik per jaar"
                   type="number"
                   {...register('gasJaar', { 
                     valueAsNumber: true,
                     onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
                   })}
                   placeholder="Bijv. 1200"
-                  className="w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                  error={errors.gasJaar?.message}
+                  required
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                  m³
-                </span>
               </div>
-              {errors.gasJaar && (
-                <p className="mt-2 text-sm text-red-600">{errors.gasJaar.message}</p>
-              )}
-            </div>
-          )}
+            )}
 
           <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
             <input
@@ -982,19 +950,21 @@ export function VerbruikForm() {
             </div>
           </label>
         </div>
+        </div>
       </div>
 
       {/* Meter type */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-            <Gauge weight="duotone" className="w-5 h-5 text-white" />
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <Gauge weight="duotone" className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-brand-navy-500">Type meter</h3>
+              <p className="text-sm text-gray-600">Helpt ons de beste contracten te vinden</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-brand-navy-500">Type meter</h3>
-            <p className="text-sm text-gray-600">Helpt ons de beste contracten te vinden</p>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
@@ -1028,21 +998,23 @@ export function VerbruikForm() {
             )
           })}
         </div>
+        </div>
       </div>
 
       {/* Aansluitwaarden (Automatisch geschat, aanpasbaar) */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
-            <Plugs weight="duotone" className="w-5 h-5 text-white" />
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
+              <Plugs weight="duotone" className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
+              <p className="text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
-            <p className="text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
-          </div>
-        </div>
 
-        <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-4 md:p-6 space-y-4">
+          <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Elektriciteit Aansluitwaarde */}
             <div>
@@ -1126,6 +1098,7 @@ export function VerbruikForm() {
               </ul>
             </div>
           )}
+        </div>
         </div>
       </div>
 

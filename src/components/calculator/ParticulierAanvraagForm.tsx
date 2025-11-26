@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { 
   User, 
@@ -391,8 +390,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       </div>
 
       {/* Bent u momenteel klant? */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Bent u momenteel klant bij {leverancierNaam}?
@@ -420,12 +419,12 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </label>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Leveringsadres */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <MapPin weight="duotone" className="w-5 h-5 text-white" />
@@ -618,12 +617,12 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               <p className="text-red-700">Geen leveringsadres gevonden. Ga terug naar stap 1 om een adres in te vullen.</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Uw gegevens */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <User weight="duotone" className="w-5 h-5 text-white" />
@@ -740,12 +739,12 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               icon={<Envelope weight="duotone" className="w-5 h-5" />}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Maandelijkse betaling */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <CreditCard weight="duotone" className="w-5 h-5 text-white" />
@@ -789,12 +788,12 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </span>
             </label>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Levering */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <House weight="duotone" className="w-5 h-5 text-white" />
@@ -950,12 +949,12 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </label>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Akkoord en privacyverklaring */}
-      <Card>
-        <CardContent className="pt-6">
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <ShieldCheck weight="duotone" className="w-5 h-5 text-white" />
@@ -1019,8 +1018,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
