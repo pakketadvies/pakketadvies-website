@@ -170,7 +170,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
 
         {/* Content */}
         <div className="p-6">
-      <div className="space-y-6">
+          <div className="space-y-6">
         {/* Mode selector */}
         <div className="flex gap-3 border-b border-gray-200 pb-4">
           <button
@@ -396,8 +396,12 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </Modal>
-  )
+    </div>,
+    document.body
+  ) : null
+
+  return modalContent
 }
 
