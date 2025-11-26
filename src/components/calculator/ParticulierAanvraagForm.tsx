@@ -23,6 +23,7 @@ import {
   Warning
 } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
+import { IbanCalculator } from '@/components/ui/IbanCalculator'
 
 const particulierAanvraagSchema = z.object({
   // Klant check
@@ -76,6 +77,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   const { verbruik, vorigeStap } = useCalculatorStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAdresWijzigen, setShowAdresWijzigen] = useState(false)
+  const [showIbanCalculator, setShowIbanCalculator] = useState(false)
 
   const {
     register,
@@ -419,14 +421,13 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
                 required
                 icon={<CreditCard weight="duotone" className="w-5 h-5" />}
               />
-              <a
-                href="https://www.iban.nl/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-semibold underline mt-1 inline-block"
+              <button
+                type="button"
+                onClick={() => setShowIbanCalculator(true)}
+                className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-semibold underline mt-1 inline-block transition-colors"
               >
                 IBAN bepalen
-              </a>
+              </button>
             </div>
 
             {/* Checkbox: Rekening op andere naam */}
@@ -704,6 +705,16 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
           )}
         </Button>
       </div>
+
+      {/* IBAN Calculator Modal */}
+      <IbanCalculator
+        isOpen={showIbanCalculator}
+        onClose={() => setShowIbanCalculator(false)}
+        onSelect={(iban) => {
+          setValue('iban', iban)
+          setShowIbanCalculator(false)
+        }}
+      />
     </form>
   )
 }

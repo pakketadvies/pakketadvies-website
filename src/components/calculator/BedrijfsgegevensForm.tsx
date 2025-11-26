@@ -13,6 +13,7 @@ import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDow
 import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 import { bepaalContractType } from '@/lib/contract-type'
 import { ParticulierAanvraagForm } from './ParticulierAanvraagForm'
+import { IbanCalculator } from '@/components/ui/IbanCalculator'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -106,6 +107,9 @@ function BedrijfsgegevensFormContent() {
   
   // Correspondentieadres checkbox
   const [zelfdeAlsLeveradres, setZelfdeAlsLeveradres] = useState(false)
+  
+  // IBAN Calculator modal
+  const [showIbanCalculator, setShowIbanCalculator] = useState(false)
 
   const {
     register,
@@ -848,14 +852,13 @@ function BedrijfsgegevensFormContent() {
                 required
                 icon={<CreditCard weight="duotone" className="w-5 h-5" />}
               />
-              <a
-                href="https://www.iban.nl/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-semibold underline mt-1 inline-block"
+              <button
+                type="button"
+                onClick={() => setShowIbanCalculator(true)}
+                className="text-xs text-brand-teal-600 hover:text-brand-teal-700 font-semibold underline mt-1 inline-block transition-colors"
               >
                 IBAN bepalen
-              </a>
+              </button>
             </div>
           </div>
         </CardContent>
