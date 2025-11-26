@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Lightning, Flame, MapPin, Plugs, PencilSimple, Check, X, CaretDown, CaretUp, Sun, CheckCircle, XCircle, ArrowsClockwise } from '@phosphor-icons/react'
+import { Lightning, Flame, MapPin, Plugs, PencilSimple, Check, X, CaretDown, CaretUp, Sun, CheckCircle, XCircle, ArrowsClockwise, Warning } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
@@ -29,6 +29,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
     city?: string;
   } | null>(null)
   const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null)
+  const [originalBagResult, setOriginalBagResult] = useState<'particulier' | 'zakelijk' | null>(null)
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Request counters voor race condition preventie
@@ -212,6 +213,10 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
             
             // Update addressType in formData
             if (bagResult.type !== 'error') {
+              // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
+              if (!originalBagResult && !manualAddressTypeOverride) {
+                setOriginalBagResult(bagResult.type)
+              }
               setFormData(prev => ({
                 ...prev,
                 addressType: bagResult.type
@@ -299,7 +304,10 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
     const newType: 'particulier' | 'zakelijk' = addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'
     setManualAddressTypeOverride(newType)
 
-    // Update addressTypeResult state
+    // Bepaal of dit een handmatige wijziging is (verschilt van origineel)
+    const isManualChange = originalBagResult !== null && newType !== originalBagResult
+
+    // Update addressTypeResult state met aangepaste message
     const newResult: {
       type: 'particulier' | 'zakelijk' | 'error';
       message: string;
@@ -307,9 +315,13 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
       city?: string;
     } = {
       type: newType,
-      message: newType === 'particulier' 
-        ? 'Particulier adres - geschikt voor consumentencontracten'
-        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      message: isManualChange
+        ? newType === 'particulier'
+          ? 'Particulier adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+          : 'Zakelijk adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+        : newType === 'particulier'
+          ? 'Particulier adres - geschikt voor consumentencontracten'
+          : 'Zakelijk adres - geschikt voor zakelijke contracten',
       street: addressTypeResult.street,
       city: addressTypeResult.city
     }
@@ -469,7 +481,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                             {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
                           </div>
                         )}
-                        <div>{addressTypeResult.message}</div>
+                        <div className="whitespace-pre-line">{addressTypeResult.message}</div>
                         
                         {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
                         {addressTypeResult.type !== 'error' && (

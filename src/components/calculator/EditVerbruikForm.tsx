@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Lightning, Flame, MapPin, Plugs, Sun, Check, X, CheckCircle, XCircle, ArrowsClockwise } from '@phosphor-icons/react'
+import { Lightning, Flame, MapPin, Plugs, Sun, Check, X, CheckCircle, XCircle, ArrowsClockwise, Warning } from '@phosphor-icons/react'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
 
@@ -25,6 +25,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     city?: string;
   } | null>(null)
   const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null)
+  const [originalBagResult, setOriginalBagResult] = useState<'particulier' | 'zakelijk' | null>(null)
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Request counters voor race condition preventie
@@ -63,8 +64,9 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     
     setAddressError('')
     setAddressTypeResult(null) // Clear BAG API result
-    // Reset manual override als adres wijzigt
+    // Reset manual override en origineel resultaat als adres wijzigt
     setManualAddressTypeOverride(null)
+    setOriginalBagResult(null)
     // Clear addressType omdat adres is gewijzigd
     const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
     setFormData(newData)
@@ -96,7 +98,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     const newType: 'particulier' | 'zakelijk' = addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'
     setManualAddressTypeOverride(newType)
 
-    // Update addressTypeResult state
+    // Bepaal of dit een handmatige wijziging is (verschilt van origineel)
+    const isManualChange = originalBagResult !== null && newType !== originalBagResult
+
+    // Update addressTypeResult state met aangepaste message
     const newResult: {
       type: 'particulier' | 'zakelijk' | 'error';
       message: string;
@@ -104,9 +109,13 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
       city?: string;
     } = {
       type: newType,
-      message: newType === 'particulier' 
-        ? 'Particulier adres - geschikt voor consumentencontracten'
-        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      message: isManualChange
+        ? newType === 'particulier'
+          ? 'Particulier adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+          : 'Zakelijk adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+        : newType === 'particulier'
+          ? 'Particulier adres - geschikt voor consumentencontracten'
+          : 'Zakelijk adres - geschikt voor zakelijke contracten',
       street: addressTypeResult.street,
       city: addressTypeResult.city
     }
@@ -234,6 +243,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               
               // Update addressType in formData
               if (bagResult.type !== 'error') {
+                // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
+                if (!originalBagResult && !manualAddressTypeOverride) {
+                  setOriginalBagResult(bagResult.type)
+                }
                 const updatedData = { ...newData, addressType: bagResult.type };
                 setFormData(updatedData);
                 onChange(updatedData);
@@ -395,7 +408,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                         {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
                       </div>
                     )}
-                    <div>{addressTypeResult.message}</div>
+                    <div className="whitespace-pre-line">{addressTypeResult.message}</div>
                     
                     {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
                     {addressTypeResult.type !== 'error' && (

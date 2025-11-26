@@ -21,7 +21,8 @@ import {
   MagnifyingGlass,
   Gauge,
   Plugs,
-  ArrowsClockwise
+  ArrowsClockwise,
+  Warning
 } from '@phosphor-icons/react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -107,6 +108,7 @@ export function VerbruikForm() {
   } | null }>({});
   const [checkingAddressType, setCheckingAddressType] = useState<{ [key: number]: boolean }>({});
   const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<{ [key: number]: 'particulier' | 'zakelijk' | null }>({});
+  const [originalBagResult, setOriginalBagResult] = useState<{ [key: number]: 'particulier' | 'zakelijk' | null }>({});
 
   const {
     register,
@@ -331,7 +333,11 @@ export function VerbruikForm() {
     // Update manual override voor dit specifieke adres
     setManualAddressTypeOverride(prev => ({ ...prev, [index]: newType }))
 
-    // Update addressTypeResult state voor dit adres
+    // Bepaal of dit een handmatige wijziging is (verschilt van origineel)
+    const originalType = originalBagResult[index]
+    const isManualChange = originalType !== null && originalType !== undefined && newType !== originalType
+
+    // Update addressTypeResult state voor dit adres met aangepaste message
     const newResult: {
       type: 'particulier' | 'zakelijk' | 'error';
       message: string;
@@ -339,9 +345,13 @@ export function VerbruikForm() {
       city?: string;
     } = {
       type: newType,
-      message: newType === 'particulier' 
-        ? 'Particulier adres - geschikt voor consumentencontracten'
-        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      message: isManualChange
+        ? newType === 'particulier'
+          ? 'Particulier adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+          : 'Zakelijk adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+        : newType === 'particulier'
+          ? 'Particulier adres - geschikt voor consumentencontracten'
+          : 'Zakelijk adres - geschikt voor zakelijke contracten',
       street: currentResult.street,
       city: currentResult.city
     }
@@ -413,9 +423,15 @@ export function VerbruikForm() {
       setAddressTypeResult(prev => ({ ...prev, [index]: resultWithDetails }));
 
       // Als het een geldig adres is, sla het type op in de form state (alleen voor primair adres)
-      if (result.type !== 'error' && index === 0) {
-        setValue('addressType', result.type);
-        setAddressType(result.type);
+      if (result.type !== 'error') {
+        // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
+        if (!originalBagResult[index] && !manualAddressTypeOverride[index]) {
+          setOriginalBagResult(prev => ({ ...prev, [index]: result.type }))
+        }
+        if (index === 0) {
+          setValue('addressType', result.type);
+          setAddressType(result.type);
+        }
       }
     } catch (error) {
       console.error('Address type check error:', error);
@@ -458,8 +474,9 @@ export function VerbruikForm() {
         
         // Clear BAG API result omdat adres is gewijzigd
         setAddressTypeResult(prev => ({ ...prev, [index]: null }))
-        // Reset manual override als adres wijzigt
+        // Reset manual override en origineel resultaat als adres wijzigt
         setManualAddressTypeOverride(prev => ({ ...prev, [index]: null }))
+        setOriginalBagResult(prev => ({ ...prev, [index]: null }))
         
         // Reset lookup key zodat we opnieuw kunnen zoeken
         delete lastLookup.current[index]
@@ -688,7 +705,7 @@ export function VerbruikForm() {
                           {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}, {adres.postcode} {adres.plaats}
                         </div>
                       )}
-                      <div>{addressTypeResult[index]!.message}</div>
+                      <div className="whitespace-pre-line">{addressTypeResult[index]!.message}</div>
                       
                       {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
                       {addressTypeResult[index]!.type !== 'error' && (

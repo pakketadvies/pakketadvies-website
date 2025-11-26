@@ -20,7 +20,8 @@ import {
   Info,
   XCircle,
   Plugs,
-  ArrowsClockwise
+  ArrowsClockwise,
+  Warning
 } from '@phosphor-icons/react'
 import type { VerbruikData } from '@/types/calculator'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
@@ -99,6 +100,7 @@ export function QuickCalculator() {
   } | null>(null);
   const [checkingAddressType, setCheckingAddressType] = useState(false);
   const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null);
+  const [originalBagResult, setOriginalBagResult] = useState<'particulier' | 'zakelijk' | null>(null);
   
   // Refs voor debouncing en duplicate prevention (exact zoals VerbruikForm)
   const lastLookup = useRef<string>('')
@@ -393,6 +395,10 @@ export function QuickCalculator() {
 
       // Als het een geldig adres is, sla het type op in de form state
       if (result.type !== 'error') {
+        // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
+        if (!originalBagResult && !manualAddressTypeOverride) {
+          setOriginalBagResult(result.type)
+        }
         // Update de verbruik data met address type
         setValue('addressType', result.type);
         setAddressType(result.type);
@@ -426,7 +432,10 @@ export function QuickCalculator() {
     const newType: 'particulier' | 'zakelijk' = addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'
     setManualAddressTypeOverride(newType)
 
-    // Update addressTypeResult state
+    // Bepaal of dit een handmatige wijziging is (verschilt van origineel)
+    const isManualChange = originalBagResult !== null && newType !== originalBagResult
+
+    // Update addressTypeResult state met aangepaste message
     const newResult: {
       type: 'particulier' | 'zakelijk' | 'error';
       message: string;
@@ -434,9 +443,13 @@ export function QuickCalculator() {
       city?: string;
     } = {
       type: newType,
-      message: newType === 'particulier' 
-        ? 'Particulier adres - geschikt voor consumentencontracten'
-        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      message: isManualChange
+        ? newType === 'particulier'
+          ? 'Particulier adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+          : 'Zakelijk adres (handmatig gewijzigd)\n⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+        : newType === 'particulier'
+          ? 'Particulier adres - geschikt voor consumentencontracten'
+          : 'Zakelijk adres - geschikt voor zakelijke contracten',
       street: addressTypeResult.street,
       city: addressTypeResult.city
     }
@@ -465,8 +478,9 @@ export function QuickCalculator() {
     
     // Clear BAG API result omdat adres is gewijzigd
     setAddressTypeResult(null)
-    // Reset manual override als adres wijzigt
+    // Reset manual override en origineel resultaat als adres wijzigt
     setManualAddressTypeOverride(null)
+    setOriginalBagResult(null)
     
     setLeveringsadressen([newAdres])
     
@@ -618,7 +632,7 @@ export function QuickCalculator() {
                           {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}, {leveringsadressen[0].postcode} {leveringsadressen[0].plaats}
                         </div>
                       )}
-                      <div>{addressTypeResult.message}</div>
+                      <div className="whitespace-pre-line">{addressTypeResult.message}</div>
                       
                       {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
                       {addressTypeResult.type !== 'error' && (
