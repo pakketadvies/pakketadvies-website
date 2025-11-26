@@ -246,9 +246,12 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
                       setAccountNumber(value)
                       setResult(null)
                     }}
-                    placeholder="10 cijfers (bijv. 1234567890)"
+                    placeholder="Bijv. 118860844 (voorloopnullen niet nodig)"
                     maxLength={10}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Voer uw rekeningnummer in zonder voorloopnullen. Het systeem vult deze automatisch aan.
+                  </p>
                 </div>
 
                 <Button

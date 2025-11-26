@@ -85,13 +85,21 @@ export function calculateIBAN(bankCode: string, accountNumber: string): { iban: 
     return { iban: '', error: 'Bankcode moet 4 letters zijn (bijv. INGB, RABO)' }
   }
 
-  // Validate account number (10 digits)
-  if (!/^\d{10}$/.test(cleanedAccount)) {
-    return { iban: '', error: 'Rekeningnummer moet 10 cijfers zijn' }
+  // Validate account number (must be digits, max 10 digits)
+  if (!/^\d+$/.test(cleanedAccount)) {
+    return { iban: '', error: 'Rekeningnummer mag alleen cijfers bevatten' }
   }
 
+  // Check if account number is too long
+  if (cleanedAccount.length > 10) {
+    return { iban: '', error: 'Rekeningnummer mag maximaal 10 cijfers zijn' }
+  }
+
+  // Automatically pad account number with leading zeros to 10 digits
+  const paddedAccount = cleanedAccount.padStart(10, '0')
+
   // Create base IBAN (without check digits)
-  const base = 'NL00' + cleanedBankCode + cleanedAccount.padStart(10, '0')
+  const base = 'NL00' + cleanedBankCode + paddedAccount
 
   // Calculate check digits using mod-97 algorithm
   const rearranged = base.slice(4) + base.slice(0, 4)
@@ -107,7 +115,7 @@ export function calculateIBAN(bankCode: string, accountNumber: string): { iban: 
   const mod97 = parseInt(remainder) % 97
   const checkDigits = String(98 - mod97).padStart(2, '0')
 
-  const iban = 'NL' + checkDigits + cleanedBankCode + cleanedAccount.padStart(10, '0')
+  const iban = 'NL' + checkDigits + cleanedBankCode + paddedAccount
 
   return { iban }
 }
