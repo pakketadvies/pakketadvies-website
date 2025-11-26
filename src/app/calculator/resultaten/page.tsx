@@ -741,11 +741,22 @@ function ResultatenContent() {
     let filtered = [...resultaten]
 
     // NIEUW: Filter by address type (particulier/zakelijk)
+    // Deze filtering is al gedaan in loadResultaten, maar we doen het hier ook voor extra zekerheid
     if (verbruik?.addressType) {
-      // We moeten contracten ophalen met target_audience informatie
-      // Voor nu: filteren we niet actief, maar tonen we alleen contracten die geschikt zijn
-      // Dit wordt later uitgebreid met database filtering
-      console.log('Address type filtering:', verbruik.addressType)
+      const beforeFilter = filtered.length
+      filtered = filtered.filter(r => {
+        // Als targetAudience niet is ingesteld, altijd tonen (backward compatibility)
+        if (!r.targetAudience) return true
+        
+        // Als targetAudience 'both' is, altijd tonen
+        if (r.targetAudience === 'both') return true
+        
+        // Anders alleen tonen als het overeenkomt met address type
+        return r.targetAudience === verbruik.addressType
+      })
+      console.log('🔍 Client-side filtering by addressType:', verbruik.addressType, `(${beforeFilter} -> ${filtered.length} contracts)`)
+    } else {
+      console.log('🔍 Client-side filtering: No addressType in verbruik, showing all contracts')
     }
     
     // Filter by type
