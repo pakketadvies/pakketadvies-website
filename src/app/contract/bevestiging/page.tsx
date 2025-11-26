@@ -10,6 +10,17 @@ import confetti from 'canvas-confetti'
 function BevestigingContent() {
   const { bedrijfsgegevens, verbruik } = useCalculatorStore()
   const [showConfetti, setShowConfetti] = useState(true)
+  const [aanvraagnummer, setAanvraagnummer] = useState<string | null>(null)
+  
+  useEffect(() => {
+    // Haal aanvraagnummer op uit sessionStorage
+    if (typeof window !== 'undefined') {
+      const nummer = sessionStorage.getItem('aanvraagnummer')
+      if (nummer) {
+        setAanvraagnummer(nummer)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (showConfetti && typeof window !== 'undefined') {
@@ -112,7 +123,7 @@ function BevestigingContent() {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-300">
                   <span className="text-gray-600 text-xs md:text-sm">Aanvraagnummer:</span>
                   <span className="font-mono text-xs md:text-sm font-semibold text-brand-navy-500">
-                    #PA-{new Date().getFullYear()}-{String(Math.floor(Math.random() * 999999)).padStart(6, '0')}
+                    {aanvraagnummer ? `#${aanvraagnummer}` : `#PA-${new Date().getFullYear()}-XXXXXX`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

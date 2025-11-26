@@ -418,20 +418,89 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
   const onSubmit = async (data: ParticulierAanvraagFormData) => {
     setIsSubmitting(true)
+    try {
+      if (!contract || !verbruik) {
+        alert('Er is een fout opgetreden. Probeer het opnieuw.')
+        return
+      }
 
-    // Hier zou je de data naar de backend sturen
-    const aanvraagData = {
-      contract: contract,
-      verbruik: verbruik,
-      persoonlijkeGegevens: data,
+      // Prepare gegevens_data (particulier)
+      const gegevensData = {
+        aanhef: data.aanhef,
+        voornaam: data.voornaam,
+        voorletters: data.voorletters,
+        tussenvoegsel: data.tussenvoegsel,
+        achternaam: data.achternaam,
+        geboortedatum: data.geboortedatum,
+        telefoonnummer: data.telefoonnummer,
+        emailadres: data.emailadres,
+        heeft_andere_correspondentie_adres: data.anderCorrespondentieadres,
+        correspondentie_adres: data.anderCorrespondentieadres ? {
+          straat: data.correspondentieStraat,
+          huisnummer: data.correspondentieHuisnummer,
+          postcode: data.correspondentiePostcode,
+          plaats: data.correspondentiePlaats,
+        } : null,
+      }
+
+      // Prepare aanvraag data
+      const aanvraagData = {
+        contract_id: contract.id,
+        contract_type: contract.type, // 'vast' | 'dynamisch' (maatwerk wordt getoond als vast)
+        contract_naam: contract.contractNaam || `${contract.type === 'vast' ? 'Vast' : 'Dynamisch'} contract`,
+        leverancier_id: contract.leverancier.id,
+        leverancier_naam: contract.leverancier.naam,
+        aanvraag_type: 'particulier' as const,
+        verbruik_data: verbruik,
+        gegevens_data: gegevensData,
+        iban: data.iban,
+        rekening_op_andere_naam: data.rekeningOpAndereNaam || false,
+        rekeninghouder_naam: data.rekeninghouderNaam,
+        heeft_verblijfsfunctie: data.heeftVerblijfsfunctie,
+        gaat_verhuizen: data.gaatVerhuizen,
+        wanneer_overstappen: data.wanneerOverstappen,
+        contract_einddatum: data.contractEinddatum,
+        ingangsdatum: data.ingangsdatum,
+        is_klant_bij_leverancier: data.isKlantBijLeverancier,
+        herinnering_contract: data.herinneringContract,
+        nieuwsbrief: data.nieuwsbrief,
+        heeft_andere_correspondentie_adres: data.anderCorrespondentieadres,
+        correspondentie_adres: data.anderCorrespondentieadres ? {
+          straat: data.correspondentieStraat,
+          huisnummer: data.correspondentieHuisnummer,
+          postcode: data.correspondentiePostcode,
+          plaats: data.correspondentiePlaats,
+        } : undefined,
+      }
+
+      // Save to database via API
+      const response = await fetch('/api/aanvragen/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(aanvraagData),
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Fout bij opslaan aanvraag')
+      }
+
+      // Store aanvraagnummer in sessionStorage for bevestigingspagina
+      if (result.aanvraagnummer) {
+        sessionStorage.setItem('aanvraagnummer', result.aanvraagnummer)
+      }
+
+      // Redirect to bevestigingspagina
+      router.push('/contract/bevestiging')
+    } catch (error: any) {
+      console.error('Error submitting form:', error)
+      alert(error.message || 'Er is een fout opgetreden bij het verzenden van uw aanvraag. Probeer het opnieuw.')
+    } finally {
+      setIsSubmitting(false)
     }
-
-    console.log('Particulier aanvraag data:', aanvraagData)
-
-    // Simuleer API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    router.push('/contract/bevestiging')
   }
 
   const contractNaam = contract?.contractNaam || `${contract?.type === 'vast' ? 'Vast' : 'Dynamisch'} contract`

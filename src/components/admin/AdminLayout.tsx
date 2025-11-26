@@ -13,6 +13,7 @@ import {
   List,
   X,
   CurrencyEur,
+  ClipboardText,
 } from '@phosphor-icons/react'
 
 interface AdminLayoutProps {
@@ -51,6 +52,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/contracten',
       icon: FileText,
       active: pathname.startsWith('/admin/contracten'),
+    },
+    {
+      name: 'Aanvragen',
+      href: '/admin/aanvragen',
+      icon: ClipboardText,
+      active: pathname.startsWith('/admin/aanvragen'),
     },
     {
       name: 'Tarieven',
