@@ -171,8 +171,8 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
         {/* Content */}
         <div className="p-6">
           <div className="space-y-6">
-        {/* Mode selector */}
-        <div className="flex gap-3 border-b border-gray-200 pb-4">
+            {/* Mode selector */}
+            <div className="flex gap-3 border-b border-gray-200 pb-4">
           <button
             onClick={() => {
               setMode('calculate')
@@ -208,11 +208,11 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
               <span>Valideren</span>
             </div>
           </button>
-        </div>
+            </div>
 
-        {/* Calculate mode */}
-        {mode === 'calculate' && (
-          <div className="space-y-4">
+                {/* Calculate mode */}
+            {mode === 'calculate' && (
+              <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Bank <span className="text-red-500">*</span>
@@ -257,14 +257,14 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
               disabled={!bankCode || !accountNumber}
             >
               <CreditCard weight="duotone" className="w-5 h-5 mr-2" />
-              IBAN Berekenen
-            </Button>
-          </div>
-        )}
+                IBAN Berekenen
+              </Button>
+              </div>
+            )}
 
-        {/* Validate mode */}
-        {mode === 'validate' && (
-          <div className="space-y-4">
+            {/* Validate mode */}
+            {mode === 'validate' && (
+              <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 IBAN <span className="text-red-500">*</span>
@@ -290,13 +290,13 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
               disabled={!ibanInput}
             >
               <CheckCircle weight="duotone" className="w-5 h-5 mr-2" />
-              IBAN Valideren
-            </Button>
-          </div>
-        )}
+                IBAN Valideren
+              </Button>
+              </div>
+            )}
 
-        {/* Result */}
-        {result && (
+            {/* Result */}
+            {result && (
           <div
             className={`p-4 rounded-xl border-2 animate-slide-down ${
               result.valid
@@ -358,11 +358,11 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
                 </div>
               </div>
             )}
-          </div>
-        )}
+            </div>
+            )}
 
-        {/* Info */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+            {/* Info */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
           <div className="flex items-start gap-2">
             <CreditCard weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800">
@@ -380,7 +380,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
               </p>
             </div>
           </div>
-        </div>
+          </div>
         </div>
       </div>
     </div>,
