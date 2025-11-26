@@ -173,137 +173,137 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
           <div className="space-y-6">
             {/* Mode selector */}
             <div className="flex gap-3 border-b border-gray-200 pb-4">
-          <button
-            onClick={() => {
-              setMode('calculate')
-              setResult(null)
-              setIbanInput('')
-            }}
-            className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all ${
-              mode === 'calculate'
-                ? 'bg-brand-teal-500 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <MagnifyingGlass weight="duotone" className="w-5 h-5" />
-              <span>Berekenen</span>
-            </div>
-          </button>
-          <button
-            onClick={() => {
-              setMode('validate')
-              setResult(null)
-              setBankCode('')
-              setAccountNumber('')
-            }}
-            className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all ${
-              mode === 'validate'
-                ? 'bg-brand-teal-500 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <CheckCircle weight="duotone" className="w-5 h-5" />
-              <span>Valideren</span>
-            </div>
-          </button>
+              <button
+                onClick={() => {
+                  setMode('calculate')
+                  setResult(null)
+                  setIbanInput('')
+                }}
+                className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all ${
+                  mode === 'calculate'
+                    ? 'bg-brand-teal-500 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <MagnifyingGlass weight="duotone" className="w-5 h-5" />
+                  <span>Berekenen</span>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setMode('validate')
+                  setResult(null)
+                  setBankCode('')
+                  setAccountNumber('')
+                }}
+                className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all ${
+                  mode === 'validate'
+                    ? 'bg-brand-teal-500 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircle weight="duotone" className="w-5 h-5" />
+                  <span>Valideren</span>
+                </div>
+              </button>
             </div>
 
-                {/* Calculate mode */}
+            {/* Calculate mode */}
             {mode === 'calculate' && (
               <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bank <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={bankCode}
-                onChange={(e) => {
-                  setBankCode(e.target.value)
-                  setResult(null)
-                }}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all text-brand-navy-500 font-medium bg-white"
-              >
-                <option value="">Selecteer je bank</option>
-                {commonBanks.map((bank) => (
-                  <option key={bank.code} value={bank.code}>
-                    {bank.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bank <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={bankCode}
+                    onChange={(e) => {
+                      setBankCode(e.target.value)
+                      setResult(null)
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all text-brand-navy-500 font-medium bg-white"
+                  >
+                    <option value="">Selecteer je bank</option>
+                    {commonBanks.map((bank) => (
+                      <option key={bank.code} value={bank.code}>
+                        {bank.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rekeningnummer <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="text"
-                value={accountNumber}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 10)
-                  setAccountNumber(value)
-                  setResult(null)
-                }}
-                placeholder="10 cijfers (bijv. 1234567890)"
-                maxLength={10}
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rekeningnummer <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={accountNumber}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+                      setAccountNumber(value)
+                      setResult(null)
+                    }}
+                    placeholder="10 cijfers (bijv. 1234567890)"
+                    maxLength={10}
+                  />
+                </div>
 
-            <Button
-              onClick={handleCalculate}
-              className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
-              disabled={!bankCode || !accountNumber}
-            >
-              <CreditCard weight="duotone" className="w-5 h-5 mr-2" />
-                IBAN Berekenen
-              </Button>
+                <Button
+                  onClick={handleCalculate}
+                  className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+                  disabled={!bankCode || !accountNumber}
+                >
+                  <CreditCard weight="duotone" className="w-5 h-5 mr-2" />
+                  IBAN Berekenen
+                </Button>
               </div>
             )}
 
             {/* Validate mode */}
             {mode === 'validate' && (
               <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                IBAN <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={ibanInput}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Z0-9\s]/gi, '').toUpperCase()
-                  setIbanInput(value)
-                  setResult(null)
-                }}
-                placeholder="NL91 ABNA 0417 1643 00"
-                maxLength={21}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Voer uw IBAN in om te controleren of deze geldig is
-              </p>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    IBAN <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={ibanInput}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^A-Z0-9\s]/gi, '').toUpperCase()
+                      setIbanInput(value)
+                      setResult(null)
+                    }}
+                    placeholder="NL91 ABNA 0417 1643 00"
+                    maxLength={21}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Voer uw IBAN in om te controleren of deze geldig is
+                  </p>
+                </div>
 
-            <Button
-              onClick={handleValidate}
-              className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
-              disabled={!ibanInput}
-            >
-              <CheckCircle weight="duotone" className="w-5 h-5 mr-2" />
-                IBAN Valideren
-              </Button>
+                <Button
+                  onClick={handleValidate}
+                  className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+                  disabled={!ibanInput}
+                >
+                  <CheckCircle weight="duotone" className="w-5 h-5 mr-2" />
+                  IBAN Valideren
+                </Button>
               </div>
             )}
 
             {/* Result */}
             {result && (
-          <div
-            className={`p-4 rounded-xl border-2 animate-slide-down ${
-              result.valid
-                ? 'bg-green-50 border-green-200'
-                : 'bg-red-50 border-red-200'
-            }`}
-          >
+              <div
+                className={`p-4 rounded-xl border-2 animate-slide-down ${
+                  result.valid
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-red-50 border-red-200'
+                }`}
+              >
             {result.valid && result.iban ? (
               <div className="space-y-3">
                 <div className="flex items-start gap-2">
@@ -358,28 +358,29 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
                 </div>
               </div>
             )}
-            </div>
+              </div>
             )}
 
             {/* Info */}
             <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-          <div className="flex items-start gap-2">
-            <CreditCard weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">Wat is een IBAN?</p>
-              <p>
-                IBAN staat voor International Bank Account Number. Een Nederlands IBAN bestaat uit:
-                <br />
-                • Landcode: NL
-                <br />
-                • 2 controlecijfers
-                <br />
-                • 4 letters (bankcode)
-                <br />
-                • 10 cijfers (rekeningnummer)
-              </p>
+              <div className="flex items-start gap-2">
+                <CreditCard weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-semibold mb-1">Wat is een IBAN?</p>
+                  <p>
+                    IBAN staat voor International Bank Account Number. Een Nederlands IBAN bestaat uit:
+                    <br />
+                    • Landcode: NL
+                    <br />
+                    • 2 controlecijfers
+                    <br />
+                    • 4 letters (bankcode)
+                    <br />
+                    • 10 cijfers (rekeningnummer)
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
