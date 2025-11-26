@@ -24,9 +24,18 @@ export async function POST(request: Request) {
     }
 
     // Use service role key for public inserts (bypasses RLS)
+    // This is safe because we validate the data server-side
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
+      return NextResponse.json<CreateAanvraagResponse>(
+        { success: false, error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
       {
         auth: {
           autoRefreshToken: false,
