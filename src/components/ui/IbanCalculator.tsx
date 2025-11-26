@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Modal } from './Modal'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from './Button'
 import { Input } from './Input'
-import { CreditCard, CheckCircle, XCircle, Copy, MagnifyingGlass } from '@phosphor-icons/react'
+import { CreditCard, CheckCircle, XCircle, Copy, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { calculateIBAN, validateIBAN, formatIBAN, getBankNameFromIBAN, getCommonBankCodes } from '@/lib/iban-calculator'
 
 interface IbanCalculatorProps {
@@ -98,6 +98,32 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     }
   }
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen])
+
   const handleClose = () => {
     onClose()
     // Reset on close
@@ -111,13 +137,39 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     }, 300)
   }
 
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="IBAN Bepalen"
-      size="lg"
-    >
+  if (!isOpen) return null
+
+  // Render fullscreen overlay via portal
+  const modalContent = typeof window !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+      {/* Backdrop - click to close */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+      
+      {/* Modal Content */}
+      <div
+        className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl md:rounded-t-3xl z-10">
+          <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500">
+            IBAN Bepalen
+          </h2>
+          <button
+            onClick={handleClose}
+            className="ml-auto p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Sluiten"
+          >
+            <X weight="bold" className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
       <div className="space-y-6">
         {/* Mode selector */}
         <div className="flex gap-3 border-b border-gray-200 pb-4">

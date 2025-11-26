@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
@@ -20,7 +20,10 @@ import {
   CheckCircle,
   Calendar,
   House,
-  Warning
+  Warning,
+  XCircle,
+  ArrowsClockwise,
+  MagnifyingGlass
 } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
 import { IbanCalculator } from '@/components/ui/IbanCalculator'
@@ -74,10 +77,30 @@ interface ParticulierAanvraagFormProps {
 
 export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormProps) {
   const router = useRouter()
-  const { verbruik, vorigeStap } = useCalculatorStore()
+  const { verbruik, vorigeStap, setVerbruik, setAddressType } = useCalculatorStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAdresWijzigen, setShowAdresWijzigen] = useState(false)
   const [showIbanCalculator, setShowIbanCalculator] = useState(false)
+  
+  // Address change states
+  const [editPostcode, setEditPostcode] = useState('')
+  const [editHuisnummer, setEditHuisnummer] = useState('')
+  const [editToevoeging, setEditToevoeging] = useState('')
+  const [loadingAddress, setLoadingAddress] = useState(false)
+  const [addressError, setAddressError] = useState('')
+  const [checkingAddressType, setCheckingAddressType] = useState(false)
+  const [addressTypeResult, setAddressTypeResult] = useState<{
+    type: 'particulier' | 'zakelijk' | 'error';
+    message: string;
+    street?: string;
+    city?: string;
+  } | null>(null)
+  const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null)
+  const [originalBagResult, setOriginalBagResult] = useState<'particulier' | 'zakelijk' | null>(null)
+  const lastLookup = useRef<string>('')
+  const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const requestCounter = useRef<number>(0)
+  const bagRequestCounter = useRef<number>(0)
 
   const {
     register,
@@ -108,6 +131,221 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
   // Haal leveringsadres op uit verbruik
   const leveringsadres = verbruik?.leveringsadressen?.[0] || null
+  
+  // Initialize edit fields when opening address change
+  const handleOpenAdresWijzigen = () => {
+    if (leveringsadres) {
+      setEditPostcode(leveringsadres.postcode || '')
+      setEditHuisnummer(leveringsadres.huisnummer || '')
+      setEditToevoeging(leveringsadres.toevoeging || '')
+    }
+    setShowAdresWijzigen(true)
+    setAddressError('')
+    setAddressTypeResult(null)
+    setManualAddressTypeOverride(null)
+    setOriginalBagResult(null)
+  }
+  
+  // Valideer postcode
+  const isValidPostcode = (postcode: string): boolean => {
+    const clean = postcode.toUpperCase().replace(/\s/g, '')
+    return /^\d{4}[A-Z]{2}$/.test(clean)
+  }
+  
+  // BAG API check functie
+  const checkAddressType = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    if (manualAddressTypeOverride) {
+      const overrideResult = {
+        type: manualAddressTypeOverride,
+        message: manualAddressTypeOverride === 'particulier' 
+          ? 'Particulier adres (handmatig gewijzigd) ⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype'
+          : 'Zakelijk adres (handmatig gewijzigd) ⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype',
+        street: addressTypeResult?.street,
+        city: addressTypeResult?.city
+      }
+      setAddressTypeResult(overrideResult)
+      return
+    }
+
+    const currentBagRequestId = bagRequestCounter.current + 1
+    bagRequestCounter.current = currentBagRequestId
+    setCheckingAddressType(true)
+
+    try {
+      const response = await fetch('/api/adres-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postcode, huisnummer, toevoeging }),
+      })
+
+      if (bagRequestCounter.current !== currentBagRequestId) {
+        return
+      }
+
+      if (response.ok) {
+        const result = await response.json()
+        setOriginalBagResult(result.type === 'error' ? null : result.type)
+        setAddressTypeResult(result)
+        
+        if (result.type !== 'error') {
+          setAddressType(result.type)
+        }
+      }
+    } catch (error) {
+      if (bagRequestCounter.current === currentBagRequestId) {
+        setAddressTypeResult({
+          type: 'error',
+          message: 'Kon adres type niet controleren'
+        })
+      }
+    } finally {
+      if (bagRequestCounter.current === currentBagRequestId) {
+        setCheckingAddressType(false)
+      }
+    }
+  }, [manualAddressTypeOverride, addressTypeResult, setAddressType])
+  
+  // Fetch address functie
+  const fetchAddress = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
+    if (lastLookup.current === lookupKey) return
+
+    const currentRequestId = requestCounter.current + 1
+    requestCounter.current = currentRequestId
+    const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
+    
+    setLoadingAddress(true)
+    setAddressError('')
+    
+    try {
+      let url = `/api/postcode?postcode=${postcodeClean}&number=${huisnummer}`
+      if (toevoeging && toevoeging.trim()) {
+        url += `&addition=${encodeURIComponent(toevoeging.trim())}`
+      }
+      
+      const response = await fetch(url)
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (requestCounter.current !== currentRequestId) return
+        
+        if (data.error) {
+          setAddressError(data.error)
+          setAddressTypeResult(null)
+          setLoadingAddress(false)
+          return
+        }
+        
+        lastLookup.current = lookupKey
+        
+        if (requestCounter.current === currentRequestId) {
+          await checkAddressType(postcode, huisnummer, toevoeging)
+        }
+      } else if (response.status === 404) {
+        if (requestCounter.current !== currentRequestId) return
+        const errorData = await response.json()
+        setAddressError(errorData.error || 'Adres niet gevonden')
+        setAddressTypeResult(null)
+      }
+    } catch (error) {
+      if (requestCounter.current === currentRequestId) {
+        setAddressError('Fout bij ophalen adres')
+      }
+    } finally {
+      if (requestCounter.current === currentRequestId) {
+        setLoadingAddress(false)
+      }
+    }
+  }, [checkAddressType])
+  
+  // Handle address input change
+  const handleAddressInputChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
+    if (field === 'postcode') setEditPostcode(value)
+    if (field === 'huisnummer') setEditHuisnummer(value)
+    if (field === 'toevoeging') setEditToevoeging(value)
+    
+    setAddressError('')
+    setAddressTypeResult(null)
+    setManualAddressTypeOverride(null)
+    setOriginalBagResult(null)
+    
+    if (addressTimeoutRef.current) {
+      clearTimeout(addressTimeoutRef.current)
+    }
+    
+    const postcodeComplete = isValidPostcode(field === 'postcode' ? value : editPostcode)
+    const hasHuisnummer = (field === 'huisnummer' ? value : editHuisnummer).trim().length > 0
+    
+    if (postcodeComplete && hasHuisnummer) {
+      addressTimeoutRef.current = setTimeout(() => {
+        fetchAddress(
+          field === 'postcode' ? value : editPostcode,
+          field === 'huisnummer' ? value : editHuisnummer,
+          field === 'toevoeging' ? value : editToevoeging
+        )
+      }, 800)
+    }
+  }
+  
+  // Handle manual address type switch
+  const handleManualAddressTypeSwitch = () => {
+    if (!addressTypeResult || addressTypeResult.type === 'error') return
+    
+    const newType: 'particulier' | 'zakelijk' = addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'
+    setManualAddressTypeOverride(newType)
+    
+    const isManualChange = originalBagResult && originalBagResult !== newType
+    const newResult = {
+      type: newType,
+      message: isManualChange
+        ? `${newType === 'particulier' ? 'Particulier' : 'Zakelijk'} adres (handmatig gewijzigd) ⚠️ U bent zelf verantwoordelijk voor de juistheid van dit adrestype`
+        : newType === 'particulier'
+        ? 'Particulier adres - geschikt voor consumentencontracten'
+        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      street: addressTypeResult.street,
+      city: addressTypeResult.city
+    }
+    setAddressTypeResult(newResult)
+    setAddressType(newType)
+  }
+  
+  // Save new address
+  const handleSaveAddress = async () => {
+    if (!isValidPostcode(editPostcode) || !editHuisnummer.trim()) {
+      setAddressError('Vul een geldige postcode en huisnummer in')
+      return
+    }
+    
+    if (!addressTypeResult) {
+      setAddressError('Controleer eerst het adres voordat u opslaat')
+      return
+    }
+    
+    if (addressTypeResult.type === 'error') {
+      setAddressError('Het adres is niet geldig. Controleer het adres voordat u opslaat.')
+      return
+    }
+    
+    // Update verbruik in store
+    if (verbruik) {
+      const updatedVerbruik = {
+        ...verbruik,
+        leveringsadressen: [{
+          postcode: editPostcode.toUpperCase().replace(/\s/g, '').replace(/^(\d{4})([A-Z]{2})$/, '$1 $2'),
+          huisnummer: editHuisnummer.trim(),
+          toevoeging: editToevoeging.trim() || undefined,
+          straat: addressTypeResult.street || '',
+          plaats: addressTypeResult.city || '',
+        }],
+        addressType: addressTypeResult.type,
+      }
+      setVerbruik(updatedVerbruik)
+      setAddressType(addressTypeResult.type)
+    }
+    
+    setShowAdresWijzigen(false)
+  }
 
   const onSubmit = async (data: ParticulierAanvraagFormData) => {
     setIsSubmitting(true)
@@ -209,18 +447,127 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
               <button
                 type="button"
-                onClick={() => setShowAdresWijzigen(!showAdresWijzigen)}
+                onClick={handleOpenAdresWijzigen}
                 className="text-sm text-brand-teal-600 hover:text-brand-teal-700 font-semibold underline"
               >
                 Adres wijzigen
               </button>
 
-              {/* Adres wijzigen formulier (wordt later geïmplementeerd) */}
+              {/* Adres wijzigen formulier */}
               {showAdresWijzigen && (
-                <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
-                  <p className="text-sm text-yellow-800">
-                    Adres wijzigen functionaliteit wordt hier geïmplementeerd...
-                  </p>
+                <div className="bg-white border-2 border-gray-200 rounded-xl p-4 md:p-6 space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-brand-navy-500">Adres wijzigen</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdresWijzigen(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <XCircle weight="bold" className="w-5 h-5" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Input
+                      label="Postcode"
+                      value={editPostcode}
+                      onChange={(e) => handleAddressInputChange('postcode', e.target.value)}
+                      error={addressError && !isValidPostcode(editPostcode) ? addressError : undefined}
+                      placeholder="1234 AB"
+                    />
+                    <Input
+                      label="Huisnummer"
+                      value={editHuisnummer}
+                      onChange={(e) => handleAddressInputChange('huisnummer', e.target.value)}
+                      placeholder="12"
+                    />
+                    <Input
+                      label="Toevoeging (optioneel)"
+                      value={editToevoeging}
+                      onChange={(e) => handleAddressInputChange('toevoeging', e.target.value)}
+                      placeholder="A"
+                    />
+                  </div>
+                  
+                  {/* Loading state */}
+                  {(loadingAddress || checkingAddressType) && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <MagnifyingGlass className="w-4 h-4 animate-pulse" />
+                      <span>{loadingAddress ? 'Adres opzoeken...' : 'Adres controleren...'}</span>
+                    </div>
+                  )}
+                  
+                  {/* Address error */}
+                  {addressError && !loadingAddress && (
+                    <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-900">{addressError}</p>
+                    </div>
+                  )}
+                  
+                  {/* Address type result */}
+                  {addressTypeResult && !loadingAddress && !checkingAddressType && (
+                    <div className={`flex items-start gap-2 p-3 rounded-lg ${
+                      addressTypeResult.type === 'error'
+                        ? 'bg-red-50 border border-red-200'
+                        : addressTypeResult.type === 'particulier'
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-blue-50 border border-blue-200'
+                    }`}>
+                      {addressTypeResult.type === 'error' ? (
+                        <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <CheckCircle weight="duotone" className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                          addressTypeResult.type === 'particulier' ? 'text-green-600' : 'text-blue-600'
+                        }`} />
+                      )}
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${
+                          addressTypeResult.type === 'error'
+                            ? 'text-red-900'
+                            : addressTypeResult.type === 'particulier'
+                            ? 'text-green-900'
+                            : 'text-blue-900'
+                        }`}>
+                          {addressTypeResult.message}
+                        </p>
+                        {addressTypeResult.street && addressTypeResult.city && (
+                          <p className="text-xs text-gray-600 mt-1">
+                            {addressTypeResult.street}, {addressTypeResult.city}
+                          </p>
+                        )}
+                        {addressTypeResult.type !== 'error' && (
+                          <button
+                            type="button"
+                            onClick={handleManualAddressTypeSwitch}
+                            className="mt-2 text-xs text-brand-teal-600 hover:text-brand-teal-700 font-semibold flex items-center gap-1"
+                          >
+                            Wijzig naar {addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'}
+                            <ArrowsClockwise weight="bold" className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Save button */}
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      type="button"
+                      onClick={handleSaveAddress}
+                      disabled={!addressTypeResult || addressTypeResult.type === 'error' || loadingAddress || checkingAddressType}
+                      className="flex-1 bg-brand-teal-500 hover:bg-brand-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Adres opslaan
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setShowAdresWijzigen(false)}
+                      variant="outline"
+                    >
+                      Annuleren
+                    </Button>
+                  </div>
                 </div>
               )}
 
