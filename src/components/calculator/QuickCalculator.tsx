@@ -19,7 +19,8 @@ import {
   Lightbulb,
   Info,
   XCircle,
-  Plugs
+  Plugs,
+  ArrowsClockwise
 } from '@phosphor-icons/react'
 import type { VerbruikData } from '@/types/calculator'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
@@ -65,7 +66,7 @@ const verbruikSchema = z.object({
 
 export function QuickCalculator() {
   const router = useRouter()
-  const { setVerbruik, verbruik } = useCalculatorStore()
+  const { setVerbruik, verbruik, setAddressType } = useCalculatorStore()
   
   // State
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
@@ -93,8 +94,11 @@ export function QuickCalculator() {
   const [addressTypeResult, setAddressTypeResult] = useState<{
     type: 'particulier' | 'zakelijk' | 'error';
     message: string;
+    street?: string;
+    city?: string;
   } | null>(null);
   const [checkingAddressType, setCheckingAddressType] = useState(false);
+  const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null);
   
   // Refs voor debouncing en duplicate prevention (exact zoals VerbruikForm)
   const lastLookup = useRef<string>('')
@@ -335,6 +339,27 @@ export function QuickCalculator() {
 
   // NIEUW: BAG API functie voor woonfunctie check
   const checkAddressType = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    // Als er een manual override is, gebruik die in plaats van BAG API
+    if (manualAddressTypeOverride) {
+      const overrideResult: {
+        type: 'particulier' | 'zakelijk' | 'error';
+        message: string;
+        street?: string;
+        city?: string;
+      } = {
+        type: manualAddressTypeOverride,
+        message: manualAddressTypeOverride === 'particulier' 
+          ? 'Particulier adres - geschikt voor consumentencontracten'
+          : 'Zakelijk adres - geschikt voor zakelijke contracten',
+        street: addressTypeResult?.street,
+        city: addressTypeResult?.city
+      }
+      setAddressTypeResult(overrideResult)
+      setValue('addressType', manualAddressTypeOverride)
+      setAddressType(manualAddressTypeOverride)
+      return
+    }
+
     // Genereer unieke request ID voor race condition preventie
     const currentBagRequestId = bagRequestCounter.current + 1
     bagRequestCounter.current = currentBagRequestId
@@ -357,12 +382,20 @@ export function QuickCalculator() {
         return
       }
       
-      setAddressTypeResult(result);
+      // Sla street en city op in result
+      const resultWithDetails = {
+        ...result,
+        street: result.street,
+        city: result.city
+      }
+      
+      setAddressTypeResult(resultWithDetails);
 
       // Als het een geldig adres is, sla het type op in de form state
       if (result.type !== 'error') {
         // Update de verbruik data met address type
         setValue('addressType', result.type);
+        setAddressType(result.type);
       }
     } catch (error) {
       console.error('Address type check error:', error);
@@ -382,7 +415,39 @@ export function QuickCalculator() {
         setCheckingAddressType(false);
       }
     }
-  }, [setValue]);
+  }, [setValue, manualAddressTypeOverride, addressTypeResult, setAddressType]);
+
+  // Handler voor handmatige address type switch
+  const handleManualAddressTypeSwitch = () => {
+    if (!addressTypeResult || addressTypeResult.type === 'error') {
+      return
+    }
+
+    const newType: 'particulier' | 'zakelijk' = addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'
+    setManualAddressTypeOverride(newType)
+
+    // Update addressTypeResult state
+    const newResult: {
+      type: 'particulier' | 'zakelijk' | 'error';
+      message: string;
+      street?: string;
+      city?: string;
+    } = {
+      type: newType,
+      message: newType === 'particulier' 
+        ? 'Particulier adres - geschikt voor consumentencontracten'
+        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      street: addressTypeResult.street,
+      city: addressTypeResult.city
+    }
+    setAddressTypeResult(newResult)
+
+    // Update form state
+    setValue('addressType', newType)
+
+    // Update Zustand store
+    setAddressType(newType)
+  }
 
   // Address change handler - exact zoals VerbruikForm
   const handleAddressChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
@@ -400,6 +465,8 @@ export function QuickCalculator() {
     
     // Clear BAG API result omdat adres is gewijzigd
     setAddressTypeResult(null)
+    // Reset manual override als adres wijzigt
+    setManualAddressTypeOverride(null)
     
     setLeveringsadressen([newAdres])
     
@@ -538,7 +605,7 @@ export function QuickCalculator() {
                     ) : (
                       <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     )}
-                    <div className={`text-xs md:text-sm ${
+                    <div className={`flex-1 text-xs md:text-sm ${
                       addressTypeResult.type === 'error'
                         ? 'text-red-900'
                         : addressTypeResult.type === 'particulier'
@@ -552,6 +619,18 @@ export function QuickCalculator() {
                         </div>
                       )}
                       <div>{addressTypeResult.message}</div>
+                      
+                      {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
+                      {addressTypeResult.type !== 'error' && (
+                        <button
+                          type="button"
+                          onClick={handleManualAddressTypeSwitch}
+                          className="mt-2 text-xs text-gray-600 hover:text-gray-900 underline flex items-center gap-1 transition-colors"
+                        >
+                          Wijzig naar {addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'}
+                          <ArrowsClockwise weight="bold" className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ) : (

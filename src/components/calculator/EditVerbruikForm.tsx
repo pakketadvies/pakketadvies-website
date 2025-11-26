@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Lightning, Flame, MapPin, Plugs, Sun, Check, X, CheckCircle, XCircle } from '@phosphor-icons/react'
+import { Lightning, Flame, MapPin, Plugs, Sun, Check, X, CheckCircle, XCircle, ArrowsClockwise } from '@phosphor-icons/react'
+import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
 
 interface EditVerbruikFormProps {
@@ -10,6 +11,7 @@ interface EditVerbruikFormProps {
 }
 
 export default function EditVerbruikForm({ currentData, onChange }: EditVerbruikFormProps) {
+  const { setAddressType } = useCalculatorStore()
   const [formData, setFormData] = useState<VerbruikData>(currentData)
   
   // Address lookup states
@@ -19,7 +21,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   const [addressTypeResult, setAddressTypeResult] = useState<{
     type: 'particulier' | 'zakelijk' | 'error';
     message: string;
+    street?: string;
+    city?: string;
   } | null>(null)
+  const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null)
   const lastLookup = useRef<string>('')
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Request counters voor race condition preventie
@@ -58,6 +63,8 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     
     setAddressError('')
     setAddressTypeResult(null) // Clear BAG API result
+    // Reset manual override als adres wijzigt
+    setManualAddressTypeOverride(null)
     // Clear addressType omdat adres is gewijzigd
     const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
     setFormData(newData)
@@ -78,6 +85,40 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         fetchAddress(newAdres.postcode, newAdres.huisnummer, newAdres.toevoeging)
       }, 800)
     }
+  }
+
+  // Handler voor handmatige address type switch
+  const handleManualAddressTypeSwitch = () => {
+    if (!addressTypeResult || addressTypeResult.type === 'error') {
+      return
+    }
+
+    const newType: 'particulier' | 'zakelijk' = addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'
+    setManualAddressTypeOverride(newType)
+
+    // Update addressTypeResult state
+    const newResult: {
+      type: 'particulier' | 'zakelijk' | 'error';
+      message: string;
+      street?: string;
+      city?: string;
+    } = {
+      type: newType,
+      message: newType === 'particulier' 
+        ? 'Particulier adres - geschikt voor consumentencontracten'
+        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      street: addressTypeResult.street,
+      city: addressTypeResult.city
+    }
+    setAddressTypeResult(newResult)
+
+    // Update formData
+    const updatedData = { ...formData, addressType: newType }
+    setFormData(updatedData)
+    onChange(updatedData)
+
+    // Update Zustand store
+    setAddressType(newType)
   }
 
   const isValidPostcode = (postcode: string): boolean => {
@@ -137,6 +178,29 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
 
           // NIEUW: BAG API woonfunctie check (alleen als dit nog steeds de laatste request is)
           if (requestCounter.current === currentRequestId) {
+            // Als er een manual override is, gebruik die in plaats van BAG API
+            if (manualAddressTypeOverride) {
+              const overrideResult: {
+                type: 'particulier' | 'zakelijk' | 'error';
+                message: string;
+                street?: string;
+                city?: string;
+              } = {
+                type: manualAddressTypeOverride,
+                message: manualAddressTypeOverride === 'particulier' 
+                  ? 'Particulier adres - geschikt voor consumentencontracten'
+                  : 'Zakelijk adres - geschikt voor zakelijke contracten',
+                street: addressTypeResult?.street,
+                city: addressTypeResult?.city
+              }
+              setAddressTypeResult(overrideResult)
+              const updatedData = { ...newData, addressType: manualAddressTypeOverride }
+              setFormData(updatedData)
+              onChange(updatedData)
+              setAddressType(manualAddressTypeOverride)
+              return
+            }
+
             // Genereer unieke request ID voor BAG API race condition preventie
             const currentBagRequestId = bagRequestCounter.current + 1
             bagRequestCounter.current = currentBagRequestId
@@ -159,13 +223,21 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 return
               }
               
-              setAddressTypeResult(bagResult);
+              // Sla street en city op in result
+              const bagResultWithDetails = {
+                ...bagResult,
+                street: bagResult.street,
+                city: bagResult.city
+              }
+              
+              setAddressTypeResult(bagResultWithDetails);
               
               // Update addressType in formData
               if (bagResult.type !== 'error') {
                 const updatedData = { ...newData, addressType: bagResult.type };
                 setFormData(updatedData);
                 onChange(updatedData);
+                setAddressType(bagResult.type);
               } else {
                 const updatedData = { ...newData, addressType: null };
                 setFormData(updatedData);
@@ -309,7 +381,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                   ) : (
                     <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   )}
-                  <div className={`text-sm ${
+                  <div className={`flex-1 text-sm ${
                     addressTypeResult.type === 'error'
                       ? 'text-red-900'
                       : addressTypeResult.type === 'particulier'
@@ -324,6 +396,18 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                       </div>
                     )}
                     <div>{addressTypeResult.message}</div>
+                    
+                    {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
+                    {addressTypeResult.type !== 'error' && (
+                      <button
+                        type="button"
+                        onClick={handleManualAddressTypeSwitch}
+                        className="mt-2 text-xs text-gray-600 hover:text-gray-900 underline flex items-center gap-1 transition-colors"
+                      >
+                        Wijzig naar {addressTypeResult.type === 'particulier' ? 'zakelijk' : 'particulier'}
+                        <ArrowsClockwise weight="bold" className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (

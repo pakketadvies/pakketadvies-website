@@ -20,7 +20,8 @@ import {
   Trash,
   MagnifyingGlass,
   Gauge,
-  Plugs
+  Plugs,
+  ArrowsClockwise
 } from '@phosphor-icons/react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -68,7 +69,7 @@ type VerbruikFormData = z.infer<typeof verbruikSchema>
 
 export function VerbruikForm() {
   const router = useRouter()
-  const { setVerbruik } = useCalculatorStore()
+  const { setVerbruik, setAddressType } = useCalculatorStore()
   
   // State
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
@@ -97,12 +98,15 @@ export function VerbruikForm() {
   // Debounce timer voor aansluitwaarde schatting
   const aansluitwaardeTimer = useRef<NodeJS.Timeout | null>(null)
 
-  // NIEUW: State voor address type check
-  const [addressTypeResult, setAddressTypeResult] = useState<{
+  // NIEUW: State voor address type check (per adres index)
+  const [addressTypeResult, setAddressTypeResult] = useState<{ [key: number]: {
     type: 'particulier' | 'zakelijk' | 'error';
     message: string;
-  } | null>(null);
-  const [checkingAddressType, setCheckingAddressType] = useState(false);
+    street?: string;
+    city?: string;
+  } | null }>({});
+  const [checkingAddressType, setCheckingAddressType] = useState<{ [key: number]: boolean }>({});
+  const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<{ [key: number]: 'particulier' | 'zakelijk' | null }>({});
 
   const {
     register,
@@ -211,7 +215,7 @@ export function VerbruikForm() {
             message: data.error
           })
           // Clear BAG API result omdat adres niet geldig is
-          setAddressTypeResult(null)
+          setAddressTypeResult(prev => ({ ...prev, [index]: null }))
           setLoadingAddresses(prev => ({ ...prev, [index]: false }))
           return
         }
@@ -259,7 +263,8 @@ export function VerbruikForm() {
         }
         
         // Clear oude data EN BAG API result omdat adres niet geldig is
-        setAddressTypeResult(null)
+        setAddressTypeResult(prev => ({ ...prev, [index]: null }))
+        setManualAddressTypeOverride(prev => ({ ...prev, [index]: null }))
         setLeveringsadressen(prev => {
           const updated = [...prev]
           updated[index] = {
@@ -314,14 +319,74 @@ export function VerbruikForm() {
     }
   }, [setValue, clearErrors, setError])
 
+  // Handler voor handmatige address type switch (per adres index)
+  const handleManualAddressTypeSwitch = (index: number) => {
+    const currentResult = addressTypeResult[index]
+    if (!currentResult || currentResult.type === 'error') {
+      return
+    }
+
+    const newType: 'particulier' | 'zakelijk' = currentResult.type === 'particulier' ? 'zakelijk' : 'particulier'
+    
+    // Update manual override voor dit specifieke adres
+    setManualAddressTypeOverride(prev => ({ ...prev, [index]: newType }))
+
+    // Update addressTypeResult state voor dit adres
+    const newResult: {
+      type: 'particulier' | 'zakelijk' | 'error';
+      message: string;
+      street?: string;
+      city?: string;
+    } = {
+      type: newType,
+      message: newType === 'particulier' 
+        ? 'Particulier adres - geschikt voor consumentencontracten'
+        : 'Zakelijk adres - geschikt voor zakelijke contracten',
+      street: currentResult.street,
+      city: currentResult.city
+    }
+    setAddressTypeResult(prev => ({ ...prev, [index]: newResult }))
+
+    // Update form state (alleen voor primair adres, index 0)
+    if (index === 0) {
+      setValue('addressType', newType)
+      setAddressType(newType)
+    }
+  }
+
   // NIEUW: BAG API functie voor woonfunctie check
   const checkAddressType = useCallback(async (index: number, postcode: string, huisnummer: string, toevoeging?: string) => {
+    // Als er een manual override is voor dit adres, gebruik die in plaats van BAG API
+    if (manualAddressTypeOverride[index]) {
+      const overrideType = manualAddressTypeOverride[index]
+      const currentResult = addressTypeResult[index]
+      const overrideResult: {
+        type: 'particulier' | 'zakelijk' | 'error';
+        message: string;
+        street?: string;
+        city?: string;
+      } = {
+        type: overrideType,
+        message: overrideType === 'particulier' 
+          ? 'Particulier adres - geschikt voor consumentencontracten'
+          : 'Zakelijk adres - geschikt voor zakelijke contracten',
+        street: currentResult?.street,
+        city: currentResult?.city
+      }
+      setAddressTypeResult(prev => ({ ...prev, [index]: overrideResult }))
+      if (index === 0) {
+        setValue('addressType', overrideType)
+        setAddressType(overrideType)
+      }
+      return
+    }
+
     // Genereer unieke request ID voor race condition preventie
     const currentBagRequestId = (bagRequestCounter.current[index] || 0) + 1
     bagRequestCounter.current[index] = currentBagRequestId
 
-    setCheckingAddressType(true);
-    setAddressTypeResult(null);
+    setCheckingAddressType(prev => ({ ...prev, [index]: true }));
+    setAddressTypeResult(prev => ({ ...prev, [index]: null }));
 
     try {
       const response = await fetch('/api/adres-check', {
@@ -338,12 +403,19 @@ export function VerbruikForm() {
         return
       }
       
-      setAddressTypeResult(result);
+      // Sla street en city op in result
+      const resultWithDetails = {
+        ...result,
+        street: result.street,
+        city: result.city
+      }
+      
+      setAddressTypeResult(prev => ({ ...prev, [index]: resultWithDetails }));
 
-      // Als het een geldig adres is, sla het type op in de form state
-      if (result.type !== 'error') {
-        // Update de verbruik data met address type
+      // Als het een geldig adres is, sla het type op in de form state (alleen voor primair adres)
+      if (result.type !== 'error' && index === 0) {
         setValue('addressType', result.type);
+        setAddressType(result.type);
       }
     } catch (error) {
       console.error('Address type check error:', error);
@@ -353,17 +425,20 @@ export function VerbruikForm() {
         return
       }
       
-      setAddressTypeResult({
-        type: 'error',
-        message: 'Kon adres type niet controleren'
-      });
+      setAddressTypeResult(prev => ({
+        ...prev,
+        [index]: {
+          type: 'error',
+          message: 'Kon adres type niet controleren'
+        }
+      }));
     } finally {
       // Alleen loading state updaten als dit nog steeds de laatste request is
       if (bagRequestCounter.current[index] === currentBagRequestId) {
-        setCheckingAddressType(false);
+        setCheckingAddressType(prev => ({ ...prev, [index]: false }));
       }
     }
-  }, [setValue]);
+  }, [setValue, manualAddressTypeOverride, addressTypeResult, setAddressType]);
 
   const handleLeveringsadresChange = (index: number, field: string, value: string) => {
     // Update state
@@ -382,7 +457,9 @@ export function VerbruikForm() {
         setValue(`leveringsadressen.${index}.plaats`, '')
         
         // Clear BAG API result omdat adres is gewijzigd
-        setAddressTypeResult(null)
+        setAddressTypeResult(prev => ({ ...prev, [index]: null }))
+        // Reset manual override als adres wijzigt
+        setManualAddressTypeOverride(prev => ({ ...prev, [index]: null }))
         
         // Reset lookup key zodat we opnieuw kunnen zoeken
         delete lastLookup.current[index]
@@ -566,7 +643,7 @@ export function VerbruikForm() {
             </div>
 
             {/* Gecombineerde loading state: zichtbaar zolang één van beide API calls bezig is */}
-            {(loadingAddresses[index] || checkingAddressType) && (
+            {(loadingAddresses[index] || checkingAddressType[index]) && (
               <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
                 <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
                 <span>
@@ -580,28 +657,28 @@ export function VerbruikForm() {
             )}
 
             {/* Gecombineerde status: BAG API resultaat (prioriteit) of postcode API success */}
-            {!checkingAddressType && !loadingAddresses[index] && (
+            {!checkingAddressType[index] && !loadingAddresses[index] && (
               <>
                 {/* BAG API resultaat heeft prioriteit */}
-                {addressTypeResult ? (
+                {addressTypeResult[index] ? (
                   <div className={`flex items-start gap-2 p-3 rounded-lg animate-slide-down ${
-                    addressTypeResult.type === 'error'
+                    addressTypeResult[index]!.type === 'error'
                       ? 'bg-red-50 border border-red-200'
-                      : addressTypeResult.type === 'particulier'
+                      : addressTypeResult[index]!.type === 'particulier'
                       ? 'bg-green-50 border border-green-200'
                       : 'bg-blue-50 border border-blue-200'
                   }`}>
-                    {addressTypeResult.type === 'error' ? (
+                    {addressTypeResult[index]!.type === 'error' ? (
                       <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                    ) : addressTypeResult.type === 'particulier' ? (
+                    ) : addressTypeResult[index]!.type === 'particulier' ? (
                       <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     ) : (
                       <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     )}
-                    <div className={`text-sm ${
-                      addressTypeResult.type === 'error'
+                    <div className={`flex-1 text-sm ${
+                      addressTypeResult[index]!.type === 'error'
                         ? 'text-red-900'
-                        : addressTypeResult.type === 'particulier'
+                        : addressTypeResult[index]!.type === 'particulier'
                         ? 'text-green-900'
                         : 'text-blue-900'
                     }`}>
@@ -611,7 +688,19 @@ export function VerbruikForm() {
                           {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}, {adres.postcode} {adres.plaats}
                         </div>
                       )}
-                      <div>{addressTypeResult.message}</div>
+                      <div>{addressTypeResult[index]!.message}</div>
+                      
+                      {/* NIEUW: Handmatige switch knop (alleen bij succes, niet bij error) */}
+                      {addressTypeResult[index]!.type !== 'error' && (
+                        <button
+                          type="button"
+                          onClick={() => handleManualAddressTypeSwitch(index)}
+                          className="mt-2 text-xs text-gray-600 hover:text-gray-900 underline flex items-center gap-1 transition-colors"
+                        >
+                          Wijzig naar {addressTypeResult[index]!.type === 'particulier' ? 'zakelijk' : 'particulier'}
+                          <ArrowsClockwise weight="bold" className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ) : (

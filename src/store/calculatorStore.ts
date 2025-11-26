@@ -17,6 +17,7 @@ interface CalculatorStore extends CalculatorState {
   setBedrijfsgegevens: (bedrijfsgegevens: BedrijfsGegevens) => void
   setVoorkeuren: (voorkeuren: ContractVoorkeuren) => void
   setResultaten: (resultaten: ContractOptie[]) => void
+  setAddressType: (type: 'particulier' | 'zakelijk' | null) => void
   reset: () => void
 }
 
@@ -56,6 +57,13 @@ export const useCalculatorStore = create<CalculatorStore>()(
       setVoorkeuren: (voorkeuren) => set({ voorkeuren }),
 
       setResultaten: (resultaten) => set({ resultaten }),
+
+      setAddressType: (type) => {
+        const currentVerbruik = get().verbruik
+        if (currentVerbruik) {
+          set({ verbruik: { ...currentVerbruik, addressType: type } })
+        }
+      },
 
       reset: () => set(initialState),
     }),
