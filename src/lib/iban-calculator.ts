@@ -125,12 +125,12 @@ export function formatIBAN(iban: string): string {
 /**
  * Gets bank name from IBAN
  */
-export function getBankNameFromIBAN(iban: string): string | null {
+export function getBankNameFromIBAN(iban: string): string | undefined {
   const cleaned = iban.replace(/\s/g, '').toUpperCase()
-  if (cleaned.length < 8) return null
+  if (cleaned.length < 8) return undefined
   
   const bankCode = cleaned.slice(4, 8)
-  return DUTCH_BANK_CODES[bankCode] || null
+  return DUTCH_BANK_CODES[bankCode] || undefined
 }
 
 /**
