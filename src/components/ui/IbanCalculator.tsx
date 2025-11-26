@@ -18,7 +18,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
   const [bankCode, setBankCode] = useState('')
   const [accountNumber, setAccountNumber] = useState('')
   const [ibanInput, setIbanInput] = useState('')
-  const [result, setResult] = useState<{ iban?: string; valid?: boolean; error?: string; bankName?: string } | null>(null)
+  const [result, setResult] = useState<{ iban?: string; valid?: boolean; error?: string; bankName?: string | null } | null>(null)
   const [copied, setCopied] = useState(false)
 
   const commonBanks = getCommonBankCodes()
@@ -44,7 +44,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     setResult({
       iban: formatted,
       valid: true,
-      bankName,
+      bankName: bankName || undefined,
     })
   }
 
@@ -69,7 +69,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
     setResult({
       iban: formatted,
       valid: true,
-      bankName,
+      bankName: bankName || undefined,
     })
   }
 
