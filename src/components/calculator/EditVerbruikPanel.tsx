@@ -285,7 +285,7 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
     } finally {
       // Alleen loading state updaten als dit nog steeds de laatste request is
       if (requestCounter.current === currentRequestId) {
-        setLoadingAddress(false)
+      setLoadingAddress(false)
       }
     }
   }
@@ -499,13 +499,13 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                   ) : (
                     /* Fallback: alleen postcode API success (als BAG check nog niet gedaan) */
                     formData.leveringsadressen[0]?.straat && formData.leveringsadressen[0]?.plaats && (
-                      <div className="flex items-center gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg text-sm animate-slide-down">
-                        <Check weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
-                        <span className="text-brand-teal-900 font-medium">
-                          {formData.leveringsadressen[0].straat} {formData.leveringsadressen[0].huisnummer}
-                          {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
-                        </span>
-                      </div>
+                <div className="flex items-center gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg text-sm animate-slide-down">
+                  <Check weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0" />
+                  <span className="text-brand-teal-900 font-medium">
+                    {formData.leveringsadressen[0].straat} {formData.leveringsadressen[0].huisnummer}
+                    {formData.leveringsadressen[0].toevoeging ? ` ${formData.leveringsadressen[0].toevoeging}` : ''}, {formData.leveringsadressen[0].postcode} {formData.leveringsadressen[0].plaats}
+                  </span>
+                </div>
                     )
                   )}
                 </>

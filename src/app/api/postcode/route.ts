@@ -90,11 +90,11 @@ export async function GET(request: NextRequest) {
                 province: matchingDoc.provincienaam || '',
               })
             } else {
-              // Basisadres bestaat, maar toevoeging niet
-              return NextResponse.json(
+            // Basisadres bestaat, maar toevoeging niet
+            return NextResponse.json(
                 { error: `Toevoeging '${trimmedAddition}' bestaat niet voor dit adres` },
-                { status: 404 }
-              )
+              { status: 404 }
+            )
             }
           }
         }

@@ -826,8 +826,8 @@ export default function ContractCard({
               router.push(`/calculator?stap=2&contract=${contract.id}`)
             }}
           >
-            Aanvragen
-          </Button>
+              Aanvragen
+            </Button>
           <button className="w-full text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors">
             Meer informatie
           </button>

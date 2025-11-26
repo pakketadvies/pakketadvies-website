@@ -418,13 +418,13 @@ function BedrijfsgegevensFormContent() {
   const leveringsadres = verbruik?.leveringsadressen?.[0] || null
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
       {/* Header: Meld u nu aan */}
-      <div className="text-center mb-6 md:mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-brand-navy-500 mb-2">
+      <div className="text-center mb-4 md:mb-6">
+        <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2">
           Meld u nu aan bij {leverancierNaam}
         </h2>
-        <p className="text-base md:text-lg text-gray-600">
+        <p className="text-sm md:text-base text-gray-600">
           Meld u nu aan voor {contractNaam}. {leverancierNaam} verzorgt uw volledige overstap. 
           Uw bedrijf komt geen moment zonder stroom en gas te zitten.
         </p>
@@ -432,31 +432,31 @@ function BedrijfsgegevensFormContent() {
 
       {/* Bent u momenteel klant? */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
-        <div className="p-6">
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+        <div className="p-4 md:p-6">
+          <div className="space-y-3 md:space-y-4">
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
               Bent u momenteel klant bij {leverancierNaam}?
             </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+            <div className="flex gap-3 md:gap-4">
+              <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                 <input
                   type="radio"
                   value="ja"
                   checked={watch('isKlantBijLeverancier') === true}
                   onChange={() => setValue('isKlantBijLeverancier', true)}
-                  className="w-5 h-5 text-brand-teal-500"
+                  className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                 />
-                <span className="font-medium">Ja</span>
+                <span className="text-sm md:text-base font-medium">Ja</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+              <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                 <input
                   type="radio"
                   value="nee"
                   checked={watch('isKlantBijLeverancier') === false}
                   onChange={() => setValue('isKlantBijLeverancier', false)}
-                  className="w-5 h-5 text-brand-teal-500"
+                  className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                 />
-                <span className="font-medium">Nee</span>
+                <span className="text-sm md:text-base font-medium">Nee</span>
               </label>
             </div>
           </div>
@@ -465,12 +465,12 @@ function BedrijfsgegevensFormContent() {
 
       {/* Leveringsadres */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <MapPin weight="duotone" className="w-5 h-5 text-white" />
+        <div className="p-4 md:p-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-brand-navy-500">Leveringsadres</h2>
+            <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Leveringsadres</h2>
           </div>
 
           {leveringsadres ? (
@@ -656,54 +656,54 @@ function BedrijfsgegevensFormContent() {
 
       {/* Uw gegevens - Persoonlijke gegevens */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <User weight="duotone" className="w-5 h-5 text-white" />
+        <div className="p-4 md:p-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <User weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-brand-navy-500">Uw gegevens</h2>
+            <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Uw gegevens</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {/* Aanhef */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                 Aanhef <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+              <div className="flex gap-3 md:gap-4">
+                <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                   <input
                     type="radio"
                     value="dhr"
                     {...register('aanhef')}
-                    className="w-5 h-5 text-brand-teal-500"
+                    className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                   />
-                  <span className="font-medium">Dhr.</span>
+                  <span className="text-sm md:text-base font-medium">Dhr.</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+                <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                   <input
                     type="radio"
                     value="mevr"
                     {...register('aanhef')}
-                    className="w-5 h-5 text-brand-teal-500"
+                    className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                   />
-                  <span className="font-medium">Mevr.</span>
+                  <span className="text-sm md:text-base font-medium">Mevr.</span>
                 </label>
               </div>
-            </div>
-
+        </div>
+        
             {/* Voornaam */}
-            <Input
+        <Input
               label="Voornaam"
               {...register('voornaam')}
               error={errors.voornaam?.message}
               placeholder="Jan"
-              required
+          required
               icon={<User weight="duotone" className="w-5 h-5" />}
-            />
+        />
 
             {/* Voorletters */}
-            <Input
+        <Input
               label="Voorletters"
               {...register('voorletters')}
               error={errors.voorletters?.message}
@@ -725,8 +725,8 @@ function BedrijfsgegevensFormContent() {
               {...register('achternaam')}
               error={errors.achternaam?.message}
               placeholder="Jansen"
-              required
-            />
+          required
+        />
 
             {/* Geboortedatum */}
             <Input
@@ -739,13 +739,13 @@ function BedrijfsgegevensFormContent() {
             />
 
             {/* Telefoonnummer */}
-            <Input
-              label="Telefoonnummer"
-              type="tel"
-              {...register('telefoon')}
+        <Input
+          label="Telefoonnummer"
+          type="tel"
+          {...register('telefoon')}
               error={errors.telefoon?.message}
               placeholder="bijv. 0612345678"
-              required
+          required
               icon={<Phone weight="duotone" className="w-5 h-5" />}
             />
 
@@ -769,7 +769,7 @@ function BedrijfsgegevensFormContent() {
               placeholder="naam@bedrijf.nl"
               required
               icon={<Envelope weight="duotone" className="w-5 h-5" />}
-            />
+        />
           </div>
         </div>
       </div>
@@ -834,16 +834,16 @@ function BedrijfsgegevensFormContent() {
 
       {/* Maandelijkse betaling */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <CreditCard weight="duotone" className="w-5 h-5 text-white" />
+        <div className="p-4 md:p-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <CreditCard weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-brand-navy-500">Maandelijkse betaling</h2>
+            <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Maandelijkse betaling</h2>
           </div>
 
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="space-y-3 md:space-y-4">
+            <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">
               Bij {leverancierNaam} betaalt u standaard via automatische incasso.
             </p>
 
@@ -871,47 +871,47 @@ function BedrijfsgegevensFormContent() {
 
       {/* Levering */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <House weight="duotone" className="w-5 h-5 text-white" />
+        <div className="p-4 md:p-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <House weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-brand-navy-500">Levering</h2>
+            <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Levering</h2>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Heeft uw adres een verblijfsfunctie? */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                 Heeft uw adres een verblijfsfunctie (woon-/werkadres)? <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+              <div className="flex gap-3 md:gap-4">
+                <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                   <input
                     type="radio"
                     value="ja"
                     checked={heeftVerblijfsfunctie === true}
                     onChange={() => setValue('heeftVerblijfsfunctie', true)}
-                    className="w-5 h-5 text-brand-teal-500"
+                    className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                   />
-                  <span className="font-medium">Ja</span>
+                  <span className="text-sm md:text-base font-medium">Ja</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+                <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                   <input
                     type="radio"
                     value="nee"
                     checked={heeftVerblijfsfunctie === false}
                     onChange={() => setValue('heeftVerblijfsfunctie', false)}
-                    className="w-5 h-5 text-brand-teal-500"
+                    className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                   />
-                  <span className="font-medium">Nee</span>
+                  <span className="text-sm md:text-base font-medium">Nee</span>
                 </label>
               </div>
               {!heeftVerblijfsfunctie && (
-                <div className="mt-3 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
+                <div className="mt-2 md:mt-3 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 md:p-4">
                   <div className="flex items-start gap-2">
-                    <Warning weight="duotone" className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-yellow-800">
+                    <Warning weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs md:text-sm text-yellow-800">
                       <strong>Let op:</strong> U heeft geen recht op vermindering energiebelasting als uw adres geen verblijfsfunctie heeft.
                     </p>
                   </div>
@@ -921,29 +921,29 @@ function BedrijfsgegevensFormContent() {
 
             {/* Gaat u binnenkort verhuizen? */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                 Gaat u binnenkort verhuizen, of bent u onlangs verhuisd?
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+              <div className="flex gap-3 md:gap-4">
+                <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                   <input
                     type="radio"
                     value="nee"
                     checked={gaatVerhuizen === false}
                     onChange={() => setValue('gaatVerhuizen', false)}
-                    className="w-5 h-5 text-brand-teal-500"
+                    className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                   />
-                  <span className="font-medium">Nee</span>
+                  <span className="text-sm md:text-base font-medium">Nee</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
+                <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors flex-1">
                   <input
                     type="radio"
                     value="ja"
                     checked={gaatVerhuizen === true}
                     onChange={() => setValue('gaatVerhuizen', true)}
-                    className="w-5 h-5 text-brand-teal-500"
+                    className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-500"
                   />
-                  <span className="font-medium">Ja</span>
+                  <span className="text-sm md:text-base font-medium">Ja</span>
                 </label>
               </div>
             </div>
@@ -951,38 +951,38 @@ function BedrijfsgegevensFormContent() {
             {/* Wanneer wilt u overstappen? */}
             {!gaatVerhuizen && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                   Wanneer wilt u overstappen? <span className="text-red-500">*</span>
                 </label>
-                <div className="space-y-3">
-                  <label className="flex items-start gap-3 cursor-pointer p-4 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors">
+                <div className="space-y-2 md:space-y-3">
+                  <label className="flex items-start gap-2 md:gap-3 cursor-pointer p-3 md:p-4 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors">
                     <input
                       type="radio"
                       value="zo_snel_mogelijk"
                       {...register('wanneerOverstappen')}
-                      className="w-5 h-5 mt-0.5 text-brand-teal-500"
+                      className="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-brand-teal-500"
                     />
                     <div className="flex-1">
-                      <div className="font-semibold text-brand-navy-500 mb-1">
+                      <div className="text-sm md:text-base font-semibold text-brand-navy-500 mb-0.5 md:mb-1">
                         Zo snel mogelijk overstappen
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs md:text-sm text-gray-600">
                         Contract is verlopen, onbepaalde tijd of voortijdig opzeggen
                       </div>
                     </div>
                   </label>
-                  <label className="flex items-start gap-3 cursor-pointer p-4 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors">
+                  <label className="flex items-start gap-2 md:gap-3 cursor-pointer p-3 md:p-4 border-2 border-gray-200 rounded-xl hover:border-brand-teal-500 transition-colors">
                     <input
                       type="radio"
                       value="na_contract_verlopen"
                       {...register('wanneerOverstappen')}
-                      className="w-5 h-5 mt-0.5 text-brand-teal-500"
+                      className="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-brand-teal-500"
                     />
                     <div className="flex-1">
-                      <div className="font-semibold text-brand-navy-500 mb-1">
+                      <div className="text-sm md:text-base font-semibold text-brand-navy-500 mb-0.5 md:mb-1">
                         Zodra mijn vaste contract afloopt
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs md:text-sm text-gray-600">
                         Stap pas over nadat het vaste contract afloopt en voorkom een opzegboete
                       </div>
                     </div>
@@ -990,9 +990,9 @@ function BedrijfsgegevensFormContent() {
                 </div>
 
                 {/* Info blok: Hoe snel stapt u over? */}
-                <div className="mt-4 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-                  <h4 className="font-semibold text-brand-navy-500 mb-2">Hoe snel stapt u over?</h4>
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                <div className="mt-3 md:mt-4 bg-blue-50 border-2 border-blue-200 rounded-xl p-3 md:p-4">
+                  <h4 className="text-sm md:text-base font-semibold text-brand-navy-500 mb-1.5 md:mb-2">Hoe snel stapt u over?</h4>
+                  <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
                     De verwerkingstijd van een overstap is gemiddeld 30 dagen.
                     <br />
                     Als uw contract eerder ingaat, is dit geen probleem en regelen de leveranciers dit onderling.
@@ -1004,24 +1004,24 @@ function BedrijfsgegevensFormContent() {
             )}
 
             {/* Checkboxes */}
-            <div className="space-y-3 pt-4 border-t border-gray-200">
-              <label className="flex items-start gap-3 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            <div className="space-y-2 md:space-y-3 pt-3 md:pt-4 border-t border-gray-200">
+              <label className="flex items-start gap-2 md:gap-3 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 <input
                   type="checkbox"
                   {...register('herinneringContract')}
-                  className="w-5 h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500"
+                  className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs md:text-sm font-medium text-gray-700">
                   Ja, ik word graag door PakketAdvies herinnerd wanneer mijn contract bijna afloopt
                 </span>
               </label>
-              <label className="flex items-start gap-3 cursor-pointer p-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+              <label className="flex items-start gap-2 md:gap-3 cursor-pointer p-2.5 md:p-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 <input
                   type="checkbox"
                   {...register('nieuwsbrief')}
-                  className="w-5 h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500"
+                  className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs md:text-sm font-medium text-gray-700">
                   Ja, ik ontvang graag nieuws en marktontwikkelingen van PakketAdvies
                 </span>
               </label>
@@ -1032,16 +1032,16 @@ function BedrijfsgegevensFormContent() {
 
       {/* Akkoord en privacyverklaring */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <ShieldCheck weight="duotone" className="w-5 h-5 text-white" />
+        <div className="p-4 md:p-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <ShieldCheck weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-brand-navy-500">Akkoord en privacyverklaring</h2>
+            <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Akkoord en privacyverklaring</h2>
           </div>
 
-          <div className="space-y-4">
-            <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-colors">
+          <div className="space-y-3 md:space-y-4">
+            <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 {...register('voorwaarden')}

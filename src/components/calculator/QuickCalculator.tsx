@@ -353,7 +353,7 @@ export function QuickCalculator() {
     } finally {
       // Alleen loading state updaten als dit nog steeds de laatste request is
       if (requestCounter.current === currentRequestId) {
-        setLoadingAddress(false)
+      setLoadingAddress(false)
       }
     }
   }, []) // LEGE dependency array - geen stale closures!
@@ -690,15 +690,15 @@ export function QuickCalculator() {
                 ) : (
                   /* Fallback: alleen postcode API success (als BAG check nog niet gedaan) */
                   leveringsadressen[0].straat && leveringsadressen[0].plaats && (
-                    <div className="flex items-start gap-2 p-2 md:p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
-                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-xs md:text-sm text-brand-teal-900">
-                        <div className="font-semibold">
-                          {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
-                        </div>
-                        <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
-                      </div>
-                    </div>
+              <div className="flex items-start gap-2 p-2 md:p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
+                <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs md:text-sm text-brand-teal-900">
+                  <div className="font-semibold">
+                    {leveringsadressen[0].straat} {leveringsadressen[0].huisnummer}{leveringsadressen[0].toevoeging ? ` ${leveringsadressen[0].toevoeging}` : ''}
+                  </div>
+                  <div>{leveringsadressen[0].postcode} {leveringsadressen[0].plaats}</div>
+                </div>
+              </div>
                   )
                 )}
               </>

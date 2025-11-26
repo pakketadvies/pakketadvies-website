@@ -296,7 +296,7 @@ export function VerbruikForm() {
       
       // Alleen loading state updaten als dit nog steeds de laatste request is
       if (requestCounter.current[index] === currentRequestId) {
-        setLoadingAddresses(prev => ({ ...prev, [index]: false }))
+      setLoadingAddresses(prev => ({ ...prev, [index]: false }))
       }
     } catch (error) {
       console.error('Postcode API exception:', error)
@@ -596,22 +596,22 @@ export function VerbruikForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
       {/* Leveringsadres */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <MapPin weight="duotone" className="w-5 h-5 text-white" />
+        <div className="space-y-3 md:space-y-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-brand-navy-500">Waar wordt de energie geleverd?</h3>
-              <p className="text-sm text-gray-600">Vul je postcode en huisnummer in</p>
+              <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Waar wordt de energie geleverd?</h3>
+              <p className="text-xs md:text-sm text-gray-600">Vul je postcode en huisnummer in</p>
             </div>
           </div>
 
         {leveringsadressen.map((adres, index) => (
-          <div key={index} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 md:p-6 space-y-4">
+          <div key={index} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3 md:p-6 space-y-3 md:space-y-4">
             {leveringsadressen.length > 1 && (
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-gray-700">Adres {index + 1}</span>
@@ -626,7 +626,7 @@ export function VerbruikForm() {
             )}
 
             {/* Desktop: compactere grid */}
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3 md:gap-4">
               <div className="md:col-span-3">
                 <Input
                   label="Postcode"
@@ -663,8 +663,8 @@ export function VerbruikForm() {
 
             {/* Gecombineerde loading state: zichtbaar zolang één van beide API calls bezig is */}
             {(loadingAddresses[index] || checkingAddressType[index]) && (
-              <div className="flex items-center gap-2 text-sm text-brand-teal-600 animate-slide-down">
-                <div className="w-4 h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
+              <div className="flex items-center gap-2 text-xs md:text-sm text-brand-teal-600 animate-slide-down">
+                <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
                 <span>
                   {loadingAddresses[index] && !checkingAddressType 
                     ? 'Adres opzoeken...' 
@@ -680,7 +680,7 @@ export function VerbruikForm() {
               <>
                 {/* BAG API resultaat heeft prioriteit */}
                 {addressTypeResult[index] ? (
-                  <div className={`flex items-start gap-2 p-3 rounded-lg animate-slide-down ${
+                  <div className={`flex items-start gap-2 p-2.5 md:p-3 rounded-lg animate-slide-down ${
                     addressTypeResult[index]!.type === 'error'
                       ? 'bg-red-50 border border-red-200'
                       : addressTypeResult[index]!.type === 'particulier'
@@ -688,13 +688,13 @@ export function VerbruikForm() {
                       : 'bg-blue-50 border border-blue-200'
                   }`}>
                     {addressTypeResult[index]!.type === 'error' ? (
-                      <XCircle weight="duotone" className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <XCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-red-600 flex-shrink-0 mt-0.5" />
                     ) : addressTypeResult[index]!.type === 'particulier' ? (
-                      <CheckCircle weight="duotone" className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     ) : (
-                      <CheckCircle weight="duotone" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     )}
-                    <div className={`flex-1 text-sm ${
+                    <div className={`flex-1 text-xs md:text-sm ${
                       addressTypeResult[index]!.type === 'error'
                         ? 'text-red-900'
                         : addressTypeResult[index]!.type === 'particulier'
@@ -725,15 +725,15 @@ export function VerbruikForm() {
                 ) : (
                   /* Fallback: alleen postcode API success (als BAG check nog niet gedaan) */
                   adres.straat && adres.plaats && (
-                    <div className="flex items-start gap-2 p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
-                      <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-brand-teal-900">
-                        <div className="font-semibold">
-                          {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
-                        </div>
-                        <div>{adres.postcode} {adres.plaats}</div>
-                      </div>
-                    </div>
+                    <div className="flex items-start gap-2 p-2.5 md:p-3 bg-brand-teal-50 border border-brand-teal-200 rounded-lg animate-slide-down">
+                      <CheckCircle weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs md:text-sm text-brand-teal-900">
+                  <div className="font-semibold">
+                    {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
+                  </div>
+                  <div>{adres.postcode} {adres.plaats}</div>
+                </div>
+              </div>
                   )
                 )}
               </>
@@ -745,7 +745,7 @@ export function VerbruikForm() {
           <button
             type="button"
             onClick={toevoegenLeveringsadres}
-            className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-brand-teal-300 text-brand-teal-600 hover:border-brand-teal-500 hover:bg-brand-teal-50 rounded-xl font-semibold transition-all"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-3 border-2 border-dashed border-brand-teal-300 text-brand-teal-600 hover:border-brand-teal-500 hover:bg-brand-teal-50 rounded-xl text-sm md:text-base font-semibold transition-all"
           >
             <Plus weight="bold" className="w-5 h-5" />
             Extra leveringsadres toevoegen
@@ -756,38 +756,38 @@ export function VerbruikForm() {
 
       {/* Elektriciteitsverbruik */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-                <Lightning weight="duotone" className="w-5 h-5 text-white" />
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex items-center justify-between gap-2 md:gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+                <Lightning weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
-                <p className="text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
+                <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Elektriciteitsverbruik</h3>
+                <p className="text-xs md:text-sm text-gray-600">Je vindt dit op je laatste jaarafrekening</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowHelpSchatten(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
+              className="flex items-center gap-1.5 md:gap-2 px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-all"
             >
-              <Lightbulb weight="duotone" className="w-5 h-5" />
+              <Lightbulb weight="duotone" className="w-4 h-4 md:w-5 md:h-5" />
               <span className="hidden md:inline">Help me schatten</span>
             </button>
           </div>
 
-          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-6 space-y-4">
+          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
           {/* Desktop: grid voor normaal + dal naast elkaar */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <Input
               label={heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'}
-              type="number"
-              {...register('elektriciteitNormaal', { 
-                valueAsNumber: true,
-                onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
-              })}
-              placeholder="Bijv. 3500"
+                  type="number"
+                  {...register('elektriciteitNormaal', { 
+                    valueAsNumber: true,
+                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
+                  })}
+                  placeholder="Bijv. 3500"
               error={errors.elektriciteitNormaal?.message}
               required
             />
@@ -796,12 +796,12 @@ export function VerbruikForm() {
               <div className="animate-slide-down">
                 <Input
                   label="Dal tarief (nacht/weekend)"
-                  type="number"
-                  {...register('elektriciteitDal', { 
-                    valueAsNumber: true,
-                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
-                  })}
-                  placeholder="Bijv. 2500"
+                    type="number"
+                    {...register('elektriciteitDal', { 
+                      valueAsNumber: true,
+                      onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
+                    })}
+                    placeholder="Bijv. 2500"
                   error={errors.elektriciteitDal?.message}
                   required
                 />
@@ -809,7 +809,7 @@ export function VerbruikForm() {
             )}
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-white/50 transition-colors">
+          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-white/50 transition-colors">
             <input
               type="checkbox"
               checked={heeftEnkeleMeter}
@@ -820,10 +820,10 @@ export function VerbruikForm() {
                   setValue('elektriciteitDal', null)
                 }
               }}
-              className="w-5 h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+              className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
             />
             <div>
-              <span className="text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
+              <span className="text-xs md:text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
                 Ik heb een enkele meter
               </span>
               <p className="text-xs text-gray-600 mt-0.5">
@@ -832,46 +832,46 @@ export function VerbruikForm() {
             </div>
           </label>
 
-          <div className="flex items-start gap-2 p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
-            <Info weight="duotone" className="w-5 h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 p-2.5 md:p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
+            <Info weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-brand-navy-700 leading-relaxed">
               <strong>Tip:</strong> Bij een dubbele meter betaal je overdag een ander tarief dan 's nachts en in het weekend. 
               Bij een enkele meter is er maar één tarief.
             </p>
           </div>
-        </div>
+          </div>
         </div>
       </div>
 
       {/* Zonnepanelen */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-4">
-          <label className="flex items-center gap-3 cursor-pointer group p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
-          <input
-            type="checkbox"
-            checked={heeftZonnepanelen}
-            onChange={(e) => {
-              setHeeftZonnepanelen(e.target.checked)
-              setValue('heeftZonnepanelen', e.target.checked)
-              if (!e.target.checked) {
-                setValue('terugleveringJaar', null)
-              }
-            }}
-            className="w-5 h-5 rounded-md border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
-          />
-          <Sun weight="duotone" className="w-6 h-6 text-brand-teal-600 flex-shrink-0" />
-          <span className="text-base font-semibold text-brand-navy-500 group-hover:text-brand-teal-700 transition-colors">
+        <div className="space-y-3 md:space-y-4">
+          <label className="flex items-center gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
+            <input
+              type="checkbox"
+              checked={heeftZonnepanelen}
+              onChange={(e) => {
+                setHeeftZonnepanelen(e.target.checked)
+                setValue('heeftZonnepanelen', e.target.checked)
+                if (!e.target.checked) {
+                  setValue('terugleveringJaar', null)
+                }
+              }}
+              className="w-4 h-4 md:w-5 md:h-5 rounded-md border-2 border-brand-teal-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+            />
+          <Sun weight="duotone" className="w-5 h-5 md:w-6 md:h-6 text-brand-teal-600 flex-shrink-0" />
+          <span className="text-sm md:text-base font-semibold text-brand-navy-500 group-hover:text-brand-teal-700 transition-colors">
             Ja, wij hebben zonnepanelen
           </span>
         </label>
 
         {heeftZonnepanelen && (
-          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-6 space-y-4">
+          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
             <Input
               label="Teruglevering per jaar"
-              type="number"
-              {...register('terugleveringJaar', { valueAsNumber: true })}
-              placeholder="Bijv. 3000"
+                  type="number"
+                  {...register('terugleveringJaar', { valueAsNumber: true })}
+                  placeholder="Bijv. 3000"
               error={errors.terugleveringJaar?.message}
               required
             />
@@ -885,8 +885,8 @@ export function VerbruikForm() {
               Weet je het niet? Laat ons het schatten
             </button>
 
-            <div className="flex items-start gap-2 p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
-              <Lightbulb weight="duotone" className="w-5 h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 p-2.5 md:p-3 bg-brand-navy-50 border border-brand-navy-200 rounded-lg">
+              <Lightbulb weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-navy-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-brand-navy-700 leading-relaxed">
                 <strong>Waarom belangrijk?</strong> Met teruglevering kunnen we dynamische contracten aanbevelen 
                 die optimaal profiteren van je energieopbrengst en de salderingsregeling.
@@ -899,20 +899,20 @@ export function VerbruikForm() {
 
       {/* Gasverbruik */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <Flame weight="duotone" className="w-5 h-5 text-white" />
+        <div className="space-y-3 md:space-y-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <Flame weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-brand-navy-500">Gasverbruik</h3>
-              <p className="text-sm text-gray-600">Ook te vinden op je jaarafrekening</p>
+              <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Gasverbruik</h3>
+              <p className="text-xs md:text-sm text-gray-600">Ook te vinden op je jaarafrekening</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {!geenGasaansluiting && (
-              <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-6">
+              <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
                 <Input
                   label="Gasverbruik per jaar"
                   type="number"
@@ -924,10 +924,10 @@ export function VerbruikForm() {
                   error={errors.gasJaar?.message}
                   required
                 />
-              </div>
-            )}
+            </div>
+          )}
 
-          <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
+          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
             <input
               type="checkbox"
               checked={geenGasaansluiting}
@@ -938,10 +938,10 @@ export function VerbruikForm() {
                   setValue('gasJaar', null)
                 }
               }}
-              className="w-5 h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+              className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
             />
             <div>
-              <span className="text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
+              <span className="text-xs md:text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
                 Wij hebben geen gasaansluiting
               </span>
               <p className="text-xs text-gray-600 mt-0.5">
@@ -955,18 +955,18 @@ export function VerbruikForm() {
 
       {/* Meter type */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <Gauge weight="duotone" className="w-5 h-5 text-white" />
+        <div className="space-y-3 md:space-y-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <Gauge weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-brand-navy-500">Type meter</h3>
-              <p className="text-sm text-gray-600">Helpt ons de beste contracten te vinden</p>
+              <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Type meter</h3>
+              <p className="text-xs md:text-sm text-gray-600">Helpt ons de beste contracten te vinden</p>
             </div>
           </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
           {[
             { value: 'slim', label: 'Slimme meter', icon: DeviceMobile, desc: 'Digitale uitlezing' },
             { value: 'oud', label: 'Oude meter', icon: Gauge, desc: 'Draaiende schijf' },
@@ -983,14 +983,14 @@ export function VerbruikForm() {
                   setMeterType(option.value as any)
                   setValue('meterType', option.value as any)
                 }}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                className={`p-3 md:p-4 rounded-xl border-2 transition-all text-left ${
                   isSelected
                     ? 'border-brand-teal-500 bg-brand-teal-50'
                     : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                <Icon weight="duotone" className={`w-8 h-8 mb-2 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`} />
-                <div className={`text-sm font-semibold mb-1 ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
+                <Icon weight="duotone" className={`w-6 h-6 md:w-8 md:h-8 mb-1.5 md:mb-2 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`} />
+                <div className={`text-xs md:text-sm font-semibold mb-0.5 md:mb-1 ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
                   {option.label}
                 </div>
                 <div className="text-xs text-gray-500">{option.desc}</div>
@@ -1003,19 +1003,19 @@ export function VerbruikForm() {
 
       {/* Aansluitwaarden (Automatisch geschat, aanpasbaar) */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
-              <Plugs weight="duotone" className="w-5 h-5 text-white" />
+        <div className="space-y-3 md:space-y-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
+              <Plugs weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
-              <p className="text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
+              <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
+              <p className="text-xs md:text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
             </div>
           </div>
 
-          <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Elektriciteit Aansluitwaarde */}
             <div>
               <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
@@ -1064,8 +1064,8 @@ export function VerbruikForm() {
             )}
           </div>
 
-          <div className="flex items-start gap-2 p-3 bg-brand-purple-100 border border-brand-purple-300 rounded-lg">
-            <Info weight="duotone" className="w-5 h-5 text-brand-purple-700 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 p-2.5 md:p-3 bg-brand-purple-100 border border-brand-purple-300 rounded-lg">
+            <Info weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-purple-700 flex-shrink-0 mt-0.5" />
             <div className="text-xs text-brand-purple-900 leading-relaxed">
               <strong>Automatisch geschat:</strong> We hebben de aansluitwaarden automatisch geschat op basis van je verbruik. 
               Dit is meestal correct, maar je kunt het handmatig aanpassen als je zeker bent van een andere waarde. 
@@ -1103,12 +1103,12 @@ export function VerbruikForm() {
       </div>
 
       {/* Submit */}
-      <div className="pt-6">
+      <div className="pt-4 md:pt-6">
         <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
-          <MagnifyingGlass weight="bold" className="w-5 h-5 mr-2" />
+          <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5 mr-2" />
           Bekijk mijn aanbiedingen
         </Button>
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
           100% vrijblijvend • Direct resultaat • Geen verplichtingen
         </p>
       </div>

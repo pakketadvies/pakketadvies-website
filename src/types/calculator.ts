@@ -29,7 +29,7 @@ export interface VerbruikData {
   
   // Leveringsadressen
   leveringsadressen: Leveringsadres[]
-
+  
   // NIEUW: Address type (woonfunctie check via BAG API)
   addressType?: 'particulier' | 'zakelijk' | null // null = nog niet gecontroleerd
   
