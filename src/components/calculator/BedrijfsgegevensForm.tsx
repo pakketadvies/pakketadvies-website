@@ -649,8 +649,8 @@ function BedrijfsgegevensFormContent() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-navy-500 rounded-xl flex items-center justify-center">
-              <User weight="duotone" className="w-5 h-5 text-brand-teal-500" />
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <User weight="duotone" className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-brand-navy-500">Uw gegevens</h2>
           </div>
@@ -827,8 +827,8 @@ function BedrijfsgegevensFormContent() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-navy-500 rounded-xl flex items-center justify-center">
-              <CreditCard weight="duotone" className="w-5 h-5 text-brand-teal-500" />
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <CreditCard weight="duotone" className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-brand-navy-500">Maandelijkse betaling</h2>
           </div>
@@ -865,8 +865,8 @@ function BedrijfsgegevensFormContent() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-navy-500 rounded-xl flex items-center justify-center">
-              <House weight="duotone" className="w-5 h-5 text-brand-teal-500" />
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <House weight="duotone" className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-brand-navy-500">Levering</h2>
           </div>
@@ -1026,8 +1026,8 @@ function BedrijfsgegevensFormContent() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-brand-navy-500 rounded-xl flex items-center justify-center">
-              <ShieldCheck weight="duotone" className="w-5 h-5 text-brand-teal-500" />
+            <div className="w-10 h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+              <ShieldCheck weight="duotone" className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-brand-navy-500">Akkoord en privacyverklaring</h2>
           </div>
