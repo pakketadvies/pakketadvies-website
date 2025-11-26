@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { converteerGasAansluitwaardeVoorDatabase } from '@/lib/aansluitwaarde-schatting'
 import { getCurrentDynamicPrices } from '@/lib/dynamic-pricing/database'
 import { calculateDynamicContract } from '@/lib/dynamic-pricing/calculate-dynamic-contract'
+import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
 
 /**
  * POST /api/energie/bereken-contract
@@ -155,6 +156,13 @@ export async function POST(request: Request) {
       netbeheerElektriciteit = 430
     }
     
+    // NIEUW: Bij grootverbruik elektriciteit worden netbeheerkosten apart door netbeheerder in rekening gebracht
+    // Dus deze moeten NIET in het maandbedrag worden meegenomen
+    if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+      console.log('⚠️ Grootverbruik elektriciteit gedetecteerd: netbeheerkosten worden apart door netbeheerder in rekening gebracht')
+      netbeheerElektriciteit = 0
+    }
+    
     console.log('🔍 Zoek netbeheertarief gas:', {
       netbeheerderId,
       aansluitwaardeInput: aansluitwaardeGas,
@@ -217,6 +225,14 @@ export async function POST(request: Request) {
         console.error('   Dit betekent dat de database nog niet correct is gevuld!')
         // Fallback naar gemiddelde
         netbeheerGas = 245
+      }
+      
+      // NIEUW: Bij grootverbruik gas worden netbeheerkosten apart door netbeheerder in rekening gebracht
+      // Dus deze moeten NIET in het maandbedrag worden meegenomen
+      // Let op: we gebruiken de originele aansluitwaarde (niet de geconverteerde G6 variant)
+      if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+        console.log('⚠️ Grootverbruik gas gedetecteerd: netbeheerkosten worden apart door netbeheerder in rekening gebracht')
+        netbeheerGas = 0
       }
     }
     

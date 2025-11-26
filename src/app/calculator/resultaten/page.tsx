@@ -11,7 +11,7 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie, VerbruikData } from '@/types/calculator'
-import { isGrootverbruik } from '@/lib/verbruik-type'
+import { isGrootverbruik, isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
 
 // Helper: Calculate estimated cost for contract
 // NOTE: This is a SIMPLIFIED calculation for the results page
@@ -24,7 +24,9 @@ const berekenContractKostenVereenvoudigd = (
   verbruikElektriciteitDal: number,
   verbruikGas: number,
   heeftEnkeleMeter: boolean = false,
-  terugleveringJaar: number = 0 // NIEUW: voor saldering
+  terugleveringJaar: number = 0, // NIEUW: voor saldering
+  aansluitwaardeElektriciteit?: string, // NIEUW: voor grootverbruik check
+  aansluitwaardeGas?: string // NIEUW: voor grootverbruik check
 ): { maandbedrag: number; jaarbedrag: number; besparing: number } => {
   let totaalJaar = 0
   
@@ -127,8 +129,17 @@ const berekenContractKostenVereenvoudigd = (
     
     // Netbeheerkosten Enexis (default aansluitwaarden)
     // 3x25A elektriciteit + G6 gas
-    const netbeheerElektriciteit = 430.00
-    const netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    // NIEUW: Bij grootverbruik worden netbeheerkosten apart door netbeheerder in rekening gebracht
+    let netbeheerElektriciteit = 430.00
+    if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+      netbeheerElektriciteit = 0
+    }
+    
+    let netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+      netbeheerGas = 0
+    }
+    
     const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
@@ -153,8 +164,17 @@ const berekenContractKostenVereenvoudigd = (
     const ebElektriciteit = totaalElektriciteit * 0.10154
     const ebGas = verbruikGas * 0.57816
     const vermindering = 524.95
-    const netbeheerElektriciteit = 430.00
-    const netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    // NIEUW: Bij grootverbruik worden netbeheerkosten apart door netbeheerder in rekening gebracht
+    let netbeheerElektriciteit = 430.00
+    if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+      netbeheerElektriciteit = 0
+    }
+    
+    let netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+      netbeheerGas = 0
+    }
+    
     const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
@@ -237,8 +257,17 @@ const berekenContractKostenVereenvoudigd = (
     const ebElektriciteit = totaalElektriciteit * 0.10154
     const ebGas = verbruikGas * 0.57816
     const vermindering = 524.95
-    const netbeheerElektriciteit = 430.00
-    const netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    // NIEUW: Bij grootverbruik worden netbeheerkosten apart door netbeheerder in rekening gebracht
+    let netbeheerElektriciteit = 430.00
+    if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+      netbeheerElektriciteit = 0
+    }
+    
+    let netbeheerGas = verbruikGas > 0 ? 245.00 : 0
+    if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+      netbeheerGas = 0
+    }
+    
     const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
@@ -270,7 +299,9 @@ const transformContractToOptie = (
   verbruikElektriciteitDal: number,
   verbruikGas: number,
   heeftEnkeleMeter: boolean = false,
-  terugleveringJaar: number = 0 // NIEUW
+  terugleveringJaar: number = 0, // NIEUW
+  aansluitwaardeElektriciteit?: string, // NIEUW: voor grootverbruik check
+  aansluitwaardeGas?: string // NIEUW: voor grootverbruik check
 ): ContractOptie | null => {
   // Maatwerkcontracten worden nu getoond, maar worden gefilterd op min_verbruik in loadResultaten
 
@@ -290,7 +321,9 @@ const transformContractToOptie = (
       verbruikElektriciteitDal,
       verbruikGas,
       heeftEnkeleMeter,
-      terugleveringJaar // NIEUW: teruglevering meegeven
+      terugleveringJaar, // NIEUW: teruglevering meegeven
+      aansluitwaardeElektriciteit, // NIEUW: aansluitwaarde elektriciteit
+      aansluitwaardeGas // NIEUW: aansluitwaarde gas
     )
     maandbedrag = berekend.maandbedrag
     jaarbedrag = berekend.jaarbedrag
@@ -669,7 +702,9 @@ function ResultatenContent() {
           elektriciteitDal, 
           totaalGas, 
           data?.heeftEnkeleMeter || false,
-          data?.terugleveringJaar || 0 // NIEUW: teruglevering meegeven
+          data?.terugleveringJaar || 0, // NIEUW: teruglevering meegeven
+          data?.aansluitwaardeElektriciteit, // NIEUW: aansluitwaarde elektriciteit
+          data?.aansluitwaardeGas // NIEUW: aansluitwaarde gas
         ))
         .filter((c: any) => c !== null) as ContractOptie[]
       

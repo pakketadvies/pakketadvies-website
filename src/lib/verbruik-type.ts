@@ -28,7 +28,7 @@ export function isGrootverbruik(
  * Check of elektriciteit aansluitwaarde grootverbruik is
  * > 3x80A = grootverbruik
  */
-function isGrootverbruikElektriciteitAansluitwaarde(aansluitwaarde: string): boolean {
+export function isGrootverbruikElektriciteitAansluitwaarde(aansluitwaarde: string): boolean {
   // Alle waarden ≤ 3x80A zijn kleinverbruik
   const kleinverbruikWaarden = [
     '1x25A', '1x35A', '1x40A',
@@ -42,7 +42,7 @@ function isGrootverbruikElektriciteitAansluitwaarde(aansluitwaarde: string): boo
  * Check of gas aansluitwaarde grootverbruik is
  * > G25 = grootverbruik
  */
-function isGrootverbruikGasAansluitwaarde(aansluitwaarde: string): boolean {
+export function isGrootverbruikGasAansluitwaarde(aansluitwaarde: string): boolean {
   // Alle waarden ≤ G25 zijn kleinverbruik
   const kleinverbruikWaarden = [
     'G4', 'G6', 'G6_LAAG', 'G6_MIDDEN', 'G6_HOOG',
