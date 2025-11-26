@@ -1073,7 +1073,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
           </div>
 
           <div className="space-y-3 md:space-y-4">
-            <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
+            {/* Checkboxes - alleen zichtbaar op desktop */}
+            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 {...register('voorwaarden')}
@@ -1093,7 +1094,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </div>
             </label>
 
-            <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
+            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 {...register('privacy')}
@@ -1112,8 +1113,27 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </div>
             </label>
 
+            {/* Aanmelden button - boven security card op mobiel, naast terug op desktop */}
+            <div className="md:hidden mb-3">
+              <Button 
+                type="submit" 
+                size="lg" 
+                disabled={isSubmitting}
+                className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Bezig...
+                  </>
+                ) : (
+                  'Aanmelden'
+                )}
+              </Button>
+            </div>
+
             {/* Security badges */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4 mt-3 md:mt-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
               <div className="flex flex-wrap items-center gap-4 justify-center">
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
@@ -1131,8 +1151,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+      {/* Buttons - Desktop: beide buttons naast elkaar, Mobile: alleen Terug onderaan */}
+      <div className="hidden md:flex flex-col sm:flex-row gap-3 md:gap-4">
         <Button 
           type="button" 
           variant="ghost" 
@@ -1157,8 +1177,24 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               Bezig...
             </>
           ) : (
-            'Contract aanvragen'
+            'Aanmelden'
           )}
+        </Button>
+      </div>
+
+      {/* Terug button - alleen op mobiel onderaan */}
+      <div className="md:hidden">
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="lg" 
+          onClick={vorigeStap} 
+          className="w-full text-sm md:text-base"
+        >
+          <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+          </svg>
+          Terug
         </Button>
       </div>
 

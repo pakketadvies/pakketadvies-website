@@ -159,6 +159,9 @@ function BedrijfsgegevensFormContent() {
   
   // Anders: zakelijk formulier (bestaande logica)
   
+  // Form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   // KvK number lookup states
   const [kvkNummer, setKvkNummer] = useState('')
   const [kvkLoading, setKvkLoading] = useState(false)
@@ -461,18 +464,25 @@ function BedrijfsgegevensFormContent() {
     }
   }
 
-  const onSubmit = (data: BedrijfsgegevensFormData) => {
-    // Transform form data to BedrijfsGegevens format
-    setBedrijfsgegevens({
-      bedrijfsnaam: data.bedrijfsnaam,
-      contactpersoon: `${data.voornaam} ${data.tussenvoegsel ? data.tussenvoegsel + ' ' : ''}${data.achternaam}`.trim(),
-      email: data.email,
-      telefoon: data.telefoon,
-      kvkNummer: kvkNummer || data.kvkNummer || undefined,
-      typeBedrijf: data.typeBedrijf || 'overig',
-    })
-    // Ga naar bevestigingspagina (contract is al gekozen op resultaten pagina)
-    router.push('/contract/bevestiging')
+  const onSubmit = async (data: BedrijfsgegevensFormData) => {
+    setIsSubmitting(true)
+    try {
+      // Transform form data to BedrijfsGegevens format
+      setBedrijfsgegevens({
+        bedrijfsnaam: data.bedrijfsnaam,
+        contactpersoon: `${data.voornaam} ${data.tussenvoegsel ? data.tussenvoegsel + ' ' : ''}${data.achternaam}`.trim(),
+        email: data.email,
+        telefoon: data.telefoon,
+        kvkNummer: kvkNummer || data.kvkNummer || undefined,
+        typeBedrijf: data.typeBedrijf || 'overig',
+      })
+      // Ga naar bevestigingspagina (contract is al gekozen op resultaten pagina)
+      router.push('/contract/bevestiging')
+    } catch (error) {
+      console.error('Error submitting form:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const leverancierNaam = contract?.leverancier.naam || 'Energieleverancier'
@@ -1159,14 +1169,15 @@ function BedrijfsgegevensFormContent() {
           </div>
 
           <div className="space-y-3 md:space-y-4">
-            <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
+            {/* Checkboxes - alleen zichtbaar op desktop */}
+            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 {...register('voorwaarden')}
-                className="w-5 h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
+                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
               />
               <div>
-                <span className="text-sm font-medium text-brand-navy-500">
+                <span className="text-xs md:text-sm font-medium text-brand-navy-500">
                   Door aan te melden gaat u akkoord met de voorwaarden en sluit u een overeenkomst met betalingsverplichting met {leverancierNaam}. 
                   U heeft 14 kalenderdagen bedenktijd na ontvangst contract leverancier.
                 </span>
@@ -1179,14 +1190,14 @@ function BedrijfsgegevensFormContent() {
               </div>
             </label>
 
-            <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-colors">
+            <label className="hidden md:flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 {...register('privacy')}
-                className="w-5 h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
+                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md text-brand-teal-500 border-gray-300 focus:ring-brand-teal-500 cursor-pointer"
               />
               <div>
-                <span className="text-sm font-medium text-brand-navy-500">
+                <span className="text-xs md:text-sm font-medium text-brand-navy-500">
                   Ik geef toestemming voor verwerking van mijn gegevens conform het privacybeleid
                 </span>
                 <button
@@ -1198,8 +1209,27 @@ function BedrijfsgegevensFormContent() {
               </div>
             </label>
 
+            {/* Aanmelden button - boven security card op mobiel, naast terug op desktop */}
+            <div className="md:hidden mb-3">
+              <Button 
+                type="submit" 
+                size="lg" 
+                disabled={isSubmitting}
+                className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Bezig...
+                  </>
+                ) : (
+                  'Aanmelden'
+                )}
+              </Button>
+            </div>
+
             {/* Security badges */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
               <div className="flex flex-wrap items-center gap-4 justify-center">
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
@@ -1217,19 +1247,50 @@ function BedrijfsgegevensFormContent() {
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-        <Button type="button" variant="ghost" size="lg" onClick={vorigeStap} className="w-full sm:flex-1 text-sm md:text-base">
+      {/* Buttons - Desktop: beide buttons naast elkaar, Mobile: alleen Terug onderaan */}
+      <div className="hidden md:flex flex-col sm:flex-row gap-3 md:gap-4">
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="lg" 
+          onClick={vorigeStap} 
+          className="w-full sm:flex-1 text-sm md:text-base"
+        >
           <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
           </svg>
-          Vorige
+          Terug
         </Button>
-        <Button type="submit" size="lg" className="w-full sm:flex-1 bg-brand-teal-500 hover:bg-brand-teal-600 text-sm md:text-base">
-          Volgende stap
-          <svg className="w-4 h-4 md:w-5 md:h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        <Button 
+          type="submit" 
+          size="lg" 
+          disabled={isSubmitting}
+          className="w-full sm:flex-1 bg-brand-teal-500 hover:bg-brand-teal-600"
+        >
+          {isSubmitting ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+              Bezig...
+            </>
+          ) : (
+            'Aanmelden'
+          )}
+        </Button>
+      </div>
+
+      {/* Terug button - alleen op mobiel onderaan */}
+      <div className="md:hidden">
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="lg" 
+          onClick={vorigeStap} 
+          className="w-full text-sm md:text-base"
+        >
+          <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
           </svg>
+          Terug
         </Button>
       </div>
     </form>
