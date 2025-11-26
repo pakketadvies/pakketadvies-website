@@ -539,6 +539,43 @@ function ResultatenContent() {
               }
             }
             
+            // NIEUW: Filter op verbruik_type voor vast en dynamisch contracten
+            if (contract.type === 'vast' && contract.details_vast) {
+              const verbruikType = contract.details_vast.verbruik_type || 'beide'
+              
+              if (verbruikType !== 'beide') {
+                const gebruikerIsGrootverbruik = isGrootverbruik(
+                  data?.aansluitwaardeElektriciteit,
+                  data?.aansluitwaardeGas
+                )
+                
+                if (verbruikType === 'kleinverbruik' && gebruikerIsGrootverbruik) {
+                  return null
+                }
+                if (verbruikType === 'grootverbruik' && !gebruikerIsGrootverbruik) {
+                  return null
+                }
+              }
+            }
+            
+            if (contract.type === 'dynamisch' && contract.details_dynamisch) {
+              const verbruikType = contract.details_dynamisch.verbruik_type || 'beide'
+              
+              if (verbruikType !== 'beide') {
+                const gebruikerIsGrootverbruik = isGrootverbruik(
+                  data?.aansluitwaardeElektriciteit,
+                  data?.aansluitwaardeGas
+                )
+                
+                if (verbruikType === 'kleinverbruik' && gebruikerIsGrootverbruik) {
+                  return null
+                }
+                if (verbruikType === 'grootverbruik' && !gebruikerIsGrootverbruik) {
+                  return null
+                }
+              }
+            }
+            
             
             // Bereken exacte kosten via API
             // BELANGRIJK: gebruik USER input voor metertype, niet contract details!

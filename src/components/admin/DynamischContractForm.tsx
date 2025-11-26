@@ -20,6 +20,7 @@ const dynamischContractSchema = z.object({
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
   target_audience: z.enum(['particulier', 'zakelijk', 'both']), // NIEUW: address type targeting
+  verbruik_type: z.enum(['kleinverbruik', 'grootverbruik', 'beide']), // NIEUW: verbruik type filtering
   
   opslag_elektriciteit: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_gas: z.number().min(0).nullable(),
@@ -88,6 +89,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       volgorde: contract?.volgorde || 0,
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
       target_audience: (contract?.target_audience as 'particulier' | 'zakelijk' | 'both') || 'both',
+      verbruik_type: (contract?.details_dynamisch?.verbruik_type as 'kleinverbruik' | 'grootverbruik' | 'beide') || 'beide',
       opslag_elektriciteit: contract?.details_dynamisch?.opslag_elektriciteit || 0,
       opslag_gas: contract?.details_dynamisch?.opslag_gas || null,
       opslag_teruglevering: contract?.details_dynamisch?.opslag_teruglevering || 0,
@@ -342,6 +344,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         max_prijs_cap: data.max_prijs_cap,
         groene_energie: data.groene_energie,
         opzegtermijn: data.opzegtermijn,
+        verbruik_type: data.verbruik_type,
         voorwaarden: voorwaardenForDb,
         bijzonderheden,
         rating: data.rating,
@@ -431,6 +434,28 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
               <p className="text-xs text-gray-500 mt-1">
                 Bepaal voor welke doelgroep dit contract wordt getoond op basis van adrescheck (BAG API).
               </p>
+            </div>
+
+            {/* Verbruik Type */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-brand-navy-500">
+                Verbruik Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register('verbruik_type')}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all"
+                disabled={loading}
+              >
+                <option value="beide">Beide (kleinverbruik en grootverbruik)</option>
+                <option value="kleinverbruik">Alleen kleinverbruik (≤3x80A / ≤G25)</option>
+                <option value="grootverbruik">Alleen grootverbruik (&gt;3x80A / &gt;G25)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Bepaalt voor welk verbruikstype dit contract zichtbaar is op basis van aansluitwaarden
+              </p>
+              {errors.verbruik_type && (
+                <p className="text-sm text-red-500 mt-1">{errors.verbruik_type.message}</p>
+              )}
             </div>
           </div>
         </div>

@@ -55,6 +55,9 @@ export interface ContractDetailsVast {
   prijsgarantie: boolean
   opzegtermijn: number
   
+  // NIEUW: Verbruik type filtering
+  verbruik_type: 'kleinverbruik' | 'grootverbruik' | 'beide' // Default: 'beide'
+  
   // Display
   voorwaarden: string[]
   bijzonderheden: string[]
@@ -84,6 +87,9 @@ export interface ContractDetailsDynamisch {
   // Eigenschappen
   groene_energie: boolean
   opzegtermijn: number
+  
+  // NIEUW: Verbruik type filtering
+  verbruik_type: 'kleinverbruik' | 'grootverbruik' | 'beide' // Default: 'beide'
   
   // Display
   voorwaarden: string[]
