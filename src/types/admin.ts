@@ -122,6 +122,9 @@ export interface ContractDetailsMaatwerk {
   min_verbruik_elektriciteit: number | null // Minimaal verbruik in kWh/jaar om zichtbaar te zijn
   min_verbruik_gas: number | null // Minimaal verbruik in m³/jaar om zichtbaar te zijn
   
+  // NIEUW: Verbruik type filtering
+  verbruik_type: 'kleinverbruik' | 'grootverbruik' | 'beide' // Default: 'beide'
+  
   // Contact (optioneel, voor maatwerk specifiek)
   custom_tekst: string | null
   contact_email: string | null

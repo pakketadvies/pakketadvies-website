@@ -11,6 +11,7 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { ContractOptie, VerbruikData } from '@/types/calculator'
+import { isGrootverbruik } from '@/lib/verbruik-type'
 
 // Helper: Calculate estimated cost for contract
 // NOTE: This is a SIMPLIFIED calculation for the results page
@@ -515,6 +516,25 @@ function ResultatenContent() {
                 // Contract is alleen zichtbaar als aan MINSTENS ÉÉN drempelwaarde wordt voldaan
                 if (!voldoetElektriciteit && !voldoetGas) {
                   return null // Contract niet zichtbaar, klant voldoet niet aan minimaal één drempelwaarde
+                }
+              }
+              
+              // NIEUW: Filter op verbruik_type voor maatwerk contracten
+              const verbruikType = maatwerkDetails.verbruik_type || 'beide'
+              
+              // Als verbruik_type is ingesteld (niet 'beide'), filter op grootverbruik status
+              if (verbruikType !== 'beide') {
+                const gebruikerIsGrootverbruik = isGrootverbruik(
+                  data?.aansluitwaardeElektriciteit,
+                  data?.aansluitwaardeGas
+                )
+                
+                // Contract is alleen zichtbaar als verbruik_type matcht met gebruiker status
+                if (verbruikType === 'kleinverbruik' && gebruikerIsGrootverbruik) {
+                  return null // Contract niet zichtbaar, gebruiker is grootverbruiker
+                }
+                if (verbruikType === 'grootverbruik' && !gebruikerIsGrootverbruik) {
+                  return null // Contract niet zichtbaar, gebruiker is kleinverbruiker
                 }
               }
             }

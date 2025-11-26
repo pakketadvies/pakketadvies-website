@@ -5,6 +5,14 @@ import Link from 'next/link'
 export default function KennisbankPage() {
   const articles = [
     {
+      title: 'Grootverbruik vs. Kleinverbruik: wat is het verschil?',
+      excerpt: 'Ontdek wanneer u een grootverbruiker bent en wat dit betekent voor uw energiecontract.',
+      category: 'Uitleg',
+      date: '15 januari 2025',
+      readTime: '5 min',
+      href: '/kennisbank/grootverbruik-kleinverbruik',
+    },
+    {
       title: 'Vast of dynamisch energiecontract: wat past bij uw bedrijf?',
       excerpt: 'Ontdek de verschillen tussen vaste en dynamische energiecontracten en welke het beste bij uw bedrijf past.',
       category: 'Advies',
@@ -98,7 +106,7 @@ export default function KennisbankPage() {
                     <span>{article.readTime} leestijd</span>
                   </div>
                   <Link
-                    href="#"
+                    href={article.href || '#'}
                     className="text-brand-teal-500 hover:text-brand-teal-600 font-medium text-sm inline-flex items-center gap-1"
                   >
                     Lees meer
