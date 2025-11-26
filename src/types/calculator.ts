@@ -71,6 +71,7 @@ export interface CalculatorState {
   bedrijfsgegevens: BedrijfsGegevens | null
   voorkeuren: ContractVoorkeuren | null
   resultaten: ContractOptie[] | null
+  selectedContract: ContractOptie | null // NIEUW: gekozen contract voor aanvraag
 }
 
 export interface ContractOptie {
@@ -94,6 +95,8 @@ export interface ContractOptie {
   aanbevolen?: boolean
   populair?: boolean
   breakdown?: any // Kosten breakdown voor prijsdetails (optioneel)
+  targetAudience?: 'particulier' | 'zakelijk' | 'both' // NIEUW: voor particulier/zakelijk filtering
+  contractNaam?: string // NIEUW: naam van het contract (bijv. "NL Groene Stroom en Aardgas")
 }
 
 export interface Leverancier {

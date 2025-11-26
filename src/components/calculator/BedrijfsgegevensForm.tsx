@@ -3,26 +3,62 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown } from '@phosphor-icons/react'
+import { Card, CardContent } from '@/components/ui/Card'
+import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone } from '@phosphor-icons/react'
 import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
+import { bepaalContractType } from '@/lib/contract-type'
+import { ParticulierAanvraagForm } from './ParticulierAanvraagForm'
 
 const bedrijfsgegevensSchema = z.object({
+  // Klant check
+  isKlantBijLeverancier: z.boolean(),
+  
+  // Bedrijfsgegevens
   kvkNummer: z.string().optional(),
   bedrijfsnaam: z.string().min(2, 'Vul een geldige bedrijfsnaam in'),
-  contactpersoon: z.string().min(2, 'Vul een naam in'),
-  email: z.string().email('Vul een geldig e-mailadres in'),
+  
+  // Persoonlijke gegevens
+  aanhef: z.enum(['dhr', 'mevr']),
+  voornaam: z.string().min(2, 'Vul je voornaam in'),
+  voorletters: z.string().optional(),
+  tussenvoegsel: z.string().optional(),
+  achternaam: z.string().min(2, 'Vul je achternaam in'),
+  geboortedatum: z.string().regex(/^\d{2}-\d{2}-\d{4}$/, 'Vul een geldige geboortedatum in (dd-mm-jjjj)'),
   telefoon: z.string().regex(/^[\d\s\-+()]+$/, 'Vul een geldig telefoonnummer in'),
-  typeBedrijf: z.enum(['retail', 'horeca', 'kantoor', 'productie', 'gezondheidszorg', 'onderwijs', 'overig']),
+  email: z.string().email('Vul een geldig e-mailadres in'),
+  herhaalEmail: z.string().email('Vul een geldig e-mailadres in'),
+  
+  // IBAN
+  iban: z.string().min(15, 'Vul een geldig IBAN in'),
+  
+  // Levering
+  heeftVerblijfsfunctie: z.boolean(),
+  gaatVerhuizen: z.boolean(),
+  wanneerOverstappen: z.enum(['zo_snel_mogelijk', 'na_contract_verlopen']),
+  
+  // Legacy velden (voor backward compatibility)
+  contactpersoon: z.string().optional(), // Wordt nu vervangen door voornaam + achternaam
+  typeBedrijf: z.enum(['retail', 'horeca', 'kantoor', 'productie', 'gezondheidszorg', 'onderwijs', 'overig']).optional(),
+  
   // Correspondentieadres (verplicht)
   correspondentieStraat: z.string().min(2, 'Vul een straatnaam in'),
   correspondentieHuisnummer: z.string().min(1, 'Vul een huisnummer in'),
   correspondentiePostcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/i, 'Vul een geldige postcode in'),
   correspondentiePlaats: z.string().min(2, 'Vul een plaatsnaam in'),
+  
+  // Akkoorden
+  voorwaarden: z.boolean().refine(val => val === true, 'Je moet akkoord gaan met de voorwaarden'),
+  privacy: z.boolean().refine(val => val === true, 'Je moet akkoord gaan met het privacybeleid'),
+  herinneringContract: z.boolean(),
+  nieuwsbrief: z.boolean(),
+}).refine(data => data.email === data.herhaalEmail, {
+  message: 'E-mailadressen komen niet overeen',
+  path: ['herhaalEmail'],
 })
 
 type BedrijfsgegevensFormData = z.infer<typeof bedrijfsgegevensSchema>
@@ -34,9 +70,24 @@ interface KvkSearchResult {
   adres: string
 }
 
-export function BedrijfsgegevensForm() {
+function BedrijfsgegevensFormContent() {
   const router = useRouter()
-  const { setBedrijfsgegevens, vorigeStap, verbruik } = useCalculatorStore()
+  const searchParams = useSearchParams()
+  const { setBedrijfsgegevens, vorigeStap, verbruik, selectedContract, resultaten } = useCalculatorStore()
+  
+  // Haal contract op uit query param of store
+  const contractId = searchParams?.get('contract')
+  const contract = selectedContract || (contractId && resultaten?.find(c => c.id === contractId)) || null
+  
+  // Bepaal contract type
+  const contractType = bepaalContractType(contract, verbruik)
+  
+  // Als particulier, render particulier formulier
+  if (contractType === 'particulier') {
+    return <ParticulierAanvraagForm contract={contract} />
+  }
+  
+  // Anders: zakelijk formulier (bestaande logica)
   
   // KvK number lookup states
   const [kvkNummer, setKvkNummer] = useState('')
@@ -66,6 +117,15 @@ export function BedrijfsgegevensForm() {
     resolver: zodResolver(bedrijfsgegevensSchema),
     defaultValues: {
       typeBedrijf: 'kantoor',
+      isKlantBijLeverancier: false,
+      aanhef: 'dhr',
+      heeftVerblijfsfunctie: true,
+      gaatVerhuizen: false,
+      wanneerOverstappen: 'zo_snel_mogelijk',
+      voorwaarden: false,
+      privacy: false,
+      herinneringContract: false,
+      nieuwsbrief: false,
     },
   })
 
@@ -329,9 +389,14 @@ export function BedrijfsgegevensForm() {
   }
 
   const onSubmit = (data: BedrijfsgegevensFormData) => {
+    // Transform form data to BedrijfsGegevens format
     setBedrijfsgegevens({
-      ...data,
-      kvkNummer: kvkNummer || undefined,
+      bedrijfsnaam: data.bedrijfsnaam,
+      contactpersoon: `${data.voornaam} ${data.tussenvoegsel ? data.tussenvoegsel + ' ' : ''}${data.achternaam}`.trim(),
+      email: data.email,
+      telefoon: data.telefoon,
+      kvkNummer: kvkNummer || data.kvkNummer || undefined,
+      typeBedrijf: data.typeBedrijf || 'overig',
     })
     // Ga naar bevestigingspagina (contract is al gekozen op resultaten pagina)
     router.push('/contract/bevestiging')
@@ -641,5 +706,18 @@ export function BedrijfsgegevensForm() {
         </Button>
       </div>
     </form>
+  )
+}
+
+export function BedrijfsgegevensForm() {
+  return (
+    <Suspense fallback={
+      <div className="text-center py-12">
+        <div className="w-8 h-8 border-4 border-brand-teal-50 border-t-brand-teal-500 rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Laden...</p>
+      </div>
+    }>
+      <BedrijfsgegevensFormContent />
+    </Suspense>
   )
 }

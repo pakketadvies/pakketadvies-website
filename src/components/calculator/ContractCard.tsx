@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info, FilePdf, FileText } from '@phosphor-icons/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useCalculatorStore } from '@/store/calculatorStore'
 import type { ContractOptie } from '@/types/calculator'
 import Tooltip from '@/components/ui/Tooltip'
 import { getFriendlyDocumentUrl } from '@/lib/document-url'
@@ -94,6 +96,8 @@ export default function ContractCard({
   postcode,
   position
 }: ContractCardProps) {
+  const router = useRouter()
+  const { setSelectedContract } = useCalculatorStore()
   const [openAccordion, setOpenAccordion] = useState<'prijsdetails' | 'voorwaarden' | 'over' | null>(null)
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
   const [loading, setLoading] = useState(false)
@@ -813,11 +817,17 @@ export default function ContractCard({
 
         {/* Actions */}
         <div className="space-y-3 pt-4 border-t-2 border-gray-100">
-          <Link href="/calculator?stap=2">
-            <Button className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
-              Aanvragen
-            </Button>
-          </Link>
+          <Button 
+            className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+            onClick={() => {
+              // Sla gekozen contract op in store
+              setSelectedContract(contract)
+              // Navigeer naar stap 2
+              router.push(`/calculator?stap=2&contract=${contract.id}`)
+            }}
+          >
+            Aanvragen
+          </Button>
           <button className="w-full text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors">
             Meer informatie
           </button>

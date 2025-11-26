@@ -367,6 +367,8 @@ const transformContractToOptie = (
     tariefElektriciteitDal: details.tarief_elektriciteit_dal || undefined,
     tariefGas: details.tarief_gas || details.opslag_gas || 0,
     groeneEnergie: details.groene_energie || false,
+    targetAudience: contract.target_audience || undefined, // NIEUW: voor particulier/zakelijk filtering
+    contractNaam: details.naam || details.contract_naam || undefined, // NIEUW: naam van het contract
     rating: contractRating,
     aantalReviews: contractAantalReviews,
     voorwaarden: details.voorwaarden || [],
