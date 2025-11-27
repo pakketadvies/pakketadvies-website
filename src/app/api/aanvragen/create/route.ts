@@ -139,13 +139,16 @@ export async function POST(request: Request) {
         }
         
         // Send confirmation email (fire and forget)
-        import('@/lib/send-email-internal').then(({ sendBevestigingEmail }) => {
-          sendBevestigingEmail(retryData.id, aanvraagnummer).catch((error: any) => {
-            console.error('❌ Error sending confirmation email (retry, non-blocking):', error)
-          })
-        }).catch((error: any) => {
-          console.error('❌ Error importing email function (retry):', error)
-        })
+        ;(async () => {
+          try {
+            const { sendBevestigingEmail } = await import('@/lib/send-email-internal')
+            console.log('📧 [create-retry] Triggering email send for aanvraag:', retryData.id, 'aanvraagnummer:', aanvraagnummer)
+            await sendBevestigingEmail(retryData.id, aanvraagnummer)
+            console.log('✅ [create-retry] Email sent successfully')
+          } catch (error: any) {
+            console.error('❌ [create-retry] Error sending confirmation email (non-blocking):', error)
+          }
+        })()
 
         return NextResponse.json<CreateAanvraagResponse>({
           success: true,
