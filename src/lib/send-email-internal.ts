@@ -37,41 +37,108 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     console.log('📧 [sendBevestigingEmail] Fetching aanvraag data...')
     console.log('📧 [sendBevestigingEmail] Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
     console.log('📧 [sendBevestigingEmail] Service role key present:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+    console.log('📧 [sendBevestigingEmail] Aanvraag ID:', aanvraagId)
+    
+    let aanvraag: any
     
     try {
-      const { data: aanvraag, error: aanvraagError } = await supabase
-        .from('contractaanvragen')
-        .select(`
-          *,
-          contract:contracten(
-            naam,
-            leverancier:leveranciers(
-              id,
-              naam,
-              logo_url
-            )
-          )
-        `)
-        .eq('id', aanvraagId)
-        .single()
-
-      if (aanvraagError) {
-        console.error('❌ [sendBevestigingEmail] Supabase error fetching aanvraag:', {
-          code: aanvraagError.code,
-          message: aanvraagError.message,
-          details: aanvraagError.details,
-          hint: aanvraagError.hint,
-        })
-        throw new Error(`Aanvraag niet gevonden: ${aanvraagError.message}`)
-      }
-
-      if (!aanvraag) {
-        console.error('❌ [sendBevestigingEmail] Aanvraag not found (no data returned)')
-        throw new Error('Aanvraag niet gevonden (geen data)')
-      }
+      console.log('📧 [sendBevestigingEmail] Executing Supabase query...')
+      const queryStartTime = Date.now()
       
-      console.log('✅ [sendBevestigingEmail] Aanvraag found:', aanvraag.id)
-      console.log('📧 [sendBevestigingEmail] Aanvraag data keys:', Object.keys(aanvraag))
+      // Try with nested select first
+      try {
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Query timeout na 10 seconden')), 10000)
+        )
+        
+        const queryPromise = supabase
+          .from('contractaanvragen')
+          .select(`
+            *,
+            contract:contracten(
+              naam,
+              leverancier:leveranciers(
+                id,
+                naam,
+                logo_url
+              )
+            )
+          `)
+          .eq('id', aanvraagId)
+          .single()
+
+        const queryResult = await Promise.race([queryPromise, timeoutPromise])
+        const queryDuration = Date.now() - queryStartTime
+        console.log(`📧 [sendBevestigingEmail] Query completed in ${queryDuration}ms`)
+
+        const { data, error: aanvraagError } = queryResult
+
+        if (aanvraagError) {
+          console.error('❌ [sendBevestigingEmail] Supabase error fetching aanvraag:', {
+            code: aanvraagError.code,
+            message: aanvraagError.message,
+            details: aanvraagError.details,
+            hint: aanvraagError.hint,
+          })
+          throw new Error(`Aanvraag niet gevonden: ${aanvraagError.message}`)
+        }
+
+        if (!data) {
+          console.error('❌ [sendBevestigingEmail] Aanvraag not found (no data returned)')
+          throw new Error('Aanvraag niet gevonden (geen data)')
+        }
+        
+        aanvraag = data
+        console.log('✅ [sendBevestigingEmail] Aanvraag found:', aanvraag.id)
+        console.log('📧 [sendBevestigingEmail] Aanvraag data keys:', Object.keys(aanvraag))
+        console.log('📧 [sendBevestigingEmail] Contract data:', aanvraag.contract ? 'present' : 'missing')
+        console.log('📧 [sendBevestigingEmail] Verbruik data:', aanvraag.verbruik_data ? 'present' : 'missing')
+        console.log('📧 [sendBevestigingEmail] Gegevens data:', aanvraag.gegevens_data ? 'present' : 'missing')
+      } catch (nestedError: any) {
+        console.warn('⚠️ [sendBevestigingEmail] Nested select failed, trying fallback query:', nestedError.message)
+        
+        // Fallback: fetch aanvraag without nested select
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('contractaanvragen')
+          .select('*')
+          .eq('id', aanvraagId)
+          .single()
+
+        if (fallbackError) {
+          console.error('❌ [sendBevestigingEmail] Fallback query also failed:', fallbackError)
+          throw new Error(`Aanvraag niet gevonden: ${fallbackError.message}`)
+        }
+
+        if (!fallbackData) {
+          throw new Error('Aanvraag niet gevonden (geen data)')
+        }
+
+        aanvraag = fallbackData
+        
+        // Fetch contract data separately if contract_id exists
+        if (aanvraag.contract_id) {
+          console.log('📧 [sendBevestigingEmail] Fetching contract data separately...')
+          const { data: contractData } = await supabase
+            .from('contracten')
+            .select(`
+              naam,
+              leverancier:leveranciers(
+                id,
+                naam,
+                logo_url
+              )
+            `)
+            .eq('id', aanvraag.contract_id)
+            .single()
+          
+          if (contractData) {
+            aanvraag.contract = contractData
+            console.log('✅ [sendBevestigingEmail] Contract data fetched separately')
+          }
+        }
+        
+        console.log('✅ [sendBevestigingEmail] Aanvraag found via fallback:', aanvraag.id)
+      }
     } catch (fetchError: any) {
       console.error('❌ [sendBevestigingEmail] Exception during fetch:', {
         message: fetchError.message,
@@ -79,6 +146,11 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
         name: fetchError.name,
       })
       throw fetchError
+    }
+    
+    if (!aanvraag) {
+      console.error('❌ [sendBevestigingEmail] Aanvraag is null after fetch')
+      throw new Error('Aanvraag niet gevonden (null na fetch)')
     }
 
     // Extract data
