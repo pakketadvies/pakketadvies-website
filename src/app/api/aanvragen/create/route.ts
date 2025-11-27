@@ -139,11 +139,11 @@ export async function POST(request: Request) {
         }
         
         // Send confirmation email (fire and forget)
-        import('./send-email-internal').then(({ sendBevestigingEmail }) => {
-          sendBevestigingEmail(retryData.id, aanvraagnummer).catch((error) => {
+        import('@/lib/send-email-internal').then(({ sendBevestigingEmail }) => {
+          sendBevestigingEmail(retryData.id, aanvraagnummer).catch((error: any) => {
             console.error('❌ Error sending confirmation email (retry, non-blocking):', error)
           })
-        }).catch((error) => {
+        }).catch((error: any) => {
           console.error('❌ Error importing email function (retry):', error)
         })
 
@@ -163,11 +163,11 @@ export async function POST(request: Request) {
     
     // Send confirmation email (fire and forget - don't block response)
     // Call email function directly instead of fetch for better reliability
-    import('./send-email-internal').then(({ sendBevestigingEmail }) => {
-      sendBevestigingEmail(data.id, aanvraagnummer).catch((error) => {
+    import('@/lib/send-email-internal').then(({ sendBevestigingEmail }) => {
+      sendBevestigingEmail(data.id, aanvraagnummer).catch((error: any) => {
         console.error('❌ Error sending confirmation email (non-blocking):', error)
       })
-    }).catch((error) => {
+    }).catch((error: any) => {
       console.error('❌ Error importing email function:', error)
       // Fallback: try fetch as backup
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
@@ -179,7 +179,7 @@ export async function POST(request: Request) {
           aanvraagId: data.id,
           aanvraagnummer,
         }),
-      }).catch((err) => {
+      }).catch((err: any) => {
         console.error('❌ Fallback fetch also failed:', err)
       })
     })
