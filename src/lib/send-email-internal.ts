@@ -257,8 +257,31 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     
     // Use environment variable for from address, fallback to Resend test domain
     // IMPORTANT: For production, verify pakketadvies.nl domain in Resend and set RESEND_FROM_EMAIL
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>'
-    console.log('📧 [sendBevestigingEmail] From email:', fromEmail)
+    // Trim and clean the from email to remove any extra quotes, whitespace, or newlines
+    let fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
+      .trim()
+      .replace(/\n/g, '') // Remove newlines
+      .replace(/\r/g, '') // Remove carriage returns
+    // Remove surrounding quotes if present
+    if ((fromEmail.startsWith('"') && fromEmail.endsWith('"')) || 
+        (fromEmail.startsWith("'") && fromEmail.endsWith("'"))) {
+      fromEmail = fromEmail.slice(1, -1).trim()
+    }
+    
+    // Validate format: should be either "email@domain.com" or "Name <email@domain.com>"
+    const emailRegex = /^[^\s<>]+@[^\s<>]+\.[^\s<>]+$/
+    const nameEmailRegex = /^[^<>]+\s*<[^\s<>]+@[^\s<>]+\.[^\s<>]+>$/
+    
+    if (!emailRegex.test(fromEmail) && !nameEmailRegex.test(fromEmail)) {
+      console.error('❌ [sendBevestigingEmail] Invalid from email format:', fromEmail)
+      console.error('❌ [sendBevestigingEmail] Expected format: "email@domain.com" or "Name <email@domain.com>"')
+      // Fallback to test domain if format is invalid
+      fromEmail = 'PakketAdvies <onboarding@resend.dev>'
+      console.warn('⚠️ [sendBevestigingEmail] Using fallback from email:', fromEmail)
+    }
+    
+    console.log('📧 [sendBevestigingEmail] From email (raw env):', JSON.stringify(process.env.RESEND_FROM_EMAIL))
+    console.log('📧 [sendBevestigingEmail] From email (cleaned):', fromEmail)
     
     let emailResult: any
     let emailError: any
