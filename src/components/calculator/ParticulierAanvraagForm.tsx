@@ -485,6 +485,31 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
       const result = await response.json()
 
+      // Log all email logs to browser console
+      if (result.emailLogs && result.emailLogs.length > 0) {
+        console.group('📧 Email Sending Logs')
+        result.emailLogs.forEach((log: string) => {
+          if (log.includes('❌')) {
+            console.error(log)
+          } else if (log.includes('⚠️')) {
+            console.warn(log)
+          } else {
+            console.log(log)
+          }
+        })
+        console.groupEnd()
+        
+        if (result.emailError) {
+          console.error('❌ Email Error Details:', result.emailError)
+        }
+        
+        if (result.emailSuccess) {
+          console.log('✅ Email sent successfully!')
+        } else {
+          console.error('❌ Email sending failed!')
+        }
+      }
+
       if (!result.success) {
         throw new Error(result.error || 'Fout bij opslaan aanvraag')
       }

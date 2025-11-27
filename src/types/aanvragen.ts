@@ -64,5 +64,12 @@ export interface CreateAanvraagResponse {
   aanvraag?: ContractAanvraag
   aanvraagnummer?: string
   error?: string
+  emailLogs?: string[]
+  emailSuccess?: boolean
+  emailError?: {
+    message?: string
+    stack?: string
+    name?: string
+  }
 }
 
