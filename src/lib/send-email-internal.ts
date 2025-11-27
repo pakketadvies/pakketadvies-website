@@ -255,12 +255,17 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     console.log('📧 [sendBevestigingEmail] Sending email via Resend to:', email)
     console.log('📧 [sendBevestigingEmail] Email subject:', `✅ Uw aanvraag is ontvangen - ${aanvraagnummer} | PakketAdvies`)
     
+    // Use environment variable for from address, fallback to Resend test domain
+    // IMPORTANT: For production, verify pakketadvies.nl domain in Resend and set RESEND_FROM_EMAIL
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>'
+    console.log('📧 [sendBevestigingEmail] From email:', fromEmail)
+    
     let emailResult: any
     let emailError: any
     
     try {
       const result = await resend.emails.send({
-        from: 'PakketAdvies <noreply@pakketadvies.nl>',
+        from: fromEmail,
         to: email,
         subject: `✅ Uw aanvraag is ontvangen - ${aanvraagnummer} | PakketAdvies`,
         html: emailHtml,
