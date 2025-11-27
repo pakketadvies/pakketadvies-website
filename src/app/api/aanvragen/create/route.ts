@@ -138,6 +138,20 @@ export async function POST(request: Request) {
           )
         }
         
+        // Send confirmation email (fire and forget)
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+          (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+        fetch(`${baseUrl}/api/email/send-bevestiging`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            aanvraagId: retryData.id,
+            aanvraagnummer,
+          }),
+        }).catch((error) => {
+          console.error('Error sending confirmation email (non-blocking):', error)
+        })
+
         return NextResponse.json<CreateAanvraagResponse>({
           success: true,
           aanvraag: retryData,
@@ -152,6 +166,20 @@ export async function POST(request: Request) {
       )
     }
     
+    // Send confirmation email (fire and forget - don't block response)
+    // We do this in the background so the user gets immediate feedback
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'}/api/email/send-bevestiging`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        aanvraagId: data.id,
+        aanvraagnummer,
+      }),
+    }).catch((error) => {
+      console.error('Error sending confirmation email (non-blocking):', error)
+      // Don't throw - email failure shouldn't block the response
+    })
+
     return NextResponse.json<CreateAanvraagResponse>({
       success: true,
       aanvraag: data,
