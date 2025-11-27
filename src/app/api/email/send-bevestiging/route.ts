@@ -10,10 +10,14 @@ import { generateBevestigingEmail, type EmailBevestigingData } from '@/lib/email
  */
 export async function POST(request: Request) {
   try {
+    console.log('📧 [send-bevestiging] Email API called')
     const body = await request.json()
     const { aanvraagId, aanvraagnummer } = body
 
+    console.log('📧 [send-bevestiging] Request data:', { aanvraagId, aanvraagnummer })
+
     if (!aanvraagId || !aanvraagnummer) {
+      console.error('❌ [send-bevestiging] Missing required fields')
       return NextResponse.json(
         { success: false, error: 'aanvraagId en aanvraagnummer zijn verplicht' },
         { status: 400 }
@@ -22,12 +26,13 @@ export async function POST(request: Request) {
 
     // Check Resend API key
     if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set')
+      console.error('❌ [send-bevestiging] RESEND_API_KEY is not set')
       return NextResponse.json(
         { success: false, error: 'Email service niet geconfigureerd' },
         { status: 500 }
       )
     }
+    console.log('✅ [send-bevestiging] RESEND_API_KEY is set')
 
     // Use service role key to fetch aanvraag data
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -67,12 +72,13 @@ export async function POST(request: Request) {
       .single()
 
     if (aanvraagError || !aanvraag) {
-      console.error('Error fetching aanvraag:', aanvraagError)
+      console.error('❌ [send-bevestiging] Error fetching aanvraag:', aanvraagError)
       return NextResponse.json(
         { success: false, error: 'Aanvraag niet gevonden' },
         { status: 404 }
       )
     }
+    console.log('✅ [send-bevestiging] Aanvraag found:', aanvraag.id)
 
     // Extract data
     const verbruikData = aanvraag.verbruik_data
@@ -83,11 +89,13 @@ export async function POST(request: Request) {
     // Get email from gegevens_data
     const email = gegevensData?.emailadres || gegevensData?.email
     if (!email) {
+      console.error('❌ [send-bevestiging] No email found in gegevens_data:', gegevensData)
       return NextResponse.json(
         { success: false, error: 'Geen emailadres gevonden in aanvraag' },
         { status: 400 }
       )
     }
+    console.log('✅ [send-bevestiging] Email address found:', email)
 
     // Get klant naam
     const klantNaam = gegevensData?.bedrijfsnaam || 
@@ -169,6 +177,7 @@ export async function POST(request: Request) {
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     // Send email
+    console.log('📧 [send-bevestiging] Sending email via Resend to:', email)
     const { data: emailResult, error: emailError } = await resend.emails.send({
       from: 'PakketAdvies <noreply@pakketadvies.nl>',
       to: email,
@@ -177,7 +186,7 @@ export async function POST(request: Request) {
     })
 
     if (emailError) {
-      console.error('Error sending email:', emailError)
+      console.error('❌ [send-bevestiging] Error sending email via Resend:', emailError)
       
       // Log failed email
       await supabase
@@ -215,6 +224,7 @@ export async function POST(request: Request) {
       .update({ email_bevestiging_verzonden: true })
       .eq('id', aanvraagId)
 
+    console.log('✅ [send-bevestiging] Email sent successfully, ID:', emailResult?.id)
     return NextResponse.json({
       success: true,
       emailId: emailResult?.id,

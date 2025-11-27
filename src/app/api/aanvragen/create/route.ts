@@ -141,6 +141,10 @@ export async function POST(request: Request) {
         // Send confirmation email (fire and forget)
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
           (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+        
+        console.log('📧 Triggering email send for aanvraag (retry):', retryData.id, 'aanvraagnummer:', aanvraagnummer)
+        console.log('📧 Email API URL:', `${baseUrl}/api/email/send-bevestiging`)
+        
         fetch(`${baseUrl}/api/email/send-bevestiging`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -148,8 +152,18 @@ export async function POST(request: Request) {
             aanvraagId: retryData.id,
             aanvraagnummer,
           }),
-        }).catch((error) => {
-          console.error('Error sending confirmation email (non-blocking):', error)
+        })
+        .then(async (response) => {
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('❌ Email API returned error (retry):', response.status, errorText)
+          } else {
+            const result = await response.json()
+            console.log('✅ Email sent successfully (retry):', result)
+          }
+        })
+        .catch((error) => {
+          console.error('❌ Error sending confirmation email (retry, non-blocking):', error)
         })
 
         return NextResponse.json<CreateAanvraagResponse>({
@@ -170,6 +184,10 @@ export async function POST(request: Request) {
     // We do this in the background so the user gets immediate feedback
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+    
+    console.log('📧 Triggering email send for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
+    console.log('📧 Email API URL:', `${baseUrl}/api/email/send-bevestiging`)
+    
     fetch(`${baseUrl}/api/email/send-bevestiging`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -177,8 +195,18 @@ export async function POST(request: Request) {
         aanvraagId: data.id,
         aanvraagnummer,
       }),
-    }).catch((error) => {
-      console.error('Error sending confirmation email (non-blocking):', error)
+    })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Email API returned error:', response.status, errorText)
+      } else {
+        const result = await response.json()
+        console.log('✅ Email sent successfully:', result)
+      }
+    })
+    .catch((error) => {
+      console.error('❌ Error sending confirmation email (non-blocking):', error)
       // Don't throw - email failure shouldn't block the response
     })
 
