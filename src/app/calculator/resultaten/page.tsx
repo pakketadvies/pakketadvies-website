@@ -384,7 +384,7 @@ const transformContractToOptie = (
 function ResultatenContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { verbruik, setVerbruik, voorkeuren, reset } = useCalculatorStore()
+  const { verbruik, setVerbruik, voorkeuren, reset, setResultaten: setResultatenInStore } = useCalculatorStore()
   
   const [resultaten, setResultaten] = useState<ContractOptie[]>([])
   const [filteredResultaten, setFilteredResultaten] = useState<ContractOptie[]>([])
@@ -723,6 +723,8 @@ function ResultatenContent() {
       
       setResultaten(transformed)
       setFilteredResultaten(transformed)
+      // Zet ook in Zustand store zodat BedrijfsgegevensForm het kan gebruiken
+      setResultatenInStore(transformed)
       setLoading(false)
     } catch (err) {
       console.error('Error loading resultaten:', err)

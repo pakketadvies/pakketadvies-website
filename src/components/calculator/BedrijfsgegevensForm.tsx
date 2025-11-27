@@ -16,6 +16,7 @@ import { IbanCalculator } from '@/components/ui/IbanCalculator'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
+import type { ContractOptie } from '@/types/calculator'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -138,15 +139,145 @@ interface KvkSearchResult {
 function BedrijfsgegevensFormContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { setBedrijfsgegevens, vorigeStap, verbruik, selectedContract, resultaten, setVerbruik, setAddressType } = useCalculatorStore()
+  const { setBedrijfsgegevens, vorigeStap, verbruik, selectedContract, resultaten, setVerbruik, setAddressType, setSelectedContract } = useCalculatorStore()
   
   // Haal contract op uit query param of store
   const contractId = searchParams?.get('contract')
-  const contract = selectedContract || (contractId && resultaten?.find(c => c.id === contractId)) || null
+  const [contract, setContract] = useState<ContractOptie | null>(
+    selectedContract || (contractId && resultaten?.find(c => c.id === contractId)) || null
+  )
+  const [loadingContract, setLoadingContract] = useState(false)
+  const [contractError, setContractError] = useState<string | null>(null)
+  
+  // Fetch contract from API als fallback (als niet in store)
+  useEffect(() => {
+    const loadContract = async () => {
+      // Als contract al beschikbaar is, skip
+      if (contract || !contractId) return
+      
+      // Als selectedContract of resultaten nog niet beschikbaar zijn, fetch van API
+      if (!selectedContract && (!resultaten || resultaten.length === 0)) {
+        setLoadingContract(true)
+        setContractError(null)
+        
+        try {
+          // Fetch contract from API
+          const response = await fetch(`/api/contracten/${contractId}`)
+          
+          if (!response.ok) {
+            throw new Error('Contract niet gevonden')
+          }
+          
+          const data = await response.json()
+          const rawContract = data.contract
+          
+          if (!rawContract || !verbruik) {
+            throw new Error('Contract of verbruik data ontbreekt')
+          }
+          
+          // Transform raw contract to ContractOptie format
+          const transformedContract: ContractOptie = {
+            id: rawContract.id,
+            leverancier: {
+              id: rawContract.leverancier?.id || rawContract.leverancier_id,
+              naam: rawContract.leverancier?.naam || 'Onbekende leverancier',
+              logo: rawContract.leverancier?.logo_url || '',
+              website: rawContract.leverancier?.website || '',
+            },
+            type: rawContract.type === 'maatwerk' ? 'vast' : rawContract.type,
+            looptijd: rawContract.details_vast?.looptijd || rawContract.details_maatwerk?.looptijd || 1,
+            maandbedrag: 0, // Wordt later berekend
+            jaarbedrag: 0, // Wordt later berekend
+            tariefElektriciteit: rawContract.details_vast?.tarief_elektriciteit_normaal || rawContract.details_dynamisch?.opslag_elektriciteit_normaal || rawContract.details_maatwerk?.tarief_elektriciteit_normaal || 0,
+            tariefElektriciteitDal: rawContract.details_vast?.tarief_elektriciteit_dal || undefined,
+            tariefElektriciteitEnkel: rawContract.details_vast?.tarief_elektriciteit_enkel || rawContract.details_maatwerk?.tarief_elektriciteit_enkel || undefined,
+            tariefGas: rawContract.details_vast?.tarief_gas || rawContract.details_dynamisch?.opslag_gas || rawContract.details_maatwerk?.tarief_gas || 0,
+            groeneEnergie: rawContract.details_vast?.groene_energie || rawContract.details_dynamisch?.groene_energie || rawContract.details_maatwerk?.groene_energie || false,
+            targetAudience: rawContract.target_audience || 'both',
+            contractNaam: rawContract.naam,
+            rating: rawContract.details_vast?.rating || rawContract.details_dynamisch?.rating || rawContract.details_maatwerk?.rating || 0,
+            aantalReviews: rawContract.details_vast?.aantal_reviews || rawContract.details_dynamisch?.aantal_reviews || rawContract.details_maatwerk?.aantal_reviews || 0,
+            voorwaarden: rawContract.details_vast?.voorwaarden || rawContract.details_dynamisch?.voorwaarden || rawContract.details_maatwerk?.voorwaarden || [],
+            opzegtermijn: rawContract.details_vast?.opzegtermijn || rawContract.details_dynamisch?.opzegtermijn || rawContract.details_maatwerk?.opzegtermijn || 1,
+            bijzonderheden: rawContract.details_vast?.bijzonderheden || rawContract.details_dynamisch?.bijzonderheden || rawContract.details_maatwerk?.bijzonderheden || [],
+            besparing: 0, // Wordt later berekend
+            aanbevolen: rawContract.aanbevolen || false,
+            populair: rawContract.populair || false,
+          }
+          
+          setContract(transformedContract)
+          setSelectedContract(transformedContract) // Zet ook in store voor volgende keer
+          setLoadingContract(false)
+        } catch (error: any) {
+          console.error('Error loading contract:', error)
+          setContractError(error.message || 'Fout bij laden contract')
+          setLoadingContract(false)
+        }
+      }
+    }
+    
+    loadContract()
+  }, [contractId, contract, selectedContract, resultaten, verbruik, setSelectedContract])
+  
+  // Update contract als selectedContract of resultaten veranderen
+  useEffect(() => {
+    if (selectedContract && selectedContract.id === contractId) {
+      setContract(selectedContract)
+    } else if (contractId && resultaten && resultaten.length > 0) {
+      const found = resultaten.find(c => c.id === contractId)
+      if (found) {
+        setContract(found)
+      }
+    }
+  }, [selectedContract, resultaten, contractId])
   
   // Debug logging
   console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
   console.log('🔍 BedrijfsgegevensForm - Verbruik:', verbruik ? { addressType: verbruik.addressType } : 'null')
+  
+  // Loading state
+  if (loadingContract) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-8 h-8 border-4 border-brand-teal-50 border-t-brand-teal-500 rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Contract laden...</p>
+      </div>
+    )
+  }
+  
+  // Error state
+  if (contractError || (!contract && contractId)) {
+    return (
+      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 text-center">
+        <XCircle weight="duotone" className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-red-700 mb-2">Contract niet gevonden</h3>
+        <p className="text-red-600 mb-4">{contractError || 'Het geselecteerde contract kon niet worden geladen.'}</p>
+        <Button
+          onClick={() => router.push('/calculator/resultaten')}
+          variant="outline"
+        >
+          Terug naar resultaten
+        </Button>
+      </div>
+    )
+  }
+  
+  // Als geen contract en geen contractId, toon error
+  if (!contract && !contractId) {
+    return (
+      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 text-center">
+        <XCircle weight="duotone" className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-red-700 mb-2">Geen contract geselecteerd</h3>
+        <p className="text-red-600 mb-4">Selecteer eerst een contract op de resultaten pagina.</p>
+        <Button
+          onClick={() => router.push('/calculator/resultaten')}
+          variant="outline"
+        >
+          Terug naar resultaten
+        </Button>
+      </div>
+    )
+  }
   
   // Bepaal contract type
   const contractType = bepaalContractType(contract, verbruik)
