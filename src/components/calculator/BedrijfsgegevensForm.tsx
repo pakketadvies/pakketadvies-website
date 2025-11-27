@@ -15,6 +15,7 @@ import { ParticulierAanvraagForm } from './ParticulierAanvraagForm'
 import { IbanCalculator } from '@/components/ui/IbanCalculator'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
+import { convertToISODate } from '@/lib/date-utils'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -482,7 +483,7 @@ function BedrijfsgegevensFormContent() {
         voorletters: data.voorletters,
         tussenvoegsel: data.tussenvoegsel,
         achternaam: data.achternaam,
-        geboortedatum: data.geboortedatum,
+        geboortedatum: convertToISODate(data.geboortedatum),
         telefoon: data.telefoon,
         email: data.email,
         contactpersoon: `${data.voornaam} ${data.tussenvoegsel ? data.tussenvoegsel + ' ' : ''}${data.achternaam}`.trim(),
@@ -511,8 +512,8 @@ function BedrijfsgegevensFormContent() {
         heeft_verblijfsfunctie: data.heeftVerblijfsfunctie,
         gaat_verhuizen: data.gaatVerhuizen,
         wanneer_overstappen: data.wanneerOverstappen,
-        contract_einddatum: data.contractEinddatum,
-        ingangsdatum: data.ingangsdatum,
+        contract_einddatum: convertToISODate(data.contractEinddatum),
+        ingangsdatum: convertToISODate(data.ingangsdatum),
         is_klant_bij_leverancier: data.isKlantBijLeverancier,
         herinnering_contract: data.herinneringContract,
         nieuwsbrief: data.nieuwsbrief,
