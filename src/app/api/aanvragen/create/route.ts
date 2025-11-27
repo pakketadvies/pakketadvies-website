@@ -166,26 +166,38 @@ export async function POST(request: Request) {
     
     // Send confirmation email (fire and forget - don't block response)
     // Call email function directly instead of fetch for better reliability
-    import('@/lib/send-email-internal').then(({ sendBevestigingEmail }) => {
-      sendBevestigingEmail(data.id, aanvraagnummer).catch((error: any) => {
-        console.error('❌ Error sending confirmation email (non-blocking):', error)
-      })
-    }).catch((error: any) => {
-      console.error('❌ Error importing email function:', error)
-      // Fallback: try fetch as backup
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-      fetch(`${baseUrl}/api/email/send-bevestiging`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          aanvraagId: data.id,
-          aanvraagnummer,
-        }),
-      }).catch((err: any) => {
-        console.error('❌ Fallback fetch also failed:', err)
-      })
-    })
+    console.log('📧 [create] Triggering email send for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
+    ;(async () => {
+      try {
+        const { sendBevestigingEmail } = await import('@/lib/send-email-internal')
+        console.log('📧 [create] Email function imported, calling sendBevestigingEmail...')
+        await sendBevestigingEmail(data.id, aanvraagnummer)
+        console.log('✅ [create] Email sent successfully for aanvraag:', data.id)
+      } catch (error: any) {
+        console.error('❌ [create] Error sending confirmation email (non-blocking):', error)
+        console.error('❌ [create] Error details:', {
+          message: error.message,
+          stack: error.stack,
+        })
+        // Fallback: try fetch as backup
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+          console.log('📧 [create] Attempting fallback fetch to:', `${baseUrl}/api/email/send-bevestiging`)
+          await fetch(`${baseUrl}/api/email/send-bevestiging`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              aanvraagId: data.id,
+              aanvraagnummer,
+            }),
+          })
+          console.log('✅ [create] Fallback fetch completed')
+        } catch (fetchError: any) {
+          console.error('❌ [create] Fallback fetch also failed:', fetchError)
+        }
+      }
+    })()
 
     return NextResponse.json<CreateAanvraagResponse>({
       success: true,
