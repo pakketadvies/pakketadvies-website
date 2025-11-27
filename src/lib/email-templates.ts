@@ -62,8 +62,8 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
     }).format(amount)
   }
 
-  const logoUrl = leverancierLogoUrl || `${baseUrl}/logo-placeholder.png`
-  const pakketAdviesLogoUrl = `${baseUrl}/logo.png`
+  const logoUrl = leverancierLogoUrl || `${baseUrl}/images/logo-placeholder.png`
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo.png`
 
   return `
 <!DOCTYPE html>

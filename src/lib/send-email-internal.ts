@@ -193,8 +193,9 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     const besparing = verbruikData?.besparing
 
     // Generate contract viewer URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://pakketadvies.nl')
+    // Always use production URL for contract viewer links in emails
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
+    console.log('📧 [sendBevestigingEmail] Base URL for contract viewer:', baseUrl)
     
     // Generate access token for contract viewer
     const accessToken = crypto.randomUUID()

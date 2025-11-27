@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import ContractViewer from '@/components/contract/ContractViewer'
 
@@ -9,23 +10,50 @@ interface PageProps {
 }
 
 async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer: string; token?: string }) {
-  const supabase = await createClient()
+  // Use service role key if token is provided (from email link)
+  // Otherwise use regular client (for authenticated admin access)
+  let supabase: any
+  
+  if (token && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // Use service role key to bypass RLS when accessing via email token
+    supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+  } else {
+    supabase = await createClient()
+  }
 
   // First, verify access token if provided
   if (token) {
-    const { data: accessData } = await supabase
+    const { data: accessData, error: tokenError } = await supabase
       .from('contract_viewer_access')
-      .select('aanvraag_id, accessed_at')
+      .select('aanvraag_id, accessed_at, expires_at')
       .eq('access_token', token)
       .single()
 
-    if (accessData) {
-      // Update accessed_at
-      await supabase
-        .from('contract_viewer_access')
-        .update({ accessed_at: new Date().toISOString() })
-        .eq('access_token', token)
+    if (tokenError || !accessData) {
+      console.error('Invalid or expired access token:', tokenError)
+      redirect('/contract/niet-gevonden')
     }
+
+    // Check if token is expired
+    if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
+      console.error('Access token expired')
+      redirect('/contract/niet-gevonden')
+    }
+
+    // Update accessed_at
+    await supabase
+      .from('contract_viewer_access')
+      .update({ accessed_at: new Date().toISOString() })
+      .eq('access_token', token)
   }
 
   // Fetch aanvraag by aanvraagnummer
@@ -50,6 +78,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     .single()
 
   if (aanvraagError || !aanvraag) {
+    console.error('Error fetching aanvraag:', aanvraagError)
     redirect('/contract/niet-gevonden')
   }
 
