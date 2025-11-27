@@ -169,22 +169,27 @@ export async function POST(request: Request) {
     console.log('📧 [create] Triggering email send for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
     ;(async () => {
       try {
+        console.log('📧 [create] Starting email send process...')
         const { sendBevestigingEmail } = await import('@/lib/send-email-internal')
         console.log('📧 [create] Email function imported, calling sendBevestigingEmail...')
-        await sendBevestigingEmail(data.id, aanvraagnummer)
-        console.log('✅ [create] Email sent successfully for aanvraag:', data.id)
+        const result = await sendBevestigingEmail(data.id, aanvraagnummer)
+        console.log('✅ [create] Email sent successfully for aanvraag:', data.id, 'Result:', result)
       } catch (error: any) {
         console.error('❌ [create] Error sending confirmation email (non-blocking):', error)
         console.error('❌ [create] Error details:', {
-          message: error.message,
-          stack: error.stack,
+          message: error?.message,
+          stack: error?.stack,
+          name: error?.name,
+          code: error?.code,
+          statusCode: error?.statusCode,
+          cause: error?.cause,
         })
         // Fallback: try fetch as backup
         try {
           const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
           console.log('📧 [create] Attempting fallback fetch to:', `${baseUrl}/api/email/send-bevestiging`)
-          await fetch(`${baseUrl}/api/email/send-bevestiging`, {
+          const fallbackResponse = await fetch(`${baseUrl}/api/email/send-bevestiging`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -192,9 +197,14 @@ export async function POST(request: Request) {
               aanvraagnummer,
             }),
           })
-          console.log('✅ [create] Fallback fetch completed')
+          const fallbackResult = await fallbackResponse.json()
+          console.log('✅ [create] Fallback fetch completed:', fallbackResult)
         } catch (fetchError: any) {
-          console.error('❌ [create] Fallback fetch also failed:', fetchError)
+          console.error('❌ [create] Fallback fetch also failed:', {
+            message: fetchError?.message,
+            stack: fetchError?.stack,
+            name: fetchError?.name,
+          })
         }
       }
     })()
