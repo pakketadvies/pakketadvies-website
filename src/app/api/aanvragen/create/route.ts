@@ -168,7 +168,9 @@ export async function POST(request: Request) {
     
     // Send confirmation email (fire and forget - don't block response)
     // We do this in the background so the user gets immediate feedback
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'}/api/email/send-bevestiging`, {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+    fetch(`${baseUrl}/api/email/send-bevestiging`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -95,19 +95,20 @@ export async function POST(request: Request) {
                       gegevensData?.achternaam ||
                       'Klant'
 
-    // Get address from verbruik_data
+    // Get address from verbruik_data (first leveringsadres)
+    const leveringsadres = verbruikData?.leveringsadressen?.[0] || {}
     const adres = {
-      straat: verbruikData?.straat || '',
-      huisnummer: verbruikData?.huisnummer || '',
-      toevoeging: verbruikData?.toevoeging || undefined,
-      postcode: verbruikData?.postcode || '',
-      plaats: verbruikData?.plaats || '',
+      straat: leveringsadres.straat || '',
+      huisnummer: leveringsadres.huisnummer || '',
+      toevoeging: leveringsadres.toevoeging || undefined,
+      postcode: leveringsadres.postcode || '',
+      plaats: leveringsadres.plaats || '',
     }
 
     // Get verbruik
     const verbruik = {
-      elektriciteit: verbruikData?.elektriciteitNormaal + verbruikData?.elektriciteitDal || 0,
-      gas: verbruikData?.gas || 0,
+      elektriciteit: (verbruikData?.elektriciteitNormaal || 0) + (verbruikData?.elektriciteitDal || 0),
+      gas: verbruikData?.gasJaar || verbruikData?.gas || 0,
     }
 
     // Get aansluitwaarden
@@ -129,12 +130,16 @@ export async function POST(request: Request) {
     // Generate access token for contract viewer
     const accessToken = crypto.randomUUID()
     
-    // Store access token in database
+    // Store access token in database (valid for 7 days)
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7)
+    
     await supabase
       .from('contract_viewer_access')
       .insert({
         aanvraag_id: aanvraagId,
         access_token: accessToken,
+        expires_at: expiresAt.toISOString(),
       })
 
     const contractViewerUrl = `${baseUrl}/contract/${aanvraagnummer}?token=${accessToken}`
@@ -201,8 +206,7 @@ export async function POST(request: Request) {
         recipient_email: email,
         subject: `✅ Uw aanvraag is ontvangen - ${aanvraagnummer} | PakketAdvies`,
         status: 'sent',
-        sent_at: new Date().toISOString(),
-        metadata: { resend_id: emailResult?.id },
+        resend_id: emailResult?.id,
       })
 
     // Update aanvraag email status
