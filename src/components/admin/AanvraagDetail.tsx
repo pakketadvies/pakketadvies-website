@@ -23,6 +23,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
 import type { ContractAanvraag, AanvraagStatus } from '@/types/aanvragen'
+import { convertToDutchDate } from '@/lib/date-utils'
 
 interface AanvraagDetailProps {
   aanvraag: ContractAanvraag
@@ -120,8 +121,12 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
         naam: `${gegevens.voornaam || ''} ${gegevens.tussenvoegsel ? gegevens.tussenvoegsel + ' ' : ''}${gegevens.achternaam || ''}`.trim(),
         email: gegevens.emailadres || gegevens.email,
         telefoon: gegevens.telefoonnummer || gegevens.telefoon,
-        geboortedatum: gegevens.geboortedatum,
+        geboortedatum: gegevens.geboortedatum ? convertToDutchDate(gegevens.geboortedatum) || gegevens.geboortedatum : undefined,
         aanhef: gegevens.aanhef,
+        voornaam: gegevens.voornaam,
+        voorletters: gegevens.voorletters,
+        tussenvoegsel: gegevens.tussenvoegsel,
+        achternaam: gegevens.achternaam,
       }
     } else {
       return {
@@ -130,6 +135,13 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
         telefoon: gegevens.telefoon || '',
         kvk: gegevens.kvkNummer,
         typeBedrijf: gegevens.typeBedrijf,
+        aanhef: gegevens.aanhef,
+        voornaam: gegevens.voornaam,
+        voorletters: gegevens.voorletters,
+        tussenvoegsel: gegevens.tussenvoegsel,
+        achternaam: gegevens.achternaam,
+        geboortedatum: gegevens.geboortedatum ? convertToDutchDate(gegevens.geboortedatum) || gegevens.geboortedatum : undefined,
+        contactpersoon: gegevens.contactpersoon,
       }
     }
   }
@@ -197,10 +209,86 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
               </h2>
             </div>
             <div className="space-y-3">
-              <div>
-                <span className="text-sm text-gray-600">Naam:</span>
-                <p className="font-medium text-brand-navy-500">{contactInfo.naam}</p>
-              </div>
+              {/* Zakelijk: Bedrijfsnaam */}
+              {aanvraag.aanvraag_type === 'zakelijk' && (
+                <div>
+                  <span className="text-sm text-gray-600">Bedrijfsnaam:</span>
+                  <p className="font-medium text-brand-navy-500">{contactInfo.naam}</p>
+                </div>
+              )}
+              
+              {/* KvK nummer (zakelijk) */}
+              {contactInfo.kvk && (
+                <div>
+                  <span className="text-sm text-gray-600">KvK nummer:</span>
+                  <p className="font-medium">{contactInfo.kvk}</p>
+                </div>
+              )}
+              
+              {/* Type bedrijf (zakelijk) */}
+              {contactInfo.typeBedrijf && (
+                <div>
+                  <span className="text-sm text-gray-600">Type bedrijf:</span>
+                  <p className="font-medium capitalize">{contactInfo.typeBedrijf}</p>
+                </div>
+              )}
+              
+              {/* Aanhef */}
+              {contactInfo.aanhef && (
+                <div>
+                  <span className="text-sm text-gray-600">Aanhef:</span>
+                  <p className="font-medium">{contactInfo.aanhef === 'dhr' ? 'Dhr.' : 'Mevr.'}</p>
+                </div>
+              )}
+              
+              {/* Voornaam */}
+              {contactInfo.voornaam && (
+                <div>
+                  <span className="text-sm text-gray-600">Voornaam:</span>
+                  <p className="font-medium">{contactInfo.voornaam}</p>
+                </div>
+              )}
+              
+              {/* Voorletters */}
+              {contactInfo.voorletters && (
+                <div>
+                  <span className="text-sm text-gray-600">Voorletters:</span>
+                  <p className="font-medium">{contactInfo.voorletters}</p>
+                </div>
+              )}
+              
+              {/* Tussenvoegsel */}
+              {contactInfo.tussenvoegsel && (
+                <div>
+                  <span className="text-sm text-gray-600">Tussenvoegsel:</span>
+                  <p className="font-medium">{contactInfo.tussenvoegsel}</p>
+                </div>
+              )}
+              
+              {/* Achternaam */}
+              {contactInfo.achternaam && (
+                <div>
+                  <span className="text-sm text-gray-600">Achternaam:</span>
+                  <p className="font-medium">{contactInfo.achternaam}</p>
+                </div>
+              )}
+              
+              {/* Volledige naam (particulier) */}
+              {aanvraag.aanvraag_type === 'particulier' && contactInfo.naam && (
+                <div>
+                  <span className="text-sm text-gray-600">Naam:</span>
+                  <p className="font-medium text-brand-navy-500">{contactInfo.naam}</p>
+                </div>
+              )}
+              
+              {/* Contactpersoon (zakelijk) */}
+              {contactInfo.contactpersoon && (
+                <div>
+                  <span className="text-sm text-gray-600">Contactpersoon:</span>
+                  <p className="font-medium">{contactInfo.contactpersoon}</p>
+                </div>
+              )}
+              
               {contactInfo.email && (
                 <div className="flex items-center gap-2">
                   <Envelope weight="duotone" className="w-4 h-4 text-gray-400" />
@@ -215,12 +303,6 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
                   <a href={`tel:${contactInfo.telefoon}`} className="text-brand-teal-600 hover:underline">
                     {contactInfo.telefoon}
                   </a>
-                </div>
-              )}
-              {contactInfo.kvk && (
-                <div>
-                  <span className="text-sm text-gray-600">KvK nummer:</span>
-                  <p className="font-medium">{contactInfo.kvk}</p>
                 </div>
               )}
               {contactInfo.geboortedatum && (
@@ -271,10 +353,28 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
                   <p className="font-medium">{verbruik.elektriciteitDal.toLocaleString('nl-NL')} kWh/jaar</p>
                 </div>
               )}
-              {verbruik?.gasJaar && (
+              {(verbruik?.gasJaar !== undefined || verbruik?.gas !== undefined) && (
                 <div>
                   <span className="text-sm text-gray-600">Gas:</span>
-                  <p className="font-medium">{verbruik.gasJaar.toLocaleString('nl-NL')} m³/jaar</p>
+                  <p className="font-medium">{(verbruik.gasJaar || verbruik.gas || 0).toLocaleString('nl-NL')} m³/jaar</p>
+                </div>
+              )}
+              {verbruik?.aansluitwaardeElektriciteit && (
+                <div>
+                  <span className="text-sm text-gray-600">Aansluitwaarde elektriciteit:</span>
+                  <p className="font-medium">{verbruik.aansluitwaardeElektriciteit}</p>
+                </div>
+              )}
+              {verbruik?.aansluitwaardeGas && (
+                <div>
+                  <span className="text-sm text-gray-600">Aansluitwaarde gas:</span>
+                  <p className="font-medium">{verbruik.aansluitwaardeGas}</p>
+                </div>
+              )}
+              {verbruik?.addressType && (
+                <div>
+                  <span className="text-sm text-gray-600">Adrestype:</span>
+                  <p className="font-medium capitalize">{verbruik.addressType}</p>
                 </div>
               )}
               {verbruik?.terugleveringJaar && (
@@ -285,6 +385,25 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
               )}
             </div>
           </div>
+
+          {/* Correspondentieadres */}
+          {aanvraag.heeft_andere_correspondentie_adres && aanvraag.correspondentie_adres && (
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Envelope weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+                <h2 className="text-lg font-semibold text-brand-navy-500">Correspondentieadres</h2>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium">
+                  {aanvraag.correspondentie_adres.straat} {aanvraag.correspondentie_adres.huisnummer}
+                  {aanvraag.correspondentie_adres.toevoeging ? ` ${aanvraag.correspondentie_adres.toevoeging}` : ''}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {aanvraag.correspondentie_adres.postcode} {aanvraag.correspondentie_adres.plaats}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Betalingsgegevens */}
           {aanvraag.iban && (
@@ -298,6 +417,12 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
                   <span className="text-sm text-gray-600">IBAN:</span>
                   <p className="font-mono font-medium">{aanvraag.iban}</p>
                 </div>
+                {aanvraag.rekening_op_andere_naam && (
+                  <div>
+                    <span className="text-sm text-gray-600">Rekening staat op andere naam:</span>
+                    <p className="font-medium">{aanvraag.rekening_op_andere_naam ? 'Ja' : 'Nee'}</p>
+                  </div>
+                )}
                 {aanvraag.rekening_op_andere_naam && aanvraag.rekeninghouder_naam && (
                   <div>
                     <span className="text-sm text-gray-600">Rekeninghouder:</span>
@@ -307,6 +432,92 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
               </div>
             </div>
           )}
+
+          {/* Levering Details */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+              <h2 className="text-lg font-semibold text-brand-navy-500">Levering</h2>
+            </div>
+            <div className="space-y-3">
+              {aanvraag.heeft_verblijfsfunctie !== undefined && (
+                <div>
+                  <span className="text-sm text-gray-600">Heeft verblijfsfunctie:</span>
+                  <p className="font-medium">{aanvraag.heeft_verblijfsfunctie ? 'Ja' : 'Nee'}</p>
+                </div>
+              )}
+              {aanvraag.gaat_verhuizen !== undefined && (
+                <div>
+                  <span className="text-sm text-gray-600">Gaat verhuizen:</span>
+                  <p className="font-medium">{aanvraag.gaat_verhuizen ? 'Ja' : 'Nee'}</p>
+                </div>
+              )}
+              {aanvraag.wanneer_overstappen && (
+                <div>
+                  <span className="text-sm text-gray-600">Wanneer overstappen:</span>
+                  <p className="font-medium">
+                    {aanvraag.wanneer_overstappen === 'zo_snel_mogelijk' ? 'Zo snel mogelijk' : 'Zodra contract afloopt'}
+                  </p>
+                </div>
+              )}
+              {aanvraag.contract_einddatum && (
+                <div>
+                  <span className="text-sm text-gray-600">Contract einddatum:</span>
+                  <p className="font-medium">
+                    {convertToDutchDate(aanvraag.contract_einddatum) || aanvraag.contract_einddatum}
+                  </p>
+                </div>
+              )}
+              {aanvraag.ingangsdatum && (
+                <div>
+                  <span className="text-sm text-gray-600">Ingangsdatum:</span>
+                  <p className="font-medium">
+                    {convertToDutchDate(aanvraag.ingangsdatum) || aanvraag.ingangsdatum}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Opties */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+              <h2 className="text-lg font-semibold text-brand-navy-500">Opties</h2>
+            </div>
+            <div className="space-y-2">
+              {aanvraag.is_klant_bij_leverancier !== undefined && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Klant bij leverancier:</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    aanvraag.is_klant_bij_leverancier ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {aanvraag.is_klant_bij_leverancier ? 'Ja' : 'Nee'}
+                  </span>
+                </div>
+              )}
+              {aanvraag.herinnering_contract !== undefined && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Contract herinnering:</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    aanvraag.herinnering_contract ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {aanvraag.herinnering_contract ? 'Ja' : 'Nee'}
+                  </span>
+                </div>
+              )}
+              {aanvraag.nieuwsbrief !== undefined && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Nieuwsbrief:</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    aanvraag.nieuwsbrief ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {aanvraag.nieuwsbrief ? 'Ja' : 'Nee'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right Column - Sidebar */}
