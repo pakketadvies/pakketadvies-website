@@ -31,7 +31,7 @@ interface ContractCardProps {
   position?: number
 }
 
-interface KostenBreakdown {
+export interface KostenBreakdown {
   leverancier: {
     elektriciteit: number
     elektriciteitDetails?: {

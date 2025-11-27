@@ -164,15 +164,15 @@ export default function ContractViewer({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'nieuw':
-        return <Badge variant="default" className="bg-blue-100 text-blue-700">Nieuw</Badge>
+        return <Badge variant="info" className="bg-blue-100 text-blue-700">Nieuw</Badge>
       case 'in_behandeling':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-700">In behandeling</Badge>
+        return <Badge variant="warning" className="bg-yellow-100 text-yellow-700">In behandeling</Badge>
       case 'afgehandeld':
-        return <Badge variant="default" className="bg-green-100 text-green-700">Afgehandeld</Badge>
+        return <Badge variant="success" className="bg-green-100 text-green-700">Afgehandeld</Badge>
       case 'geannuleerd':
-        return <Badge variant="default" className="bg-red-100 text-red-700">Geannuleerd</Badge>
+        return <Badge variant="error" className="bg-red-100 text-red-700">Geannuleerd</Badge>
       default:
-        return <Badge variant="default">{status}</Badge>
+        return <Badge variant="neutral">{status}</Badge>
     }
   }
 
@@ -383,7 +383,7 @@ export default function ContractViewer({
             <p className="text-gray-600 mb-6">Ons team staat voor u klaar</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="mailto:info@pakketadvies.nl">
-                <Button variant="default" className="bg-brand-teal-500 hover:bg-brand-teal-600">
+                <Button variant="primary" className="bg-brand-teal-500 hover:bg-brand-teal-600">
                   Email ons
                 </Button>
               </a>
