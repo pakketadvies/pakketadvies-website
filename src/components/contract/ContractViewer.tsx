@@ -253,36 +253,6 @@ export default function ContractViewer({
     return openAccordion === section
   }
 
-  // Load current prices and history for dynamic contracts
-  const loadPriceData = async () => {
-    if (contract.type !== 'dynamisch') return
-    
-    setLoadingPrices(true)
-    try {
-      // Fetch current prices
-      const currentResponse = await fetch('/api/dynamic-pricing/current')
-      if (currentResponse.ok) {
-        const currentData = await currentResponse.json()
-        if (currentData.success) {
-          setCurrentPrices(currentData.prices)
-        }
-      }
-      
-      // Fetch price history
-      const historyResponse = await fetch('/api/dynamic-prices/history?days=30')
-      if (historyResponse.ok) {
-        const historyData = await historyResponse.json()
-        if (historyData.success) {
-          setPriceHistory(historyData.history || [])
-        }
-      }
-    } catch (err) {
-      console.error('Error loading price data:', err)
-    } finally {
-      setLoadingPrices(false)
-    }
-  }
-
   // Get klant naam
   const klantNaam = gegevensData?.bedrijfsnaam || 
                     `${gegevensData?.aanhef === 'dhr' ? 'Dhr.' : 'Mevr.'} ${gegevensData?.voornaam || ''} ${gegevensData?.achternaam || ''}`.trim() ||
