@@ -193,21 +193,22 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     const besparing = verbruikData?.besparing
 
     // Generate contract viewer URL
-    // IMPORTANT: Always use production URL for emails (pakketadvies.nl)
+    // IMPORTANT: Use the current production domain (pakketadvies.vercel.app)
+    // Later when www.pakketadvies.nl is connected, set NEXT_PUBLIC_BASE_URL to that domain
     // VERCEL_URL is the preview deployment URL (e.g., pakketadvies-website-xxx.vercel.app)
-    // We want the production URL (pakketadvies.nl) for customer emails
+    // We want the production Vercel URL (pakketadvies.vercel.app) for customer emails
     let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     
-    // If NEXT_PUBLIC_BASE_URL is not set, always use production URL
-    // This ensures customer emails always have working links
+    // If NEXT_PUBLIC_BASE_URL is not set, use current production Vercel domain
     if (!baseUrl) {
-      baseUrl = 'https://pakketadvies.nl'
+      baseUrl = 'https://pakketadvies.vercel.app'
     }
     
-    // Safety check: if baseUrl contains a preview deployment pattern, use production URL
+    // Safety check: if baseUrl contains a preview deployment pattern (random hash), use production Vercel URL
+    // Pattern: pakketadvies-website-XXXXX.vercel.app (preview) vs pakketadvies.vercel.app (production)
     if (baseUrl.includes('-') && baseUrl.includes('.vercel.app') && !baseUrl.includes('pakketadvies.vercel.app')) {
-      console.warn('⚠️ [sendBevestigingEmail] Detected preview deployment URL, using production URL instead')
-      baseUrl = 'https://pakketadvies.nl'
+      console.warn('⚠️ [sendBevestigingEmail] Detected preview deployment URL, using production Vercel URL instead')
+      baseUrl = 'https://pakketadvies.vercel.app'
     }
     
     console.log('📧 [sendBevestigingEmail] Base URL for contract viewer:', baseUrl)
