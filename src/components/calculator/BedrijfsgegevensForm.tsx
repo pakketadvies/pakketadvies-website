@@ -1087,64 +1087,6 @@ function BedrijfsgegevensFormContent() {
         </div>
       </div>
 
-      {/* Type bedrijf */}
-      <div className="space-y-4">
-        <label className="block text-sm md:text-base font-semibold text-gray-700">
-          Type bedrijf <span className="text-red-500">*</span>
-        </label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {[
-            { value: 'kantoor', label: 'Kantoor', icon: Briefcase },
-            { value: 'retail', label: 'Retail', icon: Storefront },
-            { value: 'horeca', label: 'Horeca', icon: ForkKnife },
-            { value: 'productie', label: 'Productie', icon: Factory },
-            { value: 'gezondheidszorg', label: 'Zorg', icon: FirstAid },
-            { value: 'onderwijs', label: 'Onderwijs', icon: GraduationCap },
-            { value: 'overig', label: 'Overig', icon: SquaresFour },
-          ].map((option) => {
-            const isSelected = typeBedrijf === option.value
-            const Icon = option.icon
-            
-            return (
-              <label
-                key={option.value}
-                className={`
-                  relative flex flex-col items-center justify-center p-4 md:p-5 rounded-xl md:rounded-2xl border-2 cursor-pointer transition-all duration-300
-                  ${isSelected 
-                    ? 'border-brand-teal-500 bg-brand-teal-50 shadow-lg shadow-brand-teal-500/20' 
-                    : 'border-gray-200 bg-white hover:border-brand-teal-300 hover:shadow-md'
-                  }
-                `}
-              >
-                <input
-                  type="radio"
-                  value={option.value}
-                  {...register('typeBedrijf')}
-                  className="sr-only"
-                />
-                <Icon 
-                  weight="duotone" 
-                  className={`w-8 h-8 md:w-10 md:h-10 mb-2 transition-colors ${
-                    isSelected ? 'text-brand-teal-600' : 'text-gray-400'
-                  }`}
-                />
-                <div className={`text-sm md:text-base font-semibold ${isSelected ? 'text-brand-navy-500' : 'text-gray-700'}`}>
-                  {option.label}
-                </div>
-                
-                {isSelected && (
-                  <div className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 bg-brand-teal-600 rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
-              </label>
-            )
-          })}
-        </div>
-      </div>
-
       {/* Maandelijkse betaling */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
         <div className="p-4 md:p-6">
