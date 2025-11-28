@@ -51,6 +51,23 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
     contractViewerUrl,
     baseUrl,
   } = data
+  
+  // Validate and ensure contractViewerUrl is always a valid absolute URL
+  let validContractViewerUrl = contractViewerUrl
+  if (!validContractViewerUrl || !validContractViewerUrl.startsWith('http')) {
+    console.error('❌ [generateBevestigingEmail] Invalid contractViewerUrl:', validContractViewerUrl)
+    // Fallback to baseUrl + contract path
+    validContractViewerUrl = `${baseUrl}/contract/${aanvraagnummer}`
+    console.warn('⚠️ [generateBevestigingEmail] Using fallback URL:', validContractViewerUrl)
+  }
+  
+  // Ensure URL is properly encoded
+  try {
+    new URL(validContractViewerUrl) // This will throw if URL is invalid
+  } catch (e) {
+    console.error('❌ [generateBevestigingEmail] Invalid URL format:', validContractViewerUrl)
+    validContractViewerUrl = `${baseUrl}/contract/${aanvraagnummer}`
+  }
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -117,7 +134,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
               <p style="color: white; font-size: 48px; font-weight: bold; margin: 0 0 5px 0;">${formatCurrency(jaarbedrag)}</p>
               <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 0 0 30px 0;">per jaar (${formatCurrency(maandbedrag)} per maand)</p>
               ${besparing ? `<p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 20px 0;">U bespaart ${formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief</p>` : ''}
-              <a href="${contractViewerUrl || '#'}" target="_blank" rel="noopener noreferrer" style="background: white; color: #14B8A6; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
+              <a href="${validContractViewerUrl}" target="_blank" rel="noopener noreferrer" style="background: white; color: #14B8A6; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
                 📊 Bekijk volledige berekening
               </a>
             </td>
@@ -226,7 +243,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
           <!-- CTA Buttons -->
           <tr>
             <td style="text-align: center; padding: 30px 20px; background: white;">
-              <a href="${contractViewerUrl || '#'}" target="_blank" rel="noopener noreferrer" style="background: #14B8A6; color: white; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; font-size: 16px;">
+              <a href="${validContractViewerUrl}" target="_blank" rel="noopener noreferrer" style="background: #14B8A6; color: white; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; font-size: 16px;">
                 📄 Bekijk contract online
               </a>
               <br style="display: none;">
