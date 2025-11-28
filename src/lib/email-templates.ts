@@ -84,8 +84,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 30px 20px; text-align: center;">
-              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 180px; height: auto; margin-bottom: 8px; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1);">
-              <p style="color: #14B8A6; font-size: 12px; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">ONAFHANKELIJK ENERGIE VERGELIJKEN</p>
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; height: auto; margin-bottom: 0; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1); display: block; margin-left: auto; margin-right: auto;">
             </td>
           </tr>
 
