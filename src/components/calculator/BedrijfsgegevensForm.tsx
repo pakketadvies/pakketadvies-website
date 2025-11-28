@@ -606,10 +606,21 @@ function BedrijfsgegevensFormContent() {
   const onSubmit = async (data: BedrijfsgegevensFormData) => {
     setIsSubmitting(true)
     try {
-      if (!contract || !verbruik) {
-        alert('Er is een fout opgetreden. Probeer het opnieuw.')
+      if (!contract) {
+        console.error('❌ [BedrijfsgegevensForm] No contract available on submit')
+        setContractError('Geen contract geselecteerd. Probeer de pagina te verversen.')
+        setIsSubmitting(false)
         return
       }
+      
+      if (!verbruik) {
+        console.error('❌ [BedrijfsgegevensForm] No verbruik data available on submit')
+        alert('Geen verbruik data beschikbaar. Ga terug naar stap 1.')
+        setIsSubmitting(false)
+        return
+      }
+      
+      console.log('✅ [BedrijfsgegevensForm] Submitting with contract:', contract.id, contract.contractNaam)
 
       // Prepare gegevens_data (zakelijk)
       const gegevensData = {
