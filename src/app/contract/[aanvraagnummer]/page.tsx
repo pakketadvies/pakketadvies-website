@@ -83,24 +83,11 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   }
 
   // Fetch aanvraag by aanvraagnummer
+  // Use simpler query first (without nested select) to avoid RLS issues
   console.log('🔍 [ContractViewer] Fetching aanvraag with aanvraagnummer:', aanvraagnummer)
   const { data: aanvraag, error: aanvraagError } = await supabase
     .from('contractaanvragen')
-    .select(`
-      *,
-      contract:contracten(
-        id,
-        naam,
-        type,
-        leverancier:leveranciers(
-          id,
-          naam,
-          logo_url,
-          website,
-          over_leverancier
-        )
-      )
-    `)
+    .select('*')
     .eq('aanvraagnummer', aanvraagnummer)
     .single()
 
@@ -131,32 +118,87 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     id: aanvraag.id,
     aanvraagnummer: aanvraag.aanvraagnummer,
     contract_id: aanvraag.contract_id,
-    has_contract: !!aanvraag.contract,
     has_verbruik_data: !!aanvraag.verbruik_data,
     has_gegevens_data: !!aanvraag.gegevens_data,
   })
 
+  // Fetch contract separately to avoid nested query issues
+  let contract: any = null
+  let leverancier: any = null
+  
+  if (aanvraag.contract_id) {
+    console.log('🔍 [ContractViewer] Fetching contract separately:', aanvraag.contract_id)
+    const { data: contractData, error: contractError } = await supabase
+      .from('contracten')
+      .select(`
+        id,
+        naam,
+        type,
+        leverancier_id
+      `)
+      .eq('id', aanvraag.contract_id)
+      .single()
+    
+    if (contractError) {
+      console.error('❌ [ContractViewer] Error fetching contract:', {
+        error: contractError,
+        code: contractError.code,
+        message: contractError.message,
+        contract_id: aanvraag.contract_id,
+      })
+      // Continue with fallback data from aanvraag
+    } else if (contractData) {
+      contract = contractData
+      console.log('✅ [ContractViewer] Contract found:', contract.id)
+      
+      // Fetch leverancier separately
+      if (contract.leverancier_id) {
+        console.log('🔍 [ContractViewer] Fetching leverancier separately:', contract.leverancier_id)
+        const { data: leverancierData, error: leverancierError } = await supabase
+          .from('leveranciers')
+          .select('id, naam, logo_url, website, over_leverancier')
+          .eq('id', contract.leverancier_id)
+          .single()
+        
+        if (leverancierError) {
+          console.error('❌ [ContractViewer] Error fetching leverancier:', {
+            error: leverancierError,
+            code: leverancierError.code,
+            message: leverancierError.message,
+            leverancier_id: contract.leverancier_id,
+          })
+          // Continue with fallback data from aanvraag
+        } else if (leverancierData) {
+          leverancier = leverancierData
+          console.log('✅ [ContractViewer] Leverancier found:', leverancier.id)
+        }
+      }
+    }
+  }
+
   // Extract data
   const verbruikData = aanvraag.verbruik_data
   const gegevensData = aanvraag.gegevens_data
-  const contract = aanvraag.contract as any
-  const leverancier = contract?.leverancier
 
+  // Use fallback data from aanvraag if contract/leverancier not found
   if (!contract) {
-    console.error('❌ [ContractViewer] Contract not found:', {
-      contract_id: aanvraag.contract_id,
-      has_contract_in_response: !!aanvraag.contract,
-    })
-    redirect('/contract/niet-gevonden')
+    console.warn('⚠️ [ContractViewer] Contract not found, using fallback data from aanvraag')
+    contract = {
+      id: aanvraag.contract_id,
+      naam: aanvraag.contract_naam || 'Onbekend contract',
+      type: aanvraag.contract_type || 'vast',
+    }
   }
 
   if (!leverancier) {
-    console.error('❌ [ContractViewer] Leverancier not found:', {
-      contract_id: aanvraag.contract_id,
-      has_contract: !!contract,
-      has_leverancier: !!leverancier,
-    })
-    redirect('/contract/niet-gevonden')
+    console.warn('⚠️ [ContractViewer] Leverancier not found, using fallback data from aanvraag')
+    leverancier = {
+      id: aanvraag.leverancier_id,
+      naam: aanvraag.leverancier_naam || 'Onbekende leverancier',
+      logo_url: null,
+      website: null,
+      over_leverancier: null,
+    }
   }
 
   console.log('✅ [ContractViewer] All data available, rendering ContractViewer component')
