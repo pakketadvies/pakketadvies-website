@@ -63,6 +63,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
   }
 
   const logoUrl = leverancierLogoUrl || `${baseUrl}/images/logo-placeholder.png`
+  // Use logo.png (same as footer) - it will be made white with CSS filter for dark background
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo.png`
 
   return `
@@ -84,7 +85,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 30px 20px; text-align: center;">
-              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; height: auto; margin-bottom: 0; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1); display: block; margin-left: auto; margin-right: auto;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; height: auto; margin: 0 auto; display: block; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1);">
             </td>
           </tr>
 
