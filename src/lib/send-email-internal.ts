@@ -193,25 +193,21 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     const besparing = verbruikData?.besparing
 
     // Generate contract viewer URL
-    // IMPORTANT: Always use pakketadvies.nl for production emails (not VERCEL_URL)
-    // VERCEL_URL is only for preview deployments, not for customer-facing links
+    // Use NEXT_PUBLIC_BASE_URL if set, otherwise use VERCEL_URL, fallback to pakketadvies.vercel.app
     let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     
     if (!baseUrl) {
-      // Always use production domain for customer emails
-      // Only use VERCEL_URL for internal/preview purposes
-      baseUrl = 'https://pakketadvies.nl'
-    }
-    
-    // Ensure baseUrl is always https://pakketadvies.nl for production
-    // This ensures customer links always work, even if VERCEL_URL is set
-    if (baseUrl.includes('vercel.app')) {
-      console.warn('⚠️ [sendBevestigingEmail] Base URL contains vercel.app, using pakketadvies.nl instead')
-      baseUrl = 'https://pakketadvies.nl'
+      // If running on Vercel, use the Vercel URL
+      if (process.env.VERCEL_URL) {
+        baseUrl = `https://${process.env.VERCEL_URL}`
+      } else {
+        // Fallback to production domain
+        baseUrl = 'https://pakketadvies.vercel.app'
+      }
     }
     
     console.log('📧 [sendBevestigingEmail] Base URL for contract viewer:', baseUrl)
-    console.log('📧 [sendBevestigingEmail] VERCEL_URL (not used for emails):', process.env.VERCEL_URL)
+    console.log('📧 [sendBevestigingEmail] VERCEL_URL:', process.env.VERCEL_URL)
     console.log('📧 [sendBevestigingEmail] NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL)
     
     // Generate access token for contract viewer
