@@ -1,12 +1,11 @@
 import Link from 'next/link'
-import { Warning } from '@phosphor-icons/react'
 
 export default function ContractNietGevondenPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-white to-brand-navy-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
         <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Warning weight="duotone" className="w-8 h-8 text-yellow-600" />
+          <span className="text-4xl">⚠️</span>
         </div>
         <h1 className="text-2xl font-bold text-brand-navy-500 mb-2">
           Contract niet gevonden
