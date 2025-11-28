@@ -161,19 +161,24 @@ function BedrijfsgegevensFormContent() {
         setContractError(null)
         
         try {
+          console.log('📡 [BedrijfsgegevensForm] Fetching contract from API:', contractId)
+          
           // Fetch contract from API
           const response = await fetch(`/api/contracten/${contractId}`)
           
           if (!response.ok) {
-            throw new Error('Contract niet gevonden')
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+            throw new Error(errorData.error || 'Contract niet gevonden')
           }
           
           const data = await response.json()
           const rawContract = data.contract
           
-          if (!rawContract || !verbruik) {
-            throw new Error('Contract of verbruik data ontbreekt')
+          if (!rawContract) {
+            throw new Error('Contract data ontbreekt in API response')
           }
+          
+          console.log('✅ [BedrijfsgegevensForm] Contract fetched:', rawContract.id, rawContract.naam)
           
           // Transform raw contract to ContractOptie format
           const transformedContract: ContractOptie = {
@@ -205,11 +210,13 @@ function BedrijfsgegevensFormContent() {
             populair: rawContract.populair || false,
           }
           
+          console.log('✅ [BedrijfsgegevensForm] Contract transformed:', transformedContract.id, transformedContract.targetAudience)
+          
           setContract(transformedContract)
           setSelectedContract(transformedContract) // Zet ook in store voor volgende keer
           setLoadingContract(false)
         } catch (error: any) {
-          console.error('Error loading contract:', error)
+          console.error('❌ [BedrijfsgegevensForm] Error loading contract:', error)
           setContractError(error.message || 'Fout bij laden contract')
           setLoadingContract(false)
         }
@@ -217,7 +224,7 @@ function BedrijfsgegevensFormContent() {
     }
     
     loadContract()
-  }, [contractId, contract, selectedContract, resultaten, verbruik, setSelectedContract])
+  }, [contractId, contract, selectedContract, resultaten, setSelectedContract])
   
   // Update contract als selectedContract of resultaten veranderen
   useEffect(() => {
