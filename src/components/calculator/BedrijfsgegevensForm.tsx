@@ -152,11 +152,30 @@ function BedrijfsgegevensFormContent() {
   // Fetch contract from API als fallback (als niet in store)
   useEffect(() => {
     const loadContract = async () => {
-      // Als contract al beschikbaar is, skip
-      if (contract || !contractId) return
+      // Als contract al beschikbaar is EN het ID komt overeen, skip
+      if (contract && contractId && contract.id === contractId) return
+      
+      // Als er geen contractId is, skip (maar toon error later)
+      if (!contractId) return
+      
+      // Als selectedContract beschikbaar is EN het ID komt overeen, gebruik die
+      if (selectedContract && selectedContract.id === contractId) {
+        setContract(selectedContract)
+        return
+      }
+      
+      // Als resultaten beschikbaar zijn, probeer daar te vinden
+      if (resultaten && resultaten.length > 0) {
+        const found = resultaten.find(c => c.id === contractId)
+        if (found) {
+          setContract(found)
+          setSelectedContract(found) // Zet ook in store
+          return
+        }
+      }
       
       // Als selectedContract of resultaten nog niet beschikbaar zijn, fetch van API
-      if (!selectedContract && (!resultaten || resultaten.length === 0)) {
+      if (!selectedContract || selectedContract.id !== contractId) {
         setLoadingContract(true)
         setContractError(null)
         
@@ -218,6 +237,14 @@ function BedrijfsgegevensFormContent() {
     
     loadContract()
   }, [contractId, contract, selectedContract, resultaten, verbruik, setSelectedContract])
+  
+  // Debug: log contract ID en beschikbaarheid
+  useEffect(() => {
+    console.log('🔍 BedrijfsgegevensForm - Contract ID from URL:', contractId)
+    console.log('🔍 BedrijfsgegevensForm - Selected contract from store:', selectedContract?.id)
+    console.log('🔍 BedrijfsgegevensForm - Current contract state:', contract?.id)
+    console.log('🔍 BedrijfsgegevensForm - Resultaten count:', resultaten?.length || 0)
+  }, [contractId, selectedContract, contract, resultaten])
   
   // Update contract als selectedContract of resultaten veranderen
   useEffect(() => {
