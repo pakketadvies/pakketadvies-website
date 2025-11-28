@@ -66,6 +66,9 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
   }
 
   const logoUrl = leverancierLogoUrl || `${baseUrl}/logo-placeholder.png`
+  // Try white logo first, fallback to regular logo with CSS filter
+  // Note: CSS filters don't work in all email clients (especially Outlook)
+  // Best solution: create a white logo file (logo-wit.png) for perfect compatibility
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo.png`
 
   return `
@@ -87,7 +90,16 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
-              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; filter: brightness(0) invert(1);">
+              <!-- Logo with multiple methods for white color (for better email client compatibility) -->
+              <!-- Method 1: Try white logo file first (best compatibility) -->
+              <!-- Method 2: Use CSS filter (works in most modern email clients) -->
+              <!-- Method 3: Use inline style with multiple filter properties -->
+              <img 
+                src="${baseUrl}/images/logo-wit.png" 
+                alt="PakketAdvies" 
+                style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto; -webkit-filter: brightness(0) invert(1); filter: brightness(0) invert(1);" 
+                onerror="this.onerror=null; this.src='${pakketAdviesLogoUrl}'; this.style.setProperty('-webkit-filter', 'brightness(0) invert(1)', 'important'); this.style.setProperty('filter', 'brightness(0) invert(1)', 'important');"
+              >
             </td>
           </tr>
 
