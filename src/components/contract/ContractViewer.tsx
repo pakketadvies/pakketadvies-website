@@ -273,8 +273,8 @@ export default function ContractViewer({
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-        {/* Contract Header Card */}
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        {/* Contract Header Card - Full width */}
         <Card className="mb-6 shadow-xl border-0 overflow-hidden">
           <CardContent className="p-6 md:p-8 bg-white">
             <div className="text-center mb-6">
@@ -354,181 +354,187 @@ export default function ContractViewer({
           </CardContent>
         </Card>
 
-        {/* Prijsdetails Accordion */}
-        <Card className="mb-6 shadow-lg border-0">
-          <CardContent className="p-0 bg-white">
-            <button
-              onClick={() => toggleAccordion('prijsdetails')}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Calculator className="w-6 h-6 text-brand-teal-500" />
-                <span className="text-lg font-semibold text-brand-navy-500">Prijsdetails</span>
-              </div>
-              {openAccordion === 'prijsdetails' ? (
-                <CaretUp className="w-5 h-5 text-gray-400" />
-              ) : (
-                <CaretDown className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
+        {/* Desktop: Two-column layout, Mobile: Stacked */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Left Column: Prijsdetails (2/3 width on desktop) */}
+          <div className="lg:col-span-2">
+            <Card className="shadow-lg border-0 h-full">
+              <CardContent className="p-0 bg-white">
+                <button
+                  onClick={() => toggleAccordion('prijsdetails')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Calculator className="w-6 h-6 text-brand-teal-500" />
+                    <span className="text-lg font-semibold text-brand-navy-500">Prijsdetails</span>
+                  </div>
+                  {openAccordion === 'prijsdetails' ? (
+                    <CaretUp className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <CaretDown className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
 
-            {openAccordion === 'prijsdetails' && (
-              <div className="px-6 pb-6 border-t border-gray-200">
-                {loading && (
-                  <div className="py-8 text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-teal-500 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Kosten berekenen...</p>
+                {openAccordion === 'prijsdetails' && (
+                  <div className="px-6 pb-6 border-t border-gray-200">
+                    {loading && (
+                      <div className="py-8 text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-teal-500 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Kosten berekenen...</p>
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="py-4 text-center text-red-600">
+                        <p>{error}</p>
+                      </div>
+                    )}
+
+                    {breakdown && !loading && (
+                      <div className="mt-4 space-y-4">
+                        {/* Leverancier kosten */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-brand-navy-500 mb-3">Leverancierskosten</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Elektriciteit:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.leverancier.elektriciteit)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Gas:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.leverancier.gas)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Vastrecht:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.leverancier.vastrecht)}</span>
+                            </div>
+                            <div className="flex justify-between pt-2 border-t border-gray-300 font-semibold">
+                              <span>Subtotaal leverancier:</span>
+                              <span>{formatCurrency(breakdown.leverancier.subtotaal)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Energiebelasting */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-brand-navy-500 mb-3">Energiebelasting</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Elektriciteit:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.energiebelasting.elektriciteit)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Gas:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.energiebelasting.gas)}</span>
+                            </div>
+                            <div className="flex justify-between text-green-600">
+                              <span>Vermindering:</span>
+                              <span className="font-medium">-{formatCurrency(breakdown.energiebelasting.vermindering)}</span>
+                            </div>
+                            <div className="flex justify-between pt-2 border-t border-gray-300 font-semibold">
+                              <span>Subtotaal energiebelasting:</span>
+                              <span>{formatCurrency(breakdown.energiebelasting.subtotaal)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Netbeheer */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-brand-navy-500 mb-3">Netbeheerkosten</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Elektriciteit:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.netbeheer.elektriciteit)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Gas:</span>
+                              <span className="font-medium">{formatCurrency(breakdown.netbeheer.gas)}</span>
+                            </div>
+                            {breakdown.netbeheer.netbeheerder && (
+                              <p className="text-xs text-gray-500 mt-2">Netbeheerder: {breakdown.netbeheer.netbeheerder}</p>
+                            )}
+                            <div className="flex justify-between pt-2 border-t border-gray-300 font-semibold">
+                              <span>Subtotaal netbeheer:</span>
+                              <span>{formatCurrency(breakdown.netbeheer.subtotaal)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Totaal */}
+                        <div className="bg-brand-teal-50 rounded-lg p-4 border-2 border-brand-teal-200">
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg font-bold text-brand-navy-500">Totaal per jaar (excl. BTW):</span>
+                            <span className="text-2xl font-bold text-brand-teal-600">
+                              {formatCurrency(breakdown.totaal.jaarExclBtw)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-sm text-gray-600">Totaal per maand (excl. BTW):</span>
+                            <span className="text-lg font-semibold text-brand-navy-500">
+                              {formatCurrency(breakdown.totaal.maandExclBtw)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </div>
 
-                {error && (
-                  <div className="py-4 text-center text-red-600">
-                    <p>{error}</p>
+          {/* Right Column: Contract Informatie (1/3 width on desktop) */}
+          <div className="lg:col-span-1">
+            <Card className="shadow-lg border-0 h-full">
+              <CardContent className="p-0 bg-white">
+                <button
+                  onClick={() => toggleAccordion('contractinfo')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Info className="w-6 h-6 text-brand-teal-500" />
+                    <span className="text-base lg:text-lg font-semibold text-brand-navy-500">
+                      {contract.type === 'dynamisch' ? 'Dynamisch contract' : 
+                       contract.type === 'vast' ? 'Vast contract' :
+                       'Maatwerk contract'}
+                    </span>
+                  </div>
+                  {openAccordion === 'contractinfo' ? (
+                    <CaretUp className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <CaretDown className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
+
+                {openAccordion === 'contractinfo' && (
+                  <div className="px-6 pb-6 border-t border-gray-200">
+                    {contract.type === 'dynamisch' && (
+                      <DynamischContractInfo 
+                        contract={contract}
+                        currentPrices={currentPrices}
+                        priceHistory={priceHistory}
+                        loadingPrices={loadingPrices}
+                        formatCurrency={formatCurrency}
+                      />
+                    )}
+                    {contract.type === 'vast' && (
+                      <VastContractInfo 
+                        contract={contract}
+                        formatCurrency={formatCurrency}
+                      />
+                    )}
+                    {contract.type === 'maatwerk' && (
+                      <MaatwerkContractInfo 
+                        contract={contract}
+                        formatCurrency={formatCurrency}
+                      />
+                    )}
                   </div>
                 )}
-
-                {breakdown && !loading && (
-                  <div className="mt-4 space-y-4">
-                    {/* Leverancier kosten */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-brand-navy-500 mb-3">Leverancierskosten</h4>
-                      {/* Breakdown details hier - reuse logic from ContractCard */}
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Elektriciteit:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.leverancier.elektriciteit)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Gas:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.leverancier.gas)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Vastrecht:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.leverancier.vastrecht)}</span>
-                        </div>
-                        <div className="flex justify-between pt-2 border-t border-gray-300 font-semibold">
-                          <span>Subtotaal leverancier:</span>
-                          <span>{formatCurrency(breakdown.leverancier.subtotaal)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Energiebelasting */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-brand-navy-500 mb-3">Energiebelasting</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Elektriciteit:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.energiebelasting.elektriciteit)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Gas:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.energiebelasting.gas)}</span>
-                        </div>
-                        <div className="flex justify-between text-green-600">
-                          <span>Vermindering:</span>
-                          <span className="font-medium">-{formatCurrency(breakdown.energiebelasting.vermindering)}</span>
-                        </div>
-                        <div className="flex justify-between pt-2 border-t border-gray-300 font-semibold">
-                          <span>Subtotaal energiebelasting:</span>
-                          <span>{formatCurrency(breakdown.energiebelasting.subtotaal)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Netbeheer */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-brand-navy-500 mb-3">Netbeheerkosten</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Elektriciteit:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.netbeheer.elektriciteit)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Gas:</span>
-                          <span className="font-medium">{formatCurrency(breakdown.netbeheer.gas)}</span>
-                        </div>
-                        {breakdown.netbeheer.netbeheerder && (
-                          <p className="text-xs text-gray-500 mt-2">Netbeheerder: {breakdown.netbeheer.netbeheerder}</p>
-                        )}
-                        <div className="flex justify-between pt-2 border-t border-gray-300 font-semibold">
-                          <span>Subtotaal netbeheer:</span>
-                          <span>{formatCurrency(breakdown.netbeheer.subtotaal)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Totaal */}
-                    <div className="bg-brand-teal-50 rounded-lg p-4 border-2 border-brand-teal-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-brand-navy-500">Totaal per jaar (excl. BTW):</span>
-                        <span className="text-2xl font-bold text-brand-teal-600">
-                          {formatCurrency(breakdown.totaal.jaarExclBtw)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-sm text-gray-600">Totaal per maand (excl. BTW):</span>
-                        <span className="text-lg font-semibold text-brand-navy-500">
-                          {formatCurrency(breakdown.totaal.maandExclBtw)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Contract Informatie Accordion */}
-        <Card className="mb-6 shadow-lg border-0">
-          <CardContent className="p-0 bg-white">
-            <button
-              onClick={() => toggleAccordion('contractinfo')}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Info className="w-6 h-6 text-brand-teal-500" />
-                <span className="text-lg font-semibold text-brand-navy-500">
-                  {contract.type === 'dynamisch' ? 'Hoe werkt een dynamisch contract?' : 
-                   contract.type === 'vast' ? 'Informatie over uw vaste contract' :
-                   'Informatie over uw maatwerk contract'}
-                </span>
-              </div>
-              {openAccordion === 'contractinfo' ? (
-                <CaretUp className="w-5 h-5 text-gray-400" />
-              ) : (
-                <CaretDown className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
-
-            {openAccordion === 'contractinfo' && (
-              <div className="px-6 pb-6 border-t border-gray-200">
-                {contract.type === 'dynamisch' && (
-                  <DynamischContractInfo 
-                    contract={contract}
-                    currentPrices={currentPrices}
-                    priceHistory={priceHistory}
-                    loadingPrices={loadingPrices}
-                    formatCurrency={formatCurrency}
-                  />
-                )}
-                {contract.type === 'vast' && (
-                  <VastContractInfo 
-                    contract={contract}
-                    formatCurrency={formatCurrency}
-                  />
-                )}
-                {contract.type === 'maatwerk' && (
-                  <MaatwerkContractInfo 
-                    contract={contract}
-                    formatCurrency={formatCurrency}
-                  />
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Contact Card */}
         <Card className="shadow-lg border-0">
@@ -585,26 +591,24 @@ function DynamischContractInfo({
     : null
 
   return (
-    <div className="mt-4 space-y-6">
+    <div className="mt-4 space-y-4 lg:space-y-5">
       {/* Uitleg */}
-      <div className="bg-blue-50 rounded-lg p-4 md:p-6 border border-blue-200">
-        <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-          <Info className="w-5 h-5 text-blue-600" />
-          Wat is een dynamisch contract?
+      <div className="bg-blue-50 rounded-lg p-4 lg:p-5 border border-blue-200">
+        <h4 className="font-bold text-brand-navy-500 mb-2 lg:mb-3 flex items-center gap-2 text-sm lg:text-base">
+          <Info className="w-4 h-4 lg:w-5 lg:h-5 text-blue-600 flex-shrink-0" />
+          <span>Hoe werkt een dynamisch contract?</span>
         </h4>
-        <div className="space-y-2 text-sm md:text-base text-gray-700">
+        <div className="space-y-2 text-xs lg:text-sm text-gray-700">
           <p>
             Bij een <strong>dynamisch energiecontract</strong> volgt uw tarief de dagelijkse marktprijs van energie. 
-            Dit betekent dat uw tarief per uur kan variëren op basis van vraag en aanbod op de energiemarkt.
+            Uw tarief kan per uur variëren op basis van vraag en aanbod.
           </p>
           <p>
-            Uw tarief bestaat uit de <strong>spotprijs</strong> (de marktprijs) plus een <strong>opslag</strong> van de leverancier. 
-            De spotprijs wordt bepaald door de {indexNaam} index en kan fluctueren.
+            Uw tarief = <strong>spotprijs</strong> ({indexNaam}) + <strong>opslag</strong> leverancier.
           </p>
           {maxPrijsCap && (
-            <p className="text-green-700 font-semibold">
-              ✓ Uw contract heeft een maximumprijs (cap) van {formatCurrency(maxPrijsCap)} per kWh, 
-              waardoor u beschermd bent tegen extreme prijsstijgingen.
+            <p className="text-green-700 font-semibold text-xs">
+              ✓ Maximumprijs: {formatCurrency(maxPrijsCap)}/kWh
             </p>
           )}
         </div>
@@ -614,39 +618,39 @@ function DynamischContractInfo({
       {loadingPrices ? (
         <div className="text-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-teal-500 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-600">Tarieven laden...</p>
+          <p className="text-xs text-gray-600">Tarieven laden...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-            <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-              <Lightning className="w-5 h-5 text-brand-teal-500" />
-              Huidige tarieven
+        <div className="space-y-3">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+            <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+              <Lightning className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+              <span>Huidige tarieven</span>
             </h5>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-xs">
               {huidigTariefElektriciteit !== null ? (
                 <>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Elektriciteit (dag):</span>
-                    <span className="font-semibold">{formatCurrency(huidigTariefElektriciteit)}/kWh</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Elektriciteit:</span>
+                    <span className="font-semibold text-right">{formatCurrency(huidigTariefElektriciteit)}/kWh</span>
                   </div>
-                  <div className="text-xs text-gray-500 pl-4">
-                    Spotprijs: {formatCurrency(currentPrices.electricityDay || 0)}/kWh<br />
-                    Opslag: +{formatCurrency(opslagElektriciteit)}/kWh
+                  <div className="text-xs text-gray-500 pl-5 space-y-0.5">
+                    <div>Spot: {formatCurrency(currentPrices.electricityDay || 0)}/kWh</div>
+                    <div>Opslag: +{formatCurrency(opslagElektriciteit)}/kWh</div>
                   </div>
                 </>
               ) : (
-                <p className="text-gray-500 text-xs">Huidige tarieven niet beschikbaar</p>
+                <p className="text-gray-500 text-xs">Niet beschikbaar</p>
               )}
               {huidigTariefGas !== null && (
                 <>
-                  <div className="flex justify-between mt-3">
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200">
                     <span className="text-gray-600">Gas:</span>
-                    <span className="font-semibold">{formatCurrency(huidigTariefGas)}/m³</span>
+                    <span className="font-semibold text-right">{formatCurrency(huidigTariefGas)}/m³</span>
                   </div>
-                  <div className="text-xs text-gray-500 pl-4">
-                    Spotprijs: {formatCurrency(currentPrices.gas || 0)}/m³<br />
-                    Opslag: +{formatCurrency(opslagGas)}/m³
+                  <div className="text-xs text-gray-500 pl-5 space-y-0.5">
+                    <div>Spot: {formatCurrency(currentPrices.gas || 0)}/m³</div>
+                    <div>Opslag: +{formatCurrency(opslagGas)}/m³</div>
                   </div>
                 </>
               )}
@@ -655,59 +659,56 @@ function DynamischContractInfo({
 
           {/* Gemiddelde tarieven (30 dagen) */}
           {gemiddeldeElektriciteit !== null && (
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-              <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-                <ChartLine className="w-5 h-5 text-brand-teal-500" />
-                Gemiddelde (30 dagen)
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+              <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+                <ChartLine className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+                <span>Gemiddelde (30 dagen)</span>
               </h5>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Elektriciteit:</span>
                   <span className="font-semibold">{formatCurrency(gemiddeldeElektriciteit)}/kWh</span>
                 </div>
                 {gemiddeldeGas !== null && (
-                  <div className="flex justify-between mt-3">
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Gas:</span>
                     <span className="font-semibold">{formatCurrency(gemiddeldeGas)}/m³</span>
                   </div>
                 )}
-                <p className="text-xs text-gray-500 mt-2">
-                  Gebaseerd op de laatste 30 dagen
-                </p>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Historische tarieven grafiek/overzicht */}
+      {/* Historische tarieven - compact voor sidebar */}
       {priceHistory.length > 0 && (
-        <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200">
-          <h5 className="font-semibold text-brand-navy-500 mb-4 flex items-center gap-2">
-            <ChartLine className="w-5 h-5 text-brand-teal-500" />
-            Historische tarieven (laatste 30 dagen)
+        <div className="bg-white rounded-lg p-3 lg:p-4 border border-gray-200">
+          <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2 text-xs lg:text-sm">
+            <ChartLine className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+            <span>Historie (30 dagen)</span>
           </h5>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {priceHistory.slice(0, 10).map((record, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
-                <span className="text-gray-600">
+          <div className="space-y-1.5 max-h-48 lg:max-h-64 overflow-y-auto text-xs">
+            {priceHistory.slice(0, 7).map((record, idx) => (
+              <div key={idx} className="flex flex-col lg:flex-row lg:justify-between lg:items-center py-1.5 border-b border-gray-100 last:border-0">
+                <span className="text-gray-600 text-xs mb-0.5 lg:mb-0">
                   {new Date(record.datum).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit' })}
                 </span>
-                <div className="flex gap-4">
-                  <span className="text-gray-700">
+                <div className="flex flex-col lg:flex-row lg:gap-3 text-gray-700">
+                  <span className="text-xs">
                     Stroom: {formatCurrency((record.elektriciteit_gemiddeld_dag || 0) + opslagElektriciteit)}/kWh
                   </span>
                   {record.gas_gemiddeld && (
-                    <span className="text-gray-700">
+                    <span className="text-xs">
                       Gas: {formatCurrency((record.gas_gemiddeld || 0) + opslagGas)}/m³
                     </span>
                   )}
                 </div>
               </div>
             ))}
-            {priceHistory.length > 10 && (
+            {priceHistory.length > 7 && (
               <p className="text-xs text-gray-500 text-center pt-2">
-                Toont laatste 10 dagen van {priceHistory.length} beschikbare dagen
+                +{priceHistory.length - 7} meer dagen
               </p>
             )}
           </div>
@@ -732,81 +733,81 @@ function VastContractInfo({
   const groeneEnergie = details.groene_energie || false
 
   return (
-    <div className="mt-4 space-y-6">
+    <div className="mt-4 space-y-4 lg:space-y-5">
       {/* Uitleg */}
-      <div className="bg-green-50 rounded-lg p-4 md:p-6 border border-green-200">
-        <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-green-600" />
-          Wat is een vast contract?
+      <div className="bg-green-50 rounded-lg p-4 lg:p-5 border border-green-200">
+        <h4 className="font-bold text-brand-navy-500 mb-2 lg:mb-3 flex items-center gap-2 text-sm lg:text-base">
+          <ShieldCheck className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 flex-shrink-0" />
+          <span>Wat is een vast contract?</span>
         </h4>
-        <div className="space-y-2 text-sm md:text-base text-gray-700">
+        <div className="space-y-2 text-xs lg:text-sm text-gray-700">
           <p>
-            Bij een <strong>vast energiecontract</strong> betaalt u gedurende de hele looptijd hetzelfde tarief per kWh (elektriciteit) 
-            en per m³ (gas). Uw tarieven zijn dus gegarandeerd en veranderen niet, ongeacht wat er gebeurt op de energiemarkt.
+            Bij een <strong>vast energiecontract</strong> betaalt u gedurende de hele looptijd hetzelfde tarief. 
+            Uw tarieven zijn gegarandeerd en veranderen niet.
           </p>
           {prijsgarantie && (
-            <p className="text-green-700 font-semibold">
-              ✓ Dit contract heeft een prijsgarantie, wat betekent dat uw tarieven volledig vast staan.
+            <p className="text-green-700 font-semibold text-xs">
+              ✓ Volledige prijsgarantie
             </p>
           )}
         </div>
       </div>
 
-      {/* Contract Details Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-          <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-brand-teal-500" />
-            Looptijd
+      {/* Contract Details - Stacked on mobile, grid on desktop sidebar */}
+      <div className="space-y-3">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+          <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+            <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+            <span>Looptijd</span>
           </h5>
-          <p className="text-2xl font-bold text-brand-navy-500">{looptijd} {looptijd === 1 ? 'jaar' : 'jaar'}</p>
+          <p className="text-xl lg:text-2xl font-bold text-brand-navy-500">{looptijd} {looptijd === 1 ? 'jaar' : 'jaar'}</p>
           <p className="text-xs text-gray-500 mt-1">
-            Uw tarieven blijven {looptijd} {looptijd === 1 ? 'jaar' : 'jaar'} lang hetzelfde
+            Vaste tarieven voor {looptijd} {looptijd === 1 ? 'jaar' : 'jaar'}
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-          <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-brand-teal-500" />
-            Prijsgarantie
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+          <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+            <ShieldCheck className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+            <span>Prijsgarantie</span>
           </h5>
           {prijsgarantie ? (
             <>
-              <p className="text-lg font-bold text-green-600">✓ Ja</p>
+              <p className="text-base lg:text-lg font-bold text-green-600">✓ Ja</p>
               <p className="text-xs text-gray-500 mt-1">
-                Uw tarieven zijn volledig gegarandeerd
+                Volledig gegarandeerd
               </p>
             </>
           ) : (
             <>
-              <p className="text-lg font-bold text-gray-400">Nee</p>
+              <p className="text-base lg:text-lg font-bold text-gray-400">Nee</p>
               <p className="text-xs text-gray-500 mt-1">
-                Tarieven kunnen worden aangepast
+                Kan worden aangepast
               </p>
             </>
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-          <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-brand-teal-500" />
-            Opzegtermijn
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+          <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+            <FileText className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+            <span>Opzegtermijn</span>
           </h5>
-          <p className="text-2xl font-bold text-brand-navy-500">{opzegtermijn} {opzegtermijn === 1 ? 'maand' : 'maanden'}</p>
+          <p className="text-xl lg:text-2xl font-bold text-brand-navy-500">{opzegtermijn} {opzegtermijn === 1 ? 'maand' : 'maanden'}</p>
           <p className="text-xs text-gray-500 mt-1">
-            U kunt het contract opzeggen met {opzegtermijn} {opzegtermijn === 1 ? 'maand' : 'maanden'} opzegtermijn
+            Opzeggen met {opzegtermijn} {opzegtermijn === 1 ? 'maand' : 'maanden'} opzegtermijn
           </p>
         </div>
 
         {groeneEnergie && (
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-            <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-              <Leaf className="w-5 h-5 text-green-600" />
-              Groene energie
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 lg:p-4 border border-green-200">
+            <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+              <Leaf className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 flex-shrink-0" />
+              <span>Groene energie</span>
             </h5>
-            <p className="text-lg font-bold text-green-600">✓ 100% Groen</p>
+            <p className="text-base lg:text-lg font-bold text-green-600">✓ 100% Groen</p>
             <p className="text-xs text-gray-600 mt-1">
-              Uw energie komt uit duurzame bronnen
+              Uit duurzame bronnen
             </p>
           </div>
         )}
@@ -829,58 +830,57 @@ function MaatwerkContractInfo({
   const groeneEnergie = details.groene_energie || false
 
   return (
-    <div className="mt-4 space-y-6">
+    <div className="mt-4 space-y-4 lg:space-y-5">
       {/* Uitleg */}
-      <div className="bg-purple-50 rounded-lg p-4 md:p-6 border border-purple-200">
-        <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-purple-600" />
-          Wat is een maatwerk contract?
+      <div className="bg-purple-50 rounded-lg p-4 lg:p-5 border border-purple-200">
+        <h4 className="font-bold text-brand-navy-500 mb-2 lg:mb-3 flex items-center gap-2 text-sm lg:text-base">
+          <FileText className="w-4 h-4 lg:w-5 lg:h-5 text-purple-600 flex-shrink-0" />
+          <span>Wat is een maatwerk contract?</span>
         </h4>
-        <div className="space-y-2 text-sm md:text-base text-gray-700">
+        <div className="space-y-2 text-xs lg:text-sm text-gray-700">
           <p>
             Een <strong>maatwerk energiecontract</strong> is speciaal op uw situatie afgestemd. 
-            Dit contract is op maat gemaakt voor uw specifieke verbruikspatroon en behoeften.
+            Op maat gemaakt voor uw specifieke verbruikspatroon en behoeften.
           </p>
           <p>
-            Maatwerk contracten bieden vaak de beste voorwaarden voor bedrijven met specifieke energiebehoeften 
-            of bijzondere omstandigheden.
+            Ideaal voor bedrijven met specifieke energiebehoeften of bijzondere omstandigheden.
           </p>
         </div>
       </div>
 
-      {/* Contract Details Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-          <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-brand-teal-500" />
-            Looptijd
+      {/* Contract Details - Stacked */}
+      <div className="space-y-3">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+          <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+            <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+            <span>Looptijd</span>
           </h5>
-          <p className="text-2xl font-bold text-brand-navy-500">{looptijd} {looptijd === 1 ? 'jaar' : 'jaar'}</p>
+          <p className="text-xl lg:text-2xl font-bold text-brand-navy-500">{looptijd} {looptijd === 1 ? 'jaar' : 'jaar'}</p>
           <p className="text-xs text-gray-500 mt-1">
             Contract looptijd
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-          <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-brand-teal-500" />
-            Opzegtermijn
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 lg:p-4 border border-gray-200">
+          <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+            <FileText className="w-4 h-4 lg:w-5 lg:h-5 text-brand-teal-500 flex-shrink-0" />
+            <span>Opzegtermijn</span>
           </h5>
-          <p className="text-2xl font-bold text-brand-navy-500">{opzegtermijn} {opzegtermijn === 1 ? 'maand' : 'maanden'}</p>
+          <p className="text-xl lg:text-2xl font-bold text-brand-navy-500">{opzegtermijn} {opzegtermijn === 1 ? 'maand' : 'maanden'}</p>
           <p className="text-xs text-gray-500 mt-1">
             Opzegtermijn voor dit contract
           </p>
         </div>
 
         {groeneEnergie && (
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200 md:col-span-2">
-            <h5 className="font-semibold text-brand-navy-500 mb-3 flex items-center gap-2">
-              <Leaf className="w-5 h-5 text-green-600" />
-              Groene energie
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 lg:p-4 border border-green-200">
+            <h5 className="font-semibold text-brand-navy-500 mb-2 flex items-center gap-2 text-xs lg:text-sm">
+              <Leaf className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 flex-shrink-0" />
+              <span>Groene energie</span>
             </h5>
-            <p className="text-lg font-bold text-green-600">✓ 100% Groen</p>
+            <p className="text-base lg:text-lg font-bold text-green-600">✓ 100% Groen</p>
             <p className="text-xs text-gray-600 mt-1">
-              Uw energie komt uit duurzame bronnen
+              Uit duurzame bronnen
             </p>
           </div>
         )}
