@@ -120,9 +120,12 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
               <p style="color: white; font-size: 48px; font-weight: bold; margin: 0 0 5px 0;">${formatCurrency(maandbedrag)}</p>
               <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 0 0 30px 0;">per maand (${formatCurrency(jaarbedrag)} per jaar)</p>
               ${besparing && besparing > 0 ? `<p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 20px 0;">U bespaart ${formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief</p>` : ''}
-              <a href="${contractViewerUrl}" style="background: white; color: #14B8A6; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
+              <a href="${contractViewerUrl}" target="_blank" rel="noopener noreferrer" style="background: white; color: #14B8A6; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px; cursor: pointer;">
                 📊 Bekijk volledige berekening
               </a>
+              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 15px 0 0 0; word-break: break-all;">
+                Of kopieer deze link: <a href="${contractViewerUrl}" target="_blank" rel="noopener noreferrer" style="color: rgba(255,255,255,0.9); text-decoration: underline;">${contractViewerUrl}</a>
+              </p>
             </td>
           </tr>
 
@@ -233,7 +236,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
           <!-- CTA Buttons -->
           <tr>
             <td style="text-align: center; padding: 30px 20px; background: white;">
-              <a href="${contractViewerUrl}" style="background: #14B8A6; color: white; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; font-size: 16px;">
+              <a href="${contractViewerUrl}" target="_blank" rel="noopener noreferrer" style="background: #14B8A6; color: white; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; font-size: 16px; cursor: pointer;">
                 📄 Bekijk contract online
               </a>
               <br style="display: none;">
