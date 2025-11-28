@@ -218,13 +218,25 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     expiresAt.setDate(expiresAt.getDate() + 7)
     
     console.log('📧 [sendBevestigingEmail] Storing access token...')
-    await supabase
+    const { error: tokenInsertError } = await supabase
       .from('contract_viewer_access')
       .insert({
         aanvraag_id: aanvraagId,
         access_token: accessToken,
         expires_at: expiresAt.toISOString(),
       })
+    
+    if (tokenInsertError) {
+      console.error('❌ [sendBevestigingEmail] Error storing access token:', {
+        code: tokenInsertError.code,
+        message: tokenInsertError.message,
+        details: tokenInsertError.details,
+        hint: tokenInsertError.hint,
+      })
+      // Continue anyway - token is not critical for email sending
+    } else {
+      console.log('✅ [sendBevestigingEmail] Access token stored successfully')
+    }
 
     const contractViewerUrl = `${baseUrl}/contract/${aanvraagnummer}?token=${accessToken}`
 
