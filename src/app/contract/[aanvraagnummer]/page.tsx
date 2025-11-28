@@ -42,44 +42,61 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   // First, verify access token if provided
   if (token) {
     console.log('🔐 [ContractViewer] Verifying access token...')
-    const { data: accessData, error: tokenError } = await supabase
-      .from('contract_viewer_access')
-      .select('aanvraag_id, accessed_at, expires_at')
-      .eq('access_token', token)
-      .single()
+    console.log('🔐 [ContractViewer] Token (first 10 chars):', token.substring(0, 10) + '...')
+    
+    try {
+      const { data: accessData, error: tokenError } = await supabase
+        .from('contract_viewer_access')
+        .select('aanvraag_id, accessed_at, expires_at')
+        .eq('access_token', token)
+        .single()
 
-    if (tokenError) {
-      console.error('❌ [ContractViewer] Token error:', {
-        code: tokenError.code,
-        message: tokenError.message,
-        details: tokenError.details,
-        hint: tokenError.hint,
+      if (tokenError) {
+        console.error('❌ [ContractViewer] Token error:', {
+          code: tokenError.code,
+          message: tokenError.message,
+          details: tokenError.details,
+          hint: tokenError.hint,
+          using_service_role: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        })
+        redirect('/contract/niet-gevonden')
+      }
+
+      if (!accessData) {
+        console.error('❌ [ContractViewer] Access token not found in database')
+        console.error('❌ [ContractViewer] Token searched:', token.substring(0, 10) + '...')
+        redirect('/contract/niet-gevonden')
+      }
+
+      console.log('✅ [ContractViewer] Token found:', {
+        aanvraag_id: accessData.aanvraag_id,
+        expires_at: accessData.expires_at,
+        is_expired: accessData.expires_at ? new Date(accessData.expires_at) < new Date() : false,
+      })
+
+      // Check if token is expired
+      if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
+        console.error('❌ [ContractViewer] Access token expired:', accessData.expires_at)
+        redirect('/contract/niet-gevonden')
+      }
+
+      // Update accessed_at (non-blocking)
+      try {
+        await supabase
+          .from('contract_viewer_access')
+          .update({ accessed_at: new Date().toISOString() })
+          .eq('access_token', token)
+        console.log('✅ [ContractViewer] Updated accessed_at timestamp')
+      } catch (updateError: any) {
+        console.warn('⚠️ [ContractViewer] Failed to update accessed_at (non-critical):', updateError.message)
+      }
+    } catch (tokenVerifyError: any) {
+      console.error('❌ [ContractViewer] Exception during token verification:', {
+        message: tokenVerifyError.message,
+        stack: tokenVerifyError.stack,
       })
       redirect('/contract/niet-gevonden')
     }
-
-    if (!accessData) {
-      console.error('❌ [ContractViewer] Access token not found in database')
-      redirect('/contract/niet-gevonden')
-    }
-
-    console.log('✅ [ContractViewer] Token found:', {
-      aanvraag_id: accessData.aanvraag_id,
-      expires_at: accessData.expires_at,
-      is_expired: accessData.expires_at ? new Date(accessData.expires_at) < new Date() : false,
-    })
-
-    // Check if token is expired
-    if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
-      console.error('❌ [ContractViewer] Access token expired:', accessData.expires_at)
-      redirect('/contract/niet-gevonden')
-    }
-
-    // Update accessed_at
-    await supabase
-      .from('contract_viewer_access')
-      .update({ accessed_at: new Date().toISOString() })
-      .eq('access_token', token)
   }
 
   // Fetch aanvraag by aanvraagnummer
