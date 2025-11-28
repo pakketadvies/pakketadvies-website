@@ -196,128 +196,107 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
       gas: verbruikData?.aansluitwaardeGas || 'Onbekend',
     }
 
-    // Calculate costs - try to get from verbruik_data first, otherwise calculate from contract details
+    // Calculate costs - use API for accurate calculation
     let maandbedrag = verbruikData?.maandbedrag || 0
     let jaarbedrag = verbruikData?.jaarbedrag || 0
     
-    // If maandbedrag/jaarbedrag not in verbruik_data, try to calculate from contract details
-    if ((!maandbedrag || maandbedrag === 0) && contract) {
-      console.log('📧 [sendBevestigingEmail] Calculating costs from contract details...')
+    // If maandbedrag/jaarbedrag not in verbruik_data, calculate via API
+    if ((!maandbedrag || maandbedrag === 0) && contract && adres.postcode) {
+      console.log('📧 [sendBevestigingEmail] Calculating costs via API...')
       
-      // Fetch contract details if not already available
-      let contractDetails: any = null
-      if (contract.type === 'vast') {
-        const { data: details } = await supabase
-          .from('contract_details_vast')
-          .select('*')
-          .eq('contract_id', contract.id)
-          .single()
-        contractDetails = details
-      } else if (contract.type === 'dynamisch') {
-        const { data: details } = await supabase
-          .from('contract_details_dynamisch')
-          .select('*')
-          .eq('contract_id', contract.id)
-          .single()
-        contractDetails = details
-      } else if (contract.type === 'maatwerk') {
-        const { data: details } = await supabase
-          .from('contract_details_maatwerk')
-          .select('*')
-          .eq('contract_id', contract.id)
-          .single()
-        contractDetails = details
-      }
-      
-      if (contractDetails) {
-        // Simple calculation: leverancier costs + estimated taxes/netbeheer
-        const terugleveringJaar = verbruikData?.terugleveringJaar || 0
-        let nettoElektriciteitNormaal = elektriciteitNormaal
-        let nettoElektriciteitDal = elektriciteitDal
-        
-        // Saldering
-        if (terugleveringJaar > 0) {
-          if (heeftEnkeleMeter) {
-            const totaalElektriciteit = elektriciteitNormaal + elektriciteitDal
-            const saldering = Math.min(totaalElektriciteit, terugleveringJaar)
-            nettoElektriciteitNormaal = Math.max(0, totaalElektriciteit - saldering)
-            nettoElektriciteitDal = 0
-          } else {
-            const totaalElektriciteit = elektriciteitNormaal + elektriciteitDal
-            const saldering = Math.min(totaalElektriciteit, terugleveringJaar)
-            const salderingRatio = totaalElektriciteit > 0 ? saldering / totaalElektriciteit : 0
-            nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal * (1 - salderingRatio))
-            nettoElektriciteitDal = Math.max(0, elektriciteitDal * (1 - salderingRatio))
-          }
-        }
-        
-        // Calculate leverancier costs
-        let leverancierKosten = 0
-        if (contract.type === 'vast' || contract.type === 'maatwerk') {
-          if (heeftEnkeleMeter && contractDetails.tarief_elektriciteit_enkel) {
-            leverancierKosten = (nettoElektriciteitNormaal * contractDetails.tarief_elektriciteit_enkel) +
-                              (gasJaar * (contractDetails.tarief_gas || 0))
-          } else {
-            leverancierKosten = (nettoElektriciteitNormaal * (contractDetails.tarief_elektriciteit_normaal || 0)) +
-                              (nettoElektriciteitDal * (contractDetails.tarief_elektriciteit_dal || 0)) +
-                              (gasJaar * (contractDetails.tarief_gas || 0))
-          }
-          
-          // Add teruglevering costs if applicable
-          if (terugleveringJaar > 0 && contractDetails.tarief_teruglevering_kwh) {
-            const overschot = Math.max(0, terugleveringJaar - (elektriciteitNormaal + elektriciteitDal))
-            leverancierKosten += overschot * contractDetails.tarief_teruglevering_kwh
-          }
-          
-          // Add vastrecht
-          const vastrechtJaar = ((contractDetails.vastrecht_stroom_maand || contractDetails.vaste_kosten_maand || 4) * 12) +
-                                ((contractDetails.vastrecht_gas_maand || 0) * 12)
-          leverancierKosten += vastrechtJaar
+      try {
+        // Fetch contract details
+        let contractDetails: any = null
+        if (contract.type === 'vast') {
+          const { data: details } = await supabase
+            .from('contract_details_vast')
+            .select('*')
+            .eq('contract_id', contract.id)
+            .single()
+          contractDetails = details
         } else if (contract.type === 'dynamisch') {
-          // For dynamic contracts, use estimated market prices + opslag
-          const marktPrijsElektriciteit = 0.20
-          const marktPrijsGas = 0.80
-          leverancierKosten = (nettoElektriciteitNormaal * (marktPrijsElektriciteit + (contractDetails.opslag_elektriciteit_normaal || contractDetails.opslag_elektriciteit || 0))) +
-                            (nettoElektriciteitDal * (marktPrijsElektriciteit + (contractDetails.opslag_elektriciteit_dal || contractDetails.opslag_elektriciteit || 0))) +
-                            (gasJaar * (marktPrijsGas + (contractDetails.opslag_gas || 0)))
+          const { data: details } = await supabase
+            .from('contract_details_dynamisch')
+            .select('*')
+            .eq('contract_id', contract.id)
+            .single()
+          contractDetails = details
+        } else if (contract.type === 'maatwerk') {
+          const { data: details } = await supabase
+            .from('contract_details_maatwerk')
+            .select('*')
+            .eq('contract_id', contract.id)
+            .single()
+          contractDetails = details
+        }
+        
+        if (contractDetails) {
+          // Call the bereken-contract API for accurate calculation
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://pakketadvies.vercel.app')
           
-          const vastrechtJaar = ((contractDetails.vastrecht_stroom_maand || contractDetails.vaste_kosten_maand || 4) * 12) +
-                                ((contractDetails.vastrecht_gas_maand || 0) * 12)
-          leverancierKosten += vastrechtJaar
+          const apiUrl = `${baseUrl}/api/energie/bereken-contract`
+          
+          const berekenResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              // Verbruik
+              elektriciteitNormaal: elektriciteitNormaal,
+              elektriciteitDal: elektriciteitDal,
+              gas: gasJaar,
+              terugleveringJaar: verbruikData?.terugleveringJaar || 0,
+              
+              // Aansluitwaarden
+              aansluitwaardeElektriciteit: aansluitwaarden.elektriciteit,
+              aansluitwaardeGas: aansluitwaarden.gas,
+              
+              // Postcode
+              postcode: adres.postcode.replace(/\s/g, ''),
+              
+              // Contract details
+              contractType: contract.type,
+              tariefElektriciteitNormaal: contractDetails.tarief_elektriciteit_normaal,
+              tariefElektriciteitDal: contractDetails.tarief_elektriciteit_dal,
+              tariefElektriciteitEnkel: contractDetails.tarief_elektriciteit_enkel,
+              tariefGas: contractDetails.tarief_gas,
+              tariefTerugleveringKwh: contractDetails.tarief_teruglevering_kwh || 0,
+              // Dynamische contract opslagen
+              opslagElektriciteit: contractDetails.opslag_elektriciteit_normaal || contractDetails.opslag_elektriciteit || 0,
+              opslagGas: contractDetails.opslag_gas || 0,
+              opslagTeruglevering: contractDetails.opslag_teruglevering || 0,
+              vastrechtStroomMaand: contractDetails.vastrecht_stroom_maand || contractDetails.vaste_kosten_maand || 4,
+              vastrechtGasMaand: contractDetails.vastrecht_gas_maand || 0,
+              heeftDubbeleMeter: !heeftEnkeleMeter,
+            }),
+          })
+          
+          if (berekenResponse.ok) {
+            const berekenData = await berekenResponse.json()
+            if (berekenData.success && berekenData.breakdown) {
+              jaarbedrag = Math.round(berekenData.breakdown.totaal.jaarExclBtw)
+              maandbedrag = Math.round(berekenData.breakdown.totaal.maandExclBtw)
+              console.log('✅ [sendBevestigingEmail] Costs calculated via API:', { maandbedrag, jaarbedrag })
+            } else {
+              console.warn('⚠️ [sendBevestigingEmail] API calculation failed:', berekenData.error)
+            }
+          } else {
+            console.warn('⚠️ [sendBevestigingEmail] API call failed:', berekenResponse.status)
+          }
         }
-        
-        // Add estimated taxes and netbeheer (simplified)
-        const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
-        const ebElektriciteit = totaalElektriciteit * 0.10154
-        const ebGas = gasJaar * 0.57816
-        const vermindering = 524.95
-        
-        // Netbeheerkosten (simplified - using default values)
-        let netbeheerElektriciteit = 430.00
-        let netbeheerGas = gasJaar > 0 ? 245.00 : 0
-        
-        // Check for grootverbruik
-        const { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } = await import('@/lib/verbruik-type')
-        if (aansluitwaarden.elektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaarden.elektriciteit)) {
-          netbeheerElektriciteit = 0
-        }
-        if (aansluitwaarden.gas && isGrootverbruikGasAansluitwaarde(aansluitwaarden.gas)) {
-          netbeheerGas = 0
-        }
-        
-        const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
-        const extraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
-        
-        jaarbedrag = Math.round(leverancierKosten + extraKosten)
-        maandbedrag = Math.round(jaarbedrag / 12)
-        
-        console.log('📧 [sendBevestigingEmail] Calculated costs:', { maandbedrag, jaarbedrag })
+      } catch (apiError: any) {
+        console.error('❌ [sendBevestigingEmail] Error calling bereken-contract API:', apiError.message)
+        // Continue with fallback values
       }
     }
     
     // Fallback if still 0
     if (!maandbedrag || maandbedrag === 0) {
-      jaarbedrag = maandbedrag * 12
+      if (jaarbedrag > 0) {
+        maandbedrag = Math.round(jaarbedrag / 12)
+      } else {
+        jaarbedrag = maandbedrag * 12
+      }
     } else if (!jaarbedrag || jaarbedrag === 0) {
       jaarbedrag = maandbedrag * 12
     }

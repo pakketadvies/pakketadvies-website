@@ -190,9 +190,9 @@ export default function ContractViewer({
   const verbruikElektriciteitTotaal = elektriciteitNormaal + elektriciteitDal
   const verbruikGas = verbruikData?.gasJaar || verbruikData?.gas || 0
 
-  // Get costs
-  const maandbedrag = verbruikData?.maandbedrag || 0
-  const jaarbedrag = verbruikData?.jaarbedrag || maandbedrag * 12
+  // Get costs - use breakdown if available (from prijsdetails calculation), otherwise from verbruik_data
+  const maandbedrag = breakdown?.totaal?.maandExclBtw || verbruikData?.maandbedrag || 0
+  const jaarbedrag = breakdown?.totaal?.jaarExclBtw || verbruikData?.jaarbedrag || (maandbedrag > 0 ? maandbedrag * 12 : 0)
   const besparing = verbruikData?.besparing
 
   // Status badge
