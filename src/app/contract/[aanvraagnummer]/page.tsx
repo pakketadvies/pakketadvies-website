@@ -77,10 +77,33 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     .eq('aanvraagnummer', aanvraagnummer)
     .single()
 
-  if (aanvraagError || !aanvraag) {
-    console.error('Error fetching aanvraag:', aanvraagError)
+  if (aanvraagError) {
+    console.error('❌ [ContractViewer] Error fetching aanvraag:', {
+      error: aanvraagError,
+      code: aanvraagError.code,
+      message: aanvraagError.message,
+      details: aanvraagError.details,
+      hint: aanvraagError.hint,
+      aanvraagnummer,
+      token: token ? 'present' : 'missing',
+    })
     redirect('/contract/niet-gevonden')
   }
+
+  if (!aanvraag) {
+    console.error('❌ [ContractViewer] Aanvraag not found:', {
+      aanvraagnummer,
+      token: token ? 'present' : 'missing',
+    })
+    redirect('/contract/niet-gevonden')
+  }
+  
+  console.log('✅ [ContractViewer] Aanvraag found:', {
+    id: aanvraag.id,
+    aanvraagnummer: aanvraag.aanvraagnummer,
+    contract_id: aanvraag.contract_id,
+    has_contract: !!aanvraag.contract,
+  })
 
   // Extract data
   const verbruikData = aanvraag.verbruik_data
