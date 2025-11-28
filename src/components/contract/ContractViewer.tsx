@@ -69,6 +69,36 @@ export default function ContractViewer({
   const [loadingPrices, setLoadingPrices] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
 
+  // Load current prices and history for dynamic contracts
+  const loadPriceData = async () => {
+    if (contract.type !== 'dynamisch') return
+    
+    setLoadingPrices(true)
+    try {
+      // Fetch current prices
+      const currentResponse = await fetch('/api/dynamic-pricing/current')
+      if (currentResponse.ok) {
+        const currentData = await currentResponse.json()
+        if (currentData.success) {
+          setCurrentPrices(currentData.prices)
+        }
+      }
+      
+      // Fetch price history
+      const historyResponse = await fetch('/api/dynamic-prices/history?days=30')
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json()
+        if (historyData.success) {
+          setPriceHistory(historyData.history || [])
+        }
+      }
+    } catch (err) {
+      console.error('Error loading price data:', err)
+    } finally {
+      setLoadingPrices(false)
+    }
+  }
+
   // Detect desktop vs mobile
   useEffect(() => {
     const checkDesktop = () => {
@@ -79,10 +109,13 @@ export default function ContractViewer({
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // On desktop, always keep both accordions open
+  // On desktop, always keep both accordions open and load price data
   useEffect(() => {
     if (isDesktop) {
-      setOpenAccordion('prijsdetails')
+      // Set prijsdetails as open (contractinfo will also be shown via isAccordionOpen)
+      if (openAccordion !== 'prijsdetails' && openAccordion !== 'contractinfo') {
+        setOpenAccordion('prijsdetails')
+      }
       // Load price data for dynamic contracts when desktop
       if (contract.type === 'dynamisch' && priceHistory.length === 0 && !loadingPrices) {
         loadPriceData()
