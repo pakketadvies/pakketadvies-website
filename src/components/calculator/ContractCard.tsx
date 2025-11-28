@@ -820,12 +820,10 @@ export default function ContractCard({
           <Button 
             className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
             onClick={() => {
-              // Sla gekozen contract op in store (sync)
+              // Sla gekozen contract op in store
               setSelectedContract(contract)
-              // Navigeer naar stap 2 met contract ID in URL
-              // Gebruik encodeURIComponent om speciale karakters te escapen
-              const contractId = encodeURIComponent(contract.id)
-              router.push(`/calculator?stap=2&contract=${contractId}`)
+              // Navigeer naar stap 2
+              router.push(`/calculator?stap=2&contract=${contract.id}`)
             }}
           >
               Aanvragen

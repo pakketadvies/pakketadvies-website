@@ -193,21 +193,21 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     const besparing = verbruikData?.besparing
 
     // Generate contract viewer URL
-    // IMPORTANT: Always use pakketadvies.vercel.app for production emails
+    // IMPORTANT: Always use production URL for emails (pakketadvies.nl)
     // VERCEL_URL is the preview deployment URL (e.g., pakketadvies-website-xxx.vercel.app)
-    // We want the production URL (pakketadvies.vercel.app) for customer emails
+    // We want the production URL (pakketadvies.nl) for customer emails
     let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     
     // If NEXT_PUBLIC_BASE_URL is not set, always use production URL
     // This ensures customer emails always have working links
     if (!baseUrl) {
-      baseUrl = 'https://pakketadvies.vercel.app'
+      baseUrl = 'https://pakketadvies.nl'
     }
     
     // Safety check: if baseUrl contains a preview deployment pattern, use production URL
     if (baseUrl.includes('-') && baseUrl.includes('.vercel.app') && !baseUrl.includes('pakketadvies.vercel.app')) {
       console.warn('⚠️ [sendBevestigingEmail] Detected preview deployment URL, using production URL instead')
-      baseUrl = 'https://pakketadvies.vercel.app'
+      baseUrl = 'https://pakketadvies.nl'
     }
     
     console.log('📧 [sendBevestigingEmail] Base URL for contract viewer:', baseUrl)
@@ -222,57 +222,15 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     expiresAt.setDate(expiresAt.getDate() + 7)
     
     console.log('📧 [sendBevestigingEmail] Storing access token...')
-    const { error: tokenInsertError } = await supabase
+    await supabase
       .from('contract_viewer_access')
       .insert({
         aanvraag_id: aanvraagId,
         access_token: accessToken,
         expires_at: expiresAt.toISOString(),
       })
-    
-    if (tokenInsertError) {
-      console.error('❌ [sendBevestigingEmail] Error storing access token:', {
-        code: tokenInsertError.code,
-        message: tokenInsertError.message,
-        details: tokenInsertError.details,
-        hint: tokenInsertError.hint,
-      })
-      // Continue anyway - token is not critical for email sending
-    } else {
-      console.log('✅ [sendBevestigingEmail] Access token stored successfully')
-    }
 
-    // Ensure baseUrl is always a valid URL
-    if (!baseUrl || !baseUrl.startsWith('http')) {
-      console.warn('⚠️ [sendBevestigingEmail] Invalid baseUrl, using production URL')
-      baseUrl = 'https://pakketadvies.vercel.app'
-    }
-    
-    // Ensure accessToken is valid
-    if (!accessToken || accessToken.length === 0) {
-      console.error('❌ [sendBevestigingEmail] Access token is empty, generating new one')
-      // This should never happen, but just in case
-      throw new Error('Access token is empty')
-    }
-    
-    // Ensure aanvraagnummer is valid
-    if (!aanvraagnummer || aanvraagnummer.length === 0) {
-      console.error('❌ [sendBevestigingEmail] Aanvraagnummer is empty')
-      throw new Error('Aanvraagnummer is empty')
-    }
-    
-    // Generate contract viewer URL - ensure it's always a valid absolute URL
-    const contractViewerUrl = `${baseUrl}/contract/${encodeURIComponent(aanvraagnummer)}?token=${encodeURIComponent(accessToken)}`
-    
-    console.log('📧 [sendBevestigingEmail] Generated contractViewerUrl:', contractViewerUrl)
-    console.log('📧 [sendBevestigingEmail] URL validation:', {
-      hasBaseUrl: !!baseUrl,
-      baseUrlValid: baseUrl.startsWith('http'),
-      hasAccessToken: !!accessToken,
-      accessTokenLength: accessToken.length,
-      hasAanvraagnummer: !!aanvraagnummer,
-      aanvraagnummerLength: aanvraagnummer.length,
-    })
+    const contractViewerUrl = `${baseUrl}/contract/${aanvraagnummer}?token=${accessToken}`
 
     // Prepare email data
     const emailData: EmailBevestigingData = {
@@ -291,37 +249,13 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
       contractViewerUrl,
       baseUrl,
     }
-    
-    // Validate email data before generating HTML
-    if (!emailData.contractViewerUrl || emailData.contractViewerUrl.length === 0) {
-      console.error('❌ [sendBevestigingEmail] contractViewerUrl is empty in emailData!')
-      throw new Error('Contract viewer URL is empty')
-    }
-    
-    if (!emailData.contractViewerUrl.startsWith('http')) {
-      console.error('❌ [sendBevestigingEmail] contractViewerUrl is not a valid absolute URL:', emailData.contractViewerUrl)
-      throw new Error('Contract viewer URL is not a valid absolute URL')
-    }
 
     // Generate email HTML
     console.log('📧 [sendBevestigingEmail] Generating email HTML...')
-    console.log('📧 [sendBevestigingEmail] Email data contractViewerUrl:', emailData.contractViewerUrl)
     let emailHtml: string
     try {
       emailHtml = generateBevestigingEmail(emailData)
       console.log('✅ [sendBevestigingEmail] Email HTML generated, length:', emailHtml.length)
-      
-      // Verify that the URLs are in the HTML
-      const urlCount = (emailHtml.match(new RegExp(contractViewerUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length
-      console.log('📧 [sendBevestigingEmail] Contract viewer URL found in HTML:', urlCount, 'times')
-      
-      if (urlCount === 0) {
-        console.error('❌ [sendBevestigingEmail] WARNING: contractViewerUrl not found in generated HTML!')
-        console.error('❌ [sendBevestigingEmail] Expected URL:', contractViewerUrl)
-        // Extract href attributes from HTML to debug
-        const hrefMatches = emailHtml.match(/href="([^"]+)"/g) || []
-        console.error('❌ [sendBevestigingEmail] All href attributes in HTML:', hrefMatches)
-      }
     } catch (htmlError: any) {
       console.error('❌ [sendBevestigingEmail] Error generating email HTML:', {
         message: htmlError.message,

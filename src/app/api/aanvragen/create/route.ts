@@ -178,15 +178,6 @@ export async function POST(request: Request) {
     
     try {
       logToClient('📧 [create] Starting email send process...')
-      
-      // Check if RESEND_API_KEY is set
-      if (!process.env.RESEND_API_KEY) {
-        logToClient('❌ [create] RESEND_API_KEY is not set in environment variables')
-        emailError = { message: 'Email service niet geconfigureerd: RESEND_API_KEY ontbreekt' }
-        throw new Error('Email service niet geconfigureerd')
-      }
-      
-      logToClient('📧 [create] RESEND_API_KEY is present, importing email function...')
       const { sendBevestigingEmail } = await import('@/lib/send-email-internal')
       logToClient('📧 [create] Email function imported, calling sendBevestigingEmail...')
       
@@ -220,15 +211,9 @@ export async function POST(request: Request) {
       }
       
       try {
-        logToClient('📧 [create] Calling sendBevestigingEmail with aanvraagId: ' + data.id + ', aanvraagnummer: ' + aanvraagnummer)
         const result = await sendBevestigingEmail(data.id, aanvraagnummer)
         emailSuccess = true
         logToClient('✅ [create] Email sent successfully for aanvraag: ' + data.id + ' Result: ' + JSON.stringify(result))
-      } catch (emailSendError: any) {
-        emailError = emailSendError
-        logToClient('❌ [create] Exception during sendBevestigingEmail: ' + emailSendError?.message)
-        logToClient('❌ [create] Error stack: ' + (emailSendError?.stack || 'No stack trace'))
-        throw emailSendError // Re-throw to be caught by outer catch
       } finally {
         // Restore original console functions
         console.log = originalConsoleLog
@@ -236,11 +221,8 @@ export async function POST(request: Request) {
         console.warn = originalConsoleWarn
       }
     } catch (error: any) {
-      // Only set emailError if not already set
-      if (!emailError) {
-        emailError = error
-      }
-      logToClient('❌ [create] Error sending confirmation email: ' + (error?.message || 'Unknown error'))
+      emailError = error
+      logToClient('❌ [create] Error sending confirmation email: ' + error?.message)
       logToClient('❌ [create] Error details: ' + JSON.stringify({
         message: error?.message,
         stack: error?.stack,
