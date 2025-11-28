@@ -175,10 +175,19 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
       plaats: leveringsadres.plaats || '',
     }
 
-    // Get verbruik
+    // Get verbruik - correct extract normaal/dal split
+    const elektriciteitNormaal = verbruikData?.elektriciteitNormaal || 0
+    const elektriciteitDal = verbruikData?.elektriciteitDal || 0
+    const elektriciteitTotaal = elektriciteitNormaal + elektriciteitDal
+    const heeftEnkeleMeter = verbruikData?.heeftEnkeleMeter || false
+    const gasJaar = verbruikData?.gasJaar || verbruikData?.gas || 0
+    
     const verbruik = {
-      elektriciteit: (verbruikData?.elektriciteitNormaal || 0) + (verbruikData?.elektriciteitDal || 0),
-      gas: verbruikData?.gasJaar || verbruikData?.gas || 0,
+      elektriciteitNormaal: heeftEnkeleMeter ? undefined : elektriciteitNormaal,
+      elektriciteitDal: heeftEnkeleMeter ? undefined : (verbruikData?.elektriciteitDal || null),
+      elektriciteitTotaal,
+      heeftEnkeleMeter,
+      gas: gasJaar,
     }
 
     // Get aansluitwaarden

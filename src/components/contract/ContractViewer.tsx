@@ -36,6 +36,7 @@ interface ContractViewerProps {
     id: string
     naam: string
     type: 'vast' | 'dynamisch' | 'maatwerk'
+    details?: any
   }
   leverancier: {
     id: string
@@ -82,6 +83,45 @@ export default function ContractViewer({
     setError(null)
 
     try {
+      // Get postcode from leveringsadres
+      const postcode = leveringsadres?.postcode || verbruikData?.postcode || ''
+      
+      // Extract contract details based on type
+      const details = contract.details
+      const heeftEnkeleMeter = verbruikData?.heeftEnkeleMeter || false
+      
+      // Prepare contract details for API
+      let contractDetails: any = {}
+      if (contract.type === 'vast' && details) {
+        contractDetails = {
+          tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal,
+          tariefElektriciteitDal: details.tarief_elektriciteit_dal,
+          tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel,
+          tariefGas: details.tarief_gas,
+          tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0,
+          vastrechtStroomMaand: details.vastrecht_stroom_maand || 0,
+          vastrechtGasMaand: details.vastrecht_gas_maand || 0,
+        }
+      } else if (contract.type === 'dynamisch' && details) {
+        contractDetails = {
+          opslagElektriciteit: details.opslag_elektriciteit_normaal || details.opslag_elektriciteit,
+          opslagGas: details.opslag_gas,
+          opslagTeruglevering: details.opslag_teruglevering || 0,
+          vastrechtStroomMaand: details.vastrecht_stroom_maand || 0,
+          vastrechtGasMaand: details.vastrecht_gas_maand || 0,
+        }
+      } else if (contract.type === 'maatwerk' && details) {
+        contractDetails = {
+          tariefElektriciteitNormaal: details.tarief_elektriciteit_normaal,
+          tariefElektriciteitDal: details.tarief_elektriciteit_dal,
+          tariefElektriciteitEnkel: details.tarief_elektriciteit_enkel,
+          tariefGas: details.tarief_gas,
+          tariefTerugleveringKwh: details.tarief_teruglevering_kwh || 0,
+          vastrechtStroomMaand: details.vastrecht_stroom_maand || 0,
+          vastrechtGasMaand: details.vastrecht_gas_maand || 0,
+        }
+      }
+      
       const response = await fetch('/api/energie/bereken-contract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -89,7 +129,7 @@ export default function ContractViewer({
           // Verbruik
           elektriciteitNormaal: verbruikData?.elektriciteitNormaal || 0,
           elektriciteitDal: verbruikData?.elektriciteitDal || 0,
-          gas: verbruikData?.gas || 0,
+          gas: verbruikData?.gasJaar || verbruikData?.gas || 0,
           terugleveringJaar: verbruikData?.terugleveringJaar || 0,
           
           // Aansluitwaarden
@@ -97,21 +137,12 @@ export default function ContractViewer({
           aansluitwaardeGas: verbruikData?.aansluitwaardeGas,
           
           // Postcode
-          postcode: verbruikData?.postcode,
+          postcode: postcode,
           
           // Contract details
           contractType: contract.type,
-          tariefElektriciteitNormaal: verbruikData?.tariefElektriciteitNormaal,
-          tariefElektriciteitDal: verbruikData?.tariefElektriciteitDal,
-          tariefElektriciteitEnkel: verbruikData?.tariefElektriciteitEnkel,
-          tariefGas: verbruikData?.tariefGas,
-          tariefTerugleveringKwh: verbruikData?.tariefTerugleveringKwh,
-          opslagElektriciteit: verbruikData?.opslagElektriciteit,
-          opslagGas: verbruikData?.opslagGas,
-          opslagTeruglevering: verbruikData?.opslagTeruglevering,
-          vastrechtStroomMaand: verbruikData?.vastrechtStroomMaand,
-          vastrechtGasMaand: verbruikData?.vastrechtGasMaand,
-          heeftDubbeleMeter: verbruikData?.meterType !== 'enkel',
+          heeftDubbeleMeter: !heeftEnkeleMeter,
+          ...contractDetails,
         }),
       })
 
@@ -142,18 +173,22 @@ export default function ContractViewer({
                     gegevensData?.achternaam ||
                     'Klant'
 
-  // Get address
+  // Get address from leveringsadressen array
+  const leveringsadres = verbruikData?.leveringsadressen?.[0] || {}
   const adres = {
-    straat: verbruikData?.straat || '',
-    huisnummer: verbruikData?.huisnummer || '',
-    toevoeging: verbruikData?.toevoeging || '',
-    postcode: verbruikData?.postcode || '',
-    plaats: verbruikData?.plaats || '',
+    straat: leveringsadres.straat || verbruikData?.straat || '',
+    huisnummer: leveringsadres.huisnummer || verbruikData?.huisnummer || '',
+    toevoeging: leveringsadres.toevoeging || verbruikData?.toevoeging || '',
+    postcode: leveringsadres.postcode || verbruikData?.postcode || '',
+    plaats: leveringsadres.plaats || verbruikData?.plaats || '',
   }
 
-  // Get verbruik
-  const verbruikElektriciteit = (verbruikData?.elektriciteitNormaal || 0) + (verbruikData?.elektriciteitDal || 0)
-  const verbruikGas = verbruikData?.gas || 0
+  // Get verbruik - correct extract normaal/dal split
+  const elektriciteitNormaal = verbruikData?.elektriciteitNormaal || 0
+  const elektriciteitDal = verbruikData?.elektriciteitDal || 0
+  const heeftEnkeleMeter = verbruikData?.heeftEnkeleMeter || false
+  const verbruikElektriciteitTotaal = elektriciteitNormaal + elektriciteitDal
+  const verbruikGas = verbruikData?.gasJaar || verbruikData?.gas || 0
 
   // Get costs
   const maandbedrag = verbruikData?.maandbedrag || 0
@@ -177,21 +212,21 @@ export default function ContractViewer({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-brand-teal-50 via-white to-brand-navy-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-brand-teal-600 transition-colors">
+          <Link href="/" className="inline-flex items-center gap-2 text-brand-navy-600 hover:text-brand-teal-600 transition-colors font-medium">
             <ArrowLeft className="w-5 h-5" />
             <span>Terug naar home</span>
           </Link>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
         {/* Contract Header Card */}
-        <Card className="mb-6">
-          <CardContent className="p-6 md:p-8">
+        <Card className="mb-6 shadow-xl border-0 overflow-hidden">
+          <CardContent className="p-6 md:p-8 bg-white">
             <div className="text-center mb-6">
               {leverancier.logo_url && (
                 <div className="mb-4">
@@ -214,11 +249,11 @@ export default function ContractViewer({
               </div>
             </div>
 
-            {/* Besparing Box */}
+            {/* Maandbedrag Box */}
             <div className="bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-xl p-6 md:p-8 text-white text-center mb-6">
-              <p className="text-sm uppercase tracking-wider mb-2 opacity-90">Uw besparing</p>
-              <p className="text-4xl md:text-5xl font-bold mb-2">{formatCurrency(jaarbedrag)}</p>
-              <p className="text-lg opacity-90 mb-4">per jaar ({formatCurrency(maandbedrag)} per maand)</p>
+              <p className="text-sm uppercase tracking-wider mb-2 opacity-90">Uw maandbedrag</p>
+              <p className="text-4xl md:text-5xl font-bold mb-2">{formatCurrency(maandbedrag)}</p>
+              <p className="text-lg opacity-90 mb-4">per maand ({formatCurrency(jaarbedrag)} per jaar)</p>
               {besparing && besparing > 0 && (
                 <p className="text-sm opacity-80">
                   U bespaart {formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief
@@ -228,31 +263,50 @@ export default function ContractViewer({
 
             {/* Quick Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <Lightning className="w-8 h-8 text-brand-teal-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-1">Elektriciteit</p>
-                <p className="text-lg font-semibold text-brand-navy-500">{verbruikElektriciteit.toLocaleString('nl-NL')} kWh</p>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 text-center border border-gray-200 shadow-sm">
+                <Lightning className="w-10 h-10 text-brand-teal-500 mx-auto mb-3" weight="duotone" />
+                <p className="text-xs uppercase tracking-wider text-gray-600 mb-2 font-semibold">Elektriciteit</p>
+                {heeftEnkeleMeter ? (
+                  <p className="text-lg font-bold text-brand-navy-500">{verbruikElektriciteitTotaal.toLocaleString('nl-NL')} kWh</p>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-lg font-bold text-brand-navy-500">{verbruikElektriciteitTotaal.toLocaleString('nl-NL')} kWh</p>
+                    <p className="text-xs text-gray-500">
+                      {elektriciteitNormaal.toLocaleString('nl-NL')} normaal + {elektriciteitDal.toLocaleString('nl-NL')} dal
+                    </p>
+                  </div>
+                )}
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <Flame className="w-8 h-8 text-brand-teal-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-1">Gas</p>
-                <p className="text-lg font-semibold text-brand-navy-500">{verbruikGas.toLocaleString('nl-NL')} m³</p>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 text-center border border-gray-200 shadow-sm">
+                <Flame className="w-10 h-10 text-brand-teal-500 mx-auto mb-3" weight="duotone" />
+                <p className="text-xs uppercase tracking-wider text-gray-600 mb-2 font-semibold">Gas</p>
+                {verbruikGas > 0 ? (
+                  <p className="text-lg font-bold text-brand-navy-500">{verbruikGas.toLocaleString('nl-NL')} m³</p>
+                ) : (
+                  <p className="text-sm text-gray-500">Geen gasaansluiting</p>
+                )}
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <MapPin className="w-8 h-8 text-brand-teal-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-1">Leveringsadres</p>
-                <p className="text-sm font-semibold text-brand-navy-500">
-                  {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
-                </p>
-                <p className="text-xs text-gray-500">{adres.postcode} {adres.plaats}</p>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 text-center border border-gray-200 shadow-sm">
+                <MapPin className="w-10 h-10 text-brand-teal-500 mx-auto mb-3" weight="duotone" />
+                <p className="text-xs uppercase tracking-wider text-gray-600 mb-2 font-semibold">Leveringsadres</p>
+                {adres.straat ? (
+                  <>
+                    <p className="text-sm font-semibold text-brand-navy-500 mb-1">
+                      {adres.straat} {adres.huisnummer}{adres.toevoeging ? ` ${adres.toevoeging}` : ''}
+                    </p>
+                    <p className="text-xs text-gray-500">{adres.postcode} {adres.plaats}</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500">Niet beschikbaar</p>
+                )}
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Prijsdetails Accordion */}
-        <Card className="mb-6">
-          <CardContent className="p-0">
+        <Card className="mb-6 shadow-lg border-0">
+          <CardContent className="p-0 bg-white">
             <button
               onClick={() => toggleAccordion('prijsdetails')}
               className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -377,8 +431,8 @@ export default function ContractViewer({
         </Card>
 
         {/* Contact Card */}
-        <Card>
-          <CardContent className="p-6 md:p-8 text-center">
+        <Card className="shadow-lg border-0">
+          <CardContent className="p-6 md:p-8 text-center bg-white">
             <h3 className="text-xl font-bold text-brand-navy-500 mb-4">Heeft u vragen?</h3>
             <p className="text-gray-600 mb-6">Ons team staat voor u klaar</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

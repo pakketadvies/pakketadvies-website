@@ -63,6 +63,31 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     redirect('/contract/niet-gevonden')
   }
 
+  // Fetch contract details based on type
+  let contractDetails: any = null
+  if (contract.type === 'vast') {
+    const { data: details } = await supabase
+      .from('contract_details_vast')
+      .select('*')
+      .eq('contract_id', contract.id)
+      .single()
+    contractDetails = details
+  } else if (contract.type === 'dynamisch') {
+    const { data: details } = await supabase
+      .from('contract_details_dynamisch')
+      .select('*')
+      .eq('contract_id', contract.id)
+      .single()
+    contractDetails = details
+  } else if (contract.type === 'maatwerk') {
+    const { data: details } = await supabase
+      .from('contract_details_maatwerk')
+      .select('*')
+      .eq('contract_id', contract.id)
+      .single()
+    contractDetails = details
+  }
+
   return (
     <ContractViewer
       aanvraag={{
@@ -75,6 +100,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
         id: contract.id,
         naam: aanvraag.contract_naam || contract.naam,
         type: aanvraag.contract_type,
+        details: contractDetails,
       }}
       leverancier={{
         id: leverancier.id,

@@ -18,7 +18,10 @@ export interface EmailBevestigingData {
     plaats: string
   }
   verbruik: {
-    elektriciteit: number
+    elektriciteitNormaal?: number
+    elektriciteitDal?: number | null
+    elektriciteitTotaal: number
+    heeftEnkeleMeter?: boolean
     gas: number
   }
   aansluitwaarden: {
@@ -110,13 +113,13 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
             </td>
           </tr>
 
-          <!-- Besparing Box (Groot & Opvallend) -->
+          <!-- Maandbedrag Box (Groot & Opvallend) -->
           <tr>
             <td style="background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%); padding: 40px 20px; text-align: center; margin: 0;">
-              <p style="color: white; font-size: 14px; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Uw besparing</p>
-              <p style="color: white; font-size: 48px; font-weight: bold; margin: 0 0 5px 0;">${formatCurrency(jaarbedrag)}</p>
-              <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 0 0 30px 0;">per jaar (${formatCurrency(maandbedrag)} per maand)</p>
-              ${besparing ? `<p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 20px 0;">U bespaart ${formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief</p>` : ''}
+              <p style="color: white; font-size: 14px; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Uw maandbedrag</p>
+              <p style="color: white; font-size: 48px; font-weight: bold; margin: 0 0 5px 0;">${formatCurrency(maandbedrag)}</p>
+              <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 0 0 30px 0;">per maand (${formatCurrency(jaarbedrag)} per jaar)</p>
+              ${besparing && besparing > 0 ? `<p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 20px 0;">U bespaart ${formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief</p>` : ''}
               <a href="${contractViewerUrl}" style="background: white; color: #14B8A6; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
                 📊 Bekijk volledige berekening
               </a>
@@ -152,8 +155,12 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
                   <td style="padding: 8px 0;">
                     <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Verbruik</p>
                     <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">
-                      Elektriciteit: ${verbruik.elektriciteit.toLocaleString('nl-NL')} kWh/jaar | Gas: ${verbruik.gas.toLocaleString('nl-NL')} m³/jaar
+                      ${verbruik.heeftEnkeleMeter 
+                        ? `Elektriciteit: ${verbruik.elektriciteitTotaal.toLocaleString('nl-NL')} kWh/jaar (enkele meter)`
+                        : `Elektriciteit: ${verbruik.elektriciteitNormaal?.toLocaleString('nl-NL') || 0} kWh normaal + ${verbruik.elektriciteitDal?.toLocaleString('nl-NL') || 0} kWh dal = ${verbruik.elektriciteitTotaal.toLocaleString('nl-NL')} kWh/jaar`
+                      }
                     </p>
+                    ${verbruik.gas > 0 ? `<p style="color: #0F4C75; font-size: 16px; margin: 5px 0 0 0; font-weight: 500;">Gas: ${verbruik.gas.toLocaleString('nl-NL')} m³/jaar</p>` : '<p style="color: #64748B; font-size: 14px; margin: 5px 0 0 0;">Geen gasaansluiting</p>'}
                   </td>
                 </tr>
               </table>
