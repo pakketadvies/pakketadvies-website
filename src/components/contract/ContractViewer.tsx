@@ -67,6 +67,28 @@ export default function ContractViewer({
   const [priceHistory, setPriceHistory] = useState<any[]>([])
   const [currentPrices, setCurrentPrices] = useState<any>(null)
   const [loadingPrices, setLoadingPrices] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  // Detect desktop vs mobile
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024) // lg breakpoint
+    }
+    checkDesktop()
+    window.addEventListener('resize', checkDesktop)
+    return () => window.removeEventListener('resize', checkDesktop)
+  }, [])
+
+  // On desktop, always keep both accordions open
+  useEffect(() => {
+    if (isDesktop) {
+      setOpenAccordion('prijsdetails')
+      // Load price data for dynamic contracts when desktop
+      if (contract.type === 'dynamisch' && priceHistory.length === 0 && !loadingPrices) {
+        loadPriceData()
+      }
+    }
+  }, [isDesktop, contract.type])
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -179,12 +201,23 @@ export default function ContractViewer({
   }
 
   const toggleAccordion = (section: 'prijsdetails' | 'voorwaarden' | 'over' | 'contractinfo') => {
+    // On desktop, don't allow closing (both always open)
+    if (isDesktop && (section === 'prijsdetails' || section === 'contractinfo')) {
+      return
+    }
+    
     setOpenAccordion(openAccordion === section ? null : section)
     
     // Load price history when contractinfo is opened for dynamic contracts
     if (section === 'contractinfo' && contract.type === 'dynamisch' && priceHistory.length === 0 && !loadingPrices) {
       loadPriceData()
     }
+  }
+  
+  // Determine if accordion should be open
+  const isAccordionOpen = (section: 'prijsdetails' | 'contractinfo') => {
+    if (isDesktop) return true // Always open on desktop
+    return openAccordion === section
   }
 
   // Load current prices and history for dynamic contracts
@@ -362,20 +395,24 @@ export default function ContractViewer({
               <CardContent className="p-0 bg-white">
                 <button
                   onClick={() => toggleAccordion('prijsdetails')}
-                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className={`w-full px-6 py-4 flex items-center justify-between transition-colors ${
+                    isDesktop ? 'cursor-default' : 'hover:bg-gray-50'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Calculator className="w-6 h-6 text-brand-teal-500" />
                     <span className="text-lg font-semibold text-brand-navy-500">Prijsdetails</span>
                   </div>
-                  {openAccordion === 'prijsdetails' ? (
-                    <CaretUp className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <CaretDown className="w-5 h-5 text-gray-400" />
+                  {!isDesktop && (
+                    isAccordionOpen('prijsdetails') ? (
+                      <CaretUp className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <CaretDown className="w-5 h-5 text-gray-400" />
+                    )
                   )}
                 </button>
 
-                {openAccordion === 'prijsdetails' && (
+                {isAccordionOpen('prijsdetails') && (
                   <div className="px-6 pb-6 border-t border-gray-200">
                     {loading && (
                       <div className="py-8 text-center">
@@ -489,7 +526,9 @@ export default function ContractViewer({
               <CardContent className="p-0 bg-white">
                 <button
                   onClick={() => toggleAccordion('contractinfo')}
-                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className={`w-full px-6 py-4 flex items-center justify-between transition-colors ${
+                    isDesktop ? 'cursor-default' : 'hover:bg-gray-50'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Info className="w-6 h-6 text-brand-teal-500" />
@@ -499,14 +538,16 @@ export default function ContractViewer({
                        'Maatwerk contract'}
                     </span>
                   </div>
-                  {openAccordion === 'contractinfo' ? (
-                    <CaretUp className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <CaretDown className="w-5 h-5 text-gray-400" />
+                  {!isDesktop && (
+                    isAccordionOpen('contractinfo') ? (
+                      <CaretUp className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <CaretDown className="w-5 h-5 text-gray-400" />
+                    )
                   )}
                 </button>
 
-                {openAccordion === 'contractinfo' && (
+                {isAccordionOpen('contractinfo') && (
                   <div className="px-6 pb-6 border-t border-gray-200">
                     {contract.type === 'dynamisch' && (
                       <DynamischContractInfo 
