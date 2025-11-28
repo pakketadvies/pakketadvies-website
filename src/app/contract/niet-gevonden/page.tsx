@@ -1,5 +1,7 @@
+'use client'
+
 import Link from 'next/link'
-import { AlertCircle } from '@phosphor-icons/react'
+import { Warning } from '@phosphor-icons/react'
 
 export default function ContractNietGevondenPage() {
   return (
@@ -7,7 +9,7 @@ export default function ContractNietGevondenPage() {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
         <div className="mb-6 flex justify-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-red-600" weight="fill" />
+            <Warning className="w-8 h-8 text-red-600" weight="fill" />
           </div>
         </div>
         
