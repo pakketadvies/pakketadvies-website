@@ -71,7 +71,15 @@ export default function ContractViewer({
     }).format(amount)
   }
 
-  // Calculate costs via API
+  // Calculate costs via API - automatically on mount if no maandbedrag
+  useEffect(() => {
+    // Always calculate on mount to get maandbedrag/jaarbedrag
+    if (!breakdown && !loading && verbruikData) {
+      berekenKosten()
+    }
+  }, []) // Only run once on mount
+
+  // Also calculate when prijsdetails is opened (if not already calculated)
   useEffect(() => {
     if (openAccordion === 'prijsdetails' && !breakdown && !loading) {
       berekenKosten()

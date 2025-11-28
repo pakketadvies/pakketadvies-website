@@ -196,15 +196,18 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
       gas: verbruikData?.aansluitwaardeGas || 'Onbekend',
     }
 
-    // Calculate costs - use API for accurate calculation
+    // Calculate costs - import and use the calculation function directly
     let maandbedrag = verbruikData?.maandbedrag || 0
     let jaarbedrag = verbruikData?.jaarbedrag || 0
     
-    // If maandbedrag/jaarbedrag not in verbruik_data, calculate via API
+    // If maandbedrag/jaarbedrag not in verbruik_data, calculate directly
     if ((!maandbedrag || maandbedrag === 0) && contract && adres.postcode) {
-      console.log('📧 [sendBevestigingEmail] Calculating costs via API...')
+      console.log('📧 [sendBevestigingEmail] Calculating costs directly...')
       
       try {
+        // Import the calculation function directly
+        const { calculateContractCosts } = await import('@/lib/bereken-contract-internal')
+        
         // Fetch contract details
         let contractDetails: any = null
         if (contract.type === 'vast') {
@@ -231,61 +234,46 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
         }
         
         if (contractDetails) {
-          // Call the bereken-contract API for accurate calculation
-          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://pakketadvies.vercel.app')
+          const result = await calculateContractCosts({
+            // Verbruik
+            elektriciteitNormaal: elektriciteitNormaal,
+            elektriciteitDal: elektriciteitDal,
+            gas: gasJaar,
+            terugleveringJaar: verbruikData?.terugleveringJaar || 0,
+            
+            // Aansluitwaarden
+            aansluitwaardeElektriciteit: aansluitwaarden.elektriciteit,
+            aansluitwaardeGas: aansluitwaarden.gas,
+            
+            // Postcode
+            postcode: adres.postcode.replace(/\s/g, ''),
+            
+            // Contract details
+            contractType: contract.type,
+            tariefElektriciteitNormaal: contractDetails.tarief_elektriciteit_normaal,
+            tariefElektriciteitDal: contractDetails.tarief_elektriciteit_dal,
+            tariefElektriciteitEnkel: contractDetails.tarief_elektriciteit_enkel,
+            tariefGas: contractDetails.tarief_gas,
+            tariefTerugleveringKwh: contractDetails.tarief_teruglevering_kwh || 0,
+            // Dynamische contract opslagen
+            opslagElektriciteit: contractDetails.opslag_elektriciteit_normaal || contractDetails.opslag_elektriciteit || 0,
+            opslagGas: contractDetails.opslag_gas || 0,
+            opslagTeruglevering: contractDetails.opslag_teruglevering || 0,
+            vastrechtStroomMaand: contractDetails.vastrecht_stroom_maand || contractDetails.vaste_kosten_maand || 4,
+            vastrechtGasMaand: contractDetails.vastrecht_gas_maand || 0,
+            heeftDubbeleMeter: !heeftEnkeleMeter,
+          }, supabase)
           
-          const apiUrl = `${baseUrl}/api/energie/bereken-contract`
-          
-          const berekenResponse = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              // Verbruik
-              elektriciteitNormaal: elektriciteitNormaal,
-              elektriciteitDal: elektriciteitDal,
-              gas: gasJaar,
-              terugleveringJaar: verbruikData?.terugleveringJaar || 0,
-              
-              // Aansluitwaarden
-              aansluitwaardeElektriciteit: aansluitwaarden.elektriciteit,
-              aansluitwaardeGas: aansluitwaarden.gas,
-              
-              // Postcode
-              postcode: adres.postcode.replace(/\s/g, ''),
-              
-              // Contract details
-              contractType: contract.type,
-              tariefElektriciteitNormaal: contractDetails.tarief_elektriciteit_normaal,
-              tariefElektriciteitDal: contractDetails.tarief_elektriciteit_dal,
-              tariefElektriciteitEnkel: contractDetails.tarief_elektriciteit_enkel,
-              tariefGas: contractDetails.tarief_gas,
-              tariefTerugleveringKwh: contractDetails.tarief_teruglevering_kwh || 0,
-              // Dynamische contract opslagen
-              opslagElektriciteit: contractDetails.opslag_elektriciteit_normaal || contractDetails.opslag_elektriciteit || 0,
-              opslagGas: contractDetails.opslag_gas || 0,
-              opslagTeruglevering: contractDetails.opslag_teruglevering || 0,
-              vastrechtStroomMaand: contractDetails.vastrecht_stroom_maand || contractDetails.vaste_kosten_maand || 4,
-              vastrechtGasMaand: contractDetails.vastrecht_gas_maand || 0,
-              heeftDubbeleMeter: !heeftEnkeleMeter,
-            }),
-          })
-          
-          if (berekenResponse.ok) {
-            const berekenData = await berekenResponse.json()
-            if (berekenData.success && berekenData.breakdown) {
-              jaarbedrag = Math.round(berekenData.breakdown.totaal.jaarExclBtw)
-              maandbedrag = Math.round(berekenData.breakdown.totaal.maandExclBtw)
-              console.log('✅ [sendBevestigingEmail] Costs calculated via API:', { maandbedrag, jaarbedrag })
-            } else {
-              console.warn('⚠️ [sendBevestigingEmail] API calculation failed:', berekenData.error)
-            }
+          if (result.success && result.breakdown) {
+            jaarbedrag = Math.round(result.breakdown.totaal.jaarExclBtw)
+            maandbedrag = Math.round(result.breakdown.totaal.maandExclBtw)
+            console.log('✅ [sendBevestigingEmail] Costs calculated:', { maandbedrag, jaarbedrag })
           } else {
-            console.warn('⚠️ [sendBevestigingEmail] API call failed:', berekenResponse.status)
+            console.warn('⚠️ [sendBevestigingEmail] Calculation failed:', result.error)
           }
         }
-      } catch (apiError: any) {
-        console.error('❌ [sendBevestigingEmail] Error calling bereken-contract API:', apiError.message)
+      } catch (calcError: any) {
+        console.error('❌ [sendBevestigingEmail] Error calculating costs:', calcError.message)
         // Continue with fallback values
       }
     }
