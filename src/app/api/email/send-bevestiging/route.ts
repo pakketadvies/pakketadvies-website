@@ -169,7 +169,9 @@ export async function POST(request: Request) {
         expires_at: expiresAt.toISOString(),
       })
 
-    const contractViewerUrl = `${baseUrl}/contract/${aanvraagnummer}?token=${accessToken}`
+    // Use a more trusted redirect URL structure for email clients
+    // This is less likely to be blocked than direct contract viewer links
+    const contractViewerUrl = `${baseUrl}/bekijk-contract/${aanvraagnummer}?token=${accessToken}`
 
     // Prepare email data
     const emailData: EmailBevestigingData = {
