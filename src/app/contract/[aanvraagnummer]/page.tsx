@@ -10,12 +10,20 @@ interface PageProps {
 }
 
 async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer: string; token?: string }) {
+  console.log('🔍 [ContractViewer] Starting with:', { aanvraagnummer, hasToken: !!token })
+  
   // Use service role key if token is provided (from email link)
   // Otherwise use regular client (for authenticated admin access)
   let supabase: any
   
-  if (token && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    // Use service role key to bypass RLS when accessing via email token
+  if (token) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('❌ [ContractViewer] SUPABASE_SERVICE_ROLE_KEY not available')
+      redirect('/contract/niet-gevonden')
+    }
+    
+    // Always use service role key when token is provided to bypass RLS
+    console.log('🔑 [ContractViewer] Using service role key for token-based access')
     supabase = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -27,25 +35,43 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
       }
     )
   } else {
+    console.log('👤 [ContractViewer] Using regular client (no token)')
     supabase = await createClient()
   }
 
   // First, verify access token if provided
   if (token) {
+    console.log('🔐 [ContractViewer] Verifying access token...')
     const { data: accessData, error: tokenError } = await supabase
       .from('contract_viewer_access')
       .select('aanvraag_id, accessed_at, expires_at')
       .eq('access_token', token)
       .single()
 
-    if (tokenError || !accessData) {
-      console.error('Invalid or expired access token:', tokenError)
+    if (tokenError) {
+      console.error('❌ [ContractViewer] Token error:', {
+        code: tokenError.code,
+        message: tokenError.message,
+        details: tokenError.details,
+        hint: tokenError.hint,
+      })
       redirect('/contract/niet-gevonden')
     }
 
+    if (!accessData) {
+      console.error('❌ [ContractViewer] Access token not found in database')
+      redirect('/contract/niet-gevonden')
+    }
+
+    console.log('✅ [ContractViewer] Token found:', {
+      aanvraag_id: accessData.aanvraag_id,
+      expires_at: accessData.expires_at,
+      is_expired: accessData.expires_at ? new Date(accessData.expires_at) < new Date() : false,
+    })
+
     // Check if token is expired
     if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
-      console.error('Access token expired')
+      console.error('❌ [ContractViewer] Access token expired:', accessData.expires_at)
       redirect('/contract/niet-gevonden')
     }
 
@@ -57,6 +83,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   }
 
   // Fetch aanvraag by aanvraagnummer
+  console.log('🔍 [ContractViewer] Fetching aanvraag with aanvraagnummer:', aanvraagnummer)
   const { data: aanvraag, error: aanvraagError } = await supabase
     .from('contractaanvragen')
     .select(`
@@ -86,14 +113,16 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
       hint: aanvraagError.hint,
       aanvraagnummer,
       token: token ? 'present' : 'missing',
+      using_service_role: !!token && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
     })
     redirect('/contract/niet-gevonden')
   }
 
   if (!aanvraag) {
-    console.error('❌ [ContractViewer] Aanvraag not found:', {
+    console.error('❌ [ContractViewer] Aanvraag not found (no data returned):', {
       aanvraagnummer,
       token: token ? 'present' : 'missing',
+      using_service_role: !!token && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
     })
     redirect('/contract/niet-gevonden')
   }
@@ -103,6 +132,8 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     aanvraagnummer: aanvraag.aanvraagnummer,
     contract_id: aanvraag.contract_id,
     has_contract: !!aanvraag.contract,
+    has_verbruik_data: !!aanvraag.verbruik_data,
+    has_gegevens_data: !!aanvraag.gegevens_data,
   })
 
   // Extract data
@@ -111,9 +142,24 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   const contract = aanvraag.contract as any
   const leverancier = contract?.leverancier
 
-  if (!contract || !leverancier) {
+  if (!contract) {
+    console.error('❌ [ContractViewer] Contract not found:', {
+      contract_id: aanvraag.contract_id,
+      has_contract_in_response: !!aanvraag.contract,
+    })
     redirect('/contract/niet-gevonden')
   }
+
+  if (!leverancier) {
+    console.error('❌ [ContractViewer] Leverancier not found:', {
+      contract_id: aanvraag.contract_id,
+      has_contract: !!contract,
+      has_leverancier: !!leverancier,
+    })
+    redirect('/contract/niet-gevonden')
+  }
+
+  console.log('✅ [ContractViewer] All data available, rendering ContractViewer component')
 
   return (
     <ContractViewer
