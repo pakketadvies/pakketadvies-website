@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { CreateAanvraagRequest, CreateAanvraagResponse } from '@/types/aanvragen'
+import { calculateContractCosts } from '@/lib/bereken-contract-internal'
 
 /**
  * POST /api/aanvragen/create
@@ -60,6 +61,101 @@ export async function POST(request: Request) {
       aanvraagnummer = nummerData as string
     }
     
+    // BEREKEN MAANDBEDRAG/JAARBEDRAG VOORDAT AANVRAAG WORDT OPGESLAGEN
+    // Dit zorgt ervoor dat de email direct het juiste bedrag toont zonder vertraging
+    let verbruikDataMetBedragen = { ...body.verbruik_data }
+    
+    // Alleen berekenen als maandbedrag/jaarbedrag nog niet in verbruik_data staat
+    if (!verbruikDataMetBedragen.maandbedrag || verbruikDataMetBedragen.maandbedrag === 0) {
+      try {
+        console.log('💰 [create] Calculating maandbedrag/jaarbedrag before saving aanvraag...')
+        
+        // Haal contract type op
+        const { data: contractData, error: contractError } = await supabase
+          .from('contracten')
+          .select('type')
+          .eq('id', body.contract_id)
+          .single()
+        
+        if (!contractError && contractData && verbruikDataMetBedragen.leveringsadressen?.[0]?.postcode) {
+          const contractType = contractData.type
+          const postcode = verbruikDataMetBedragen.leveringsadressen[0].postcode
+          
+          // Fetch contract details based on type
+          let contractDetails: any = null
+          if (contractType === 'vast') {
+            const { data: details } = await supabase
+              .from('contract_details_vast')
+              .select('*')
+              .eq('contract_id', body.contract_id)
+              .single()
+            contractDetails = details
+          } else if (contractType === 'dynamisch') {
+            const { data: details } = await supabase
+              .from('contract_details_dynamisch')
+              .select('*')
+              .eq('contract_id', body.contract_id)
+              .single()
+            contractDetails = details
+          } else if (contractType === 'maatwerk') {
+            const { data: details } = await supabase
+              .from('contract_details_maatwerk')
+              .select('*')
+              .eq('contract_id', body.contract_id)
+              .single()
+            contractDetails = details
+          }
+          
+          if (contractDetails) {
+            // Bereid input voor calculateContractCosts
+            const berekenInput = {
+              elektriciteitNormaal: verbruikDataMetBedragen.elektriciteitNormaal || 0,
+              elektriciteitDal: verbruikDataMetBedragen.elektriciteitDal || 0,
+              gas: verbruikDataMetBedragen.gasJaar || 0,
+              terugleveringJaar: verbruikDataMetBedragen.terugleveringJaar || 0,
+              aansluitwaardeElektriciteit: verbruikDataMetBedragen.aansluitwaardeElektriciteit || '3x25A',
+              aansluitwaardeGas: verbruikDataMetBedragen.aansluitwaardeGas || 'G6',
+              postcode: postcode,
+              contractType: (contractType === 'maatwerk' ? 'maatwerk' : contractType) as 'vast' | 'dynamisch' | 'maatwerk',
+              tariefElektriciteitNormaal: contractDetails.tarief_elektriciteit_normaal || contractDetails.opslag_elektriciteit_normaal || 0,
+              tariefElektriciteitDal: contractDetails.tarief_elektriciteit_dal || undefined,
+              tariefElektriciteitEnkel: contractDetails.tarief_elektriciteit_enkel || undefined,
+              tariefGas: contractDetails.tarief_gas || contractDetails.opslag_gas || 0,
+              tariefTerugleveringKwh: contractDetails.tarief_teruglevering_kwh || 0,
+              opslagElektriciteit: contractDetails.opslag_elektriciteit_normaal || contractDetails.opslag_elektriciteit || undefined,
+              opslagGas: contractDetails.opslag_gas || undefined,
+              opslagTeruglevering: contractDetails.opslag_teruglevering || undefined,
+              vastrechtStroomMaand: contractDetails.vastrecht_stroom_maand || contractDetails.vaste_kosten_maand || 4,
+              vastrechtGasMaand: contractDetails.vastrecht_gas_maand || 4,
+              heeftDubbeleMeter: !verbruikDataMetBedragen.heeftEnkeleMeter,
+            }
+            
+            const berekenResult = await calculateContractCosts(berekenInput, supabase)
+            
+            if (berekenResult.success && berekenResult.breakdown) {
+              verbruikDataMetBedragen.maandbedrag = Math.round(berekenResult.breakdown.totaal.maandExclBtw)
+              verbruikDataMetBedragen.jaarbedrag = Math.round(berekenResult.breakdown.totaal.jaarExclBtw)
+              console.log('✅ [create] Maandbedrag/jaarbedrag calculated:', {
+                maandbedrag: verbruikDataMetBedragen.maandbedrag,
+                jaarbedrag: verbruikDataMetBedragen.jaarbedrag
+              })
+            } else {
+              console.warn('⚠️ [create] Could not calculate maandbedrag/jaarbedrag:', berekenResult.error)
+            }
+          } else {
+            console.warn('⚠️ [create] Could not fetch contract details for calculation')
+          }
+        } else {
+          console.warn('⚠️ [create] Could not fetch contract or postcode for calculation')
+        }
+      } catch (error: any) {
+        console.error('❌ [create] Error calculating maandbedrag/jaarbedrag (non-blocking):', error)
+        // Non-blocking: als berekening faalt, gebruik 0 (wordt later in email berekend als fallback)
+      }
+    } else {
+      console.log('✅ [create] Maandbedrag/jaarbedrag already in verbruik_data, skipping calculation')
+    }
+    
     // Insert aanvraag
     const { data, error } = await supabase
       .from('contractaanvragen')
@@ -72,7 +168,7 @@ export async function POST(request: Request) {
         leverancier_naam: body.leverancier_naam,
         aanvraag_type: body.aanvraag_type,
         status: 'nieuw',
-        verbruik_data: body.verbruik_data,
+        verbruik_data: verbruikDataMetBedragen, // Gebruik verbruik_data met berekende bedragen
         gegevens_data: body.gegevens_data,
         iban: body.iban,
         rekening_op_andere_naam: body.rekening_op_andere_naam || false,
@@ -111,7 +207,7 @@ export async function POST(request: Request) {
             leverancier_naam: body.leverancier_naam,
             aanvraag_type: body.aanvraag_type,
             status: 'nieuw',
-            verbruik_data: body.verbruik_data,
+            verbruik_data: verbruikDataMetBedragen, // Gebruik verbruik_data met berekende bedragen
             gegevens_data: body.gegevens_data,
             iban: body.iban,
             rekening_op_andere_naam: body.rekening_op_andere_naam || false,

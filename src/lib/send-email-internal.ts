@@ -196,13 +196,17 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
       gas: verbruikData?.aansluitwaardeGas || 'Onbekend',
     }
 
-    // Calculate costs - import and use the calculation function directly
+    // Get maandbedrag/jaarbedrag from verbruik_data (already calculated in API route)
+    // This ensures instant display in email without delay
     let maandbedrag = verbruikData?.maandbedrag || 0
     let jaarbedrag = verbruikData?.jaarbedrag || 0
     
-    // If maandbedrag/jaarbedrag not in verbruik_data, calculate directly
+    console.log('💰 [sendBevestigingEmail] Maandbedrag/jaarbedrag from verbruik_data:', { maandbedrag, jaarbedrag })
+    
+    // FALLBACK: Only calculate if not already in verbruik_data (for backward compatibility)
+    // This should rarely happen as calculation is done in API route before saving
     if ((!maandbedrag || maandbedrag === 0) && contract && adres.postcode) {
-      console.log('📧 [sendBevestigingEmail] Calculating costs directly...')
+      console.warn('⚠️ [sendBevestigingEmail] Maandbedrag/jaarbedrag not in verbruik_data, calculating as fallback...')
       
       try {
         // Import the calculation function directly
@@ -267,27 +271,31 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
           if (result.success && result.breakdown) {
             jaarbedrag = Math.round(result.breakdown.totaal.jaarExclBtw)
             maandbedrag = Math.round(result.breakdown.totaal.maandExclBtw)
-            console.log('✅ [sendBevestigingEmail] Costs calculated:', { maandbedrag, jaarbedrag })
+            console.log('✅ [sendBevestigingEmail] Costs calculated (fallback):', { maandbedrag, jaarbedrag })
           } else {
             console.warn('⚠️ [sendBevestigingEmail] Calculation failed:', result.error)
           }
         }
       } catch (calcError: any) {
-        console.error('❌ [sendBevestigingEmail] Error calculating costs:', calcError.message)
+        console.error('❌ [sendBevestigingEmail] Error calculating costs (fallback):', calcError.message)
         // Continue with fallback values
       }
     }
     
-    // Fallback if still 0
+    // Final fallback if still 0
     if (!maandbedrag || maandbedrag === 0) {
       if (jaarbedrag > 0) {
         maandbedrag = Math.round(jaarbedrag / 12)
+        console.log('💰 [sendBevestigingEmail] Calculated maandbedrag from jaarbedrag:', maandbedrag)
       } else {
-        jaarbedrag = maandbedrag * 12
+        console.error('❌ [sendBevestigingEmail] Both maandbedrag and jaarbedrag are 0!')
       }
     } else if (!jaarbedrag || jaarbedrag === 0) {
       jaarbedrag = maandbedrag * 12
+      console.log('💰 [sendBevestigingEmail] Calculated jaarbedrag from maandbedrag:', jaarbedrag)
     }
+    
+    console.log('✅ [sendBevestigingEmail] Final maandbedrag/jaarbedrag:', { maandbedrag, jaarbedrag })
     
     const besparing = verbruikData?.besparing
 

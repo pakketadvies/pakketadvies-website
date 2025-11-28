@@ -35,6 +35,10 @@ export interface VerbruikData {
   
   // Legacy
   geschat: boolean // wordt later vervangen door "help mij schatten" feature
+  
+  // NIEUW: Opgeslagen berekende bedragen (voor email en contract viewer)
+  maandbedrag?: number // Maandelijks bedrag in centen
+  jaarbedrag?: number // Jaarlijks bedrag in centen
 }
 
 export interface BedrijfsGegevens {
