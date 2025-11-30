@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const today = new Date()
     
     console.log('🔄 Starting manual price update for last 7 days...')
+    console.log(`   Date: ${today.toISOString().split('T')[0]}`)
 
     let successCount = 0
     let failCount = 0
