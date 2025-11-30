@@ -198,44 +198,22 @@ export function PrijzenGrafiek({
               <XAxis
                 dataKey="datum"
                 stroke="#6B7280"
-                style={{ fontSize: '12px' }}
+                style={{ fontSize: 'clamp(10px, 2vw, 12px)' }}
                 angle={-45}
                 textAnchor="end"
                 height={80}
-                className="hidden md:block"
-              />
-              <XAxis
-                dataKey="datum"
-                stroke="#6B7280"
-                style={{ fontSize: '10px' }}
-                angle={-90}
-                textAnchor="middle"
-                height={100}
                 interval="preserveStartEnd"
-                className="block md:hidden"
               />
               <YAxis
                 stroke="#6B7280"
-                style={{ fontSize: '12px' }}
+                style={{ fontSize: 'clamp(10px, 2vw, 12px)' }}
                 tickFormatter={(value) => formatPrice(value)}
                 width={100}
-                className="hidden md:block"
-              />
-              <YAxis
-                stroke="#6B7280"
-                style={{ fontSize: '10px' }}
-                tickFormatter={(value) => {
-                  // Shorter format for mobile
-                  return `€${value.toFixed(3)}`
-                }}
-                width={70}
-                className="block md:hidden"
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ paddingTop: '20px' }}
+                wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
                 iconType="line"
-                className="text-xs"
               />
               
               {energietype === 'beide' ? (
