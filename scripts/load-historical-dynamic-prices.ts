@@ -12,12 +12,26 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import * as dotenv from 'dotenv'
-import { config } from 'dotenv'
+import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
-// Load environment variables
-dotenv.config({ path: resolve(__dirname, '../.env.local') })
+// Load environment variables from .env.local
+try {
+  const envPath = resolve(__dirname, '../.env.local')
+  const envFile = readFileSync(envPath, 'utf-8')
+  envFile.split('\n').forEach(line => {
+    const trimmed = line.trim()
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=')
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join('=').trim().replace(/^["']|["']$/g, '')
+        process.env[key.trim()] = value
+      }
+    }
+  })
+} catch (error) {
+  console.warn('⚠️  Could not load .env.local, using environment variables from system')
+}
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
