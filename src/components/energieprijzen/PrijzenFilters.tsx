@@ -79,8 +79,8 @@ export function PrijzenFilters({
         </button>
 
         {/* Filters - Expanded on desktop, toggleable on mobile */}
-        <div className={`px-6 pb-6 border-t border-gray-200 ${isExpanded || isDesktop ? 'block' : 'hidden'}`}>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+        <div className={`px-6 pb-6 border-t border-gray-200 transition-all ${isExpanded || isDesktop ? 'block' : 'hidden'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
             {/* Periode */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-brand-navy-500 mb-2">
