@@ -5,6 +5,15 @@ import Link from 'next/link'
 export default function KennisbankPage() {
   const articles = [
     {
+      title: 'Energieprijzen - Inzicht in de markt',
+      excerpt: 'Bekijk actuele en historische marktprijzen voor elektriciteit en gas. Interactieve grafieken en gedetailleerde prijstabellen.',
+      category: 'Markt',
+      date: '30 november 2025',
+      readTime: '3 min',
+      href: '/kennisbank/energieprijzen',
+      featured: true,
+    },
+    {
       title: 'Grootverbruik vs. Kleinverbruik: wat is het verschil?',
       excerpt: 'Ontdek wanneer u een grootverbruiker bent en wat dit betekent voor uw energiecontract.',
       category: 'Uitleg',
@@ -93,30 +102,47 @@ export default function KennisbankPage() {
           <h2 className="text-3xl font-bold text-brand-navy-500 mb-8">Artikelen</h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16">
-            {articles.map((article, index) => (
-              <Card key={index} className="hover:shadow-xl transition-shadow">
-                <CardContent className="pt-8">
-                  <div className="mb-3">
-                    <Badge variant="info">{article.category}</Badge>
-                  </div>
-                  <CardTitle className="mb-3 line-clamp-2">{article.title}</CardTitle>
-                  <p className="text-gray-500 text-sm mb-4 line-clamp-3">{article.excerpt}</p>
-                  <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-                    <span>{article.date}</span>
-                    <span>{article.readTime} leestijd</span>
-                  </div>
-                  <Link
-                    href={article.href || '#'}
-                    className="text-brand-teal-500 hover:text-brand-teal-600 font-medium text-sm inline-flex items-center gap-1"
-                  >
-                    Lees meer
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+            {articles.map((article, index) => {
+              const isFeatured = (article as any).featured
+              return (
+                <Card 
+                  key={index} 
+                  className={`hover:shadow-xl transition-shadow ${
+                    isFeatured ? 'lg:col-span-3 md:col-span-2 border-2 border-brand-teal-200 bg-gradient-to-br from-white to-brand-teal-50' : ''
+                  }`}
+                >
+                  <CardContent className="pt-8">
+                    <div className="mb-3 flex items-center justify-between">
+                      <Badge variant={isFeatured ? "info" : "info"}>{article.category}</Badge>
+                      {isFeatured && (
+                        <Badge variant="info" className="bg-brand-teal-500 text-white">
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
+                    <CardTitle className={`mb-3 ${isFeatured ? 'text-2xl' : 'line-clamp-2'}`}>
+                      {article.title}
+                    </CardTitle>
+                    <p className={`text-gray-500 text-sm mb-4 ${isFeatured ? '' : 'line-clamp-3'}`}>
+                      {article.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
+                      <span>{article.date}</span>
+                      <span>{article.readTime} leestijd</span>
+                    </div>
+                    <Link
+                      href={article.href || '#'}
+                      className="text-brand-teal-500 hover:text-brand-teal-600 font-medium text-sm inline-flex items-center gap-1"
+                    >
+                      {isFeatured ? 'Bekijk energieprijzen' : 'Lees meer'}
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
 
           {/* FAQ Section */}
