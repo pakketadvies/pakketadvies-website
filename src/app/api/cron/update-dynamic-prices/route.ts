@@ -1,133 +1,91 @@
 import { NextResponse } from 'next/server'
 import { fetchDayAheadPrices } from '@/lib/dynamic-pricing/api-client'
 import { saveDynamicPrices } from '@/lib/dynamic-pricing/database'
+import { createClient } from '@/lib/supabase/server'
 
 /**
- * Vercel Cron Job: Update Dynamic Energy Prices
+ * CRON endpoint: Update dynamic prices daily
  * 
- * Runs daily at 14:00 CET (after day-ahead auction closes at 12:00)
+ * Called by Vercel Cron Jobs at 14:00 UTC daily
+ * Fetches today's prices and saves them to Supabase
  * 
- * Security: Vercel Cron authentication via Authorization header
- * 
- * Manual trigger for testing:
- * curl -X GET https://your-domain.com/api/cron/update-dynamic-prices \
- *   -H "Authorization: Bearer YOUR_CRON_SECRET"
+ * Security: Should be protected by Vercel Cron secret
  */
 export async function GET(request: Request) {
   try {
-    // ============================================
-    // STEP 1: VERIFY CRON AUTHENTICATION
-    // ============================================
+    // Verify this is a cron request (Vercel adds Authorization header)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
     
-    // In production, Vercel automatically adds this header
-    // For manual testing, you need to provide it
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       console.error('❌ Unauthorized cron request')
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    console.log('🔄 Starting dynamic prices update...')
-
-    // ============================================
-    // STEP 2: FETCH TODAY'S PRICES
-    // ============================================
+    console.log('🔄 Starting daily price update...')
+    
     const today = new Date()
-    const todayPrices = await fetchDayAheadPrices(today)
+    const todayStr = today.toISOString().split('T')[0]
+    
+    // Check if today's prices already exist
+    const supabase = await createClient()
+    const { data: existing } = await supabase
+      .from('dynamic_prices')
+      .select('datum')
+      .eq('datum', todayStr)
+      .single()
 
-    console.log('📊 Today prices fetched:', {
-      date: todayPrices.date,
-      source: todayPrices.source,
-      electricity: todayPrices.electricity.average.toFixed(5),
-      gas: todayPrices.gas.average.toFixed(5),
+    if (existing) {
+      console.log(`⏭️  Prices for ${todayStr} already exist, updating...`)
+    }
+
+    // Fetch today's prices
+    console.log(`📡 Fetching prices for ${todayStr}...`)
+    const prices = await fetchDayAheadPrices(today)
+    
+    if (!prices) {
+      console.error('❌ Failed to fetch prices')
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch prices' },
+        { status: 500 }
+      )
+    }
+
+    // Save to database
+    console.log(`💾 Saving prices to database...`)
+    await saveDynamicPrices({
+      electricity: prices.electricity,
+      gas: prices.gas,
+      source: prices.source,
+      date: todayStr,
     })
 
-    // ============================================
-    // STEP 3: SAVE TO DATABASE
-    // ============================================
-    await saveDynamicPrices(todayPrices)
+    console.log(`✅ Successfully updated prices for ${todayStr}`)
+    console.log(`   Electricity: €${prices.electricity.average.toFixed(5)}/kWh`)
+    console.log(`   Gas: €${prices.gas.average.toFixed(5)}/m³`)
+    console.log(`   Source: ${prices.source}`)
 
-    // ============================================
-    // STEP 4: ALSO FETCH TOMORROW'S PRICES (if available)
-    // ============================================
-    // Day-ahead auction is at 12:00, results at 13:00
-    // So at 14:00 we should have tomorrow's prices
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-
-    try {
-      const tomorrowPrices = await fetchDayAheadPrices(tomorrow)
-      
-      console.log('📊 Tomorrow prices fetched:', {
-        date: tomorrowPrices.date,
-        source: tomorrowPrices.source,
-        electricity: tomorrowPrices.electricity.average.toFixed(5),
-        gas: tomorrowPrices.gas.average.toFixed(5),
-      })
-
-      await saveDynamicPrices(tomorrowPrices)
-    } catch (error) {
-      console.warn('⚠️ Tomorrow prices not yet available (this is normal before 13:00)', error)
-      // Not a critical error, continue
-    }
-
-    // ============================================
-    // STEP 5: CLEANUP OLD DATA (keep last 90 days)
-    // ============================================
-    const { createClient } = await import('@/lib/supabase/server')
-    const supabase = await createClient()
-
-    const ninetyDaysAgo = new Date(today)
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
-
-    const { error: deleteError } = await supabase
-      .from('dynamic_prices')
-      .delete()
-      .lt('datum', ninetyDaysAgo.toISOString().split('T')[0])
-
-    if (deleteError) {
-      console.warn('⚠️ Failed to cleanup old prices:', deleteError)
-      // Not critical, continue
-    } else {
-      console.log('🧹 Old prices cleaned up (> 90 days)')
-    }
-
-    // ============================================
-    // STEP 6: RETURN SUCCESS
-    // ============================================
     return NextResponse.json({
       success: true,
-      message: 'Dynamic prices updated successfully',
-      today: {
-        date: todayPrices.date,
-        source: todayPrices.source,
-        electricity: todayPrices.electricity.average,
-        gas: todayPrices.gas.average,
+      date: todayStr,
+      prices: {
+        electricity: prices.electricity.average,
+        gas: prices.gas.average,
       },
-      timestamp: new Date().toISOString(),
+      source: prices.source,
     })
-
-  } catch (error) {
-    console.error('❌ Cron job failed:', error)
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
-    }, {
-      status: 500
-    })
+  } catch (error: any) {
+    console.error('❌ Error in cron job:', error)
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: error.message || 'Failed to update prices',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
+      { status: 500 }
+    )
   }
 }
-
-/**
- * POST endpoint for manual triggering (same logic as GET)
- */
-export async function POST(request: Request) {
-  return GET(request)
-}
-

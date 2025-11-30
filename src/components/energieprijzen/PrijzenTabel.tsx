@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { ArrowUp, ArrowDown, Download, Table } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, Download, Calendar } from '@phosphor-icons/react'
 import type { Energietype, TariefType, BelastingenType } from './PrijzenFilters'
 
 interface PrijsData {
@@ -23,9 +23,6 @@ interface PrijzenTabelProps {
   loading?: boolean
 }
 
-type SortField = 'datum' | 'prijs'
-type SortDirection = 'asc' | 'desc'
-
 const BTW_PERCENTAGE = 0.21
 const EB_ELEKTRICITEIT = 0.10154
 const EB_GAS = 0.57816
@@ -37,21 +34,28 @@ export function PrijzenTabel({
   belastingen,
   loading,
 }: PrijzenTabelProps) {
-  const [sortField, setSortField] = useState<SortField>('datum')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [expanded, setExpanded] = useState(false)
-  const [visibleRows, setVisibleRows] = useState(30)
+  const [currentWeek, setCurrentWeek] = useState(0) // 0 = current week, -1 = last week, etc.
+  const [viewMode, setViewMode] = useState<'week' | 'all'>('week')
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('nl-NL', {
       style: 'currency',
       currency: 'EUR',
-      minimumFractionDigits: 4,
-      maximumFractionDigits: 4,
+      minimumFractionDigits: 5,
+      maximumFractionDigits: 5,
     }).format(price)
   }
 
   const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const days = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']
+    const dayName = days[date.getDay()]
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    return `${dayName} ${day} ${month}`
+  }
+
+  const formatDateFull = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('nl-NL', {
       day: '2-digit',
       month: '2-digit',
@@ -59,11 +63,37 @@ export function PrijzenTabel({
     })
   }
 
-  // Transform and sort data
+  // Get current week dates
+  const getWeekDates = (weekOffset: number) => {
+    const today = new Date()
+    const currentDay = today.getDay()
+    const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1) // Monday as first day
+    const monday = new Date(today.setDate(diff))
+    monday.setDate(monday.getDate() + (weekOffset * 7))
+    
+    const weekDates: Date[] = []
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday)
+      date.setDate(monday.getDate() + i)
+      weekDates.push(date)
+    }
+    return weekDates
+  }
+
+  // Get week number
+  const getWeekNumber = (date: Date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const dayNum = d.getUTCDay() || 7
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  }
+
+  // Process data
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return []
 
-    const transformed = data.map((item) => {
+    return data.map((item) => {
       const base: any = {
         datum: item.datum,
         bron: item.bron || 'Onbekend',
@@ -107,40 +137,28 @@ export function PrijzenTabel({
         base.gas = parseFloat(gasPrice.toFixed(5))
       }
 
-      // For sorting
-      if (energietype === 'elektriciteit') {
-        base.prijs = base.elektriciteit
-      } else if (energietype === 'gas') {
-        base.prijs = base.gas
-      } else {
-        base.prijs = base.elektriciteit || base.gas || 0
-      }
-
       return base
     })
+  }, [data, energietype, tarief, belastingen])
 
-    // Sort
-    const sorted = [...transformed].sort((a, b) => {
-      if (sortField === 'datum') {
-        const dateA = new Date(a.datum).getTime()
-        const dateB = new Date(b.datum).getTime()
-        return sortDirection === 'asc' ? dateA - dateB : dateB - dateA
-      } else {
-        return sortDirection === 'asc' ? a.prijs - b.prijs : b.prijs - a.prijs
-      }
+  // Filter data for current week
+  const weekDates = getWeekDates(currentWeek)
+  const weekStart = weekDates[0].toISOString().split('T')[0]
+  const weekEnd = weekDates[6].toISOString().split('T')[0]
+
+  const weekData = useMemo(() => {
+    if (viewMode === 'all') return processedData
+    
+    return processedData.filter(item => {
+      return item.datum >= weekStart && item.datum <= weekEnd
     })
+  }, [processedData, weekStart, weekEnd, viewMode])
 
-    return sorted
-  }, [data, energietype, tarief, belastingen, sortField, sortDirection])
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('desc')
-    }
-  }
+  // Get current time and price
+  const now = new Date()
+  const todayStr = now.toISOString().split('T')[0]
+  const currentHour = now.getHours()
+  const currentPrice = processedData.find(item => item.datum === todayStr)
 
   const exportToCSV = () => {
     const headers = ['Datum']
@@ -158,8 +176,8 @@ export function PrijzenTabel({
 
     const csvRows = [
       headers.join(','),
-      ...processedData.map((row) => {
-        const values = [formatDate(row.datum)]
+      ...(viewMode === 'week' ? weekData : processedData).map((row) => {
+        const values = [formatDateFull(row.datum)]
         if (energietype === 'elektriciteit' || energietype === 'beide') {
           if (energietype === 'beide') {
             values.push(
@@ -184,22 +202,11 @@ export function PrijzenTabel({
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `energieprijzen_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute('download', `energieprijzen_${viewMode === 'week' ? `week_${getWeekNumber(weekDates[0])}` : 'all'}_${new Date().toISOString().split('T')[0]}.csv`)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }
-
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) {
-      return <ArrowUp className="w-4 h-4 text-gray-300" />
-    }
-    return sortDirection === 'asc' ? (
-      <ArrowUp className="w-4 h-4 text-brand-teal-500" />
-    ) : (
-      <ArrowDown className="w-4 h-4 text-brand-teal-500" />
-    )
   }
 
   if (loading) {
@@ -223,7 +230,7 @@ export function PrijzenTabel({
         <CardContent className="pt-8">
           <div className="h-64 flex items-center justify-center">
             <div className="text-center">
-              <Table className="w-16 h-16 text-gray-300 mx-auto mb-4" weight="duotone" />
+              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" weight="duotone" />
               <p className="text-gray-500">Geen data beschikbaar</p>
             </div>
           </div>
@@ -232,19 +239,82 @@ export function PrijzenTabel({
     )
   }
 
-  const displayData = expanded ? processedData : processedData.slice(0, visibleRows)
-  const hasMore = processedData.length > visibleRows
+  const weekNumber = getWeekNumber(weekDates[0])
+  const currentYear = weekDates[0].getFullYear()
 
   return (
     <Card className="mb-6">
       <CardContent className="pt-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-xl font-bold text-brand-navy-500 mb-2">Prijstabel</h3>
-            <p className="text-sm text-gray-500">
-              {processedData.length} {processedData.length === 1 ? 'record' : 'records'}
-            </p>
+        {/* Header with week navigation */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentWeek(currentWeek - 1)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Vorige week"
+              >
+                <CaretLeft className="w-5 h-5 text-brand-navy-500" weight="bold" />
+              </button>
+              <div className="px-4 py-2 bg-gray-100 rounded-lg min-w-[140px] text-center">
+                <span className="font-semibold text-brand-navy-500">
+                  Week {weekNumber}
+                </span>
+                <div className="text-xs text-gray-500 mt-0.5">
+                  {formatDateFull(weekStart)} - {formatDateFull(weekEnd)}
+                </div>
+              </div>
+              <button
+                onClick={() => setCurrentWeek(currentWeek + 1)}
+                disabled={currentWeek >= 0}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Volgende week"
+              >
+                <CaretRight className="w-5 h-5 text-brand-navy-500" weight="bold" />
+              </button>
+            </div>
+            
+            {/* View mode toggle */}
+            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('week')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                  viewMode === 'week'
+                    ? 'bg-white text-brand-teal-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Week
+              </button>
+              <button
+                onClick={() => setViewMode('all')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                  viewMode === 'all'
+                    ? 'bg-white text-brand-teal-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Alles
+              </button>
+            </div>
           </div>
+
+          {/* Current price indicator */}
+          {currentPrice && currentWeek === 0 && (
+            <div className="flex items-center gap-3 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div>
+                <div className="text-xs text-gray-600">Nu: {currentHour}:00 - {currentHour + 1}:00</div>
+                <div className="text-sm font-semibold text-brand-navy-500">
+                  {energietype === 'elektriciteit' || energietype === 'beide' 
+                    ? `Gem. marktprijs: ${formatPrice(currentPrice.elektriciteit)}/kWh`
+                    : `Gem. marktprijs: ${formatPrice(currentPrice.gas)}/m³`
+                  }
+                </div>
+              </div>
+            </div>
+          )}
+
           <Button
             variant="outline"
             size="sm"
@@ -256,107 +326,72 @@ export function PrijzenTabel({
           </Button>
         </div>
 
-        <div className="overflow-x-auto scrollbar-thin">
-          <table className="w-full text-sm min-w-[600px]">
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-brand-navy-500">
-                  <button
-                    onClick={() => handleSort('datum')}
-                    className="flex items-center gap-2 hover:text-brand-teal-600 transition-colors"
-                  >
-                    Datum
-                    <SortIcon field="datum" />
-                  </button>
-                </th>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left py-3 px-4 font-semibold text-brand-navy-500">Datum</th>
                 {energietype === 'elektriciteit' || energietype === 'beide' ? (
                   energietype === 'beide' ? (
                     <>
-                      <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">
-                        <button
-                          onClick={() => handleSort('prijs')}
-                          className="flex items-center gap-2 ml-auto hover:text-brand-teal-600 transition-colors"
-                        >
-                          Elektriciteit Dag
-                          <SortIcon field="prijs" />
-                        </button>
-                      </th>
-                      <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">
-                        Elektriciteit Nacht
-                      </th>
-                      <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">
-                        Elektriciteit Gemiddeld
-                      </th>
+                      <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">Dag (€/kWh)</th>
+                      <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">Nacht (€/kWh)</th>
+                      <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">Gemiddeld (€/kWh)</th>
                     </>
                   ) : (
                     <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">
-                      <button
-                        onClick={() => handleSort('prijs')}
-                        className="flex items-center gap-2 ml-auto hover:text-brand-teal-600 transition-colors"
-                      >
-                        Elektriciteit (€/kWh)
-                        <SortIcon field="prijs" />
-                      </button>
+                      {tarief === 'dag' ? 'Dag' : tarief === 'nacht' ? 'Nacht' : 'Gemiddeld'} (€/kWh)
                     </th>
                   )
                 ) : null}
                 {energietype === 'gas' || energietype === 'beide' ? (
-                  <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">
-                    <button
-                      onClick={() => handleSort('prijs')}
-                      className="flex items-center gap-2 ml-auto hover:text-brand-teal-600 transition-colors"
-                    >
-                      Gas (€/m³)
-                      <SortIcon field="prijs" />
-                    </button>
-                  </th>
+                  <th className="text-right py-3 px-4 font-semibold text-brand-navy-500">Gas (€/m³)</th>
                 ) : null}
-                <th className="text-left py-3 px-4 font-semibold text-brand-navy-500">Bron</th>
               </tr>
             </thead>
             <tbody>
-              {displayData.map((row, index) => {
-                const isToday = row.datum === new Date().toISOString().split('T')[0]
+              {(viewMode === 'week' ? weekData : processedData).map((row, index) => {
+                const isToday = row.datum === todayStr
+                const date = new Date(row.datum)
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6
+                
                 return (
                   <tr
                     key={index}
-                    className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                      isToday ? 'bg-brand-teal-50' : ''
-                    }`}
+                    className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
+                      isToday ? 'bg-brand-teal-50 font-semibold' : ''
+                    } ${isWeekend ? 'bg-gray-50/50' : ''}`}
                   >
                     <td className="py-3 px-4">
-                      <span className={isToday ? 'font-semibold text-brand-teal-600' : ''}>
+                      <span className={isToday ? 'text-brand-teal-600' : 'text-gray-700'}>
                         {formatDate(row.datum)}
-                        {isToday && <span className="ml-2 text-xs text-brand-teal-600">(vandaag)</span>}
                       </span>
                     </td>
                     {energietype === 'elektriciteit' || energietype === 'beide' ? (
                       energietype === 'beide' ? (
                         <>
-                          <td className="text-right py-3 px-4 font-mono">
+                          <td className="text-right py-3 px-4 font-mono text-gray-700">
                             {row.elektriciteit_dag ? formatPrice(row.elektriciteit_dag) : '-'}
                           </td>
-                          <td className="text-right py-3 px-4 font-mono">
+                          <td className="text-right py-3 px-4 font-mono text-gray-700">
                             {row.elektriciteit_nacht ? formatPrice(row.elektriciteit_nacht) : '-'}
                           </td>
-                          <td className="text-right py-3 px-4 font-mono font-semibold">
+                          <td className={`text-right py-3 px-4 font-mono ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
                             {formatPrice(row.elektriciteit)}
                           </td>
                         </>
                       ) : (
-                        <td className="text-right py-3 px-4 font-mono font-semibold">
+                        <td className={`text-right py-3 px-4 font-mono ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
                           {formatPrice(row.elektriciteit)}
                         </td>
                       )
                     ) : null}
                     {energietype === 'gas' || energietype === 'beide' ? (
-                      <td className="text-right py-3 px-4 font-mono font-semibold">
+                      <td className={`text-right py-3 px-4 font-mono ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
                         {formatPrice(row.gas)}
                       </td>
                     ) : null}
-                    <td className="py-3 px-4">
-                      <span className="text-xs text-gray-500">{row.bron}</span>
-                    </td>
                   </tr>
                 )
               })}
@@ -364,35 +399,27 @@ export function PrijzenTabel({
           </table>
         </div>
 
-        {hasMore && !expanded && (
-          <div className="mt-6 text-center">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setExpanded(true)
-                setVisibleRows(processedData.length)
-              }}
-            >
-              Toon alle {processedData.length} records
-            </Button>
-          </div>
-        )}
-
-        {expanded && processedData.length > 30 && (
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setExpanded(false)
-                setVisibleRows(30)
-              }}
-            >
-              Toon minder
-            </Button>
+        {/* Footer info */}
+        {viewMode === 'week' && weekData.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <span>
+                Marktprijs gemiddeld:{' '}
+                <span className="font-semibold text-brand-navy-500">
+                  {energietype === 'elektriciteit' || energietype === 'beide'
+                    ? formatPrice(weekData.reduce((sum, r) => sum + r.elektriciteit, 0) / weekData.length)
+                    : formatPrice(weekData.reduce((sum, r) => sum + r.gas, 0) / weekData.length)
+                  }
+                  {energietype === 'elektriciteit' || energietype === 'beide' ? '/kWh' : '/m³'}
+                </span>
+              </span>
+              <span className="text-xs text-gray-500">
+                {weekData.length} {weekData.length === 1 ? 'dag' : 'dagen'}
+              </span>
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
   )
 }
-

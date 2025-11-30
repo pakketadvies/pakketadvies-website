@@ -209,8 +209,13 @@ function sleep(ms: number): Promise<void> {
 async function main() {
   // Parse command line arguments
   const args = process.argv.slice(2)
-  let startDate = new Date('2020-11-30')
-  let endDate = new Date('2025-11-30')
+  // Calculate 5 years ago from today
+  const today = new Date()
+  const fiveYearsAgo = new Date(today)
+  fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5)
+  
+  let startDate = fiveYearsAgo
+  let endDate = today
 
   const startIndex = args.indexOf('--start')
   if (startIndex !== -1 && args[startIndex + 1]) {
@@ -256,17 +261,26 @@ async function main() {
     const batchPromises = batch.map(async (date) => {
       const dateStr = date.toISOString().split('T')[0]
       
-      // Check if already exists
+      // Check if already exists and is recent (within last 7 days, always update)
       const { data: existing } = await supabase
         .from('dynamic_prices')
-        .select('datum')
+        .select('datum, laatst_geupdate')
         .eq('datum', dateStr)
         .single()
 
-      if (existing) {
-        console.log(`   ⏭️  ${dateStr}: Already exists, skipping`)
+      // Always update recent dates (last 7 days) to ensure accuracy
+      const dateObj = new Date(dateStr)
+      const daysDiff = Math.floor((today.getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24))
+      const isRecent = daysDiff <= 7
+
+      if (existing && !isRecent) {
+        console.log(`   ⏭️  ${dateStr}: Already exists (${daysDiff} days ago), skipping`)
         skipCount++
         return
+      }
+
+      if (existing && isRecent) {
+        console.log(`   🔄 ${dateStr}: Exists but is recent, updating...`)
       }
 
       // Fetch prices
