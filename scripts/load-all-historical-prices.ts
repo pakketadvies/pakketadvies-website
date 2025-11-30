@@ -32,8 +32,9 @@ try {
   console.warn('⚠️  Could not load .env.local, using environment variables from system')
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+// Use provided token or environment variable
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'sbp_66788a47001b20bcb6275c4e8b2453e474d0efc0'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://dxztyhwiwgrxjnlohapm.supabase.co'
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('❌ Missing Supabase credentials')
@@ -41,6 +42,9 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('   Make sure these are set in .env.local or as environment variables')
   process.exit(1)
 }
+
+console.log('✅ Using Supabase URL:', SUPABASE_URL)
+console.log('✅ Using Service Role Key:', SUPABASE_SERVICE_ROLE_KEY.substring(0, 20) + '...')
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
