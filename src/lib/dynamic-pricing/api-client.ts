@@ -22,7 +22,7 @@ interface EnergyPrices {
     min: number
     max: number
   }
-  source: 'ENERGYZERO' | 'ENTSOE' | 'FALLBACK'
+  source: 'ENERGYZERO' | 'ENTSOE'
   date: string
 }
 
@@ -245,25 +245,11 @@ export async function fetchDayAheadPrices(date: Date = new Date()): Promise<Ener
     return entsoePrices
   }
 
-  console.error('❌ All pricing sources failed, using hardcoded fallback')
-
-  // Ultimate fallback: conservative estimates
-  return {
-    electricity: {
-      average: 0.20,
-      day: 0.22,
-      night: 0.15,
-      min: 0.12,
-      max: 0.35,
-    },
-    gas: {
-      average: 0.80,
-      min: 0.70,
-      max: 0.90,
-    },
-    source: 'FALLBACK',
-    date: date.toISOString().split('T')[0],
-  }
+  console.error('❌ All pricing sources failed')
+  
+  // Don't return fallback data - throw error instead
+  // This ensures we never save FALLBACK data to the database
+  throw new Error('Failed to fetch prices from all available sources')
 }
 
 /**

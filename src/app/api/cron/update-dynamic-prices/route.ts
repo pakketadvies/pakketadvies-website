@@ -44,12 +44,30 @@ export async function GET(request: Request) {
 
     // Fetch today's prices
     console.log(`📡 Fetching prices for ${todayStr}...`)
-    const prices = await fetchDayAheadPrices(today)
+    let prices
+    try {
+      prices = await fetchDayAheadPrices(today)
+    } catch (error: any) {
+      console.error('❌ Failed to fetch prices:', error.message)
+      return NextResponse.json(
+        { success: false, error: `Failed to fetch prices: ${error.message}` },
+        { status: 500 }
+      )
+    }
     
     if (!prices) {
-      console.error('❌ Failed to fetch prices')
+      console.error('❌ No prices returned from API')
       return NextResponse.json(
-        { success: false, error: 'Failed to fetch prices' },
+        { success: false, error: 'No prices returned from API' },
+        { status: 500 }
+      )
+    }
+    
+    // Ensure we never save FALLBACK data
+    if (prices.source === 'FALLBACK') {
+      console.error('❌ Received FALLBACK data - refusing to save')
+      return NextResponse.json(
+        { success: false, error: 'Received FALLBACK data - cannot save' },
         { status: 500 }
       )
     }

@@ -67,7 +67,7 @@ async function get30DayAverageElectricityPrices(): Promise<{
         day: dayPrice,
         night: nightPrice,
         single: singlePrice,
-        source: recentData.bron + '_FALLBACK',
+        source: recentData.bron,
         daysUsed: 1,
       }
     }
@@ -158,7 +158,7 @@ async function get30DayAverageGasPrice(): Promise<{
     if (recentData) {
       return {
         gas: recentData.gas_gemiddeld,
-        source: recentData.bron + '_FALLBACK',
+        source: recentData.bron,
         daysUsed: 1,
       }
     }
@@ -243,29 +243,29 @@ export async function getCurrentDynamicPrices(): Promise<{
       const freshPrices = await fetchDayAheadPrices(now)
       await saveDynamicPrices(freshPrices)
       
-      electricity30Day = {
-        day: freshPrices.electricity.day,
-        night: freshPrices.electricity.night,
-        single: freshPrices.electricity.average,
-        source: freshPrices.source,
-        daysUsed: 1,
-      }
-    } catch (fetchError) {
-      console.error('❌ Failed to fetch fresh electricity prices', fetchError)
-      
-      // Ultimate fallback: use recentData if available
-      if (recentData) {
         electricity30Day = {
-          day: recentData.elektriciteit_gemiddeld_dag,
-          night: recentData.elektriciteit_gemiddeld_nacht || recentData.elektriciteit_gemiddeld_dag * 0.8,
-          single: (recentData.elektriciteit_gemiddeld_dag + (recentData.elektriciteit_gemiddeld_nacht || recentData.elektriciteit_gemiddeld_dag * 0.8)) / 2,
-          source: recentData.bron + '_FALLBACK',
+          day: freshPrices.electricity.day,
+          night: freshPrices.electricity.night,
+          single: freshPrices.electricity.average,
+          source: freshPrices.source,
           daysUsed: 1,
         }
-      } else {
-        throw new Error('No electricity price data available')
+      } catch (fetchError) {
+        console.error('❌ Failed to fetch fresh electricity prices', fetchError)
+        
+        // Use recentData if available (but keep original source, not FALLBACK)
+        if (recentData) {
+          electricity30Day = {
+            day: recentData.elektriciteit_gemiddeld_dag,
+            night: recentData.elektriciteit_gemiddeld_nacht || recentData.elektriciteit_gemiddeld_dag * 0.8,
+            single: (recentData.elektriciteit_gemiddeld_dag + (recentData.elektriciteit_gemiddeld_nacht || recentData.elektriciteit_gemiddeld_dag * 0.8)) / 2,
+            source: recentData.bron,
+            daysUsed: 1,
+          }
+        } else {
+          throw new Error('No electricity price data available')
+        }
       }
-    }
   }
 
   // Get 30-day average for gas
@@ -281,25 +281,25 @@ export async function getCurrentDynamicPrices(): Promise<{
       const freshPrices = await fetchDayAheadPrices(now)
       await saveDynamicPrices(freshPrices)
       
-      gas30Day = {
-        gas: freshPrices.gas.average,
-        source: freshPrices.source,
-        daysUsed: 1,
-      }
-    } catch (fetchError) {
-      console.error('❌ Failed to fetch fresh gas prices', fetchError)
-      
-      // Ultimate fallback: use recentData if available
-      if (recentData) {
         gas30Day = {
-          gas: recentData.gas_gemiddeld,
-          source: recentData.bron + '_FALLBACK',
+          gas: freshPrices.gas.average,
+          source: freshPrices.source,
           daysUsed: 1,
         }
-      } else {
-        throw new Error('No gas price data available')
+      } catch (fetchError) {
+        console.error('❌ Failed to fetch fresh gas prices', fetchError)
+        
+        // Use recentData if available (but keep original source, not FALLBACK)
+        if (recentData) {
+          gas30Day = {
+            gas: recentData.gas_gemiddeld,
+            source: recentData.bron,
+            daysUsed: 1,
+          }
+        } else {
+          throw new Error('No gas price data available')
+        }
       }
-    }
   }
 
   // Check if we have fresh data (for isFresh flag)
