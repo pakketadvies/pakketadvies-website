@@ -19,6 +19,7 @@ export function Header() {
 
   const navLinks = [
     { href: '/diensten', label: 'Diensten' },
+    { href: '/kennisbank/energieprijzen', label: 'Energieprijzen' },
     { href: '/kennisbank', label: 'Kennisbank' },
     { href: '/over-ons', label: 'Over ons' },
     { href: '/contact', label: 'Contact' },
