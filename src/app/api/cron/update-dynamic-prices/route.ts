@@ -63,14 +63,8 @@ export async function GET(request: Request) {
       )
     }
     
-    // Ensure we never save FALLBACK data
-    if (prices.source === 'FALLBACK') {
-      console.error('❌ Received FALLBACK data - refusing to save')
-      return NextResponse.json(
-        { success: false, error: 'Received FALLBACK data - cannot save' },
-        { status: 500 }
-      )
-    }
+    // Note: fetchDayAheadPrices now throws an error instead of returning FALLBACK
+    // So we don't need to check for FALLBACK here anymore
 
     // Save to database
     console.log(`💾 Saving prices to database...`)

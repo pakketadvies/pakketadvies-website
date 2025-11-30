@@ -65,6 +65,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: CurrencyEur,
       active: pathname.startsWith('/admin/tarieven'),
     },
+    {
+      name: 'Energieprijzen',
+      href: '/admin/energieprijzen',
+      icon: Lightning,
+      active: pathname.startsWith('/admin/energieprijzen'),
+    },
   ]
 
   return (
