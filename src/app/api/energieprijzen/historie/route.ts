@@ -43,12 +43,14 @@ export async function GET(request: Request) {
     }
     
     // Fetch data from database
+    // Use a high limit to ensure we get all data (Supabase default is 1000)
     const { data, error } = await supabase
       .from('dynamic_prices')
       .select('*')
       .gte('datum', startDateStr)
       .lte('datum', endDateStr)
       .order('datum', { ascending: true })
+      .limit(10000) // High limit to get all historical data
     
     if (error) {
       console.error('Error fetching price history:', error)
