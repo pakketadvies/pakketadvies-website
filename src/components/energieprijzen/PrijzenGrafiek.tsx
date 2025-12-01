@@ -108,6 +108,16 @@ export function PrijzenGrafiek({
     }
   }, [selectedDate, localEnergietype, graphView])
 
+  // Memoize selected date string for stable dependencies
+  const selectedDateStr = useMemo(() => {
+    return selectedDate.toISOString().split('T')[0]
+  }, [selectedDate])
+
+  // Memoize current time timestamp for stable dependencies
+  const currentTimeStamp = useMemo(() => {
+    return currentTime.getTime()
+  }, [currentTime])
+
   // Format chart data
   const chartData = useMemo(() => {
     // For day view with hourly/quarter-hourly data
@@ -116,11 +126,10 @@ export function PrijzenGrafiek({
       
       // If no hourly data, fallback to daily data from props
       if (sourceData.length === 0) {
-        const dateStr = selectedDate.toISOString().split('T')[0]
         const dayData = data.find((d) => {
           // Handle both string and Date formats
           const recordDate = typeof d.datum === 'string' ? d.datum : new Date(d.datum).toISOString().split('T')[0]
-          return recordDate === dateStr
+          return recordDate === selectedDateStr
         })
         
         if (!dayData) return []
@@ -180,11 +189,10 @@ export function PrijzenGrafiek({
     
     // For gas day view - single daily price
     if (graphView === 'dag' && localEnergietype === 'gas') {
-      const dateStr = selectedDate.toISOString().split('T')[0]
       const dayData = data.find((d) => {
         // Handle both string and Date formats
         const recordDate = typeof d.datum === 'string' ? d.datum : new Date(d.datum).toISOString().split('T')[0]
-        return recordDate === dateStr
+        return recordDate === selectedDateStr
       })
       
       if (!dayData) return []
@@ -271,7 +279,16 @@ export function PrijzenGrafiek({
 
       return base
     })
-  }, [hourlyData, quarterHourlyData, showQuarterHour, data, graphView, localEnergietype, belastingen, selectedDate])
+  }, [
+    hourlyData, 
+    quarterHourlyData, 
+    showQuarterHour, 
+    data, 
+    graphView, 
+    localEnergietype, 
+    belastingen, 
+    selectedDateStr // Use memoized date string
+  ])
 
   // Calculate average price
   const averagePrice = useMemo(() => {
@@ -298,7 +315,7 @@ export function PrijzenGrafiek({
     if (graphView !== 'dag') return null
     
     const today = new Date()
-    const isToday = selectedDate.toISOString().split('T')[0] === today.toISOString().split('T')[0]
+    const isToday = selectedDateStr === today.toISOString().split('T')[0]
     
     if (!isToday) return null
     
@@ -343,8 +360,10 @@ export function PrijzenGrafiek({
         }
       }
     } else if (localEnergietype === 'gas') {
-      const today = selectedDate.toISOString().split('T')[0]
-      const dayData = data.find((d) => d.datum === today)
+      const dayData = data.find((d) => {
+        const recordDate = typeof d.datum === 'string' ? d.datum : new Date(d.datum).toISOString().split('T')[0]
+        return recordDate === selectedDateStr
+      })
       if (!dayData) return null
       
       let price = dayData.gas_gemiddeld || 0
@@ -361,7 +380,17 @@ export function PrijzenGrafiek({
     }
     
     return null
-  }, [graphView, selectedDate, currentTime, localEnergietype, showQuarterHour, hourlyData, quarterHourlyData, belastingen, data])
+  }, [
+    graphView, 
+    selectedDateStr, // Use memoized date string
+    currentTime, // Use currentTime directly (updates every minute)
+    localEnergietype, 
+    showQuarterHour, 
+    hourlyData, 
+    quarterHourlyData, 
+    belastingen, 
+    data
+  ])
 
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -500,7 +529,7 @@ export function PrijzenGrafiek({
     )
   }
 
-  const isToday = selectedDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
+  const isToday = selectedDateStr === new Date().toISOString().split('T')[0]
   const currentHour = currentTime.getHours()
   const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
   
@@ -524,7 +553,17 @@ export function PrijzenGrafiek({
     }
     
     return -1
-  }, [isToday, graphView, localEnergietype, showQuarterHour, currentHour, currentQuarter, hourlyData, quarterHourlyData])
+  }, [
+    isToday, 
+    graphView, 
+    localEnergietype, 
+    showQuarterHour, 
+    currentHour, 
+    currentQuarter, 
+    hourlyData, 
+    quarterHourlyData,
+    selectedDateStr // Use memoized date string
+  ])
 
   return (
     <Card className="mb-6">
