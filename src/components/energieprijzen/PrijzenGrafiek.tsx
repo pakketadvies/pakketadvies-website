@@ -109,22 +109,12 @@ export function PrijzenGrafiek({
   }, [selectedDateStr, localEnergietype, graphView])
 
   // Helper: get Date object from string (only for display/calculation)
-  const selectedDate = useMemo(() => {
-    return new Date(selectedDateStr + 'T00:00:00Z')
-  }, [selectedDateStr])
+  const selectedDate = new Date(selectedDateStr + 'T00:00:00Z')
 
-  // Memoize current time values - use currentTimeStamp as single source of truth
-  // Calculate directly from currentTimeStamp to avoid nested useMemo issues
-  const currentHour = useMemo(() => {
-    const time = new Date(currentTimeStamp)
-    return time.getHours()
-  }, [currentTimeStamp])
-  const currentQuarter = useMemo(() => {
-    const time = new Date(currentTimeStamp)
-    return Math.floor(time.getMinutes() / 15)
-  }, [currentTimeStamp])
-  // todayStr and isToday - calculate directly, no useMemo needed
-  // These are simple calculations that don't need memoization
+  // Calculate current time values directly - no useMemo to avoid React error #310
+  const currentTime = new Date(currentTimeStamp)
+  const currentHour = currentTime.getHours()
+  const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
   const todayStr = new Date().toISOString().split('T')[0]
   const isToday = selectedDateStr === todayStr
 
@@ -294,35 +284,26 @@ export function PrijzenGrafiek({
     hourlyData, 
     quarterHourlyData, 
     showQuarterHour, 
-    data, 
+    data, // Keep data - we need to recalculate when data changes
     graphView, 
     localEnergietype, 
     belastingen, 
-    selectedDateStr // Use memoized date string
+    selectedDateStr
   ])
 
-  // Calculate average price
-  const averagePrice = useMemo(() => {
-    if (chartData.length === 0) return 0
-    const prices = chartData.map((d: any) => d.price || d.prijs || 0)
-    return prices.reduce((sum: number, p: number) => sum + p, 0) / prices.length
-  }, [chartData])
+  // Calculate average price - direct calculation, no useMemo
+  const averagePrice = chartData.length === 0 ? 0 : 
+    chartData.map((d: any) => d.price || d.prijs || 0).reduce((sum: number, p: number) => sum + p, 0) / chartData.length
 
-  // Find min and max prices for labels
-  const { minPrice, maxPrice, minIndex, maxIndex } = useMemo(() => {
-    if (chartData.length === 0) return { minPrice: 0, maxPrice: 0, minIndex: -1, maxIndex: -1 }
-    
-    const prices = chartData.map((d: any) => d.price || d.prijs || 0)
-    const min = Math.min(...prices)
-    const max = Math.max(...prices)
-    const minIdx = prices.indexOf(min)
-    const maxIdx = prices.indexOf(max)
-    
-    return { minPrice: min, maxPrice: max, minIndex: minIdx, maxIndex: maxIdx }
-  }, [chartData])
+  // Find min and max prices for labels - direct calculation, no useMemo
+  const prices = chartData.map((d: any) => d.price || d.prijs || 0)
+  const minPrice = chartData.length === 0 ? 0 : Math.min(...prices)
+  const maxPrice = chartData.length === 0 ? 0 : Math.max(...prices)
+  const minIndex = chartData.length === 0 ? -1 : prices.indexOf(minPrice)
+  const maxIndex = chartData.length === 0 ? -1 : prices.indexOf(maxPrice)
 
-  // Get current hour/quarter price
-  const currentPriceInfo = useMemo(() => {
+  // Get current hour/quarter price - direct calculation, no useMemo
+  const getCurrentPriceInfo = () => {
     if (graphView !== 'dag') return null
     
     // Calculate isToday inside useMemo to avoid dependency issues
@@ -387,19 +368,9 @@ export function PrijzenGrafiek({
     }
     
     return null
-  }, [
-    graphView, 
-    selectedDateStr, // Use selectedDateStr instead of isToday to avoid recalculation issues
-    currentTimeStamp,
-    currentHour,
-    currentQuarter,
-    localEnergietype, 
-    showQuarterHour, 
-    hourlyData, 
-    quarterHourlyData, 
-    belastingen, 
-    data
-  ])
+  }
+  
+  const currentPriceInfo = getCurrentPriceInfo()
 
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -538,11 +509,9 @@ export function PrijzenGrafiek({
     )
   }
   
-  // Calculate current index for "Nu" line
-  const currentIndex = useMemo(() => {
-    // Calculate isToday inside useMemo to avoid dependency issues
-    const today = new Date().toISOString().split('T')[0]
-    if (selectedDateStr !== today || graphView !== 'dag') return -1
+  // Calculate current index for "Nu" line - direct calculation, no useMemo
+  const getCurrentIndex = () => {
+    if (!isToday || graphView !== 'dag') return -1
     
     if (localEnergietype === 'elektriciteit') {
       if (showQuarterHour && quarterHourlyData.length > 0) {
@@ -560,16 +529,9 @@ export function PrijzenGrafiek({
     }
     
     return -1
-  }, [
-    selectedDateStr, // Use selectedDateStr instead of isToday
-    graphView, 
-    localEnergietype, 
-    showQuarterHour, 
-    currentHour, 
-    currentQuarter, 
-    hourlyData, 
-    quarterHourlyData
-  ])
+  }
+  
+  const currentIndex = getCurrentIndex()
 
   return (
     <Card className="mb-6">

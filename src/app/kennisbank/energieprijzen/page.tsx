@@ -62,7 +62,19 @@ export default function EnergieprijzenPage() {
         const data = await response.json()
         
         if (data.success) {
-          setHistorieData(data.data || [])
+          // Only update if data actually changed to avoid unnecessary re-renders
+          setHistorieData((prev) => {
+            const newData = data.data || []
+            // Simple check: if length or first/last items changed, update
+            if (prev.length !== newData.length) return newData
+            if (prev.length > 0 && newData.length > 0) {
+              if (prev[0]?.datum !== newData[0]?.datum || 
+                  prev[prev.length - 1]?.datum !== newData[newData.length - 1]?.datum) {
+                return newData
+              }
+            }
+            return prev // Keep previous reference if data is the same
+          })
         } else {
           setError(data.error || 'Fout bij ophalen historische prijzen')
           setHistorieData([])
