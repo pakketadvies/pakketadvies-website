@@ -61,13 +61,13 @@ export function PrijzenGrafiek({
   // Store current time as timestamp to avoid Date object issues
   const [currentTimeStamp, setCurrentTimeStamp] = useState(() => Date.now())
 
-  // Update current time every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTimeStamp(Date.now())
-    }, 60000)
-    return () => clearInterval(interval)
-  }, [])
+  // Update current time every minute - DISABLED TEMPORARILY TO FIX REACT ERROR #310
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCurrentTimeStamp(Date.now())
+  //   }, 60000)
+  //   return () => clearInterval(interval)
+  // }, [])
 
   // Fetch hourly/quarter-hourly data when date or type changes
   useEffect(() => {
@@ -113,22 +113,20 @@ export function PrijzenGrafiek({
     return new Date(selectedDateStr + 'T00:00:00Z')
   }, [selectedDateStr])
 
-  // Memoize current time values to avoid recalculation issues
-  // Calculate these in the correct order to avoid dependency issues
-  const currentTime = useMemo(() => new Date(currentTimeStamp), [currentTimeStamp])
-  const currentHour = useMemo(() => {
-    const time = new Date(currentTimeStamp)
-    return time.getHours()
-  }, [currentTimeStamp])
-  const currentQuarter = useMemo(() => {
-    const time = new Date(currentTimeStamp)
-    return Math.floor(time.getMinutes() / 15)
-  }, [currentTimeStamp])
-  const todayStr = useMemo(() => {
+  // Calculate current time values - SIMPLIFIED TO FIX REACT ERROR #310
+  // Only calculate when needed, not in useMemo to avoid dependency issues
+  const getCurrentTimeValues = () => {
     const now = new Date()
-    return now.toISOString().split('T')[0]
-  }, [currentTimeStamp])
-  const isToday = useMemo(() => selectedDateStr === todayStr, [selectedDateStr, todayStr])
+    return {
+      hour: now.getHours(),
+      quarter: Math.floor(now.getMinutes() / 15),
+      todayStr: now.toISOString().split('T')[0],
+    }
+  }
+  
+  // Only calculate isToday, not the other values to reduce complexity
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isToday = selectedDateStr === todayStr
 
   // Format chart data
   const chartData = useMemo(() => {
@@ -327,6 +325,7 @@ export function PrijzenGrafiek({
     if (!isToday) return null
     
     if (localEnergietype === 'elektriciteit') {
+      const { hour: currentHour, quarter: currentQuarter } = getCurrentTimeValues()
       if (showQuarterHour && quarterHourlyData.length > 0) {
         const qhData = quarterHourlyData.find(
           (q) => q.hour === currentHour && q.quarter === currentQuarter
@@ -348,6 +347,7 @@ export function PrijzenGrafiek({
           index: quarterHourlyData.indexOf(qhData),
         }
       } else if (hourlyData.length > 0) {
+        const { hour: currentHour } = getCurrentTimeValues()
         const hourData = hourlyData.find((h) => h.hour === currentHour)
         if (!hourData) return null
         
@@ -388,9 +388,6 @@ export function PrijzenGrafiek({
     graphView, 
     isToday,
     selectedDateStr,
-    currentTimeStamp, // Recalculate when time changes
-    currentHour,
-    currentQuarter,
     localEnergietype, 
     showQuarterHour, 
     hourlyData, 
@@ -536,9 +533,11 @@ export function PrijzenGrafiek({
     )
   }
   
-  // Calculate current index for "Nu" line
-  const currentIndex = useMemo(() => {
+  // Calculate current index for "Nu" line - SIMPLIFIED
+  const getCurrentIndex = () => {
     if (!isToday || graphView !== 'dag') return -1
+    
+    const { hour: currentHour, quarter: currentQuarter } = getCurrentTimeValues()
     
     if (localEnergietype === 'elektriciteit') {
       if (showQuarterHour && quarterHourlyData.length > 0) {
@@ -556,17 +555,9 @@ export function PrijzenGrafiek({
     }
     
     return -1
-  }, [
-    isToday, 
-    graphView, 
-    localEnergietype, 
-    showQuarterHour, 
-    currentHour, 
-    currentQuarter, 
-    hourlyData, 
-    quarterHourlyData,
-    selectedDateStr
-  ])
+  }
+  
+  const currentIndex = getCurrentIndex()
 
   return (
     <Card className="mb-6">
