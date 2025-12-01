@@ -52,15 +52,16 @@ export async function POST(request: Request) {
 
     console.log(`🔄 Starting historical price load from ${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`)
 
-    // Generate list of dates to process
+    // Generate list of dates to process (from today backwards to start date)
+    // This ensures we process most recent dates first
     const dates: string[] = []
-    const currentDate = new Date(start)
-    while (currentDate <= end) {
+    const currentDate = new Date(end)
+    while (currentDate >= start) {
       dates.push(currentDate.toISOString().split('T')[0])
-      currentDate.setDate(currentDate.getDate() + 1)
+      currentDate.setDate(currentDate.getDate() - 1)
     }
 
-    console.log(`📅 Processing ${dates.length} dates...`)
+    console.log(`📅 Processing ${dates.length} dates (from ${end.toISOString().split('T')[0]} backwards to ${start.toISOString().split('T')[0]})...`)
 
     // Check which dates already have data (if not forcing)
     let datesToProcess = dates
