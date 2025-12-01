@@ -57,7 +57,8 @@ export default function EnergieprijzenPage() {
       
       try {
         const response = await fetch(
-          `/api/energieprijzen/historie?startDate=${dateRange.start}&endDate=${dateRange.end}&type=beide`
+          `/api/energieprijzen/historie?startDate=${dateRange.start}&endDate=${dateRange.end}&type=beide`,
+          { cache: 'no-store' } // Don't cache to ensure fresh data
         )
         const data = await response.json()
         

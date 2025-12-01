@@ -122,12 +122,20 @@ export function PrijzenGrafiek({
   const chartData = useMemo(() => {
     // Debug logging for week/month/year views
     if (graphView !== 'dag' && data && data.length > 0) {
+      const firstDate = data[0]?.datum
+      const lastDate = data[data.length - 1]?.datum
       console.log(`[PrijzenGrafiek] ${graphView} view:`, {
         totalData: data.length,
-        firstDate: data[0]?.datum,
-        lastDate: data[data.length - 1]?.datum,
-        sampleDates: data.slice(0, 5).map(d => d.datum)
+        firstDate,
+        lastDate,
+        sampleDates: data.slice(0, 5).map(d => d.datum),
+        sampleDatesEnd: data.slice(-5).map(d => d.datum)
       })
+      
+      // Check if we have recent data
+      const today = new Date().toISOString().split('T')[0]
+      const hasRecentData = lastDate >= today || lastDate >= '2025-11-01'
+      console.log(`[PrijzenGrafiek] Has recent data (>= 2025-11-01):`, hasRecentData, 'lastDate:', lastDate)
     }
     
     // For day view with hourly/quarter-hourly data
