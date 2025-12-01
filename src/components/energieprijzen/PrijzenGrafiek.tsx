@@ -13,7 +13,7 @@ import {
   Cell,
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/Card'
-import { Lightning, Flame, CaretLeft, CaretRight, Calendar } from '@phosphor-icons/react'
+import { Lightning, Flame, CaretLeft, CaretRight } from '@phosphor-icons/react'
 import type { Energietype } from './PrijzenFilters'
 
 interface HourlyPrice {
@@ -21,6 +21,14 @@ interface HourlyPrice {
   price: number
   min?: number
   max?: number
+}
+
+interface QuarterHourlyPrice {
+  hour: number
+  quarter: number
+  timestamp: string
+  price: number
+  time: string
 }
 
 interface PrijzenGrafiekProps {
@@ -36,20 +44,35 @@ const BTW_PERCENTAGE = 0.21
 const EB_ELEKTRICITEIT = 0.10154
 const EB_GAS = 0.57816
 
+type GraphView = 'dag' | 'week' | 'maand' | 'jaar'
+type LocalEnergietype = 'elektriciteit' | 'gas'
+
 export function PrijzenGrafiek({
   data,
   periode,
-  energietype,
+  energietype: propEnergietype,
   tarief,
   belastingen,
   loading,
 }: PrijzenGrafiekProps) {
+  // Local state for graph controls
+  const [localEnergietype, setLocalEnergietype] = useState<LocalEnergietype>(
+    propEnergietype === 'beide' ? 'elektriciteit' : propEnergietype
+  )
+  const [graphView, setGraphView] = useState<GraphView>('dag')
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [showQuarterHour, setShowQuarterHour] = useState(false)
   const [hourlyData, setHourlyData] = useState<HourlyPrice[]>([])
+  const [quarterHourlyData, setQuarterHourlyData] = useState<QuarterHourlyPrice[]>([])
   const [loadingHourly, setLoadingHourly] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
-  const timeRange = periode === '1m' ? 'dag' : periode === '3m' ? 'week' : periode === '1j' ? 'maand' : 'jaar'
+
+  // Update local energietype when prop changes
+  useEffect(() => {
+    if (propEnergietype !== 'beide') {
+      setLocalEnergietype(propEnergietype)
+    }
+  }, [propEnergietype])
 
   // Update current time every minute
   useEffect(() => {
@@ -59,10 +82,11 @@ export function PrijzenGrafiek({
     return () => clearInterval(interval)
   }, [])
 
-  // Fetch hourly data when date or type changes
+  // Fetch hourly/quarter-hourly data when date or type changes
   useEffect(() => {
-    if (timeRange !== 'dag' || energietype === 'gas') {
+    if (graphView !== 'dag' || localEnergietype === 'gas') {
       setHourlyData([])
+      setQuarterHourlyData([])
       return
     }
 
@@ -70,11 +94,16 @@ export function PrijzenGrafiek({
       setLoadingHourly(true)
       try {
         const dateStr = selectedDate.toISOString().split('T')[0]
-        const response = await fetch(`/api/energieprijzen/uur?date=${dateStr}&type=${energietype}`)
+        const response = await fetch(`/api/energieprijzen/uur?date=${dateStr}&type=${localEnergietype}`)
         const result = await response.json()
         
-        if (result.success && result.hourly) {
-          setHourlyData(result.hourly)
+        if (result.success) {
+          if (result.hourly) {
+            setHourlyData(result.hourly)
+          }
+          if (result.quarterHourly) {
+            setQuarterHourlyData(result.quarterHourly)
+          }
         }
       } catch (error) {
         console.error('Error fetching hourly data:', error)
@@ -84,12 +113,17 @@ export function PrijzenGrafiek({
     }
 
     fetchHourlyData()
-  }, [selectedDate, energietype, timeRange])
+  }, [selectedDate, localEnergietype, graphView])
 
   // Format chart data
   const chartData = useMemo(() => {
-    if (timeRange === 'dag' && hourlyData.length > 0 && energietype !== 'gas') {
-      return hourlyData.map((item) => {
+    // For day view with hourly/quarter-hourly data
+    if (graphView === 'dag' && localEnergietype === 'elektriciteit') {
+      const sourceData = showQuarterHour ? quarterHourlyData : hourlyData
+      
+      if (sourceData.length === 0) return []
+      
+      return sourceData.map((item, index) => {
         let price = item.price
         
         if (belastingen === 'inclusief') {
@@ -97,24 +131,81 @@ export function PrijzenGrafiek({
           price = withEB * (1 + BTW_PERCENTAGE)
         }
         
-        return {
-          hour: item.hour,
-          label: `${String(item.hour).padStart(2, '0')}:00`,
-          price: parseFloat(price.toFixed(5)),
-          min: item.min ? parseFloat((belastingen === 'inclusief' 
-            ? (item.min + EB_ELEKTRICITEIT) * (1 + BTW_PERCENTAGE)
-            : item.min).toFixed(5)) : undefined,
-          max: item.max ? parseFloat((belastingen === 'inclusief'
-            ? (item.max + EB_ELEKTRICITEIT) * (1 + BTW_PERCENTAGE)
-            : item.max).toFixed(5)) : undefined,
+        if (showQuarterHour) {
+          const qhItem = item as QuarterHourlyPrice
+          return {
+            index,
+            hour: qhItem.hour,
+            quarter: qhItem.quarter,
+            label: qhItem.time,
+            price: parseFloat(price.toFixed(5)),
+            originalPrice: qhItem.price,
+          }
+        } else {
+          const hItem = item as HourlyPrice
+          return {
+            index,
+            hour: hItem.hour,
+            label: `${String(hItem.hour).padStart(2, '0')}:00`,
+            price: parseFloat(price.toFixed(5)),
+            min: hItem.min ? parseFloat((belastingen === 'inclusief' 
+              ? (hItem.min + EB_ELEKTRICITEIT) * (1 + BTW_PERCENTAGE)
+              : hItem.min).toFixed(5)) : undefined,
+            max: hItem.max ? parseFloat((belastingen === 'inclusief'
+              ? (hItem.max + EB_ELEKTRICITEIT) * (1 + BTW_PERCENTAGE)
+              : hItem.max).toFixed(5)) : undefined,
+            originalPrice: hItem.price,
+          }
         }
       })
     }
     
-    // Fallback to daily data
+    // For gas day view - single daily price
+    if (graphView === 'dag' && localEnergietype === 'gas') {
+      const today = selectedDate.toISOString().split('T')[0]
+      const dayData = data.find((d) => d.datum === today)
+      
+      if (!dayData) return []
+      
+      let gasPrice = dayData.gas_gemiddeld || 0
+      if (belastingen === 'inclusief') {
+        const withEB = gasPrice + EB_GAS
+        gasPrice = withEB * (1 + BTW_PERCENTAGE)
+      }
+      
+      return [{
+        label: 'Vandaag',
+        price: parseFloat(gasPrice.toFixed(5)),
+        originalPrice: dayData.gas_gemiddeld || 0,
+      }]
+    }
+    
+    // Fallback to daily data for week/month/year views
     if (!data || data.length === 0) return []
     
-    return data.map((item) => {
+    // Filter data based on graphView
+    let filteredData = data
+    if (graphView === 'week') {
+      const weekAgo = new Date(selectedDate)
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      const weekAgoStr = weekAgo.toISOString().split('T')[0]
+      const selectedDateStr = selectedDate.toISOString().split('T')[0]
+      filteredData = data.filter((item) => item.datum >= weekAgoStr && item.datum <= selectedDateStr)
+    } else if (graphView === 'maand') {
+      const monthAgo = new Date(selectedDate)
+      monthAgo.setMonth(monthAgo.getMonth() - 1)
+      const monthAgoStr = monthAgo.toISOString().split('T')[0]
+      const selectedDateStr = selectedDate.toISOString().split('T')[0]
+      filteredData = data.filter((item) => item.datum >= monthAgoStr && item.datum <= selectedDateStr)
+    } else if (graphView === 'jaar') {
+      const yearAgo = new Date(selectedDate)
+      yearAgo.setFullYear(yearAgo.getFullYear() - 1)
+      const yearAgoStr = yearAgo.toISOString().split('T')[0]
+      const selectedDateStr = selectedDate.toISOString().split('T')[0]
+      filteredData = data.filter((item) => item.datum >= yearAgoStr && item.datum <= selectedDateStr)
+    }
+    
+    return filteredData.map((item) => {
       const base: any = {
         datum: new Date(item.datum).toLocaleDateString('nl-NL', {
           day: '2-digit',
@@ -123,7 +214,7 @@ export function PrijzenGrafiek({
         fullDate: item.datum,
       }
 
-      if (energietype === 'elektriciteit' || energietype === 'beide') {
+      if (localEnergietype === 'elektriciteit') {
         let elecPrice = item.elektriciteit_gemiddeld || item.elektriciteit_dag || 0
         
         if (belastingen === 'inclusief') {
@@ -131,14 +222,11 @@ export function PrijzenGrafiek({
           elecPrice = withEB * (1 + BTW_PERCENTAGE)
         }
         
-        if (energietype === 'beide') {
-          base.elektriciteit = parseFloat(elecPrice.toFixed(5))
-        } else {
-          base.prijs = parseFloat(elecPrice.toFixed(5))
-        }
+        base.prijs = parseFloat(elecPrice.toFixed(5))
+        base.originalPrice = item.elektriciteit_gemiddeld || item.elektriciteit_dag || 0
       }
 
-      if (energietype === 'gas' || energietype === 'beide') {
+      if (localEnergietype === 'gas') {
         let gasPrice = item.gas_gemiddeld || 0
         
         if (belastingen === 'inclusief') {
@@ -146,16 +234,103 @@ export function PrijzenGrafiek({
           gasPrice = withEB * (1 + BTW_PERCENTAGE)
         }
         
-        if (energietype === 'beide') {
-          base.gas = parseFloat(gasPrice.toFixed(5))
-        } else {
-          base.prijs = parseFloat(gasPrice.toFixed(5))
-        }
+        base.prijs = parseFloat(gasPrice.toFixed(5))
+        base.originalPrice = item.gas_gemiddeld || 0
       }
 
       return base
     })
-  }, [hourlyData, data, timeRange, energietype, belastingen])
+  }, [hourlyData, quarterHourlyData, showQuarterHour, data, graphView, localEnergietype, belastingen, selectedDate])
+
+  // Calculate average price
+  const averagePrice = useMemo(() => {
+    if (chartData.length === 0) return 0
+    const prices = chartData.map((d: any) => d.price || d.prijs || 0)
+    return prices.reduce((sum: number, p: number) => sum + p, 0) / prices.length
+  }, [chartData])
+
+  // Find min and max prices for labels
+  const { minPrice, maxPrice, minIndex, maxIndex } = useMemo(() => {
+    if (chartData.length === 0) return { minPrice: 0, maxPrice: 0, minIndex: -1, maxIndex: -1 }
+    
+    const prices = chartData.map((d: any) => d.price || d.prijs || 0)
+    const min = Math.min(...prices)
+    const max = Math.max(...prices)
+    const minIdx = prices.indexOf(min)
+    const maxIdx = prices.indexOf(max)
+    
+    return { minPrice: min, maxPrice: max, minIndex: minIdx, maxIndex: maxIdx }
+  }, [chartData])
+
+  // Get current hour/quarter price
+  const currentPriceInfo = useMemo(() => {
+    if (graphView !== 'dag') return null
+    
+    const today = new Date()
+    const isToday = selectedDate.toISOString().split('T')[0] === today.toISOString().split('T')[0]
+    
+    if (!isToday) return null
+    
+    if (localEnergietype === 'elektriciteit') {
+      const currentHour = currentTime.getHours()
+      const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
+      
+      if (showQuarterHour && quarterHourlyData.length > 0) {
+        const qhData = quarterHourlyData.find(
+          (q) => q.hour === currentHour && q.quarter === currentQuarter
+        )
+        if (!qhData) return null
+        
+        let price = qhData.price
+        if (belastingen === 'inclusief') {
+          const withEB = price + EB_ELEKTRICITEIT
+          price = withEB * (1 + BTW_PERCENTAGE)
+        }
+        
+        const nextQuarter = currentQuarter === 3 ? { hour: currentHour + 1, quarter: 0 } : { hour: currentHour, quarter: currentQuarter + 1 }
+        const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentQuarter * 15).padStart(2, '0')} - ${String(nextQuarter.hour).padStart(2, '0')}:${String(nextQuarter.quarter * 15).padStart(2, '0')}`
+        
+        return {
+          price: parseFloat(price.toFixed(5)),
+          time: timeStr,
+          index: quarterHourlyData.indexOf(qhData),
+        }
+      } else if (hourlyData.length > 0) {
+        const hourData = hourlyData.find((h) => h.hour === currentHour)
+        if (!hourData) return null
+        
+        let price = hourData.price
+        if (belastingen === 'inclusief') {
+          const withEB = price + EB_ELEKTRICITEIT
+          price = withEB * (1 + BTW_PERCENTAGE)
+        }
+        
+        return {
+          price: parseFloat(price.toFixed(5)),
+          time: `${String(currentHour).padStart(2, '0')}:00 - ${String(currentHour + 1).padStart(2, '0')}:00`,
+          index: hourlyData.indexOf(hourData),
+        }
+      }
+    } else if (localEnergietype === 'gas') {
+      const today = selectedDate.toISOString().split('T')[0]
+      const dayData = data.find((d) => d.datum === today)
+      if (!dayData) return null
+      
+      let price = dayData.gas_gemiddeld || 0
+      if (belastingen === 'inclusief') {
+        const withEB = price + EB_GAS
+        price = withEB * (1 + BTW_PERCENTAGE)
+      }
+      
+      return {
+        price: parseFloat(price.toFixed(5)),
+        time: 'Vandaag',
+        index: 0,
+      }
+    }
+    
+    return null
+  }, [graphView, selectedDate, currentTime, localEnergietype, showQuarterHour, hourlyData, quarterHourlyData, belastingen, data])
 
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -177,45 +352,38 @@ export function PrijzenGrafiek({
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate)
     if (direction === 'prev') {
-      newDate.setDate(newDate.getDate() - 1)
+      switch (graphView) {
+        case 'dag':
+          newDate.setDate(newDate.getDate() - 1)
+          break
+        case 'week':
+          newDate.setDate(newDate.getDate() - 7)
+          break
+        case 'maand':
+          newDate.setMonth(newDate.getMonth() - 1)
+          break
+        case 'jaar':
+          newDate.setFullYear(newDate.getFullYear() - 1)
+          break
+      }
     } else {
-      newDate.setDate(newDate.getDate() + 1)
+      switch (graphView) {
+        case 'dag':
+          newDate.setDate(newDate.getDate() + 1)
+          break
+        case 'week':
+          newDate.setDate(newDate.getDate() + 7)
+          break
+        case 'maand':
+          newDate.setMonth(newDate.getMonth() + 1)
+          break
+        case 'jaar':
+          newDate.setFullYear(newDate.getFullYear() + 1)
+          break
+      }
     }
     setSelectedDate(newDate)
   }
-
-  // Calculate average price
-  const averagePrice = useMemo(() => {
-    if (chartData.length === 0) return 0
-    const prices = chartData.map((d: any) => d.price || d.prijs || d.elektriciteit || d.gas || 0)
-    return prices.reduce((sum: number, p: number) => sum + p, 0) / prices.length
-  }, [chartData])
-
-  // Get current hour price
-  const currentHourPrice = useMemo(() => {
-    if (timeRange !== 'dag' || !hourlyData.length) return null
-    
-    const currentHour = currentTime.getHours()
-    const today = new Date()
-    const isToday = selectedDate.toISOString().split('T')[0] === today.toISOString().split('T')[0]
-    
-    if (!isToday) return null
-    
-    const hourData = hourlyData.find((h) => h.hour === currentHour)
-    if (!hourData) return null
-    
-    let price = hourData.price
-    if (belastingen === 'inclusief') {
-      const withEB = price + EB_ELEKTRICITEIT
-      price = withEB * (1 + BTW_PERCENTAGE)
-    }
-    
-    return {
-      hour: currentHour,
-      price: parseFloat(price.toFixed(5)),
-      time: `${String(currentHour).padStart(2, '0')}:00 - ${String(currentHour + 1).padStart(2, '0')}:00`,
-    }
-  }, [hourlyData, currentTime, selectedDate, timeRange, belastingen])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -231,6 +399,27 @@ export function PrijzenGrafiek({
       )
     }
     return null
+  }
+
+  // Custom label component for min/max prices on bars
+  const CustomBarLabel = ({ x, y, width, value, index }: any) => {
+    if (index !== minIndex && index !== maxIndex) return null
+    
+    const isMin = index === minIndex
+    const price = isMin ? minPrice : maxPrice
+    
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 8}
+        fill={isMin ? '#10B981' : '#EF4444'}
+        textAnchor="middle"
+        fontSize={12}
+        fontWeight="bold"
+      >
+        {formatPrice(price)}
+      </text>
+    )
   }
 
   if (loading || loadingHourly) {
@@ -265,20 +454,76 @@ export function PrijzenGrafiek({
 
   const isToday = selectedDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
   const currentHour = currentTime.getHours()
+  const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
+  
+  // Calculate current index for "Nu" line
+  const currentIndex = useMemo(() => {
+    if (!isToday || graphView !== 'dag') return -1
+    
+    if (localEnergietype === 'elektriciteit') {
+      if (showQuarterHour && quarterHourlyData.length > 0) {
+        const index = quarterHourlyData.findIndex(
+          (q) => q.hour === currentHour && q.quarter === currentQuarter
+        )
+        return index >= 0 ? index : -1
+      } else if (hourlyData.length > 0) {
+        const index = hourlyData.findIndex((h) => h.hour === currentHour)
+        return index >= 0 ? index : -1
+      }
+    } else if (localEnergietype === 'gas') {
+      // For gas, show "Nu" line on the single bar
+      return 0
+    }
+    
+    return -1
+  }, [isToday, graphView, localEnergietype, showQuarterHour, currentHour, currentQuarter, hourlyData, quarterHourlyData])
 
   return (
     <Card className="mb-6">
       <CardContent className="pt-8">
-        {/* Controls */}
+        {/* Controls Section */}
         <div className="mb-6 space-y-4">
+          {/* Type Toggle (Stroom/Gas) */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setLocalEnergietype('elektriciteit')
+                if (graphView !== 'dag') setGraphView('dag')
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                localEnergietype === 'elektriciteit'
+                  ? 'bg-brand-teal-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Lightning className="w-5 h-5" weight="duotone" />
+              Stroom
+            </button>
+            <button
+              onClick={() => {
+                setLocalEnergietype('gas')
+                setShowQuarterHour(false)
+                if (graphView !== 'dag') setGraphView('dag')
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                localEnergietype === 'gas'
+                  ? 'bg-brand-teal-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Flame className="w-5 h-5" weight="duotone" />
+              Gas
+            </button>
+          </div>
+
           {/* Quarter Hour Toggle (only for electricity, day view) */}
-          {energietype === 'elektriciteit' && timeRange === 'dag' && (
+          {localEnergietype === 'elektriciteit' && graphView === 'dag' && (
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">Toon kwartierprijzen</span>
               <button
                 onClick={() => setShowQuarterHour(!showQuarterHour)}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
-                  showQuarterHour ? 'bg-blue-500' : 'bg-gray-300'
+                  showQuarterHour ? 'bg-brand-teal-500' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -290,64 +535,81 @@ export function PrijzenGrafiek({
             </div>
           )}
 
-          {/* Date Navigation */}
-          {timeRange === 'dag' && (
-            <div className="flex items-center gap-4">
+          {/* Period Filters */}
+          <div className="flex items-center gap-2">
+            {(['dag', 'week', 'maand', 'jaar'] as GraphView[]).map((view) => (
               <button
-                onClick={() => navigateDate('prev')}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label="Vorige dag"
+                key={view}
+                onClick={() => {
+                  setGraphView(view)
+                  if (view !== 'dag') {
+                    setShowQuarterHour(false)
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  graphView === view
+                    ? 'bg-brand-teal-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                <CaretLeft className="w-5 h-5 text-gray-600" weight="bold" />
+                {view.charAt(0).toUpperCase() + view.slice(1)}
               </button>
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-                <Calendar className="w-5 h-5 text-gray-600" weight="duotone" />
-                <span className="font-medium text-gray-700">{formatDate(selectedDate)}</span>
-              </div>
-              <button
-                onClick={() => navigateDate('next')}
-                disabled={isToday}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Volgende dag"
-              >
-                <CaretRight className="w-5 h-5 text-gray-600" weight="bold" />
-              </button>
-            </div>
-          )}
+            ))}
+          </div>
 
-          {/* Current Time/Price Indicator */}
-          {currentHourPrice && isToday && timeRange === 'dag' && (
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="px-4 py-2 bg-yellow-100 border border-yellow-300 rounded-lg">
-                <span className="text-sm font-medium text-gray-700">
-                  Nu: {currentHourPrice.time}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">
-                  Gem. marktprijs: <span className="font-semibold">{formatPrice(currentHourPrice.price)}/kWh</span>
-                </span>
-              </div>
+          {/* Date Navigation */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigateDate('prev')}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Vorige"
+            >
+              <CaretLeft className="w-5 h-5 text-gray-600" weight="bold" />
+            </button>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+              <span className="font-medium text-gray-700">{formatDate(selectedDate)}</span>
             </div>
-          )}
+            <button
+              onClick={() => navigateDate('next')}
+              disabled={isToday && graphView === 'dag'}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Volgende"
+            >
+              <CaretRight className="w-5 h-5 text-gray-600" weight="bold" />
+            </button>
+          </div>
         </div>
 
+        {/* Current Price Box (yellow, above graph) */}
+        {currentPriceInfo && isToday && graphView === 'dag' && (
+          <div className="mb-4 px-4 py-3 bg-[#FCD34D] rounded-lg border border-yellow-400">
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="text-sm font-medium text-gray-800">
+                Nu: {currentPriceInfo.time}
+              </span>
+              <span className="text-sm text-gray-800">
+                Gem. marktprijs: <span className="font-semibold">{formatPrice(currentPriceInfo.price)}/{localEnergietype === 'elektriciteit' ? 'kWh' : 'm³'}</span>
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Graph */}
-        <div className="h-96 w-full">
+        <div className="h-96 w-full relative">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
               <XAxis
-                dataKey={timeRange === 'dag' ? 'label' : 'datum'}
+                dataKey={graphView === 'dag' ? 'label' : 'datum'}
                 stroke="#6B7280"
                 style={{ fontSize: '12px' }}
-                angle={timeRange === 'dag' ? 0 : -45}
-                textAnchor={timeRange === 'dag' ? 'middle' : 'end'}
-                height={timeRange === 'dag' ? 40 : 80}
+                angle={graphView === 'dag' ? 0 : -45}
+                textAnchor={graphView === 'dag' ? 'middle' : 'end'}
+                height={graphView === 'dag' ? 40 : 80}
+                interval={graphView === 'dag' && showQuarterHour ? 'preserveStartEnd' : 0}
               />
               <YAxis
                 stroke="#6B7280"
@@ -358,65 +620,66 @@ export function PrijzenGrafiek({
               <Tooltip content={<CustomTooltip />} />
               
               {/* Average price reference line */}
-              <ReferenceLine
-                y={averagePrice}
-                stroke="#000"
-                strokeDasharray="5 5"
-                strokeWidth={1}
-                label={{ value: `Gemiddeld: ${formatPrice(averagePrice)}`, position: 'right' }}
-              />
-              
-              {/* Current time indicator (only for today, day view) */}
-              {isToday && timeRange === 'dag' && currentHourPrice && (
+              {averagePrice > 0 && (
                 <ReferenceLine
-                  x={currentHour}
+                  y={averagePrice}
+                  stroke="#6B7280"
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                />
+              )}
+              
+              {/* Current time indicator (yellow "Nu" line) */}
+              {isToday && graphView === 'dag' && currentIndex >= 0 && (
+                <ReferenceLine
+                  x={currentIndex}
                   stroke="#FCD34D"
                   strokeWidth={3}
-                  label={{ value: 'Nu', position: 'bottom', fill: '#FCD34D', fontSize: 12 }}
+                  label={{ value: 'Nu', position: 'bottom', fill: '#FCD34D', fontSize: 12, fontWeight: 'bold' }}
                 />
               )}
               
               {/* Bar chart */}
-              {energietype === 'beide' ? (
-                <>
-                  <Bar dataKey="elektriciteit" name="Elektriciteit" fill="#00AF9B" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="gas" name="Gas" fill="#1A3756" radius={[4, 4, 0, 0]} />
-                </>
-              ) : (
-                <Bar
-                  dataKey={timeRange === 'dag' ? 'price' : 'prijs'}
-                  name={energietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
-                  fill="#00AF9B"
-                  radius={[4, 4, 0, 0]}
-                >
-                  {chartData.map((entry: any, index: number) => {
-                    // Color bars based on price (green for low, red for high)
-                    const price = entry.price || entry.prijs || entry.elektriciteit || entry.gas || 0
-                    const isLow = price < averagePrice * 0.9
-                    const isHigh = price > averagePrice * 1.1
-                    
-                    return (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
-                      />
-                    )
-                  })}
-                </Bar>
-              )}
+              <Bar
+                dataKey={graphView === 'dag' ? 'price' : 'prijs'}
+                name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
+                fill="#00AF9B"
+                radius={[4, 4, 0, 0]}
+                label={<CustomBarLabel />}
+              >
+                {chartData.map((entry: any, index: number) => {
+                  const price = entry.price || entry.prijs || 0
+                  const isLow = index === minIndex
+                  const isHigh = index === maxIndex
+                  
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
+                    />
+                  )
+                })}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
+          
+          {/* Type indicator (STROOM/GAS) - bottom right */}
+          <div className="absolute bottom-2 right-4">
+            <span className="text-xs font-semibold text-gray-400 uppercase">
+              {localEnergietype === 'elektriciteit' ? 'STROOM' : 'GAS'}
+            </span>
+          </div>
         </div>
 
         {/* Average price below graph */}
         <div className="mt-4 text-center mb-6">
           <p className="text-sm text-gray-600">
-            Marktprijs gemiddeld: <span className="font-semibold text-brand-navy-500">{formatPrice(averagePrice)}/kWh</span>
+            Marktprijs gemiddeld: <span className="font-semibold text-brand-navy-500">{formatPrice(averagePrice)}/{localEnergietype === 'elektriciteit' ? 'kWh' : 'm³'}</span>
           </p>
         </div>
 
         {/* Explanatory text (like Nieuwe Stroom) */}
-        {energietype === 'elektriciteit' && timeRange === 'dag' && (
+        {localEnergietype === 'elektriciteit' && graphView === 'dag' && (
           <div className="mt-6 space-y-3 text-sm text-gray-700">
             <p>
               Voor stroom verschilt de prijs per kwartier, voor gas per dag. Je kunt de marktprijzen (en je verbruik) realtime volgen, 
