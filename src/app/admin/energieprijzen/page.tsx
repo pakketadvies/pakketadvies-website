@@ -68,8 +68,14 @@ export default function EnergieprijzenAdminPage() {
           startDate: startDate.toISOString().split('T')[0],
           endDate: today.toISOString().split('T')[0],
           force,
+          limit: 100, // Process 100 dates per request to avoid timeout
         }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Server error: ${response.status} ${response.statusText}`)
+      }
 
       const data = await response.json()
 
@@ -79,6 +85,11 @@ export default function EnergieprijzenAdminPage() {
 
       setProgress(data)
       await fetchStats() // Refresh stats
+      
+      // If there's more data, show a message
+      if (data.hasMore) {
+        setError(`⚠️ Opgelet: Er zijn nog meer data te verwerken. Verwerkt: ${data.summary.processed}, Overgebleven: ${data.summary.remaining}. Klik opnieuw om verder te gaan.`)
+      }
     } catch (err: any) {
       console.error('Error loading historical prices:', err)
       setError(err.message || 'Er is een fout opgetreden bij het laden van historische prijzen')

@@ -16,8 +16,16 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-    const body = await request.json().catch(() => ({}))
-    const { force = false, startDate, endDate } = body
+    
+    // Parse body with better error handling
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      body = {}
+    }
+    
+    const { force = false, startDate, endDate, limit = 100 } = body
 
     // Calculate date range (5 years back by default)
     const today = new Date()
@@ -57,14 +65,33 @@ export async function POST(request: Request) {
     // Check which dates already have data (if not forcing)
     let datesToProcess = dates
     if (!force) {
-      const { data: existing } = await supabase
-        .from('dynamic_prices')
-        .select('datum')
-        .in('datum', dates)
-
-      const existingDates = new Set((existing || []).map((r: any) => r.datum))
+      // Check in chunks to avoid query size limits
+      const existingDates = new Set<string>()
+      const CHUNK_SIZE = 1000
+      
+      for (let i = 0; i < dates.length; i += CHUNK_SIZE) {
+        const chunk = dates.slice(i, i + CHUNK_SIZE)
+        const { data: existing, error: checkError } = await supabase
+          .from('dynamic_prices')
+          .select('datum')
+          .in('datum', chunk)
+        
+        if (checkError) {
+          console.error('Error checking existing dates:', checkError)
+          // Continue anyway
+        } else {
+          (existing || []).forEach((r: any) => existingDates.add(r.datum))
+        }
+      }
+      
       datesToProcess = dates.filter((d) => !existingDates.has(d))
       console.log(`⏭️  Skipping ${dates.length - datesToProcess.length} dates that already have data`)
+    }
+    
+    // Limit the number of dates to process per request (to avoid timeout)
+    if (datesToProcess.length > limit) {
+      datesToProcess = datesToProcess.slice(0, limit)
+      console.log(`⚠️  Limiting to ${limit} dates per request to avoid timeout`)
     }
 
     if (datesToProcess.length === 0) {
@@ -221,19 +248,26 @@ export async function POST(request: Request) {
         processed: successCount,
         failed: failCount,
         skipped,
+        remaining: dates.length - datesToProcess.length - successCount - failCount,
       },
       dateRange: {
         start: start.toISOString().split('T')[0],
         end: end.toISOString().split('T')[0],
       },
       errors: errors.slice(0, 50), // Return first 50 errors
+      hasMore: datesToProcess.length > limit,
     })
   } catch (error: any) {
     console.error('❌ Error in load-historical:', error)
+    
+    // Better error message
+    const errorMessage = error?.message || error?.toString() || 'Failed to load historical prices'
+    
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to load historical prices',
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
       },
       { status: 500 }
     )
