@@ -120,11 +120,6 @@ export function PrijzenGrafiek({
 
   // Format chart data
   const chartData = useMemo(() => {
-    // Debug: log data availability
-    if (graphView !== 'dag' && (!data || data.length === 0)) {
-      console.warn('[PrijzenGrafiek] No data available for', graphView, 'view. Data length:', data?.length || 0)
-    }
-    
     // For day view with hourly/quarter-hourly data
     if (graphView === 'dag' && localEnergietype === 'elektriciteit') {
       const sourceData = showQuarterHour ? quarterHourlyData : hourlyData
@@ -220,35 +215,66 @@ export function PrijzenGrafiek({
     
     // Filter data based on graphView
     // For week/month/year, always show data up to today (not selectedDate)
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayStr = today.toISOString().split('T')[0]
+    
+    // Helper function to normalize date strings
+    const normalizeDate = (dateInput: any): string => {
+      if (typeof dateInput === 'string') {
+        // If it's already a string in YYYY-MM-DD format, return it
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+          return dateInput
+        }
+        // Try to parse it
+        const parsed = new Date(dateInput)
+        if (!isNaN(parsed.getTime())) {
+          return parsed.toISOString().split('T')[0]
+        }
+        return dateInput
+      }
+      // If it's a Date object, convert to string
+      if (dateInput instanceof Date) {
+        return dateInput.toISOString().split('T')[0]
+      }
+      // Fallback: try to create a Date
+      const parsed = new Date(dateInput)
+      return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0]
+    }
     
     let filteredData = data
     if (graphView === 'week') {
-      // Show last 7 days from today
-      const weekAgo = new Date(today + 'T00:00:00Z')
-      weekAgo.setUTCDate(weekAgo.getUTCDate() - 7)
+      // Show last 7 days from today (including today)
+      const weekAgo = new Date(today)
+      weekAgo.setDate(weekAgo.getDate() - 6) // 7 days total (today + 6 days back)
       const weekAgoStr = weekAgo.toISOString().split('T')[0]
+      
       filteredData = data.filter((item) => {
-        const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= weekAgoStr && recordDate <= today
+        const recordDate = normalizeDate(item.datum)
+        if (!recordDate) return false
+        return recordDate >= weekAgoStr && recordDate <= todayStr
       })
     } else if (graphView === 'maand') {
-      // Show last 30 days from today
-      const monthAgo = new Date(today + 'T00:00:00Z')
-      monthAgo.setUTCDate(monthAgo.getUTCDate() - 30)
+      // Show last 30 days from today (including today)
+      const monthAgo = new Date(today)
+      monthAgo.setDate(monthAgo.getDate() - 29) // 30 days total (today + 29 days back)
       const monthAgoStr = monthAgo.toISOString().split('T')[0]
+      
       filteredData = data.filter((item) => {
-        const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= monthAgoStr && recordDate <= today
+        const recordDate = normalizeDate(item.datum)
+        if (!recordDate) return false
+        return recordDate >= monthAgoStr && recordDate <= todayStr
       })
     } else if (graphView === 'jaar') {
-      // Show last 365 days from today
-      const yearAgo = new Date(today + 'T00:00:00Z')
-      yearAgo.setUTCDate(yearAgo.getUTCDate() - 365)
+      // Show last 365 days from today (including today)
+      const yearAgo = new Date(today)
+      yearAgo.setDate(yearAgo.getDate() - 364) // 365 days total (today + 364 days back)
       const yearAgoStr = yearAgo.toISOString().split('T')[0]
+      
       filteredData = data.filter((item) => {
-        const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= yearAgoStr && recordDate <= today
+        const recordDate = normalizeDate(item.datum)
+        if (!recordDate) return false
+        return recordDate >= yearAgoStr && recordDate <= todayStr
       })
     }
     
