@@ -214,34 +214,36 @@ export function PrijzenGrafiek({
     if (!data || data.length === 0) return []
     
     // Filter data based on graphView
-    // For week/month/year, always show data up to today, not selectedDate
+    // For week/month/year, always show data up to today (not selectedDate)
     const today = new Date().toISOString().split('T')[0]
-    const endDate = selectedDateStr > today ? today : selectedDateStr
     
     let filteredData = data
     if (graphView === 'week') {
-      const weekAgo = new Date(endDate + 'T00:00:00Z')
+      // Show last 7 days from today
+      const weekAgo = new Date(today + 'T00:00:00Z')
       weekAgo.setUTCDate(weekAgo.getUTCDate() - 7)
       const weekAgoStr = weekAgo.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= weekAgoStr && recordDate <= endDate
+        return recordDate >= weekAgoStr && recordDate <= today
       })
     } else if (graphView === 'maand') {
-      const monthAgo = new Date(endDate + 'T00:00:00Z')
-      monthAgo.setUTCMonth(monthAgo.getUTCMonth() - 1)
+      // Show last 30 days from today
+      const monthAgo = new Date(today + 'T00:00:00Z')
+      monthAgo.setUTCDate(monthAgo.getUTCDate() - 30)
       const monthAgoStr = monthAgo.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= monthAgoStr && recordDate <= endDate
+        return recordDate >= monthAgoStr && recordDate <= today
       })
     } else if (graphView === 'jaar') {
-      const yearAgo = new Date(endDate + 'T00:00:00Z')
-      yearAgo.setUTCFullYear(yearAgo.getUTCFullYear() - 1)
+      // Show last 365 days from today
+      const yearAgo = new Date(today + 'T00:00:00Z')
+      yearAgo.setUTCDate(yearAgo.getUTCDate() - 365)
       const yearAgoStr = yearAgo.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= yearAgoStr && recordDate <= endDate
+        return recordDate >= yearAgoStr && recordDate <= today
       })
     }
     
@@ -650,8 +652,9 @@ export function PrijzenGrafiek({
         )}
 
         {/* Graph */}
-        <div className="h-96 w-full relative">
-          <ResponsiveContainer width="100%" height="100%">
+        {chartData && chartData.length > 0 ? (
+          <div className="h-96 w-full relative min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minHeight={384} minWidth={0}>
             <BarChart
               data={chartData}
               margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
@@ -716,15 +719,16 @@ export function PrijzenGrafiek({
                 })}
               </Bar>
             </BarChart>
-          </ResponsiveContainer>
-          
-          {/* Type indicator (STROOM/GAS) - bottom right */}
-          <div className="absolute bottom-2 right-4">
-            <span className="text-xs font-semibold text-gray-400 uppercase">
-              {localEnergietype === 'elektriciteit' ? 'STROOM' : 'GAS'}
-            </span>
+            </ResponsiveContainer>
+            
+            {/* Type indicator (STROOM/GAS) - bottom right */}
+            <div className="absolute bottom-2 right-4">
+              <span className="text-xs font-semibold text-gray-400 uppercase">
+                {localEnergietype === 'elektriciteit' ? 'STROOM' : 'GAS'}
+              </span>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {/* Average price below graph */}
         <div className="mt-4 text-center mb-6">
