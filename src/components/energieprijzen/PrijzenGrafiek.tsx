@@ -114,9 +114,15 @@ export function PrijzenGrafiek({
   }, [selectedDateStr])
 
   // Memoize current time values - use currentTimeStamp as single source of truth
-  const currentTimeObj = useMemo(() => new Date(currentTimeStamp), [currentTimeStamp])
-  const currentHour = useMemo(() => currentTimeObj.getHours(), [currentTimeStamp])
-  const currentQuarter = useMemo(() => Math.floor(currentTimeObj.getMinutes() / 15), [currentTimeStamp])
+  // Calculate directly from currentTimeStamp to avoid nested useMemo issues
+  const currentHour = useMemo(() => {
+    const time = new Date(currentTimeStamp)
+    return time.getHours()
+  }, [currentTimeStamp])
+  const currentQuarter = useMemo(() => {
+    const time = new Date(currentTimeStamp)
+    return Math.floor(time.getMinutes() / 15)
+  }, [currentTimeStamp])
   const todayStr = useMemo(() => {
     const now = new Date()
     return now.toISOString().split('T')[0]
@@ -219,30 +225,34 @@ export function PrijzenGrafiek({
     if (!data || data.length === 0) return []
     
     // Filter data based on graphView
+    // For week/month/year, always show data up to today, not selectedDate
+    const today = new Date().toISOString().split('T')[0]
+    const endDate = selectedDateStr > today ? today : selectedDateStr
+    
     let filteredData = data
     if (graphView === 'week') {
-      const weekAgo = new Date(selectedDateStr + 'T00:00:00Z')
+      const weekAgo = new Date(endDate + 'T00:00:00Z')
       weekAgo.setUTCDate(weekAgo.getUTCDate() - 7)
       const weekAgoStr = weekAgo.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= weekAgoStr && recordDate <= selectedDateStr
+        return recordDate >= weekAgoStr && recordDate <= endDate
       })
     } else if (graphView === 'maand') {
-      const monthAgo = new Date(selectedDateStr + 'T00:00:00Z')
+      const monthAgo = new Date(endDate + 'T00:00:00Z')
       monthAgo.setUTCMonth(monthAgo.getUTCMonth() - 1)
       const monthAgoStr = monthAgo.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= monthAgoStr && recordDate <= selectedDateStr
+        return recordDate >= monthAgoStr && recordDate <= endDate
       })
     } else if (graphView === 'jaar') {
-      const yearAgo = new Date(selectedDateStr + 'T00:00:00Z')
+      const yearAgo = new Date(endDate + 'T00:00:00Z')
       yearAgo.setUTCFullYear(yearAgo.getUTCFullYear() - 1)
       const yearAgoStr = yearAgo.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
-        return recordDate >= yearAgoStr && recordDate <= selectedDateStr
+        return recordDate >= yearAgoStr && recordDate <= endDate
       })
     }
     
