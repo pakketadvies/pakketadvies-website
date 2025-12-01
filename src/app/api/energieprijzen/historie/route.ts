@@ -43,14 +43,40 @@ export async function GET(request: Request) {
     }
     
     // Fetch data from database
-    // Use a high limit to ensure we get all data (Supabase default is 1000)
-    const { data, error } = await supabase
-      .from('dynamic_prices')
-      .select('*')
-      .gte('datum', startDateStr)
-      .lte('datum', endDateStr)
-      .order('datum', { ascending: true })
-      .limit(10000) // High limit to get all historical data
+    // Supabase has a default limit of 1000, we need to fetch all data
+    // Use pagination to get all records
+    let allData: any[] = []
+    let from = 0
+    const pageSize = 1000
+    let hasMore = true
+    
+    while (hasMore) {
+      const { data: pageData, error } = await supabase
+        .from('dynamic_prices')
+        .select('*')
+        .gte('datum', startDateStr)
+        .lte('datum', endDateStr)
+        .order('datum', { ascending: true })
+        .range(from, from + pageSize - 1)
+      
+      if (error) {
+        console.error('Error fetching price history:', error)
+        return NextResponse.json(
+          { success: false, error: 'Fout bij ophalen historische prijzen' },
+          { status: 500 }
+        )
+      }
+      
+      if (pageData && pageData.length > 0) {
+        allData = [...allData, ...pageData]
+        from += pageSize
+        hasMore = pageData.length === pageSize
+      } else {
+        hasMore = false
+      }
+    }
+    
+    const data = allData
     
     if (error) {
       console.error('Error fetching price history:', error)

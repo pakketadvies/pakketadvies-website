@@ -726,8 +726,8 @@ export function PrijzenGrafiek({
 
         {/* Graph */}
         {chartData && chartData.length > 0 ? (
-          <div className="h-96 w-full relative" style={{ minWidth: '1px', minHeight: '384px', width: '100%', height: '384px' }}>
-            <ResponsiveContainer width="100%" height="100%" minHeight={384} minWidth={0}>
+          <div className="h-96 w-full relative" style={{ width: '100%', height: '384px' }}>
+            <ResponsiveContainer width="100%" height={384}>
             <BarChart
               data={chartData}
               margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
