@@ -78,14 +78,6 @@ export async function GET(request: Request) {
     
     const data = allData
     
-    if (error) {
-      console.error('Error fetching price history:', error)
-      return NextResponse.json(
-        { success: false, error: 'Fout bij ophalen historische prijzen' },
-        { status: 500 }
-      )
-    }
-    
     // Transform data based on type
     const transformed = (data || []).map(record => {
       const base: any = {
