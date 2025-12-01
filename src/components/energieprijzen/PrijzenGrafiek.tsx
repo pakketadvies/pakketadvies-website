@@ -58,13 +58,13 @@ export function PrijzenGrafiek({
   const [hourlyData, setHourlyData] = useState<HourlyPrice[]>([])
   const [quarterHourlyData, setQuarterHourlyData] = useState<QuarterHourlyPrice[]>([])
   const [loadingHourly, setLoadingHourly] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
-
+  // Store current time as timestamp to avoid Date object issues
+  const [currentTimeStamp, setCurrentTimeStamp] = useState(() => Date.now())
 
   // Update current time every minute
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date())
+      setCurrentTimeStamp(Date.now())
     }, 60000)
     return () => clearInterval(interval)
   }, [])
@@ -113,29 +113,12 @@ export function PrijzenGrafiek({
     return new Date(selectedDateStr + 'T00:00:00Z')
   }, [selectedDateStr])
 
-  // Memoize current time timestamp for stable dependencies
-  const currentTimeStamp = useMemo(() => {
-    return currentTime.getTime()
-  }, [currentTime])
-
-  // Memoize current hour and quarter for stable dependencies
-  const currentHourMemo = useMemo(() => {
-    return currentTime.getHours()
-  }, [currentTimeStamp])
-
-  const currentQuarterMemo = useMemo(() => {
-    return Math.floor(currentTime.getMinutes() / 15)
-  }, [currentTimeStamp])
-
-  // Memoize today string - update when time changes
-  const todayStr = useMemo(() => {
-    return new Date().toISOString().split('T')[0]
-  }, [currentTimeStamp])
-
-  // Memoize isToday check
-  const isToday = useMemo(() => {
-    return selectedDateStr === todayStr
-  }, [selectedDateStr, todayStr])
+  // Calculate current time values directly (no useMemo needed for simple calculations)
+  const currentTime = new Date(currentTimeStamp)
+  const currentHour = currentTime.getHours()
+  const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isToday = selectedDateStr === todayStr
 
   // Format chart data
   const chartData = useMemo(() => {
@@ -334,9 +317,6 @@ export function PrijzenGrafiek({
     if (!isToday) return null
     
     if (localEnergietype === 'elektriciteit') {
-      const currentHour = currentHourMemo
-      const currentQuarter = currentQuarterMemo
-      
       if (showQuarterHour && quarterHourlyData.length > 0) {
         const qhData = quarterHourlyData.find(
           (q) => q.hour === currentHour && q.quarter === currentQuarter
@@ -396,11 +376,11 @@ export function PrijzenGrafiek({
     return null
   }, [
     graphView, 
-    isToday, // Use memoized isToday
-    selectedDateStr, // Use memoized date string
-    currentTimeStamp, // Use memoized timestamp
-    currentHourMemo, // Use memoized hour
-    currentQuarterMemo, // Use memoized quarter
+    isToday,
+    selectedDateStr,
+    currentTimeStamp, // Recalculate when time changes
+    currentHour, // Direct value, no memo needed
+    currentQuarter, // Direct value, no memo needed
     localEnergietype, 
     showQuarterHour, 
     hourlyData, 
@@ -553,11 +533,11 @@ export function PrijzenGrafiek({
     if (localEnergietype === 'elektriciteit') {
       if (showQuarterHour && quarterHourlyData.length > 0) {
         const index = quarterHourlyData.findIndex(
-          (q) => q.hour === currentHourMemo && q.quarter === currentQuarterMemo
+          (q) => q.hour === currentHour && q.quarter === currentQuarter
         )
         return index >= 0 ? index : -1
       } else if (hourlyData.length > 0) {
-        const index = hourlyData.findIndex((h) => h.hour === currentHourMemo)
+        const index = hourlyData.findIndex((h) => h.hour === currentHour)
         return index >= 0 ? index : -1
       }
     } else if (localEnergietype === 'gas') {
@@ -571,11 +551,11 @@ export function PrijzenGrafiek({
     graphView, 
     localEnergietype, 
     showQuarterHour, 
-    currentHourMemo, 
-    currentQuarterMemo, 
+    currentHour, 
+    currentQuarter, 
     hourlyData, 
     quarterHourlyData,
-    selectedDateStr // Use memoized date string
+    selectedDateStr
   ])
 
   return (
