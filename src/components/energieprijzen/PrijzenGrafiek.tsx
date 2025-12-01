@@ -119,13 +119,26 @@ export function PrijzenGrafiek({
   }, [currentTime])
 
   // Memoize current hour and quarter for stable dependencies
+  // Use currentTimeStamp to recalculate when time changes
   const currentHourMemo = useMemo(() => {
-    return currentTime.getHours()
+    const date = new Date(currentTimeStamp)
+    return date.getHours()
   }, [currentTimeStamp])
 
   const currentQuarterMemo = useMemo(() => {
-    return Math.floor(currentTime.getMinutes() / 15)
+    const date = new Date(currentTimeStamp)
+    return Math.floor(date.getMinutes() / 15)
   }, [currentTimeStamp])
+
+  // Memoize today string - update when time changes
+  const todayStr = useMemo(() => {
+    return new Date().toISOString().split('T')[0]
+  }, [currentTimeStamp]) // Update when time changes (every minute)
+
+  // Memoize isToday check
+  const isToday = useMemo(() => {
+    return selectedDateStr === todayStr
+  }, [selectedDateStr, todayStr])
 
   // Format chart data
   const chartData = useMemo(() => {
@@ -320,9 +333,7 @@ export function PrijzenGrafiek({
   const currentPriceInfo = useMemo(() => {
     if (graphView !== 'dag') return null
     
-    const today = new Date()
-    const isToday = selectedDateStr === today.toISOString().split('T')[0]
-    
+    // Use memoized isToday instead of recalculating
     if (!isToday) return null
     
     if (localEnergietype === 'elektriciteit') {
@@ -388,6 +399,7 @@ export function PrijzenGrafiek({
     return null
   }, [
     graphView, 
+    isToday, // Use memoized isToday
     selectedDateStr, // Use memoized date string
     currentTimeStamp, // Use memoized timestamp
     currentHourMemo, // Use memoized hour
@@ -536,11 +548,6 @@ export function PrijzenGrafiek({
       </Card>
     )
   }
-
-  // Memoize isToday check
-  const isToday = useMemo(() => {
-    return selectedDateStr === new Date().toISOString().split('T')[0]
-  }, [selectedDateStr])
   
   // Calculate current index for "Nu" line
   const currentIndex = useMemo(() => {
