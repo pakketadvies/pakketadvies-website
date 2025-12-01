@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { PrijzenInfoCards } from '@/components/energieprijzen/PrijzenInfoCards'
-import { PrijzenFilters, type PeriodeType, type Energietype, type TariefType, type BelastingenType } from '@/components/energieprijzen/PrijzenFilters'
 import { PrijzenGrafiek } from '@/components/energieprijzen/PrijzenGrafiek'
 import { PrijzenTabel } from '@/components/energieprijzen/PrijzenTabel'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -11,44 +10,23 @@ import { Button } from '@/components/ui/Button'
 import { Info, ArrowRight, Lightning, Flame, Question } from '@phosphor-icons/react'
 
 export default function EnergieprijzenPage() {
-  const [periode, setPeriode] = useState<PeriodeType>('1m')
-  const [energietype, setEnergietype] = useState<Energietype>('beide')
-  const [tarief, setTarief] = useState<TariefType>('gemiddeld')
-  const [belastingen, setBelastingen] = useState<BelastingenType>('exclusief')
-  
+  const [belastingen] = useState<'exclusief' | 'inclusief'>('exclusief')
   const [huidigeData, setHuidigeData] = useState<any>(null)
   const [historieData, setHistorieData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Calculate date range based on periode
+  // Calculate date range for historical data (5 years back)
   const dateRange = useMemo(() => {
     const today = new Date()
     const startDate = new Date(today)
-    
-    switch (periode) {
-      case '1m':
-        startDate.setMonth(startDate.getMonth() - 1)
-        break
-      case '3m':
-        startDate.setMonth(startDate.getMonth() - 3)
-        break
-      case '1j':
-        startDate.setFullYear(startDate.getFullYear() - 1)
-        break
-      case '2j':
-        startDate.setFullYear(startDate.getFullYear() - 2)
-        break
-      case '5j':
-        startDate.setFullYear(startDate.getFullYear() - 5)
-        break
-    }
+    startDate.setFullYear(startDate.getFullYear() - 5)
     
     return {
       start: startDate.toISOString().split('T')[0],
       end: today.toISOString().split('T')[0],
     }
-  }, [periode])
+  }, [])
 
   // Fetch current prices
   useEffect(() => {
@@ -79,7 +57,7 @@ export default function EnergieprijzenPage() {
       
       try {
         const response = await fetch(
-          `/api/energieprijzen/historie?startDate=${dateRange.start}&endDate=${dateRange.end}&type=${energietype}`
+          `/api/energieprijzen/historie?startDate=${dateRange.start}&endDate=${dateRange.end}&type=beide`
         )
         const data = await response.json()
         
@@ -99,7 +77,7 @@ export default function EnergieprijzenPage() {
     }
     
     fetchHistorie()
-  }, [dateRange, energietype])
+  }, [dateRange])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -142,18 +120,6 @@ export default function EnergieprijzenPage() {
             />
           )}
 
-          {/* Filters */}
-          <PrijzenFilters
-            periode={periode}
-            energietype={energietype}
-            tarief={tarief}
-            belastingen={belastingen}
-            onPeriodeChange={setPeriode}
-            onEnergietypeChange={setEnergietype}
-            onTariefChange={setTarief}
-            onBelastingenChange={setBelastingen}
-          />
-
           {/* Error Message */}
           {error && (
             <Card className="mb-6 border-red-200 bg-red-50">
@@ -169,9 +135,6 @@ export default function EnergieprijzenPage() {
           {/* Grafiek */}
           <PrijzenGrafiek
             data={historieData}
-            periode={periode}
-            energietype={energietype}
-            tarief={tarief}
             belastingen={belastingen}
             loading={loading}
           />
@@ -179,8 +142,8 @@ export default function EnergieprijzenPage() {
           {/* Tabel */}
           <PrijzenTabel
             data={historieData}
-            energietype={energietype}
-            tarief={tarief}
+            energietype="beide"
+            tarief="gemiddeld"
             belastingen={belastingen}
             loading={loading}
           />

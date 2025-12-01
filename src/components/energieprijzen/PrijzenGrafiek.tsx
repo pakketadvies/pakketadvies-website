@@ -33,10 +33,7 @@ interface QuarterHourlyPrice {
 
 interface PrijzenGrafiekProps {
   data: any[]
-  periode: string
-  energietype: Energietype
-  tarief: string
-  belastingen: string
+  belastingen?: string
   loading?: boolean
 }
 
@@ -49,16 +46,11 @@ type LocalEnergietype = 'elektriciteit' | 'gas'
 
 export function PrijzenGrafiek({
   data,
-  periode,
-  energietype: propEnergietype,
-  tarief,
-  belastingen,
+  belastingen = 'exclusief',
   loading,
 }: PrijzenGrafiekProps) {
   // Local state for graph controls
-  const [localEnergietype, setLocalEnergietype] = useState<LocalEnergietype>(
-    propEnergietype === 'beide' ? 'elektriciteit' : propEnergietype
-  )
+  const [localEnergietype, setLocalEnergietype] = useState<LocalEnergietype>('elektriciteit')
   const [graphView, setGraphView] = useState<GraphView>('dag')
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [showQuarterHour, setShowQuarterHour] = useState(false)
@@ -67,12 +59,6 @@ export function PrijzenGrafiek({
   const [loadingHourly, setLoadingHourly] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
 
-  // Update local energietype when prop changes
-  useEffect(() => {
-    if (propEnergietype !== 'beide') {
-      setLocalEnergietype(propEnergietype)
-    }
-  }, [propEnergietype])
 
   // Update current time every minute
   useEffect(() => {
@@ -84,35 +70,42 @@ export function PrijzenGrafiek({
 
   // Fetch hourly/quarter-hourly data when date or type changes
   useEffect(() => {
-    if (graphView !== 'dag' || localEnergietype === 'gas') {
+    // Always fetch data for day view, or for gas (single daily price)
+    if (graphView === 'dag') {
+      const fetchHourlyData = async () => {
+        setLoadingHourly(true)
+        try {
+          const dateStr = selectedDate.toISOString().split('T')[0]
+          const response = await fetch(`/api/energieprijzen/uur?date=${dateStr}&type=${localEnergietype}`)
+          const result = await response.json()
+          
+          if (result.success) {
+            if (result.hourly) {
+              setHourlyData(result.hourly)
+            }
+            if (result.quarterHourly) {
+              setQuarterHourlyData(result.quarterHourly)
+            }
+          } else {
+            // If API fails, clear data
+            setHourlyData([])
+            setQuarterHourlyData([])
+          }
+        } catch (error) {
+          console.error('Error fetching hourly data:', error)
+          setHourlyData([])
+          setQuarterHourlyData([])
+        } finally {
+          setLoadingHourly(false)
+        }
+      }
+
+      fetchHourlyData()
+    } else {
+      // For week/month/year, clear hourly data
       setHourlyData([])
       setQuarterHourlyData([])
-      return
     }
-
-    const fetchHourlyData = async () => {
-      setLoadingHourly(true)
-      try {
-        const dateStr = selectedDate.toISOString().split('T')[0]
-        const response = await fetch(`/api/energieprijzen/uur?date=${dateStr}&type=${localEnergietype}`)
-        const result = await response.json()
-        
-        if (result.success) {
-          if (result.hourly) {
-            setHourlyData(result.hourly)
-          }
-          if (result.quarterHourly) {
-            setQuarterHourlyData(result.quarterHourly)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching hourly data:', error)
-      } finally {
-        setLoadingHourly(false)
-      }
-    }
-
-    fetchHourlyData()
   }, [selectedDate, localEnergietype, graphView])
 
   // Format chart data
@@ -437,7 +430,24 @@ export function PrijzenGrafiek({
     )
   }
 
-  if (!chartData || chartData.length === 0) {
+  // Don't show empty state if we're still loading hourly data for day view
+  if ((!chartData || chartData.length === 0) && !loadingHourly && graphView === 'dag') {
+    return (
+      <Card className="mb-6">
+        <CardContent className="pt-8">
+          <div className="h-96 flex items-center justify-center">
+            <div className="text-center">
+              <Lightning className="w-16 h-16 text-gray-300 mx-auto mb-4" weight="duotone" />
+              <p className="text-gray-500">Geen data beschikbaar voor deze datum</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+  
+  // For week/month/year views, show empty state if no data
+  if ((!chartData || chartData.length === 0) && graphView !== 'dag' && !loading) {
     return (
       <Card className="mb-6">
         <CardContent className="pt-8">
