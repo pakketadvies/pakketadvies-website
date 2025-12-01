@@ -62,18 +62,24 @@ export default function EnergieprijzenPage() {
         const data = await response.json()
         
         if (data.success) {
-          // Only update if data actually changed to avoid unnecessary re-renders
+          const newData = data.data || []
+          // Always update if we have new data, or if previous data was empty
           setHistorieData((prev) => {
-            const newData = data.data || []
-            // Simple check: if length or first/last items changed, update
+            // If previous was empty and new has data, always update
+            if (prev.length === 0 && newData.length > 0) return newData
+            // If new is empty, keep previous (might be loading)
+            if (newData.length === 0) return prev
+            // If lengths differ, update
             if (prev.length !== newData.length) return newData
+            // If first or last date changed, update
             if (prev.length > 0 && newData.length > 0) {
               if (prev[0]?.datum !== newData[0]?.datum || 
                   prev[prev.length - 1]?.datum !== newData[newData.length - 1]?.datum) {
                 return newData
               }
             }
-            return prev // Keep previous reference if data is the same
+            // Keep previous reference if data is the same
+            return prev
           })
         } else {
           setError(data.error || 'Fout bij ophalen historische prijzen')
