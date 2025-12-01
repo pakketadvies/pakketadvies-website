@@ -114,7 +114,32 @@ export function PrijzenGrafiek({
     if (graphView === 'dag' && localEnergietype === 'elektriciteit') {
       const sourceData = showQuarterHour ? quarterHourlyData : hourlyData
       
-      if (sourceData.length === 0) return []
+      // If no hourly data, fallback to daily data from props
+      if (sourceData.length === 0) {
+        const dateStr = selectedDate.toISOString().split('T')[0]
+        const dayData = data.find((d) => {
+          // Handle both string and Date formats
+          const recordDate = typeof d.datum === 'string' ? d.datum : new Date(d.datum).toISOString().split('T')[0]
+          return recordDate === dateStr
+        })
+        
+        if (!dayData) return []
+        
+        // Use daily average price and create a single bar
+        let elecPrice = dayData.elektriciteit_gemiddeld || dayData.elektriciteit_dag || 0
+        if (belastingen === 'inclusief') {
+          const withEB = elecPrice + EB_ELEKTRICITEIT
+          elecPrice = withEB * (1 + BTW_PERCENTAGE)
+        }
+        
+        return [{
+          index: 0,
+          hour: 12,
+          label: 'Vandaag',
+          price: parseFloat(elecPrice.toFixed(5)),
+          originalPrice: dayData.elektriciteit_gemiddeld || dayData.elektriciteit_dag || 0,
+        }]
+      }
       
       return sourceData.map((item, index) => {
         let price = item.price
@@ -155,8 +180,12 @@ export function PrijzenGrafiek({
     
     // For gas day view - single daily price
     if (graphView === 'dag' && localEnergietype === 'gas') {
-      const today = selectedDate.toISOString().split('T')[0]
-      const dayData = data.find((d) => d.datum === today)
+      const dateStr = selectedDate.toISOString().split('T')[0]
+      const dayData = data.find((d) => {
+        // Handle both string and Date formats
+        const recordDate = typeof d.datum === 'string' ? d.datum : new Date(d.datum).toISOString().split('T')[0]
+        return recordDate === dateStr
+      })
       
       if (!dayData) return []
       
@@ -183,19 +212,28 @@ export function PrijzenGrafiek({
       weekAgo.setDate(weekAgo.getDate() - 7)
       const weekAgoStr = weekAgo.toISOString().split('T')[0]
       const selectedDateStr = selectedDate.toISOString().split('T')[0]
-      filteredData = data.filter((item) => item.datum >= weekAgoStr && item.datum <= selectedDateStr)
+      filteredData = data.filter((item) => {
+        const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
+        return recordDate >= weekAgoStr && recordDate <= selectedDateStr
+      })
     } else if (graphView === 'maand') {
       const monthAgo = new Date(selectedDate)
       monthAgo.setMonth(monthAgo.getMonth() - 1)
       const monthAgoStr = monthAgo.toISOString().split('T')[0]
       const selectedDateStr = selectedDate.toISOString().split('T')[0]
-      filteredData = data.filter((item) => item.datum >= monthAgoStr && item.datum <= selectedDateStr)
+      filteredData = data.filter((item) => {
+        const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
+        return recordDate >= monthAgoStr && recordDate <= selectedDateStr
+      })
     } else if (graphView === 'jaar') {
       const yearAgo = new Date(selectedDate)
       yearAgo.setFullYear(yearAgo.getFullYear() - 1)
       const yearAgoStr = yearAgo.toISOString().split('T')[0]
       const selectedDateStr = selectedDate.toISOString().split('T')[0]
-      filteredData = data.filter((item) => item.datum >= yearAgoStr && item.datum <= selectedDateStr)
+      filteredData = data.filter((item) => {
+        const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
+        return recordDate >= yearAgoStr && recordDate <= selectedDateStr
+      })
     }
     
     return filteredData.map((item) => {
