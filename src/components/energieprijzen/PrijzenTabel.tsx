@@ -365,7 +365,7 @@ export function PrijzenTabel({
                   >
                     <td className="py-3 px-4">
                       <span className={isToday ? 'text-brand-teal-600' : 'text-gray-700'}>
-                        {formatDate(row.datum)}
+                        {formatDateFull(row.datum)}
                       </span>
                     </td>
                     {energietype === 'elektriciteit' || energietype === 'beide' ? (

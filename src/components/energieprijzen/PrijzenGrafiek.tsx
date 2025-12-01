@@ -120,6 +120,16 @@ export function PrijzenGrafiek({
 
   // Format chart data
   const chartData = useMemo(() => {
+    // Debug logging for week/month/year views
+    if (graphView !== 'dag' && data && data.length > 0) {
+      console.log(`[PrijzenGrafiek] ${graphView} view:`, {
+        totalData: data.length,
+        firstDate: data[0]?.datum,
+        lastDate: data[data.length - 1]?.datum,
+        sampleDates: data.slice(0, 5).map(d => d.datum)
+      })
+    }
+    
     // For day view with hourly/quarter-hourly data
     if (graphView === 'dag' && localEnergietype === 'elektriciteit') {
       const sourceData = showQuarterHour ? quarterHourlyData : hourlyData
@@ -249,33 +259,57 @@ export function PrijzenGrafiek({
       weekAgo.setDate(weekAgo.getDate() - 6) // 7 days total (today + 6 days back)
       const weekAgoStr = weekAgo.toISOString().split('T')[0]
       
+      console.log(`[PrijzenGrafiek] Week filter: ${weekAgoStr} to ${todayStr}`)
+      
       filteredData = data.filter((item) => {
         const recordDate = normalizeDate(item.datum)
-        if (!recordDate) return false
-        return recordDate >= weekAgoStr && recordDate <= todayStr
+        if (!recordDate) {
+          console.warn('[PrijzenGrafiek] Invalid date:', item.datum)
+          return false
+        }
+        const inRange = recordDate >= weekAgoStr && recordDate <= todayStr
+        return inRange
       })
+      
+      console.log(`[PrijzenGrafiek] Week filtered: ${filteredData.length} records from ${data.length} total`)
     } else if (graphView === 'maand') {
       // Show last 30 days from today (including today)
       const monthAgo = new Date(today)
       monthAgo.setDate(monthAgo.getDate() - 29) // 30 days total (today + 29 days back)
       const monthAgoStr = monthAgo.toISOString().split('T')[0]
       
+      console.log(`[PrijzenGrafiek] Month filter: ${monthAgoStr} to ${todayStr}`)
+      
       filteredData = data.filter((item) => {
         const recordDate = normalizeDate(item.datum)
-        if (!recordDate) return false
-        return recordDate >= monthAgoStr && recordDate <= todayStr
+        if (!recordDate) {
+          console.warn('[PrijzenGrafiek] Invalid date:', item.datum)
+          return false
+        }
+        const inRange = recordDate >= monthAgoStr && recordDate <= todayStr
+        return inRange
       })
+      
+      console.log(`[PrijzenGrafiek] Month filtered: ${filteredData.length} records from ${data.length} total`)
     } else if (graphView === 'jaar') {
       // Show last 365 days from today (including today)
       const yearAgo = new Date(today)
       yearAgo.setDate(yearAgo.getDate() - 364) // 365 days total (today + 364 days back)
       const yearAgoStr = yearAgo.toISOString().split('T')[0]
       
+      console.log(`[PrijzenGrafiek] Year filter: ${yearAgoStr} to ${todayStr}`)
+      
       filteredData = data.filter((item) => {
         const recordDate = normalizeDate(item.datum)
-        if (!recordDate) return false
-        return recordDate >= yearAgoStr && recordDate <= todayStr
+        if (!recordDate) {
+          console.warn('[PrijzenGrafiek] Invalid date:', item.datum)
+          return false
+        }
+        const inRange = recordDate >= yearAgoStr && recordDate <= todayStr
+        return inRange
       })
+      
+      console.log(`[PrijzenGrafiek] Year filtered: ${filteredData.length} records from ${data.length} total`)
     }
     
     return filteredData.map((item) => {
