@@ -118,6 +118,15 @@ export function PrijzenGrafiek({
     return currentTime.getTime()
   }, [currentTime])
 
+  // Memoize current hour and quarter for stable dependencies
+  const currentHourMemo = useMemo(() => {
+    return currentTime.getHours()
+  }, [currentTimeStamp])
+
+  const currentQuarterMemo = useMemo(() => {
+    return Math.floor(currentTime.getMinutes() / 15)
+  }, [currentTimeStamp])
+
   // Format chart data
   const chartData = useMemo(() => {
     // For day view with hourly/quarter-hourly data
@@ -216,28 +225,25 @@ export function PrijzenGrafiek({
     // Filter data based on graphView
     let filteredData = data
     if (graphView === 'week') {
-      const weekAgo = new Date(selectedDate)
-      weekAgo.setDate(weekAgo.getDate() - 7)
+      const weekAgo = new Date(selectedDateStr + 'T00:00:00Z')
+      weekAgo.setUTCDate(weekAgo.getUTCDate() - 7)
       const weekAgoStr = weekAgo.toISOString().split('T')[0]
-      const selectedDateStr = selectedDate.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
         return recordDate >= weekAgoStr && recordDate <= selectedDateStr
       })
     } else if (graphView === 'maand') {
-      const monthAgo = new Date(selectedDate)
-      monthAgo.setMonth(monthAgo.getMonth() - 1)
+      const monthAgo = new Date(selectedDateStr + 'T00:00:00Z')
+      monthAgo.setUTCMonth(monthAgo.getUTCMonth() - 1)
       const monthAgoStr = monthAgo.toISOString().split('T')[0]
-      const selectedDateStr = selectedDate.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
         return recordDate >= monthAgoStr && recordDate <= selectedDateStr
       })
     } else if (graphView === 'jaar') {
-      const yearAgo = new Date(selectedDate)
-      yearAgo.setFullYear(yearAgo.getFullYear() - 1)
+      const yearAgo = new Date(selectedDateStr + 'T00:00:00Z')
+      yearAgo.setUTCFullYear(yearAgo.getUTCFullYear() - 1)
       const yearAgoStr = yearAgo.toISOString().split('T')[0]
-      const selectedDateStr = selectedDate.toISOString().split('T')[0]
       filteredData = data.filter((item) => {
         const recordDate = typeof item.datum === 'string' ? item.datum : new Date(item.datum).toISOString().split('T')[0]
         return recordDate >= yearAgoStr && recordDate <= selectedDateStr
@@ -320,8 +326,8 @@ export function PrijzenGrafiek({
     if (!isToday) return null
     
     if (localEnergietype === 'elektriciteit') {
-      const currentHour = currentTime.getHours()
-      const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
+      const currentHour = currentHourMemo
+      const currentQuarter = currentQuarterMemo
       
       if (showQuarterHour && quarterHourlyData.length > 0) {
         const qhData = quarterHourlyData.find(
@@ -383,7 +389,9 @@ export function PrijzenGrafiek({
   }, [
     graphView, 
     selectedDateStr, // Use memoized date string
-    currentTime, // Use currentTime directly (updates every minute)
+    currentTimeStamp, // Use memoized timestamp
+    currentHourMemo, // Use memoized hour
+    currentQuarterMemo, // Use memoized quarter
     localEnergietype, 
     showQuarterHour, 
     hourlyData, 
@@ -529,9 +537,10 @@ export function PrijzenGrafiek({
     )
   }
 
-  const isToday = selectedDateStr === new Date().toISOString().split('T')[0]
-  const currentHour = currentTime.getHours()
-  const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
+  // Memoize isToday check
+  const isToday = useMemo(() => {
+    return selectedDateStr === new Date().toISOString().split('T')[0]
+  }, [selectedDateStr])
   
   // Calculate current index for "Nu" line
   const currentIndex = useMemo(() => {
@@ -540,11 +549,11 @@ export function PrijzenGrafiek({
     if (localEnergietype === 'elektriciteit') {
       if (showQuarterHour && quarterHourlyData.length > 0) {
         const index = quarterHourlyData.findIndex(
-          (q) => q.hour === currentHour && q.quarter === currentQuarter
+          (q) => q.hour === currentHourMemo && q.quarter === currentQuarterMemo
         )
         return index >= 0 ? index : -1
       } else if (hourlyData.length > 0) {
-        const index = hourlyData.findIndex((h) => h.hour === currentHour)
+        const index = hourlyData.findIndex((h) => h.hour === currentHourMemo)
         return index >= 0 ? index : -1
       }
     } else if (localEnergietype === 'gas') {
@@ -558,8 +567,8 @@ export function PrijzenGrafiek({
     graphView, 
     localEnergietype, 
     showQuarterHour, 
-    currentHour, 
-    currentQuarter, 
+    currentHourMemo, 
+    currentQuarterMemo, 
     hourlyData, 
     quarterHourlyData,
     selectedDateStr // Use memoized date string
