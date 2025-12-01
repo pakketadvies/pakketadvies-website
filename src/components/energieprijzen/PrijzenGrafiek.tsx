@@ -123,11 +123,10 @@ export function PrijzenGrafiek({
     const time = new Date(currentTimeStamp)
     return Math.floor(time.getMinutes() / 15)
   }, [currentTimeStamp])
-  const todayStr = useMemo(() => {
-    const now = new Date()
-    return now.toISOString().split('T')[0]
-  }, [currentTimeStamp])
-  const isToday = useMemo(() => selectedDateStr === todayStr, [selectedDateStr, todayStr])
+  // todayStr and isToday - calculate directly, no useMemo needed
+  // These are simple calculations that don't need memoization
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isToday = selectedDateStr === todayStr
 
   // Format chart data
   const chartData = useMemo(() => {
@@ -326,8 +325,9 @@ export function PrijzenGrafiek({
   const currentPriceInfo = useMemo(() => {
     if (graphView !== 'dag') return null
     
-    // Use memoized isToday instead of recalculating
-    if (!isToday) return null
+    // Calculate isToday inside useMemo to avoid dependency issues
+    const today = new Date().toISOString().split('T')[0]
+    if (selectedDateStr !== today) return null
     
     if (localEnergietype === 'elektriciteit') {
       if (showQuarterHour && quarterHourlyData.length > 0) {
@@ -389,8 +389,7 @@ export function PrijzenGrafiek({
     return null
   }, [
     graphView, 
-    isToday,
-    selectedDateStr,
+    selectedDateStr, // Use selectedDateStr instead of isToday to avoid recalculation issues
     currentTimeStamp,
     currentHour,
     currentQuarter,
@@ -541,7 +540,9 @@ export function PrijzenGrafiek({
   
   // Calculate current index for "Nu" line
   const currentIndex = useMemo(() => {
-    if (!isToday || graphView !== 'dag') return -1
+    // Calculate isToday inside useMemo to avoid dependency issues
+    const today = new Date().toISOString().split('T')[0]
+    if (selectedDateStr !== today || graphView !== 'dag') return -1
     
     if (localEnergietype === 'elektriciteit') {
       if (showQuarterHour && quarterHourlyData.length > 0) {
@@ -560,15 +561,14 @@ export function PrijzenGrafiek({
     
     return -1
   }, [
-    isToday, 
+    selectedDateStr, // Use selectedDateStr instead of isToday
     graphView, 
     localEnergietype, 
     showQuarterHour, 
     currentHour, 
     currentQuarter, 
     hourlyData, 
-    quarterHourlyData,
-    selectedDateStr
+    quarterHourlyData
   ])
 
   return (
