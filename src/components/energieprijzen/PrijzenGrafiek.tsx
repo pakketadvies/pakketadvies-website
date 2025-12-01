@@ -52,7 +52,8 @@ export function PrijzenGrafiek({
   // Local state for graph controls
   const [localEnergietype, setLocalEnergietype] = useState<LocalEnergietype>('elektriciteit')
   const [graphView, setGraphView] = useState<GraphView>('dag')
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  // Store selectedDate as string to avoid Date object reference issues
+  const [selectedDateStr, setSelectedDateStr] = useState(() => new Date().toISOString().split('T')[0])
   const [showQuarterHour, setShowQuarterHour] = useState(false)
   const [hourlyData, setHourlyData] = useState<HourlyPrice[]>([])
   const [quarterHourlyData, setQuarterHourlyData] = useState<QuarterHourlyPrice[]>([])
@@ -75,8 +76,7 @@ export function PrijzenGrafiek({
       const fetchHourlyData = async () => {
         setLoadingHourly(true)
         try {
-          const dateStr = selectedDate.toISOString().split('T')[0]
-          const response = await fetch(`/api/energieprijzen/uur?date=${dateStr}&type=${localEnergietype}`)
+          const response = await fetch(`/api/energieprijzen/uur?date=${selectedDateStr}&type=${localEnergietype}`)
           const result = await response.json()
           
           if (result.success) {
@@ -106,12 +106,12 @@ export function PrijzenGrafiek({
       setHourlyData([])
       setQuarterHourlyData([])
     }
-  }, [selectedDate, localEnergietype, graphView])
+  }, [selectedDateStr, localEnergietype, graphView])
 
-  // Memoize selected date string for stable dependencies
-  const selectedDateStr = useMemo(() => {
-    return selectedDate.toISOString().split('T')[0]
-  }, [selectedDate])
+  // Helper: get Date object from string (only for display/calculation)
+  const selectedDate = useMemo(() => {
+    return new Date(selectedDateStr + 'T00:00:00Z')
+  }, [selectedDateStr])
 
   // Memoize current time timestamp for stable dependencies
   const currentTimeStamp = useMemo(() => {
@@ -119,21 +119,18 @@ export function PrijzenGrafiek({
   }, [currentTime])
 
   // Memoize current hour and quarter for stable dependencies
-  // Use currentTimeStamp to recalculate when time changes
   const currentHourMemo = useMemo(() => {
-    const date = new Date(currentTimeStamp)
-    return date.getHours()
+    return currentTime.getHours()
   }, [currentTimeStamp])
 
   const currentQuarterMemo = useMemo(() => {
-    const date = new Date(currentTimeStamp)
-    return Math.floor(date.getMinutes() / 15)
+    return Math.floor(currentTime.getMinutes() / 15)
   }, [currentTimeStamp])
 
   // Memoize today string - update when time changes
   const todayStr = useMemo(() => {
     return new Date().toISOString().split('T')[0]
-  }, [currentTimeStamp]) // Update when time changes (every minute)
+  }, [currentTimeStamp])
 
   // Memoize isToday check
   const isToday = useMemo(() => {
@@ -430,39 +427,39 @@ export function PrijzenGrafiek({
   }
 
   const navigateDate = (direction: 'prev' | 'next') => {
-    const newDate = new Date(selectedDate)
+    const date = new Date(selectedDateStr + 'T00:00:00Z')
     if (direction === 'prev') {
       switch (graphView) {
         case 'dag':
-          newDate.setDate(newDate.getDate() - 1)
+          date.setUTCDate(date.getUTCDate() - 1)
           break
         case 'week':
-          newDate.setDate(newDate.getDate() - 7)
+          date.setUTCDate(date.getUTCDate() - 7)
           break
         case 'maand':
-          newDate.setMonth(newDate.getMonth() - 1)
+          date.setUTCMonth(date.getUTCMonth() - 1)
           break
         case 'jaar':
-          newDate.setFullYear(newDate.getFullYear() - 1)
+          date.setUTCFullYear(date.getUTCFullYear() - 1)
           break
       }
     } else {
       switch (graphView) {
         case 'dag':
-          newDate.setDate(newDate.getDate() + 1)
+          date.setUTCDate(date.getUTCDate() + 1)
           break
         case 'week':
-          newDate.setDate(newDate.getDate() + 7)
+          date.setUTCDate(date.getUTCDate() + 7)
           break
         case 'maand':
-          newDate.setMonth(newDate.getMonth() + 1)
+          date.setUTCMonth(date.getUTCMonth() + 1)
           break
         case 'jaar':
-          newDate.setFullYear(newDate.getFullYear() + 1)
+          date.setUTCFullYear(date.getUTCFullYear() + 1)
           break
       }
     }
-    setSelectedDate(newDate)
+    setSelectedDateStr(date.toISOString().split('T')[0])
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
