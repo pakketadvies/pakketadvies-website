@@ -120,6 +120,11 @@ export function PrijzenGrafiek({
 
   // Format chart data
   const chartData = useMemo(() => {
+    // Debug: log data availability
+    if (graphView !== 'dag' && (!data || data.length === 0)) {
+      console.warn('[PrijzenGrafiek] No data available for', graphView, 'view. Data length:', data?.length || 0)
+    }
+    
     // For day view with hourly/quarter-hourly data
     if (graphView === 'dag' && localEnergietype === 'elektriciteit') {
       const sourceData = showQuarterHour ? quarterHourlyData : hourlyData
