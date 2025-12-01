@@ -17,6 +17,7 @@ export default function EnergieprijzenPage() {
   const [error, setError] = useState<string | null>(null)
 
   // Calculate date range for historical data (5 years back)
+  // Use today's date to ensure we always get the latest data
   const dateRange = useMemo(() => {
     const today = new Date()
     const startDate = new Date(today)
@@ -27,6 +28,9 @@ export default function EnergieprijzenPage() {
       end: today.toISOString().split('T')[0],
     }
   }, [])
+  
+  // Force refetch when component mounts or dateRange changes
+  const [refreshKey, setRefreshKey] = useState(0)
 
   // Fetch current prices
   useEffect(() => {
@@ -96,7 +100,12 @@ export default function EnergieprijzenPage() {
     }
     
     fetchHistorie()
-  }, [dateRange])
+  }, [dateRange, refreshKey])
+  
+  // Force refresh on mount to get latest data
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
