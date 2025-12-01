@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     let hasMore = true
     
     while (hasMore) {
-      const { data: pageData, error } = await supabase
+      const { data: pageData, error: pageError } = await supabase
         .from('dynamic_prices')
         .select('*')
         .gte('datum', startDateStr)
@@ -59,8 +59,8 @@ export async function GET(request: Request) {
         .order('datum', { ascending: true })
         .range(from, from + pageSize - 1)
       
-      if (error) {
-        console.error('Error fetching price history:', error)
+      if (pageError) {
+        console.error('Error fetching price history:', pageError)
         return NextResponse.json(
           { success: false, error: 'Fout bij ophalen historische prijzen' },
           { status: 500 }
