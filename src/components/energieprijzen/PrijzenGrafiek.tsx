@@ -113,12 +113,22 @@ export function PrijzenGrafiek({
     return new Date(selectedDateStr + 'T00:00:00Z')
   }, [selectedDateStr])
 
-  // Calculate current time values directly (no useMemo needed for simple calculations)
-  const currentTime = new Date(currentTimeStamp)
-  const currentHour = currentTime.getHours()
-  const currentQuarter = Math.floor(currentTime.getMinutes() / 15)
-  const todayStr = new Date().toISOString().split('T')[0]
-  const isToday = selectedDateStr === todayStr
+  // Memoize current time values to avoid recalculation issues
+  // Calculate these in the correct order to avoid dependency issues
+  const currentTime = useMemo(() => new Date(currentTimeStamp), [currentTimeStamp])
+  const currentHour = useMemo(() => {
+    const time = new Date(currentTimeStamp)
+    return time.getHours()
+  }, [currentTimeStamp])
+  const currentQuarter = useMemo(() => {
+    const time = new Date(currentTimeStamp)
+    return Math.floor(time.getMinutes() / 15)
+  }, [currentTimeStamp])
+  const todayStr = useMemo(() => {
+    const now = new Date()
+    return now.toISOString().split('T')[0]
+  }, [currentTimeStamp])
+  const isToday = useMemo(() => selectedDateStr === todayStr, [selectedDateStr, todayStr])
 
   // Format chart data
   const chartData = useMemo(() => {
@@ -379,8 +389,8 @@ export function PrijzenGrafiek({
     isToday,
     selectedDateStr,
     currentTimeStamp, // Recalculate when time changes
-    currentHour, // Direct value, no memo needed
-    currentQuarter, // Direct value, no memo needed
+    currentHour,
+    currentQuarter,
     localEnergietype, 
     showQuarterHour, 
     hourlyData, 
