@@ -23,6 +23,7 @@ import {
   ClockClockwise
 } from '@phosphor-icons/react'
 import { allArticles, getArticlesByCategory } from '@/data/articles'
+import { FAQSchema } from '@/components/seo/StructuredData'
 
 const categories = [
   { id: 'all', name: 'Alle', icon: Lightning },
@@ -486,5 +487,6 @@ export default function KennisbankPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }
