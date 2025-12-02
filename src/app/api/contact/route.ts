@@ -108,11 +108,11 @@ export async function POST(request: Request) {
         console.warn('RESEND_API_KEY is not set, skipping email notification')
       } else {
         // Get base URL for email template
-        let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.vercel.app'
+        let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
         
-        // Safety check: if baseUrl contains a preview deployment pattern, use production Vercel URL
-        if (baseUrl.includes('-') && baseUrl.includes('.vercel.app') && !baseUrl.includes('pakketadvies.vercel.app')) {
-          baseUrl = 'https://pakketadvies.vercel.app'
+        // Safety check: if baseUrl contains a preview deployment pattern, use production domain
+        if (baseUrl.includes('-') && baseUrl.includes('.vercel.app')) {
+          baseUrl = 'https://pakketadvies.nl'
         }
 
         // Generate email HTML

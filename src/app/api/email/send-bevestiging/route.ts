@@ -141,17 +141,16 @@ export async function POST(request: Request) {
     const besparing = verbruikData?.besparing
 
     // Generate contract viewer URL
-    // Use current production Vercel domain (pakketadvies.vercel.app)
-    // Later when www.pakketadvies.nl is connected, set NEXT_PUBLIC_BASE_URL to that domain
+    // Use current production domain (pakketadvies.nl)
     let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     
     if (!baseUrl) {
-      baseUrl = 'https://pakketadvies.vercel.app'
+      baseUrl = 'https://pakketadvies.nl'
     }
     
-    // Safety check: if baseUrl contains a preview deployment pattern, use production Vercel URL
-    if (baseUrl.includes('-') && baseUrl.includes('.vercel.app') && !baseUrl.includes('pakketadvies.vercel.app')) {
-      baseUrl = 'https://pakketadvies.vercel.app'
+    // Safety check: if baseUrl contains a preview deployment pattern, use production domain
+    if (baseUrl.includes('-') && baseUrl.includes('.vercel.app')) {
+      baseUrl = 'https://pakketadvies.nl'
     }
     
     // Generate access token for contract viewer
