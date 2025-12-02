@@ -247,12 +247,6 @@ export function PrijzenGrafiek({
     // Fallback to daily data for week/month/year views
     if (!data || data.length === 0) return []
 
-    // Filter data based on graphView
-    // For week/month/year, always show data up to today (not selectedDate)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const todayStr = today.toISOString().split('T')[0]
-    
     // Helper function to normalize date strings
     const normalizeDate = (dateInput: any): string => {
       if (typeof dateInput === 'string') {
@@ -276,64 +270,83 @@ export function PrijzenGrafiek({
       return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0]
     }
     
-    let filteredData = data
+    // Helper functions to calculate period boundaries based on selectedDate
+    const getWeekStart = (date: Date): Date => {
+      const d = new Date(date)
+      const day = d.getDay()
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Monday as first day
+      return new Date(d.setDate(diff))
+    }
+    
+    const getWeekEnd = (date: Date): Date => {
+      const start = getWeekStart(date)
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      return end
+    }
+    
+    const getMonthStart = (date: Date): Date => {
+      return new Date(date.getFullYear(), date.getMonth(), 1)
+    }
+    
+    const getMonthEnd = (date: Date): Date => {
+      return new Date(date.getFullYear(), date.getMonth() + 1, 0)
+    }
+    
+    const getYearStart = (date: Date): Date => {
+      return new Date(date.getFullYear(), 0, 1)
+    }
+    
+    const getYearEnd = (date: Date): Date => {
+      return new Date(date.getFullYear(), 11, 31)
+    }
+    
+    // Calculate period boundaries based on selectedDate and graphView
+    let periodStart: Date
+    let periodEnd: Date
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
     if (graphView === 'week') {
-      // Show last 7 days from today (including today)
-      const weekAgo = new Date(today)
-      weekAgo.setDate(weekAgo.getDate() - 6) // 7 days total (today + 6 days back)
-      const weekAgoStr = weekAgo.toISOString().split('T')[0]
-      
-      console.log(`[PrijzenGrafiek] Week filter: ${weekAgoStr} to ${todayStr}`)
-      
-      filteredData = data.filter((item) => {
-        const recordDate = normalizeDate(item.datum)
-        if (!recordDate) {
-          console.warn('[PrijzenGrafiek] Invalid date:', item.datum)
-          return false
-        }
-        const inRange = recordDate >= weekAgoStr && recordDate <= todayStr
-        return inRange
-      })
-      
-      console.log(`[PrijzenGrafiek] Week filtered: ${filteredData.length} records from ${data.length} total`)
+      periodStart = getWeekStart(selectedDate)
+      periodEnd = getWeekEnd(selectedDate)
+      // Don't show future dates
+      if (periodEnd > today) {
+        periodEnd = today
+      }
     } else if (graphView === 'maand') {
-      // Show last 30 days from today (including today)
-      const monthAgo = new Date(today)
-      monthAgo.setDate(monthAgo.getDate() - 29) // 30 days total (today + 29 days back)
-      const monthAgoStr = monthAgo.toISOString().split('T')[0]
-      
-      console.log(`[PrijzenGrafiek] Month filter: ${monthAgoStr} to ${todayStr}`)
-      
-      filteredData = data.filter((item) => {
-        const recordDate = normalizeDate(item.datum)
-        if (!recordDate) {
-          console.warn('[PrijzenGrafiek] Invalid date:', item.datum)
-          return false
-        }
-        const inRange = recordDate >= monthAgoStr && recordDate <= todayStr
-        return inRange
-      })
-      
-      console.log(`[PrijzenGrafiek] Month filtered: ${filteredData.length} records from ${data.length} total`)
+      periodStart = getMonthStart(selectedDate)
+      periodEnd = getMonthEnd(selectedDate)
+      // Don't show future dates
+      if (periodEnd > today) {
+        periodEnd = today
+      }
     } else if (graphView === 'jaar') {
-      // Show last 365 days from today (including today)
-      const yearAgo = new Date(today)
-      yearAgo.setDate(yearAgo.getDate() - 364) // 365 days total (today + 364 days back)
-      const yearAgoStr = yearAgo.toISOString().split('T')[0]
-      
-      console.log(`[PrijzenGrafiek] Year filter: ${yearAgoStr} to ${todayStr}`)
-      
-      filteredData = data.filter((item) => {
-        const recordDate = normalizeDate(item.datum)
-        if (!recordDate) {
-          console.warn('[PrijzenGrafiek] Invalid date:', item.datum)
-          return false
-        }
-        const inRange = recordDate >= yearAgoStr && recordDate <= todayStr
-        return inRange
-      })
-      
-      console.log(`[PrijzenGrafiek] Year filtered: ${filteredData.length} records from ${data.length} total`)
+      periodStart = getYearStart(selectedDate)
+      periodEnd = getYearEnd(selectedDate)
+      // Don't show future dates
+      if (periodEnd > today) {
+        periodEnd = today
+      }
+    } else {
+      // For day view, use selectedDate
+      periodStart = selectedDate
+      periodEnd = selectedDate
+    }
+    
+    const periodStartStr = periodStart.toISOString().split('T')[0]
+    const periodEndStr = periodEnd.toISOString().split('T')[0]
+    
+    // Filter data based on calculated period
+    let filteredData = data.filter((item) => {
+      const recordDate = normalizeDate(item.datum)
+      if (!recordDate) {
+        return false
+      }
+      return recordDate >= periodStartStr && recordDate <= periodEndStr
+    })
+    
+    if (graphView === 'jaar') {
       
       // For year view: aggregate data per month
       const monthGroups: Record<string, any[]> = {}
@@ -568,28 +581,56 @@ export function PrijzenGrafiek({
     return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
   }
 
+  // Helper functions to get period display date
+  const getDisplayDate = (): Date => {
+    switch (graphView) {
+      case 'week': {
+        // Use the Monday of the week
+        const d = new Date(selectedDateStr + 'T00:00:00Z')
+        const day = d.getDay()
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Monday as first day
+        return new Date(d.setDate(diff))
+      }
+      case 'maand': {
+        // Use the first day of the month
+        const d = new Date(selectedDateStr + 'T00:00:00Z')
+        return new Date(d.getFullYear(), d.getMonth(), 1)
+      }
+      case 'jaar': {
+        // Use the first day of the year
+        const d = new Date(selectedDateStr + 'T00:00:00Z')
+        return new Date(d.getFullYear(), 0, 1)
+      }
+      default:
+        return selectedDate
+    }
+  }
+
   const formatDate = (date: Date) => {
+    // Use the display date for week/month/year to show the correct period
+    const displayDate = graphView !== 'dag' ? getDisplayDate() : date
+    
     switch (graphView) {
       case 'dag':
-        return date.toLocaleDateString('nl-NL', {
+        return displayDate.toLocaleDateString('nl-NL', {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
         })
       case 'week': {
-        const weekNumber = getWeekNumber(date)
-        const year = date.getFullYear()
+        const weekNumber = getWeekNumber(displayDate)
+        const year = displayDate.getFullYear()
         return `Week ${weekNumber}, ${year}`
       }
       case 'maand':
-        return date.toLocaleDateString('nl-NL', {
+        return displayDate.toLocaleDateString('nl-NL', {
           month: 'long',
           year: 'numeric',
         })
       case 'jaar':
-        return date.getFullYear().toString()
+        return displayDate.getFullYear().toString()
       default:
-        return date.toLocaleDateString('nl-NL', {
+        return displayDate.toLocaleDateString('nl-NL', {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
@@ -599,35 +640,82 @@ export function PrijzenGrafiek({
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const date = new Date(selectedDateStr + 'T00:00:00Z')
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
     if (direction === 'prev') {
       switch (graphView) {
         case 'dag':
           date.setUTCDate(date.getUTCDate() - 1)
           break
-        case 'week':
-          date.setUTCDate(date.getUTCDate() - 7)
+        case 'week': {
+          // Go to Monday of previous week
+          const day = date.getDay()
+          const diff = date.getDate() - day + (day === 0 ? -6 : 1) // Monday of current week
+          const monday = new Date(date)
+          monday.setDate(diff)
+          monday.setUTCDate(monday.getUTCDate() - 7) // Previous week Monday
+          date.setTime(monday.getTime())
           break
-        case 'maand':
+        }
+        case 'maand': {
+          // Go to first day of previous month
           date.setUTCMonth(date.getUTCMonth() - 1)
+          date.setUTCDate(1)
           break
-        case 'jaar':
+        }
+        case 'jaar': {
+          // Go to first day of previous year
           date.setUTCFullYear(date.getUTCFullYear() - 1)
+          date.setUTCMonth(0)
+          date.setUTCDate(1)
           break
+        }
       }
     } else {
       switch (graphView) {
         case 'dag':
           date.setUTCDate(date.getUTCDate() + 1)
+          // Don't allow future dates
+          if (date > today) {
+            return
+          }
           break
-        case 'week':
-          date.setUTCDate(date.getUTCDate() + 7)
+        case 'week': {
+          // Go to Monday of next week
+          const day = date.getDay()
+          const diff = date.getDate() - day + (day === 0 ? -6 : 1) // Monday of current week
+          const monday = new Date(date)
+          monday.setDate(diff)
+          monday.setUTCDate(monday.getUTCDate() + 7) // Next week Monday
+          // Don't allow future weeks
+          if (monday > today) {
+            return
+          }
+          date.setTime(monday.getTime())
           break
-        case 'maand':
+        }
+        case 'maand': {
+          // Go to first day of next month
           date.setUTCMonth(date.getUTCMonth() + 1)
+          date.setUTCDate(1)
+          // Don't allow future months
+          if (date > today) {
+            return
+          }
           break
-        case 'jaar':
+        }
+        case 'jaar': {
+          // Go to first day of next year
           date.setUTCFullYear(date.getUTCFullYear() + 1)
+          date.setUTCMonth(0)
+          date.setUTCDate(1)
+          // Don't allow future years
+          if (date > today) {
+            return
+          }
           break
+        }
       }
     }
     setSelectedDateStr(date.toISOString().split('T')[0])
