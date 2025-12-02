@@ -949,7 +949,9 @@ export function PrijzenGrafiek({
                     name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
                     fill="#00AF9B"
                     radius={[4, 4, 0, 0]}
-                    label={undefined}
+                    label={undefined} // Disabled on mobile for readability
+                    // Make bars narrower for quarter-hourly view (96 bars)
+                    barSize={graphView === 'dag' && showQuarterHour ? 4 : undefined}
                   >
                     {chartData.map((entry: any, index: number) => {
                       const price = entry.price || entry.prijs || 0
