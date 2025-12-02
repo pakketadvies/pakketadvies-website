@@ -22,6 +22,7 @@ import {
   Calendar,
   ClockClockwise
 } from '@phosphor-icons/react'
+import { allArticles, getArticlesByCategory } from '@/data/articles'
 
 const categories = [
   { id: 'all', name: 'Alle', icon: Lightning },
@@ -33,7 +34,16 @@ const categories = [
   { id: 'Subsidies', name: 'Subsidies', icon: FileText }
 ]
 
-const articles = [
+// Convert articles from data to format needed for display
+const articles = allArticles.map(article => ({
+  title: article.title,
+  excerpt: article.description,
+  category: article.category,
+  date: new Date(article.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
+  readTime: article.readTime,
+  href: `/kennisbank/${article.slug}`,
+  featured: article.featured || false,
+}))
   {
     title: 'Energieprijzen - Inzicht in de markt',
     excerpt: 'Bekijk actuele en historische marktprijzen voor elektriciteit en gas. Interactieve grafieken en gedetailleerde prijstabellen.',
@@ -142,9 +152,15 @@ export default function KennisbankPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
 
-  const filteredArticles = selectedCategory === 'all' 
-    ? articles 
-    : articles.filter(article => article.category === selectedCategory)
+  const filteredArticles = getArticlesByCategory(selectedCategory).map(article => ({
+    title: article.title,
+    excerpt: article.description,
+    category: article.category,
+    date: new Date(article.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
+    readTime: article.readTime,
+    href: `/kennisbank/${article.slug}`,
+    featured: article.featured || false,
+  }))
 
   const categoryIcons: { [key: string]: any } = {
     'Markt': ChartLine,
