@@ -1,5 +1,4 @@
-import Script from 'next/script'
-import { ReactNode } from 'react'
+// Structured data components for SEO
 
 interface OrganizationSchemaProps {
   name?: string
@@ -37,7 +36,7 @@ export function OrganizationSchema({
   }
 
   return (
-    <Script
+    <script
       id="organization-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -62,7 +61,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
   }
 
   return (
-    <Script
+    <script
       id="breadcrumb-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -89,7 +88,7 @@ export function FAQSchema({ questions }: FAQSchemaProps) {
   }
 
   return (
-    <Script
+    <script
       id="faq-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -126,7 +125,7 @@ export function ServiceSchema({
   }
 
   return (
-    <Script
+    <script
       id="service-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
