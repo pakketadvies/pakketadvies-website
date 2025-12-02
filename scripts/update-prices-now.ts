@@ -8,7 +8,7 @@
 async function main() {
   const baseUrl = process.env.VERCEL_URL 
     ? `https://${process.env.VERCEL_URL}`
-    : 'https://pakketadvies.vercel.app'
+    : 'https://pakketadvies.nl'
 
   console.log('🔄 Updating recent prices via API...')
   console.log(`   API URL: ${baseUrl}/api/energieprijzen/update-recent`)

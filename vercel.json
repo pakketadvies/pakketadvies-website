@@ -1,5 +1,5 @@
 {
-  "alias": ["pakketadvies.vercel.app"],
+  "alias": ["pakketadvies.nl", "www.pakketadvies.nl"],
   "git": {
     "deploymentEnabled": {
       "main": true
@@ -9,6 +9,13 @@
     {
       "path": "/api/cron/update-dynamic-prices",
       "schedule": "0 14 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "https://www.pakketadvies.nl/:path*",
+      "destination": "https://pakketadvies.nl/:path*",
+      "permanent": true
     }
   ]
 }
