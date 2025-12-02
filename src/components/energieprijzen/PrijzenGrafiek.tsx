@@ -853,14 +853,14 @@ export function PrijzenGrafiek({
         <div className="mb-4 md:mb-6 space-y-3 md:space-y-4">
           {/* Desktop: Top row with Stroom/Gas left and Period filters right */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
-            {/* Type Toggle (Stroom/Gas) - Full width on mobile, left on desktop */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
+            {/* Type Toggle (Stroom/Gas) - Horizontal on mobile, left on desktop */}
+            <div className="flex flex-row items-center gap-2 md:gap-3">
               <button
                 onClick={() => {
                   setLocalEnergietype('elektriciteit')
                   if (graphView !== 'dag') setGraphView('dag')
                 }}
-                className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all w-full md:w-auto ${
+                className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all flex-1 md:flex-none ${
                   localEnergietype === 'elektriciteit'
                     ? 'bg-brand-teal-500 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -875,7 +875,7 @@ export function PrijzenGrafiek({
                   setShowQuarterHour(false)
                   if (graphView !== 'dag') setGraphView('dag')
                 }}
-                className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all w-full md:w-auto ${
+                className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all flex-1 md:flex-none ${
                   localEnergietype === 'gas'
                     ? 'bg-brand-teal-500 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -886,8 +886,8 @@ export function PrijzenGrafiek({
               </button>
             </div>
 
-            {/* Period Filters - Full width on mobile, right on desktop */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-1.5 md:overflow-x-auto md:pb-1 md:-mx-2 md:px-2">
+            {/* Period Filters - Horizontal on mobile, right on desktop */}
+            <div className="flex flex-row items-center gap-1.5 md:gap-1.5 md:overflow-x-auto md:pb-1 md:-mx-2 md:px-2">
               {(['dag', 'week', 'maand', 'jaar'] as GraphView[]).map((view) => (
                 <button
                   key={view}
@@ -897,7 +897,7 @@ export function PrijzenGrafiek({
                       setShowQuarterHour(false)
                     }
                   }}
-                  className={`px-2.5 md:px-3 py-2.5 md:py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap w-full md:w-auto md:flex-shrink-0 ${
+                  className={`px-2.5 md:px-3 py-2.5 md:py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap flex-1 md:flex-none md:flex-shrink-0 ${
                     graphView === view
                       ? 'bg-brand-teal-500 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
