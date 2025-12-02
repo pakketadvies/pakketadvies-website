@@ -275,6 +275,38 @@ export default function OverOnsPage() {
         </div>
       </section>
 
+      {/* Team/Verhaal Sectie */}
+      <section className="py-16 md:py-24 bg-gray-50">
+        <div className="container-custom max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-6">
+                Wie zijn wij?
+              </h2>
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                <p>
+                  PakketAdvies is ontstaan uit frustratie. Frustratie over de complexiteit van de energiemarkt, verborgen kosten en het gebrek aan transparantie. Wij geloven dat energie inkopen simpel en eerlijk moet zijn.
+                </p>
+                <p>
+                  Daarom zijn we in 2014 gestart met één doel: bedrijven helpen om het beste energiecontract te vinden. Onafhankelijk, transparant en altijd in het belang van de klant.
+                </p>
+                <p>
+                  Vandaag de dag helpen we honderden bedrijven per jaar. Van kleine MKB'ers tot grote bedrijven met meerdere locaties. Onze aanpak blijft hetzelfde: persoonlijk, transparant en resultaatgericht.
+                </p>
+              </div>
+            </div>
+            <div className="relative h-80 rounded-2xl overflow-hidden shadow-2xl">
+              <Image
+                src="/images/office-team.jpg"
+                alt="PakketAdvies team"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Waarden Sectie */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="container-custom max-w-7xl">
@@ -543,38 +575,6 @@ export default function OverOnsPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team/Verhaal Sectie */}
-      <section className="py-16 md:py-24 bg-gray-50">
-        <div className="container-custom max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-6">
-                Wie zijn wij?
-              </h2>
-              <div className="space-y-4 text-gray-600 leading-relaxed">
-                <p>
-                  PakketAdvies is ontstaan uit frustratie. Frustratie over de complexiteit van de energiemarkt, verborgen kosten en het gebrek aan transparantie. Wij geloven dat energie inkopen simpel en eerlijk moet zijn.
-                </p>
-                <p>
-                  Daarom zijn we in 2014 gestart met één doel: bedrijven helpen om het beste energiecontract te vinden. Onafhankelijk, transparant en altijd in het belang van de klant.
-                </p>
-                <p>
-                  Vandaag de dag helpen we honderden bedrijven per jaar. Van kleine MKB'ers tot grote bedrijven met meerdere locaties. Onze aanpak blijft hetzelfde: persoonlijk, transparant en resultaatgericht.
-                </p>
-              </div>
-            </div>
-            <div className="relative h-80 rounded-2xl overflow-hidden shadow-2xl">
-              <Image
-                src="/images/office-team.jpg"
-                alt="PakketAdvies team"
-                fill
-                className="object-cover"
-              />
-            </div>
           </div>
         </div>
       </section>
