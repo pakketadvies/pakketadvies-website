@@ -919,32 +919,16 @@ export function PrijzenGrafiek({
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
                     height={graphView === 'dag' ? (isMobile ? 50 : 30) : 60}
                     // For quarter-hourly: show every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
-                    // Use interval 0 to show all ticks, then filter with tickFormatter
+                    // Every 3 hours = every 12 quarter-hours (3 * 4 = 12)
+                    // Interval 11 means: skip 11, show 1 = every 12th tick
                     interval={
                       graphView === 'dag' && showQuarterHour
-                        ? 0 // Show all ticks, filter with tickFormatter
+                        ? 11 // Every 12th tick = every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
                         : 'preserveStartEnd'
                     }
                     tick={{ fontSize: isMobile ? 8 : 10 }}
-                    // Custom tick formatter to ensure we show labels at 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
-                    tickFormatter={(value, index) => {
-                      if (graphView === 'dag' && showQuarterHour) {
-                        // For quarter-hourly, only show labels at 3-hour intervals (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
-                        // Check if this is a quarter-hourly time string (HH:MM format)
-                        if (typeof value === 'string' && value.includes(':')) {
-                          const [hourStr, minuteStr] = value.split(':')
-                          const hour = parseInt(hourStr, 10)
-                          const minute = parseInt(minuteStr, 10)
-                          
-                          // Only show labels at exactly 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
-                          if (minute === 0 && hour % 3 === 0 && hour <= 21) {
-                            return value
-                          }
-                        }
-                        return ''
-                      }
-                      return value
-                    }}
+                    // No custom tickFormatter needed - interval handles it correctly
+                    // The interval of 11 will show: index 0 (00:00), 12 (03:00), 24 (06:00), 36 (09:00), 48 (12:00), 60 (15:00), 72 (18:00), 84 (21:00)
                   />
                   <YAxis
                     stroke="#6B7280"
