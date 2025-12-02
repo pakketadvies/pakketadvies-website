@@ -950,26 +950,42 @@ export function PrijzenGrafiek({
                     angle={graphView === 'dag' ? 0 : -60}
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
                     height={graphView === 'dag' ? (isMobile ? 50 : 30) : 60}
-                    // For day view: show labels every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00)
+                    // For day view: show labels every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
                     interval={graphView === 'dag' ? 0 : 'preserveStartEnd'}
                     tick={{ fontSize: isMobile ? 8 : 10 }}
+                    tickLine={false}
                     // Custom tickFormatter to show only labels at 3-hour intervals
                     tickFormatter={(value, index) => {
                       if (graphView === 'dag') {
-                        // Parse the time string (e.g., "00:00", "03:00", "17:15")
+                        // For quarter-hourly view: show labels every 3 hours (every 12 quarters)
+                        if (showQuarterHour) {
+                          // Show labels at indices 0, 12, 24, 36, 48, 60, 72, 84 (every 3 hours)
+                          // Skip the last data point (index 95) to avoid duplicate 00:00
+                          if (index % 12 === 0) {
+                            // Skip if it's the last data point and would show 00:00
+                            if (index === chartData.length - 1) {
+                              return ''
+                            }
+                            const hour = Math.floor(index / 12) * 3
+                            return `${String(hour).padStart(2, '0')}:00`
+                          }
+                          return ''
+                        }
+                        
+                        // For hourly view: parse the time string (e.g., "00:00", "03:00", "17:00")
                         if (typeof value === 'string' && value.includes(':')) {
                           const [hourStr, minuteStr] = value.split(':')
                           const hour = parseInt(hourStr, 10)
                           const minute = parseInt(minuteStr, 10)
                           
                           // Show labels at exactly 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
-                          // Also show the last data point (which is labeled as 00:00)
+                          // But skip the last data point if it's already 00:00 to avoid duplicate
                           if (minute === 0 && hour % 3 === 0) {
+                            // Don't show 00:00 on the last data point if it's the same as the first
+                            if (hour === 0 && index === chartData.length - 1) {
+                              return ''
+                            }
                             return value
-                          }
-                          // Check if this is the last data point (which should show as 00:00)
-                          if (index === chartData.length - 1) {
-                            return '00:00'
                           }
                         }
                         // Hide all other labels
