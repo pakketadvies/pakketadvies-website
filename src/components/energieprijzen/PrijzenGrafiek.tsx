@@ -310,9 +310,23 @@ export function PrijzenGrafiek({
     if (graphView === 'week') {
       periodStart = getWeekStart(selectedDate)
       periodEnd = getWeekEnd(selectedDate)
-      // Don't show future dates
-      if (periodEnd > today) {
-        periodEnd = today
+      // For current week, include today
+      const todayStr = today.toISOString().split('T')[0]
+      const selectedDateStr = selectedDate.toISOString().split('T')[0]
+      const weekStartStr = periodStart.toISOString().split('T')[0]
+      const weekEndStr = periodEnd.toISOString().split('T')[0]
+      
+      // If current week is selected, make sure today is included
+      if (selectedDateStr >= weekStartStr && selectedDateStr <= weekEndStr && todayStr >= weekStartStr && todayStr <= weekEndStr) {
+        // Current week - include today
+        if (periodEnd > today) {
+          periodEnd = today
+        }
+      } else {
+        // Past week - don't show future dates
+        if (periodEnd > today) {
+          periodEnd = today
+        }
       }
     } else if (graphView === 'maand') {
       periodStart = getMonthStart(selectedDate)
@@ -334,8 +348,9 @@ export function PrijzenGrafiek({
       periodEnd = selectedDate
     }
     
-    const periodStartStr = periodStart.toISOString().split('T')[0]
-    const periodEndStr = periodEnd.toISOString().split('T')[0]
+    // Set time to midnight to ensure correct date comparison (use UTC to avoid timezone issues)
+    const periodStartStr = `${periodStart.getUTCFullYear()}-${String(periodStart.getUTCMonth() + 1).padStart(2, '0')}-${String(periodStart.getUTCDate()).padStart(2, '0')}`
+    const periodEndStr = `${periodEnd.getUTCFullYear()}-${String(periodEnd.getUTCMonth() + 1).padStart(2, '0')}-${String(periodEnd.getUTCDate()).padStart(2, '0')}`
     
     // Filter data based on calculated period
     let filteredData = data.filter((item) => {
@@ -367,12 +382,38 @@ export function PrijzenGrafiek({
       // Calculate monthly averages, min, max
       const monthNames = ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec']
       
-      return Object.entries(monthGroups)
-        .sort(([a], [b]) => a.localeCompare(b))
+      // Create entries for all 12 months, even if no data
+      const year = selectedDate.getFullYear()
+      const allMonths: Array<[string, any[]]> = []
+      
+      for (let month = 1; month <= 12; month++) {
+        const monthKey = `${year}-${String(month).padStart(2, '0')}`
+        allMonths.push([monthKey, monthGroups[monthKey] || []])
+      }
+      
+      return allMonths
         .map(([monthKey, items]) => {
           const [year, month] = monthKey.split('-')
           const monthIndex = parseInt(month) - 1
           const monthName = monthNames[monthIndex]
+          
+          // If no data for this month, return null/empty values
+          if (items.length === 0) {
+            return {
+              datum: monthName,
+              fullDate: monthKey,
+              monthKey,
+              year: parseInt(year),
+              month: parseInt(month),
+              prijs: 0,
+              originalPrice: 0,
+              min: 0,
+              max: 0,
+              originalMin: 0,
+              originalMax: 0,
+              isEmpty: true,
+            }
+          }
           
           const base: any = {
             datum: monthName,
@@ -427,13 +468,24 @@ export function PrijzenGrafiek({
     }
     
     // For week/month views: return daily data
-    return filteredData.map((item) => {
+    // Sort by date to ensure correct order
+    const sortedData = [...filteredData].sort((a, b) => {
+      const dateA = normalizeDate(a.datum)
+      const dateB = normalizeDate(b.datum)
+      return dateA.localeCompare(dateB)
+    })
+    
+    return sortedData.map((item) => {
+      // Ensure we use the normalized date format
+      const recordDate = normalizeDate(item.datum)
+      const date = new Date(recordDate + 'T00:00:00Z')
+      
       const base: any = {
-        datum: new Date(item.datum).toLocaleDateString('nl-NL', {
+        datum: date.toLocaleDateString('nl-NL', {
           day: '2-digit',
           month: '2-digit',
         }),
-        fullDate: item.datum,
+        fullDate: recordDate,
       }
 
       if (localEnergietype === 'elektriciteit') {
