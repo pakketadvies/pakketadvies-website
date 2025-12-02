@@ -559,12 +559,42 @@ export function PrijzenGrafiek({
     }).format(value)
   }
 
+  // Helper function to calculate week number (ISO 8601)
+  const getWeekNumber = (date: Date): number => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const dayNum = d.getUTCDay() || 7
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  }
+
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('nl-NL', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
+    switch (graphView) {
+      case 'dag':
+        return date.toLocaleDateString('nl-NL', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      case 'week': {
+        const weekNumber = getWeekNumber(date)
+        const year = date.getFullYear()
+        return `Week ${weekNumber}, ${year}`
+      }
+      case 'maand':
+        return date.toLocaleDateString('nl-NL', {
+          month: 'long',
+          year: 'numeric',
+        })
+      case 'jaar':
+        return date.getFullYear().toString()
+      default:
+        return date.toLocaleDateString('nl-NL', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+    }
   }
 
   const navigateDate = (direction: 'prev' | 'next') => {
