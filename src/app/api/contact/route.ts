@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { generateContactFormulierEmail } from '@/lib/email-templates'
+import { generateContactFormulierEmail, generateContactBevestigingEmail } from '@/lib/email-templates'
 
 interface ContactFormData {
   naam: string
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
           fromEmail = fromEmail.slice(1, -1)
         }
 
-        // Send email
+        // Send notification email to PakketAdvies team
         console.log('📧 [contact] Sending notification email via Resend to:', recipientEmail)
         const { data: emailResult, error: emailError } = await resend.emails.send({
           from: fromEmail,
@@ -152,10 +152,39 @@ export async function POST(request: Request) {
         })
 
         if (emailError) {
-          console.error('❌ [contact] Error sending email via Resend:', emailError)
+          console.error('❌ [contact] Error sending notification email via Resend:', emailError)
           // Don't fail the request if email fails, just log it
         } else {
-          console.log('✅ [contact] Email sent successfully, ID:', emailResult?.id)
+          console.log('✅ [contact] Notification email sent successfully, ID:', emailResult?.id)
+        }
+
+        // Send confirmation email to customer
+        try {
+          const bevestigingHtml = generateContactBevestigingEmail({
+            naam: body.naam,
+            bedrijfsnaam: body.bedrijfsnaam,
+            email: body.email,
+            onderwerp: body.onderwerp,
+            baseUrl,
+          })
+
+          console.log('📧 [contact] Sending confirmation email to customer:', body.email)
+          const { data: bevestigingResult, error: bevestigingError } = await resend.emails.send({
+            from: fromEmail,
+            to: body.email,
+            subject: `✅ Bedankt voor je bericht - ${body.onderwerp} | PakketAdvies`,
+            html: bevestigingHtml,
+          })
+
+          if (bevestigingError) {
+            console.error('❌ [contact] Error sending confirmation email via Resend:', bevestigingError)
+            // Don't fail the request if email fails, just log it
+          } else {
+            console.log('✅ [contact] Confirmation email sent successfully, ID:', bevestigingResult?.id)
+          }
+        } catch (bevestigingError: any) {
+          console.error('❌ [contact] Unexpected error sending confirmation email:', bevestigingError)
+          // Don't fail the request if email fails, just log it
         }
       }
     } catch (emailError: any) {
