@@ -229,7 +229,10 @@ export function PrijzenTabel({
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `energieprijzen_${viewMode === 'week' ? `week_${getWeekNumber(weekDates[0])}` : 'all'}_${new Date().toISOString().split('T')[0]}.csv`)
+    const filename = viewMode === 'week' 
+      ? `energieprijzen_week_${getWeekNumber(weekDates[0])}_${new Date().toISOString().split('T')[0]}.csv`
+      : `energieprijzen_maand_${getMonthName(monthDates.firstDay)}_${monthDates.firstDay.getFullYear()}_${new Date().toISOString().split('T')[0]}.csv`
+    link.setAttribute('download', filename)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
@@ -268,6 +271,8 @@ export function PrijzenTabel({
 
   const weekNumber = getWeekNumber(weekDates[0])
   const currentYear = weekDates[0].getFullYear()
+  const monthName = getMonthName(monthDates.firstDay)
+  const monthYear = monthDates.firstDay.getFullYear()
 
   return (
     <Card className="mb-6">
@@ -314,14 +319,17 @@ export function PrijzenTabel({
                 Week
               </button>
               <button
-                onClick={() => setViewMode('all')}
+                onClick={() => {
+                  setViewMode('maand')
+                  setCurrentMonth(0)
+                }}
                 className={`px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
-                  viewMode === 'all'
+                  viewMode === 'maand'
                     ? 'bg-white text-brand-teal-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Alles
+                Maand
               </button>
             </div>
           </div>
@@ -425,25 +433,24 @@ export function PrijzenTabel({
               })}
             </tbody>
           </table>
-          )}
         </div>
 
         {/* Footer info */}
-        {viewMode === 'week' && weekData.length > 0 && (
+        {filteredData.length > 0 && (
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center justify-between text-xs md:text-sm text-gray-600">
               <span>
                 Marktprijs gemiddeld:{' '}
                 <span className="font-semibold text-brand-navy-500">
                   {energietype === 'elektriciteit' || energietype === 'beide'
-                    ? formatPrice(weekData.reduce((sum, r) => sum + r.elektriciteit, 0) / weekData.length)
-                    : formatPrice(weekData.reduce((sum, r) => sum + r.gas, 0) / weekData.length)
+                    ? formatPrice(filteredData.reduce((sum: number, r: any) => sum + r.elektriciteit, 0) / filteredData.length)
+                    : formatPrice(filteredData.reduce((sum: number, r: any) => sum + r.gas, 0) / filteredData.length)
                   }
                   {energietype === 'elektriciteit' || energietype === 'beide' ? '/kWh' : '/m³'}
                 </span>
               </span>
-              <span className="text-xs text-gray-500">
-                {weekData.length} {weekData.length === 1 ? 'dag' : 'dagen'}
+              <span className="text-[10px] md:text-xs text-gray-500">
+                {filteredData.length} {filteredData.length === 1 ? 'dag' : 'dagen'}
               </span>
             </div>
           </div>
