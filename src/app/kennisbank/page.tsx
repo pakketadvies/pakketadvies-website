@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Lightning,
   ChartLine,
@@ -108,6 +108,8 @@ const faqItems = [
 export default function KennisbankPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const articlesPerPage = 12
 
   // Convert FAQ items for structured data
   const faqStructuredData = faqItems.map(item => ({
@@ -115,7 +117,8 @@ export default function KennisbankPage() {
     answer: item.antwoord,
   }))
 
-  const filteredArticles = getArticlesByCategory(selectedCategory).map(article => ({
+  // Get articles from data
+  const categoryArticles = getArticlesByCategory(selectedCategory).map(article => ({
     title: article.title,
     excerpt: article.description,
     category: article.category,
@@ -124,6 +127,34 @@ export default function KennisbankPage() {
     href: `/kennisbank/${article.slug}`,
     featured: article.featured || false,
   }))
+
+  // Combine special articles with category articles
+  // Filter special articles by category if needed
+  const specialArticlesFiltered = selectedCategory === 'all' || selectedCategory === 'Markt' 
+    ? specialArticles 
+    : []
+
+  // Combine and sort: featured articles first, then by date (newest first)
+  const allFilteredArticles = [...specialArticlesFiltered, ...categoryArticles].sort((a, b) => {
+    // Featured articles always first
+    if (a.featured && !b.featured) return -1
+    if (!a.featured && b.featured) return 1
+    // Then sort by date (newest first)
+    const dateA = new Date(a.date).getTime()
+    const dateB = new Date(b.date).getTime()
+    return dateB - dateA
+  })
+
+  // Pagination
+  const totalPages = Math.ceil(allFilteredArticles.length / articlesPerPage)
+  const startIndex = (currentPage - 1) * articlesPerPage
+  const endIndex = startIndex + articlesPerPage
+  const filteredArticles = allFilteredArticles.slice(startIndex, endIndex)
+
+  // Reset to page 1 when category changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCategory])
 
   const categoryIcons: { [key: string]: any } = {
     'Markt': ChartLine,
@@ -277,14 +308,14 @@ export default function KennisbankPage() {
             Artikelen
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
             {filteredArticles.map((article, index) => {
               const isFeatured = (article as any).featured
               const CategoryIcon = categoryIcons[article.category] || FileText
               
               return (
                 <Card 
-                  key={index} 
+                  key={`${article.href}-${index}`} 
                   className={`hover-lift ${
                     isFeatured ? 'lg:col-span-3 md:col-span-2 border-2 border-brand-teal-200 bg-gradient-to-br from-white to-brand-teal-50' : ''
                   }`}
@@ -332,6 +363,67 @@ export default function KennisbankPage() {
                 </Card>
               )
             })}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Vorige
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-4 py-2 rounded-lg border transition-colors ${
+                          currentPage === page
+                            ? 'bg-brand-teal-500 text-white border-brand-teal-500'
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  } else if (
+                    page === currentPage - 2 ||
+                    page === currentPage + 2
+                  ) {
+                    return (
+                      <span key={page} className="px-2 text-gray-400">
+                        ...
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Volgende
+              </button>
+            </div>
+          )}
+
+          {/* Results count */}
+          <div className="text-center text-sm text-gray-500 mt-4">
+            Toon {startIndex + 1}-{Math.min(endIndex, allFilteredArticles.length)} van {allFilteredArticles.length} artikelen
           </div>
         </div>
       </section>
