@@ -33,10 +33,11 @@ interface EnergyPrices {
  */
 async function fetchFromEnergyZero(date: Date): Promise<EnergyPrices | null> {
   try {
-    const dateStr = date.toISOString().split('T')[0]
+    // EnergyZero API requires timestamps with timezone (ending with Z)
+    const dateStr = date.toISOString().split('T')[0] + 'T00:00:00Z'
     const nextDay = new Date(date)
     nextDay.setDate(nextDay.getDate() + 1)
-    const nextDayStr = nextDay.toISOString().split('T')[0]
+    const nextDayStr = nextDay.toISOString().split('T')[0] + 'T00:00:00Z'
 
     // Fetch electricity prices
     const electricityResponse = await fetch(
