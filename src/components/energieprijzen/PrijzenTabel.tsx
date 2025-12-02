@@ -84,10 +84,14 @@ export function PrijzenTabel({
   // Get month dates
   const getMonthDates = (monthOffset: number) => {
     const today = new Date()
-    const year = today.getFullYear()
-    const month = today.getMonth() + monthOffset
+    // Calculate target month and year, handling year rollover
+    const targetDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1)
+    const year = targetDate.getFullYear()
+    const month = targetDate.getMonth()
     
+    // First day of the month
     const firstDay = new Date(year, month, 1)
+    // Last day of the month (day 0 of next month gives last day of current month)
     const lastDay = new Date(year, month + 1, 0)
     
     return { firstDay, lastDay }
