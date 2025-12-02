@@ -80,9 +80,7 @@ export default function ContactPage() {
       newErrors.naam = 'Naam is verplicht'
     }
 
-    if (!formData.bedrijfsnaam.trim()) {
-      newErrors.bedrijfsnaam = 'Bedrijfsnaam is verplicht'
-    }
+    // Bedrijfsnaam is optioneel - geen validatie nodig
 
     if (!formData.email.trim()) {
       newErrors.email = 'Email is verplicht'
@@ -186,9 +184,9 @@ export default function ContactPage() {
         <div className="container-custom relative z-10">
           <div className="max-w-4xl">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
-              <Lightning weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-              <span className="text-sm font-semibold text-brand-teal-200">Contact</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple-500/20 border border-brand-purple-400/30 mb-6">
+              <Lightning weight="duotone" className="w-5 h-5 text-brand-purple-300" />
+              <span className="text-sm font-semibold text-brand-purple-200">Contact</span>
             </div>
 
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
@@ -236,9 +234,9 @@ export default function ContactPage() {
             className="w-full h-20 md:h-24 lg:h-auto"
             preserveAspectRatio="none"
           >
-            <path d="M0,40 Q360,10 720,40 T1440,40 L1440,120 L0,120 Z" fill="white"/>
+            <path d="M0,70 Q360,40 720,70 T1440,70 L1440,120 L0,120 Z" fill="white"/>
             <path 
-              d="M0,40 Q360,10 720,40 T1440,40" 
+              d="M0,70 Q360,40 720,70 T1440,70" 
               stroke="url(#energyGradient)" 
               strokeWidth="2" 
               fill="none"
@@ -316,12 +314,11 @@ export default function ContactPage() {
                         required
                       />
                       <Input
-                        label="Bedrijfsnaam *"
+                        label="Bedrijfsnaam"
                         placeholder="Naam van je bedrijf"
                         value={formData.bedrijfsnaam}
                         onChange={(e) => handleChange('bedrijfsnaam', e.target.value)}
                         error={errors.bedrijfsnaam}
-                        required
                       />
                     </div>
 
@@ -341,13 +338,12 @@ export default function ContactPage() {
                         placeholder="06 12345678"
                         value={formData.telefoon}
                         onChange={(e) => handleChange('telefoon', e.target.value)}
-                        helpText="Bellen we je liever terug? Laat je nummer achter"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Onderwerp * <span className="text-red-500">*</span>
+                        Onderwerp *
                       </label>
                       <select
                         value={formData.onderwerp}
@@ -377,7 +373,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Bericht * <span className="text-red-500">*</span>
+                        Bericht *
                       </label>
                       <textarea
                         rows={6}
@@ -524,7 +520,7 @@ export default function ContactPage() {
               <Card className="hover-lift">
                 <CardContent className="pt-8">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-brand-teal-500 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                    <div className="w-14 h-14 rounded-2xl bg-brand-purple-500 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                       <MapPin weight="duotone" className="w-7 h-7" />
                     </div>
                     <div className="flex-1">
@@ -579,7 +575,7 @@ export default function ContactPage() {
                 icon: ChatCircleDots,
                 title: 'We nemen contact op',
                 description: 'Binnen 24 uur neemt een energiespecialist contact met je op om je vraag te beantwoorden.',
-                color: 'teal'
+                color: 'purple'
               },
               {
                 number: '03',
@@ -590,23 +586,24 @@ export default function ContactPage() {
               }
             ].map((step, index) => {
               const Icon = step.icon
+              const isPurple = step.color === 'purple'
               return (
                 <div key={index} className="relative">
                   {/* Connector line (desktop only) */}
                   {index < 2 && (
-                    <div className="hidden md:block absolute left-full top-1/2 w-8 h-0.5 bg-gradient-to-r from-brand-teal-500/30 to-transparent" />
+                    <div className={`hidden md:block absolute left-full top-1/2 w-8 h-0.5 bg-gradient-to-r ${isPurple ? 'from-brand-purple-500/30' : 'from-brand-teal-500/30'} to-transparent`} />
                   )}
                   
-                  <div className="relative bg-white rounded-3xl p-8 border border-gray-200 hover-lift hover:border-brand-teal-500/50 transition-all duration-300 h-full">
+                  <div className={`relative bg-white rounded-3xl p-8 border border-gray-200 hover-lift ${isPurple ? 'hover:border-brand-purple-500/50' : 'hover:border-brand-teal-500/50'} transition-all duration-300 h-full`}>
                     {/* Number badge */}
-                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-navy-500 rounded-2xl flex items-center justify-center shadow-xl">
+                    <div className={`absolute -top-4 -right-4 w-16 h-16 ${isPurple ? 'bg-brand-purple-500' : 'bg-brand-navy-500'} rounded-2xl flex items-center justify-center shadow-xl`}>
                       <span className="font-display text-2xl font-bold text-white">
                         {step.number}
                       </span>
                     </div>
                     
                     {/* Icon */}
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-teal-500 shadow-lg mb-6">
+                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${isPurple ? 'bg-brand-purple-500' : 'bg-brand-teal-500'} shadow-lg mb-6`}>
                       <Icon weight="duotone" className="w-8 h-8 text-white" />
                     </div>
                     
@@ -639,33 +636,37 @@ export default function ContactPage() {
           </div>
 
           <div className="space-y-4">
-            {faqItems.map((item, index) => (
-              <Card key={index} className="hover-lift">
-                <CardContent className="pt-6">
-                  <button
-                    onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                    className="w-full flex items-center justify-between gap-4 text-left"
-                  >
-                    <h3 className="font-bold text-brand-navy-500 text-lg pr-8">
-                      {item.vraag}
-                    </h3>
-                    {openFaqIndex === index ? (
-                      <CaretUp weight="bold" className="w-6 h-6 text-brand-teal-500 flex-shrink-0" />
-                    ) : (
-                      <CaretDown weight="bold" className="w-6 h-6 text-gray-400 flex-shrink-0" />
+            {faqItems.map((item, index) => {
+              const isOpen = openFaqIndex === index
+              const isPurple = index % 2 === 1 // Alternerend: oneven index = paars
+              return (
+                <Card key={index} className={`hover-lift ${isOpen && isPurple ? 'border-brand-purple-500/50' : ''} transition-all duration-300`}>
+                  <CardContent className="pt-6">
+                    <button
+                      onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                      className="w-full flex items-center justify-between gap-4 text-left"
+                    >
+                      <h3 className={`font-bold text-lg pr-8 ${isOpen && isPurple ? 'text-brand-purple-600' : 'text-brand-navy-500'}`}>
+                        {item.vraag}
+                      </h3>
+                      {isOpen ? (
+                        <CaretUp weight="bold" className={`w-6 h-6 flex-shrink-0 ${isPurple ? 'text-brand-purple-500' : 'text-brand-teal-500'}`} />
+                      ) : (
+                        <CaretDown weight="bold" className="w-6 h-6 text-gray-400 flex-shrink-0" />
+                      )}
+                    </button>
+                    
+                    {isOpen && (
+                      <div className={`mt-4 pt-4 border-t ${isPurple ? 'border-brand-purple-200' : 'border-gray-200'}`}>
+                        <p className="text-gray-600 leading-relaxed">
+                          {item.antwoord}
+                        </p>
+                      </div>
                     )}
-                  </button>
-                  
-                  {openFaqIndex === index && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <p className="text-gray-600 leading-relaxed">
-                        {item.antwoord}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </section>

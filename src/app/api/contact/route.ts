@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const body: ContactFormData = await request.json()
     
     // Validatie
-    if (!body.naam || !body.bedrijfsnaam || !body.email || !body.onderwerp || !body.bericht) {
+    if (!body.naam || !body.email || !body.onderwerp || !body.bericht) {
       return NextResponse.json(
         { 
           success: false, 
