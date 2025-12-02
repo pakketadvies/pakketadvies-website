@@ -536,6 +536,15 @@ export function PrijzenGrafiek({
     }).format(value)
   }
 
+  const formatPriceYAxis = (value: number) => {
+    return new Intl.NumberFormat('nl-NL', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value)
+  }
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('nl-NL', {
       day: 'numeric',
@@ -834,7 +843,7 @@ export function PrijzenGrafiek({
                   margin={{ 
                     top: 10, 
                     right: 10, 
-                    left: 40, 
+                    left: 35, 
                     bottom: 40 
                   }}
                 >
@@ -851,8 +860,8 @@ export function PrijzenGrafiek({
                   <YAxis
                     stroke="#6B7280"
                     style={{ fontSize: '10px' }}
-                    tickFormatter={(value) => formatPrice(value)}
-                    width={50}
+                    tickFormatter={(value) => formatPriceYAxis(value)}
+                    width={35}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
