@@ -13,22 +13,39 @@ import { createClient } from '@/lib/supabase/server'
  */
 export async function GET(request: Request) {
   try {
-    // Verify this is a cron request (Vercel adds Authorization header)
+    // Verify this is a cron request
+    // Vercel cron jobs automatically add an Authorization header
+    // If CRON_SECRET is set, verify it matches
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
     
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      console.error('❌ Unauthorized cron request')
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Check if this is a Vercel cron request (has authorization header)
+    // Or allow if CRON_SECRET is not set (for manual testing)
+    if (cronSecret) {
+      if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+        console.error('❌ Unauthorized cron request - missing or invalid auth header')
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized' },
+          { status: 401 }
+        )
+      }
+    } else {
+      // If no CRON_SECRET is set, allow requests with Vercel's default cron header
+      // Vercel cron jobs always include an authorization header
+      if (!authHeader) {
+        console.warn('⚠️  No CRON_SECRET set and no auth header - allowing request (may be manual test)')
+      }
     }
 
     console.log('🔄 Starting daily price update...')
     
+    // Use today's date in UTC to ensure consistency
     const today = new Date()
-    const todayStr = today.toISOString().split('T')[0]
+    // Set to UTC midnight to get the correct date
+    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
+    const todayStr = todayUTC.toISOString().split('T')[0]
+    
+    console.log(`📅 Today's date (UTC): ${todayStr}`)
     
     // Check if today's prices already exist
     const supabase = await createClient()
