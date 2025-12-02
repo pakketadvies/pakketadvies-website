@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { ArrowLeft, Calendar, Clock } from '@phosphor-icons/react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { StructuredData } from '@/components/seo/StructuredData'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const article = getArticleBySlug(params.slug)
@@ -82,8 +81,14 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
   return (
     <>
       {/* Structured Data */}
-      <StructuredData data={structuredData} id="article-schema" />
-      <StructuredData data={breadcrumbData} id="breadcrumb-schema" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
+      />
 
       <div className="min-h-screen bg-white">
         {/* Hero */}
