@@ -244,41 +244,41 @@ export function PrijzenTabel({
 
   return (
     <Card className="mb-6">
-      <CardContent className="pt-8">
+      <CardContent className="pt-4 md:pt-8 px-2 md:px-6">
         {/* Header with week navigation */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-6 gap-3 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+            <div className="flex items-center gap-1 md:gap-2">
               <button
                 onClick={() => setCurrentWeek(currentWeek - 1)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 aria-label="Vorige week"
               >
-                <CaretLeft className="w-5 h-5 text-brand-navy-500" weight="bold" />
+                <CaretLeft className="w-4 h-4 md:w-5 md:h-5 text-brand-navy-500" weight="bold" />
               </button>
-              <div className="px-4 py-2 bg-gray-100 rounded-lg min-w-[140px] text-center">
-                <span className="font-semibold text-brand-navy-500">
+              <div className="px-2 md:px-4 py-1.5 md:py-2 bg-gray-100 rounded-lg min-w-[120px] md:min-w-[140px] text-center">
+                <span className="font-semibold text-brand-navy-500 text-sm md:text-base">
                   Week {weekNumber}
                 </span>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">
                   {formatDateFull(weekStart)} - {formatDateFull(weekEnd)}
                 </div>
               </div>
               <button
                 onClick={() => setCurrentWeek(currentWeek + 1)}
                 disabled={currentWeek >= 0}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Volgende week"
               >
-                <CaretRight className="w-5 h-5 text-brand-navy-500" weight="bold" />
+                <CaretRight className="w-4 h-4 md:w-5 md:h-5 text-brand-navy-500" weight="bold" />
               </button>
             </div>
             
             {/* View mode toggle */}
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-1 md:gap-2 bg-gray-100 rounded-lg p-0.5 md:p-1">
               <button
                 onClick={() => setViewMode('week')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                className={`px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
                   viewMode === 'week'
                     ? 'bg-white text-brand-teal-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -288,7 +288,7 @@ export function PrijzenTabel({
               </button>
               <button
                 onClick={() => setViewMode('all')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                className={`px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
                   viewMode === 'all'
                     ? 'bg-white text-brand-teal-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -301,11 +301,11 @@ export function PrijzenTabel({
 
           {/* Current price indicator */}
           {currentPrice && currentWeek === 0 && (
-            <div className="flex items-center gap-3 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div>
+            <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
                 <div className="text-xs text-gray-600">Nu: {currentHour}:00 - {currentHour + 1}:00</div>
-                <div className="text-sm font-semibold text-brand-navy-500">
+                <div className="text-xs md:text-sm font-semibold text-brand-navy-500">
                   {energietype === 'elektriciteit' || energietype === 'beide' 
                     ? `Gem. marktprijs: ${formatPrice(currentPrice.elektriciteit)}/kWh`
                     : `Gem. marktprijs: ${formatPrice(currentPrice.gas)}/m³`
@@ -319,10 +319,11 @@ export function PrijzenTabel({
             variant="outline"
             size="sm"
             onClick={exportToCSV}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm px-2 md:px-4 py-1.5 md:py-2"
           >
             <Download className="w-4 h-4" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
+            <span className="sm:hidden">Export</span>
           </Button>
         </div>
 
@@ -363,32 +364,32 @@ export function PrijzenTabel({
                       isToday ? 'bg-brand-teal-50 font-semibold' : ''
                     } ${isWeekend ? 'bg-gray-50/50' : ''}`}
                   >
-                    <td className="py-3 px-4">
-                      <span className={isToday ? 'text-brand-teal-600' : 'text-gray-700'}>
+                    <td className="py-2 md:py-3 px-2 md:px-4">
+                      <span className={`text-xs md:text-sm ${isToday ? 'text-brand-teal-600' : 'text-gray-700'}`}>
                         {formatDateFull(row.datum)}
                       </span>
                     </td>
                     {energietype === 'elektriciteit' || energietype === 'beide' ? (
                       energietype === 'beide' ? (
                         <>
-                          <td className="text-right py-3 px-4 font-mono text-gray-700">
+                          <td className="text-right py-2 md:py-3 px-2 md:px-4 font-mono text-[10px] md:text-sm text-gray-700">
                             {row.elektriciteit_dag ? formatPrice(row.elektriciteit_dag) : '-'}
                           </td>
-                          <td className="text-right py-3 px-4 font-mono text-gray-700">
+                          <td className="text-right py-2 md:py-3 px-2 md:px-4 font-mono text-[10px] md:text-sm text-gray-700">
                             {row.elektriciteit_nacht ? formatPrice(row.elektriciteit_nacht) : '-'}
                           </td>
-                          <td className={`text-right py-3 px-4 font-mono ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
+                          <td className={`text-right py-2 md:py-3 px-2 md:px-4 font-mono text-[10px] md:text-sm ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
                             {formatPrice(row.elektriciteit)}
                           </td>
                         </>
                       ) : (
-                        <td className={`text-right py-3 px-4 font-mono ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
+                        <td className={`text-right py-2 md:py-3 px-2 md:px-4 font-mono text-[10px] md:text-sm ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
                           {formatPrice(row.elektriciteit)}
                         </td>
                       )
                     ) : null}
                     {energietype === 'gas' || energietype === 'beide' ? (
-                      <td className={`text-right py-3 px-4 font-mono ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
+                      <td className={`text-right py-2 md:py-3 px-2 md:px-4 font-mono text-[10px] md:text-sm ${isToday ? 'text-brand-teal-600 font-bold' : 'text-gray-900 font-semibold'}`}>
                         {formatPrice(row.gas)}
                       </td>
                     ) : null}
