@@ -286,3 +286,188 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
   `.trim()
 }
 
+export interface ContactFormulierData {
+  naam: string
+  bedrijfsnaam: string
+  email: string
+  telefoon?: string
+  onderwerp: string
+  bericht: string
+  baseUrl: string
+}
+
+/**
+ * Generate the HTML email template for contact form notifications
+ * Sent to PakketAdvies team when a customer submits the contact form
+ */
+export function generateContactFormulierEmail(data: ContactFormulierData): string {
+  const {
+    naam,
+    bedrijfsnaam,
+    email,
+    telefoon,
+    onderwerp,
+    bericht,
+    baseUrl,
+  } = data
+
+  // HTML escape helper
+  const escapeHtml = (text: string): string => {
+    const map: { [key: string]: string } = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }
+    return text.replace(/[&<>"']/g, (m) => map[m])
+  }
+
+  // Escape all user input
+  const safeNaam = escapeHtml(naam)
+  const safeBedrijfsnaam = escapeHtml(bedrijfsnaam)
+  const safeEmail = escapeHtml(email)
+  const safeTelefoon = telefoon ? escapeHtml(telefoon) : ''
+  const safeOnderwerp = escapeHtml(onderwerp)
+  // Bericht needs special handling - preserve line breaks but escape HTML
+  const safeBericht = escapeHtml(bericht).replace(/\n/g, '<br>')
+
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nieuw contactformulier bericht - PakketAdvies</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  
+  <!-- Main Container -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
+
+          <!-- Notification Header -->
+          <tr>
+            <td style="background: #F0FDFA; padding: 30px 20px; text-align: center; border-top: 4px solid #14B8A6;">
+              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 10px 0; font-weight: bold;">📧 Nieuw contactformulier bericht</h1>
+              <p style="color: #64748B; font-size: 16px; margin: 0;">Er is een nieuw bericht ontvangen via het contactformulier</p>
+            </td>
+          </tr>
+
+          <!-- Contact Details Section -->
+          <tr>
+            <td style="background: white; padding: 30px 20px; border-bottom: 1px solid #E2E8F0;">
+              <h2 style="color: #0F4C75; font-size: 22px; margin: 0 0 20px 0; font-weight: bold;">Contactgegevens</h2>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Naam</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">${safeNaam}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Bedrijfsnaam</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">${safeBedrijfsnaam}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Emailadres</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">
+                      <a href="mailto:${safeEmail}" style="color: #14B8A6; text-decoration: none;">${safeEmail}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              ${safeTelefoon ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Telefoonnummer</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">
+                      <a href="tel:${safeTelefoon.replace(/\s/g, '')}" style="color: #14B8A6; text-decoration: none;">${safeTelefoon}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Onderwerp</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">${safeOnderwerp}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Message Section -->
+          <tr>
+            <td style="background: #F8FAFC; padding: 30px 20px; margin: 0;">
+              <h3 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Bericht</h3>
+              <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                <p style="color: #0F4C75; font-size: 16px; margin: 0; white-space: pre-wrap; word-wrap: break-word;">${safeBericht}</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Quick Actions -->
+          <tr>
+            <td style="text-align: center; padding: 30px 20px; background: white;">
+              <a href="mailto:${safeEmail}?subject=Re: ${encodeURIComponent(safeOnderwerp)}" style="background: #14B8A6; color: white; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; font-size: 16px; cursor: pointer;">
+                📧 Antwoord sturen
+              </a>
+              ${safeTelefoon ? `
+              <br style="display: none;">
+              <a href="tel:${safeTelefoon.replace(/\s/g, '')}" style="background: white; color: #14B8A6; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; border: 2px solid #14B8A6; font-size: 16px;">
+                📞 Bel terug
+              </a>
+              ` : ''}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: #0F4C75; padding: 30px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 20px auto;">
+              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
+                Dit bericht is automatisch gegenereerd vanuit het contactformulier op de website.
+              </p>
+              <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
+                <a href="${baseUrl}/contact" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Contactpagina</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `.trim()
+}
+
