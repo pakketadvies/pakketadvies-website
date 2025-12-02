@@ -1692,7 +1692,1048 @@ Gasprijzen normaliseerden:
 Wij volgen de markt continu en houden u op de hoogte van ontwikkelingen die voor u relevant zijn.
     `.trim()
   },
-  // ... (Ik voeg de resterende ~60 artikelen toe in volgende batches)
+  // JULI 2025 (9 artikelen)
+  {
+    slug: 'energieprijzen-juli-2025',
+    title: 'Energieprijzen juli 2025: marktanalyse',
+    description: 'Analyse van de energieprijzen in juli 2025. Wat gebeurde er op de markt en wat betekent dit voor uw energiecontract?',
+    keywords: ['energieprijzen', 'marktanalyse', 'juli 2025', 'elektriciteitsprijzen', 'gasprijzen'],
+    category: 'Markt',
+    date: '2025-07-05',
+    readTime: '4 min',
+    content: `
+# Energieprijzen juli 2025: marktanalyse
+
+In juli 2025 zagen we belangrijke ontwikkelingen op de energiemarkt. Deze analyse helpt u begrijpen wat er gebeurde.
+
+## Marktontwikkelingen
+
+Juli 2025 kenmerkte zich door:
+- Zomerperiode met lagere vraag naar gas
+- Hoog aanbod van zonne-energie
+- Stabilisatie van elektriciteitsprijzen
+
+## Elektriciteitsprijzen
+
+Elektriciteitsprijzen daalden door:
+- Meer zonne-energie die prijzen drukt
+- Lagere vraag in zomerperiode
+- Betere balans tussen vraag en aanbod
+
+## Gasprijzen
+
+Gasprijzen bleven stabiel:
+- Lage vraag in zomerperiode
+- Goede voorraadniveaus
+- Minder volatiliteit
+
+## Wat betekent dit voor u?
+
+- **Vaste contracten**: Goed moment om te verlengen
+- **Dynamische contracten**: Profiteer van lagere prijzen
+- **Overstappen**: Mogelijkheden voor betere tarieven
+
+## Blijf op de hoogte
+
+Wij volgen de markt continu en houden u op de hoogte van ontwikkelingen die voor u relevant zijn.
+    `.trim()
+  },
+  {
+    slug: 'slimme-meter-energie-uitleg',
+    title: 'Wat is een slimme meter en wat zijn de voordelen?',
+    description: 'Uitleg over slimme meters voor energie. Wat zijn ze, hoe werken ze en wat zijn de voordelen voor uw bedrijf?',
+    keywords: ['slimme meter', 'smart meter', 'energiemeter', 'verbruik monitoring', 'energie inzicht'],
+    category: 'Uitleg',
+    date: '2025-07-10',
+    readTime: '5 min',
+    content: `
+# Wat is een slimme meter en wat zijn de voordelen?
+
+Een slimme meter is een digitale energiemeter die uw verbruik automatisch uitleest en doorgeeft. Hier leggen we uit wat het is en wat de voordelen zijn.
+
+## Wat is een slimme meter?
+
+Een slimme meter is een digitale meter die:
+- Uw verbruik automatisch uitleest
+- Gegevens digitaal doorgeeft aan uw leverancier
+- Real-time inzicht geeft in uw verbruik
+- Werkt voor zowel elektriciteit als gas
+
+## Hoe werkt het?
+
+De slimme meter:
+- Meet uw verbruik continu
+- Slaat gegevens op per kwartier (elektriciteit) of per uur (gas)
+- Geeft gegevens door via een beveiligde verbinding
+- Is gekoppeld aan uw energieleverancier
+
+## Voordelen
+
+### Voor u:
+- **Geen meterstanden doorgeven**: Automatisch uitlezen
+- **Real-time inzicht**: Zie direct uw verbruik
+- **Nauwkeurige facturering**: Op basis van daadwerkelijk verbruik
+- **Dynamische contracten**: Mogelijk met slimme meter
+
+### Voor uw leverancier:
+- Efficiëntere facturering
+- Betere service
+- Minder administratie
+
+## Wanneer krijgt u een slimme meter?
+
+U krijgt een slimme meter:
+- Bij nieuwe aansluiting
+- Bij vervanging oude meter
+- Op verzoek (soms tegen betaling)
+
+## Kosten
+
+De slimme meter is meestal gratis:
+- Geen extra kosten voor installatie
+- Geen extra kosten voor uitlezing
+- Soms eenmalige bijdrage bij vervroegde installatie
+
+## Privacy
+
+Uw gegevens zijn beveiligd:
+- Versleutelde verbinding
+- Alleen gegevens voor facturering
+- U bepaalt wie toegang heeft
+
+## Hulp nodig?
+
+Wij helpen u graag begrijpen wat een slimme meter betekent voor uw bedrijf. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiecontract-verlengen-tips',
+    title: 'Wanneer moet u uw energiecontract verlengen?',
+    description: 'Tips voor het verlengen van uw energiecontract. Wanneer is het beste moment, waar moet u op letten en hoe voorkomt u automatische verlenging?',
+    keywords: ['contract verlengen', 'energiecontract', 'opzegtermijn', 'automatische verlenging', 'contract einde'],
+    category: 'Advies',
+    date: '2025-07-15',
+    readTime: '5 min',
+    content: `
+# Wanneer moet u uw energiecontract verlengen?
+
+Het verlengen van uw energiecontract is een belangrijke beslissing. Hier zijn tips om het beste moment te kiezen.
+
+## Wanneer verlengen?
+
+U kunt uw contract verlengen:
+- **Binnen opzegtermijn**: Meestal 1 maand voor einde contract
+- **Bij einde contract**: Als u niet opzegt, wordt het automatisch verlengd
+- **Tussentijds**: Meestal niet mogelijk zonder boete
+
+## Beste moment
+
+Het beste moment om te verlengen is:
+- **3-6 maanden voor einde**: Tijd om te vergelijken
+- **Bij gunstige marktprijzen**: Profiteer van lage prijzen
+- **Voor opzegtermijn**: Zorg dat u op tijd bent
+
+## Waar moet u op letten?
+
+### 1. Nieuwe tarieven
+- Check of tarieven zijn veranderd
+- Vergelijk met andere leveranciers
+- Let op verborgen kosten
+
+### 2. Looptijd
+- Kies looptijd die bij u past
+- Korte looptijd = flexibiliteit
+- Lange looptijd = prijszekerheid
+
+### 3. Voorwaarden
+- Lees voorwaarden goed door
+- Check opzegtermijn
+- Let op automatische verlenging
+
+## Automatische verlenging voorkomen
+
+Om automatische verlenging te voorkomen:
+- Zeg tijdig op (binnen opzegtermijn)
+- Bewaar bevestiging van opzegging
+- Check of opzegging is ontvangen
+
+## Tips
+
+- Start tijdig met vergelijken
+- Gebruik onze calculator
+- Laat u adviseren
+- Check reviews en klantenservice
+
+## Hulp nodig?
+
+Wij helpen u graag bij het verlengen van uw contract. Van vergelijken tot afsluiten: wij staan voor u klaar.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-verlichting-led',
+    title: 'LED-verlichting: de beste investering voor energiebesparing',
+    description: 'Waarom LED-verlichting de beste investering is voor energiebesparing. Wat kost het, wat levert het op en wat is de terugverdientijd?',
+    keywords: ['LED verlichting', 'energiebesparing', 'verlichting', 'energiezuinig', 'terugverdientijd'],
+    category: 'Tips',
+    date: '2025-07-20',
+    readTime: '6 min',
+    content: `
+# LED-verlichting: de beste investering voor energiebesparing
+
+LED-verlichting is een van de beste investeringen voor energiebesparing. Hier leest u waarom.
+
+## Wat is LED-verlichting?
+
+LED (Light Emitting Diode) is een energiezuinige verlichtingstechnologie:
+- **Efficiënt**: 80-90% minder energie dan gloeilampen
+- **Langdurig**: 25.000-50.000 branduren
+- **Duurzaam**: Geen giftige stoffen
+
+## Voordelen
+
+LED-verlichting heeft vele voordelen:
+- **Energiebesparing**: 50-70% op verlichtingskosten
+- **Lange levensduur**: 10-20 jaar
+- **Minder onderhoud**: Minder vaak vervangen
+- **Betere kwaliteit**: Constante lichtkleur
+- **Direct aan/uit**: Geen opwarmtijd
+
+## Kosten
+
+De kosten voor LED-verlichting:
+- **Aanschaf**: €5-€50 per lamp (afhankelijk van type)
+- **Installatie**: Meestal zelf te doen
+- **Onderhoud**: Minimaal
+
+## Terugverdientijd
+
+De terugverdientijd is meestal:
+- **1-2 jaar**: Voor zakelijk gebruik
+- **Korter bij veel branduren**: Hoe meer gebruik, hoe sneller terugverdiend
+- **Langer bij weinig gebruik**: Maar nog steeds rendabel
+
+## Besparing
+
+U kunt besparen:
+- **50-70% op verlichtingskosten**: Door energiebesparing
+- **Minder onderhoud**: Door lange levensduur
+- **Lagere koeling**: LED geeft minder warmte af
+
+## Tips
+
+- Vervang eerst lampen die veel branden
+- Kies voor goede kwaliteit LED
+- Let op lichtkleur (warm/koud wit)
+- Check dimbaarheid indien nodig
+
+## Hulp nodig?
+
+Wij helpen u graag bij het kiezen van de juiste LED-verlichting. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-isolatie',
+    title: 'Isolatie: de basis voor energiebesparing',
+    description: 'Waarom isolatie de basis is voor energiebesparing. Welke isolatiematerialen zijn er, wat kost het en wat is de terugverdientijd?',
+    keywords: ['isolatie', 'energiebesparing', 'verwarming', 'koeling', 'energiezuinig'],
+    category: 'Tips',
+    date: '2025-07-25',
+    readTime: '6 min',
+    content: `
+# Isolatie: de basis voor energiebesparing
+
+Goede isolatie is de basis voor energiebesparing. Hier leest u alles wat u moet weten.
+
+## Wat is isolatie?
+
+Isolatie voorkomt warmteverlies:
+- **Dak**: Voorkomt warmteverlies naar boven
+- **Muren**: Voorkomt warmteverlies naar buiten
+- **Vloer**: Voorkomt warmteverlies naar beneden
+- **Ramen**: Dubbel glas of HR++ glas
+
+## Voordelen
+
+Goede isolatie heeft vele voordelen:
+- **Energiebesparing**: 20-30% op verwarming en koeling
+- **Comfort**: Aangenamere temperatuur
+- **Waardevermeerdering**: Hogere waarde van uw pand
+- **Duurzaamheid**: Minder CO2-uitstoot
+
+## Soorten isolatie
+
+Er zijn verschillende soorten isolatie:
+- **Dakisolatie**: Meest effectief
+- **Muurisolatie**: Spouwmuur of buitenmuur
+- **Vloerisolatie**: Voor begane grond
+- **Glasisolatie**: Dubbel glas of HR++ glas
+
+## Kosten
+
+De kosten voor isolatie:
+- **Dakisolatie**: €30-€60 per m²
+- **Muurisolatie**: €20-€50 per m²
+- **Vloerisolatie**: €25-€45 per m²
+- **Glasisolatie**: €100-€300 per m²
+
+## Terugverdientijd
+
+De terugverdientijd is meestal:
+- **3-5 jaar**: Voor dakisolatie
+- **5-10 jaar**: Voor muurisolatie
+- **10-15 jaar**: Voor vloerisolatie
+- **15-20 jaar**: Voor glasisolatie
+
+## Subsidies
+
+Er zijn verschillende subsidies:
+- **ISDE**: Investeringssubsidie Duurzame Energie
+- **Gemeentelijke subsidies**: Check uw gemeente
+- **EIA**: Energie-investeringsaftrek
+
+## Tips
+
+- Start met dakisolatie (meest effectief)
+- Laat een energieadvies uitvoeren
+- Check beschikbare subsidies
+- Vraag meerdere offertes aan
+
+## Hulp nodig?
+
+Wij helpen u graag bij het kiezen van de juiste isolatie. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-koeling',
+    title: 'Energie besparen op koeling: praktische tips',
+    description: 'Praktische tips om energie te besparen op koeling. Van temperatuurregeling tot onderhoud: welke maatregelen leveren de meeste besparing op?',
+    keywords: ['koeling', 'energie besparen', 'airconditioning', 'koelinstallatie', 'energiezuinig'],
+    category: 'Tips',
+    date: '2025-07-30',
+    readTime: '5 min',
+    content: `
+# Energie besparen op koeling: praktische tips
+
+Koeling is een grote kostenpost voor veel bedrijven. Hier zijn praktische tips om energie te besparen.
+
+## Temperatuurregeling
+
+Optimaliseer de temperatuur:
+- **1 graad hoger**: Bespaar 5-10% op koeling
+- **Programmeren**: Automatische regeling per dag/uur
+- **Zones**: Verschillende temperaturen per ruimte
+
+## Onderhoud
+
+Regelmatig onderhoud bespaart energie:
+- **Filters**: Vervang filters regelmatig
+- **Condensor**: Reinig condensor regelmatig
+- **Leidingen**: Check leidingen op lekkages
+
+## Isolatie
+
+Goede isolatie bespaart op koeling:
+- **Dak**: Voorkomt warmte van buiten
+- **Ramen**: HR++ glas of zonwering
+- **Muren**: Goede isolatie voorkomt warmte
+
+## Ventilatie
+
+Goede ventilatie helpt:
+- **Natuurlijke ventilatie**: Gebruik waar mogelijk
+- **Nachtkoeling**: Koel 's nachts met buitenlucht
+- **Luchtstroming**: Optimaliseer luchtstroming
+
+## Tips
+
+- Zet temperatuur 1 graad hoger
+- Onderhoud regelmatig
+- Investeer in isolatie
+- Gebruik natuurlijke ventilatie
+
+## Hulp nodig?
+
+Wij helpen u graag met energiebesparing op koeling. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  // AUGUSTUS 2025 (4 artikelen)
+  {
+    slug: 'energieprijzen-augustus-2025',
+    title: 'Energieprijzen augustus 2025: marktanalyse',
+    description: 'Analyse van de energieprijzen in augustus 2025. Wat gebeurde er op de markt en wat betekent dit voor uw energiecontract?',
+    keywords: ['energieprijzen', 'marktanalyse', 'augustus 2025', 'elektriciteitsprijzen', 'gasprijzen'],
+    category: 'Markt',
+    date: '2025-08-05',
+    readTime: '4 min',
+    content: `
+# Energieprijzen augustus 2025: marktanalyse
+
+In augustus 2025 zagen we belangrijke ontwikkelingen op de energiemarkt. Deze analyse helpt u begrijpen wat er gebeurde.
+
+## Marktontwikkelingen
+
+Augustus 2025 kenmerkte zich door:
+- Zomerperiode met lagere vraag
+- Hoog aanbod van zonne-energie
+- Stabilisatie van prijzen
+
+## Elektriciteitsprijzen
+
+Elektriciteitsprijzen bleven stabiel:
+- Meer zonne-energie die prijzen drukt
+- Lagere vraag in zomerperiode
+- Betere balans tussen vraag en aanbod
+
+## Gasprijzen
+
+Gasprijzen bleven laag:
+- Zeer lage vraag in zomerperiode
+- Goede voorraadniveaus
+- Minder volatiliteit
+
+## Wat betekent dit voor u?
+
+- **Vaste contracten**: Goed moment om te verlengen
+- **Dynamische contracten**: Profiteer van lagere prijzen
+- **Overstappen**: Mogelijkheden voor betere tarieven
+
+## Blijf op de hoogte
+
+Wij volgen de markt continu en houden u op de hoogte van ontwikkelingen die voor u relevant zijn.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-verwarming',
+    title: 'Energie besparen op verwarming: praktische tips',
+    description: 'Praktische tips om energie te besparen op verwarming. Van temperatuurregeling tot isolatie: welke maatregelen leveren de meeste besparing op?',
+    keywords: ['verwarming', 'energie besparen', 'verwarmingskosten', 'energiezuinig', 'thermostaat'],
+    category: 'Tips',
+    date: '2025-08-10',
+    readTime: '5 min',
+    content: `
+# Energie besparen op verwarming: praktische tips
+
+Verwarming is een grote kostenpost voor veel bedrijven. Hier zijn praktische tips om energie te besparen.
+
+## Temperatuurregeling
+
+Optimaliseer de temperatuur:
+- **1 graad lager**: Bespaar 5-10% op verwarming
+- **Programmeren**: Automatische regeling per dag/uur
+- **Zones**: Verschillende temperaturen per ruimte
+
+## Isolatie
+
+Goede isolatie bespaart op verwarming:
+- **Dak**: Voorkomt warmteverlies naar boven
+- **Muren**: Voorkomt warmteverlies naar buiten
+- **Ramen**: HR++ glas voorkomt warmteverlies
+- **Vloer**: Voorkomt warmteverlies naar beneden
+
+## Onderhoud
+
+Regelmatig onderhoud bespaart energie:
+- **Ketel**: Laat ketel jaarlijks onderhouden
+- **Radiatoren**: Ontlucht radiatoren regelmatig
+- **Leidingen**: Check leidingen op lekkages
+
+## Tips
+
+- Zet temperatuur 1 graad lager
+- Investeer in isolatie
+- Onderhoud regelmatig
+- Gebruik slimme thermostaten
+
+## Hulp nodig?
+
+Wij helpen u graag met energiebesparing op verwarming. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-monitoring',
+    title: 'Energieverbruik monitoren: waarom en hoe?',
+    description: 'Waarom is het monitoren van uw energieverbruik belangrijk en hoe doet u dat? Van slimme meters tot dashboards: welke tools zijn er?',
+    keywords: ['energieverbruik', 'monitoring', 'slimme meter', 'dashboard', 'verbruik inzicht'],
+    category: 'Tips',
+    date: '2025-08-15',
+    readTime: '5 min',
+    content: `
+# Energieverbruik monitoren: waarom en hoe?
+
+Het monitoren van uw energieverbruik is essentieel voor energiebesparing. Hier leest u waarom en hoe.
+
+## Waarom monitoren?
+
+Monitoring helpt u:
+- **Inzicht krijgen**: Zie waar u energie verbruikt
+- **Besparen**: Identificeer besparingsmogelijkheden
+- **Optimaliseren**: Verbeter uw verbruikspatroon
+- **Budgetteren**: Plan uw energiekosten
+
+## Hoe monitoren?
+
+Er zijn verschillende manieren:
+- **Slimme meters**: Real-time inzicht via app
+- **Dashboards**: Overzicht van verbruik
+- **Rapportages**: Maandelijkse of jaarlijkse rapporten
+- **Meterstanden**: Handmatig bijhouden
+
+## Tools
+
+Er zijn verschillende tools beschikbaar:
+- **Leverancier apps**: Apps van uw energieleverancier
+- **Derde partij apps**: Apps voor energiebeheer
+- **Dashboards**: Online dashboards
+- **Excel**: Handmatig bijhouden
+
+## Tips
+
+- Monitor dagelijks of wekelijks
+- Vergelijk maandelijkse verbruiken
+- Stel doelen en monitor voortgang
+- Gebruik slimme meters waar mogelijk
+
+## Hulp nodig?
+
+Wij helpen u graag bij het monitoren van uw energieverbruik. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-apparatuur',
+    title: 'Energiezuinige apparatuur: waar moet u op letten?',
+    description: 'Waar moet u op letten bij het kiezen van energiezuinige apparatuur? Van energielabels tot levensduur: welke factoren zijn belangrijk?',
+    keywords: ['energiezuinige apparatuur', 'energielabel', 'apparatuur', 'energiebesparing', 'duurzaam'],
+    category: 'Tips',
+    date: '2025-08-20',
+    readTime: '5 min',
+    content: `
+# Energiezuinige apparatuur: waar moet u op letten?
+
+Het kiezen van energiezuinige apparatuur kan veel energie besparen. Hier leest u waar u op moet letten.
+
+## Energielabels
+
+Let op energielabels:
+- **A+++**: Meest energiezuinig
+- **A++**: Zeer energiezuinig
+- **A+**: Energiezuinig
+- **A**: Redelijk energiezuinig
+
+## Levensduur
+
+Kies voor lange levensduur:
+- **Kwaliteit**: Goede kwaliteit gaat langer mee
+- **Onderhoud**: Regelmatig onderhoud verlengt levensduur
+- **Garantie**: Check garantieperiode
+
+## Verbruik
+
+Check het verbruik:
+- **Specificaties**: Check specificaties voor verbruik
+- **Vergelijken**: Vergelijk verbruik tussen modellen
+- **Berekenen**: Reken jaarlijkse kosten uit
+
+## Tips
+
+- Kies voor A+++ of A++ label
+- Let op levensduur
+- Check verbruik
+- Vergelijk totaalkosten
+
+## Hulp nodig?
+
+Wij helpen u graag bij het kiezen van energiezuinige apparatuur. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  // SEPTEMBER 2025 (5 artikelen)
+  {
+    slug: 'energieprijzen-september-2025',
+    title: 'Energieprijzen september 2025: marktanalyse',
+    description: 'Analyse van de energieprijzen in september 2025. Wat gebeurde er op de markt en wat betekent dit voor uw energiecontract?',
+    keywords: ['energieprijzen', 'marktanalyse', 'september 2025', 'elektriciteitsprijzen', 'gasprijzen'],
+    category: 'Markt',
+    date: '2025-09-05',
+    readTime: '4 min',
+    content: `
+# Energieprijzen september 2025: marktanalyse
+
+In september 2025 zagen we belangrijke ontwikkelingen op de energiemarkt. Deze analyse helpt u begrijpen wat er gebeurde.
+
+## Marktontwikkelingen
+
+September 2025 kenmerkte zich door:
+- Overgang van zomer naar herfst
+- Toenemende vraag naar gas
+- Stabilisatie van elektriciteitsprijzen
+
+## Elektriciteitsprijzen
+
+Elektriciteitsprijzen stabiliseerden:
+- Minder zonne-energie dan in zomer
+- Toenemende vraag door kortere dagen
+- Betere balans tussen vraag en aanbod
+
+## Gasprijzen
+
+Gasprijzen stegen licht:
+- Toenemende vraag voor verwarming
+- Goede voorraadniveaus
+- Minder volatiliteit dan voorgaande jaren
+
+## Wat betekent dit voor u?
+
+- **Vaste contracten**: Goed moment om te verlengen
+- **Dynamische contracten**: Let op stijgende prijzen
+- **Overstappen**: Mogelijkheden voor betere tarieven
+
+## Blijf op de hoogte
+
+Wij volgen de markt continu en houden u op de hoogte van ontwikkelingen die voor u relevant zijn.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-gedrag',
+    title: 'Energie besparen door gedrag: kleine aanpassingen, groot effect',
+    description: 'Hoe kunt u energie besparen door kleine aanpassingen in gedrag? Van verwarming tot verlichting: welke gewoontes helpen het meest?',
+    keywords: ['energie besparen', 'gedrag', 'energiebesparing', 'gewontes', 'energiezuinig'],
+    category: 'Tips',
+    date: '2025-09-10',
+    readTime: '4 min',
+    content: `
+# Energie besparen door gedrag: kleine aanpassingen, groot effect
+
+Kleine aanpassingen in gedrag kunnen veel energie besparen. Hier zijn praktische tips.
+
+## Verwarming
+
+Aanpassingen in verwarming:
+- **1 graad lager**: Bespaar 5-10% op verwarming
+- **Programmeren**: Zet verwarming lager buiten kantooruren
+- **Zones**: Verwarm alleen waar nodig
+
+## Verlichting
+
+Aanpassingen in verlichting:
+- **Uitzetten**: Zet verlichting uit waar niet nodig
+- **Natuurlijk licht**: Gebruik daglicht waar mogelijk
+- **Dimmen**: Dim verlichting waar mogelijk
+
+## Apparatuur
+
+Aanpassingen in apparatuur:
+- **Uitzetten**: Zet apparaten uit in plaats van stand-by
+- **Nachtstand**: Gebruik nachtstand waar mogelijk
+- **Onderhoud**: Onderhoud apparaten regelmatig
+
+## Tips
+
+- Maak energiebesparing onderdeel van cultuur
+- Train medewerkers
+- Monitor resultaten
+- Vier successen
+
+## Hulp nodig?
+
+Wij helpen u graag bij het besparen van energie door gedrag. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-ventilatie',
+    title: 'Energie besparen op ventilatie: praktische tips',
+    description: 'Praktische tips om energie te besparen op ventilatie. Van natuurlijke ventilatie tot warmteterugwinning: welke maatregelen leveren de meeste besparing op?',
+    keywords: ['ventilatie', 'energie besparen', 'luchtbehandeling', 'energiezuinig', 'warmteterugwinning'],
+    category: 'Tips',
+    date: '2025-09-15',
+    readTime: '5 min',
+    content: `
+# Energie besparen op ventilatie: praktische tips
+
+Ventilatie is belangrijk voor comfort, maar kan veel energie kosten. Hier zijn praktische tips om energie te besparen.
+
+## Natuurlijke ventilatie
+
+Gebruik natuurlijke ventilatie waar mogelijk:
+- **Ramen open**: Gebruik ramen voor ventilatie
+- **Nachtkoeling**: Koel 's nachts met buitenlucht
+- **Luchtstroming**: Optimaliseer luchtstroming
+
+## Warmteterugwinning
+
+Warmteterugwinning bespaart energie:
+- **WTW-systeem**: Warmteterugwinningssysteem
+- **Efficiëntie**: Tot 90% warmteterugwinning
+- **Terugverdientijd**: 3-5 jaar
+
+## Onderhoud
+
+Regelmatig onderhoud bespaart energie:
+- **Filters**: Vervang filters regelmatig
+- **Leidingen**: Check leidingen op lekkages
+- **Ventilatoren**: Onderhoud ventilatoren regelmatig
+
+## Tips
+
+- Gebruik natuurlijke ventilatie waar mogelijk
+- Investeer in warmteterugwinning
+- Onderhoud regelmatig
+- Monitor verbruik
+
+## Hulp nodig?
+
+Wij helpen u graag met energiebesparing op ventilatie. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-water',
+    title: 'Energie besparen op warm water: praktische tips',
+    description: 'Praktische tips om energie te besparen op warm water. Van temperatuurregeling tot isolatie: welke maatregelen leveren de meeste besparing op?',
+    keywords: ['warm water', 'energie besparen', 'waterverwarming', 'energiezuinig', 'waterbesparing'],
+    category: 'Tips',
+    date: '2025-09-20',
+    readTime: '5 min',
+    content: `
+# Energie besparen op warm water: praktische tips
+
+Warm water is een grote kostenpost voor veel bedrijven. Hier zijn praktische tips om energie te besparen.
+
+## Temperatuurregeling
+
+Optimaliseer de temperatuur:
+- **60 graden**: Voldoende voor meeste doeleinden
+- **Programmeren**: Automatische regeling per dag/uur
+- **Zones**: Verschillende temperaturen per zone
+
+## Isolatie
+
+Goede isolatie bespaart energie:
+- **Leidingen**: Isoleer warmwaterleidingen
+- **Boiler**: Isoleer boiler goed
+- **Opslag**: Isoleer warmwateropslag
+
+## Onderhoud
+
+Regelmatig onderhoud bespaart energie:
+- **Boiler**: Laat boiler jaarlijks onderhouden
+- **Leidingen**: Check leidingen op lekkages
+- **Filters**: Vervang filters regelmatig
+
+## Tips
+
+- Zet temperatuur op 60 graden
+- Isoleer leidingen en boiler
+- Onderhoud regelmatig
+- Gebruik waterbesparende kranen
+
+## Hulp nodig?
+
+Wij helpen u graag met energiebesparing op warm water. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-elektrische-apparaten',
+    title: 'Energie besparen op elektrische apparaten: praktische tips',
+    description: 'Praktische tips om energie te besparen op elektrische apparaten. Van computers tot printers: welke maatregelen leveren de meeste besparing op?',
+    keywords: ['elektrische apparaten', 'energie besparen', 'computers', 'printers', 'energiezuinig'],
+    category: 'Tips',
+    date: '2025-09-25',
+    readTime: '5 min',
+    content: `
+# Energie besparen op elektrische apparaten: praktische tips
+
+Elektrische apparaten verbruiken veel energie. Hier zijn praktische tips om energie te besparen.
+
+## Computers
+
+Bespaar energie op computers:
+- **Slaapstand**: Gebruik slaapstand bij niet-gebruik
+- **Uitzetten**: Zet computers uit buiten kantooruren
+- **Energiezuinig**: Kies voor energiezuinige modellen
+
+## Printers
+
+Bespaar energie op printers:
+- **Uitzetten**: Zet printers uit buiten kantooruren
+- **Slaapstand**: Gebruik slaapstand bij niet-gebruik
+- **Energiezuinig**: Kies voor energiezuinige modellen
+
+## Overige apparaten
+
+Bespaar energie op overige apparaten:
+- **Uitzetten**: Zet apparaten uit in plaats van stand-by
+- **Nachtstand**: Gebruik nachtstand waar mogelijk
+- **Onderhoud**: Onderhoud apparaten regelmatig
+
+## Tips
+
+- Zet apparaten uit buiten kantooruren
+- Gebruik slaapstand waar mogelijk
+- Kies voor energiezuinige modellen
+- Onderhoud regelmatig
+
+## Hulp nodig?
+
+Wij helpen u graag met energiebesparing op elektrische apparaten. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  // OKTOBER 2025 (5 artikelen)
+  {
+    slug: 'energieprijzen-oktober-2025',
+    title: 'Energieprijzen oktober 2025: marktanalyse',
+    description: 'Analyse van de energieprijzen in oktober 2025. Wat gebeurde er op de markt en wat betekent dit voor uw energiecontract?',
+    keywords: ['energieprijzen', 'marktanalyse', 'oktober 2025', 'elektriciteitsprijzen', 'gasprijzen'],
+    category: 'Markt',
+    date: '2025-10-05',
+    readTime: '4 min',
+    content: `
+# Energieprijzen oktober 2025: marktanalyse
+
+In oktober 2025 zagen we belangrijke ontwikkelingen op de energiemarkt. Deze analyse helpt u begrijpen wat er gebeurde.
+
+## Marktontwikkelingen
+
+Oktober 2025 kenmerkte zich door:
+- Herfstperiode met toenemende vraag
+- Minder zonne-energie
+- Stijgende gasprijzen
+
+## Elektriciteitsprijzen
+
+Elektriciteitsprijzen stegen licht:
+- Minder zonne-energie dan in zomer
+- Toenemende vraag door kortere dagen
+- Betere balans tussen vraag en aanbod
+
+## Gasprijzen
+
+Gasprijzen stegen:
+- Toenemende vraag voor verwarming
+- Goede voorraadniveaus
+- Minder volatiliteit dan voorgaande jaren
+
+## Wat betekent dit voor u?
+
+- **Vaste contracten**: Goed moment om te verlengen
+- **Dynamische contracten**: Let op stijgende prijzen
+- **Overstappen**: Mogelijkheden voor betere tarieven
+
+## Blijf op de hoogte
+
+Wij volgen de markt continu en houden u op de hoogte van ontwikkelingen die voor u relevant zijn.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-totaalplan',
+    title: 'Totaalplan voor energiebesparing: waar te beginnen?',
+    description: 'Een totaalplan voor energiebesparing. Waar moet u beginnen, welke maatregelen hebben de meeste impact en wat is de beste volgorde?',
+    keywords: ['energiebesparing', 'totaalplan', 'energiezuinig', 'besparingsplan', 'energie advies'],
+    category: 'Advies',
+    date: '2025-10-10',
+    readTime: '6 min',
+    content: `
+# Totaalplan voor energiebesparing: waar te beginnen?
+
+Een totaalplan voor energiebesparing helpt u systematisch energie besparen. Hier leest u waar u moet beginnen.
+
+## Stap 1: Inzicht krijgen
+
+Begin met inzicht:
+- **Meterstanden**: Houd meterstanden bij
+- **Monitoring**: Gebruik slimme meters
+- **Analyse**: Analyseer verbruikspatronen
+
+## Stap 2: Quick wins
+
+Start met quick wins:
+- **LED-verlichting**: Vervang oude verlichting
+- **Temperatuur**: Zet temperatuur 1 graad lager
+- **Uitzetten**: Zet apparaten uit buiten kantooruren
+
+## Stap 3: Investeringen
+
+Plan investeringen:
+- **Isolatie**: Start met dakisolatie
+- **Zonnepanelen**: Overweeg zonnepanelen
+- **Warmtepomp**: Overweeg warmtepomp
+
+## Stap 4: Monitoring
+
+Monitor resultaten:
+- **Verbruik**: Houd verbruik in de gaten
+- **Besparing**: Meet besparing
+- **Aanpassen**: Pas plan aan waar nodig
+
+## Tips
+
+- Start met inzicht
+- Begin met quick wins
+- Plan investeringen
+- Monitor resultaten
+
+## Hulp nodig?
+
+Wij helpen u graag bij het opstellen van een totaalplan voor energiebesparing. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-subsidies-overzicht',
+    title: 'Subsidies voor energiebesparing: compleet overzicht',
+    description: 'Compleet overzicht van subsidies voor energiebesparing. Van ISDE tot EIA: welke subsidies zijn er en waar heeft u recht op?',
+    keywords: ['subsidies', 'energiebesparing', 'ISDE', 'EIA', 'SDE++'],
+    category: 'Subsidies',
+    date: '2025-10-15',
+    readTime: '6 min',
+    content: `
+# Subsidies voor energiebesparing: compleet overzicht
+
+Er zijn verschillende subsidies beschikbaar voor energiebesparing. Hier is een compleet overzicht.
+
+## ISDE
+
+Investeringssubsidie Duurzame Energie:
+- **Voor**: Zonnepanelen, warmtepompen, zonneboilers
+- **Bedrag**: Afhankelijk van type installatie
+- **Aanvragen**: Via RVO
+
+## EIA
+
+Energie-investeringsaftrek:
+- **Voor**: Energiebesparende maatregelen
+- **Bedrag**: Extra aftrekpost op winst
+- **Aanvragen**: Via Belastingdienst
+
+## SDE++
+
+Stimulering Duurzame Energieproductie:
+- **Voor**: Duurzame energieproductie
+- **Bedrag**: Verschillende tarieven per technologie
+- **Aanvragen**: Via RVO
+
+## MIA/VAMIL
+
+Milieuvriendelijke investeringen:
+- **MIA**: Versnelde afschrijving
+- **VAMIL**: Willekeurige afschrijving
+- **Voor**: Milieuvriendelijke bedrijfsmiddelen
+
+## Regionale subsidies
+
+Veel gemeenten en provincies hebben eigen regelingen:
+- **Gemeentelijke subsidies**: Check uw gemeente
+- **Provinciale regelingen**: Verschillen per provincie
+- **Lokale initiatieven**: Soms extra ondersteuning
+
+## Tips
+
+- Check beschikbare subsidies
+- Vraag tijdig aan
+- Houd documentatie bij
+- Combineer waar mogelijk
+
+## Hulp nodig?
+
+Wij helpen u graag bij het vinden en aanvragen van subsidies. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-terugverdientijd',
+    title: 'Terugverdientijd energiebesparende maatregelen: wat is realistisch?',
+    description: 'Wat is een realistische terugverdientijd voor energiebesparende maatregelen? Van LED-verlichting tot zonnepanelen: wat kunt u verwachten?',
+    keywords: ['terugverdientijd', 'energiebesparing', 'ROI', 'investering', 'energiezuinig'],
+    category: 'Advies',
+    date: '2025-10-20',
+    readTime: '5 min',
+    content: `
+# Terugverdientijd energiebesparende maatregelen: wat is realistisch?
+
+De terugverdientijd van energiebesparende maatregelen verschilt per maatregel. Hier leest u wat realistisch is.
+
+## LED-verlichting
+
+Terugverdientijd LED-verlichting:
+- **1-2 jaar**: Voor zakelijk gebruik
+- **Korter bij veel branduren**: Hoe meer gebruik, hoe sneller
+- **Langer bij weinig gebruik**: Maar nog steeds rendabel
+
+## Isolatie
+
+Terugverdientijd isolatie:
+- **3-5 jaar**: Voor dakisolatie
+- **5-10 jaar**: Voor muurisolatie
+- **10-15 jaar**: Voor vloerisolatie
+
+## Zonnepanelen
+
+Terugverdientijd zonnepanelen:
+- **5-7 jaar**: Voor kleinverbruikers met saldering
+- **7-10 jaar**: Voor grootverbruikers
+- **Korter met subsidies**: ISDE, SDE++
+
+## Warmtepomp
+
+Terugverdientijd warmtepomp:
+- **5-10 jaar**: Afhankelijk van type
+- **Korter met subsidies**: ISDE, SDE++
+- **Langer bij lage gasprijzen**: Maar duurzamer
+
+## Tips
+
+- Reken terugverdientijd uit
+- Houd rekening met subsidies
+- Vergelijk verschillende maatregelen
+- Start met kortste terugverdientijd
+
+## Hulp nodig?
+
+Wij helpen u graag bij het berekenen van terugverdientijden. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
+  {
+    slug: 'energiebesparing-co2-reductie',
+    title: 'Energiebesparing en CO2-reductie: wat is de impact?',
+    description: 'Wat is de impact van energiebesparing op CO2-reductie? Van verlichting tot verwarming: welke maatregelen hebben de meeste impact?',
+    keywords: ['CO2-reductie', 'energiebesparing', 'duurzaamheid', 'klimaat', 'milieu'],
+    category: 'Duurzaamheid',
+    date: '2025-10-25',
+    readTime: '5 min',
+    content: `
+# Energiebesparing en CO2-reductie: wat is de impact?
+
+Energiebesparing heeft directe impact op CO2-reductie. Hier leest u wat de impact is.
+
+## Impact per maatregel
+
+Verschillende maatregelen hebben verschillende impact:
+- **LED-verlichting**: 50-70% minder CO2
+- **Isolatie**: 20-30% minder CO2
+- **Zonnepanelen**: 100% minder CO2 (bij gebruik)
+- **Warmtepomp**: 50-70% minder CO2
+
+## Berekening
+
+CO2-reductie berekenen:
+- **Elektriciteit**: 1 kWh = 0,5 kg CO2
+- **Gas**: 1 m³ = 2 kg CO2
+- **Besparing**: Minder verbruik = minder CO2
+
+## Doelen
+
+CO2-reductiedoelen:
+- **Nederland**: 49% reductie in 2030
+- **EU**: 55% reductie in 2030
+- **Bedrijven**: Verschillende doelen per sector
+
+## Tips
+
+- Monitor CO2-reductie
+- Stel doelen
+- Meet resultaten
+- Vier successen
+
+## Hulp nodig?
+
+Wij helpen u graag bij het berekenen van CO2-reductie. Neem contact met ons op voor persoonlijk advies.
+    `.trim()
+  },
 ]
 
 // Helper functie om artikelen op datum te sorteren
