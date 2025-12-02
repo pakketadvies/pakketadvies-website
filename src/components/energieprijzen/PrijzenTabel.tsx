@@ -277,30 +277,55 @@ export function PrijzenTabel({
   return (
     <Card className="mb-6">
       <CardContent className="pt-4 md:pt-8 px-2 md:px-6">
-        {/* Header with week navigation */}
+        {/* Header with week/month navigation */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-6 gap-3 md:gap-4">
           <div className="flex items-center gap-2 md:gap-4 flex-wrap">
             <div className="flex items-center gap-1 md:gap-2">
               <button
-                onClick={() => setCurrentWeek(currentWeek - 1)}
+                onClick={() => {
+                  if (viewMode === 'week') {
+                    setCurrentWeek(currentWeek - 1)
+                  } else {
+                    setCurrentMonth(currentMonth - 1)
+                  }
+                }}
                 className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label="Vorige week"
+                aria-label={viewMode === 'week' ? 'Vorige week' : 'Vorige maand'}
               >
                 <CaretLeft className="w-4 h-4 md:w-5 md:h-5 text-brand-navy-500" weight="bold" />
               </button>
               <div className="px-2 md:px-4 py-1.5 md:py-2 bg-gray-100 rounded-lg min-w-[120px] md:min-w-[140px] text-center">
-                <span className="font-semibold text-brand-navy-500 text-sm md:text-base">
-                  Week {weekNumber}
-                </span>
-                <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">
-                  {formatDateFull(weekStart)} - {formatDateFull(weekEnd)}
-                </div>
+                {viewMode === 'week' ? (
+                  <>
+                    <span className="font-semibold text-brand-navy-500 text-sm md:text-base">
+                      Week {weekNumber}
+                    </span>
+                    <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                      {formatDateFull(weekStart)} - {formatDateFull(weekEnd)}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold text-brand-navy-500 text-sm md:text-base capitalize">
+                      {monthName} {monthYear}
+                    </span>
+                    <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                      {formatDateFull(monthStart)} - {formatDateFull(monthEnd)}
+                    </div>
+                  </>
+                )}
               </div>
               <button
-                onClick={() => setCurrentWeek(currentWeek + 1)}
-                disabled={currentWeek >= 0}
+                onClick={() => {
+                  if (viewMode === 'week') {
+                    setCurrentWeek(currentWeek + 1)
+                  } else {
+                    setCurrentMonth(currentMonth + 1)
+                  }
+                }}
+                disabled={(viewMode === 'week' && currentWeek >= 0) || (viewMode === 'maand' && currentMonth >= 0)}
                 className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Volgende week"
+                aria-label={viewMode === 'week' ? 'Volgende week' : 'Volgende maand'}
               >
                 <CaretRight className="w-4 h-4 md:w-5 md:h-5 text-brand-navy-500" weight="bold" />
               </button>
@@ -309,7 +334,10 @@ export function PrijzenTabel({
             {/* View mode toggle */}
             <div className="flex items-center gap-1 md:gap-2 bg-gray-100 rounded-lg p-0.5 md:p-1">
               <button
-                onClick={() => setViewMode('week')}
+                onClick={() => {
+                  setViewMode('week')
+                  setCurrentWeek(0)
+                }}
                 className={`px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
                   viewMode === 'week'
                     ? 'bg-white text-brand-teal-600 shadow-sm'
