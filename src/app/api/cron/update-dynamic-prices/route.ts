@@ -21,15 +21,15 @@ export async function GET(request: Request) {
     // Verify this is a cron request
     // Vercel cron jobs automatically add an Authorization header
     // For manual testing, use: Authorization: Bearer <CRON_SECRET>
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
+    const authHeader = request.headers.get('authorization')?.trim()
+    const cronSecret = process.env.CRON_SECRET?.trim()
     
     // Debug logging (remove in production if needed)
     console.log('🔍 Auth check:', {
       hasAuthHeader: !!authHeader,
-      authHeaderPrefix: authHeader?.substring(0, 20) + '...',
+      authHeaderValue: authHeader ? `"${authHeader}"` : 'none',
       hasCronSecret: !!cronSecret,
-      cronSecretPrefix: cronSecret ? cronSecret.substring(0, 10) + '...' : 'none',
+      cronSecretValue: cronSecret ? `"${cronSecret}"` : 'none',
       expectedHeader: cronSecret ? `Bearer ${cronSecret}` : 'none',
       headersMatch: authHeader === (cronSecret ? `Bearer ${cronSecret}` : null),
     })
@@ -50,9 +50,11 @@ export async function GET(request: Request) {
         
         if (!isVercelInternal) {
           console.error('❌ Unauthorized cron request')
-          console.error('   Received header:', authHeader || 'none')
-          console.error('   Expected header:', expectedHeader)
+          console.error('   Received header:', authHeader ? `"${authHeader}"` : 'none')
+          console.error('   Expected header:', `"${expectedHeader}"`)
           console.error('   Match:', authHeader === expectedHeader)
+          console.error('   Auth header length:', authHeader?.length || 0)
+          console.error('   Expected length:', expectedHeader.length)
           console.error('   For manual testing, use: Authorization: Bearer <CRON_SECRET>')
           return NextResponse.json(
             { 
