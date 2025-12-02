@@ -851,62 +851,65 @@ export function PrijzenGrafiek({
       <CardContent className="pt-4 md:pt-8 px-2 md:px-6">
         {/* Controls Section */}
         <div className="mb-4 md:mb-6 space-y-3 md:space-y-4">
-          {/* Type Toggle (Stroom/Gas) - Full width on mobile */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
-            <button
-              onClick={() => {
-                setLocalEnergietype('elektriciteit')
-                if (graphView !== 'dag') setGraphView('dag')
-              }}
-              className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all w-full md:w-auto ${
-                localEnergietype === 'elektriciteit'
-                  ? 'bg-brand-teal-500 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Lightning className="w-4 h-4 md:w-5 md:h-5" weight="duotone" />
-              <span>Stroom</span>
-            </button>
-            <button
-              onClick={() => {
-                setLocalEnergietype('gas')
-                setShowQuarterHour(false)
-                if (graphView !== 'dag') setGraphView('dag')
-              }}
-              className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all w-full md:w-auto ${
-                localEnergietype === 'gas'
-                  ? 'bg-brand-teal-500 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Flame className="w-4 h-4 md:w-5 md:h-5" weight="duotone" />
-              Gas
-            </button>
-          </div>
-
-          {/* Period Filters - Full width on mobile */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-1.5 md:overflow-x-auto md:pb-1 md:-mx-2 md:px-2">
-            {(['dag', 'week', 'maand', 'jaar'] as GraphView[]).map((view) => (
+          {/* Desktop: Top row with Stroom/Gas left and Period filters right */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+            {/* Type Toggle (Stroom/Gas) - Full width on mobile, left on desktop */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
               <button
-                key={view}
                 onClick={() => {
-                  setGraphView(view)
-                  if (view !== 'dag') {
-                    setShowQuarterHour(false)
-                  }
+                  setLocalEnergietype('elektriciteit')
+                  if (graphView !== 'dag') setGraphView('dag')
                 }}
-                className={`px-2.5 md:px-3 py-2.5 md:py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap w-full md:w-auto md:flex-shrink-0 ${
-                  graphView === view
+                className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all w-full md:w-auto ${
+                  localEnergietype === 'elektriciteit'
                     ? 'bg-brand-teal-500 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {view.charAt(0).toUpperCase() + view.slice(1)}
+                <Lightning className="w-4 h-4 md:w-5 md:h-5" weight="duotone" />
+                <span>Stroom</span>
               </button>
-            ))}
+              <button
+                onClick={() => {
+                  setLocalEnergietype('gas')
+                  setShowQuarterHour(false)
+                  if (graphView !== 'dag') setGraphView('dag')
+                }}
+                className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-1.5 rounded-lg text-sm md:text-base font-medium transition-all w-full md:w-auto ${
+                  localEnergietype === 'gas'
+                    ? 'bg-brand-teal-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Flame className="w-4 h-4 md:w-5 md:h-5" weight="duotone" />
+                Gas
+              </button>
+            </div>
+
+            {/* Period Filters - Full width on mobile, right on desktop */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-1.5 md:overflow-x-auto md:pb-1 md:-mx-2 md:px-2">
+              {(['dag', 'week', 'maand', 'jaar'] as GraphView[]).map((view) => (
+                <button
+                  key={view}
+                  onClick={() => {
+                    setGraphView(view)
+                    if (view !== 'dag') {
+                      setShowQuarterHour(false)
+                    }
+                  }}
+                  className={`px-2.5 md:px-3 py-2.5 md:py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap w-full md:w-auto md:flex-shrink-0 ${
+                    graphView === view
+                      ? 'bg-brand-teal-500 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {view.charAt(0).toUpperCase() + view.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Quarter Hour Toggle (only for electricity, day view) */}
+          {/* Quarter Hour Toggle (only for electricity, day view) - Left on desktop */}
           {localEnergietype === 'elektriciteit' && graphView === 'dag' && (
             <div className="flex items-center justify-between md:justify-start gap-2 md:gap-3">
               <span className="text-xs md:text-sm text-gray-600">Toon kwartierprijzen</span>
