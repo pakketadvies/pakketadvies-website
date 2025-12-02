@@ -920,45 +920,33 @@ export function PrijzenGrafiek({
                     angle={graphView === 'dag' ? 0 : -60}
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
                     height={graphView === 'dag' ? (isMobile ? 50 : 30) : 60}
-                    // For day view: show labels every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
-                    {...(graphView === 'dag' && chartData.length > 0
-                      ? {
-                          ticks: (() => {
-                            const ticks: number[] = []
-                            if (showQuarterHour) {
-                              // For quarter-hourly: 96 datapunten, show every 12 (every 3 hours)
-                              // Indices: 0 (00:00), 12 (03:00), 24 (06:00), 36 (09:00), 48 (12:00), 60 (15:00), 72 (18:00), 84 (21:00), 96 (00:00 next day)
-                              for (let hour = 0; hour <= 21; hour += 3) {
-                                const index = hour * 4 // Each hour has 4 quarters
-                                if (index < chartData.length) {
-                                  ticks.push(index)
-                                }
-                              }
-                              // Add 00:00 at the end (last data point, which will be labeled as 00:00)
-                              if (chartData.length > 0) {
-                                ticks.push(chartData.length - 1) // Last data point (23:45, labeled as 00:00)
-                              }
-                            } else {
-                              // For hourly: 24 datapunten, show every 3 hours
-                              // Indices: 0 (00:00), 3 (03:00), 6 (06:00), 9 (09:00), 12 (12:00), 15 (15:00), 18 (18:00), 21 (21:00), 23 (23:00)
-                              for (let hour = 0; hour <= 21; hour += 3) {
-                                if (hour < chartData.length) {
-                                  ticks.push(hour)
-                                }
-                              }
-                              // Add 00:00 at the end (last data point, which will be labeled as 00:00)
-                              if (chartData.length > 0) {
-                                ticks.push(chartData.length - 1) // Last data point (23:00, labeled as 00:00)
-                              }
-                            }
-                            return ticks
-                          })(),
-                          interval: 0, // Show all ticks from the ticks array
-                        }
-                      : {
-                          interval: 'preserveStartEnd',
-                        })}
+                    // For day view: show labels every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00)
+                    interval={graphView === 'dag' ? 0 : 'preserveStartEnd'}
                     tick={{ fontSize: isMobile ? 8 : 10 }}
+                    // Custom tickFormatter to show only labels at 3-hour intervals
+                    tickFormatter={(value, index) => {
+                      if (graphView === 'dag') {
+                        // Parse the time string (e.g., "00:00", "03:00", "17:15")
+                        if (typeof value === 'string' && value.includes(':')) {
+                          const [hourStr, minuteStr] = value.split(':')
+                          const hour = parseInt(hourStr, 10)
+                          const minute = parseInt(minuteStr, 10)
+                          
+                          // Show labels at exactly 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
+                          // Also show the last data point (which is labeled as 00:00)
+                          if (minute === 0 && hour % 3 === 0) {
+                            return value
+                          }
+                          // Check if this is the last data point (which should show as 00:00)
+                          if (index === chartData.length - 1) {
+                            return '00:00'
+                          }
+                        }
+                        // Hide all other labels
+                        return ''
+                      }
+                      return value
+                    }}
                   />
                   <YAxis
                     stroke="#6B7280"
