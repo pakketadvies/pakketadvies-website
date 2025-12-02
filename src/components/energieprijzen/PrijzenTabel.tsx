@@ -180,9 +180,9 @@ export function PrijzenTabel({
         return item.datum >= monthStart && item.datum <= monthEnd
       })
     } else {
-      return processedData.filter(item => {
-        return item.datum >= weekStart && item.datum <= weekEnd
-      })
+    return processedData.filter(item => {
+      return item.datum >= weekStart && item.datum <= weekEnd
+    })
     }
   }, [processedData, weekStart, weekEnd, monthStart, monthEnd, viewMode])
 
@@ -303,11 +303,11 @@ export function PrijzenTabel({
                 {viewMode === 'week' ? (
                   <>
                     <span className="font-semibold text-brand-navy-500 text-sm md:text-base">
-                      Week {weekNumber}
-                    </span>
+                  Week {weekNumber}
+                </span>
                     <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">
-                      {formatDateFull(weekStart)} - {formatDateFull(weekEnd)}
-                    </div>
+                  {formatDateFull(weekStart)} - {formatDateFull(weekEnd)}
+                </div>
                   </>
                 ) : (
                   <>

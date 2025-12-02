@@ -602,8 +602,8 @@ export function PrijzenGrafiek({
           {payload.map((entry: any, index: number) => (
             <div key={index} className="text-xs md:text-sm" style={{ color: entry.color }}>
               <p className="font-medium">
-                {entry.name}: {formatPrice(entry.value)}
-              </p>
+              {entry.name}: {formatPrice(entry.value)}
+            </p>
               {isYearView && data && (data.min !== undefined || data.max !== undefined) && (
                 <div className="mt-1 text-[10px] md:text-xs text-gray-600">
                   {data.min !== undefined && (
@@ -769,8 +769,8 @@ export function PrijzenGrafiek({
                   }`}
                 />
               </button>
-            </div>
-          )}
+              </div>
+            )}
 
           {/* Period Filters */}
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 -mx-2 px-2 md:mx-0 md:px-0">
@@ -814,7 +814,7 @@ export function PrijzenGrafiek({
             >
               <CaretRight className="w-4 h-4 md:w-5 md:h-5 text-gray-600" weight="bold" />
             </button>
-          </div>
+              </div>
         </div>
 
         {/* Current Price Box (yellow, above graph) */}
@@ -838,32 +838,32 @@ export function PrijzenGrafiek({
               <ResponsiveContainer width="100%" height="100%" minHeight={256}>
               {graphView === 'jaar' ? (
                 // Line chart for year view - optimized for mobile
-                <LineChart
-                  data={chartData}
+            <LineChart 
+              data={chartData} 
                   margin={{ 
                     top: 10, 
                     right: 10, 
                     left: 20, 
                     bottom: 40 
                   }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    dataKey="datum"
-                    stroke="#6B7280"
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis
+                dataKey="datum"
+                stroke="#6B7280"
                     style={{ fontSize: '10px' }}
                     angle={0}
                     textAnchor="middle"
                     height={30}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    stroke="#6B7280"
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                stroke="#6B7280"
                     style={{ fontSize: '10px' }}
                     tickFormatter={(value) => formatPriceYAxis(value)}
                     width={20}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
+              />
+              <Tooltip content={<CustomTooltip />} />
                   
                   {/* Average price reference line */}
                   {averagePrice > 0 && (
@@ -932,7 +932,7 @@ export function PrijzenGrafiek({
                     <ReferenceLine
                       x={currentIndex}
                       stroke="#FCD34D"
-                      strokeWidth={2}
+                  strokeWidth={2}
                       label={{ 
                         value: 'Nu', 
                         position: 'bottom', 
@@ -962,13 +962,13 @@ export function PrijzenGrafiek({
                         <Cell
                           key={`cell-${index}`}
                           fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
-                    />
+                />
                       )
                     })}
                   </Bar>
                 </BarChart>
               )}
-            </ResponsiveContainer>
+          </ResponsiveContainer>
             </div>
             
             {/* Type indicator (STROOM/GAS) - bottom right */}

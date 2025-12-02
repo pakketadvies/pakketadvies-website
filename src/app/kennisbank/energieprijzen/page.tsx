@@ -109,36 +109,36 @@ export default function EnergieprijzenPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-            {/* Hero Section */}
+      {/* Hero Section */}
             <section className="bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 text-white py-8 md:py-12 lg:py-16 pt-24 md:pt-32 lg:pt-36">
               <div className="container-custom px-4 md:px-6">
-                <div className="max-w-4xl mx-auto text-center">
-                  <Link
-                    href="/kennisbank"
+          <div className="max-w-4xl mx-auto text-center">
+            <Link
+              href="/kennisbank"
                     className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 md:mb-6 transition-colors text-xs md:text-sm"
-                  >
-                    <span>← Terug naar kennisbank</span>
-                  </Link>
-                  
+            >
+              <span>← Terug naar kennisbank</span>
+            </Link>
+            
                   <div className="flex flex-col items-center gap-4 md:gap-6 mb-4 md:mb-6">
                     <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white/10 backdrop-blur-sm rounded-2xl">
                       <Lightning className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" weight="duotone" />
-                    </div>
-                    
+            </div>
+            
                     <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold">
-                      Energieprijzen
-                    </h1>
+              Energieprijzen
+            </h1>
                   </div>
                   
                   <p className="text-sm md:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto px-2">
-                    Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. 
-                    Deze prijzen geven inzicht in de energiemarkt en helpen u bij het kiezen van het juiste energiecontract.
-                  </p>
-                </div>
-              </div>
-            </section>
+              Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. 
+              Deze prijzen geven inzicht in de energiemarkt en helpen u bij het kiezen van het juiste energiecontract.
+            </p>
+          </div>
+        </div>
+      </section>
 
-            {/* Main Content */}
+      {/* Main Content */}
             <section className="py-6 md:py-12 lg:py-16">
               <div className="container-custom max-w-7xl px-2 md:px-4 lg:px-6">
           {/* Info Cards */}
