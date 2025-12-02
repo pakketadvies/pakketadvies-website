@@ -893,7 +893,7 @@ export function PrijzenGrafiek({
                   margin={{ 
                     top: 10, 
                     right: 10, 
-                    left: 35, 
+                    left: 20, 
                     bottom: graphView === 'dag' ? 40 : 60
                   }}
                 >
@@ -911,7 +911,7 @@ export function PrijzenGrafiek({
                     stroke="#6B7280"
                     style={{ fontSize: '10px' }}
                     tickFormatter={(value) => formatPriceYAxis(value)}
-                    width={35}
+                    width={20}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
