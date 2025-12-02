@@ -62,6 +62,18 @@ export function PrijzenGrafiek({
   const [loadingHourly, setLoadingHourly] = useState(false)
   // Store current time as timestamp to avoid Date object issues
   const [currentTimeStamp, setCurrentTimeStamp] = useState(() => Date.now())
+  // Detect mobile screen size
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768) // md breakpoint
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Update current time every minute
   useEffect(() => {
@@ -901,13 +913,21 @@ export function PrijzenGrafiek({
                   <XAxis
                     dataKey={graphView === 'dag' ? 'label' : 'datum'}
                     stroke="#6B7280"
-                    style={{ fontSize: '10px' }}
+                    style={{ fontSize: isMobile ? '8px' : '10px' }}
                     angle={graphView === 'dag' ? 0 : -60}
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
-                    height={graphView === 'dag' ? 30 : 60}
-                    // For quarter-hourly (96 bars), show every 4th label (every hour)
-                    // For hourly (24 bars), show all labels
-                    interval={graphView === 'dag' && showQuarterHour ? 3 : 'preserveStartEnd'}
+                    height={graphView === 'dag' ? (isMobile ? 50 : 30) : 60}
+                    // For quarter-hourly on mobile: show every 8th label (every 2 hours) for better readability
+                    // For quarter-hourly on desktop: show every 4th label (every hour)
+                    // For hourly: show all labels
+                    interval={
+                      graphView === 'dag' && showQuarterHour
+                        ? isMobile
+                          ? 7 // Every 8th label (0, 8, 16, 24) = every 2 hours
+                          : 3 // Every 4th label (0, 4, 8, 12...) = every hour
+                        : 'preserveStartEnd'
+                    }
+                    tick={{ fontSize: isMobile ? 8 : 10 }}
                   />
                   <YAxis
                     stroke="#6B7280"
