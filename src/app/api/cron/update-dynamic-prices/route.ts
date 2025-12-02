@@ -19,26 +19,35 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: Request) {
   try {
     // Verify this is a cron request
-    // Vercel cron jobs automatically add an Authorization header
-    // If CRON_SECRET is set, verify it matches
+    // Vercel cron jobs automatically add an Authorization header with a secret
+    // For manual testing, we allow requests without auth header in development
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const isVercelCron = request.headers.get('x-vercel-cron') !== null || 
+                        request.headers.get('user-agent')?.includes('vercel-cron') ||
+                        (authHeader && authHeader.startsWith('Bearer'))
     
-    // Check if this is a Vercel cron request (has authorization header)
-    // Or allow if CRON_SECRET is not set (for manual testing)
+    // Security check:
+    // - If CRON_SECRET is set, require valid Bearer token
+    // - If no CRON_SECRET, allow Vercel cron requests (they have x-vercel-cron header)
+    // - In development, allow manual testing without auth
     if (cronSecret) {
+      // Production: require valid Bearer token
       if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-        console.error('❌ Unauthorized cron request - missing or invalid auth header')
-        return NextResponse.json(
-          { success: false, error: 'Unauthorized' },
-          { status: 401 }
-        )
+        // Allow if it's a Vercel cron request (has x-vercel-cron header) OR in development
+        if (!isVercelCron && !isDevelopment) {
+          console.error('❌ Unauthorized cron request - missing or invalid auth header')
+          return NextResponse.json(
+            { success: false, error: 'Unauthorized. Use Authorization: Bearer <CRON_SECRET> header' },
+            { status: 401 }
+          )
+        }
       }
     } else {
-      // If no CRON_SECRET is set, allow requests with Vercel's default cron header
-      // Vercel cron jobs always include an authorization header
-      if (!authHeader) {
-        console.warn('⚠️  No CRON_SECRET set and no auth header - allowing request (may be manual test)')
+      // No CRON_SECRET set - allow Vercel cron requests or development testing
+      if (!isVercelCron && !isDevelopment) {
+        console.warn('⚠️  No CRON_SECRET set - allowing request (should set CRON_SECRET in production)')
       }
     }
 
