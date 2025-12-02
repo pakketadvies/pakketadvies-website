@@ -45,7 +45,7 @@ const faqItems = [
   },
   {
     vraag: 'Is het contactformulier gratis?',
-    antwoord: 'Ja, het contactformulier is volledig gratis. Je betaalt alleen als je daadwerkelijk een energiecontract afsluit via ons.'
+    antwoord: 'Ja, het contactformulier is volledig gratis. Je betaalt NOOIT aan ons - ook niet als je een energiecontract afsluit. Wij bemiddelen voor je met energieleveranciers en onderhandelen de beste tarieven. In ruil ontvangen wij een kleine vergoeding van de energieleverancier (een klein gedeelte van hun winst op het contract). Dit heeft geen invloed op het tarief dat jij betaalt.'
   },
   {
     vraag: 'Kan ik ook telefonisch contact opnemen?',

@@ -37,11 +37,11 @@ const faqItems = [
   },
   {
     vraag: 'Zijn jullie onafhankelijk?',
-    antwoord: 'Ja, wij zijn 100% onafhankelijk. We werken niet voor leveranciers, maar uitsluitend voor jou. Ons advies is altijd objectief en in jouw belang. We verdienen alleen als jij een contract afsluit via ons.'
+    antwoord: 'Ja, wij zijn 100% onafhankelijk. We werken niet voor leveranciers, maar uitsluitend voor jou. Ons advies is altijd objectief en in jouw belang. Wij ontvangen een kleine vergoeding van de energieleverancier wanneer je een contract afsluit, maar dit heeft geen invloed op het tarief dat jij betaalt. Je krijgt altijd het scherpste tarief dat we kunnen onderhandelen.'
   },
   {
     vraag: 'Wat kost jullie dienstverlening?',
-    antwoord: 'Ons advies is volledig gratis en vrijblijvend. Je betaalt alleen als je daadwerkelijk een energiecontract afsluit via ons. Er zijn geen verborgen kosten of verrassingen.'
+    antwoord: 'Ons advies is volledig gratis en vrijblijvend. Je betaalt NOOIT aan ons - ook niet als je een energiecontract afsluit. Wij bemiddelen voor je met energieleveranciers en onderhandelen de beste tarieven. In ruil ontvangen wij een kleine vergoeding van de energieleverancier (een klein gedeelte van hun winst op het contract). Dit heeft geen invloed op het tarief dat jij betaalt - je krijgt altijd het scherpste tarief dat we kunnen onderhandelen.'
   },
   {
     vraag: 'Voor welke bedrijven werken jullie?',
