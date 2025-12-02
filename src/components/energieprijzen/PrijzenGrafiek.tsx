@@ -586,17 +586,17 @@ export function PrijzenGrafiek({
       const isYearView = graphView === 'jaar'
       
       return (
-        <div className="bg-white p-4 rounded-lg shadow-xl border border-gray-200">
-          <p className="font-semibold text-brand-navy-500 mb-2">
+        <div className="bg-white p-2 md:p-4 rounded-lg shadow-xl border border-gray-200 max-w-[180px] sm:max-w-[200px] md:max-w-none">
+          <p className="font-semibold text-brand-navy-500 text-xs md:text-sm mb-1 md:mb-2">
             {isYearView && data?.year ? `${label} ${data.year}` : label}
           </p>
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="text-sm" style={{ color: entry.color }}>
+            <div key={index} className="text-xs md:text-sm" style={{ color: entry.color }}>
               <p className="font-medium">
                 {entry.name}: {formatPrice(entry.value)}
               </p>
               {isYearView && data && (data.min !== undefined || data.max !== undefined) && (
-                <div className="mt-1 text-xs text-gray-600">
+                <div className="mt-1 text-[10px] md:text-xs text-gray-600">
                   {data.min !== undefined && (
                     <p>Min: {formatPrice(data.min)}</p>
                   )}
@@ -613,7 +613,7 @@ export function PrijzenGrafiek({
     return null
   }
 
-  // Custom label component for min/max prices on bars
+  // Custom label component for min/max prices on bars (disabled on mobile for better readability)
   const CustomBarLabel = ({ x, y, width, value, index }: any) => {
     if (index !== minIndex && index !== maxIndex) return null
     
@@ -707,24 +707,25 @@ export function PrijzenGrafiek({
 
   return (
     <Card className="mb-6">
-      <CardContent className="pt-8">
+      <CardContent className="pt-4 md:pt-8 px-2 md:px-6">
         {/* Controls Section */}
-        <div className="mb-6 space-y-4">
+        <div className="mb-4 md:mb-6 space-y-3 md:space-y-4">
           {/* Type Toggle (Stroom/Gas) */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={() => {
                 setLocalEnergietype('elektriciteit')
                 if (graphView !== 'dag') setGraphView('dag')
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-sm md:text-base font-medium transition-all ${
                 localEnergietype === 'elektriciteit'
                   ? 'bg-brand-teal-500 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <Lightning className="w-5 h-5" weight="duotone" />
-              Stroom
+              <Lightning className="w-4 h-4 md:w-5 md:h-5" weight="duotone" />
+              <span className="hidden sm:inline">Stroom</span>
+              <span className="sm:hidden">Stroom</span>
             </button>
             <button
               onClick={() => {
@@ -732,38 +733,38 @@ export function PrijzenGrafiek({
                 setShowQuarterHour(false)
                 if (graphView !== 'dag') setGraphView('dag')
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-sm md:text-base font-medium transition-all ${
                 localEnergietype === 'gas'
                   ? 'bg-brand-teal-500 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <Flame className="w-5 h-5" weight="duotone" />
+              <Flame className="w-4 h-4 md:w-5 md:h-5" weight="duotone" />
               Gas
             </button>
           </div>
 
           {/* Quarter Hour Toggle (only for electricity, day view) */}
           {localEnergietype === 'elektriciteit' && graphView === 'dag' && (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">Toon kwartierprijzen</span>
+            <div className="flex items-center gap-2 md:gap-3">
+              <span className="text-xs md:text-sm text-gray-600">Toon kwartierprijzen</span>
               <button
                 onClick={() => setShowQuarterHour(!showQuarterHour)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${
+                className={`relative w-10 h-5 md:w-12 md:h-6 rounded-full transition-colors ${
                   showQuarterHour ? 'bg-brand-teal-500' : 'bg-gray-300'
                 }`}
               >
                 <span
-                  className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                    showQuarterHour ? 'translate-x-6' : 'translate-x-0'
+                  className={`absolute top-0.5 left-0.5 md:top-1 md:left-1 w-4 h-4 md:w-4 md:h-4 bg-white rounded-full transition-transform ${
+                    showQuarterHour ? 'translate-x-5 md:translate-x-6' : 'translate-x-0'
                   }`}
                 />
               </button>
-              </div>
-            )}
+            </div>
+          )}
 
           {/* Period Filters */}
-              <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 -mx-2 px-2 md:mx-0 md:px-0">
             {(['dag', 'week', 'maand', 'jaar'] as GraphView[]).map((view) => (
               <button
                 key={view}
@@ -773,7 +774,7 @@ export function PrijzenGrafiek({
                     setShowQuarterHour(false)
                   }
                 }}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                   graphView === view
                     ? 'bg-brand-teal-500 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -785,36 +786,36 @@ export function PrijzenGrafiek({
           </div>
 
           {/* Date Navigation */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <button
               onClick={() => navigateDate('prev')}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors"
               aria-label="Vorige"
             >
-              <CaretLeft className="w-5 h-5 text-gray-600" weight="bold" />
+              <CaretLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-600" weight="bold" />
             </button>
-            <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-              <span className="font-medium text-gray-700">{formatDate(selectedDate)}</span>
+            <div className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 bg-gray-100 rounded-lg flex-1 justify-center">
+              <span className="font-medium text-gray-700 text-sm md:text-base">{formatDate(selectedDate)}</span>
             </div>
             <button
               onClick={() => navigateDate('next')}
               disabled={isToday && graphView === 'dag'}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Volgende"
             >
-              <CaretRight className="w-5 h-5 text-gray-600" weight="bold" />
+              <CaretRight className="w-4 h-4 md:w-5 md:h-5 text-gray-600" weight="bold" />
             </button>
-              </div>
+          </div>
         </div>
 
         {/* Current Price Box (yellow, above graph) */}
         {currentPriceInfo && isToday && graphView === 'dag' && (
-          <div className="mb-4 px-4 py-3 bg-[#FCD34D] rounded-lg border border-yellow-400">
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-sm font-medium text-gray-800">
+          <div className="mb-3 md:mb-4 px-3 md:px-4 py-2 md:py-3 bg-[#FCD34D] rounded-lg border border-yellow-400">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+              <span className="text-xs md:text-sm font-medium text-gray-800">
                 Nu: {currentPriceInfo.time}
               </span>
-              <span className="text-sm text-gray-800">
+              <span className="text-xs md:text-sm text-gray-800">
                 Gem. marktprijs: <span className="font-semibold">{formatPrice(currentPriceInfo.price)}/{localEnergietype === 'elektriciteit' ? 'kWh' : 'm³'}</span>
               </span>
             </div>
@@ -823,124 +824,143 @@ export function PrijzenGrafiek({
 
         {/* Graph */}
         {chartData && chartData.length > 0 ? (
-          <div className="h-96 w-full relative" style={{ width: '100%', height: '384px' }}>
-            <ResponsiveContainer width="100%" height={384}>
-            {graphView === 'jaar' ? (
-              // Line chart for year view
-              <LineChart
-                data={chartData}
-                margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis
-                  dataKey="datum"
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                  angle={0}
-                  textAnchor="middle"
-                  height={40}
-                />
-                <YAxis
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => formatPrice(value)}
-                  width={100}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                
-                {/* Average price reference line */}
-                {averagePrice > 0 && (
-                  <ReferenceLine
-                    y={averagePrice}
-                    stroke="#6B7280"
-                    strokeDasharray="5 5"
-                    strokeWidth={1}
-                  />
-                )}
-                
-                {/* Line chart */}
-                <Line
-                  type="monotone"
-                  dataKey="prijs"
-                  name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
-                  stroke="#00AF9B"
-                  strokeWidth={2}
-                  dot={{ fill: '#00AF9B', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            ) : (
-              // Bar chart for day/week/month views
-              <BarChart
-                data={chartData} 
-                margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis
-                  dataKey={graphView === 'dag' ? 'label' : 'datum'}
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                  angle={graphView === 'dag' ? 0 : -45}
-                  textAnchor={graphView === 'dag' ? 'middle' : 'end'}
-                  height={graphView === 'dag' ? 40 : 80}
-                  interval={graphView === 'dag' && showQuarterHour ? 'preserveStartEnd' : 0}
-                />
-                <YAxis
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => formatPrice(value)}
-                  width={100}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                
-                {/* Average price reference line */}
-                {averagePrice > 0 && (
-                  <ReferenceLine
-                    y={averagePrice}
-                    stroke="#6B7280"
-                    strokeDasharray="5 5"
-                    strokeWidth={1}
-                  />
-                )}
-                
-                {/* Current time indicator (yellow "Nu" line) */}
-                {isToday && graphView === 'dag' && currentIndex >= 0 && (
-                  <ReferenceLine
-                    x={currentIndex}
-                    stroke="#FCD34D"
-                    strokeWidth={3}
-                    label={{ value: 'Nu', position: 'bottom', fill: '#FCD34D', fontSize: 12, fontWeight: 'bold' }}
-                    />
-                )}
-                
-                {/* Bar chart */}
-                <Bar
-                  dataKey={graphView === 'dag' ? 'price' : 'prijs'}
-                  name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
-                  fill="#00AF9B"
-                  radius={[4, 4, 0, 0]}
-                  label={<CustomBarLabel />}
+          <div className="h-64 sm:h-80 md:h-96 w-full relative overflow-x-auto" style={{ width: '100%' }}>
+            <div className="min-w-full" style={{ height: '100%', minHeight: '256px' }}>
+              <ResponsiveContainer width="100%" height="100%" minHeight={256}>
+              {graphView === 'jaar' ? (
+                // Line chart for year view - optimized for mobile
+                <LineChart
+                  data={chartData}
+                  margin={{ 
+                    top: 10, 
+                    right: 10, 
+                    left: 40, 
+                    bottom: 40 
+                  }}
                 >
-                  {chartData.map((entry: any, index: number) => {
-                    const price = entry.price || entry.prijs || 0
-                    const isLow = index === minIndex
-                    const isHigh = index === maxIndex
-                    
-                    return (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    dataKey="datum"
+                    stroke="#6B7280"
+                    style={{ fontSize: '10px' }}
+                    angle={0}
+                    textAnchor="middle"
+                    height={30}
+                    interval="preserveStartEnd"
                   />
-                    )
-                  })}
-                </Bar>
-              </BarChart>
-            )}
-          </ResponsiveContainer>
+                  <YAxis
+                    stroke="#6B7280"
+                    style={{ fontSize: '10px' }}
+                    tickFormatter={(value) => formatPrice(value)}
+                    width={50}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  
+                  {/* Average price reference line */}
+                  {averagePrice > 0 && (
+                    <ReferenceLine
+                      y={averagePrice}
+                      stroke="#6B7280"
+                      strokeDasharray="5 5"
+                      strokeWidth={1}
+                    />
+                  )}
+                  
+                  {/* Line chart */}
+                  <Line
+                    type="monotone"
+                    dataKey="prijs"
+                    name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
+                    stroke="#00AF9B"
+                    strokeWidth={1.5}
+                    dot={{ fill: '#00AF9B', r: 3 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              ) : (
+                // Bar chart for day/week/month views
+                <BarChart
+                  data={chartData} 
+                  margin={{ 
+                    top: 10, 
+                    right: 10, 
+                    left: 40, 
+                    bottom: graphView === 'dag' ? 40 : 60
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    dataKey={graphView === 'dag' ? 'label' : 'datum'}
+                    stroke="#6B7280"
+                    style={{ fontSize: '10px' }}
+                    angle={graphView === 'dag' ? 0 : -60}
+                    textAnchor={graphView === 'dag' ? 'middle' : 'end'}
+                    height={graphView === 'dag' ? 30 : 60}
+                    interval={graphView === 'dag' && showQuarterHour ? 'preserveStartEnd' : 'preserveStartEnd'}
+                  />
+                  <YAxis
+                    stroke="#6B7280"
+                    style={{ fontSize: '10px' }}
+                    tickFormatter={(value) => formatPrice(value)}
+                    width={50}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  
+                  {/* Average price reference line */}
+                  {averagePrice > 0 && (
+                    <ReferenceLine
+                      y={averagePrice}
+                      stroke="#6B7280"
+                      strokeDasharray="5 5"
+                      strokeWidth={1}
+                    />
+                  )}
+                  
+                  {/* Current time indicator (yellow "Nu" line) */}
+                  {isToday && graphView === 'dag' && currentIndex >= 0 && (
+                    <ReferenceLine
+                      x={currentIndex}
+                      stroke="#FCD34D"
+                      strokeWidth={2}
+                      label={{ 
+                        value: 'Nu', 
+                        position: 'bottom', 
+                        fill: '#FCD34D', 
+                        fontSize: 10, 
+                        fontWeight: 'bold' 
+                      }}
+                      />
+                  )}
+                  
+                  {/* Bar chart */}
+                  <Bar
+                    dataKey={graphView === 'dag' ? 'price' : 'prijs'}
+                    name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
+                    fill="#00AF9B"
+                    radius={[4, 4, 0, 0]}
+                    label={undefined}
+                  >
+                    {chartData.map((entry: any, index: number) => {
+                      const price = entry.price || entry.prijs || 0
+                      const isLow = index === minIndex
+                      const isHigh = index === maxIndex
+                      
+                      return (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
+                    />
+                      )
+                    })}
+                  </Bar>
+                </BarChart>
+              )}
+            </ResponsiveContainer>
+            </div>
             
             {/* Type indicator (STROOM/GAS) - bottom right */}
-            <div className="absolute bottom-2 right-4">
-              <span className="text-xs font-semibold text-gray-400 uppercase">
+            <div className="absolute bottom-1 right-2 md:bottom-2 md:right-4">
+              <span className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase">
                 {localEnergietype === 'elektriciteit' ? 'STROOM' : 'GAS'}
               </span>
             </div>
@@ -948,8 +968,8 @@ export function PrijzenGrafiek({
         ) : null}
 
         {/* Average price below graph */}
-        <div className="mt-4 text-center mb-6">
-          <p className="text-sm text-gray-600">
+        <div className="mt-3 md:mt-4 text-center mb-4 md:mb-6">
+          <p className="text-xs md:text-sm text-gray-600">
             Marktprijs gemiddeld: <span className="font-semibold text-brand-navy-500">{formatPrice(averagePrice)}/{localEnergietype === 'elektriciteit' ? 'kWh' : 'm³'}</span>
           </p>
         </div>

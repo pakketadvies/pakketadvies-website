@@ -44,13 +44,13 @@ export function PrijzenInfoCards({ vandaag, gemiddelden, trends, loading }: Prij
 
   if (loading) {
     return (
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardContent className="pt-8">
-              <div className="h-6 bg-gray-200 rounded mb-4"></div>
-              <div className="h-8 bg-gray-200 rounded mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded"></div>
+            <CardContent className="pt-4 md:pt-8 px-3 md:px-6">
+              <div className="h-5 md:h-6 bg-gray-200 rounded mb-3 md:mb-4"></div>
+              <div className="h-7 md:h-8 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 md:h-4 bg-gray-200 rounded"></div>
             </CardContent>
           </Card>
         ))}
@@ -59,7 +59,7 @@ export function PrijzenInfoCards({ vandaag, gemiddelden, trends, loading }: Prij
   }
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
       {/* Huidige Prijzen */}
       <Card className="hover:shadow-xl transition-shadow border-l-4 border-l-brand-teal-500">
         <CardContent className="pt-8">

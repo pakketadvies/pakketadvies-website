@@ -109,35 +109,35 @@ export default function EnergieprijzenPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 text-white py-12 md:py-16 pt-32 md:pt-36">
-        <div className="container-custom">
-          <div className="max-w-4xl mx-auto text-center">
-            <Link
-              href="/kennisbank"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors text-sm"
-            >
-              <span>← Terug naar kennisbank</span>
-            </Link>
-            
-            <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-sm rounded-2xl mb-6">
-              <Lightning className="w-8 h-8 md:w-10 md:h-10 text-white" weight="duotone" />
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Energieprijzen
-            </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-              Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. 
-              Deze prijzen geven inzicht in de energiemarkt en helpen u bij het kiezen van het juiste energiecontract.
-            </p>
-          </div>
-        </div>
-      </section>
+            {/* Hero Section */}
+            <section className="bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 text-white py-8 md:py-12 lg:py-16 pt-24 md:pt-32 lg:pt-36">
+              <div className="container-custom px-4 md:px-6">
+                <div className="max-w-4xl mx-auto text-center">
+                  <Link
+                    href="/kennisbank"
+                    className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 md:mb-6 transition-colors text-xs md:text-sm"
+                  >
+                    <span>← Terug naar kennisbank</span>
+                  </Link>
+                  
+                  <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white/10 backdrop-blur-sm rounded-2xl mb-4 md:mb-6">
+                    <Lightning className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" weight="duotone" />
+                  </div>
+                  
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
+                    Energieprijzen
+                  </h1>
+                  <p className="text-sm md:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto px-2">
+                    Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. 
+                    Deze prijzen geven inzicht in de energiemarkt en helpen u bij het kiezen van het juiste energiecontract.
+                  </p>
+                </div>
+              </div>
+            </section>
 
-      {/* Main Content */}
-      <section className="py-12 md:py-16">
-        <div className="container-custom max-w-7xl">
+            {/* Main Content */}
+            <section className="py-6 md:py-12 lg:py-16">
+              <div className="container-custom max-w-7xl px-2 md:px-4 lg:px-6">
           {/* Info Cards */}
           {huidigeData && (
             <PrijzenInfoCards
@@ -177,16 +177,16 @@ export default function EnergieprijzenPage() {
           />
 
           {/* Uitleg Sectie */}
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
             <Card>
-              <CardContent className="pt-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-brand-teal-400 to-brand-teal-500 rounded-xl flex items-center justify-center">
-                    <Question className="w-6 h-6 text-white" weight="duotone" />
+              <CardContent className="pt-4 md:pt-8 px-3 md:px-6">
+                <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-brand-teal-400 to-brand-teal-500 rounded-xl flex items-center justify-center">
+                    <Question className="w-5 h-5 md:w-6 md:h-6 text-white" weight="duotone" />
                   </div>
-                  <h3 className="text-xl font-bold text-brand-navy-500">Wat zijn marktprijzen?</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Wat zijn marktprijzen?</h3>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-2 md:space-y-3 text-sm md:text-base text-gray-700">
                   <p>
                     Marktprijzen zijn de prijzen die op de energiemarkt worden bepaald door vraag en aanbod. 
                     Voor elektriciteit wordt de prijs bepaald op de EPEX Spot markt, en voor gas op de TTF (Title Transfer Facility) markt.
@@ -200,14 +200,14 @@ export default function EnergieprijzenPage() {
             </Card>
 
             <Card>
-              <CardContent className="pt-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-brand-navy-400 to-brand-navy-500 rounded-xl flex items-center justify-center">
-                    <Info className="w-6 h-6 text-white" weight="duotone" />
+              <CardContent className="pt-4 md:pt-8 px-3 md:px-6">
+                <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-brand-navy-400 to-brand-navy-500 rounded-xl flex items-center justify-center">
+                    <Info className="w-5 h-5 md:w-6 md:h-6 text-white" weight="duotone" />
                   </div>
-                  <h3 className="text-xl font-bold text-brand-navy-500">Marktprijzen vs Contractprijzen</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Marktprijzen vs Contractprijzen</h3>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-2 md:space-y-3 text-sm md:text-base text-gray-700">
                   <p>
                     De prijzen op deze pagina zijn <strong>marktprijzen</strong>, niet de prijzen die u daadwerkelijk 
                     betaalt bij een energiecontract.
@@ -216,7 +216,7 @@ export default function EnergieprijzenPage() {
                     Bij een <strong>dynamisch contract</strong> betaalt u de marktprijs plus een opslag van de leverancier. 
                     Bij een <strong>vast contract</strong> betaalt u een vaste prijs die niet verandert tijdens de contractperiode.
                   </p>
-                  <p className="text-sm text-gray-500 mt-4">
+                  <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
                     <strong>Tip:</strong> Gebruik onze calculator om te zien welke contractprijzen beschikbaar zijn voor uw situatie.
                   </p>
                 </div>
