@@ -1,8 +1,12 @@
 'use client'
 
+import type { Metadata } from 'next'
 import { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { Lightning } from '@phosphor-icons/react'
+
+// Note: Metadata must be in a separate layout.tsx file for client components
+// This is handled in the parent layout
 
 export default function CalculatorLayout({
   children,

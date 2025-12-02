@@ -35,15 +35,8 @@ const categories = [
 ]
 
 // Convert articles from data to format needed for display
-const articles = allArticles.map(article => ({
-  title: article.title,
-  excerpt: article.description,
-  category: article.category,
-  date: new Date(article.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
-  readTime: article.readTime,
-  href: `/kennisbank/${article.slug}`,
-  featured: article.featured || false,
-}))
+// Add special artikel for energieprijzen page
+const specialArticles = [
   {
     title: 'Energieprijzen - Inzicht in de markt',
     excerpt: 'Bekijk actuele en historische marktprijzen voor elektriciteit en gas. Interactieve grafieken en gedetailleerde prijstabellen.',
@@ -53,56 +46,19 @@ const articles = allArticles.map(article => ({
     href: '/kennisbank/energieprijzen',
     featured: true,
   },
-  {
-    title: 'Grootverbruik vs. Kleinverbruik: wat is het verschil?',
-    excerpt: 'Ontdek wanneer u een grootverbruiker bent en wat dit betekent voor uw energiecontract.',
-    category: 'Uitleg',
-    date: '15 januari 2025',
-    readTime: '5 min',
-    href: '/kennisbank/grootverbruik-kleinverbruik',
-  },
-  {
-    title: 'Vast of dynamisch energiecontract: wat past bij uw bedrijf?',
-    excerpt: 'Ontdek de verschillen tussen vaste en dynamische energiecontracten en welke het beste bij uw bedrijf past.',
-    category: 'Advies',
-    date: '15 november 2025',
-    readTime: '5 min',
-  },
-  {
-    title: 'Zo bespaart u energie in uw kantoorpand',
-    excerpt: 'Praktische tips om het energieverbruik in uw kantoor te verlagen en geld te besparen.',
-    category: 'Tips',
-    date: '10 november 2025',
-    readTime: '7 min',
-  },
-  {
-    title: 'Groene energie voor bedrijven: alles wat u moet weten',
-    excerpt: 'Van windenergie tot zonnepanelen: een complete gids over duurzame energie voor zakelijk gebruik.',
-    category: 'Duurzaamheid',
-    date: '5 november 2025',
-    readTime: '6 min',
-  },
-  {
-    title: 'De energiemarkt in 2025: trends en ontwikkelingen',
-    excerpt: 'Een overzicht van de belangrijkste trends op de zakelijke energiemarkt dit jaar.',
-    category: 'Markt',
-    date: '1 november 2025',
-    readTime: '8 min',
-  },
-  {
-    title: 'Hoe leest u uw energienota?',
-    excerpt: 'Stap voor stap uitleg over wat er op uw zakelijke energienota staat en waar u op moet letten.',
-    category: 'Uitleg',
-    date: '28 oktober 2025',
-    readTime: '4 min',
-  },
-  {
-    title: 'Subsidies voor verduurzaming van uw bedrijf',
-    excerpt: 'Overzicht van beschikbare subsidies en regelingen voor zakelijke verduurzaming.',
-    category: 'Subsidies',
-    date: '20 oktober 2025',
-    readTime: '6 min',
-  },
+]
+
+const articles = [
+  ...specialArticles,
+  ...allArticles.map(article => ({
+    title: article.title,
+    excerpt: article.description,
+    category: article.category,
+    date: new Date(article.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
+    readTime: article.readTime,
+    href: `/kennisbank/${article.slug}`,
+    featured: article.featured || false,
+  }))
 ]
 
 const faqItems = [
@@ -152,6 +108,12 @@ export default function KennisbankPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
 
+  // Convert FAQ items for structured data
+  const faqStructuredData = faqItems.map(item => ({
+    question: item.vraag,
+    answer: item.antwoord,
+  }))
+
   const filteredArticles = getArticlesByCategory(selectedCategory).map(article => ({
     title: article.title,
     excerpt: article.description,
@@ -172,7 +134,9 @@ export default function KennisbankPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <FAQSchema questions={faqStructuredData} />
+      <div className="min-h-screen bg-white">
       {/* Hero */}
       <section className="bg-brand-navy-500 text-white py-16 md:py-24 pt-32 md:pt-40 relative overflow-hidden">
         {/* Background Image */}

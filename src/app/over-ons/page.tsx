@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import Image from 'next/image'
+import { FAQSchema } from '@/components/seo/StructuredData'
 import { 
   Lightning,
   Clock,
@@ -129,6 +130,12 @@ const sectors = [
 
 export default function OverOnsPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+
+  // Convert FAQ items for structured data
+  const faqStructuredData = faqItems.map(item => ({
+    question: item.vraag,
+    answer: item.antwoord,
+  }))
 
   return (
     <div className="min-h-screen bg-white">
