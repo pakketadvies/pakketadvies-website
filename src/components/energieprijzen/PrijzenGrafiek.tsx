@@ -863,11 +863,12 @@ export function PrijzenGrafiek({
               <XAxis
                 dataKey="datum"
                 stroke="#6B7280"
-                    style={{ fontSize: '10px' }}
-                    angle={0}
-                    textAnchor="middle"
-                    height={30}
+                style={{ fontSize: isMobile ? '8px' : '10px' }}
+                angle={0}
+                textAnchor="middle"
+                height={isMobile ? 50 : 30}
                 interval="preserveStartEnd"
+                tick={{ fontSize: isMobile ? 8 : 10 }}
               />
               <YAxis
                 stroke="#6B7280"
