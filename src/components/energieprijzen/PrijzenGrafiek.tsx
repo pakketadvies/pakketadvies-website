@@ -833,8 +833,8 @@ export function PrijzenGrafiek({
 
         {/* Graph */}
         {chartData && chartData.length > 0 ? (
-          <div className="h-64 sm:h-80 md:h-96 w-full relative overflow-x-auto" style={{ width: '100%' }}>
-            <div className="min-w-full" style={{ height: '100%', minHeight: '256px' }}>
+          <div className="h-64 sm:h-80 md:h-96 w-full relative overflow-x-auto -ml-2 md:ml-0" style={{ width: '100%' }}>
+            <div className="min-w-full pl-2 md:pl-0" style={{ height: '100%', minHeight: '256px' }}>
               <ResponsiveContainer width="100%" height="100%" minHeight={256}>
               {graphView === 'jaar' ? (
                 // Line chart for year view - optimized for mobile
@@ -843,7 +843,7 @@ export function PrijzenGrafiek({
                   margin={{ 
                     top: 10, 
                     right: 10, 
-                    left: 35, 
+                    left: 20, 
                     bottom: 40 
                   }}
                 >
@@ -861,7 +861,7 @@ export function PrijzenGrafiek({
                     stroke="#6B7280"
                     style={{ fontSize: '10px' }}
                     tickFormatter={(value) => formatPriceYAxis(value)}
-                    width={35}
+                    width={20}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
