@@ -4,8 +4,6 @@ import { generateArticleMetadata, generateStructuredData, generateBreadcrumbStru
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Calendar, Clock } from '@phosphor-icons/react'
-import { Card, CardContent } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const article = getArticleBySlug(params.slug)
@@ -126,14 +124,14 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         {/* Content */}
         <section className="py-12 md:py-16">
           <div className="container-custom max-w-4xl">
-            <Card>
-              <CardContent className="pt-8">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md">
+              <div className="pt-8">
                 <div 
                   className="prose prose-lg max-w-none"
                   dangerouslySetInnerHTML={{ __html: htmlContent }}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* CTA */}
             <div className="mt-12 text-center">
@@ -144,15 +142,17 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
                 Wij helpen u graag met persoonlijk advies en het vinden van het perfecte energiecontract.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/calculator">
-                  <Button variant="primary" className="bg-brand-teal-500 hover:bg-brand-teal-600">
-                    Bereken uw besparing
-                  </Button>
+                <Link 
+                  href="/calculator"
+                  className="inline-flex items-center justify-center rounded-2xl font-semibold transition-all duration-300 px-6 py-3 text-base bg-brand-teal-500 text-white shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-105 hover:bg-brand-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-teal-500"
+                >
+                  Bereken uw besparing
                 </Link>
-                <Link href="/contact">
-                  <Button variant="secondary">
-                    Neem contact op
-                  </Button>
+                <Link 
+                  href="/contact"
+                  className="inline-flex items-center justify-center rounded-2xl font-semibold transition-all duration-300 px-6 py-3 text-base bg-brand-navy-500 text-white shadow-lg shadow-brand-navy-500/30 hover:shadow-xl hover:shadow-brand-navy-500/40 hover:scale-105 hover:bg-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-navy-500"
+                >
+                  Neem contact op
                 </Link>
               </div>
             </div>
