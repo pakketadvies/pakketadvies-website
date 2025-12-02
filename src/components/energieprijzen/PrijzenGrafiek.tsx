@@ -918,17 +918,27 @@ export function PrijzenGrafiek({
                     angle={graphView === 'dag' ? 0 : -60}
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
                     height={graphView === 'dag' ? (isMobile ? 50 : 30) : 60}
-                    // For quarter-hourly on mobile: show every 8th label (every 2 hours) for better readability
-                    // For quarter-hourly on desktop: show every 4th label (every hour)
-                    // For hourly: show all labels
+                    // For quarter-hourly: show every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
+                    // Every 3 hours = every 12 quarter-hours (3 * 4 = 12)
+                    // Interval 11 means: skip 11, show 1 = every 12th label
                     interval={
                       graphView === 'dag' && showQuarterHour
-                        ? isMobile
-                          ? 7 // Every 8th label (0, 8, 16, 24) = every 2 hours
-                          : 3 // Every 4th label (0, 4, 8, 12...) = every hour
+                        ? 11 // Every 12th label = every 3 hours
                         : 'preserveStartEnd'
                     }
                     tick={{ fontSize: isMobile ? 8 : 10 }}
+                    // Custom tick formatter to ensure we show labels at 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
+                    tickFormatter={(value, index) => {
+                      if (graphView === 'dag' && showQuarterHour) {
+                        // For quarter-hourly, only show labels at 3-hour intervals
+                        const hour = parseInt(value.split(':')[0])
+                        if (hour % 3 === 0) {
+                          return value
+                        }
+                        return ''
+                      }
+                      return value
+                    }}
                   />
                   <YAxis
                     stroke="#6B7280"
