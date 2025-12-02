@@ -230,7 +230,7 @@ export function PrijzenGrafiek({
     
     // Fallback to daily data for week/month/year views
     if (!data || data.length === 0) return []
-    
+
     // Filter data based on graphView
     // For week/month/year, always show data up to today (not selectedDate)
     const today = new Date()
@@ -336,20 +336,20 @@ export function PrijzenGrafiek({
           const withEB = elecPrice + EB_ELEKTRICITEIT
           elecPrice = withEB * (1 + BTW_PERCENTAGE)
         }
-        
-        base.prijs = parseFloat(elecPrice.toFixed(5))
+
+          base.prijs = parseFloat(elecPrice.toFixed(5))
         base.originalPrice = item.elektriciteit_gemiddeld || item.elektriciteit_dag || 0
       }
 
       if (localEnergietype === 'gas') {
         let gasPrice = item.gas_gemiddeld || 0
-        
+
         if (belastingen === 'inclusief') {
           const withEB = gasPrice + EB_GAS
           gasPrice = withEB * (1 + BTW_PERCENTAGE)
         }
-        
-        base.prijs = parseFloat(gasPrice.toFixed(5))
+
+          base.prijs = parseFloat(gasPrice.toFixed(5))
         base.originalPrice = item.gas_gemiddeld || 0
       }
 
@@ -662,11 +662,11 @@ export function PrijzenGrafiek({
                   }`}
                 />
               </button>
-            </div>
-          )}
+              </div>
+            )}
 
           {/* Period Filters */}
-          <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
             {(['dag', 'week', 'maand', 'jaar'] as GraphView[]).map((view) => (
               <button
                 key={view}
@@ -707,7 +707,7 @@ export function PrijzenGrafiek({
             >
               <CaretRight className="w-5 h-5 text-gray-600" weight="bold" />
             </button>
-          </div>
+              </div>
         </div>
 
         {/* Current Price Box (yellow, above graph) */}
@@ -729,7 +729,7 @@ export function PrijzenGrafiek({
           <div className="h-96 w-full relative" style={{ width: '100%', height: '384px' }}>
             <ResponsiveContainer width="100%" height={384}>
             <BarChart
-              data={chartData}
+              data={chartData} 
               margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
@@ -767,7 +767,7 @@ export function PrijzenGrafiek({
                   stroke="#FCD34D"
                   strokeWidth={3}
                   label={{ value: 'Nu', position: 'bottom', fill: '#FCD34D', fontSize: 12, fontWeight: 'bold' }}
-                />
+                  />
               )}
               
               {/* Bar chart */}
@@ -787,12 +787,12 @@ export function PrijzenGrafiek({
                     <Cell
                       key={`cell-${index}`}
                       fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
-                    />
+                />
                   )
                 })}
               </Bar>
             </BarChart>
-            </ResponsiveContainer>
+          </ResponsiveContainer>
             
             {/* Type indicator (STROOM/GAS) - bottom right */}
             <div className="absolute bottom-2 right-4">

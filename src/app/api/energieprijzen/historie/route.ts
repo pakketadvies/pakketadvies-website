@@ -52,20 +52,20 @@ export async function GET(request: Request) {
     
     while (hasMore) {
       const { data: pageData, error: pageError } = await supabase
-        .from('dynamic_prices')
-        .select('*')
-        .gte('datum', startDateStr)
-        .lte('datum', endDateStr)
-        .order('datum', { ascending: true })
+      .from('dynamic_prices')
+      .select('*')
+      .gte('datum', startDateStr)
+      .lte('datum', endDateStr)
+      .order('datum', { ascending: true })
         .range(from, from + pageSize - 1)
-      
+    
       if (pageError) {
         console.error('Error fetching price history:', pageError)
-        return NextResponse.json(
-          { success: false, error: 'Fout bij ophalen historische prijzen' },
-          { status: 500 }
-        )
-      }
+      return NextResponse.json(
+        { success: false, error: 'Fout bij ophalen historische prijzen' },
+        { status: 500 }
+      )
+    }
       
       if (pageData && pageData.length > 0) {
         allData = [...allData, ...pageData]

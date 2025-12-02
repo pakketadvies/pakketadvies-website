@@ -21,7 +21,7 @@ export default function EnergieprijzenPage() {
   const dateRange = useMemo(() => {
     const today = new Date()
     const startDate = new Date(today)
-    startDate.setFullYear(startDate.getFullYear() - 5)
+        startDate.setFullYear(startDate.getFullYear() - 5)
     
     return {
       start: startDate.toISOString().split('T')[0],

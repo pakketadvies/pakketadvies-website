@@ -24,13 +24,24 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
     
+    // Debug logging (remove in production if needed)
+    console.log('🔍 Auth check:', {
+      hasAuthHeader: !!authHeader,
+      authHeaderPrefix: authHeader?.substring(0, 20) + '...',
+      hasCronSecret: !!cronSecret,
+      cronSecretPrefix: cronSecret ? cronSecret.substring(0, 10) + '...' : 'none',
+      expectedHeader: cronSecret ? `Bearer ${cronSecret}` : 'none',
+      headersMatch: authHeader === (cronSecret ? `Bearer ${cronSecret}` : null),
+    })
+    
     // Security check:
     // - If CRON_SECRET is set, require valid Bearer token OR Vercel cron header
     // - Vercel cron jobs send Authorization header automatically
     // - For manual testing, use: curl -H "Authorization: Bearer <CRON_SECRET>" ...
     if (cronSecret) {
       // Check if request has valid Bearer token
-      if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+      const expectedHeader = `Bearer ${cronSecret}`
+      if (!authHeader || authHeader !== expectedHeader) {
         // Check if it's a Vercel cron request (they send a special header)
         // Vercel cron jobs include Authorization header automatically, but we check CRON_SECRET
         // If no valid auth, reject (unless it's a Vercel internal cron call)
@@ -38,7 +49,10 @@ export async function GET(request: Request) {
                                 request.headers.get('x-vercel-cron') !== null
         
         if (!isVercelInternal) {
-          console.error('❌ Unauthorized cron request - missing or invalid auth header')
+          console.error('❌ Unauthorized cron request')
+          console.error('   Received header:', authHeader || 'none')
+          console.error('   Expected header:', expectedHeader)
+          console.error('   Match:', authHeader === expectedHeader)
           console.error('   For manual testing, use: Authorization: Bearer <CRON_SECRET>')
           return NextResponse.json(
             { 
@@ -48,6 +62,8 @@ export async function GET(request: Request) {
             { status: 401 }
           )
         }
+      } else {
+        console.log('✅ Auth header matches!')
       }
     } else {
       // No CRON_SECRET set - allow all requests (not recommended for production)
