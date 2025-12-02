@@ -1,4 +1,5 @@
 import Script from 'next/script'
+import { ReactNode } from 'react'
 
 interface OrganizationSchemaProps {
   name?: string
@@ -129,6 +130,21 @@ export function ServiceSchema({
       id="service-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  )
+}
+
+interface StructuredDataProps {
+  data: object
+  id?: string
+}
+
+export function StructuredData({ data, id = 'structured-data' }: StructuredDataProps) {
+  return (
+    <script
+      id={id}
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   )
 }
