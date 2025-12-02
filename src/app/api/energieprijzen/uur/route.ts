@@ -50,10 +50,82 @@ export async function GET(request: Request) {
             time: `${String(p.uur).padStart(2, '0')}:${String(p.kwartier * 15).padStart(2, '0')}`,
           }))
           
-          // If we only have hourly data (24 records with kwartier=0), try to fetch quarter-hourly from API
+          // If we only have hourly data (24 records with kwartier=0), interpolate to quarter-hourly
           if (!hasQuarterHourlyData && hourlyPrices.length === 24) {
-            console.log(`⚠️ Only hourly data found in Supabase for ${dateStr}, fetching quarter-hourly from API...`)
-            // Fall through to EnergyZero API to get quarter-hourly data
+            console.log(`⚠️ Only hourly data found in Supabase for ${dateStr}, interpolating to quarter-hourly...`)
+            
+            // Interpolate hourly prices to quarter-hourly
+            const interpolatedData: any[] = []
+            for (let i = 0; i < hourlyPrices.length; i++) {
+              const currentHour = hourlyPrices[i]
+              const nextHour = hourlyPrices[i + 1] || currentHour // Use same price for last hour
+              
+              // Create 4 quarter-hour records for this hour
+              for (let q = 0; q < 4; q++) {
+                let price: number
+                
+                if (q === 0) {
+                  price = typeof currentHour.prijs === 'string' ? parseFloat(currentHour.prijs) : Number(currentHour.prijs)
+                } else if (q === 1) {
+                  const currentPrice = typeof currentHour.prijs === 'string' ? parseFloat(currentHour.prijs) : Number(currentHour.prijs)
+                  const nextPrice = typeof nextHour.prijs === 'string' ? parseFloat(nextHour.prijs) : Number(nextHour.prijs)
+                  price = currentPrice * 0.75 + nextPrice * 0.25
+                } else if (q === 2) {
+                  const currentPrice = typeof currentHour.prijs === 'string' ? parseFloat(currentHour.prijs) : Number(currentHour.prijs)
+                  const nextPrice = typeof nextHour.prijs === 'string' ? parseFloat(nextHour.prijs) : Number(nextHour.prijs)
+                  price = (currentPrice + nextPrice) / 2
+                } else {
+                  const currentPrice = typeof currentHour.prijs === 'string' ? parseFloat(currentHour.prijs) : Number(currentHour.prijs)
+                  const nextPrice = typeof nextHour.prijs === 'string' ? parseFloat(nextHour.prijs) : Number(nextHour.prijs)
+                  price = currentPrice * 0.25 + nextPrice * 0.75
+                }
+                
+                const timestamp = new Date(`${dateStr}T${String(currentHour.uur).padStart(2, '0')}:${String(q * 15).padStart(2, '0')}:00Z`)
+                
+                interpolatedData.push({
+                  hour: currentHour.uur,
+                  quarter: q,
+                  timestamp: timestamp.toISOString(),
+                  price: price,
+                  time: `${String(currentHour.uur).padStart(2, '0')}:${String(q * 15).padStart(2, '0')}`,
+                })
+              }
+            }
+            
+            // Calculate averages
+            const avgPrice = interpolatedData.reduce((sum: number, h: any) => sum + h.price, 0) / interpolatedData.length
+            const minPrice = Math.min(...interpolatedData.map((h: any) => h.price))
+            const maxPrice = Math.max(...interpolatedData.map((h: any) => h.price))
+            
+            // Group by hour for hourly view
+            const hourlyGroups: Record<number, number[]> = {}
+            interpolatedData.forEach((h: any) => {
+              if (!hourlyGroups[h.hour]) {
+                hourlyGroups[h.hour] = []
+              }
+              hourlyGroups[h.hour].push(h.price)
+            })
+            
+            const hourlyAverages = Object.entries(hourlyGroups).map(([hour, prices]) => ({
+              hour: parseInt(hour),
+              price: prices.reduce((sum, p) => sum + p, 0) / prices.length,
+              min: Math.min(...prices),
+              max: Math.max(...prices),
+            })).sort((a, b) => a.hour - b.hour)
+            
+            return NextResponse.json({
+              success: true,
+              date: dateStr,
+              type,
+              hourly: hourlyAverages,
+              quarterHourly: interpolatedData,
+              averages: {
+                average: avgPrice,
+                min: minPrice,
+                max: maxPrice,
+              },
+              source: 'supabase_interpolated',
+            })
           } else {
             // Calculate averages
             const avgPrice = quarterHourlyData.reduce((sum: number, h: any) => sum + h.price, 0) / quarterHourlyData.length
@@ -136,8 +208,8 @@ export async function GET(request: Request) {
         )
       }
       
-      // Transform to hourly format
-      const hourlyData = prices
+      // Transform to hourly format first
+      const hourlyRecords = prices
         .map((p: any) => {
           // Use readingDate if available, otherwise from
           const dateStr = p.readingDate || p.from
@@ -147,19 +219,54 @@ export async function GET(request: Request) {
           if (isNaN(date.getTime())) return null
           
           const hour = date.getUTCHours()
-          const quarter = Math.floor(date.getUTCMinutes() / 15)
           
           if (typeof p.price !== 'number' || isNaN(p.price)) return null
           
           return {
             hour,
-            quarter,
-            timestamp: date.toISOString(),
             price: p.price,
-            time: `${String(hour).padStart(2, '0')}:${String(quarter * 15).padStart(2, '0')}`,
+            timestamp: date.toISOString(),
           }
         })
         .filter((item: any) => item !== null)
+        .sort((a: any, b: any) => a.hour - b.hour)
+      
+      // Interpolate hourly prices to quarter-hourly prices
+      // For each hour, create 4 quarter-hour records
+      const hourlyData: any[] = []
+      for (let i = 0; i < hourlyRecords.length; i++) {
+        const currentHour = hourlyRecords[i]
+        const nextHour = hourlyRecords[i + 1] || currentHour // Use same price for last hour
+        
+        // Create 4 quarter-hour records for this hour
+        for (let q = 0; q < 4; q++) {
+          let price: number
+          
+          if (q === 0) {
+            // Q0 (00:00): use current hour price
+            price = currentHour.price
+          } else if (q === 1) {
+            // Q1 (15:00): interpolate between current and next hour (25% next, 75% current)
+            price = currentHour.price * 0.75 + nextHour.price * 0.25
+          } else if (q === 2) {
+            // Q2 (30:00): average of current and next hour
+            price = (currentHour.price + nextHour.price) / 2
+          } else {
+            // Q3 (45:00): interpolate between current and next hour (75% next, 25% current)
+            price = currentHour.price * 0.25 + nextHour.price * 0.75
+          }
+          
+          const timestamp = new Date(`${dateStr}T${String(currentHour.hour).padStart(2, '0')}:${String(q * 15).padStart(2, '0')}:00Z`)
+          
+          hourlyData.push({
+            hour: currentHour.hour,
+            quarter: q,
+            timestamp: timestamp.toISOString(),
+            price: price,
+            time: `${String(currentHour.hour).padStart(2, '0')}:${String(q * 15).padStart(2, '0')}`,
+          })
+        }
+      }
       
       if (hourlyData.length === 0) {
         return NextResponse.json(
