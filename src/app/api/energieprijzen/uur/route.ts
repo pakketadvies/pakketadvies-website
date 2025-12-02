@@ -38,6 +38,9 @@ export async function GET(request: Request) {
             return a.kwartier - b.kwartier
           })
           
+          // Check if we have quarter-hourly data (96 records) or only hourly (24 records)
+          const hasQuarterHourlyData = hourlyPrices.length >= 96
+          
           // Transform Supabase data to expected format
           const quarterHourlyData = hourlyPrices.map((p) => ({
             hour: p.uur,
@@ -47,40 +50,46 @@ export async function GET(request: Request) {
             time: `${String(p.uur).padStart(2, '0')}:${String(p.kwartier * 15).padStart(2, '0')}`,
           }))
           
-          // Calculate averages
-          const avgPrice = quarterHourlyData.reduce((sum: number, h: any) => sum + h.price, 0) / quarterHourlyData.length
-          const minPrice = Math.min(...quarterHourlyData.map((h: any) => h.price))
-          const maxPrice = Math.max(...quarterHourlyData.map((h: any) => h.price))
-          
-          // Group by hour for hourly view
-          const hourlyGroups: Record<number, number[]> = {}
-          quarterHourlyData.forEach((h: any) => {
-            if (!hourlyGroups[h.hour]) {
-              hourlyGroups[h.hour] = []
-            }
-            hourlyGroups[h.hour].push(h.price)
-          })
-          
-          const hourlyAverages = Object.entries(hourlyGroups).map(([hour, prices]) => ({
-            hour: parseInt(hour),
-            price: prices.reduce((sum, p) => sum + p, 0) / prices.length,
-            min: Math.min(...prices),
-            max: Math.max(...prices),
-          })).sort((a, b) => a.hour - b.hour)
-          
-          return NextResponse.json({
-            success: true,
-            date: dateStr,
-            type,
-            hourly: hourlyAverages,
-            quarterHourly: quarterHourlyData,
-            averages: {
-              average: avgPrice,
-              min: minPrice,
-              max: maxPrice,
-            },
-            source: 'supabase',
-          })
+          // If we only have hourly data (24 records with kwartier=0), try to fetch quarter-hourly from API
+          if (!hasQuarterHourlyData && hourlyPrices.length === 24) {
+            console.log(`⚠️ Only hourly data found in Supabase for ${dateStr}, fetching quarter-hourly from API...`)
+            // Fall through to EnergyZero API to get quarter-hourly data
+          } else {
+            // Calculate averages
+            const avgPrice = quarterHourlyData.reduce((sum: number, h: any) => sum + h.price, 0) / quarterHourlyData.length
+            const minPrice = Math.min(...quarterHourlyData.map((h: any) => h.price))
+            const maxPrice = Math.max(...quarterHourlyData.map((h: any) => h.price))
+            
+            // Group by hour for hourly view
+            const hourlyGroups: Record<number, number[]> = {}
+            quarterHourlyData.forEach((h: any) => {
+              if (!hourlyGroups[h.hour]) {
+                hourlyGroups[h.hour] = []
+              }
+              hourlyGroups[h.hour].push(h.price)
+            })
+            
+            const hourlyAverages = Object.entries(hourlyGroups).map(([hour, prices]) => ({
+              hour: parseInt(hour),
+              price: prices.reduce((sum, p) => sum + p, 0) / prices.length,
+              min: Math.min(...prices),
+              max: Math.max(...prices),
+            })).sort((a, b) => a.hour - b.hour)
+            
+            return NextResponse.json({
+              success: true,
+              date: dateStr,
+              type,
+              hourly: hourlyAverages,
+              quarterHourly: quarterHourlyData,
+              averages: {
+                average: avgPrice,
+                min: minPrice,
+                max: maxPrice,
+              },
+              source: 'supabase',
+            })
+          }
         } else {
           // No data in Supabase, fall through to EnergyZero API
           console.log(`No hourly prices found in Supabase for date: ${dateStr}`)
@@ -179,6 +188,47 @@ export async function GET(request: Request) {
         min: Math.min(...prices),
         max: Math.max(...prices),
       })).sort((a, b) => a.hour - b.hour)
+      
+      // Save quarter-hourly prices to Supabase for future use
+      // Only save if we have full quarter-hourly data (96 records = 24 hours * 4 quarters)
+      if (hourlyData.length >= 96 && type === 'elektriciteit') {
+        try {
+          const supabase = await createClient()
+          
+          // Prepare data for upsert
+          const recordsToInsert = hourlyData.map((item) => ({
+            datum: dateStr,
+            uur: item.hour,
+            kwartier: item.quarter,
+            prijs: item.price,
+            timestamp: item.timestamp,
+            bron: 'ENERGYZERO',
+            laatst_geupdate: new Date().toISOString(),
+          }))
+          
+          // Upsert in batches to avoid payload size limits
+          const batchSize = 100
+          for (let i = 0; i < recordsToInsert.length; i += batchSize) {
+            const batch = recordsToInsert.slice(i, i + batchSize)
+            const { error: upsertError } = await supabase
+              .from('hourly_prices')
+              .upsert(batch, {
+                onConflict: 'datum,uur,kwartier',
+                ignoreDuplicates: false,
+              })
+            
+            if (upsertError) {
+              console.error(`Error saving hourly prices batch ${i / batchSize + 1}:`, upsertError)
+              // Continue with other batches even if one fails
+            }
+          }
+          
+          console.log(`✅ Saved ${recordsToInsert.length} quarter-hourly prices to Supabase for ${dateStr}`)
+        } catch (saveError: any) {
+          console.error('Error saving quarter-hourly prices to Supabase:', saveError?.message || saveError)
+          // Don't fail the request if save fails - data is still returned
+        }
+      }
       
       return NextResponse.json({
         success: true,

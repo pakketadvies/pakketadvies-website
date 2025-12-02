@@ -905,7 +905,9 @@ export function PrijzenGrafiek({
                     angle={graphView === 'dag' ? 0 : -60}
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
                     height={graphView === 'dag' ? 30 : 60}
-                    interval={graphView === 'dag' && showQuarterHour ? 'preserveStartEnd' : 'preserveStartEnd'}
+                    // For quarter-hourly (96 bars), show every 4th label (every hour)
+                    // For hourly (24 bars), show all labels
+                    interval={graphView === 'dag' && showQuarterHour ? 3 : 'preserveStartEnd'}
                   />
                   <YAxis
                     stroke="#6B7280"
