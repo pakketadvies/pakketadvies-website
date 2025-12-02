@@ -89,10 +89,10 @@ export function PrijzenTabel({
     const year = targetDate.getFullYear()
     const month = targetDate.getMonth()
     
-    // First day of the month
-    const firstDay = new Date(year, month, 1)
+    // First day of the month (use UTC to avoid timezone issues)
+    const firstDay = new Date(Date.UTC(year, month, 1))
     // Last day of the month (day 0 of next month gives last day of current month)
-    const lastDay = new Date(year, month + 1, 0)
+    const lastDay = new Date(Date.UTC(year, month + 1, 0))
     
     return { firstDay, lastDay }
   }
@@ -170,8 +170,9 @@ export function PrijzenTabel({
   const weekEnd = weekDates[6].toISOString().split('T')[0]
 
   const monthDates = getMonthDates(currentMonth)
-  const monthStart = monthDates.firstDay.toISOString().split('T')[0]
-  const monthEnd = monthDates.lastDay.toISOString().split('T')[0]
+  // Format dates as YYYY-MM-DD without timezone conversion
+  const monthStart = `${monthDates.firstDay.getUTCFullYear()}-${String(monthDates.firstDay.getUTCMonth() + 1).padStart(2, '0')}-${String(monthDates.firstDay.getUTCDate()).padStart(2, '0')}`
+  const monthEnd = `${monthDates.lastDay.getUTCFullYear()}-${String(monthDates.lastDay.getUTCMonth() + 1).padStart(2, '0')}-${String(monthDates.lastDay.getUTCDate()).padStart(2, '0')}`
 
   const filteredData = useMemo(() => {
     if (viewMode === 'maand') {
