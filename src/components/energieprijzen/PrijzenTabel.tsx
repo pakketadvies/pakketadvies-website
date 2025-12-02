@@ -35,7 +35,8 @@ export function PrijzenTabel({
   loading,
 }: PrijzenTabelProps) {
   const [currentWeek, setCurrentWeek] = useState(0) // 0 = current week, -1 = last week, etc.
-  const [viewMode, setViewMode] = useState<'week' | 'all'>('week')
+  const [currentMonth, setCurrentMonth] = useState(0) // 0 = current month, -1 = last month, etc.
+  const [viewMode, setViewMode] = useState<'week' | 'maand'>('week')
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -80,6 +81,18 @@ export function PrijzenTabel({
     return weekDates
   }
 
+  // Get month dates
+  const getMonthDates = (monthOffset: number) => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth() + monthOffset
+    
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    
+    return { firstDay, lastDay }
+  }
+
   // Get week number
   const getWeekNumber = (date: Date) => {
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -87,6 +100,12 @@ export function PrijzenTabel({
     d.setUTCDate(d.getUTCDate() + 4 - dayNum)
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
     return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  }
+
+  // Get month name in Dutch
+  const getMonthName = (date: Date) => {
+    const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december']
+    return months[date.getMonth()]
   }
 
   // Process data
@@ -141,18 +160,26 @@ export function PrijzenTabel({
     })
   }, [data, energietype, tarief, belastingen])
 
-  // Filter data for current week
+  // Filter data for current week or month
   const weekDates = getWeekDates(currentWeek)
   const weekStart = weekDates[0].toISOString().split('T')[0]
   const weekEnd = weekDates[6].toISOString().split('T')[0]
 
-  const weekData = useMemo(() => {
-    if (viewMode === 'all') return processedData
-    
-    return processedData.filter(item => {
-      return item.datum >= weekStart && item.datum <= weekEnd
-    })
-  }, [processedData, weekStart, weekEnd, viewMode])
+  const monthDates = getMonthDates(currentMonth)
+  const monthStart = monthDates.firstDay.toISOString().split('T')[0]
+  const monthEnd = monthDates.lastDay.toISOString().split('T')[0]
+
+  const filteredData = useMemo(() => {
+    if (viewMode === 'maand') {
+      return processedData.filter(item => {
+        return item.datum >= monthStart && item.datum <= monthEnd
+      })
+    } else {
+      return processedData.filter(item => {
+        return item.datum >= weekStart && item.datum <= weekEnd
+      })
+    }
+  }, [processedData, weekStart, weekEnd, monthStart, monthEnd, viewMode])
 
   // Get current time and price
   const now = new Date()
@@ -176,7 +203,7 @@ export function PrijzenTabel({
 
     const csvRows = [
       headers.join(','),
-      ...(viewMode === 'week' ? weekData : processedData).map((row) => {
+      ...filteredData.map((row) => {
         const values = [formatDateFull(row.datum)]
         if (energietype === 'elektriciteit' || energietype === 'beide') {
           if (energietype === 'beide') {
@@ -300,7 +327,7 @@ export function PrijzenTabel({
           </div>
 
           {/* Current price indicator */}
-          {currentPrice && currentWeek === 0 && (
+          {currentPrice && ((viewMode === 'week' && currentWeek === 0) || (viewMode === 'maand' && currentMonth === 0)) && (
             <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
               <div className="flex-1 min-w-0">
@@ -352,7 +379,7 @@ export function PrijzenTabel({
               </tr>
             </thead>
             <tbody>
-              {(viewMode === 'week' ? weekData : processedData).map((row, index) => {
+              {filteredData.map((row, index) => {
                 const isToday = row.datum === todayStr
                 const date = new Date(row.datum)
                 const isWeekend = date.getDay() === 0 || date.getDay() === 6
@@ -398,6 +425,7 @@ export function PrijzenTabel({
               })}
             </tbody>
           </table>
+          )}
         </div>
 
         {/* Footer info */}
