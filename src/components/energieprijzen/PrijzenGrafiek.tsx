@@ -918,17 +918,37 @@ export function PrijzenGrafiek({
                     angle={graphView === 'dag' ? 0 : -60}
                     textAnchor={graphView === 'dag' ? 'middle' : 'end'}
                     height={graphView === 'dag' ? (isMobile ? 50 : 30) : 60}
-                    // For quarter-hourly: show every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
-                    // Every 3 hours = every 12 quarter-hours (3 * 4 = 12)
-                    // Interval 11 means: skip 11, show 1 = every 12th tick
-                    interval={
-                      graphView === 'dag' && showQuarterHour
-                        ? 11 // Every 12th tick = every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
-                        : 'preserveStartEnd'
-                    }
+                    // For day view: show labels every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
+                    {...(graphView === 'dag' && chartData.length > 0
+                      ? {
+                          ticks: (() => {
+                            const ticks: number[] = []
+                            if (showQuarterHour) {
+                              // For quarter-hourly: 96 datapunten, show every 12 (every 3 hours)
+                              // Indices: 0 (00:00), 12 (03:00), 24 (06:00), 36 (09:00), 48 (12:00), 60 (15:00), 72 (18:00), 84 (21:00)
+                              for (let hour = 0; hour <= 21; hour += 3) {
+                                const index = hour * 4 // Each hour has 4 quarters
+                                if (index < chartData.length) {
+                                  ticks.push(index)
+                                }
+                              }
+                            } else {
+                              // For hourly: 24 datapunten, show every 3 hours
+                              // Indices: 0 (00:00), 3 (03:00), 6 (06:00), 9 (09:00), 12 (12:00), 15 (15:00), 18 (18:00), 21 (21:00)
+                              for (let hour = 0; hour <= 21; hour += 3) {
+                                if (hour < chartData.length) {
+                                  ticks.push(hour)
+                                }
+                              }
+                            }
+                            return ticks
+                          })(),
+                          interval: 0, // Show all ticks from the ticks array
+                        }
+                      : {
+                          interval: 'preserveStartEnd',
+                        })}
                     tick={{ fontSize: isMobile ? 8 : 10 }}
-                    // No custom tickFormatter needed - interval handles it correctly
-                    // The interval of 11 will show: index 0 (00:00), 12 (03:00), 24 (06:00), 36 (09:00), 48 (12:00), 60 (15:00), 72 (18:00), 84 (21:00)
                   />
                   <YAxis
                     stroke="#6B7280"
