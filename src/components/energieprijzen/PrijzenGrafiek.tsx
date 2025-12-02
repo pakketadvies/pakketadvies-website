@@ -911,7 +911,7 @@ export function PrijzenGrafiek({
 
           {/* Quarter Hour Toggle (only for electricity, day view) - Left on desktop */}
           {localEnergietype === 'elektriciteit' && graphView === 'dag' && (
-            <div className="flex items-center justify-between md:justify-start gap-2 md:gap-3">
+            <div className="flex items-center justify-start gap-2 md:gap-3">
               <span className="text-xs md:text-sm text-gray-600">Toon kwartierprijzen</span>
               <button
                 onClick={() => setShowQuarterHour(!showQuarterHour)}
