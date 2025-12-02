@@ -4,10 +4,15 @@ import { saveDynamicPrices } from '@/lib/dynamic-pricing/database'
 import { createClient } from '@/lib/supabase/server'
 
 /**
- * CRON endpoint: Update dynamic prices daily
+ * CRON endpoint: Update dynamic prices daily (day-ahead)
  * 
  * Called by Vercel Cron Jobs at 14:00 UTC daily
- * Fetches today's prices and saves them to Supabase
+ * Fetches TOMORROW's day-ahead prices and saves them to Supabase
+ * 
+ * Day-ahead pricing logic:
+ * - At 14:00 UTC, tomorrow's prices become available
+ * - This allows users to see tomorrow's prices from 14:00 onwards
+ * - Prices are saved with tomorrow's date in the database
  * 
  * Security: Should be protected by Vercel Cron secret
  */
