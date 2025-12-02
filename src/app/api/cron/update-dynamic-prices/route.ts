@@ -39,31 +39,35 @@ export async function GET(request: Request) {
 
     console.log('🔄 Starting daily price update...')
     
-    // Use today's date in UTC to ensure consistency
+    // Day-ahead pricing: fetch prices for TOMORROW
+    // Cron runs at 14:00 UTC, at which point tomorrow's prices are available
     const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
     // Set to UTC midnight to get the correct date
-    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
-    const todayStr = todayUTC.toISOString().split('T')[0]
+    const tomorrowUTC = new Date(Date.UTC(tomorrow.getUTCFullYear(), tomorrow.getUTCMonth(), tomorrow.getUTCDate()))
+    const tomorrowStr = tomorrowUTC.toISOString().split('T')[0]
     
-    console.log(`📅 Today's date (UTC): ${todayStr}`)
+    console.log(`📅 Today's date (UTC): ${today.toISOString().split('T')[0]}`)
+    console.log(`📅 Fetching day-ahead prices for: ${tomorrowStr} (tomorrow)`)
     
-    // Check if today's prices already exist
+    // Check if tomorrow's prices already exist
     const supabase = await createClient()
     const { data: existing } = await supabase
       .from('dynamic_prices')
       .select('datum')
-      .eq('datum', todayStr)
+      .eq('datum', tomorrowStr)
       .single()
 
     if (existing) {
-      console.log(`⏭️  Prices for ${todayStr} already exist, updating...`)
+      console.log(`⏭️  Prices for ${tomorrowStr} already exist, updating...`)
     }
 
-    // Fetch today's prices
-    console.log(`📡 Fetching prices for ${todayStr}...`)
+    // Fetch tomorrow's day-ahead prices
+    console.log(`📡 Fetching day-ahead prices for ${tomorrowStr}...`)
     let prices
     try {
-      prices = await fetchDayAheadPrices(today)
+      prices = await fetchDayAheadPrices(tomorrowUTC)
     } catch (error: any) {
       console.error('❌ Failed to fetch prices:', error.message)
       return NextResponse.json(
@@ -83,23 +87,23 @@ export async function GET(request: Request) {
     // Note: fetchDayAheadPrices now throws an error instead of returning FALLBACK
     // So we don't need to check for FALLBACK here anymore
 
-    // Save to database
-    console.log(`💾 Saving prices to database...`)
+    // Save to database with tomorrow's date
+    console.log(`💾 Saving prices to database for ${tomorrowStr}...`)
     await saveDynamicPrices({
       electricity: prices.electricity,
       gas: prices.gas,
       source: prices.source,
-      date: todayStr,
+      date: tomorrowStr,
     })
 
-    console.log(`✅ Successfully updated prices for ${todayStr}`)
+    console.log(`✅ Successfully updated day-ahead prices for ${tomorrowStr}`)
     console.log(`   Electricity: €${prices.electricity.average.toFixed(5)}/kWh`)
     console.log(`   Gas: €${prices.gas.average.toFixed(5)}/m³`)
     console.log(`   Source: ${prices.source}`)
 
     return NextResponse.json({
       success: true,
-      date: todayStr,
+      date: tomorrowStr,
       prices: {
         electricity: prices.electricity.average,
         gas: prices.gas.average,
