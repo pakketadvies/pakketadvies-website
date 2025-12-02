@@ -196,7 +196,7 @@ export async function GET(request: Request) {
           const supabase = await createClient()
           
           // Prepare data for upsert
-          const recordsToInsert = hourlyData.map((item) => ({
+          const recordsToInsert = hourlyData.map((item: any) => ({
             datum: dateStr,
             uur: item.hour,
             kwartier: item.quarter,
