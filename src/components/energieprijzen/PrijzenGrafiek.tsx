@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -318,8 +320,86 @@ export function PrijzenGrafiek({
       })
       
       console.log(`[PrijzenGrafiek] Year filtered: ${filteredData.length} records from ${data.length} total`)
+      
+      // For year view: aggregate data per month
+      const monthGroups: Record<string, any[]> = {}
+      
+      filteredData.forEach((item) => {
+        const recordDate = normalizeDate(item.datum)
+        if (!recordDate) return
+        
+        const date = new Date(recordDate + 'T00:00:00Z')
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        
+        if (!monthGroups[monthKey]) {
+          monthGroups[monthKey] = []
+        }
+        monthGroups[monthKey].push(item)
+      })
+      
+      // Calculate monthly averages, min, max
+      const monthNames = ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec']
+      
+      return Object.entries(monthGroups)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([monthKey, items]) => {
+          const [year, month] = monthKey.split('-')
+          const monthIndex = parseInt(month) - 1
+          const monthName = monthNames[monthIndex]
+          
+          const base: any = {
+            datum: monthName,
+            fullDate: monthKey,
+            monthKey,
+            year: parseInt(year),
+            month: parseInt(month),
+          }
+          
+          if (localEnergietype === 'elektriciteit') {
+            const prices = items.map(item => {
+              let price = item.elektriciteit_gemiddeld || item.elektriciteit_dag || 0
+              if (belastingen === 'inclusief') {
+                const withEB = price + EB_ELEKTRICITEIT
+                price = withEB * (1 + BTW_PERCENTAGE)
+              }
+              return parseFloat(price.toFixed(5))
+            })
+            
+            const originalPrices = items.map(item => item.elektriciteit_gemiddeld || item.elektriciteit_dag || 0)
+            
+            base.prijs = prices.reduce((sum, p) => sum + p, 0) / prices.length
+            base.min = Math.min(...prices)
+            base.max = Math.max(...prices)
+            base.originalPrice = originalPrices.reduce((sum, p) => sum + p, 0) / originalPrices.length
+            base.originalMin = Math.min(...originalPrices)
+            base.originalMax = Math.max(...originalPrices)
+          }
+          
+          if (localEnergietype === 'gas') {
+            const prices = items.map(item => {
+              let price = item.gas_gemiddeld || 0
+              if (belastingen === 'inclusief') {
+                const withEB = price + EB_GAS
+                price = withEB * (1 + BTW_PERCENTAGE)
+              }
+              return parseFloat(price.toFixed(5))
+            })
+            
+            const originalPrices = items.map(item => item.gas_gemiddeld || 0)
+            
+            base.prijs = prices.reduce((sum, p) => sum + p, 0) / prices.length
+            base.min = Math.min(...prices)
+            base.max = Math.max(...prices)
+            base.originalPrice = originalPrices.reduce((sum, p) => sum + p, 0) / originalPrices.length
+            base.originalMin = Math.min(...originalPrices)
+            base.originalMax = Math.max(...originalPrices)
+          }
+          
+          return base
+        })
     }
     
+    // For week/month views: return daily data
     return filteredData.map((item) => {
       const base: any = {
         datum: new Date(item.datum).toLocaleDateString('nl-NL', {
@@ -502,13 +582,30 @@ export function PrijzenGrafiek({
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      const data = payload[0]?.payload
+      const isYearView = graphView === 'jaar'
+      
       return (
         <div className="bg-white p-4 rounded-lg shadow-xl border border-gray-200">
-          <p className="font-semibold text-brand-navy-500 mb-2">{label}</p>
+          <p className="font-semibold text-brand-navy-500 mb-2">
+            {isYearView && data?.year ? `${label} ${data.year}` : label}
+          </p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {formatPrice(entry.value)}
-            </p>
+            <div key={index} className="text-sm" style={{ color: entry.color }}>
+              <p className="font-medium">
+                {entry.name}: {formatPrice(entry.value)}
+              </p>
+              {isYearView && data && (data.min !== undefined || data.max !== undefined) && (
+                <div className="mt-1 text-xs text-gray-600">
+                  {data.min !== undefined && (
+                    <p>Min: {formatPrice(data.min)}</p>
+                  )}
+                  {data.max !== undefined && (
+                    <p>Max: {formatPrice(data.max)}</p>
+                  )}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )
@@ -728,70 +825,117 @@ export function PrijzenGrafiek({
         {chartData && chartData.length > 0 ? (
           <div className="h-96 w-full relative" style={{ width: '100%', height: '384px' }}>
             <ResponsiveContainer width="100%" height={384}>
-            <BarChart
-              data={chartData} 
-              margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis
-                dataKey={graphView === 'dag' ? 'label' : 'datum'}
-                stroke="#6B7280"
-                style={{ fontSize: '12px' }}
-                angle={graphView === 'dag' ? 0 : -45}
-                textAnchor={graphView === 'dag' ? 'middle' : 'end'}
-                height={graphView === 'dag' ? 40 : 80}
-                interval={graphView === 'dag' && showQuarterHour ? 'preserveStartEnd' : 0}
-              />
-              <YAxis
-                stroke="#6B7280"
-                style={{ fontSize: '12px' }}
-                tickFormatter={(value) => formatPrice(value)}
-                width={100}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              
-              {/* Average price reference line */}
-              {averagePrice > 0 && (
-                <ReferenceLine
-                  y={averagePrice}
-                  stroke="#6B7280"
-                  strokeDasharray="5 5"
-                  strokeWidth={1}
-                />
-              )}
-              
-              {/* Current time indicator (yellow "Nu" line) */}
-              {isToday && graphView === 'dag' && currentIndex >= 0 && (
-                <ReferenceLine
-                  x={currentIndex}
-                  stroke="#FCD34D"
-                  strokeWidth={3}
-                  label={{ value: 'Nu', position: 'bottom', fill: '#FCD34D', fontSize: 12, fontWeight: 'bold' }}
-                  />
-              )}
-              
-              {/* Bar chart */}
-              <Bar
-                dataKey={graphView === 'dag' ? 'price' : 'prijs'}
-                name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
-                fill="#00AF9B"
-                radius={[4, 4, 0, 0]}
-                label={<CustomBarLabel />}
+            {graphView === 'jaar' ? (
+              // Line chart for year view
+              <LineChart
+                data={chartData}
+                margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
               >
-                {chartData.map((entry: any, index: number) => {
-                  const price = entry.price || entry.prijs || 0
-                  const isLow = index === minIndex
-                  const isHigh = index === maxIndex
-                  
-                  return (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis
+                  dataKey="datum"
+                  stroke="#6B7280"
+                  style={{ fontSize: '12px' }}
+                  angle={0}
+                  textAnchor="middle"
+                  height={40}
                 />
-                  )
-                })}
-              </Bar>
-            </BarChart>
+                <YAxis
+                  stroke="#6B7280"
+                  style={{ fontSize: '12px' }}
+                  tickFormatter={(value) => formatPrice(value)}
+                  width={100}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                
+                {/* Average price reference line */}
+                {averagePrice > 0 && (
+                  <ReferenceLine
+                    y={averagePrice}
+                    stroke="#6B7280"
+                    strokeDasharray="5 5"
+                    strokeWidth={1}
+                  />
+                )}
+                
+                {/* Line chart */}
+                <Line
+                  type="monotone"
+                  dataKey="prijs"
+                  name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
+                  stroke="#00AF9B"
+                  strokeWidth={2}
+                  dot={{ fill: '#00AF9B', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            ) : (
+              // Bar chart for day/week/month views
+              <BarChart
+                data={chartData} 
+                margin={{ top: 20, right: 50, left: 20, bottom: 60 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis
+                  dataKey={graphView === 'dag' ? 'label' : 'datum'}
+                  stroke="#6B7280"
+                  style={{ fontSize: '12px' }}
+                  angle={graphView === 'dag' ? 0 : -45}
+                  textAnchor={graphView === 'dag' ? 'middle' : 'end'}
+                  height={graphView === 'dag' ? 40 : 80}
+                  interval={graphView === 'dag' && showQuarterHour ? 'preserveStartEnd' : 0}
+                />
+                <YAxis
+                  stroke="#6B7280"
+                  style={{ fontSize: '12px' }}
+                  tickFormatter={(value) => formatPrice(value)}
+                  width={100}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                
+                {/* Average price reference line */}
+                {averagePrice > 0 && (
+                  <ReferenceLine
+                    y={averagePrice}
+                    stroke="#6B7280"
+                    strokeDasharray="5 5"
+                    strokeWidth={1}
+                  />
+                )}
+                
+                {/* Current time indicator (yellow "Nu" line) */}
+                {isToday && graphView === 'dag' && currentIndex >= 0 && (
+                  <ReferenceLine
+                    x={currentIndex}
+                    stroke="#FCD34D"
+                    strokeWidth={3}
+                    label={{ value: 'Nu', position: 'bottom', fill: '#FCD34D', fontSize: 12, fontWeight: 'bold' }}
+                    />
+                )}
+                
+                {/* Bar chart */}
+                <Bar
+                  dataKey={graphView === 'dag' ? 'price' : 'prijs'}
+                  name={localEnergietype === 'elektriciteit' ? 'Elektriciteit' : 'Gas'}
+                  fill="#00AF9B"
+                  radius={[4, 4, 0, 0]}
+                  label={<CustomBarLabel />}
+                >
+                  {chartData.map((entry: any, index: number) => {
+                    const price = entry.price || entry.prijs || 0
+                    const isLow = index === minIndex
+                    const isHigh = index === maxIndex
+                    
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={isLow ? '#10B981' : isHigh ? '#EF4444' : '#00AF9B'}
+                  />
+                    )
+                  })}
+                </Bar>
+              </BarChart>
+            )}
           </ResponsiveContainer>
             
             {/* Type indicator (STROOM/GAS) - bottom right */}
