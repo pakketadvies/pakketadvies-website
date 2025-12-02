@@ -202,10 +202,12 @@ export function PrijzenGrafiek({
           }
         } else {
           const hItem = item as HourlyPrice
+          // For the last hour (23:00), we want to show it as "00:00" to indicate the next day
+          const isLastHour = index === hourlyData.length - 1 && hItem.hour === 23
           return {
             index,
             hour: hItem.hour,
-            label: `${String(hItem.hour).padStart(2, '0')}:00`,
+            label: isLastHour ? '00:00' : `${String(hItem.hour).padStart(2, '0')}:00`,
             price: parseFloat(price.toFixed(5)),
             min: hItem.min ? parseFloat((belastingen === 'inclusief' 
               ? (hItem.min + EB_ELEKTRICITEIT) * (1 + BTW_PERCENTAGE)
@@ -925,20 +927,28 @@ export function PrijzenGrafiek({
                             const ticks: number[] = []
                             if (showQuarterHour) {
                               // For quarter-hourly: 96 datapunten, show every 12 (every 3 hours)
-                              // Indices: 0 (00:00), 12 (03:00), 24 (06:00), 36 (09:00), 48 (12:00), 60 (15:00), 72 (18:00), 84 (21:00)
+                              // Indices: 0 (00:00), 12 (03:00), 24 (06:00), 36 (09:00), 48 (12:00), 60 (15:00), 72 (18:00), 84 (21:00), 96 (00:00 next day)
                               for (let hour = 0; hour <= 21; hour += 3) {
                                 const index = hour * 4 // Each hour has 4 quarters
                                 if (index < chartData.length) {
                                   ticks.push(index)
                                 }
                               }
+                              // Add 00:00 at the end (last data point, which will be labeled as 00:00)
+                              if (chartData.length > 0) {
+                                ticks.push(chartData.length - 1) // Last data point (23:45, labeled as 00:00)
+                              }
                             } else {
                               // For hourly: 24 datapunten, show every 3 hours
-                              // Indices: 0 (00:00), 3 (03:00), 6 (06:00), 9 (09:00), 12 (12:00), 15 (15:00), 18 (18:00), 21 (21:00)
+                              // Indices: 0 (00:00), 3 (03:00), 6 (06:00), 9 (09:00), 12 (12:00), 15 (15:00), 18 (18:00), 21 (21:00), 23 (23:00)
                               for (let hour = 0; hour <= 21; hour += 3) {
                                 if (hour < chartData.length) {
                                   ticks.push(hour)
                                 }
+                              }
+                              // Add 00:00 at the end (last data point, which will be labeled as 00:00)
+                              if (chartData.length > 0) {
+                                ticks.push(chartData.length - 1) // Last data point (23:00, labeled as 00:00)
                               }
                             }
                             return ticks
