@@ -120,13 +120,16 @@ export default function EnergieprijzenPage() {
                     <span>← Terug naar kennisbank</span>
                   </Link>
                   
-                  <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white/10 backdrop-blur-sm rounded-2xl mb-4 md:mb-6">
-                    <Lightning className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" weight="duotone" />
+                  <div className="flex flex-col items-center gap-4 md:gap-6 mb-4 md:mb-6">
+                    <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white/10 backdrop-blur-sm rounded-2xl">
+                      <Lightning className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" weight="duotone" />
+                    </div>
+                    
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold">
+                      Energieprijzen
+                    </h1>
                   </div>
                   
-                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
-                    Energieprijzen
-                  </h1>
                   <p className="text-sm md:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto px-2">
                     Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. 
                     Deze prijzen geven inzicht in de energiemarkt en helpen u bij het kiezen van het juiste energiecontract.
