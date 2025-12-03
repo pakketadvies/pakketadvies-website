@@ -83,9 +83,9 @@ export default function ContactPage() {
     // Bedrijfsnaam is optioneel - geen validatie nodig
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is verplicht'
+      newErrors.email = 'E-mail is verplicht'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Ongeldig emailadres'
+      newErrors.email = 'Ongeldig e-mailadres'
     }
 
     if (!formData.onderwerp) {
@@ -324,7 +324,7 @@ export default function ContactPage() {
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <Input
-                        label="Email *"
+                        label="E-mail *"
                         type="email"
                         placeholder="je.email@bedrijf.nl"
                         value={formData.email}
@@ -491,7 +491,7 @@ export default function ContactPage() {
                       <Envelope weight="duotone" className="w-7 h-7" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-brand-navy-500 mb-2 text-lg">Email</h3>
+                      <h3 className="font-bold text-brand-navy-500 mb-2 text-lg">E-mail</h3>
                       <a 
                         href="mailto:info@pakketadvies.nl" 
                         className="text-lg font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors block mb-2 break-all"
@@ -509,7 +509,7 @@ export default function ContactPage() {
                         onClick={() => window.location.href = 'mailto:info@pakketadvies.nl'}
                       >
                         <Envelope weight="bold" className="w-4 h-4 mr-2" />
-                        Email nu
+                        E-mail nu
                       </Button>
                     </div>
                   </div>

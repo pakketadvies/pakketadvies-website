@@ -50,7 +50,7 @@ export function Input({
       {label && (
         <label className="block text-sm font-semibold text-gray-700">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && !label.includes('*') && <span className="text-gray-700 ml-1">*</span>}
         </label>
       )}
       <div className="relative">
