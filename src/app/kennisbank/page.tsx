@@ -139,13 +139,21 @@ export default function KennisbankPage() {
       }))
     : [])
 
-  // Get hrefs from special articles to filter duplicates
+  // Get titles and hrefs from special articles to filter duplicates
+  // We check both title and href to catch all duplicates
+  const specialArticleTitles = new Set(specialArticlesFiltered.map(a => a.title.toLowerCase().trim()))
   const specialArticleHrefs = new Set(specialArticlesFiltered.map(a => a.href))
   
   // Filter out articles that are already in specialArticles (to prevent duplicates)
-  const categoryArticlesFiltered = categoryArticles.filter(article => 
-    !specialArticleHrefs.has(article.href)
-  )
+  // Check both title and href to catch duplicates even if hrefs differ
+  const categoryArticlesFiltered = categoryArticles.filter(article => {
+    const articleTitleLower = article.title.toLowerCase().trim()
+    const isDuplicateTitle = specialArticleTitles.has(articleTitleLower)
+    const isDuplicateHref = specialArticleHrefs.has(article.href)
+    
+    // Filter out if title matches OR href matches (or both)
+    return !isDuplicateTitle && !isDuplicateHref
+  })
 
   // Combine all articles: featured articles FIRST, then others
   // Featured articles should always be at the beginning, regardless of date
