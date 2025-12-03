@@ -430,9 +430,11 @@ export default function KennisbankPage() {
           )}
 
           {/* Results count */}
-          <div className="text-center text-sm text-gray-500 mt-4">
-            Toon {startIndex + 1}-{Math.min(endIndex, allFilteredArticles.length)} van {allFilteredArticles.length} artikelen
-          </div>
+          {allFilteredArticles.length > 0 && (
+            <div className="text-center text-sm text-gray-500 mt-4">
+              Toon {startIndex + 1}-{Math.min(endIndex, allFilteredArticles.length)} van {allFilteredArticles.length} artikelen
+            </div>
+          )}
         </div>
       </section>
 
