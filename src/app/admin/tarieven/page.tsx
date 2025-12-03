@@ -151,8 +151,6 @@ export default function TarievenPage() {
           tarief_gas: parseFloat(formData.get('tarief_gas') as string),
           vastrecht_stroom_maand: parseFloat(formData.get('vastrecht_stroom_maand') as string),
           vastrecht_gas_maand: parseFloat(formData.get('vastrecht_gas_maand') as string),
-          ingangsdatum: formData.get('ingangsdatum') as string,
-          einddatum: formData.get('einddatum') as string || null,
           opmerkingen: formData.get('opmerkingen') as string || null,
         }),
       })
@@ -484,32 +482,6 @@ export default function TarievenPage() {
                       className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
                     />
                   </div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ingangsdatum *
-                  </label>
-                  <input
-                    type="date"
-                    name="ingangsdatum"
-                    defaultValue={modelTarief?.ingangsdatum || '2025-01-01'}
-                    required
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Einddatum (optioneel)
-                  </label>
-                  <input
-                    type="date"
-                    name="einddatum"
-                    defaultValue={modelTarief?.einddatum || ''}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
-                  />
                 </div>
               </div>
 

@@ -42,8 +42,6 @@ export async function PUT(request: Request) {
       tarief_gas,
       vastrecht_stroom_maand,
       vastrecht_gas_maand,
-      ingangsdatum,
-      einddatum,
       opmerkingen,
     } = body
 
@@ -65,13 +63,13 @@ export async function PUT(request: Request) {
     // Get current active modeltarieven
     const { data: currentTarieven } = await supabase
       .from('model_tarieven')
-      .select('id, ingangsdatum')
+      .select('id')
       .eq('actief', true)
       .single()
 
     if (currentTarieven) {
       // Update existing active tarieven
-      const { data, error } = await supabase
+      const { error: updateError } = await supabase
         .from('model_tarieven')
         .update({
           tarief_elektriciteit_normaal,
@@ -80,26 +78,33 @@ export async function PUT(request: Request) {
           tarief_gas,
           vastrecht_stroom_maand,
           vastrecht_gas_maand,
-          ingangsdatum: ingangsdatum || currentTarieven.ingangsdatum,
-          einddatum: einddatum || null,
           opmerkingen: opmerkingen || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', currentTarieven.id)
-        .select()
+
+      if (updateError) {
+        throw updateError
+      }
+
+      // Fetch updated record
+      const { data: updatedData, error: fetchError } = await supabase
+        .from('model_tarieven')
+        .select('*')
+        .eq('id', currentTarieven.id)
         .single()
 
-      if (error) {
-        throw error
+      if (fetchError) {
+        throw fetchError
       }
 
       return NextResponse.json({
         success: true,
-        tarieven: data,
+        tarieven: updatedData,
       })
     } else {
       // Create new active tarieven
-      const { data, error } = await supabase
+      const { data: insertedData, error: insertError } = await supabase
         .from('model_tarieven')
         .insert({
           leverancier_naam: 'Eneco',
@@ -109,21 +114,20 @@ export async function PUT(request: Request) {
           tarief_gas,
           vastrecht_stroom_maand,
           vastrecht_gas_maand,
-          ingangsdatum: ingangsdatum || new Date().toISOString().split('T')[0],
-          einddatum: einddatum || null,
+          ingangsdatum: new Date().toISOString().split('T')[0], // Required field, set to today
           actief: true,
           opmerkingen: opmerkingen || null,
         })
         .select()
         .single()
 
-      if (error) {
-        throw error
+      if (insertError) {
+        throw insertError
       }
 
       return NextResponse.json({
         success: true,
-        tarieven: data,
+        tarieven: insertedData,
       })
     }
   } catch (error: any) {
