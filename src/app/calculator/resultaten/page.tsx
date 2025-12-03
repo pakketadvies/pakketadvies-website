@@ -495,7 +495,7 @@ function ResultatenContent() {
       const totaalGas = data.gasJaar || 0
       
       // Haal Eneco modelcontract kosten op voor besparingsberekening
-      const heeftEnkeleMeter = data.meterType === 'enkel' || data.meterType === 'weet_niet'
+      const heeftEnkeleMeter = data?.heeftEnkeleMeter || false
       let enecoModelMaandbedrag: number | null = null
       try {
         const enecoResponse = await fetch('/api/model-tarieven/bereken', {
