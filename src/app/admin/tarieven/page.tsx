@@ -157,7 +157,8 @@ export default function TarievenPage() {
 
       const data = await response.json()
       if (data.success) {
-        setModelTarief(data.tarieven)
+        // Refresh data from database to ensure we have the latest values
+        await fetchData()
         setEditingModelTarief(false)
         alert('Modeltarieven succesvol opgeslagen!')
       } else {
