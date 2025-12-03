@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 /**
  * PUT /api/model-tarieven/update
@@ -112,7 +112,12 @@ export async function PUT(request: Request) {
       console.log('💾 [MODEL-TARIEVEN-UPDATE] Update data:', JSON.stringify(updateData, null, 2))
       console.log('🔧 [MODEL-TARIEVEN-UPDATE] Updating record met id:', currentTarieven.id)
       
-      const { data: updateResult, error: updateError } = await supabase
+      // Use service role client for update to bypass RLS
+      // We've already verified the user is an admin above
+      const serviceClient = createServiceRoleClient()
+      console.log('🔑 [MODEL-TARIEVEN-UPDATE] Using service role client for update')
+      
+      const { data: updateResult, error: updateError } = await serviceClient
         .from('model_tarieven')
         .update(updateData)
         .eq('id', currentTarieven.id)
@@ -126,9 +131,9 @@ export async function PUT(request: Request) {
       
       console.log('✅ [MODEL-TARIEVEN-UPDATE] Update succesvol, resultaat:', JSON.stringify(updateResult, null, 2))
 
-      // Fetch updated record to verify
+      // Fetch updated record to verify using service role client
       console.log('🔍 [MODEL-TARIEVEN-UPDATE] Verifiëren update door record opnieuw op te halen...')
-      const { data: updatedData, error: fetchError } = await supabase
+      const { data: updatedData, error: fetchError } = await serviceClient
         .from('model_tarieven')
         .select('*')
         .eq('id', currentTarieven.id)
@@ -154,26 +159,40 @@ export async function PUT(request: Request) {
       })
     } else {
       // Create new active tarieven
-      const { data: insertedData, error: insertError } = await supabase
+      console.log('📝 [MODEL-TARIEVEN-UPDATE] Geen actieve tarieven gevonden, nieuwe aanmaken...')
+      
+      // Use service role client for insert to bypass RLS
+      const serviceClient = createServiceRoleClient()
+      console.log('🔑 [MODEL-TARIEVEN-UPDATE] Using service role client for insert')
+      
+      const insertData = {
+        leverancier_naam: 'Eneco',
+        tarief_elektriciteit_normaal,
+        tarief_elektriciteit_dal,
+        tarief_elektriciteit_enkel,
+        tarief_gas,
+        vastrecht_stroom_maand,
+        vastrecht_gas_maand,
+        ingangsdatum: new Date().toISOString().split('T')[0], // Required field, set to today
+        actief: true,
+        opmerkingen: opmerkingen || null,
+      }
+      
+      console.log('💾 [MODEL-TARIEVEN-UPDATE] Insert data:', JSON.stringify(insertData, null, 2))
+      
+      const { data: insertedData, error: insertError } = await serviceClient
         .from('model_tarieven')
-        .insert({
-          leverancier_naam: 'Eneco',
-          tarief_elektriciteit_normaal,
-          tarief_elektriciteit_dal,
-          tarief_elektriciteit_enkel,
-          tarief_gas,
-          vastrecht_stroom_maand,
-          vastrecht_gas_maand,
-          ingangsdatum: new Date().toISOString().split('T')[0], // Required field, set to today
-          actief: true,
-          opmerkingen: opmerkingen || null,
-        })
+        .insert(insertData)
         .select()
         .single()
 
       if (insertError) {
+        console.error('❌ [MODEL-TARIEVEN-UPDATE] Insert error:', insertError)
+        console.error('❌ [MODEL-TARIEVEN-UPDATE] Insert error details:', JSON.stringify(insertError, null, 2))
         throw insertError
       }
+      
+      console.log('✅ [MODEL-TARIEVEN-UPDATE] Insert succesvol, resultaat:', JSON.stringify(insertedData, null, 2))
 
       return NextResponse.json({
         success: true,
