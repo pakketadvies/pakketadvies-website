@@ -1074,8 +1074,8 @@ function ResultatenContent() {
             <Link href="/contact?reason=advies">
               <Button className="w-full sm:w-auto">Vraag persoonlijk advies</Button>
             </Link>
-            <Link href="tel:+31201234567">
-              <Button variant="outline" className="w-full sm:w-auto">Bel 020 123 4567</Button>
+            <Link href="tel:+31850477065">
+              <Button variant="outline" className="w-full sm:w-auto">Bel 085 047 7065</Button>
             </Link>
           </div>
         </div>
