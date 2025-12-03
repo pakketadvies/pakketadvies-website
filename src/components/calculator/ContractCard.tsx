@@ -80,6 +80,8 @@ export interface KostenBreakdown {
   totaal: {
     jaarExclBtw: number
     maandExclBtw: number
+    jaarInclBtw?: number
+    maandInclBtw?: number
   }
 }
 

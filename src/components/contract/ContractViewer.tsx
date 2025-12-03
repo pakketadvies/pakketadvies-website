@@ -296,8 +296,8 @@ export default function ContractViewer({
   // Get costs - use opgeslagen breakdown from verbruik_data (vastgelegd bij aanvraag)
   // Dit zorgt ervoor dat het maandbedrag altijd hetzelfde blijft, ook als tarieven later veranderen
   // opgeslagenBreakdown is al gedefinieerd bovenaan de component (regel 65)
-  const maandbedrag = verbruikData?.maandbedrag || (opgeslagenBreakdown?.totaal ? Math.round(opgeslagenBreakdown.totaal.maandInclBtw) : 0)
-  const jaarbedrag = verbruikData?.jaarbedrag || (opgeslagenBreakdown?.totaal ? Math.round(opgeslagenBreakdown.totaal.jaarInclBtw) : (maandbedrag > 0 ? maandbedrag * 12 : 0))
+  const maandbedrag = verbruikData?.maandbedrag || (opgeslagenBreakdown?.totaal?.maandInclBtw ? Math.round(opgeslagenBreakdown.totaal.maandInclBtw) : (opgeslagenBreakdown?.totaal?.maandExclBtw ? Math.round(opgeslagenBreakdown.totaal.maandExclBtw * 1.21) : 0))
+  const jaarbedrag = verbruikData?.jaarbedrag || (opgeslagenBreakdown?.totaal?.jaarInclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarInclBtw) : (opgeslagenBreakdown?.totaal?.jaarExclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarExclBtw * 1.21) : (maandbedrag > 0 ? maandbedrag * 12 : 0)))
   const besparing = verbruikData?.besparing
 
   // Status badge
