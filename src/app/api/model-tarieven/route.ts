@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getModelTarieven, berekenEnecoModelContractKosten } from '@/lib/energie-berekening'
 
+// Disable caching to ensure we always get the latest model tariffs
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 /**
  * GET /api/model-tarieven
  * 
