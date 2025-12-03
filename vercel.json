@@ -10,19 +10,6 @@
       "path": "/api/cron/update-dynamic-prices",
       "schedule": "0 14 * * *"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.pakketadvies.nl"
-        }
-      ],
-      "destination": "https://pakketadvies.nl/:path*",
-      "permanent": true
-    }
   ]
 }
 
