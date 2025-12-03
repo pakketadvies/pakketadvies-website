@@ -13,8 +13,14 @@
   ],
   "redirects": [
     {
-      "source": "https://www.pakketadvies.nl/:path*",
-      "destination": "https://pakketadvies.nl/:path*",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.pakketadvies.nl"
+        }
+      ],
+      "destination": "https://pakketadvies.nl/$1",
       "permanent": true
     }
   ]
