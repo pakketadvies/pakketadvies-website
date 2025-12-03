@@ -223,7 +223,7 @@ export default function KennisbankPage() {
                 </div>
                 <div>
                   <div className="text-sm text-gray-400">Artikelen</div>
-                  <div className="font-semibold text-white">8+ artikelen</div>
+                  <div className="font-semibold text-white">{allArticles.length + specialArticles.length} artikelen</div>
                 </div>
               </div>
               
