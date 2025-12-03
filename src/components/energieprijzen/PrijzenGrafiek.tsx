@@ -351,10 +351,28 @@ export function PrijzenGrafiek({
     } else if (graphView === 'maand') {
       periodStart = getMonthStart(selectedDate)
       periodEnd = getMonthEnd(selectedDate)
-      // Always show full month (1st to last day), don't limit to today
-      // Only limit if the month extends beyond available data
-      if (periodEnd > latestDataDate) {
-        periodEnd = latestDataDate
+      
+      // Check if this is the current month
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const selectedMonth = selectedDate.getMonth()
+      const selectedYear = selectedDate.getFullYear()
+      const currentMonth = today.getMonth()
+      const currentYear = today.getFullYear()
+      const isCurrentMonth = selectedMonth === currentMonth && selectedYear === currentYear
+      
+      if (isCurrentMonth) {
+        // Current month: show from 1st to today (or tomorrow if data available)
+        // Use latestDataDate to include tomorrow if available
+        if (latestDataDate < periodEnd) {
+          periodEnd = latestDataDate
+        }
+      } else {
+        // Past month: show full month (1st to last day of that month)
+        // Only limit if data doesn't extend that far (shouldn't happen for past months)
+        if (periodEnd > latestDataDate) {
+          periodEnd = latestDataDate
+        }
       }
     } else if (graphView === 'jaar') {
       periodStart = getYearStart(selectedDate)
