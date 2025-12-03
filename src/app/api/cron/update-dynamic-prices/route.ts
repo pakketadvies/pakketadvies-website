@@ -40,27 +40,27 @@ export async function GET(request: Request) {
     })
     
     // Security check:
-    // Vercel cron jobs automatically send Authorization header with CRON_SECRET
-    // They also send x-vercel-cron header for verification
+    // IMPORTANT: Vercel cron jobs send ONLY x-vercel-cron header (NOT Authorization header)
     // For manual testing, use: curl -H "Authorization: Bearer <CRON_SECRET>" ...
     
-    const isVercelCron = request.headers.get('x-vercel-cron') !== null ||
-                        request.headers.get('x-vercel-signature') !== null
+    const vercelCronHeader = request.headers.get('x-vercel-cron')
+    const vercelSignature = request.headers.get('x-vercel-signature')
+    const isVercelCron = vercelCronHeader !== null || vercelSignature !== null
+    
+    // For manual testing, we accept Bearer token format
+    const expectedBearerHeader = cronSecret ? `Bearer ${cronSecret}` : null
+    const hasBearerAuth = expectedBearerHeader && authHeader === expectedBearerHeader
     
     if (cronSecret) {
-      // Check if request has valid Bearer token
-      const expectedHeader = `Bearer ${cronSecret}`
-      const hasValidAuth = authHeader === expectedHeader
-      
-      // Allow if: valid auth header OR Vercel cron header present
-      if (!hasValidAuth && !isVercelCron) {
+      // Allow if: Vercel cron header present (automatic) OR Bearer token (manual testing)
+      if (!isVercelCron && !hasBearerAuth) {
         console.error('❌ Unauthorized cron request')
-        console.error('   Received header:', authHeader ? `"${authHeader}"` : 'none')
-        console.error('   Expected header:', `"${expectedHeader}"`)
+        console.error('   Received auth header:', authHeader ? `"${authHeader}"` : 'none')
+        console.error('   Expected (Bearer for manual):', expectedBearerHeader ? `"${expectedBearerHeader}"` : 'none')
         console.error('   Is Vercel cron:', isVercelCron)
         console.error('   Vercel headers:', {
-          'x-vercel-cron': request.headers.get('x-vercel-cron'),
-          'x-vercel-signature': request.headers.get('x-vercel-signature'),
+          'x-vercel-cron': vercelCronHeader,
+          'x-vercel-signature': vercelSignature ? 'present' : null,
         })
         console.error('   For manual testing, use: Authorization: Bearer <CRON_SECRET>')
         return NextResponse.json(
@@ -72,10 +72,10 @@ export async function GET(request: Request) {
         )
       }
       
-      if (hasValidAuth) {
-        console.log('✅ Auth header matches!')
-      } else if (isVercelCron) {
+      if (isVercelCron) {
         console.log('✅ Vercel cron request detected (x-vercel-cron header)')
+      } else if (hasBearerAuth) {
+        console.log('✅ Bearer token auth matches (manual test)')
       }
     } else {
       // No CRON_SECRET set - allow all requests (not recommended for production)
