@@ -76,29 +76,46 @@ export default function ContractViewer({
   const loadPriceData = async () => {
     if (contract.type !== 'dynamisch') return
     
+    console.log('📊 [ContractViewer] Loading dynamic price data...')
     setLoadingPrices(true)
     try {
       // Fetch current prices
+      console.log('📊 [ContractViewer] Fetching current prices from /api/dynamic-pricing/current')
       const currentResponse = await fetch('/api/dynamic-pricing/current')
       if (currentResponse.ok) {
         const currentData = await currentResponse.json()
-        if (currentData.success) {
+        console.log('📊 [ContractViewer] Current prices response:', currentData)
+        if (currentData.success && currentData.prices) {
           setCurrentPrices(currentData.prices)
+          console.log('✅ [ContractViewer] Current prices loaded:', currentData.prices)
+        } else {
+          console.warn('⚠️ [ContractViewer] Current prices response not successful:', currentData)
         }
+      } else {
+        console.error('❌ [ContractViewer] Failed to fetch current prices:', currentResponse.status, await currentResponse.text())
       }
       
       // Fetch price history
+      console.log('📊 [ContractViewer] Fetching price history from /api/dynamic-prices/history?days=30')
       const historyResponse = await fetch('/api/dynamic-prices/history?days=30')
       if (historyResponse.ok) {
         const historyData = await historyResponse.json()
-        if (historyData.success) {
+        console.log('📊 [ContractViewer] Price history response:', historyData)
+        if (historyData.success && historyData.history) {
           setPriceHistory(historyData.history || [])
+          console.log('✅ [ContractViewer] Price history loaded:', historyData.history?.length || 0, 'records')
+        } else {
+          console.warn('⚠️ [ContractViewer] Price history response not successful:', historyData)
         }
+      } else {
+        console.error('❌ [ContractViewer] Failed to fetch price history:', historyResponse.status, await historyResponse.text())
       }
-    } catch (err) {
-      console.error('Error loading price data:', err)
+    } catch (err: any) {
+      console.error('❌ [ContractViewer] Error loading price data:', err)
+      setError(err.message || 'Fout bij laden dynamische prijzen')
     } finally {
       setLoadingPrices(false)
+      console.log('📊 [ContractViewer] Finished loading price data')
     }
   }
 
@@ -112,19 +129,22 @@ export default function ContractViewer({
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // On desktop, always keep both accordions open and load price data
+  // Laad automatisch dynamische prijzen voor dynamische contracten (zowel desktop als mobiel)
+  useEffect(() => {
+    if (contract.type === 'dynamisch' && priceHistory.length === 0 && !loadingPrices && !currentPrices) {
+      loadPriceData()
+    }
+  }, [contract.type]) // Run when contract type is known
+
+  // On desktop, always keep both accordions open
   useEffect(() => {
     if (isDesktop) {
       // Set prijsdetails as open (contractinfo will also be shown via isAccordionOpen)
       if (openAccordion !== 'prijsdetails' && openAccordion !== 'contractinfo') {
         setOpenAccordion('prijsdetails')
       }
-      // Load price data for dynamic contracts when desktop
-      if (contract.type === 'dynamisch' && priceHistory.length === 0 && !loadingPrices) {
-        loadPriceData()
-      }
     }
-  }, [isDesktop, contract.type])
+  }, [isDesktop])
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -147,6 +167,13 @@ export default function ContractViewer({
       berekenKosten()
     }
   }, []) // Only run once on mount
+
+  // Laad automatisch dynamische prijzen voor dynamische contracten
+  useEffect(() => {
+    if (contract.type === 'dynamisch' && !loadingPrices && priceHistory.length === 0 && !currentPrices) {
+      loadPriceData()
+    }
+  }, [contract.type]) // Run when contract type is known
 
   // Also calculate when prijsdetails is opened (if not already calculated and no opgeslagen breakdown)
   useEffect(() => {
