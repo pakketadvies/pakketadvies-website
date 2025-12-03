@@ -754,7 +754,7 @@ export function VerbruikForm() {
                   value={adres.huisnummer}
                   onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
                   placeholder="12"
-                  error={errors.leveringsadressen?.[index]?.huisnummer?.message}
+                  error={(errors.leveringsadressen as any)?.[index]?.huisnummer?.message}
                   required
                 />
               </div>
@@ -765,7 +765,7 @@ export function VerbruikForm() {
                   value={adres.toevoeging || ''}
                   onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
                   placeholder="A"
-                  error={errors.leveringsadressen?.[index]?.toevoeging?.message}
+                  error={(errors.leveringsadressen as any)?.[index]?.toevoeging?.message}
                 />
               </div>
             </div>
@@ -897,7 +897,7 @@ export function VerbruikForm() {
                     onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
                   })}
                   placeholder="Bijv. 3500"
-              error={errors.elektriciteitNormaal?.message}
+              error={errors.elektriciteitNormaal?.message as string | undefined}
               required
             />
 
@@ -911,7 +911,7 @@ export function VerbruikForm() {
                       onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
                     })}
                     placeholder="Bijv. 2500"
-                  error={errors.elektriciteitDal?.message}
+                  error={errors.elektriciteitDal?.message as string | undefined}
                   required
                 />
               </div>
@@ -993,7 +993,7 @@ export function VerbruikForm() {
                   type="number"
                   {...register('terugleveringJaar', { valueAsNumber: true })}
                   placeholder="Bijv. 3000"
-              error={errors.terugleveringJaar?.message}
+              error={errors.terugleveringJaar?.message as string | undefined}
               required
             />
             
@@ -1042,7 +1042,7 @@ export function VerbruikForm() {
                     onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
                   })}
                   placeholder="Bijv. 1200"
-                  error={errors.gasJaar?.message}
+                  error={errors.gasJaar?.message as string | undefined}
                   required
                 />
             </div>
