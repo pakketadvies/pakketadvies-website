@@ -60,7 +60,10 @@ export default function ContractViewer({
   verbruikData,
   gegevensData,
 }: ContractViewerProps) {
-  const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(null)
+  // Gebruik opgeslagen breakdown uit verbruik_data (vastgelegd bij aanvraag)
+  // Dit zorgt ervoor dat de berekening altijd hetzelfde blijft, ook als tarieven later veranderen
+  const opgeslagenBreakdown = verbruikData?.breakdown as KostenBreakdown | null
+  const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(opgeslagenBreakdown || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [openAccordion, setOpenAccordion] = useState<'prijsdetails' | 'voorwaarden' | 'over' | 'contractinfo' | null>(null)
@@ -125,30 +128,44 @@ export default function ContractViewer({
 
   // Format currency
   const formatCurrency = (amount: number) => {
+    // Altijd afronden zonder decimalen voor consistentie met email
     return new Intl.NumberFormat('nl-NL', {
       style: 'currency',
       currency: 'EUR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount)
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(amount))
   }
 
-  // Calculate costs via API - automatically on mount if no maandbedrag
+  // Gebruik opgeslagen breakdown bij mount (geen nieuwe berekening nodig)
   useEffect(() => {
-    // Always calculate on mount to get maandbedrag/jaarbedrag
-    if (!breakdown && !loading && verbruikData) {
+    // Gebruik opgeslagen breakdown uit verbruik_data (vastgelegd bij aanvraag)
+    if (opgeslagenBreakdown && !breakdown) {
+      setBreakdown(opgeslagenBreakdown)
+    } else if (!breakdown && !loading && verbruikData && !opgeslagenBreakdown) {
+      // Fallback: alleen berekenen als er geen opgeslagen breakdown is
       berekenKosten()
     }
   }, []) // Only run once on mount
 
-  // Also calculate when prijsdetails is opened (if not already calculated)
+  // Also calculate when prijsdetails is opened (if not already calculated and no opgeslagen breakdown)
   useEffect(() => {
-    if (openAccordion === 'prijsdetails' && !breakdown && !loading) {
+    if (openAccordion === 'prijsdetails' && !breakdown && !loading && !opgeslagenBreakdown) {
       berekenKosten()
     }
   }, [openAccordion])
 
   const berekenKosten = async () => {
+    // Gebruik altijd de opgeslagen breakdown uit verbruik_data
+    // Dit zorgt ervoor dat de berekening altijd hetzelfde blijft, ook als tarieven later veranderen
+    if (opgeslagenBreakdown) {
+      setBreakdown(opgeslagenBreakdown)
+      setError(null)
+      return
+    }
+    
+    // Fallback: alleen als er geen opgeslagen breakdown is, bereken opnieuw
+    // Dit zou niet moeten gebeuren voor nieuwe aanvragen, maar is een veiligheidsnet
     setLoading(true)
     setError(null)
 
@@ -276,9 +293,11 @@ export default function ContractViewer({
   const verbruikElektriciteitTotaal = elektriciteitNormaal + elektriciteitDal
   const verbruikGas = verbruikData?.gasJaar || verbruikData?.gas || 0
 
-  // Get costs - use breakdown if available (from prijsdetails calculation), otherwise from verbruik_data
-  const maandbedrag = breakdown?.totaal?.maandExclBtw || verbruikData?.maandbedrag || 0
-  const jaarbedrag = breakdown?.totaal?.jaarExclBtw || verbruikData?.jaarbedrag || (maandbedrag > 0 ? maandbedrag * 12 : 0)
+  // Get costs - use opgeslagen breakdown from verbruik_data (vastgelegd bij aanvraag)
+  // Dit zorgt ervoor dat het maandbedrag altijd hetzelfde blijft, ook als tarieven later veranderen
+  const opgeslagenBreakdown = verbruikData?.breakdown
+  const maandbedrag = verbruikData?.maandbedrag || (opgeslagenBreakdown?.totaal ? Math.round(opgeslagenBreakdown.totaal.maandInclBtw) : 0)
+  const jaarbedrag = verbruikData?.jaarbedrag || (opgeslagenBreakdown?.totaal ? Math.round(opgeslagenBreakdown.totaal.jaarInclBtw) : (maandbedrag > 0 ? maandbedrag * 12 : 0))
   const besparing = verbruikData?.besparing
 
   // Status badge

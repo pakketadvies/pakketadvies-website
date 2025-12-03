@@ -270,7 +270,9 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
           
           if (result.success && result.breakdown) {
             jaarbedrag = Math.round(result.breakdown.totaal.jaarExclBtw)
-            maandbedrag = Math.round(result.breakdown.totaal.maandExclBtw)
+            // Gebruik maandInclBtw voor consistentie (zoals in create route)
+            maandbedrag = Math.round(result.breakdown.totaal.maandInclBtw)
+            jaarbedrag = Math.round(result.breakdown.totaal.jaarInclBtw)
             console.log('✅ [sendBevestigingEmail] Costs calculated (fallback):', { maandbedrag, jaarbedrag })
           } else {
             console.warn('⚠️ [sendBevestigingEmail] Calculation failed:', result.error)

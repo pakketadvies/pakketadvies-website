@@ -133,11 +133,18 @@ export async function POST(request: Request) {
             const berekenResult = await calculateContractCosts(berekenInput, supabase)
             
             if (berekenResult.success && berekenResult.breakdown) {
-              verbruikDataMetBedragen.maandbedrag = Math.round(berekenResult.breakdown.totaal.maandExclBtw)
-              verbruikDataMetBedragen.jaarbedrag = Math.round(berekenResult.breakdown.totaal.jaarExclBtw)
-              console.log('✅ [create] Maandbedrag/jaarbedrag calculated:', {
+              // Sla afgeronde bedragen op (zonder decimalen)
+              verbruikDataMetBedragen.maandbedrag = Math.round(berekenResult.breakdown.totaal.maandInclBtw)
+              verbruikDataMetBedragen.jaarbedrag = Math.round(berekenResult.breakdown.totaal.jaarInclBtw)
+              
+              // Sla de volledige breakdown op voor gebruik in online viewer
+              // Dit zorgt ervoor dat de berekening altijd hetzelfde blijft, ook als tarieven later veranderen
+              verbruikDataMetBedragen.breakdown = berekenResult.breakdown
+              
+              console.log('✅ [create] Maandbedrag/jaarbedrag calculated and breakdown saved:', {
                 maandbedrag: verbruikDataMetBedragen.maandbedrag,
-                jaarbedrag: verbruikDataMetBedragen.jaarbedrag
+                jaarbedrag: verbruikDataMetBedragen.jaarbedrag,
+                hasBreakdown: !!verbruikDataMetBedragen.breakdown
               })
             } else {
               console.warn('⚠️ [create] Could not calculate maandbedrag/jaarbedrag:', berekenResult.error)
