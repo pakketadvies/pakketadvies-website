@@ -129,23 +129,6 @@ export default function ContractViewer({
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // Laad automatisch dynamische prijzen voor dynamische contracten (zowel desktop als mobiel)
-  useEffect(() => {
-    if (contract.type === 'dynamisch' && priceHistory.length === 0 && !loadingPrices && !currentPrices) {
-      loadPriceData()
-    }
-  }, [contract.type]) // Run when contract type is known
-
-  // On desktop, always keep both accordions open
-  useEffect(() => {
-    if (isDesktop) {
-      // Set prijsdetails as open (contractinfo will also be shown via isAccordionOpen)
-      if (openAccordion !== 'prijsdetails' && openAccordion !== 'contractinfo') {
-        setOpenAccordion('prijsdetails')
-      }
-    }
-  }, [isDesktop])
-
   // Format currency
   const formatCurrency = (amount: number) => {
     // Altijd afronden zonder decimalen voor consistentie met email
@@ -168,12 +151,25 @@ export default function ContractViewer({
     }
   }, []) // Only run once on mount
 
-  // Laad automatisch dynamische prijzen voor dynamische contracten
+  // Laad automatisch dynamische prijzen voor dynamische contracten bij mount
+  // Dit gebeurt direct wanneer het component wordt geladen, ongeacht andere state
   useEffect(() => {
-    if (contract.type === 'dynamisch' && !loadingPrices && priceHistory.length === 0 && !currentPrices) {
+    if (contract.type === 'dynamisch') {
+      console.log('📊 [ContractViewer] Dynamic contract detected, loading prices immediately...')
+      // Force load immediately, don't check current state
       loadPriceData()
     }
   }, [contract.type]) // Run when contract type is known
+
+  // On desktop, always keep both accordions open
+  useEffect(() => {
+    if (isDesktop) {
+      // Set prijsdetails as open (contractinfo will also be shown via isAccordionOpen)
+      if (openAccordion !== 'prijsdetails' && openAccordion !== 'contractinfo') {
+        setOpenAccordion('prijsdetails')
+      }
+    }
+  }, [isDesktop])
 
   // Also calculate when prijsdetails is opened (if not already calculated and no opgeslagen breakdown)
   useEffect(() => {
@@ -669,8 +665,13 @@ function DynamischContractInfo({
   const maxPrijsCap = details.max_prijs_cap
 
   // Calculate current rates (spot + opslag)
-  const huidigTariefElektriciteit = currentPrices ? (currentPrices.electricityDay || 0) + opslagElektriciteit : null
-  const huidigTariefGas = currentPrices ? (currentPrices.gas || 0) + opslagGas : null
+  // Only calculate if we have valid prices (not null/undefined and not 0)
+  const huidigTariefElektriciteit = currentPrices && currentPrices.electricityDay !== undefined && currentPrices.electricityDay !== null 
+    ? (currentPrices.electricityDay + opslagElektriciteit) 
+    : null
+  const huidigTariefGas = currentPrices && currentPrices.gas !== undefined && currentPrices.gas !== null
+    ? (currentPrices.gas + opslagGas)
+    : null
 
   // Calculate averages from history
   const gemiddeldeElektriciteit = priceHistory.length > 0 
@@ -725,7 +726,7 @@ function DynamischContractInfo({
                     <span className="font-semibold text-right">{formatCurrency(huidigTariefElektriciteit)}/kWh</span>
                   </div>
                   <div className="text-xs text-gray-500 pl-5 space-y-0.5">
-                    <div>Spot: {formatCurrency(currentPrices.electricityDay || 0)}/kWh</div>
+                    <div>Spot: {formatCurrency(currentPrices?.electricityDay || 0)}/kWh</div>
                     <div>Opslag: +{formatCurrency(opslagElektriciteit)}/kWh</div>
                   </div>
                 </>
@@ -739,7 +740,7 @@ function DynamischContractInfo({
                     <span className="font-semibold text-right">{formatCurrency(huidigTariefGas)}/m³</span>
                   </div>
                   <div className="text-xs text-gray-500 pl-5 space-y-0.5">
-                    <div>Spot: {formatCurrency(currentPrices.gas || 0)}/m³</div>
+                    <div>Spot: {formatCurrency(currentPrices?.gas || 0)}/m³</div>
                     <div>Opslag: +{formatCurrency(opslagGas)}/m³</div>
                   </div>
                 </>
