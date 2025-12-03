@@ -627,9 +627,17 @@ export function QuickCalculator() {
 
       for (const fieldName of errorFields) {
         // Check of er een error is voor dit veld
-        const hasError = fieldName.includes('.') 
-          ? errors.leveringsadressen?.[0]?.[fieldName.split('.')[2] as keyof typeof errors.leveringsadressen[0]]
-          : errors[fieldName as keyof typeof errors]
+        let hasError: any = false
+        
+        if (fieldName.includes('.')) {
+          // Nested field (leveringsadressen.0.postcode, etc.)
+          const errorObj = (errors as any).leveringsadressen?.[0]
+          const nestedField = fieldName.split('.')[2]
+          hasError = errorObj?.[nestedField]
+        } else {
+          // Top-level field
+          hasError = errors[fieldName as keyof typeof errors]
+        }
         
         if (hasError) {
           const element = document.querySelector(`input[name="${fieldName}"]`) as HTMLElement
