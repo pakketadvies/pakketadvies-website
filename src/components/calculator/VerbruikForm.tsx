@@ -610,22 +610,50 @@ export function VerbruikForm() {
   const scrollToFirstError = useCallback(() => {
     // Wacht even zodat errors gerenderd zijn
     setTimeout(() => {
-      // Zoek eerste error veld in volgorde van belangrijkheid
+      // Zoek eerste error message element (meest betrouwbaar)
+      const errorMessage = document.querySelector('.text-red-600') as HTMLElement
+      if (errorMessage) {
+        // Zoek het dichtstbijzijnde input veld
+        const formGroup = errorMessage.closest('.space-y-2, .space-y-3, .space-y-4, div') as HTMLElement
+        if (formGroup) {
+          const input = formGroup.querySelector('input, textarea, select') as HTMLElement
+          if (input) {
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // Geef visuele feedback met een korte highlight
+            const originalBoxShadow = input.style.boxShadow
+            input.style.transition = 'box-shadow 0.3s'
+            input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
+            setTimeout(() => {
+              input.style.boxShadow = originalBoxShadow
+            }, 2000)
+            return
+          }
+        }
+        // Fallback: scroll naar error message zelf
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        return
+      }
+
+      // Fallback: zoek eerste error veld via name attributen
       const errorFields = [
-        { name: 'elektriciteitNormaal', selector: 'input[name="elektriciteitNormaal"]' },
-        { name: 'elektriciteitDal', selector: 'input[name="elektriciteitDal"]' },
-        { name: 'gasJaar', selector: 'input[name="gasJaar"]' },
-        { name: 'terugleveringJaar', selector: 'input[name="terugleveringJaar"]' },
-        { name: 'postcode', selector: 'input[name="leveringsadressen.0.postcode"]' },
-        { name: 'huisnummer', selector: 'input[name="leveringsadressen.0.huisnummer"]' },
+        'elektriciteitNormaal',
+        'elektriciteitDal',
+        'gasJaar',
+        'terugleveringJaar',
+        'leveringsadressen.0.postcode',
+        'leveringsadressen.0.huisnummer',
       ]
 
-      for (const field of errorFields) {
-        if (errors[field.name as keyof typeof errors]) {
-          const element = document.querySelector(field.selector) as HTMLElement
+      for (const fieldName of errorFields) {
+        // Check of er een error is voor dit veld
+        const hasError = fieldName.includes('.') 
+          ? errors.leveringsadressen?.[0]?.[fieldName.split('.')[2] as keyof typeof errors.leveringsadressen[0]]
+          : errors[fieldName as keyof typeof errors]
+        
+        if (hasError) {
+          const element = document.querySelector(`input[name="${fieldName}"]`) as HTMLElement
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            // Geef visuele feedback met een korte highlight
             const originalBoxShadow = element.style.boxShadow
             element.style.transition = 'box-shadow 0.3s'
             element.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
@@ -633,40 +661,6 @@ export function VerbruikForm() {
               element.style.boxShadow = originalBoxShadow
             }, 2000)
             break
-          }
-        }
-      }
-      
-      // Check ook leveringsadressen errors
-      if (errors.leveringsadressen?.[0]) {
-        const postcodeError = errors.leveringsadressen[0].postcode
-        const huisnummerError = errors.leveringsadressen[0].huisnummer
-        
-        if (postcodeError) {
-          const element = document.querySelector('input[name="leveringsadressen.0.postcode"]') as HTMLElement
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            const originalBoxShadow = element.style.boxShadow
-            element.style.transition = 'box-shadow 0.3s'
-            element.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
-            setTimeout(() => {
-              element.style.boxShadow = originalBoxShadow
-            }, 2000)
-            return
-          }
-        }
-        
-        if (huisnummerError) {
-          const element = document.querySelector('input[name="leveringsadressen.0.huisnummer"]') as HTMLElement
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            const originalBoxShadow = element.style.boxShadow
-            element.style.transition = 'box-shadow 0.3s'
-            element.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
-            setTimeout(() => {
-              element.style.boxShadow = originalBoxShadow
-            }, 2000)
-            return
           }
         }
       }
