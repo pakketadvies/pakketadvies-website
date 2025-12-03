@@ -132,6 +132,46 @@ export function PrijzenGrafiek({
   const todayStr = new Date().toISOString().split('T')[0]
   const isToday = selectedDateStr === todayStr
 
+  // Helper function to normalize date strings (used in multiple places)
+  const normalizeDate = (dateInput: any): string => {
+    if (typeof dateInput === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+        return dateInput
+      }
+      const parsed = new Date(dateInput)
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().split('T')[0]
+      }
+      return dateInput
+    }
+    if (dateInput instanceof Date) {
+      return dateInput.toISOString().split('T')[0]
+    }
+    const parsed = new Date(dateInput)
+    return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0]
+  }
+
+  // Calculate latest available data date (for navigation limits)
+  const latestDataDate = useMemo(() => {
+    if (!data || data.length === 0) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      return today
+    }
+    const dates = data.map(item => {
+      const recordDate = normalizeDate(item.datum)
+      return recordDate ? new Date(recordDate + 'T00:00:00Z') : null
+    }).filter(d => d !== null) as Date[]
+    if (dates.length === 0) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      return today
+    }
+    const latest = new Date(Math.max(...dates.map(d => d.getTime())))
+    latest.setHours(0, 0, 0, 0)
+    return latest
+  }, [data])
+
   // Format chart data
   const chartData = useMemo(() => {
     // Debug logging for week/month/year views
@@ -246,29 +286,6 @@ export function PrijzenGrafiek({
     
     // Fallback to daily data for week/month/year views
     if (!data || data.length === 0) return []
-
-    // Helper function to normalize date strings
-    const normalizeDate = (dateInput: any): string => {
-      if (typeof dateInput === 'string') {
-        // If it's already a string in YYYY-MM-DD format, return it
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
-          return dateInput
-        }
-        // Try to parse it
-        const parsed = new Date(dateInput)
-        if (!isNaN(parsed.getTime())) {
-          return parsed.toISOString().split('T')[0]
-        }
-        return dateInput
-      }
-      // If it's a Date object, convert to string
-      if (dateInput instanceof Date) {
-        return dateInput.toISOString().split('T')[0]
-      }
-      // Fallback: try to create a Date
-      const parsed = new Date(dateInput)
-      return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0]
-    }
     
     // Helper functions to calculate period boundaries based on selectedDate
     const getWeekStart = (date: Date): Date => {
@@ -310,37 +327,41 @@ export function PrijzenGrafiek({
     if (graphView === 'week') {
       periodStart = getWeekStart(selectedDate)
       periodEnd = getWeekEnd(selectedDate)
-      // For current week, include today
       const todayStr = today.toISOString().split('T')[0]
       const selectedDateStr = selectedDate.toISOString().split('T')[0]
       const weekStartStr = periodStart.toISOString().split('T')[0]
       const weekEndStr = periodEnd.toISOString().split('T')[0]
       
-      // If current week is selected, make sure today is included
-      if (selectedDateStr >= weekStartStr && selectedDateStr <= weekEndStr && todayStr >= weekStartStr && todayStr <= weekEndStr) {
-        // Current week - include today
-        if (periodEnd > today) {
-          periodEnd = today
+      // Check if this is the current week (today is within this week)
+      const isCurrentWeek = todayStr >= weekStartStr && todayStr <= weekEndStr
+      
+      if (isCurrentWeek) {
+        // Current week - include today and tomorrow if data is available
+        // Don't limit to today, but extend to latest available data (which includes tomorrow)
+        if (latestDataDate > periodEnd) {
+          periodEnd = latestDataDate
         }
       } else {
-        // Past week - don't show future dates
-        if (periodEnd > today) {
-          periodEnd = today
+        // Past week - show full week, don't limit to today
+        // Only limit if the week extends beyond available data
+        if (periodEnd > latestDataDate) {
+          periodEnd = latestDataDate
         }
       }
     } else if (graphView === 'maand') {
       periodStart = getMonthStart(selectedDate)
       periodEnd = getMonthEnd(selectedDate)
-      // Don't show future dates
-      if (periodEnd > today) {
-        periodEnd = today
+      // Always show full month (1st to last day), don't limit to today
+      // Only limit if the month extends beyond available data
+      if (periodEnd > latestDataDate) {
+        periodEnd = latestDataDate
       }
     } else if (graphView === 'jaar') {
       periodStart = getYearStart(selectedDate)
       periodEnd = getYearEnd(selectedDate)
-      // Don't show future dates
-      if (periodEnd > today) {
-        periodEnd = today
+      // Only limit if the year extends beyond available data
+      if (periodEnd > latestDataDate) {
+        periodEnd = latestDataDate
       }
     } else {
       // For day view, use selectedDate
@@ -728,8 +749,8 @@ export function PrijzenGrafiek({
       switch (graphView) {
         case 'dag':
           date.setUTCDate(date.getUTCDate() + 1)
-          // Don't allow future dates
-          if (date > today) {
+          // Allow navigation to tomorrow if data is available
+          if (date > latestDataDate) {
             return
           }
           break
@@ -740,8 +761,8 @@ export function PrijzenGrafiek({
           const monday = new Date(date)
           monday.setDate(diff)
           monday.setUTCDate(monday.getUTCDate() + 7) // Next week Monday
-          // Don't allow future weeks
-          if (monday > today) {
+          // Only prevent if week extends beyond available data
+          if (monday > latestDataDate) {
             return
           }
           date.setTime(monday.getTime())
@@ -751,8 +772,8 @@ export function PrijzenGrafiek({
           // Go to first day of next month
           date.setUTCMonth(date.getUTCMonth() + 1)
           date.setUTCDate(1)
-          // Don't allow future months
-          if (date > today) {
+          // Only prevent if month extends beyond available data
+          if (date > latestDataDate) {
             return
           }
           break
@@ -762,8 +783,8 @@ export function PrijzenGrafiek({
           date.setUTCFullYear(date.getUTCFullYear() + 1)
           date.setUTCMonth(0)
           date.setUTCDate(1)
-          // Don't allow future years
-          if (date > today) {
+          // Only prevent if year extends beyond available data
+          if (date > latestDataDate) {
             return
           }
           break
@@ -994,7 +1015,6 @@ export function PrijzenGrafiek({
             </div>
             <button
               onClick={() => navigateDate('next')}
-              disabled={isToday && graphView === 'dag'}
               className="p-1.5 md:p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Volgende"
             >

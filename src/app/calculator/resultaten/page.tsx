@@ -531,8 +531,6 @@ function ResultatenContent() {
       // Bereken EXACTE kosten voor alle contracten via API
       // Dit voorkomt dat elke card apart een API call moet doen
       const postcode = data.leveringsadressen?.[0]?.postcode || '0000AA'
-      const aansluitwaardeElektriciteit = data.aansluitwaardeElektriciteit || '3x25A'
-      const aansluitwaardeGas = data.aansluitwaardeGas || 'G6'
       
       // Debug log
       console.log('🔧 Aansluitwaarden voor berekening:', {
