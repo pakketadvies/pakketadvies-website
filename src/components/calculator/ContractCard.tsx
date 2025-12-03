@@ -217,7 +217,7 @@ export default function ContractCard({
 
       <CardContent className="pt-6">
         {/* Leverancier met logo */}
-        <div className="mb-6 flex items-start gap-4 pr-24 sm:pr-32">
+        <div className="mb-6 flex items-start gap-4">
           {/* Logo */}
           {contract.leverancier.logo && (
             <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg border-2 border-gray-100 p-2 flex items-center justify-center">
@@ -230,11 +230,11 @@ export default function ContractCard({
           )}
           
           {/* Naam en details */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1 break-words">
+          <div className="flex-1 min-w-0 pr-2">
+            <h3 className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1 truncate" title={contract.leverancier.naam}>
               {contract.leverancier.naam}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 line-clamp-2">
               {contract.looptijd 
                 ? `Vast contract • ${contract.looptijd} jaar`
                 : contract.type === 'dynamisch'
