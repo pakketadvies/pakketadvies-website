@@ -253,3 +253,106 @@ export async function berekenEnergieKosten(
   }
 }
 
+/**
+ * Interface voor Eneco modeltarieven
+ */
+export interface ModelTarieven {
+  tarief_elektriciteit_normaal: number // €/kWh (inclusief EB en BTW)
+  tarief_elektriciteit_dal: number     // €/kWh (inclusief EB en BTW)
+  tarief_elektriciteit_enkel: number  // €/kWh (inclusief EB en BTW)
+  tarief_gas: number                   // €/m³ (inclusief EB en BTW)
+  vastrecht_stroom_maand: number      // €/maand (inclusief BTW)
+  vastrecht_gas_maand: number          // €/maand (inclusief BTW)
+}
+
+/**
+ * Haal actieve Eneco modeltarieven op uit Supabase
+ * Deze tarieven zijn inclusief Energiebelasting en BTW
+ */
+export async function getModelTarieven(
+  supabase: any
+): Promise<ModelTarieven | null> {
+  const { data, error } = await supabase
+    .from('model_tarieven')
+    .select('*')
+    .eq('actief', true)
+    .single()
+
+  if (error || !data) {
+    console.error('Error fetching model tarieven:', error)
+    return null
+  }
+
+  return {
+    tarief_elektriciteit_normaal: parseFloat(data.tarief_elektriciteit_normaal),
+    tarief_elektriciteit_dal: parseFloat(data.tarief_elektriciteit_dal),
+    tarief_elektriciteit_enkel: parseFloat(data.tarief_elektriciteit_enkel),
+    tarief_gas: parseFloat(data.tarief_gas),
+    vastrecht_stroom_maand: parseFloat(data.vastrecht_stroom_maand),
+    vastrecht_gas_maand: parseFloat(data.vastrecht_gas_maand),
+  }
+}
+
+/**
+ * Bereken Eneco modelcontract kosten (inclusief EB en BTW, exclusief netbeheer)
+ * Deze functie berekent de totale kosten voor het Eneco modelcontract
+ * als baseline voor besparingsberekening
+ * 
+ * Let op: Netbeheerkosten worden NIET meegenomen omdat deze per netbeheerder verschillen
+ * en al worden meegenomen in de contractkosten berekening. De besparing wordt berekend
+ * door de Eneco leverancierskosten (incl. EB en BTW) te vergelijken met de contractkosten.
+ */
+export async function berekenEnecoModelContractKosten(
+  verbruikElektriciteitNormaal: number, // kWh/jaar
+  verbruikElektriciteitDal: number,     // kWh/jaar
+  verbruikGas: number,                    // m³/jaar
+  heeftEnkeleMeter: boolean,
+  supabase: any
+): Promise<{ jaarbedrag: number; maandbedrag: number } | null> {
+  const modelTarieven = await getModelTarieven(supabase)
+  
+  if (!modelTarieven) {
+    return null
+  }
+
+  // Bepaal welk tarief te gebruiken voor elektriciteit
+  let tariefElektriciteit: number
+  if (heeftEnkeleMeter) {
+    tariefElektriciteit = modelTarieven.tarief_elektriciteit_enkel
+  } else {
+    // Voor dubbeltarief: gebruik gewogen gemiddelde van normaal en dal
+    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    if (totaalElektriciteit > 0) {
+      const gewichtNormaal = verbruikElektriciteitNormaal / totaalElektriciteit
+      const gewichtDal = verbruikElektriciteitDal / totaalElektriciteit
+      tariefElektriciteit = 
+        (modelTarieven.tarief_elektriciteit_normaal * gewichtNormaal) +
+        (modelTarieven.tarief_elektriciteit_dal * gewichtDal)
+    } else {
+      tariefElektriciteit = modelTarieven.tarief_elektriciteit_normaal
+    }
+  }
+
+  // Bereken leverancierskosten (tarieven zijn inclusief EB en BTW)
+  const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+  const leverancierElektriciteit = totaalElektriciteit * tariefElektriciteit
+  const leverancierGas = verbruikGas * modelTarieven.tarief_gas
+  
+  // Vastrecht per jaar (maandbedrag * 12)
+  const vastrechtStroomJaar = modelTarieven.vastrecht_stroom_maand * 12
+  const vastrechtGasJaar = modelTarieven.vastrecht_gas_maand * 12
+  
+  // Totaal per jaar (inclusief EB en BTW, exclusief netbeheer)
+  // Netbeheer wordt niet meegenomen omdat dit per netbeheerder verschilt
+  // en al wordt meegenomen in de contractkosten berekening
+  const jaarbedrag = leverancierElektriciteit + leverancierGas + vastrechtStroomJaar + vastrechtGasJaar
+  
+  // Maandbedrag
+  const maandbedrag = jaarbedrag / 12
+
+  return {
+    jaarbedrag: Math.round(jaarbedrag),
+    maandbedrag: Math.round(maandbedrag),
+  }
+}
+

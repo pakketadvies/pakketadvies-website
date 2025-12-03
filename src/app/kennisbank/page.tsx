@@ -38,16 +38,16 @@ const categories = [
 // Convert articles from data to format needed for display
 // Add special artikel for energieprijzen page
 const specialArticles = [
-  {
-    title: 'Energieprijzen - Inzicht in de markt',
-    excerpt: 'Bekijk actuele en historische marktprijzen voor elektriciteit en gas. Interactieve grafieken en gedetailleerde prijstabellen.',
-    category: 'Markt',
+    {
+      title: 'Energieprijzen - Inzicht in de markt',
+      excerpt: 'Bekijk actuele en historische marktprijzen voor elektriciteit en gas. Interactieve grafieken en gedetailleerde prijstabellen.',
+      category: 'Markt',
     date: '2025-11-30', // ISO format for proper sorting
     dateDisplay: '30 november 2025',
-    readTime: '3 min',
-    href: '/kennisbank/energieprijzen',
-    featured: true,
-  },
+      readTime: '3 min',
+      href: '/kennisbank/energieprijzen',
+      featured: true,
+    },
 ]
 
 const articles = [
@@ -374,7 +374,7 @@ export default function KennisbankPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock weight="duotone" className="w-4 h-4" />
-                        <span>{article.readTime} leestijd</span>
+                      <span>{article.readTime} leestijd</span>
                       </div>
                     </div>
                     <Link
@@ -511,7 +511,7 @@ export default function KennisbankPage() {
               Alles wat je wilt weten over energiecontracten en energierekeningen
             </p>
           </div>
-
+          
           <div className="space-y-4">
             {faqItems.map((item, index) => (
               <Card key={index} className="hover-lift">

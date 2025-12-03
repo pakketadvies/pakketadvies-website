@@ -26,7 +26,8 @@ const berekenContractKostenVereenvoudigd = (
   heeftEnkeleMeter: boolean = false,
   terugleveringJaar: number = 0, // NIEUW: voor saldering
   aansluitwaardeElektriciteit?: string, // NIEUW: voor grootverbruik check
-  aansluitwaardeGas?: string // NIEUW: voor grootverbruik check
+  aansluitwaardeGas?: string, // NIEUW: voor grootverbruik check
+  enecoModelMaandbedrag?: number | null // NIEUW: Eneco modelcontract maandbedrag voor besparingsberekening
 ): { maandbedrag: number; jaarbedrag: number; besparing: number } => {
   let totaalJaar = 0
   
@@ -274,9 +275,17 @@ const berekenContractKostenVereenvoudigd = (
     
     const maandbedrag = Math.round(totaalJaar / 12)
     const jaarbedrag = Math.round(totaalJaar)
-    const totaalElektriciteitVoorBesparing = verbruikElektriciteitNormaal + verbruikElektriciteitDal
-    const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteitVoorBesparing * 0.35) + (verbruikGas * 1.50) + 700) / 12)
-    const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+    
+    // Bereken besparing op basis van Eneco modeltarieven
+    let besparing = 0
+    if (enecoModelMaandbedrag && enecoModelMaandbedrag > 0) {
+      besparing = Math.max(0, enecoModelMaandbedrag - maandbedrag)
+    } else {
+      // Fallback naar oude berekening als Eneco tarieven niet beschikbaar zijn
+      const totaalElektriciteitVoorBesparing = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteitVoorBesparing * 0.35) + (verbruikGas * 1.50) + 700) / 12)
+      besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+    }
     
     return { maandbedrag, jaarbedrag, besparing }
   }
@@ -284,10 +293,16 @@ const berekenContractKostenVereenvoudigd = (
   const maandbedrag = Math.round(totaalJaar / 12)
   const jaarbedrag = Math.round(totaalJaar)
   
-  // Calculate besparing vs average of all contracts (simple estimation)
-  const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
-  const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35) + (verbruikGas * 1.50) + 700) / 12)
-  const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+  // Bereken besparing op basis van Eneco modeltarieven
+  let besparing = 0
+  if (enecoModelMaandbedrag && enecoModelMaandbedrag > 0) {
+    besparing = Math.max(0, enecoModelMaandbedrag - maandbedrag)
+  } else {
+    // Fallback naar oude berekening als Eneco tarieven niet beschikbaar zijn
+    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35) + (verbruikGas * 1.50) + 700) / 12)
+    besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+  }
 
   return { maandbedrag, jaarbedrag, besparing }
 }
@@ -301,7 +316,8 @@ const transformContractToOptie = (
   heeftEnkeleMeter: boolean = false,
   terugleveringJaar: number = 0, // NIEUW
   aansluitwaardeElektriciteit?: string, // NIEUW: voor grootverbruik check
-  aansluitwaardeGas?: string // NIEUW: voor grootverbruik check
+  aansluitwaardeGas?: string, // NIEUW: voor grootverbruik check
+  enecoModelMaandbedrag?: number | null // NIEUW: Eneco modelcontract maandbedrag voor besparingsberekening
 ): ContractOptie | null => {
   // Maatwerkcontracten worden nu getoond, maar worden gefilterd op min_verbruik in loadResultaten
 
@@ -323,7 +339,8 @@ const transformContractToOptie = (
       heeftEnkeleMeter,
       terugleveringJaar, // NIEUW: teruglevering meegeven
       aansluitwaardeElektriciteit, // NIEUW: aansluitwaarde elektriciteit
-      aansluitwaardeGas // NIEUW: aansluitwaarde gas
+      aansluitwaardeGas, // NIEUW: aansluitwaarde gas
+      enecoModelMaandbedrag // NIEUW: Eneco modeltarieven voor besparingsberekening
     )
     maandbedrag = berekend.maandbedrag
     jaarbedrag = berekend.jaarbedrag
@@ -344,10 +361,16 @@ const transformContractToOptie = (
   const contractRating = details.rating || 0
   const contractAantalReviews = details.aantal_reviews || 0
   
-  // Calculate besparing
-  const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
-  const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35) + (verbruikGas * 1.50) + 700) / 12)
-  const besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+  // Calculate besparing op basis van Eneco modeltarieven
+  let besparing = 0
+  if (enecoModelMaandbedrag && enecoModelMaandbedrag > 0) {
+    besparing = Math.max(0, enecoModelMaandbedrag - maandbedrag)
+  } else {
+    // Fallback naar oude berekening als Eneco tarieven niet beschikbaar zijn
+    const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+    const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35) + (verbruikGas * 1.50) + 700) / 12)
+    besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
+  }
 
   return {
     id: contract.id,
@@ -470,6 +493,28 @@ function ResultatenContent() {
       const elektriciteitNormaal = data.elektriciteitNormaal
       const elektriciteitDal = data.elektriciteitDal || 0
       const totaalGas = data.gasJaar || 0
+      
+      // Haal Eneco modelcontract kosten op voor besparingsberekening
+      const heeftEnkeleMeter = data.meterType === 'enkel' || data.meterType === 'weet_niet'
+      let enecoModelMaandbedrag: number | null = null
+      try {
+        const enecoResponse = await fetch('/api/model-tarieven/bereken', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            verbruikElektriciteitNormaal: elektriciteitNormaal,
+            verbruikElektriciteitDal: elektriciteitDal,
+            verbruikGas: totaalGas,
+            heeftEnkeleMeter,
+          }),
+        })
+        if (enecoResponse.ok) {
+          const enecoData = await enecoResponse.json()
+          enecoModelMaandbedrag = enecoData.maandbedrag || null
+        }
+      } catch (err) {
+        console.warn('Kon Eneco modeltarieven niet ophalen voor besparingsberekening:', err)
+      }
       
       // Fetch active contracts from API
       const response = await fetch('/api/contracten/actief')
@@ -717,7 +762,8 @@ function ResultatenContent() {
           data?.heeftEnkeleMeter || false,
           data?.terugleveringJaar || 0, // NIEUW: teruglevering meegeven
           data?.aansluitwaardeElektriciteit, // NIEUW: aansluitwaarde elektriciteit
-          data?.aansluitwaardeGas // NIEUW: aansluitwaarde gas
+          data?.aansluitwaardeGas, // NIEUW: aansluitwaarde gas
+          enecoModelMaandbedrag // NIEUW: Eneco modeltarieven voor besparingsberekening
         ))
         .filter((c: any) => c !== null) as ContractOptie[]
       

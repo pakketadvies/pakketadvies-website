@@ -239,15 +239,16 @@ export default function ContractCard({
                 overflowWrap: 'break-word',
                 lineHeight: '1.3',
               }}
-            >
-              {(() => {
-                // Format leverancier naam: split camelCase (e.g., "NieuweStroom" -> "Nieuwe Stroom")
-                const naam = contract.leverancier.naam
-                // Insert space before capital letters that follow lowercase letters (camelCase detection)
-                const formatted = naam.replace(/([a-z])([A-Z])/g, '$1 $2')
-                return formatted
-              })()}
-            </h3>
+              dangerouslySetInnerHTML={{
+                __html: (() => {
+                  // Add <wbr> (word break opportunity) before capital letters that follow lowercase letters
+                  // This allows breaking "NieuweStroom" into "Nieuwe<br>Stroom" when card is narrow
+                  // but keeps it as "NieuweStroom" when card is wide enough
+                  const naam = contract.leverancier.naam
+                  return naam.replace(/([a-z])([A-Z])/g, '$1<wbr>$2')
+                })()
+              }}
+            />
             <p className="text-sm text-gray-600 line-clamp-2">
               {contract.looptijd 
                 ? `Vast contract • ${contract.looptijd} jaar`
