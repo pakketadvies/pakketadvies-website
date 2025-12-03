@@ -113,107 +113,128 @@ export async function GET(request: Request) {
 
     console.log('🔄 Starting daily price update...')
     
-    // Day-ahead pricing: fetch prices for TOMORROW
-    // Cron runs at 14:00 UTC, at which point tomorrow's prices are available
+    const supabase = await createClient()
     const today = new Date()
+    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
+    const todayStr = todayUTC.toISOString().split('T')[0]
+    
     const tomorrow = new Date(today)
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
-    // Set to UTC midnight to get the correct date
     const tomorrowUTC = new Date(Date.UTC(tomorrow.getUTCFullYear(), tomorrow.getUTCMonth(), tomorrow.getUTCDate()))
     const tomorrowStr = tomorrowUTC.toISOString().split('T')[0]
     
-    console.log(`📅 Today's date (UTC): ${today.toISOString().split('T')[0]}`)
-    console.log(`📅 Fetching day-ahead prices for: ${tomorrowStr} (tomorrow)`)
+    console.log(`📅 Today's date (UTC): ${todayStr}`)
+    console.log(`📅 Tomorrow's date (UTC): ${tomorrowStr}`)
     
-    // Note: targetDate will be set to todayStr if tomorrow's prices aren't available
-    // We'll check for existing prices after we know which date we're using
-
-    // Fetch tomorrow's day-ahead prices
-    console.log(`📡 Fetching day-ahead prices for ${tomorrowStr}...`)
-    let prices
-    let targetDate = tomorrowStr
+    const results: any = {
+      today: null,
+      tomorrow: null,
+    }
     
+    // STEP 1: Load tomorrow's prices (primary task)
+    console.log(`\n📡 STEP 1: Fetching tomorrow's prices (${tomorrowStr})...`)
     try {
-      prices = await fetchDayAheadPrices(tomorrowUTC)
+      const tomorrowPrices = await fetchDayAheadPrices(tomorrowUTC)
+      
+      // Check if tomorrow's prices already exist
+      const { data: existingTomorrow } = await supabase
+        .from('dynamic_prices')
+        .select('datum')
+        .eq('datum', tomorrowStr)
+        .single()
+      
+      if (existingTomorrow) {
+        console.log(`⏭️  Tomorrow's prices already exist, updating...`)
+      } else {
+        console.log(`📝 Creating new price record for tomorrow...`)
+      }
+      
+      await saveDynamicPrices({
+        electricity: tomorrowPrices.electricity,
+        gas: tomorrowPrices.gas,
+        source: tomorrowPrices.source,
+        date: tomorrowStr,
+      })
+      
+      results.tomorrow = {
+        success: true,
+        date: tomorrowStr,
+        electricity: tomorrowPrices.electricity.average,
+        gas: tomorrowPrices.gas.average,
+        source: tomorrowPrices.source,
+      }
+      
+      console.log(`✅ Successfully saved tomorrow's prices`)
+      console.log(`   Electricity: €${tomorrowPrices.electricity.average.toFixed(5)}/kWh`)
+      console.log(`   Gas: €${tomorrowPrices.gas.average.toFixed(5)}/m³`)
+      console.log(`   Source: ${tomorrowPrices.source}`)
     } catch (error: any) {
-      console.error('❌ Failed to fetch tomorrow\'s prices:', error.message)
-      console.log('⚠️  Tomorrow\'s prices may not be available yet. Trying today\'s prices as fallback...')
-      
-      // Fallback: try today's prices if tomorrow's aren't available yet
-      // This can happen if the cron job runs before 14:00 UTC
-      const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
-      const todayStr = todayUTC.toISOString().split('T')[0]
-      
-      try {
-        prices = await fetchDayAheadPrices(todayUTC)
-        targetDate = todayStr
-        console.log(`✅ Successfully fetched today's prices (${todayStr}) as fallback`)
-      } catch (fallbackError: any) {
-        console.error('❌ Fallback to today also failed:', fallbackError.message)
-        return NextResponse.json(
-          { 
-            success: false, 
-            error: `Failed to fetch prices: ${error.message}. Fallback also failed: ${fallbackError.message}`,
-            details: {
-              attemptedTomorrow: tomorrowStr,
-              attemptedToday: todayStr,
-              originalError: error.message,
-              fallbackError: fallbackError.message
-            }
-          },
-          { status: 500 }
-        )
+      console.error(`❌ Failed to fetch/save tomorrow's prices:`, error.message)
+      results.tomorrow = {
+        success: false,
+        error: error.message,
       }
     }
     
-    if (!prices) {
-      console.error('❌ No prices returned from API')
-      return NextResponse.json(
-        { success: false, error: 'No prices returned from API' },
-        { status: 500 }
-      )
-    }
-    
-    // Note: fetchDayAheadPrices now throws an error instead of returning FALLBACK
-    // So we don't need to check for FALLBACK here anymore
-
-    // Check if prices already exist for target date
-    const supabase = await createClient()
-    const { data: existing } = await supabase
+    // STEP 2: Check if today's prices exist, if not, load them
+    console.log(`\n📡 STEP 2: Checking if today's prices (${todayStr}) exist...`)
+    const { data: existingToday } = await supabase
       .from('dynamic_prices')
       .select('datum')
-      .eq('datum', targetDate)
+      .eq('datum', todayStr)
       .single()
-
-    if (existing) {
-      console.log(`⏭️  Prices for ${targetDate} already exist, updating...`)
+    
+    if (existingToday) {
+      console.log(`✅ Today's prices already exist in database, skipping...`)
+      results.today = {
+        success: true,
+        date: todayStr,
+        skipped: true,
+        reason: 'Already exists in database',
+      }
     } else {
-      console.log(`📝 Creating new price record for ${targetDate}...`)
+      console.log(`⚠️  Today's prices NOT found in database, fetching now...`)
+      try {
+        const todayPrices = await fetchDayAheadPrices(todayUTC)
+        
+        await saveDynamicPrices({
+          electricity: todayPrices.electricity,
+          gas: todayPrices.gas,
+          source: todayPrices.source,
+          date: todayStr,
+        })
+        
+        results.today = {
+          success: true,
+          date: todayStr,
+          electricity: todayPrices.electricity.average,
+          gas: todayPrices.gas.average,
+          source: todayPrices.source,
+        }
+        
+        console.log(`✅ Successfully saved today's prices`)
+        console.log(`   Electricity: €${todayPrices.electricity.average.toFixed(5)}/kWh`)
+        console.log(`   Gas: €${todayPrices.gas.average.toFixed(5)}/m³`)
+        console.log(`   Source: ${todayPrices.source}`)
+      } catch (error: any) {
+        console.error(`❌ Failed to fetch/save today's prices:`, error.message)
+        results.today = {
+          success: false,
+          error: error.message,
+        }
+      }
     }
-
-    // Save to database with target date (tomorrow if available, today as fallback)
-    console.log(`💾 Saving prices to database for ${targetDate}...`)
-    await saveDynamicPrices({
-      electricity: prices.electricity,
-      gas: prices.gas,
-      source: prices.source,
-      date: targetDate,
-    })
-
-    console.log(`✅ Successfully updated prices for ${targetDate}`)
-    console.log(`   Electricity: €${prices.electricity.average.toFixed(5)}/kWh`)
-    console.log(`   Gas: €${prices.gas.average.toFixed(5)}/m³`)
-    console.log(`   Source: ${prices.source}`)
-
+    
+    // Summary
+    const allSuccess = results.tomorrow?.success && (results.today?.success || results.today?.skipped)
+    
+    console.log(`\n📊 Summary:`)
+    console.log(`   Tomorrow (${tomorrowStr}): ${results.tomorrow?.success ? '✅' : '❌'}`)
+    console.log(`   Today (${todayStr}): ${results.today?.success || results.today?.skipped ? '✅' : '❌'}`)
+    
     return NextResponse.json({
-      success: true,
-      date: targetDate,
-      isTomorrow: targetDate === tomorrowStr,
-      prices: {
-        electricity: prices.electricity.average,
-        gas: prices.gas.average,
-      },
-      source: prices.source,
+      success: allSuccess,
+      results,
     })
   } catch (error: any) {
     console.error('❌ Error in cron job:', error)
