@@ -231,8 +231,22 @@ export default function ContractCard({
           
           {/* Naam en details */}
           <div className="flex-1 min-w-0 pr-2">
-            <h3 className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1 truncate" title={contract.leverancier.naam}>
-              {contract.leverancier.naam}
+            <h3 
+              className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1" 
+              title={contract.leverancier.naam}
+              style={{
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                lineHeight: '1.3',
+              }}
+            >
+              {(() => {
+                // Format leverancier naam: split camelCase (e.g., "NieuweStroom" -> "Nieuwe Stroom")
+                const naam = contract.leverancier.naam
+                // Insert space before capital letters that follow lowercase letters (camelCase detection)
+                const formatted = naam.replace(/([a-z])([A-Z])/g, '$1 $2')
+                return formatted
+              })()}
             </h3>
             <p className="text-sm text-gray-600 line-clamp-2">
               {contract.looptijd 
