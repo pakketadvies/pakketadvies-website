@@ -395,7 +395,11 @@ export default function TarievenPage() {
 
         {editingModelTarief ? (
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
-            <form action={saveModelTarief} className="space-y-6">
+            <form 
+              key={modelTarief?.id || modelTarief?.updated_at || 'new'} 
+              action={saveModelTarief} 
+              className="space-y-6"
+            >
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Elektriciteit tarieven */}
                 <div className="space-y-4">
