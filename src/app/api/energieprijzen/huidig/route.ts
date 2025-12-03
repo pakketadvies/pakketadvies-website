@@ -10,14 +10,39 @@ import { getCurrentDynamicPrices } from '@/lib/dynamic-pricing/database'
 export async function GET(request: Request) {
   try {
     const supabase = await createClient()
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date()
+    const todayStr = today.toISOString().split('T')[0]
     
-    // Get today's prices
-    const { data: todayData, error: todayError } = await supabase
+    // Day-ahead pricing: cron job saves tomorrow's prices
+    // So we need to check both today and tomorrow
+    const tomorrow = new Date(today)
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+    
+    // Get today's prices first
+    let todayData = null
+    const { data: todayDataResult, error: todayError } = await supabase
       .from('dynamic_prices')
       .select('*')
-      .eq('datum', today)
+      .eq('datum', todayStr)
       .single()
+    
+    if (todayDataResult) {
+      todayData = todayDataResult
+    } else {
+      // If today's data doesn't exist, try tomorrow (day-ahead pricing)
+      // This happens when cron job has already saved tomorrow's prices
+      const { data: tomorrowDataResult } = await supabase
+        .from('dynamic_prices')
+        .select('*')
+        .eq('datum', tomorrowStr)
+        .single()
+      
+      if (tomorrowDataResult) {
+        // Use tomorrow's data but treat it as "today" for display
+        todayData = tomorrowDataResult
+      }
+    }
     
     // Get yesterday's prices for comparison
     const yesterday = new Date()
