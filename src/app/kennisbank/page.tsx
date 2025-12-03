@@ -42,7 +42,8 @@ const specialArticles = [
     title: 'Energieprijzen - Inzicht in de markt',
     excerpt: 'Bekijk actuele en historische marktprijzen voor elektriciteit en gas. Interactieve grafieken en gedetailleerde prijstabellen.',
     category: 'Markt',
-    date: '30 november 2025',
+    date: '2025-11-30', // ISO format for proper sorting
+    dateDisplay: '30 november 2025',
     readTime: '3 min',
     href: '/kennisbank/energieprijzen',
     featured: true,
@@ -122,7 +123,8 @@ export default function KennisbankPage() {
     title: article.title,
     excerpt: article.description,
     category: article.category,
-    date: new Date(article.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
+    date: article.date, // Keep ISO format for sorting
+    dateDisplay: new Date(article.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
     readTime: article.readTime,
     href: `/kennisbank/${article.slug}`,
     featured: article.featured || false,
@@ -130,18 +132,24 @@ export default function KennisbankPage() {
 
   // Combine special articles with category articles
   // Filter special articles by category if needed
-  const specialArticlesFiltered = selectedCategory === 'all' || selectedCategory === 'Markt' 
-    ? specialArticles 
-    : []
+  const specialArticlesFiltered = (selectedCategory === 'all' || selectedCategory === 'Markt' 
+    ? specialArticles.map(article => ({
+        ...article,
+        dateDisplay: article.dateDisplay || article.date,
+      }))
+    : [])
 
   // Combine and sort: featured articles first, then by date (newest first)
   const allFilteredArticles = [...specialArticlesFiltered, ...categoryArticles].sort((a, b) => {
-    // Featured articles always first
+    // Featured articles always first - check this first
     if (a.featured && !b.featured) return -1
     if (!a.featured && b.featured) return 1
-    // Then sort by date (newest first)
+    // If both are featured or both are not, sort by date (newest first)
     const dateA = new Date(a.date).getTime()
     const dateB = new Date(b.date).getTime()
+    // If dates are invalid, put featured first
+    if (isNaN(dateA) && a.featured) return -1
+    if (isNaN(dateB) && b.featured) return 1
     return dateB - dateA
   })
 
@@ -345,7 +353,7 @@ export default function KennisbankPage() {
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
                       <div className="flex items-center gap-2">
                         <Calendar weight="duotone" className="w-4 h-4" />
-                        <span>{article.date}</span>
+                        <span>{(article as any).dateDisplay || article.date}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock weight="duotone" className="w-4 h-4" />
