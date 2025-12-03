@@ -99,29 +99,45 @@ export async function GET(request: Request) {
     console.log(`📅 Today's date (UTC): ${today.toISOString().split('T')[0]}`)
     console.log(`📅 Fetching day-ahead prices for: ${tomorrowStr} (tomorrow)`)
     
-    // Check if tomorrow's prices already exist
-    const supabase = await createClient()
-    const { data: existing } = await supabase
-      .from('dynamic_prices')
-      .select('datum')
-      .eq('datum', tomorrowStr)
-      .single()
-
-    if (existing) {
-      console.log(`⏭️  Prices for ${tomorrowStr} already exist, updating...`)
-    }
+    // Note: targetDate will be set to todayStr if tomorrow's prices aren't available
+    // We'll check for existing prices after we know which date we're using
 
     // Fetch tomorrow's day-ahead prices
     console.log(`📡 Fetching day-ahead prices for ${tomorrowStr}...`)
     let prices
+    let targetDate = tomorrowStr
+    
     try {
       prices = await fetchDayAheadPrices(tomorrowUTC)
     } catch (error: any) {
-      console.error('❌ Failed to fetch prices:', error.message)
-      return NextResponse.json(
-        { success: false, error: `Failed to fetch prices: ${error.message}` },
-        { status: 500 }
-      )
+      console.error('❌ Failed to fetch tomorrow\'s prices:', error.message)
+      console.log('⚠️  Tomorrow\'s prices may not be available yet. Trying today\'s prices as fallback...')
+      
+      // Fallback: try today's prices if tomorrow's aren't available yet
+      // This can happen if the cron job runs before 14:00 UTC
+      const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
+      const todayStr = todayUTC.toISOString().split('T')[0]
+      
+      try {
+        prices = await fetchDayAheadPrices(todayUTC)
+        targetDate = todayStr
+        console.log(`✅ Successfully fetched today's prices (${todayStr}) as fallback`)
+      } catch (fallbackError: any) {
+        console.error('❌ Fallback to today also failed:', fallbackError.message)
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: `Failed to fetch prices: ${error.message}. Fallback also failed: ${fallbackError.message}`,
+            details: {
+              attemptedTomorrow: tomorrowStr,
+              attemptedToday: todayStr,
+              originalError: error.message,
+              fallbackError: fallbackError.message
+            }
+          },
+          { status: 500 }
+        )
+      }
     }
     
     if (!prices) {
@@ -135,23 +151,38 @@ export async function GET(request: Request) {
     // Note: fetchDayAheadPrices now throws an error instead of returning FALLBACK
     // So we don't need to check for FALLBACK here anymore
 
-    // Save to database with tomorrow's date
-    console.log(`💾 Saving prices to database for ${tomorrowStr}...`)
+    // Check if prices already exist for target date
+    const supabase = await createClient()
+    const { data: existing } = await supabase
+      .from('dynamic_prices')
+      .select('datum')
+      .eq('datum', targetDate)
+      .single()
+
+    if (existing) {
+      console.log(`⏭️  Prices for ${targetDate} already exist, updating...`)
+    } else {
+      console.log(`📝 Creating new price record for ${targetDate}...`)
+    }
+
+    // Save to database with target date (tomorrow if available, today as fallback)
+    console.log(`💾 Saving prices to database for ${targetDate}...`)
     await saveDynamicPrices({
       electricity: prices.electricity,
       gas: prices.gas,
       source: prices.source,
-      date: tomorrowStr,
+      date: targetDate,
     })
 
-    console.log(`✅ Successfully updated day-ahead prices for ${tomorrowStr}`)
+    console.log(`✅ Successfully updated prices for ${targetDate}`)
     console.log(`   Electricity: €${prices.electricity.average.toFixed(5)}/kWh`)
     console.log(`   Gas: €${prices.gas.average.toFixed(5)}/m³`)
     console.log(`   Source: ${prices.source}`)
 
     return NextResponse.json({
       success: true,
-      date: tomorrowStr,
+      date: targetDate,
+      isTomorrow: targetDate === tomorrowStr,
       prices: {
         electricity: prices.electricity.average,
         gas: prices.gas.average,
