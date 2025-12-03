@@ -146,6 +146,12 @@ const berekenContractKostenVereenvoudigd = (
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
     
+    // BTW toevoegen (21% over totaal excl. BTW)
+    // BTW wordt berekend over: leverancierskosten + EB - vermindering + netbeheer
+    const totaalExclBtw = totaalJaar
+    const btw = totaalExclBtw * 0.21
+    totaalJaar = totaalExclBtw + btw
+    
   } else if (contract.type === 'dynamisch' && contract.details_dynamisch) {
     const { opslag_elektriciteit_normaal, opslag_gas, vaste_kosten_maand } = contract.details_dynamisch
     
@@ -180,6 +186,11 @@ const berekenContractKostenVereenvoudigd = (
     
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
+    
+    // BTW toevoegen (21% over totaal excl. BTW)
+    const totaalExclBtw = totaalJaar
+    const btw = totaalExclBtw * 0.21
+    totaalJaar = totaalExclBtw + btw
     
   } else if (contract.type === 'maatwerk' && contract.details_maatwerk) {
     // Maatwerkcontracten worden behandeld als vaste contracten
@@ -273,6 +284,11 @@ const berekenContractKostenVereenvoudigd = (
     const geschatteExtraKosten = ebElektriciteit + ebGas - vermindering + netbeheerKosten
     totaalJaar += geschatteExtraKosten
     
+    // BTW toevoegen (21% over totaal excl. BTW)
+    const totaalExclBtw = totaalJaar
+    const btw = totaalExclBtw * 0.21
+    totaalJaar = totaalExclBtw + btw
+    
     const maandbedrag = Math.round(totaalJaar / 12)
     const jaarbedrag = Math.round(totaalJaar)
     
@@ -289,6 +305,11 @@ const berekenContractKostenVereenvoudigd = (
     
     return { maandbedrag, jaarbedrag, besparing }
   }
+
+  // Fallback voor onbekende contract types: voeg BTW toe
+  const totaalExclBtw = totaalJaar
+  const btw = totaalExclBtw * 0.21
+  totaalJaar = totaalExclBtw + btw
 
   const maandbedrag = Math.round(totaalJaar / 12)
   const jaarbedrag = Math.round(totaalJaar)

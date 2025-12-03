@@ -62,6 +62,7 @@ interface ModelTarief {
   einddatum: string | null
   actief: boolean
   opmerkingen: string | null
+  updated_at?: string
 }
 
 export default function TarievenPage() {

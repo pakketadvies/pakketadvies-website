@@ -346,20 +346,25 @@ export async function berekenEnecoModelContractKosten(
   const vastrechtGasJaar = modelTarieven.vastrecht_gas_maand * 12
   
   // Netbeheerkosten toevoegen (vereenvoudigd, zoals op resultatenpagina)
+  // Netbeheerkosten zijn exclusief BTW in database, dus we moeten BTW toevoegen
   // Dit is een vereenvoudigde inschatting, de volledige berekening gebeurt in berekenEnergieKosten
-  let netbeheerElektriciteit = 430.00 // Standaard voor 3x25A
+  let netbeheerElektriciteitExclBtw = 430.00 // Standaard voor 3x25A (excl. BTW)
   if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
-    netbeheerElektriciteit = 0 // Grootverbruik apart
+    netbeheerElektriciteitExclBtw = 0 // Grootverbruik apart
   }
 
-  let netbeheerGas = verbruikGas > 0 ? 245.00 : 0 // Standaard voor G6
+  let netbeheerGasExclBtw = verbruikGas > 0 ? 245.00 : 0 // Standaard voor G6 (excl. BTW)
   if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
-    netbeheerGas = 0 // Grootverbruik apart
+    netbeheerGasExclBtw = 0 // Grootverbruik apart
   }
-  const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
   
-  // Totaal per jaar (inclusief EB, BTW en netbeheer)
-  const jaarbedrag = leverancierElektriciteit + leverancierGas + vastrechtStroomJaar + vastrechtGasJaar + netbeheerKosten
+  // BTW over netbeheerkosten (21%)
+  const netbeheerKostenExclBtw = netbeheerElektriciteitExclBtw + netbeheerGasExclBtw
+  const btwNetbeheer = netbeheerKostenExclBtw * 0.21
+  const netbeheerKostenInclBtw = netbeheerKostenExclBtw + btwNetbeheer
+  
+  // Totaal per jaar (inclusief EB, BTW en netbeheer incl. BTW)
+  const jaarbedrag = leverancierElektriciteit + leverancierGas + vastrechtStroomJaar + vastrechtGasJaar + netbeheerKostenInclBtw
   
   // Maandbedrag
   const maandbedrag = jaarbedrag / 12
