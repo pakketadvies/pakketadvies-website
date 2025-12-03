@@ -906,7 +906,7 @@ export function QuickCalculator() {
                 if (checked) {
                   // Bewaar de huidige waarde voordat we het op null zetten
                   const currentDal = watch('elektriciteitDal')
-                  if (currentDal !== null && currentDal !== undefined) {
+                  if (typeof currentDal === 'number' && !isNaN(currentDal)) {
                     savedElektriciteitDal.current = currentDal
                   }
                   setValue('elektriciteitDal', null)
