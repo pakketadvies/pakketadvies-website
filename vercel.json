@@ -11,6 +11,19 @@
       "schedule": "0 14 * * *"
     }
   ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.pakketadvies.nl"
+        }
+      ],
+      "destination": "https://pakketadvies.nl/$1",
+      "permanent": true
+    }
+  ]
 }
 
 
