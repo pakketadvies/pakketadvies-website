@@ -274,6 +274,8 @@ export interface ModelTarieven {
 export async function getModelTarieven(
   supabase: any
 ): Promise<ModelTarieven | null> {
+  console.log('🔍 [GET-MODEL-TARIEVEN] Ophalen actieve modeltarieven uit Supabase...')
+  
   const { data, error } = await supabase
     .from('model_tarieven')
     .select('*')
@@ -281,11 +283,11 @@ export async function getModelTarieven(
     .single()
 
   if (error || !data) {
-    console.error('Error fetching model tarieven:', error)
+    console.error('❌ [GET-MODEL-TARIEVEN] Error:', error)
     return null
   }
 
-  return {
+  const tarieven = {
     tarief_elektriciteit_normaal: parseFloat(data.tarief_elektriciteit_normaal),
     tarief_elektriciteit_dal: parseFloat(data.tarief_elektriciteit_dal),
     tarief_elektriciteit_enkel: parseFloat(data.tarief_elektriciteit_enkel),
@@ -293,6 +295,16 @@ export async function getModelTarieven(
     vastrecht_stroom_maand: parseFloat(data.vastrecht_stroom_maand),
     vastrecht_gas_maand: parseFloat(data.vastrecht_gas_maand),
   }
+  
+  console.log('✅ [GET-MODEL-TARIEVEN] Opgehaalde tarieven:', JSON.stringify(tarieven, null, 2))
+  console.log('📊 [GET-MODEL-TARIEVEN] Raw data uit Supabase:', {
+    id: data.id,
+    vastrecht_stroom_maand: data.vastrecht_stroom_maand,
+    vastrecht_gas_maand: data.vastrecht_gas_maand,
+    updated_at: data.updated_at,
+  })
+
+  return tarieven
 }
 
 /**
@@ -312,16 +324,29 @@ export async function berekenEnecoModelContractKosten(
   aansluitwaardeElektriciteit: string = '3x25A', // NIEUW: voor netbeheer
   aansluitwaardeGas: string = 'G6'              // NIEUW: voor netbeheer
 ): Promise<{ jaarbedrag: number; maandbedrag: number } | null> {
+  console.log('🔵 [BEREKEN-ENECO-MODEL] Start berekening met:', {
+    verbruikElektriciteitNormaal,
+    verbruikElektriciteitDal,
+    verbruikGas,
+    heeftEnkeleMeter,
+    aansluitwaardeElektriciteit,
+    aansluitwaardeGas,
+  })
+  
   const modelTarieven = await getModelTarieven(supabase)
   
   if (!modelTarieven) {
+    console.error('❌ [BEREKEN-ENECO-MODEL] Geen modeltarieven gevonden')
     return null
   }
+
+  console.log('📊 [BEREKEN-ENECO-MODEL] Gebruikte modeltarieven:', JSON.stringify(modelTarieven, null, 2))
 
   // Bepaal welk tarief te gebruiken voor elektriciteit
   let tariefElektriciteit: number
   if (heeftEnkeleMeter) {
     tariefElektriciteit = modelTarieven.tarief_elektriciteit_enkel
+    console.log('🔧 [BEREKEN-ENECO-MODEL] Enkele meter, tarief:', tariefElektriciteit)
   } else {
     // Voor dubbeltarief: gebruik gewogen gemiddelde van normaal en dal
     const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
@@ -331,8 +356,10 @@ export async function berekenEnecoModelContractKosten(
       tariefElektriciteit = 
         (modelTarieven.tarief_elektriciteit_normaal * gewichtNormaal) +
         (modelTarieven.tarief_elektriciteit_dal * gewichtDal)
+      console.log('🔧 [BEREKEN-ENECO-MODEL] Dubbele meter, gewogen tarief:', tariefElektriciteit, `(normaal: ${gewichtNormaal}, dal: ${gewichtDal})`)
     } else {
       tariefElektriciteit = modelTarieven.tarief_elektriciteit_normaal
+      console.log('🔧 [BEREKEN-ENECO-MODEL] Geen verbruik, fallback naar normaal tarief:', tariefElektriciteit)
     }
   }
 
@@ -341,9 +368,21 @@ export async function berekenEnecoModelContractKosten(
   const leverancierElektriciteit = totaalElektriciteit * tariefElektriciteit
   const leverancierGas = verbruikGas * modelTarieven.tarief_gas
   
+  console.log('💰 [BEREKEN-ENECO-MODEL] Leverancierskosten:', {
+    leverancierElektriciteit,
+    leverancierGas,
+  })
+  
   // Vastrecht per jaar (maandbedrag * 12)
   const vastrechtStroomJaar = modelTarieven.vastrecht_stroom_maand * 12
   const vastrechtGasJaar = modelTarieven.vastrecht_gas_maand * 12
+  
+  console.log('💰 [BEREKEN-ENECO-MODEL] Vastrecht:', {
+    vastrecht_stroom_maand: modelTarieven.vastrecht_stroom_maand,
+    vastrecht_stroom_jaar: vastrechtStroomJaar,
+    vastrecht_gas_maand: modelTarieven.vastrecht_gas_maand,
+    vastrecht_gas_jaar: vastrechtGasJaar,
+  })
   
   // Netbeheerkosten toevoegen (vereenvoudigd, zoals op resultatenpagina)
   // Netbeheerkosten zijn exclusief BTW in database, dus we moeten BTW toevoegen
@@ -363,15 +402,38 @@ export async function berekenEnecoModelContractKosten(
   const btwNetbeheer = netbeheerKostenExclBtw * 0.21
   const netbeheerKostenInclBtw = netbeheerKostenExclBtw + btwNetbeheer
   
+  console.log('💰 [BEREKEN-ENECO-MODEL] Netbeheerkosten:', {
+    netbeheerElektriciteitExclBtw,
+    netbeheerGasExclBtw,
+    netbeheerKostenExclBtw,
+    btwNetbeheer,
+    netbeheerKostenInclBtw,
+  })
+  
   // Totaal per jaar (inclusief EB, BTW en netbeheer incl. BTW)
   const jaarbedrag = leverancierElektriciteit + leverancierGas + vastrechtStroomJaar + vastrechtGasJaar + netbeheerKostenInclBtw
   
   // Maandbedrag
   const maandbedrag = jaarbedrag / 12
 
-  return {
+  const result = {
     jaarbedrag: Math.round(jaarbedrag),
     maandbedrag: Math.round(maandbedrag),
   }
+  
+  console.log('✅ [BEREKEN-ENECO-MODEL] EINDRESULTAAT:', {
+    jaarbedrag: result.jaarbedrag,
+    maandbedrag: result.maandbedrag,
+    breakdown: {
+      leverancierElektriciteit,
+      leverancierGas,
+      vastrechtStroomJaar,
+      vastrechtGasJaar,
+      netbeheerKostenInclBtw,
+      totaal: jaarbedrag,
+    },
+  })
+
+  return result
 }
 

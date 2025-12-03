@@ -521,6 +521,7 @@ function ResultatenContent() {
       const aansluitwaardeGas = data.aansluitwaardeGas || 'G6'
       let enecoModelMaandbedrag: number | null = null
       try {
+        console.log('🔵 [RESULTATEN] Ophalen Eneco modeltarieven voor besparingsberekening...')
         const enecoResponse = await fetch('/api/model-tarieven/bereken', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -536,9 +537,13 @@ function ResultatenContent() {
         if (enecoResponse.ok) {
           const enecoData = await enecoResponse.json()
           enecoModelMaandbedrag = enecoData.maandbedrag || null
+          console.log('✅ [RESULTATEN] Eneco model maandbedrag opgehaald:', enecoModelMaandbedrag)
+        } else {
+          const errorText = await enecoResponse.text()
+          console.error('❌ [RESULTATEN] Fout bij ophalen Eneco modeltarieven:', enecoResponse.status, errorText)
         }
       } catch (err) {
-        console.warn('Kon Eneco modeltarieven niet ophalen voor besparingsberekening:', err)
+        console.error('❌ [RESULTATEN] Exception bij ophalen Eneco modeltarieven:', err)
       }
       
       // Fetch active contracts from API
@@ -777,17 +782,27 @@ function ResultatenContent() {
       
       // Transform to ContractOptie format
       const transformed = validContracten
-        .map((c: any) => transformContractToOptie(
-          c, 
-          elektriciteitNormaal, 
-          elektriciteitDal, 
-          totaalGas, 
-          data?.heeftEnkeleMeter || false,
-          data?.terugleveringJaar || 0, // NIEUW: teruglevering meegeven
-          data?.aansluitwaardeElektriciteit, // NIEUW: aansluitwaarde elektriciteit
-          data?.aansluitwaardeGas, // NIEUW: aansluitwaarde gas
-          enecoModelMaandbedrag // NIEUW: Eneco modeltarieven voor besparingsberekening
-        ))
+        .map((c: any) => {
+          const optie = transformContractToOptie(
+            c, 
+            elektriciteitNormaal, 
+            elektriciteitDal, 
+            totaalGas, 
+            data?.heeftEnkeleMeter || false,
+            data?.terugleveringJaar || 0, // NIEUW: teruglevering meegeven
+            aansluitwaardeElektriciteit, // NIEUW: aansluitwaarde elektriciteit
+            aansluitwaardeGas, // NIEUW: aansluitwaarde gas
+            enecoModelMaandbedrag // NIEUW: Eneco modeltarieven voor besparingsberekening
+          )
+          if (optie) {
+            console.log(`💰 [RESULTATEN] Contract ${c.leverancier?.naam || c.id}:`, {
+              contractMaandbedrag: optie.maandbedrag,
+              enecoModelMaandbedrag,
+              besparing: optie.besparing,
+            })
+          }
+          return optie
+        })
         .filter((c: any) => c !== null) as ContractOptie[]
       
       setResultaten(transformed)
