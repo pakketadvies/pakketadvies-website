@@ -157,14 +157,19 @@ export default function TarievenPage() {
 
       const data = await response.json()
       if (data.success) {
-        // Update state directly with the returned data first
+        // Update state directly with the returned data from API
+        // This ensures we show the exact values that were saved
         if (data.tarieven) {
           setModelTarief(data.tarieven)
         }
-        // Then refresh from database to ensure we have the latest values
-        await fetchData()
         setEditingModelTarief(false)
         alert('Modeltarieven succesvol opgeslagen!')
+        
+        // Refresh from database in background (optional, for consistency)
+        // Use a small delay to ensure database update is committed
+        setTimeout(async () => {
+          await fetchData()
+        }, 500)
       } else {
         alert('Fout bij opslaan: ' + data.error)
       }
@@ -400,7 +405,7 @@ export default function TarievenPage() {
         {editingModelTarief ? (
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
             <form 
-              key={modelTarief?.id || modelTarief?.updated_at || 'new'} 
+              key={`model-tarief-${modelTarief?.id || 'new'}-${modelTarief?.updated_at || Date.now()}`} 
               action={saveModelTarief} 
               className="space-y-6"
             >
