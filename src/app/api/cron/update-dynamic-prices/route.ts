@@ -22,6 +22,10 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function GET(request: Request) {
+  // Log immediately to ensure we see something in logs
+  console.log('🚀 CRON JOB STARTED - update-dynamic-prices')
+  console.log('⏰ Timestamp:', new Date().toISOString())
+  
   try {
     // Verify this is a cron request
     // Vercel cron jobs automatically add an Authorization header
@@ -29,14 +33,20 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization')?.trim()
     const cronSecret = process.env.CRON_SECRET?.trim()
     
+    // Log ALL headers immediately for debugging
+    const allRequestHeaders: Record<string, string | null> = {}
+    request.headers.forEach((value, key) => {
+      allRequestHeaders[key] = value
+    })
+    console.log('📋 ALL REQUEST HEADERS:', JSON.stringify(allRequestHeaders, null, 2))
+    
     // Debug logging (remove in production if needed)
     console.log('🔍 Auth check:', {
       hasAuthHeader: !!authHeader,
-      authHeaderValue: authHeader ? `"${authHeader}"` : 'none',
+      authHeaderValue: authHeader ? `"${authHeader.substring(0, 20)}..."` : 'none',
       hasCronSecret: !!cronSecret,
-      cronSecretValue: cronSecret ? `"${cronSecret}"` : 'none',
-      expectedHeader: cronSecret ? `Bearer ${cronSecret}` : 'none',
-      headersMatch: authHeader === (cronSecret ? `Bearer ${cronSecret}` : null),
+      cronSecretValue: cronSecret ? `"${cronSecret.substring(0, 10)}..."` : 'none',
+      expectedHeader: cronSecret ? `Bearer ${cronSecret.substring(0, 10)}...` : 'none',
     })
     
     // Security check:
