@@ -78,7 +78,8 @@ async function fetchFromEnergyZero(date: Date): Promise<EnergyPrices | null> {
     // Process electricity data (hourly prices)
     const electricityPrices = electricityData.Prices?.map((p: any) => p.price) || []
     if (electricityPrices.length === 0) {
-      console.warn('No electricity prices returned from EnergyZero')
+      console.warn(`No electricity prices returned from EnergyZero for date ${dateStr}`)
+      console.warn(`   Response:`, JSON.stringify(electricityData).substring(0, 200))
       return null
     }
 
