@@ -139,19 +139,20 @@ export default function KennisbankPage() {
       }))
     : [])
 
-  // Combine and sort: featured articles first, then by date (newest first)
-  const allFilteredArticles = [...specialArticlesFiltered, ...categoryArticles].sort((a, b) => {
-    // Featured articles always first - check this first
-    if (a.featured && !b.featured) return -1
-    if (!a.featured && b.featured) return 1
-    // If both are featured or both are not, sort by date (newest first)
+  // Combine all articles: featured articles FIRST, then others
+  // Featured articles should always be at the beginning, regardless of date
+  const featuredArticles = [...specialArticlesFiltered, ...categoryArticles].filter(a => a.featured)
+  const nonFeaturedArticles = [...specialArticlesFiltered, ...categoryArticles].filter(a => !a.featured)
+  
+  // Sort non-featured articles by date (newest first)
+  nonFeaturedArticles.sort((a, b) => {
     const dateA = new Date(a.date).getTime()
     const dateB = new Date(b.date).getTime()
-    // If dates are invalid, put featured first
-    if (isNaN(dateA) && a.featured) return -1
-    if (isNaN(dateB) && b.featured) return 1
     return dateB - dateA
   })
+  
+  // Combine: featured first, then non-featured sorted by date
+  const allFilteredArticles = [...featuredArticles, ...nonFeaturedArticles]
 
   // Pagination
   const totalPages = Math.ceil(allFilteredArticles.length / articlesPerPage)
