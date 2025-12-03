@@ -193,28 +193,6 @@ export default function ContractCard({
         </div>
       )}
 
-      {/* Badges - Rechtsboven */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2 items-end z-10">
-        {contract.aanbevolen && (
-          <Badge variant="success" className="shadow-lg">
-            <Check weight="bold" className="w-3 h-3 mr-1" />
-            Aanbevolen
-          </Badge>
-        )}
-        {contract.populair && (
-          <Badge variant="info" className="shadow-lg">
-            <Star weight="fill" className="w-3 h-3 mr-1" />
-            Populair
-          </Badge>
-        )}
-        {contract.groeneEnergie && (
-          <Badge className="bg-green-100 text-green-700 border-green-200">
-            <Leaf weight="duotone" className="w-3 h-3 mr-1" />
-            Groen
-          </Badge>
-        )}
-      </div>
-
       <CardContent className="pt-6">
         {/* Leverancier met logo */}
         <div className="mb-6 flex items-start gap-4">
@@ -230,9 +208,9 @@ export default function ContractCard({
           )}
           
           {/* Naam en details */}
-          <div className="flex-1 min-w-0 pr-2">
+          <div className="flex-1 min-w-0">
             <h3 
-              className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-1" 
+              className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-2 sm:mb-2.5 pr-0" 
               title={contract.leverancier.naam}
               style={{
                 wordBreak: 'break-word',
@@ -249,7 +227,32 @@ export default function ContractCard({
                 })()
               }}
             />
-            <p className="text-sm text-gray-600 line-clamp-2">
+            
+            {/* Badges - Direct onder de naam, perfect uitgelijnd */}
+            {(contract.aanbevolen || contract.populair || contract.groeneEnergie) && (
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
+                {contract.aanbevolen && (
+                  <Badge variant="success" className="shadow-md text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5">
+                    <Check weight="bold" className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 flex-shrink-0" />
+                    <span className="whitespace-nowrap">Aanbevolen</span>
+                  </Badge>
+                )}
+                {contract.populair && !contract.aanbevolen && (
+                  <Badge variant="info" className="shadow-md text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5">
+                    <Star weight="fill" className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 flex-shrink-0" />
+                    <span className="whitespace-nowrap">Populair</span>
+                  </Badge>
+                )}
+                {contract.groeneEnergie && (
+                  <Badge className="bg-green-100 text-green-700 border-green-200 shadow-md text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5">
+                    <Leaf weight="duotone" className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 flex-shrink-0" />
+                    <span className="whitespace-nowrap">Groen</span>
+                  </Badge>
+                )}
+              </div>
+            )}
+            
+            <p className="text-sm text-gray-600 line-clamp-2 mt-0.5">
               {contract.looptijd 
                 ? `Vast contract • ${contract.looptijd} jaar`
                 : contract.type === 'dynamisch'

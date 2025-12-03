@@ -30,16 +30,24 @@ const verbruikSchema = z.object({
   elektriciteitNormaal: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return undefined
-      const num = typeof val === 'string' ? parseFloat(val) : val
-      return isNaN(num) ? undefined : num
+      if (typeof val === 'number') return isNaN(val) ? undefined : val
+      if (typeof val === 'string') {
+        const num = parseFloat(val)
+        return isNaN(num) ? undefined : num
+      }
+      return undefined
     },
     z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(1, 'Vul je verbruik in')
   ),
   elektriciteitDal: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return null
-      const num = typeof val === 'string' ? parseFloat(val) : val
-      return isNaN(num) ? null : num
+      if (typeof val === 'number') return isNaN(val) ? null : val
+      if (typeof val === 'string') {
+        const num = parseFloat(val)
+        return isNaN(num) ? null : num
+      }
+      return null
     },
     z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
   ),
@@ -48,16 +56,24 @@ const verbruikSchema = z.object({
   terugleveringJaar: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return null
-      const num = typeof val === 'string' ? parseFloat(val) : val
-      return isNaN(num) ? null : num
+      if (typeof val === 'number') return isNaN(val) ? null : val
+      if (typeof val === 'string') {
+        const num = parseFloat(val)
+        return isNaN(num) ? null : num
+      }
+      return null
     },
     z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
   ),
   gasJaar: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return null
-      const num = typeof val === 'string' ? parseFloat(val) : val
-      return isNaN(num) ? null : num
+      if (typeof val === 'number') return isNaN(val) ? null : val
+      if (typeof val === 'string') {
+        const num = parseFloat(val)
+        return isNaN(num) ? null : num
+      }
+      return null
     },
     z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
   ),
