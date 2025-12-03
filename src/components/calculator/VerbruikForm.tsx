@@ -41,7 +41,7 @@ const verbruikSchema = z.object({
       }
       return undefined
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(1, 'Vul een geldig verbruik in')
+    z.number({ message: 'Vul een geldig getal in' }).min(1, 'Vul een geldig verbruik in')
   ),
   elektriciteitDal: z.preprocess(
     (val) => {
@@ -53,7 +53,7 @@ const verbruikSchema = z.object({
       }
       return null
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(0, 'Vul een geldig verbruik in').nullable()
+    z.number({ message: 'Vul een geldig getal in' }).min(0, 'Vul een geldig verbruik in').nullable()
   ),
   heeftEnkeleMeter: z.boolean(),
   
@@ -68,7 +68,7 @@ const verbruikSchema = z.object({
       }
       return null
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(0, 'Vul een geldig verbruik in').nullable()
+    z.number({ message: 'Vul een geldig getal in' }).min(0, 'Vul een geldig verbruik in').nullable()
   ),
   geenGasaansluiting: z.boolean(),
   
@@ -84,7 +84,7 @@ const verbruikSchema = z.object({
       }
       return null
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(0, 'Vul een geldige teruglevering in').nullable()
+    z.number({ message: 'Vul een geldig getal in' }).min(0, 'Vul een geldige teruglevering in').nullable()
   ),
   
   // Meter type
@@ -165,13 +165,14 @@ export function VerbruikForm() {
     setError,
     clearErrors,
     watch,
-  } = useForm<VerbruikFormData>({
-    resolver: zodResolver(verbruikSchema),
+  } = useForm<any>({
+    resolver: zodResolver(verbruikSchema) as any,
     defaultValues: {
+      elektriciteitNormaal: 0,
       heeftEnkeleMeter: false,
       geenGasaansluiting: false,
       heeftZonnepanelen: false,
-      meterType: 'weet_niet',
+      meterType: 'weet_niet' as 'slim' | 'oud' | 'weet_niet',
       elektriciteitDal: null,
       gasJaar: null,
       terugleveringJaar: null,
@@ -407,7 +408,7 @@ export function VerbruikForm() {
 
     // Update form state (alleen voor primair adres, index 0)
     if (index === 0) {
-      setValue('addressType', newType)
+      setValue('addressType', newType as any)
       setAddressType(newType)
     }
   }
@@ -433,7 +434,7 @@ export function VerbruikForm() {
       }
       setAddressTypeResult(prev => ({ ...prev, [index]: overrideResult }))
       if (index === 0) {
-        setValue('addressType', overrideType)
+        setValue('addressType', overrideType as any)
         setAddressType(overrideType)
       }
       return
@@ -608,15 +609,15 @@ export function VerbruikForm() {
 
     // Verdeel elektriciteit over normaal/dal (60/40 split voor dubbele meter)
     if (!heeftEnkeleMeter) {
-      setValue('elektriciteitNormaal', Math.round(geschatElektriciteit * 0.6))
-      setValue('elektriciteitDal', Math.round(geschatElektriciteit * 0.4))
+      setValue('elektriciteitNormaal' as any, Math.round(geschatElektriciteit * 0.6))
+      setValue('elektriciteitDal' as any, Math.round(geschatElektriciteit * 0.4))
     } else {
-      setValue('elektriciteitNormaal', geschatElektriciteit)
+      setValue('elektriciteitNormaal' as any, geschatElektriciteit)
       setValue('elektriciteitDal', null)
     }
 
     if (!geenGasaansluiting) {
-      setValue('gasJaar', geschatGas)
+      setValue('gasJaar' as any, geschatGas)
     }
 
     setShowHelpSchatten(false)
@@ -663,8 +664,8 @@ export function VerbruikForm() {
       for (const fieldName of errorFields) {
         // Check of er een error is voor dit veld
         const hasError = fieldName.includes('.') 
-          ? errors.leveringsadressen?.[0]?.[fieldName.split('.')[2] as keyof typeof errors.leveringsadressen[0]]
-          : errors[fieldName as keyof typeof errors]
+          ? (errors.leveringsadressen as any)?.[0]?.[fieldName.split('.')[2] as string]
+          : (errors as any)[fieldName]
         
         if (hasError) {
           const element = document.querySelector(`input[name="${fieldName}"]`) as HTMLElement
@@ -742,7 +743,7 @@ export function VerbruikForm() {
                   value={adres.postcode}
                   onChange={(e) => handleLeveringsadresChange(index, 'postcode', e.target.value)}
                   placeholder="1234 AB"
-                  error={errors.leveringsadressen?.[index]?.postcode?.message}
+                  error={(errors.leveringsadressen as any)?.[index]?.postcode?.message}
                   required
                 />
               </div>

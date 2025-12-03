@@ -37,7 +37,7 @@ const verbruikSchema = z.object({
       }
       return undefined
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(1, 'Vul je verbruik in')
+    z.number().min(1, 'Vul je verbruik in')
   ),
   elektriciteitDal: z.preprocess(
     (val) => {
@@ -49,7 +49,7 @@ const verbruikSchema = z.object({
       }
       return null
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
+    z.number().nullable().optional()
   ),
   heeftEnkeleMeter: z.boolean(),
   heeftZonnepanelen: z.boolean(),
@@ -63,7 +63,7 @@ const verbruikSchema = z.object({
       }
       return null
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
+    z.number().nullable().optional()
   ),
   gasJaar: z.preprocess(
     (val) => {
@@ -75,7 +75,7 @@ const verbruikSchema = z.object({
       }
       return null
     },
-    z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
+    z.number().nullable().optional()
   ),
   geenGasaansluiting: z.boolean(),
   meterType: z.enum(['slim', 'oud', 'weet_niet']),
