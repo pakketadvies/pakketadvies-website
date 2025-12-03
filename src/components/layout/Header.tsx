@@ -37,7 +37,11 @@ export function Header() {
         }`}>
           <div className="flex items-center justify-between px-6 py-3">
             {/* Logo */}
-            <Link href="/" className="group transition-transform duration-300 hover:scale-105">
+            <Link 
+              href="/" 
+              className="group transition-transform duration-300 hover:scale-105"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <Image
                 src="/images/logo-dark.png"
                 alt="PakketAdvies"
