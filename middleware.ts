@@ -2,16 +2,8 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Redirect www.pakketadvies.nl to pakketadvies.nl (before any other processing)
-  // This must happen BEFORE RSC requests are made to prevent CORS errors
-  const hostname = request.headers.get('host') || ''
-  if (hostname === 'www.pakketadvies.nl' || hostname.startsWith('www.pakketadvies.nl')) {
-    const url = request.nextUrl.clone()
-    url.host = 'pakketadvies.nl'
-    url.protocol = 'https:'
-    return NextResponse.redirect(url, 308) // 308 = permanent redirect, preserves method
-  }
-
+  // www redirect is now handled by Vercel Dashboard (infrastructure level)
+  // This prevents CORS errors with RSC requests
   return await updateSession(request)
 }
 
