@@ -16,6 +16,11 @@ import { createClient } from '@/lib/supabase/server'
  * 
  * Security: Should be protected by Vercel Cron secret
  */
+
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(request: Request) {
   try {
     // Verify this is a cron request
