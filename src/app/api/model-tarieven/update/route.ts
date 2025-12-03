@@ -65,7 +65,7 @@ export async function PUT(request: Request) {
     // Get current active modeltarieven
     const { data: currentTarieven } = await supabase
       .from('model_tarieven')
-      .select('id')
+      .select('id, ingangsdatum')
       .eq('actief', true)
       .single()
 
