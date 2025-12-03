@@ -385,4 +385,3 @@ Na implementatie heeft de "Diensten" pagina:
 - **Icons**: Phosphor Icons, duotone weight, **TEAL**
 - **Buttons**: Teal primary, white secondary
 - **Badges**: Rounded-full, **TEAL backgrounds**
-

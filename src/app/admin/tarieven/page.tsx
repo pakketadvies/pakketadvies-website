@@ -49,10 +49,28 @@ interface NetbeheerTariefCount {
   gas_count: number
 }
 
+interface ModelTarief {
+  id: string
+  leverancier_naam: string
+  tarief_elektriciteit_normaal: number
+  tarief_elektriciteit_dal: number
+  tarief_elektriciteit_enkel: number
+  tarief_gas: number
+  vastrecht_stroom_maand: number
+  vastrecht_gas_maand: number
+  ingangsdatum: string
+  einddatum: string | null
+  actief: boolean
+  opmerkingen: string | null
+}
+
 export default function TarievenPage() {
   const [overheidsTarieven, setOverheidsTarieven] = useState<OverheidsTarief[]>([])
   const [netbeheerCounts, setNetbeheerCounts] = useState<NetbeheerTariefCount[]>([])
+  const [modelTarief, setModelTarief] = useState<ModelTarief | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editingModelTarief, setEditingModelTarief] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -106,7 +124,52 @@ export default function TarievenPage() {
       setNetbeheerCounts(counts)
     }
 
+    // Haal modeltarieven op
+    const { data: modelData } = await supabase
+      .from('model_tarieven')
+      .select('*')
+      .eq('actief', true)
+      .single()
+
+    if (modelData) {
+      setModelTarief(modelData)
+    }
+
     setLoading(false)
+  }
+
+  async function saveModelTarief(formData: FormData) {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/model-tarieven/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tarief_elektriciteit_normaal: parseFloat(formData.get('tarief_elektriciteit_normaal') as string),
+          tarief_elektriciteit_dal: parseFloat(formData.get('tarief_elektriciteit_dal') as string),
+          tarief_elektriciteit_enkel: parseFloat(formData.get('tarief_elektriciteit_enkel') as string),
+          tarief_gas: parseFloat(formData.get('tarief_gas') as string),
+          vastrecht_stroom_maand: parseFloat(formData.get('vastrecht_stroom_maand') as string),
+          vastrecht_gas_maand: parseFloat(formData.get('vastrecht_gas_maand') as string),
+          ingangsdatum: formData.get('ingangsdatum') as string,
+          einddatum: formData.get('einddatum') as string || null,
+          opmerkingen: formData.get('opmerkingen') as string || null,
+        }),
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setModelTarief(data.tarieven)
+        setEditingModelTarief(false)
+        alert('Modeltarieven succesvol opgeslagen!')
+      } else {
+        alert('Fout bij opslaan: ' + data.error)
+      }
+    } catch (error: any) {
+      alert('Fout bij opslaan: ' + error.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) {
@@ -305,6 +368,241 @@ export default function TarievenPage() {
               ))}
             </div>
           </>
+        )}
+      </div>
+
+      {/* Modeltarieven Section */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-brand-navy-500 mb-1 flex items-center gap-2">
+              <Lightning size={24} weight="duotone" className="text-brand-teal-600" />
+              Eneco Modeltarieven
+            </h2>
+            <p className="text-sm text-gray-600">
+              Baseline tarieven voor besparingsberekening (inclusief EB en BTW)
+            </p>
+          </div>
+          {!editingModelTarief && (
+            <button
+              onClick={() => setEditingModelTarief(true)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all"
+            >
+              <Pencil size={20} weight="bold" />
+              {modelTarief ? 'Bewerken' : 'Toevoegen'}
+            </button>
+          )}
+        </div>
+
+        {editingModelTarief ? (
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+            <form action={saveModelTarief} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Elektriciteit tarieven */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-brand-navy-500 mb-4">Elektriciteit (€/kWh)</h3>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Normaal tarief *
+                    </label>
+                    <input
+                      type="number"
+                      name="tarief_elektriciteit_normaal"
+                      step="0.00001"
+                      defaultValue={modelTarief?.tarief_elektriciteit_normaal || 0.30112}
+                      required
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Dal tarief *
+                    </label>
+                    <input
+                      type="number"
+                      name="tarief_elektriciteit_dal"
+                      step="0.00001"
+                      defaultValue={modelTarief?.tarief_elektriciteit_dal || 0.28402}
+                      required
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Enkeltarief *
+                    </label>
+                    <input
+                      type="number"
+                      name="tarief_elektriciteit_enkel"
+                      step="0.00001"
+                      defaultValue={modelTarief?.tarief_elektriciteit_enkel || 0.29284}
+                      required
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Gas en vastrecht */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-brand-navy-500 mb-4">Gas & Vastrecht</h3>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Gas tarief (€/m³) *
+                    </label>
+                    <input
+                      type="number"
+                      name="tarief_gas"
+                      step="0.00001"
+                      defaultValue={modelTarief?.tarief_gas || 1.30055}
+                      required
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Vastrecht stroom (€/maand) *
+                    </label>
+                    <input
+                      type="number"
+                      name="vastrecht_stroom_maand"
+                      step="0.01"
+                      defaultValue={modelTarief?.vastrecht_stroom_maand || 47.99}
+                      required
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Vastrecht gas (€/maand) *
+                    </label>
+                    <input
+                      type="number"
+                      name="vastrecht_gas_maand"
+                      step="0.01"
+                      defaultValue={modelTarief?.vastrecht_gas_maand || 7.99}
+                      required
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Ingangsdatum *
+                  </label>
+                  <input
+                    type="date"
+                    name="ingangsdatum"
+                    defaultValue={modelTarief?.ingangsdatum || '2025-01-01'}
+                    required
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Einddatum (optioneel)
+                  </label>
+                  <input
+                    type="date"
+                    name="einddatum"
+                    defaultValue={modelTarief?.einddatum || ''}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Opmerkingen
+                </label>
+                <textarea
+                  name="opmerkingen"
+                  rows={3}
+                  defaultValue={modelTarief?.opmerkingen || ''}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-teal-500 focus:outline-none"
+                  placeholder="Optionele notities over deze tarieven..."
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? 'Opslaan...' : 'Opslaan'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingModelTarief(false)}
+                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-all"
+                >
+                  Annuleren
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : modelTarief ? (
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-bold text-brand-navy-500 mb-4">Elektriciteit (€/kWh)</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Normaal tarief:</span>
+                    <span className="font-semibold">€{modelTarief.tarief_elektriciteit_normaal.toFixed(5)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Dal tarief:</span>
+                    <span className="font-semibold">€{modelTarief.tarief_elektriciteit_dal.toFixed(5)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Enkeltarief:</span>
+                    <span className="font-semibold">€{modelTarief.tarief_elektriciteit_enkel.toFixed(5)}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-bold text-brand-navy-500 mb-4">Gas & Vastrecht</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Gas tarief:</span>
+                    <span className="font-semibold">€{modelTarief.tarief_gas.toFixed(5)}/m³</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Vastrecht stroom:</span>
+                    <span className="font-semibold">€{modelTarief.vastrecht_stroom_maand.toFixed(2)}/maand</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Vastrecht gas:</span>
+                    <span className="font-semibold">€{modelTarief.vastrecht_gas_maand.toFixed(2)}/maand</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {modelTarief.opmerkingen && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600">{modelTarief.opmerkingen}</p>
+              </div>
+            )}
+            <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500">
+              Geldig van {modelTarief.ingangsdatum} {modelTarief.einddatum ? `tot ${modelTarief.einddatum}` : 'tot onbepaald'}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border-2 border-gray-200 p-8 text-center">
+            <Lightning size={48} weight="duotone" className="mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600 mb-4">Nog geen modeltarieven ingesteld</p>
+            <button
+              onClick={() => setEditingModelTarief(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-teal-600 hover:bg-brand-teal-700 text-white font-semibold rounded-lg transition-all"
+            >
+              <Plus size={20} weight="bold" />
+              Modeltarieven Toevoegen
+            </button>
+          </div>
         )}
       </div>
 

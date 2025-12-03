@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /_next/
-Disallow: /bekijk-contract/
-
-Sitemap: https://pakketadvies.nl/sitemap.xml
-

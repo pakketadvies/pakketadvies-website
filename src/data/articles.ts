@@ -2751,4 +2751,3 @@ export function getArticlesByCategory(category: string): typeof allArticles {
 export function getArticleBySlug(slug: string): typeof allArticles[0] | undefined {
   return allArticles.find(article => article.slug === slug)
 }
-

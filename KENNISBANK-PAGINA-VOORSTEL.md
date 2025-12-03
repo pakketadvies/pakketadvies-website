@@ -220,4 +220,3 @@ Na implementatie heeft de "Kennisbank" pagina:
 - ✅ **Consistente styling** met contact/over ons/diensten
 - ✅ **Perfect responsive** voor mobiel en desktop
 - ✅ **Correct kleurgebruik**: TEAL als primary, geen paars
-

@@ -147,4 +147,3 @@ export function StructuredData({ data, id = 'structured-data' }: StructuredDataP
     />
   )
 }
-

@@ -115,4 +115,3 @@ export function generateBreadcrumbStructuredData(slug: string, title: string) {
     ],
   }
 }
-
