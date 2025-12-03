@@ -17,6 +17,8 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
   const [isOpen, setIsOpen] = useState(false)
   const [formData, setFormData] = useState<VerbruikData>(currentData)
   const [hasChanges, setHasChanges] = useState(false)
+  // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
+  const savedElektriciteitDal = useRef<number | null>(null)
   
   // Address lookup states
   const [loadingAddress, setLoadingAddress] = useState(false)
@@ -40,6 +42,8 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
   useEffect(() => {
     setFormData(currentData)
     setHasChanges(false)
+    // Reset saved elektriciteitDal ref wanneer data wordt geüpdatet
+    savedElektriciteitDal.current = null
   }, [currentData])
 
   // Cleanup
@@ -537,9 +541,20 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
                     type="checkbox"
                     checked={formData.heeftEnkeleMeter}
                     onChange={(e) => {
-                      handleFieldChange('heeftEnkeleMeter', e.target.checked)
-                      if (e.target.checked) {
+                      const checked = e.target.checked
+                      handleFieldChange('heeftEnkeleMeter', checked)
+                      if (checked) {
+                        // Bewaar de huidige waarde voordat we het op null zetten
+                        if (formData.elektriciteitDal !== null && formData.elektriciteitDal !== undefined) {
+                          savedElektriciteitDal.current = formData.elektriciteitDal
+                        }
                         handleFieldChange('elektriciteitDal', null)
+                      } else {
+                        // Herstel de oorspronkelijke waarde als het vinkje wordt uitgezet
+                        if (savedElektriciteitDal.current !== null) {
+                          handleFieldChange('elektriciteitDal', savedElektriciteitDal.current)
+                          savedElektriciteitDal.current = null
+                        }
                       }
                     }}
                     className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"

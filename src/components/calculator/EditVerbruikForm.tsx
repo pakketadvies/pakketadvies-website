@@ -13,6 +13,8 @@ interface EditVerbruikFormProps {
 export default function EditVerbruikForm({ currentData, onChange }: EditVerbruikFormProps) {
   const { setAddressType } = useCalculatorStore()
   const [formData, setFormData] = useState<VerbruikData>(currentData)
+  // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
+  const savedElektriciteitDal = useRef<number | null>(null)
   
   // Address lookup states
   const [loadingAddress, setLoadingAddress] = useState(false)
@@ -35,6 +37,8 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   // Update form when currentData changes
   useEffect(() => {
     setFormData(currentData)
+    // Reset saved elektriciteitDal ref wanneer data wordt geüpdatet
+    savedElektriciteitDal.current = null
   }, [currentData])
 
   // Cleanup
@@ -465,13 +469,30 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 checked={formData.heeftEnkeleMeter}
                 onChange={(e) => {
                   const checked = e.target.checked
-                  const newData = { 
-                    ...formData, 
-                    heeftEnkeleMeter: checked,
-                    elektriciteitDal: checked ? null : formData.elektriciteitDal
+                  if (checked) {
+                    // Bewaar de huidige waarde voordat we het op null zetten
+                    if (formData.elektriciteitDal !== null && formData.elektriciteitDal !== undefined) {
+                      savedElektriciteitDal.current = formData.elektriciteitDal
+                    }
+                    const newData = { 
+                      ...formData, 
+                      heeftEnkeleMeter: checked,
+                      elektriciteitDal: null
+                    }
+                    setFormData(newData)
+                    onChange(newData)
+                  } else {
+                    // Herstel de oorspronkelijke waarde als het vinkje wordt uitgezet
+                    const restoredDal = savedElektriciteitDal.current !== null ? savedElektriciteitDal.current : formData.elektriciteitDal
+                    const newData = { 
+                      ...formData, 
+                      heeftEnkeleMeter: checked,
+                      elektriciteitDal: restoredDal
+                    }
+                    setFormData(newData)
+                    onChange(newData)
+                    savedElektriciteitDal.current = null
                   }
-                  setFormData(newData)
-                  onChange(newData)
                 }}
                 className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
               />

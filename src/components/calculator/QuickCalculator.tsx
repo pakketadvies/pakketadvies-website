@@ -74,6 +74,8 @@ export function QuickCalculator() {
   const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
   const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
   const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
+  // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
+  const savedElektriciteitDal = useRef<number | null>(null)
   
   // Aansluitwaarden
   const [aansluitwaardeElektriciteit, setAansluitwaardeElektriciteit] = useState('')
@@ -779,10 +781,22 @@ export function QuickCalculator() {
               type="checkbox"
               checked={heeftEnkeleMeter}
               onChange={(e) => {
-                setHeeftEnkeleMeter(e.target.checked)
-                setValue('heeftEnkeleMeter', e.target.checked)
-                if (e.target.checked) {
+                const checked = e.target.checked
+                setHeeftEnkeleMeter(checked)
+                setValue('heeftEnkeleMeter', checked)
+                if (checked) {
+                  // Bewaar de huidige waarde voordat we het op null zetten
+                  const currentDal = watch('elektriciteitDal')
+                  if (currentDal !== null && currentDal !== undefined) {
+                    savedElektriciteitDal.current = currentDal
+                  }
                   setValue('elektriciteitDal', null)
+                } else {
+                  // Herstel de oorspronkelijke waarde als het vinkje wordt uitgezet
+                  if (savedElektriciteitDal.current !== null) {
+                    setValue('elektriciteitDal', savedElektriciteitDal.current)
+                    savedElektriciteitDal.current = null
+                  }
                 }
               }}
               className="w-5 h-5 mt-0.5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2 flex-shrink-0"

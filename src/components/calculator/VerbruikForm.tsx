@@ -78,6 +78,8 @@ export function VerbruikForm() {
   const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
   const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
   const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
+  // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
+  const savedElektriciteitDal = useRef<number | null>(null)
   const [leveringsadressen, setLeveringsadressen] = useState([
     { postcode: '', huisnummer: '', toevoeging: '', straat: '', plaats: '' }
   ])
@@ -118,6 +120,7 @@ export function VerbruikForm() {
     setValue,
     setError,
     clearErrors,
+    watch,
   } = useForm<VerbruikFormData>({
     resolver: zodResolver(verbruikSchema),
     defaultValues: {
@@ -814,10 +817,22 @@ export function VerbruikForm() {
               type="checkbox"
               checked={heeftEnkeleMeter}
               onChange={(e) => {
-                setHeeftEnkeleMeter(e.target.checked)
-                setValue('heeftEnkeleMeter', e.target.checked)
-                if (e.target.checked) {
+                const checked = e.target.checked
+                setHeeftEnkeleMeter(checked)
+                setValue('heeftEnkeleMeter', checked)
+                if (checked) {
+                  // Bewaar de huidige waarde voordat we het op null zetten
+                  const currentDal = watch('elektriciteitDal')
+                  if (currentDal !== null && currentDal !== undefined) {
+                    savedElektriciteitDal.current = currentDal
+                  }
                   setValue('elektriciteitDal', null)
+                } else {
+                  // Herstel de oorspronkelijke waarde als het vinkje wordt uitgezet
+                  if (savedElektriciteitDal.current !== null) {
+                    setValue('elektriciteitDal', savedElektriciteitDal.current)
+                    savedElektriciteitDal.current = null
+                  }
                 }
               }}
               className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
