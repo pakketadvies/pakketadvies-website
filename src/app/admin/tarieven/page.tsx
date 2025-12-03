@@ -140,27 +140,48 @@ export default function TarievenPage() {
   }
 
   async function saveModelTarief(formData: FormData) {
+    console.log('🔵 [ADMIN-TARIEVEN] saveModelTarief aangeroepen')
     setSaving(true)
+    
+    const requestBody = {
+      tarief_elektriciteit_normaal: parseFloat(formData.get('tarief_elektriciteit_normaal') as string),
+      tarief_elektriciteit_dal: parseFloat(formData.get('tarief_elektriciteit_dal') as string),
+      tarief_elektriciteit_enkel: parseFloat(formData.get('tarief_elektriciteit_enkel') as string),
+      tarief_gas: parseFloat(formData.get('tarief_gas') as string),
+      vastrecht_stroom_maand: parseFloat(formData.get('vastrecht_stroom_maand') as string),
+      vastrecht_gas_maand: parseFloat(formData.get('vastrecht_gas_maand') as string),
+      opmerkingen: formData.get('opmerkingen') as string || null,
+    }
+    
+    console.log('📤 [ADMIN-TARIEVEN] Versturen naar API:', JSON.stringify(requestBody, null, 2))
+    console.log('📤 [ADMIN-TARIEVEN] Raw FormData values:', {
+      'tarief_elektriciteit_normaal': formData.get('tarief_elektriciteit_normaal'),
+      'vastrecht_stroom_maand': formData.get('vastrecht_stroom_maand'),
+      'vastrecht_gas_maand': formData.get('vastrecht_gas_maand'),
+    })
+    
     try {
       const response = await fetch('/api/model-tarieven/update', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tarief_elektriciteit_normaal: parseFloat(formData.get('tarief_elektriciteit_normaal') as string),
-          tarief_elektriciteit_dal: parseFloat(formData.get('tarief_elektriciteit_dal') as string),
-          tarief_elektriciteit_enkel: parseFloat(formData.get('tarief_elektriciteit_enkel') as string),
-          tarief_gas: parseFloat(formData.get('tarief_gas') as string),
-          vastrecht_stroom_maand: parseFloat(formData.get('vastrecht_stroom_maand') as string),
-          vastrecht_gas_maand: parseFloat(formData.get('vastrecht_gas_maand') as string),
-          opmerkingen: formData.get('opmerkingen') as string || null,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
+      console.log('📥 [ADMIN-TARIEVEN] Response status:', response.status)
       const data = await response.json()
+      console.log('📥 [ADMIN-TARIEVEN] Response data:', JSON.stringify(data, null, 2))
+      
       if (data.success) {
+        console.log('✅ [ADMIN-TARIEVEN] Success! Ontvangen tarieven:', {
+          vastrecht_stroom_maand: data.tarieven?.vastrecht_stroom_maand,
+          vastrecht_gas_maand: data.tarieven?.vastrecht_gas_maand,
+          tarief_elektriciteit_normaal: data.tarieven?.tarief_elektriciteit_normaal,
+        })
+        
         // Update state directly with the returned data from API
         // This ensures we show the exact values that were saved
         if (data.tarieven) {
+          console.log('💾 [ADMIN-TARIEVEN] State updaten met:', data.tarieven)
           setModelTarief(data.tarieven)
         }
         setEditingModelTarief(false)
@@ -169,12 +190,15 @@ export default function TarievenPage() {
         // Refresh from database in background (optional, for consistency)
         // Use a small delay to ensure database update is committed
         setTimeout(async () => {
+          console.log('🔄 [ADMIN-TARIEVEN] Refreshing data from database...')
           await fetchData()
         }, 500)
       } else {
+        console.error('❌ [ADMIN-TARIEVEN] API returned error:', data.error)
         alert('Fout bij opslaan: ' + data.error)
       }
     } catch (error: any) {
+      console.error('❌ [ADMIN-TARIEVEN] Catch error:', error)
       alert('Fout bij opslaan: ' + error.message)
     } finally {
       setSaving(false)
