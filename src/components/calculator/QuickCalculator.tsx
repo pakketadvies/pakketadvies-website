@@ -27,12 +27,40 @@ import type { VerbruikData } from '@/types/calculator'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
 
 const verbruikSchema = z.object({
-  elektriciteitNormaal: z.number().min(1, 'Vul je verbruik in'),
-  elektriciteitDal: z.number().nullable().optional(),
+  elektriciteitNormaal: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined
+      const num = typeof val === 'string' ? parseFloat(val) : val
+      return isNaN(num) ? undefined : num
+    },
+    z.number({ invalid_type_error: 'Vul een geldig getal in' }).min(1, 'Vul je verbruik in')
+  ),
+  elektriciteitDal: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return null
+      const num = typeof val === 'string' ? parseFloat(val) : val
+      return isNaN(num) ? null : num
+    },
+    z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
+  ),
   heeftEnkeleMeter: z.boolean(),
   heeftZonnepanelen: z.boolean(),
-  terugleveringJaar: z.number().nullable().optional(),
-  gasJaar: z.number().nullable().optional(),
+  terugleveringJaar: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return null
+      const num = typeof val === 'string' ? parseFloat(val) : val
+      return isNaN(num) ? null : num
+    },
+    z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
+  ),
+  gasJaar: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return null
+      const num = typeof val === 'string' ? parseFloat(val) : val
+      return isNaN(num) ? null : num
+    },
+    z.number({ invalid_type_error: 'Vul een geldig getal in' }).nullable().optional()
+  ),
   geenGasaansluiting: z.boolean(),
   meterType: z.enum(['slim', 'oud', 'weet_niet']),
   aansluitwaardeElektriciteit: z.string().optional(),
@@ -543,30 +571,103 @@ export function QuickCalculator() {
     }
   }
 
-  const onSubmit = handleSubmit((data) => {
-    // Prepare verbruik data exactly like VerbruikForm
-    const verbruikData: VerbruikData = {
-      leveringsadressen: leveringsadressen.filter(a => a.postcode && a.huisnummer),
-      elektriciteitNormaal: data.elektriciteitNormaal,
-      elektriciteitDal: data.elektriciteitDal ?? null,
-      heeftEnkeleMeter: data.heeftEnkeleMeter,
-      gasJaar: data.gasJaar ?? null,
-      geenGasaansluiting: data.geenGasaansluiting,
-      heeftZonnepanelen: data.heeftZonnepanelen,
-      terugleveringJaar: data.terugleveringJaar ?? null,
-      meterType: data.meterType,
-      aansluitwaardeElektriciteit: aansluitwaardeElektriciteit,
-      aansluitwaardeGas: aansluitwaardeGas,
-      addressType: data.addressType || null, // NIEUW: address type toevoegen
-      geschat: false, // User filled in actual data
+  // Functie om naar eerste error veld te scrollen
+  const scrollToFirstError = useCallback(() => {
+    // Wacht even zodat errors gerenderd zijn
+    setTimeout(() => {
+      // Zoek eerste error veld in volgorde van belangrijkheid
+      const errorFields = [
+        { name: 'elektriciteitNormaal', selector: 'input[name="elektriciteitNormaal"]' },
+        { name: 'elektriciteitDal', selector: 'input[name="elektriciteitDal"]' },
+        { name: 'gasJaar', selector: 'input[name="gasJaar"]' },
+        { name: 'terugleveringJaar', selector: 'input[name="terugleveringJaar"]' },
+        { name: 'postcode', selector: 'input[name="leveringsadressen.0.postcode"]' },
+        { name: 'huisnummer', selector: 'input[name="leveringsadressen.0.huisnummer"]' },
+      ]
+
+      for (const field of errorFields) {
+        if (errors[field.name as keyof typeof errors]) {
+          const element = document.querySelector(field.selector) as HTMLElement
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // Geef visuele feedback met een korte highlight
+            const originalBoxShadow = element.style.boxShadow
+            element.style.transition = 'box-shadow 0.3s'
+            element.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
+            setTimeout(() => {
+              element.style.boxShadow = originalBoxShadow
+            }, 2000)
+            break
+          }
+        }
+      }
+      
+      // Check ook leveringsadressen errors
+      if (errors.leveringsadressen?.[0]) {
+        const postcodeError = errors.leveringsadressen[0].postcode
+        const huisnummerError = errors.leveringsadressen[0].huisnummer
+        
+        if (postcodeError) {
+          const element = document.querySelector('input[name="leveringsadressen.0.postcode"]') as HTMLElement
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            const originalBoxShadow = element.style.boxShadow
+            element.style.transition = 'box-shadow 0.3s'
+            element.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
+            setTimeout(() => {
+              element.style.boxShadow = originalBoxShadow
+            }, 2000)
+            return
+          }
+        }
+        
+        if (huisnummerError) {
+          const element = document.querySelector('input[name="leveringsadressen.0.huisnummer"]') as HTMLElement
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            const originalBoxShadow = element.style.boxShadow
+            element.style.transition = 'box-shadow 0.3s'
+            element.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)'
+            setTimeout(() => {
+              element.style.boxShadow = originalBoxShadow
+            }, 2000)
+            return
+          }
+        }
+      }
+    }, 100)
+  }, [errors])
+
+  const onSubmit = handleSubmit(
+    (data) => {
+      // Prepare verbruik data exactly like VerbruikForm
+      const verbruikData: VerbruikData = {
+        leveringsadressen: leveringsadressen.filter(a => a.postcode && a.huisnummer),
+        elektriciteitNormaal: data.elektriciteitNormaal,
+        elektriciteitDal: data.elektriciteitDal ?? null,
+        heeftEnkeleMeter: data.heeftEnkeleMeter,
+        gasJaar: data.gasJaar ?? null,
+        geenGasaansluiting: data.geenGasaansluiting,
+        heeftZonnepanelen: data.heeftZonnepanelen,
+        terugleveringJaar: data.terugleveringJaar ?? null,
+        meterType: data.meterType,
+        aansluitwaardeElektriciteit: aansluitwaardeElektriciteit,
+        aansluitwaardeGas: aansluitwaardeGas,
+        addressType: data.addressType || null, // NIEUW: address type toevoegen
+        geschat: false, // User filled in actual data
+      }
+      
+      // Store in Zustand (same as VerbruikForm)
+      setVerbruik(verbruikData)
+      
+      // Navigate to results (same as VerbruikForm)
+      router.push('/calculator/resultaten')
+    },
+    (errors) => {
+      // On validation error, scroll to first error field
+      scrollToFirstError()
     }
-    
-    // Store in Zustand (same as VerbruikForm)
-    setVerbruik(verbruikData)
-    
-    // Navigate to results (same as VerbruikForm)
-    router.push('/calculator/resultaten')
-  })
+  )
 
   return (
     <div className="bg-white rounded-2xl p-5 md:p-5 lg:p-6 shadow-xl border border-gray-100 w-full">
