@@ -36,7 +36,7 @@ export async function GET(request: Request) {
  * POST /api/model-tarieven/bereken
  * 
  * Calculates Eneco modelcontract costs for given consumption
- * Body: { verbruikElektriciteitNormaal, verbruikElektriciteitDal, verbruikGas, heeftEnkeleMeter }
+ * Body: { verbruikElektriciteitNormaal, verbruikElektriciteitDal, verbruikGas, heeftEnkeleMeter, aansluitwaardeElektriciteit, aansluitwaardeGas }
  */
 export async function POST(request: Request) {
   try {
@@ -46,6 +46,8 @@ export async function POST(request: Request) {
       verbruikElektriciteitDal,
       verbruikGas,
       heeftEnkeleMeter,
+      aansluitwaardeElektriciteit = '3x25A', // Default waarde
+      aansluitwaardeGas = 'G6',               // Default waarde
     } = body
     
     if (
@@ -66,7 +68,9 @@ export async function POST(request: Request) {
       verbruikElektriciteitDal,
       verbruikGas,
       heeftEnkeleMeter,
-      supabase
+      supabase,
+      aansluitwaardeElektriciteit,
+      aansluitwaardeGas
     )
     
     if (!result) {

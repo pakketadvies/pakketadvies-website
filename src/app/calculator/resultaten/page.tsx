@@ -496,6 +496,8 @@ function ResultatenContent() {
       
       // Haal Eneco modelcontract kosten op voor besparingsberekening
       const heeftEnkeleMeter = data?.heeftEnkeleMeter || false
+      const aansluitwaardeElektriciteit = data.aansluitwaardeElektriciteit || '3x25A'
+      const aansluitwaardeGas = data.aansluitwaardeGas || 'G6'
       let enecoModelMaandbedrag: number | null = null
       try {
         const enecoResponse = await fetch('/api/model-tarieven/bereken', {
@@ -506,6 +508,8 @@ function ResultatenContent() {
             verbruikElektriciteitDal: elektriciteitDal,
             verbruikGas: totaalGas,
             heeftEnkeleMeter,
+            aansluitwaardeElektriciteit,
+            aansluitwaardeGas,
           }),
         })
         if (enecoResponse.ok) {

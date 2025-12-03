@@ -1,6 +1,8 @@
 // Utility functions for energy cost calculations
 // Based on Sepa Green offerte analysis
 
+import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
+
 export interface EnergieKostenInput {
   // Verbruik
   elektriciteitNormaal: number // kWh/jaar
@@ -294,20 +296,21 @@ export async function getModelTarieven(
 }
 
 /**
- * Bereken Eneco modelcontract kosten (inclusief EB en BTW, exclusief netbeheer)
+ * Bereken Eneco modelcontract kosten (inclusief EB, BTW en netbeheer)
  * Deze functie berekent de totale kosten voor het Eneco modelcontract
  * als baseline voor besparingsberekening
  * 
- * Let op: Netbeheerkosten worden NIET meegenomen omdat deze per netbeheerder verschillen
- * en al worden meegenomen in de contractkosten berekening. De besparing wordt berekend
- * door de Eneco leverancierskosten (incl. EB en BTW) te vergelijken met de contractkosten.
+ * Netbeheerkosten worden WEL meegenomen zodat de vergelijking met contractkosten
+ * op dezelfde basis gebeurt (beide inclusief netbeheer).
  */
 export async function berekenEnecoModelContractKosten(
   verbruikElektriciteitNormaal: number, // kWh/jaar
   verbruikElektriciteitDal: number,     // kWh/jaar
   verbruikGas: number,                    // m³/jaar
   heeftEnkeleMeter: boolean,
-  supabase: any
+  supabase: any,
+  aansluitwaardeElektriciteit: string = '3x25A', // NIEUW: voor netbeheer
+  aansluitwaardeGas: string = 'G6'              // NIEUW: voor netbeheer
 ): Promise<{ jaarbedrag: number; maandbedrag: number } | null> {
   const modelTarieven = await getModelTarieven(supabase)
   
@@ -342,10 +345,21 @@ export async function berekenEnecoModelContractKosten(
   const vastrechtStroomJaar = modelTarieven.vastrecht_stroom_maand * 12
   const vastrechtGasJaar = modelTarieven.vastrecht_gas_maand * 12
   
-  // Totaal per jaar (inclusief EB en BTW, exclusief netbeheer)
-  // Netbeheer wordt niet meegenomen omdat dit per netbeheerder verschilt
-  // en al wordt meegenomen in de contractkosten berekening
-  const jaarbedrag = leverancierElektriciteit + leverancierGas + vastrechtStroomJaar + vastrechtGasJaar
+  // Netbeheerkosten toevoegen (vereenvoudigd, zoals op resultatenpagina)
+  // Dit is een vereenvoudigde inschatting, de volledige berekening gebeurt in berekenEnergieKosten
+  let netbeheerElektriciteit = 430.00 // Standaard voor 3x25A
+  if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+    netbeheerElektriciteit = 0 // Grootverbruik apart
+  }
+
+  let netbeheerGas = verbruikGas > 0 ? 245.00 : 0 // Standaard voor G6
+  if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+    netbeheerGas = 0 // Grootverbruik apart
+  }
+  const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
+  
+  // Totaal per jaar (inclusief EB, BTW en netbeheer)
+  const jaarbedrag = leverancierElektriciteit + leverancierGas + vastrechtStroomJaar + vastrechtGasJaar + netbeheerKosten
   
   // Maandbedrag
   const maandbedrag = jaarbedrag / 12
