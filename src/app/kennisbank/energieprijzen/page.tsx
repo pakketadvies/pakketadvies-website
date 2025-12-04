@@ -8,7 +8,7 @@ import { PrijzenGrafiek } from '@/components/energieprijzen/PrijzenGrafiek'
 import { PrijzenTabel } from '@/components/energieprijzen/PrijzenTabel'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Info, ArrowRight, Lightning, Flame, Question, ChartLine, ShieldCheck, Users } from '@phosphor-icons/react'
+import { Info, ArrowRight, Question, ChartLine } from '@phosphor-icons/react'
 
 export default function EnergieprijzenPage() {
   const [belastingen] = useState<'exclusief' | 'inclusief'>('exclusief')
@@ -155,7 +155,7 @@ export default function EnergieprijzenPage() {
               Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. Deze prijzen geven inzicht in de energiemarkt en helpen je bij het kiezen van het juiste energiecontract.
             </p>
 
-            {/* Trust indicators */}
+            {/* Trust indicator */}
             <div className="flex flex-wrap items-center gap-6 md:gap-8">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
@@ -164,30 +164,6 @@ export default function EnergieprijzenPage() {
                 <div>
                   <div className="text-sm text-gray-400">Actuele marktprijzen</div>
                   <div className="font-semibold text-white">Real-time data</div>
-                </div>
-              </div>
-              
-              <div className="w-px h-8 bg-gray-600"></div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                  <ShieldCheck weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400">100% onafhankelijk</div>
-                  <div className="font-semibold text-white">Objectieve informatie</div>
-                </div>
-              </div>
-
-              <div className="w-px h-8 bg-gray-600"></div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                  <Lightning weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400">Historie tot 5 jaar</div>
-                  <div className="font-semibold text-white">Langjarige trends</div>
                 </div>
               </div>
             </div>
