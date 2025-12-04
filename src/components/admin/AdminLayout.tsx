@@ -14,6 +14,7 @@ import {
   X,
   CurrencyEur,
   ClipboardText,
+  Megaphone,
 } from '@phosphor-icons/react'
 
 interface AdminLayoutProps {
@@ -70,6 +71,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/energieprijzen',
       icon: Lightning,
       active: pathname.startsWith('/admin/energieprijzen'),
+    },
+    {
+      name: 'Marketing',
+      href: '/admin/marketing',
+      icon: Megaphone,
+      active: pathname.startsWith('/admin/marketing'),
     },
   ]
 
