@@ -3,6 +3,8 @@
 import { MarketingContent } from '@/app/admin/marketing/page'
 import { MarketingSquarePreview } from './MarketingSquarePreview'
 import { MarketingStoryPreview } from './MarketingStoryPreview'
+import { MarketingSquarePreviewFullRes } from './MarketingSquarePreviewFullRes'
+import { MarketingStoryPreviewFullRes } from './MarketingStoryPreviewFullRes'
 import { SquaresFour, Rectangle, Download } from '@phosphor-icons/react'
 import { useDownloadImage } from './useDownloadImage'
 
@@ -47,7 +49,11 @@ export function MarketingPreviews({ content }: MarketingPreviewsProps) {
           </button>
         </div>
         <div className="flex justify-center">
-          <MarketingSquarePreview content={content} previewRef={squareDownload.elementRef} />
+          <MarketingSquarePreview content={content} />
+        </div>
+        {/* Hidden full-res version for download */}
+        <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none opacity-0" style={{ zIndex: -1 }}>
+          <MarketingSquarePreviewFullRes content={content} previewRef={squareDownload.elementRef} />
         </div>
       </div>
 
@@ -72,7 +78,11 @@ export function MarketingPreviews({ content }: MarketingPreviewsProps) {
           </button>
         </div>
         <div className="flex justify-center">
-          <MarketingStoryPreview content={content} previewRef={storyDownload.elementRef} />
+          <MarketingStoryPreview content={content} />
+        </div>
+        {/* Hidden full-res version for download */}
+        <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none opacity-0" style={{ zIndex: -1 }}>
+          <MarketingStoryPreviewFullRes content={content} previewRef={storyDownload.elementRef} />
         </div>
       </div>
     </div>
