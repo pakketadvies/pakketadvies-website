@@ -12,22 +12,16 @@ interface MarketingPreviewsProps {
 
 export function MarketingPreviews({ content }: MarketingPreviewsProps) {
   // Download hooks for both formats
-  // Square: preview is 500px, full-res is 1080px
   const squareDownload = useDownloadImage({
     width: 1080,
     height: 1080,
     filename: `pakketadvies-post-${Date.now()}.png`,
-    previewWidth: 500,
-    previewHeight: 500,
   })
 
-  // Story: preview is 304px wide x 541px high, full-res is 1080x1920
   const storyDownload = useDownloadImage({
     width: 1080,
     height: 1920,
     filename: `pakketadvies-story-${Date.now()}.png`,
-    previewWidth: 304,
-    previewHeight: 541,
   })
 
   return (
