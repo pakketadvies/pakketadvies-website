@@ -21,7 +21,8 @@ import {
   ChartLine,
   CaretDown,
   CaretUp,
-  ArrowRight
+  ArrowRight,
+  BatteryHigh
 } from '@phosphor-icons/react'
 
 const diensten = [
@@ -96,11 +97,12 @@ const diensten = [
   {
     id: 5,
     title: 'Groene Energie',
-    description: 'Stap over naar duurzame energie zonder gedoe. We helpen je met groene contracten, zonnepanelen advies en duurzaamheidsdoelen.',
+    description: 'Stap over naar duurzame energie zonder gedoe. We helpen je met groene contracten, zonnepanelen advies, batterij oplossingen en duurzaamheidsdoelen.',
     icon: Leaf,
     features: [
       'Groene energiecontracten',
       'Zonnepanelen advies',
+      'Batterij oplossingen',
       'Duurzaamheidsrapportage',
       'CO2-reductie inzicht'
     ],
@@ -108,6 +110,23 @@ const diensten = [
       'Draag bij aan duurzaamheid',
       'Vaak voordeliger dan je denkt',
       'Transparant over herkomst'
+    ]
+  },
+  {
+    id: 6,
+    title: 'Batterij Oplossingen',
+    description: 'Ondersteuning bij batterij oplossingen voor MKB en Grootzakelijk. We helpen je met de juiste batterij systemen voor energieopslag en zelfvoorzienendheid.',
+    icon: BatteryHigh,
+    features: [
+      'Advies over batterij systemen',
+      'Vergelijking van verschillende oplossingen',
+      'Ondersteuning bij installatie',
+      'Optimalisatie van energieopslag'
+    ],
+    voordelen: [
+      'Maximaliseer zelf opgewekte energie',
+      'Verlaag je energiekosten',
+      'Verhoog je energieonafhankelijkheid'
     ]
   }
 ]

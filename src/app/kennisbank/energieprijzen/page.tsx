@@ -135,13 +135,13 @@ export default function EnergieprijzenPage() {
             {/* Back link */}
             <Link
               href="/kennisbank"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors text-sm"
+              className="block mb-4 text-white/80 hover:text-white transition-colors text-sm"
             >
               <span>← Terug naar kennisbank</span>
             </Link>
 
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
+            <div className="flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
               <ChartLine weight="duotone" className="w-5 h-5 text-brand-teal-300" />
               <span className="text-sm font-semibold text-brand-teal-200">Energieprijzen</span>
             </div>
