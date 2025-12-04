@@ -5,9 +5,25 @@
 **Pixel Naam:** PakketAdvies Pixel Nieuwe...  
 **Pixel ID:** `1504480990767273`
 
-## 📋 STAP 1: Pixel ID toevoegen aan Vercel (NU DOEN!)
+## 📋 STAP 1: In Events Manager (NU DOEN!)
 
-### Vercel Environment Variable (PRODUCTION) ⭐ BELANGRIJKST
+### Je ziet nu een popup met 2 opties:
+
+**Kies: "Code handmatig installeren"** (eerste optie, blauwe knop)
+
+**Waarom?**
+- ✅ De Pixel code is al geïmplementeerd op je website
+- ✅ Je hoeft alleen de website URL toe te voegen
+- ✅ Je Pixel ID te linken
+
+**Wat gebeurt er dan:**
+1. Je voegt je website URL toe: `https://pakketadvies.nl`
+2. Facebook detecteert je Pixel code
+3. Klaar! Je Pixel is gekoppeld
+
+## 📋 STAP 2: Pixel ID toevoegen aan Vercel ⭐ BELANGRIJKST
+
+### Vercel Environment Variable (PRODUCTION)
 
 1. Ga naar: https://vercel.com/dashboard
 2. Selecteer je **PakketAdvies** project
@@ -37,16 +53,6 @@ NEXT_PUBLIC_FACEBOOK_PIXEL_ID=1504480990767273
 
 Herstart je dev server daarna.
 
-## 📋 STAP 2: Website URL toevoegen aan Pixel
-
-In Events Manager (waar je nu bent):
-
-1. Klik op de knop **"Meta-pixel instellen"** (onder "Websitegebeurtenissen verzamelen van browseractiviteit")
-2. Voeg je website URL toe: `https://pakketadvies.nl`
-3. Bevestig de instellingen
-
-Dit verbindt je Pixel met je website domain.
-
 ## ✅ STAP 3: Testen (Na deployment)
 
 ### Test 1: Pixel Helper Extension
@@ -73,10 +79,11 @@ Dit verbindt je Pixel met je website domain.
 
 ## ✅ Checklist
 
+- [ ] In Events Manager: Gekozen voor "Code handmatig installeren"
+- [ ] Website URL toegevoegd: `https://pakketadvies.nl`
 - [ ] Pixel ID `1504480990767273` toegevoegd aan Vercel Environment Variables
 - [ ] Alle 3 environments aangevinkt (Production, Preview, Development)
 - [ ] Website gedeployed (Redeploy)
-- [ ] Website URL toegevoegd aan Pixel instellingen
 - [ ] Pixel Helper extensie toont Pixel actief
 - [ ] PageView events zichtbaar in Test Events
 - [ ] InitiateCheckout event werkt bij "Aanvragen" klik
