@@ -205,7 +205,7 @@ export default function DienstenPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="bg-brand-navy-500 text-white py-16 md:py-24 pt-32 md:pt-40 relative overflow-hidden">
+      <section className="bg-brand-navy-500 text-white py-16 md:py-24 pb-20 md:pb-28 pt-32 md:pt-40 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
@@ -289,9 +289,9 @@ export default function DienstenPage() {
             className="w-full h-20 md:h-24 lg:h-auto"
             preserveAspectRatio="none"
           >
-            <path d="M0,70 Q360,40 720,70 T1440,70 L1440,120 L0,120 Z" fill="white"/>
+            <path d="M0,95 Q360,65 720,95 T1440,95 L1440,120 L0,120 Z" fill="white"/>
             <path 
-              d="M0,70 Q360,40 720,70 T1440,70" 
+              d="M0,95 Q360,65 720,95 T1440,95" 
               stroke="url(#energyGradient)" 
               strokeWidth="2" 
               fill="none"
