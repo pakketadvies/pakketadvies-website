@@ -6,12 +6,12 @@ import { usePathname } from 'next/navigation'
 
 declare global {
   interface Window {
-    fbq: (
+    fbq?: (
       action: string,
       event: string,
       data?: Record<string, any>
     ) => void
-    _fbq: typeof window.fbq
+    _fbq?: typeof window.fbq
   }
 }
 
@@ -24,7 +24,7 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
 
   useEffect(() => {
     // Track page view on route change
-    if (typeof window !== 'undefined' && window.fbq) {
+    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
       try {
         window.fbq('track', 'PageView')
       } catch (error) {

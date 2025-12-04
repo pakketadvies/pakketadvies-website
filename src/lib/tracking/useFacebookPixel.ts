@@ -4,12 +4,12 @@ import { useCallback } from 'react'
 
 declare global {
   interface Window {
-    fbq: (
+    fbq?: (
       action: string,
       event: string,
       data?: Record<string, any>
     ) => void
-    _fbq: typeof window.fbq
+    _fbq?: typeof window.fbq
   }
 }
 
@@ -24,7 +24,7 @@ function waitForPixel(maxWait = 2000): Promise<boolean> {
     }
 
     // If already loaded, resolve immediately
-    if (window.fbq) {
+    if (typeof window.fbq === 'function') {
       resolve(true)
       return
     }
@@ -32,7 +32,7 @@ function waitForPixel(maxWait = 2000): Promise<boolean> {
     // Wait for Pixel to load
     const startTime = Date.now()
     const checkInterval = setInterval(() => {
-      if (window.fbq) {
+      if (typeof window.fbq === 'function') {
         clearInterval(checkInterval)
         resolve(true)
       } else if (Date.now() - startTime > maxWait) {
@@ -54,7 +54,7 @@ export function useFacebookPixel() {
     }
 
     // Try to track immediately if Pixel is loaded
-    if (window.fbq) {
+    if (typeof window.fbq === 'function') {
       try {
         window.fbq('track', eventName, data)
         console.log('[Facebook Pixel] ✅ Event tracked:', eventName, data)
@@ -68,7 +68,7 @@ export function useFacebookPixel() {
     // If Pixel not loaded yet, wait and retry
     console.warn('[Facebook Pixel] ⏳ Pixel not loaded yet, waiting... Event:', eventName, data)
     waitForPixel(2000).then((pixelLoaded) => {
-      if (pixelLoaded && window.fbq) {
+      if (pixelLoaded && typeof window.fbq === 'function') {
         try {
           window.fbq('track', eventName, data)
           console.log('[Facebook Pixel] ✅ Event tracked (delayed):', eventName, data)
@@ -88,7 +88,7 @@ export function useFacebookPixel() {
       return
     }
 
-    if (window.fbq) {
+    if (typeof window.fbq === 'function') {
       try {
         window.fbq('trackCustom', eventName, data)
         console.log('[Facebook Pixel] ✅ Custom event tracked:', eventName, data)
@@ -100,7 +100,7 @@ export function useFacebookPixel() {
     }
 
     waitForPixel(2000).then((pixelLoaded) => {
-      if (pixelLoaded && window.fbq) {
+      if (pixelLoaded && typeof window.fbq === 'function') {
         try {
           window.fbq('trackCustom', eventName, data)
           console.log('[Facebook Pixel] ✅ Custom event tracked (delayed):', eventName, data)
