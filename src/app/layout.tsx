@@ -74,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl">
+    <html lang="nl" className="overscroll-none">
       <body className={inter.className}>
         <PWARegistration />
         <LayoutWrapper>{children}</LayoutWrapper>

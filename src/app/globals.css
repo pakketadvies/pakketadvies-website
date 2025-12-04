@@ -9,12 +9,35 @@ html {
   -moz-osx-font-smoothing: grayscale;
   /* scroll-behavior: smooth removed - causes conflicts with normal scrolling */
   /* Smooth scroll is now only applied programmatically via JavaScript when needed */
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html.overscroll-none {
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+  overscroll-behavior-x: none !important;
 }
 
 body {
   background-color: #FFFFFF;
   color: #1F2937;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Prevent iOS zoom on input focus - all inputs must be at least 16px */
