@@ -841,16 +841,22 @@ export default function ContractCard({
         <div className="space-y-3 pt-4 border-t-2 border-gray-100">
           <Button 
             className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
-            onClick={() => {
-              // Track InitiateCheckout event for Facebook Pixel
-              track('InitiateCheckout', {
+            onClick={async () => {
+              // Track InitiateCheckout event for Facebook Pixel - VOORDAT navigatie
+              const eventData = {
                 content_name: contract.leverancier.naam,
                 content_category: 'Energiecontract',
                 value: breakdown?.totaal.jaarInclBtw || breakdown?.totaal.jaarExclBtw || 0,
                 currency: 'EUR',
                 contract_id: contract.id,
                 contract_type: contract.type,
-              })
+              }
+              
+              console.log('[ContractCard] Tracking InitiateCheckout event:', eventData)
+              track('InitiateCheckout', eventData)
+              
+              // Kleine delay om Pixel event de tijd te geven om te worden getracked
+              await new Promise(resolve => setTimeout(resolve, 100))
               
               // Sla gekozen contract op in store
               setSelectedContract(contract)
