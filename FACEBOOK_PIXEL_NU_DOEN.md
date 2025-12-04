@@ -1,10 +1,13 @@
 # ⚡ Facebook Pixel - WAT JE NU MOET DOEN
 
-## 🎯 Quick Start (5 minuten)
+## 🎯 Je Nieuwe Pixel
 
-Je Pixel ID: **`1160227928919853`**
+**Pixel Naam:** PakketAdvies Pixel Nieuwe...  
+**Pixel ID:** `1504480990767273`
 
-### STAP 1: Vercel Environment Variable (PRODUCTION) ⭐ BELANGRIJKST
+## 📋 STAP 1: Pixel ID toevoegen aan Vercel (NU DOEN!)
+
+### Vercel Environment Variable (PRODUCTION) ⭐ BELANGRIJKST
 
 1. Ga naar: https://vercel.com/dashboard
 2. Selecteer je **PakketAdvies** project
@@ -14,7 +17,7 @@ Je Pixel ID: **`1160227928919853`**
 6. Vul in:
    ```
    Key: NEXT_PUBLIC_FACEBOOK_PIXEL_ID
-   Value: 1160227928919853
+   Value: 1504480990767273
    ```
 7. Vink ALLE drie aan: ✅ Production, ✅ Preview, ✅ Development
 8. Klik **Save**
@@ -22,59 +25,58 @@ Je Pixel ID: **`1160227928919853`**
    - Ga naar **Deployments** tab
    - Klik op **⋯** (3 dots) bij de laatste deployment
    - Klik **Redeploy**
-   - Wacht tot deployment klaar is
+   - Wacht tot deployment klaar is (~2-3 minuten)
 
-### STAP 2: Lokale Development (Optioneel)
+### Lokale Development (Optioneel)
 
 Voeg toe aan `.env.local` (in je project root):
 
 ```bash
-NEXT_PUBLIC_FACEBOOK_PIXEL_ID=1160227928919853
+NEXT_PUBLIC_FACEBOOK_PIXEL_ID=1504480990767273
 ```
 
 Herstart je dev server daarna.
 
-### STAP 3: Testen (Na deployment)
+## 📋 STAP 2: Website URL toevoegen aan Pixel
 
-1. **Installeer Pixel Helper**: 
-   https://chrome.google.com/webstore/detail/facebook-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc
+In Events Manager (waar je nu bent):
 
-2. **Test je website**:
-   - Ga naar: https://pakketadvies.nl
-   - Klik op Pixel Helper extensie
-   - Moet groen zijn met Pixel ID: 1160227928919853
+1. Klik op de knop **"Meta-pixel instellen"** (onder "Websitegebeurtenissen verzamelen van browseractiviteit")
+2. Voeg je website URL toe: `https://pakketadvies.nl`
+3. Bevestig de instellingen
 
-3. **Test in Events Manager**:
-   - Ga naar: https://business.facebook.com/events_manager2
-   - Klik op je Pixel
-   - Tab: **"Gebeurtenissen testen"**
-   - Open je website in andere tab → zie PageView event!
+Dit verbindt je Pixel met je website domain.
 
-4. **Test InitiateCheckout**:
-   - Ga naar: https://pakketadvies.nl/calculator
-   - Vul calculator in → bekijk resultaten
-   - Klik **"Aanvragen"** op een contract
-   - Zie InitiateCheckout event in Test Events!
+## ✅ STAP 3: Testen (Na deployment)
 
-## ❓ Over die Conversions API Popup
+### Test 1: Pixel Helper Extension
 
-**Wat is het?**
-- Extra server-side tracking (naast client-side Pixel)
-- Geeft betere data accuracy en privacy compliance
+1. Installeer: https://chrome.google.com/webstore/detail/facebook-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc
+2. Ga naar: https://pakketadvies.nl
+3. Klik op Pixel Helper extensie icon
+4. Moet groen zijn met: **Pixel ID: 1504480990767273** ✅
 
-**Moet ik het nu doen?**
-- **NEE!** Je Pixel werkt prima zoals het is
-- Klik gewoon **"Terug"** of sluit de popup
-- Later kun je altijd nog Conversions API toevoegen
+### Test 2: Events Manager - Test Events
 
-**Waarom doet Facebook dit voor?**
-- Ze willen dat iedereen de beste tracking setup heeft
-- Het is optioneel - niet verplicht!
+1. In Events Manager, ga naar tab: **"Gebeurtenissen testen"**
+2. Open je website (`https://pakketadvies.nl`) in een andere browser tab
+3. Binnen enkele seconden zie je:
+   - **PageView** event verschijnen ✅
+
+### Test 3: InitiateCheckout Event
+
+1. Ga naar: https://pakketadvies.nl/calculator
+2. Vul calculator in → bekijk resultaten
+3. Klik op **"Aanvragen"** bij een contract
+4. In Events Manager → **"Gebeurtenissen testen"** zie je:
+   - **InitiateCheckout** event met data! ✅
 
 ## ✅ Checklist
 
-- [ ] Pixel ID toegevoegd aan Vercel Environment Variables
+- [ ] Pixel ID `1504480990767273` toegevoegd aan Vercel Environment Variables
+- [ ] Alle 3 environments aangevinkt (Production, Preview, Development)
 - [ ] Website gedeployed (Redeploy)
+- [ ] Website URL toegevoegd aan Pixel instellingen
 - [ ] Pixel Helper extensie toont Pixel actief
 - [ ] PageView events zichtbaar in Test Events
 - [ ] InitiateCheckout event werkt bij "Aanvragen" klik
@@ -86,4 +88,3 @@ Herstart je dev server daarna.
 Na testen kun je een campagne opzetten die optimaliseert op **InitiateCheckout** events.
 
 Zie `FACEBOOK_PIXEL_SETUP.md` voor volledige campaign setup instructies.
-
