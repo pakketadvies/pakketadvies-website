@@ -12,7 +12,7 @@ import {
 
 interface MarketingSquarePreviewProps {
   content: MarketingContent
-  previewRef?: React.RefObject<HTMLDivElement>
+  previewRef?: React.RefObject<HTMLDivElement | null>
 }
 
 const iconMap = {
