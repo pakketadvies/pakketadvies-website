@@ -12,6 +12,7 @@ import {
 
 interface MarketingSquarePreviewProps {
   content: MarketingContent
+  previewRef?: React.RefObject<HTMLDivElement>
 }
 
 const iconMap = {
@@ -21,7 +22,7 @@ const iconMap = {
   support: Headset,
 }
 
-export function MarketingSquarePreview({ content }: MarketingSquarePreviewProps) {
+export function MarketingSquarePreview({ content, previewRef }: MarketingSquarePreviewProps) {
   const Icon = iconMap[content.iconType]
   
   const getBackgroundClasses = () => {
@@ -47,6 +48,8 @@ export function MarketingSquarePreview({ content }: MarketingSquarePreviewProps)
 
   return (
     <div 
+      ref={previewRef}
+      data-preview-element="square"
       className={`
         relative w-[500px] h-[500px] rounded-2xl overflow-hidden
         ${getBackgroundClasses()}
