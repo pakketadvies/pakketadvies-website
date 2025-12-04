@@ -94,6 +94,7 @@ export function Footer() {
               <li className="text-gray-300">Overstapservice</li>
               <li className="text-gray-300">Contractbeheer</li>
               <li className="text-gray-300">Groene energie</li>
+              <li className="text-gray-300">Batterijoplossingen</li>
             </ul>
           </div>
 
