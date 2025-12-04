@@ -4,6 +4,7 @@ import "./globals.css";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
 import { PWARegistration } from "@/components/layout/PWARegistration";
+import { FacebookPixel } from "@/components/tracking/FacebookPixel";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -73,12 +74,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID
+
   return (
     <html lang="nl" className="overscroll-none">
       <body className={inter.className}>
         <PWARegistration />
         <LayoutWrapper>{children}</LayoutWrapper>
         <InstallPrompt />
+        {facebookPixelId && <FacebookPixel pixelId={facebookPixelId} />}
       </body>
     </html>
   );

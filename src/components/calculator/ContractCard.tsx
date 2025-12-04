@@ -12,6 +12,7 @@ import type { ContractOptie } from '@/types/calculator'
 import Tooltip from '@/components/ui/Tooltip'
 import { getFriendlyDocumentUrl } from '@/lib/document-url'
 import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
+import { useFacebookPixel } from '@/lib/tracking/useFacebookPixel'
 
 interface ContractCardProps {
   contract: ContractOptie
@@ -98,6 +99,7 @@ export default function ContractCard({
   postcode,
   position
 }: ContractCardProps) {
+  const { track } = useFacebookPixel()
   const router = useRouter()
   const { setSelectedContract } = useCalculatorStore()
   const [openAccordion, setOpenAccordion] = useState<'prijsdetails' | 'voorwaarden' | 'over' | null>(null)
@@ -840,6 +842,16 @@ export default function ContractCard({
           <Button 
             className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
             onClick={() => {
+              // Track InitiateCheckout event for Facebook Pixel
+              track('InitiateCheckout', {
+                content_name: contract.leverancier.naam,
+                content_category: 'Energiecontract',
+                value: breakdown?.totaal.jaarInclBtw || breakdown?.totaal.jaarExclBtw || 0,
+                currency: 'EUR',
+                contract_id: contract.id,
+                contract_type: contract.type,
+              })
+              
               // Sla gekozen contract op in store
               setSelectedContract(contract)
               // Navigeer naar stap 2
