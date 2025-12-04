@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PrijzenInfoCards } from '@/components/energieprijzen/PrijzenInfoCards'
 import { PrijzenGrafiek } from '@/components/energieprijzen/PrijzenGrafiek'
 import { PrijzenTabel } from '@/components/energieprijzen/PrijzenTabel'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Info, ArrowRight, Lightning, Flame, Question } from '@phosphor-icons/react'
+import { Info, ArrowRight, Lightning, Flame, Question, ChartLine, ShieldCheck, Users } from '@phosphor-icons/react'
 
 export default function EnergieprijzenPage() {
   const [belastingen] = useState<'exclusief' | 'inclusief'>('exclusief')
@@ -110,37 +111,122 @@ export default function EnergieprijzenPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-            <section className="bg-gradient-to-br from-brand-navy-500 to-brand-navy-600 text-white py-8 md:py-12 lg:py-16 pt-24 md:pt-32 lg:pt-36">
-              <div className="container-custom px-4 md:px-6">
-          <div className="max-w-4xl mx-auto text-center">
+      <section className="bg-brand-navy-500 text-white py-16 md:py-24 pb-20 md:pb-28 pt-32 md:pt-40 relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/office-team.jpg"
+            alt="Professional office team"
+            fill
+            className="object-cover opacity-10"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-navy-500/95 via-brand-navy-600/90 to-brand-navy-700/95" />
+        </div>
+
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        </div>
+        
+        <div className="container-custom relative z-10">
+          <div className="max-w-4xl">
+            {/* Back link */}
             <Link
               href="/kennisbank"
-                    className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 md:mb-6 transition-colors text-xs md:text-sm"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors text-sm"
             >
               <span>← Terug naar kennisbank</span>
             </Link>
-            
-                  <div className="flex flex-col items-center gap-4 md:gap-6 mb-4 md:mb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white/10 backdrop-blur-sm rounded-2xl">
-                      <Lightning className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" weight="duotone" />
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
+              <ChartLine weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+              <span className="text-sm font-semibold text-brand-teal-200">Energieprijzen</span>
             </div>
-            
-                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold">
-              Energieprijzen
+
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              Inzicht in de{' '}
+              <span className="text-brand-teal-500">energiemarkt</span>
             </h1>
-                  </div>
-                  
-                  <p className="text-sm md:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto px-2">
-              Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. 
-              Deze prijzen geven inzicht in de energiemarkt en helpen u bij het kiezen van het juiste energiecontract.
+            
+            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
+              Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. Deze prijzen geven inzicht in de energiemarkt en helpen je bij het kiezen van het juiste energiecontract.
             </p>
+
+            {/* Trust indicators */}
+            <div className="flex flex-wrap items-center gap-6 md:gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                  <ChartLine weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Actuele marktprijzen</div>
+                  <div className="font-semibold text-white">Real-time data</div>
+                </div>
+              </div>
+              
+              <div className="w-px h-8 bg-gray-600"></div>
+              
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                  <ShieldCheck weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">100% onafhankelijk</div>
+                  <div className="font-semibold text-white">Objectieve informatie</div>
+                </div>
+              </div>
+
+              <div className="w-px h-8 bg-gray-600"></div>
+              
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                  <Lightning weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Historie tot 5 jaar</div>
+                  <div className="font-semibold text-white">Langjarige trends</div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Bottom transition */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden">
+          <svg 
+            viewBox="0 0 1440 120" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="w-full h-20 md:h-24 lg:h-auto"
+            preserveAspectRatio="none"
+          >
+            <path d="M0,95 Q360,65 720,95 T1440,95 L1440,120 L0,120 Z" fill="white"/>
+            <path 
+              d="M0,95 Q360,65 720,95 T1440,95" 
+              stroke="url(#energyGradient)" 
+              strokeWidth="2" 
+              fill="none"
+              opacity="0.4"
+            />
+            <defs>
+              <linearGradient id="energyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#00AF9B" stopOpacity="0" />
+                <stop offset="20%" stopColor="#00AF9B" stopOpacity="1" />
+                <stop offset="50%" stopColor="#00AF9B" stopOpacity="1" />
+                <stop offset="80%" stopColor="#00AF9B" stopOpacity="1" />
+                <stop offset="100%" stopColor="#00AF9B" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
       </section>
 
       {/* Main Content */}
-            <section className="py-6 md:py-12 lg:py-16">
-              <div className="container-custom max-w-7xl px-2 md:px-4 lg:px-6">
+      <section className="py-6 md:py-12 lg:py-16 bg-white">
+        <div className="container-custom max-w-7xl px-2 md:px-4 lg:px-6">
           {/* Info Cards */}
           {huidigeData && (
             <PrijzenInfoCards
