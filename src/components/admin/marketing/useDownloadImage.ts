@@ -17,13 +17,16 @@ export function useDownloadImage({ width, height, filename }: UseDownloadImageOp
 
     try {
       // Wait a bit for any pending renders
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 200))
 
-      // Calculate scale based on target size vs current size
+      // Get current element dimensions
       const rect = elementRef.current.getBoundingClientRect()
-      const scaleFactor = Math.max(width / rect.width, height / rect.height, 2) // Minimum 2x for quality
-
-      // Render at high resolution with scale
+      
+      // Calculate the scale needed to get to target resolution
+      // Use high scale for quality, then resize to exact dimensions
+      const scaleFactor = Math.max(width / rect.width, height / rect.height) * 2 // 2x for quality
+      
+      // Render with high scale
       const canvas = await html2canvas(elementRef.current, {
         scale: scaleFactor,
         useCORS: true,
@@ -33,18 +36,24 @@ export function useDownloadImage({ width, height, filename }: UseDownloadImageOp
         imageTimeout: 15000,
       })
 
-      // Resize canvas to exact target dimensions
+      // Create final canvas at exact target dimensions
       const finalCanvas = document.createElement('canvas')
       finalCanvas.width = width
       finalCanvas.height = height
       const ctx = finalCanvas.getContext('2d')
-      if (ctx) {
-        ctx.drawImage(canvas, 0, 0, width, height)
-      } else {
+      
+      if (!ctx) {
         throw new Error('Could not get canvas context')
       }
 
-      // Convert canvas to blob
+      // Use high quality image rendering
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      
+      // Draw the scaled canvas onto the final canvas at exact dimensions
+      ctx.drawImage(canvas, 0, 0, width, height)
+
+      // Convert to blob
       finalCanvas.toBlob((blob) => {
         if (!blob) {
           alert('Er is een fout opgetreden bij het genereren van de afbeelding.')
