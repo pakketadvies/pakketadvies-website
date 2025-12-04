@@ -135,7 +135,7 @@ export default function EnergieprijzenPage() {
             {/* Back link */}
             <Link
               href="/kennisbank"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors text-sm"
             >
               <span>← Terug naar kennisbank</span>
             </Link>
