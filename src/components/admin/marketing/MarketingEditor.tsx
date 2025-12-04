@@ -23,15 +23,23 @@ export function MarketingEditor({ content, onChange }: MarketingEditorProps) {
     onChange({ ...content, [field]: value })
   }
 
-  const backgroundOptions = [
+  const backgroundOptions: Array<{
+    value: 'navy' | 'teal' | 'white' | 'gradient-navy-teal' | 'gradient-teal-purple'
+    label: string
+    color: string
+  }> = [
     { value: 'navy', label: 'Navy', color: 'bg-brand-navy-500' },
     { value: 'teal', label: 'Teal', color: 'bg-brand-teal-500' },
     { value: 'white', label: 'Wit', color: 'bg-white' },
     { value: 'gradient-navy-teal', label: 'Gradient Navy → Teal', color: 'bg-gradient-to-br from-brand-navy-500 to-brand-teal-500' },
     { value: 'gradient-teal-purple', label: 'Gradient Teal → Purple', color: 'bg-gradient-to-br from-brand-teal-500 to-brand-purple-500' },
-  ] as const
+  ]
 
-  const iconOptions = [
+  const iconOptions: Array<{
+    value: 'energy' | 'savings' | 'contract' | 'support'
+    label: string
+    icon: typeof Lightning
+  }> = [
     { value: 'energy', label: 'Energie', icon: Lightning },
     { value: 'savings', label: 'Besparing', icon: CurrencyEur },
     { value: 'contract', label: 'Contract', icon: FileText },
