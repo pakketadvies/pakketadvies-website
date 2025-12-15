@@ -30,17 +30,6 @@ export function Hero({ initialBestDeals }: HeroProps = {} as HeroProps) {
       <div className="container-custom py-8 md:py-12 lg:py-20 relative z-10 w-full">
         {/* Mobile Layout */}
         <div className="lg:hidden space-y-8">
-          {/* Heading */}
-          <div className="text-center px-4">
-            <h1 className="font-display text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
-              Stop met te veel betalen voor{' '}
-              <span className="text-brand-teal-500">energie</span>
-            </h1>
-            <p className="text-base text-gray-300 leading-relaxed">
-              We bemiddelen het beste energiecontract voor jouw bedrijf.
-            </p>
-          </div>
-
           {/* Best Deals Section - Mobile */}
           <div className="w-full px-4">
             <HomepageBestDeals initialData={initialBestDeals} />

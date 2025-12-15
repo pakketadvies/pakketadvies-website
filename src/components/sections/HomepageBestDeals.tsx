@@ -426,8 +426,8 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
         </div>
       </div>
 
-      {/* Footer Links - Compact */}
-      <div className="pt-3 space-y-1.5">
+      {/* Footer Links - Desktop only */}
+      <div className="hidden lg:block pt-3 space-y-1.5">
         <Link
           href="/calculator/resultaten"
           className="text-brand-teal-400 hover:text-brand-teal-300 text-xs font-medium flex items-center gap-1.5 group"
