@@ -310,7 +310,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
                     </div>
                     
                     {/* CTA Button: Compact square button rechts */}
-                    <button className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white w-10 h-10 rounded-lg transition-colors flex items-center justify-center flex-shrink-0 group-hover:shadow-lg" title="Bereken je besparing">
+                    <button className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white w-10 h-10 rounded-lg transition-colors flex items-center justify-center flex-shrink-0 group-hover:shadow-lg" title="Aanmelden">
                       <ArrowRight className="w-5 h-5" weight="bold" />
                     </button>
                   </div>
@@ -416,7 +416,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
 
                   {/* CTA Button */}
                   <button className="w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm">
-                    Bereken je besparing
+                    Aanmelden
                     <ArrowRight className="w-4 h-4" weight="bold" />
                   </button>
                 </div>
