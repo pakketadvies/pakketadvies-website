@@ -1286,7 +1286,8 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
           setShowIbanCalculator(false)
         }}
       />
-    </form>
+      </form>
+    </>
   )
 }
 
