@@ -224,11 +224,11 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
           const Icon = contract.type === 'vast' ? Lock : Lightning
 
           return (
-            <Link
-              key={contract.id}
-              href="/calculator"
-              className="block group"
-            >
+                  <Link
+                    key={contract.id}
+                    href={`/calculator?stap=2&contract=${contract.id}&direct=true`}
+                    className="block group"
+                  >
               <div className="bg-white rounded-lg p-3 hover:shadow-lg transition-all duration-300 hover:scale-[1.01] border border-gray-200 hover:border-brand-teal-500/50">
                 <div className="flex items-start gap-3">
                   {/* Position Badge */}
@@ -336,7 +336,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
             return (
               <Link
                 key={contract.id}
-                href="/calculator"
+                href={`/calculator?stap=2&contract=${contract.id}&direct=true`}
                 className="block flex-shrink-0 w-[280px] snap-start"
               >
                 <div className="bg-white rounded-xl p-4 h-full border-2 border-transparent hover:border-brand-teal-500/30 transition-all">

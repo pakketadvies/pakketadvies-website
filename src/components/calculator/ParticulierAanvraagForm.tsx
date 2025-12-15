@@ -554,6 +554,21 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         )}
       </div>
 
+      {/* Indicatief verbruik banner */}
+      {verbruik?.geschat && (
+        <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg p-4 mb-4 md:mb-6">
+          <div className="flex items-start gap-3">
+            <Warning className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
+            <div className="text-sm text-brand-teal-900 flex-1">
+              <p className="font-semibold mb-1">Indicatief verbruik gebruikt</p>
+              <p>
+                We gebruiken standaard verbruikswaarden voor de prijsberekening. Je kunt je exacte verbruik later aanpassen via je energieaccount bij de leverancier.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bent u momenteel klant? */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
         <div className="p-4 md:p-6">

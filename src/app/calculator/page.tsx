@@ -6,12 +6,14 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import { ProgressBar } from '@/components/calculator/ProgressBar'
 import { VerbruikForm } from '@/components/calculator/VerbruikForm'
 import { BedrijfsgegevensForm } from '@/components/calculator/BedrijfsgegevensForm'
+import { QuickStartStep } from '@/components/calculator/QuickStartStep'
 
 const TOTAL_STEPS = 2  // Alleen verbruik en bedrijfsgegevens
 
 function CalculatorContent() {
   const searchParams = useSearchParams()
-  const { stap, setStap } = useCalculatorStore()
+  const { stap, setStap, verbruik } = useCalculatorStore()
+  const isDirect = searchParams?.get('direct') === 'true'
 
   // Check for stap query parameter and set step accordingly
   useEffect(() => {
@@ -23,6 +25,9 @@ function CalculatorContent() {
       }
     }
   }, [searchParams, setStap])
+  
+  // If direct=true and stap=2 but no verbruik, we need to show QuickStartStep first
+  const showQuickStart = isDirect && stap === 2 && !verbruik
 
   return (
     <div className="pt-24 pb-12 md:pt-28 md:pb-16">
@@ -44,15 +49,23 @@ function CalculatorContent() {
 
         {/* Desktop: max-w-5xl voor meer horizontale ruimte, mobiel: max-w-3xl */}
         <div className="max-w-3xl lg:max-w-5xl mx-auto">
-          {/* Progress */}
-          <div className="mb-6 md:mb-8">
-            <ProgressBar currentStep={stap} totalSteps={TOTAL_STEPS} />
-          </div>
+          {/* Progress - hide when showing QuickStart */}
+          {!showQuickStart && (
+            <div className="mb-6 md:mb-8">
+              <ProgressBar currentStep={stap} totalSteps={TOTAL_STEPS} />
+            </div>
+          )}
 
           {/* Form Card - Desktop: compactere padding */}
           <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-6 md:p-8 lg:p-10">
-            {stap === 1 && <VerbruikForm />}
-            {stap === 2 && <BedrijfsgegevensForm />}
+            {showQuickStart ? (
+              <QuickStartStep />
+            ) : (
+              <>
+                {stap === 1 && <VerbruikForm />}
+                {stap === 2 && <BedrijfsgegevensForm />}
+              </>
+            )}
           </div>
 
           {/* Help text */}
