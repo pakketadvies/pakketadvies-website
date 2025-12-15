@@ -79,6 +79,11 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice }: HomepageBe
   }
 
   const getBesparing = (contract: BestDeal) => {
+    // Use estimatedBesparing from API if available (based on Eneco model)
+    if ((contract as any).estimatedBesparing !== undefined) {
+      return (contract as any).estimatedBesparing
+    }
+    // Fallback: calculate from average price
     if (averagePrice > 0 && contract.estimatedMaandbedrag < averagePrice) {
       return averagePrice - contract.estimatedMaandbedrag
     }

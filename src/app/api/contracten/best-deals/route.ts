@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { calculateContractCosts } from '@/lib/bereken-contract-internal'
+import { berekenEnecoModelContractKosten } from '@/lib/energie-berekening'
 
 export async function GET(request: Request) {
   try {
@@ -86,6 +87,19 @@ export async function GET(request: Request) {
     const defaultElektriciteitDal = 2000 // kWh/year
     const defaultGas = 1200 // m³/year
     const defaultPostcode = '1000AA' // Amsterdam as default
+    const heeftEnkeleMeter = false // Default: dubbele meter
+
+    // Calculate Eneco model contract costs for comparison (baseline for savings)
+    const enecoModelKosten = await berekenEnecoModelContractKosten(
+      defaultElektriciteitNormaal,
+      defaultElektriciteitDal,
+      defaultGas,
+      heeftEnkeleMeter,
+      supabase,
+      '3x25A',
+      'G6'
+    )
+    const enecoModelMaandbedrag = enecoModelKosten?.maandbedrag || 0
 
     // Calculate prices for each contract using the actual calculation function
     const contractenMetPrijzen = await Promise.all(
@@ -121,9 +135,15 @@ export async function GET(request: Request) {
           if (berekenResult.success && berekenResult.breakdown) {
             const maandbedrag = Math.round(berekenResult.breakdown.totaal.maandInclBtw || 0)
             
+            // Calculate savings compared to Eneco model contract
+            const besparing = enecoModelMaandbedrag > 0 && maandbedrag < enecoModelMaandbedrag
+              ? Math.round(enecoModelMaandbedrag - maandbedrag)
+              : 0
+            
             return {
               ...contract,
               estimatedMaandbedrag: maandbedrag > 0 ? maandbedrag : 150,
+              estimatedBesparing: besparing,
               rating: details.rating || 0,
             }
           }
@@ -135,14 +155,18 @@ export async function GET(request: Request) {
         return {
           ...contract,
           estimatedMaandbedrag: 150, // Fallback to reasonable default
+          estimatedBesparing: 0,
           rating: details.rating || 0,
         }
       })
     )
 
-    // Calculate average price
-    const totalPrice = contractenMetPrijzen.reduce((sum: number, c: any) => sum + c.estimatedMaandbedrag, 0)
-    const averagePrice = validContracten.length > 0 ? Math.round(totalPrice / validContracten.length) : 0
+    // Calculate average price (use Eneco model as average if available)
+    const averagePrice = enecoModelMaandbedrag > 0 
+      ? enecoModelMaandbedrag 
+      : (validContracten.length > 0 
+          ? Math.round(contractenMetPrijzen.reduce((sum: number, c: any) => sum + c.estimatedMaandbedrag, 0) / validContracten.length)
+          : 0)
 
     // Sort by: aanbevolen > rating > price
     contractenMetPrijzen.sort((a: any, b: any) => {
