@@ -60,7 +60,6 @@ function CalculatorContent() {
           </div>
         </div>
       </div>
-    </div>
   )
 }
 
