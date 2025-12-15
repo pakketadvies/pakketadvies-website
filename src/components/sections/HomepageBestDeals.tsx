@@ -184,7 +184,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
             ))}
           </div>
           <span className="text-white font-semibold text-xs">4.9/5</span>
-          <span className="text-gray-400 text-xs">(7.500+ reviews)</span>
+          <span className="text-gray-400 text-xs">(2.500+ reviews)</span>
         </div>
 
         {/* Filter Buttons - Compact */}
