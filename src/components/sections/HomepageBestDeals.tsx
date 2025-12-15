@@ -206,8 +206,8 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
       </div>
 
       {/* Divider */}
-      <div className="border-t border-white/10 pt-4">
-        <h3 className="text-base font-semibold text-white mb-3">
+      <div className="border-t border-white/10 pt-4 mb-3">
+        <h3 className="text-base font-semibold text-white">
           Beste aanbiedingen
         </h3>
       </div>
@@ -321,9 +321,9 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
         })}
       </div>
 
-      {/* Mobile: Horizontal Scroll */}
-      <div className="lg:hidden">
-        <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide snap-x snap-mandatory -mx-4">
+      {/* Mobile: Horizontal Scroll - Full width (compensate container + wrapper padding) */}
+      <div className="lg:hidden -mx-4 sm:-mx-6">
+        <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide snap-x snap-mandatory">
           {contracts.map((contract, index) => {
             const details = getContractDetails(contract)
             const rating = getRating(contract)
