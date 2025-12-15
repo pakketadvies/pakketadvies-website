@@ -167,32 +167,6 @@ export function QuickStartStep() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-teal-500 rounded-2xl mb-4">
-          <MapPin className="w-8 h-8 text-white" weight="bold" />
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-brand-navy-500 mb-2">
-          Waar is je energieaansluiting?
-        </h2>
-        <p className="text-gray-600">
-          Vul je postcode en huisnummer in om direct door te gaan naar de aanvraag
-        </p>
-      </div>
-
-      {/* Info banner */}
-      <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <Warning className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
-          <div className="text-sm text-brand-teal-900">
-            <p className="font-semibold mb-1">Indicatief verbruik</p>
-            <p>
-              We gebruiken standaard verbruikswaarden voor de prijsberekening. Je kunt deze later aanpassen in het aanvraagformulier.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && (
