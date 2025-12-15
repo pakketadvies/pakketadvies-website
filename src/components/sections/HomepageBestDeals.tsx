@@ -26,36 +26,44 @@ interface BestDeal {
 
 interface HomepageBestDealsProps {
   averagePrice?: number
+  initialData?: {
+    contracten: BestDeal[]
+    averagePrice: number
+  }
 }
 
-export function HomepageBestDeals({ averagePrice: propAveragePrice }: HomepageBestDealsProps) {
-  const [contracts, setContracts] = useState<BestDeal[]>([])
-  const [averagePrice, setAveragePrice] = useState(propAveragePrice || 0)
-  const [loading, setLoading] = useState(true)
+export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData }: HomepageBestDealsProps) {
+  const [contracts, setContracts] = useState<BestDeal[]>(initialData?.contracten || [])
+  const [averagePrice, setAveragePrice] = useState(initialData?.averagePrice || propAveragePrice || 0)
+  const [loading, setLoading] = useState(!initialData) // Only show loading if no initial data
   const [filter, setFilter] = useState<'alle' | 'vast' | 'dynamisch'>('alle')
 
   useEffect(() => {
-    const fetchBestDeals = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/contracten/best-deals?limit=5&type=${filter}`)
-        const data = await response.json()
-        
-        if (data.contracten) {
-          setContracts(data.contracten)
-          if (data.averagePrice) {
-            setAveragePrice(data.averagePrice)
+    // Only fetch if filter changed from 'alle' (initial load has server data)
+    // Or if there's no initial data
+    if (!initialData || filter !== 'alle') {
+      const fetchBestDeals = async () => {
+        try {
+          setLoading(true)
+          const response = await fetch(`/api/contracten/best-deals?limit=5&type=${filter}`)
+          const data = await response.json()
+          
+          if (data.contracten) {
+            setContracts(data.contracten)
+            if (data.averagePrice) {
+              setAveragePrice(data.averagePrice)
+            }
           }
+        } catch (error) {
+          console.error('Error fetching best deals:', error)
+        } finally {
+          setLoading(false)
         }
-      } catch (error) {
-        console.error('Error fetching best deals:', error)
-      } finally {
-        setLoading(false)
       }
-    }
 
-    fetchBestDeals()
-  }, [filter])
+      fetchBestDeals()
+    }
+  }, [filter, initialData])
 
   const getContractDetails = (contract: BestDeal) => {
     return contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}

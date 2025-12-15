@@ -5,7 +5,14 @@ import Image from 'next/image'
 import { QuickCalculator } from '@/components/calculator/QuickCalculator'
 import { HomepageBestDeals } from '@/components/sections/HomepageBestDeals'
 
-export function Hero() {
+interface HeroProps {
+  initialBestDeals?: {
+    contracten: any[]
+    averagePrice: number
+  }
+}
+
+export function Hero({ initialBestDeals }: HeroProps = {} as HeroProps) {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-navy-500 pt-20 md:pt-24">
       {/* Background Image with Overlay */}
@@ -36,7 +43,7 @@ export function Hero() {
 
           {/* Best Deals Section - Mobile */}
           <div className="w-full px-4">
-            <HomepageBestDeals />
+            <HomepageBestDeals initialData={initialBestDeals} />
           </div>
 
           {/* Calculator - Prominent on mobile, minder marge */}
@@ -75,7 +82,7 @@ export function Hero() {
         <div className="hidden lg:grid lg:grid-cols-2 gap-12 items-start">
           {/* Best Deals Section */}
           <div className="sticky top-8">
-            <HomepageBestDeals />
+            <HomepageBestDeals initialData={initialBestDeals} />
           </div>
 
           {/* Quick Calculator Widget */}

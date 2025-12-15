@@ -7,6 +7,7 @@ import { HowItWorks } from '@/components/sections/HowItWorks'
 import { Testimonials } from '@/components/sections/Testimonials'
 import { CTA } from '@/components/sections/CTA'
 import { OrganizationSchema } from '@/components/seo/StructuredData'
+import { getBestDeals } from '@/lib/get-best-deals'
 
 export const metadata: Metadata = {
   title: 'PakketAdvies - Het beste energiecontract voor uw bedrijf',
@@ -39,11 +40,14 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://pakketadvies.nl'),
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch best deals server-side for instant loading
+  const bestDealsData = await getBestDeals(5, 'alle')
+
   return (
     <>
       <OrganizationSchema />
-      <Hero />
+      <Hero initialBestDeals={bestDealsData} />
       <ContractTypes />
       <Sectors />
       <Features />
