@@ -225,12 +225,12 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice }: HomepageBe
 
                   {/* Logo */}
                   {contract.leverancier.logo_url && (
-                    <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-200 p-1.5 flex items-center justify-center flex-shrink-0">
+                    <div className="w-14 h-14 bg-gray-50 rounded-lg border border-gray-200 p-2 flex items-center justify-center flex-shrink-0">
                       <Image
                         src={contract.leverancier.logo_url}
                         alt={contract.leverancier.naam}
-                        width={32}
-                        height={32}
+                        width={48}
+                        height={48}
                         className="object-contain"
                       />
                     </div>

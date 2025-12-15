@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { calculateContractCosts } from '@/lib/bereken-contract-internal'
 
 export async function GET(request: Request) {
   try {
@@ -79,60 +80,65 @@ export async function GET(request: Request) {
       return false
     })
 
-    // Calculate average monthly price using typical MKB usage
-    // Using typical MKB usage: 6000 kWh/year (4000 normaal + 2000 dal), 1000 m³/year
+    // Calculate prices using the actual contract calculation for accurate results
+    // Using typical MKB usage: 6000 kWh/year (4000 normaal + 2000 dal), 1200 m³/year
     const defaultElektriciteitNormaal = 4000 // kWh/year
     const defaultElektriciteitDal = 2000 // kWh/year
-    const defaultGas = 1000 // m³/year
-    const defaultAansluitwaardeElektriciteit = '3x25A'
-    const defaultAansluitwaardeGas = 'G6'
-    const btwPercentage = 1.21 // 21% BTW
+    const defaultGas = 1200 // m³/year
+    const defaultPostcode = '1000AA' // Amsterdam as default
 
-    // Calculate prices for each contract
-    const contractenMetPrijzen = validContracten.map((contract: any) => {
-      const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
-      
-      // Get tarieven based on contract type
-      let tariefElektriciteitNormaal = 0
-      let tariefElektriciteitDal = 0
-      let tariefGas = 0
-      const vastrechtStroom = details.vastrecht_stroom_maand || 4.00
-      const vastrechtGas = details.vastrecht_gas_maand || 4.00
+    // Calculate prices for each contract using the actual calculation function
+    const contractenMetPrijzen = await Promise.all(
+      validContracten.map(async (contract: any) => {
+        const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
+        
+        try {
+          // Use the actual contract calculation function for accurate pricing
+          const berekenInput = {
+            elektriciteitNormaal: defaultElektriciteitNormaal,
+            elektriciteitDal: defaultElektriciteitDal,
+            gas: defaultGas,
+            terugleveringJaar: 0,
+            aansluitwaardeElektriciteit: '3x25A',
+            aansluitwaardeGas: 'G6',
+            postcode: defaultPostcode,
+            contractType: contract.type === 'maatwerk' ? 'maatwerk' : contract.type as 'vast' | 'dynamisch' | 'maatwerk',
+            tariefElektriciteitNormaal: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_elektriciteit_normaal || 0) : 0,
+            tariefElektriciteitDal: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_elektriciteit_dal || undefined) : undefined,
+            tariefElektriciteitEnkel: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_elektriciteit_enkel || undefined) : undefined,
+            tariefGas: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_gas || 0) : 0,
+            tariefTerugleveringKwh: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_teruglevering_kwh || 0) : 0,
+            opslagElektriciteit: contract.type === 'dynamisch' ? (details.opslag_elektriciteit_normaal || details.opslag_elektriciteit || 0) : undefined,
+            opslagGas: contract.type === 'dynamisch' ? (details.opslag_gas || 0) : undefined,
+            opslagTeruglevering: contract.type === 'dynamisch' ? (details.opslag_teruglevering || 0) : undefined,
+            vastrechtStroomMaand: details.vastrecht_stroom_maand || 4.00,
+            vastrechtGasMaand: details.vastrecht_gas_maand || 4.00,
+            heeftDubbeleMeter: true,
+          }
 
-      if (contract.type === 'vast') {
-        tariefElektriciteitNormaal = details.tarief_elektriciteit_normaal || 0
-        tariefElektriciteitDal = details.tarief_elektriciteit_dal || 0
-        tariefGas = details.tarief_gas || 0
-      } else if (contract.type === 'dynamisch') {
-        // For dynamic, we use opslag - this is added to market price
-        // We'll estimate with a base market price of ~0.28 cent/kWh and ~1.40 cent/m³
-        const baseElektriciteit = 0.28 // Approximate base market price
-        const baseGas = 1.40 // Approximate base market price
-        tariefElektriciteitNormaal = baseElektriciteit + (details.opslag_elektriciteit_normaal || 0)
-        tariefElektriciteitDal = baseElektriciteit + (details.opslag_elektriciteit_dal || 0)
-        tariefGas = baseGas + (details.opslag_gas || 0)
-      } else if (contract.type === 'maatwerk') {
-        tariefElektriciteitNormaal = details.tarief_elektriciteit_normaal || 0
-        tariefElektriciteitDal = details.tarief_elektriciteit_dal || 0
-        tariefGas = details.tarief_gas || 0
-      }
+          const berekenResult = await calculateContractCosts(berekenInput, supabase)
 
-      // Calculate yearly costs (including BTW)
-      const kostenElektriciteitNormaal = (defaultElektriciteitNormaal * tariefElektriciteitNormaal) / 100
-      const kostenElektriciteitDal = (defaultElektriciteitDal * tariefElektriciteitDal) / 100
-      const kostenGas = (defaultGas * tariefGas) / 100
-      const vastrechtenJaar = (vastrechtStroom + vastrechtGas) * 12
-      
-      const jaarkostenExclBtw = kostenElektriciteitNormaal + kostenElektriciteitDal + kostenGas + vastrechtenJaar
-      const jaarkostenInclBtw = jaarkostenExclBtw * btwPercentage
-      const maandbedrag = Math.round(jaarkostenInclBtw / 12)
+          if (berekenResult.success && berekenResult.breakdown) {
+            const maandbedrag = Math.round(berekenResult.breakdown.totaal.maandInclBtw || 0)
+            
+            return {
+              ...contract,
+              estimatedMaandbedrag: maandbedrag > 0 ? maandbedrag : 150,
+              rating: details.rating || 0,
+            }
+          }
+        } catch (error) {
+          console.error(`Error calculating price for contract ${contract.id}:`, error)
+        }
 
-      return {
-        ...contract,
-        estimatedMaandbedrag: maandbedrag,
-        rating: details.rating || 0,
-      }
-    })
+        // Fallback: simplified estimate if calculation fails
+        return {
+          ...contract,
+          estimatedMaandbedrag: 150, // Fallback to reasonable default
+          rating: details.rating || 0,
+        }
+      })
+    )
 
     // Calculate average price
     const totalPrice = contractenMetPrijzen.reduce((sum: number, c: any) => sum + c.estimatedMaandbedrag, 0)
