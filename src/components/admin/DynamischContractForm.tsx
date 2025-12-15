@@ -21,6 +21,7 @@ const dynamischContractSchema = z.object({
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
   target_audience: z.enum(['particulier', 'zakelijk', 'both']), // NIEUW: address type targeting
   verbruik_type: z.enum(['kleinverbruik', 'grootverbruik', 'beide']), // NIEUW: verbruik type filtering
+  tonen_op_homepage: z.boolean(), // NIEUW: tonen op homepage carousel
   
   opslag_elektriciteit: z.number().min(0, 'Opslag moet positief zijn'),
   opslag_gas: z.number().min(0).nullable(),
@@ -90,6 +91,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
       target_audience: (contract?.target_audience as 'particulier' | 'zakelijk' | 'both') || 'both',
       verbruik_type: (contract?.details_dynamisch?.verbruik_type as 'kleinverbruik' | 'grootverbruik' | 'beide') || 'beide',
+      tonen_op_homepage: contract?.tonen_op_homepage ?? false,
       opslag_elektriciteit: contract?.details_dynamisch?.opslag_elektriciteit || 0,
       opslag_gas: contract?.details_dynamisch?.opslag_gas || null,
       opslag_teruglevering: contract?.details_dynamisch?.opslag_teruglevering || 0,
@@ -310,6 +312,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         volgorde: data.volgorde,
         zichtbaar_bij_teruglevering: data.zichtbaar_bij_teruglevering,
         target_audience: data.target_audience,
+        tonen_op_homepage: data.tonen_op_homepage,
       }
 
       let contractId = contract?.id
@@ -687,6 +690,11 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
             <div className="flex items-center gap-3">
               <input {...register('populair')} type="checkbox" id="populair_dyn" className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2" disabled={loading} />
               <label htmlFor="populair_dyn" className="text-sm font-medium text-brand-navy-500 cursor-pointer">Markeer als populair contract</label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input {...register('tonen_op_homepage')} type="checkbox" id="tonen_op_homepage_dyn" className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2" disabled={loading} />
+              <label htmlFor="tonen_op_homepage_dyn" className="text-sm font-medium text-brand-navy-500 cursor-pointer">Tonen op homepage carousel</label>
             </div>
           </div>
         </div>

@@ -22,6 +22,7 @@ const maatwerkContractSchema = z.object({
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
   target_audience: z.enum(['particulier', 'zakelijk', 'both']), // NIEUW: address type targeting
+  tonen_op_homepage: z.boolean(), // NIEUW: tonen op homepage carousel
 
   // Identiek aan vast contract
   looptijd: z.enum(['1', '2', '3', '4', '5']),
@@ -107,6 +108,7 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
       target_audience: (contract?.target_audience as 'particulier' | 'zakelijk' | 'both') || 'both',
       verbruik_type: (contract?.details_maatwerk?.verbruik_type as 'kleinverbruik' | 'grootverbruik' | 'beide') || 'beide',
+      tonen_op_homepage: contract?.tonen_op_homepage ?? false,
       looptijd: (contract?.details_maatwerk?.looptijd?.toString() || '1') as '1' | '2' | '3' | '4' | '5',
       tarief_elektriciteit_enkel: contract?.details_maatwerk?.tarief_elektriciteit_enkel || null,
       tarief_elektriciteit_normaal: contract?.details_maatwerk?.tarief_elektriciteit_normaal || null,
@@ -345,6 +347,7 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         volgorde: data.volgorde,
         zichtbaar_bij_teruglevering: data.zichtbaar_bij_teruglevering,
         target_audience: data.target_audience,
+        tonen_op_homepage: data.tonen_op_homepage,
       }
 
       let contractId = contract?.id
@@ -1071,6 +1074,19 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
               />
               <label htmlFor="populair_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
                 Markeer als populair contract
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                {...register('tonen_op_homepage')}
+                type="checkbox"
+                id="tonen_op_homepage_maat"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2"
+                disabled={loading}
+              />
+              <label htmlFor="tonen_op_homepage_maat" className="text-sm font-medium text-brand-navy-500 cursor-pointer">
+                Tonen op homepage carousel
               </label>
             </div>
           </div>

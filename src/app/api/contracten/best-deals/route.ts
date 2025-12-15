@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     
     const supabase = await createClient()
     
-    // Get all active contracts with leverancier info
+    // Get all active contracts with leverancier info that are marked to show on homepage
     let query = supabase
       .from('contracten')
       .select(`
@@ -19,6 +19,7 @@ export async function GET(request: Request) {
         leverancier:leveranciers(*)
       `)
       .eq('actief', true)
+      .eq('tonen_op_homepage', true) // Only get contracts marked for homepage
     
     // Filter by type if specified
     if (type !== 'alle') {

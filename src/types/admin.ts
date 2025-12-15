@@ -24,6 +24,7 @@ export interface Contract {
   volgorde: number
   zichtbaar_bij_teruglevering: boolean | null // NULL = altijd tonen, TRUE = alleen bij teruglevering, FALSE = alleen zonder teruglevering
   target_audience: 'particulier' | 'zakelijk' | 'both' // NIEUW: Bepaalt voor welke doelgroep het contract wordt getoond
+  tonen_op_homepage: boolean // NIEUW: Bepaalt of dit contract op de homepage carousel wordt getoond
   created_at: string
   updated_at: string
   
