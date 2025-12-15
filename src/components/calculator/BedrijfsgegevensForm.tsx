@@ -1536,7 +1536,8 @@ function BedrijfsgegevensFormContent() {
           Terug
         </Button>
       </div>
-    </form>
+      </form>
+    </>
   )
 }
 
