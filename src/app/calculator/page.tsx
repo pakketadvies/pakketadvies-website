@@ -29,8 +29,7 @@ function CalculatorContent() {
   const showQuickStart = isDirect && stap === 2 && !verbruik
 
   return (
-    <div className="pt-24 pb-12 md:pt-28 md:pb-16">
-      <div className="container-custom">
+    <div className="container-custom">
         {/* Desktop: max-w-5xl voor meer horizontale ruimte, mobiel: max-w-3xl */}
         <div className="max-w-3xl lg:max-w-5xl mx-auto">
           {/* Form Card - Desktop: compactere padding */}

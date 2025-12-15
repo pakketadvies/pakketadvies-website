@@ -69,7 +69,7 @@ export default function CalculatorLayout({
       </div>
 
       {/* Calculator Content */}
-      <main className="flex-grow bg-gray-50">
+      <main className="flex-grow bg-gray-50 pt-24 pb-12 md:pt-28 md:pb-16">
         {children}
       </main>
     </div>
