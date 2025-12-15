@@ -166,7 +166,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
                 Overstappen in december?
               </p>
               <p className="text-gray-300 text-xs">
-                92% kiest voor 1 jaar vast
+                81% kiest voor een dynamisch contract
               </p>
             </div>
           </div>
