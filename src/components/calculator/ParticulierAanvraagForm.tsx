@@ -25,6 +25,7 @@ import {
   MagnifyingGlass
 } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
+import { ContractDetailsCard } from './ContractDetailsCard'
 import { IbanCalculator } from '@/components/ui/IbanCalculator'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
