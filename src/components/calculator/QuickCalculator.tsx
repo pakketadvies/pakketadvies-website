@@ -176,6 +176,17 @@ export function QuickCalculator() {
     },
   })
 
+  // Auto-focus eerste veld (postcode) bij mount
+  const postcodeInputRef = useRef<HTMLInputElement>(null)
+  
+  useEffect(() => {
+    // Auto-focus postcode veld na korte delay (voor betere UX)
+    const timer = setTimeout(() => {
+      postcodeInputRef.current?.focus()
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
+
   // Load data from localStorage on mount
   useEffect(() => {
     if (verbruik) {
@@ -700,7 +711,7 @@ export function QuickCalculator() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5 md:space-y-4">
+      <form onSubmit={onSubmit} className="space-y-5 md:space-y-4 pb-4 md:pb-0">
         {/* Leveringsadres */}
         <div className="space-y-3 md:space-y-2">
           <div className="flex items-center gap-2.5">
@@ -716,9 +727,18 @@ export function QuickCalculator() {
               <div className="col-span-4">
                 <label className="block text-sm md:text-xs font-medium text-gray-700 mb-1.5 md:mb-0.5">Postcode</label>
                 <input
+                  ref={postcodeInputRef}
                   type="text"
                   value={leveringsadressen[0].postcode}
                   onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
+                  onKeyDown={(e) => {
+                    // Auto-advance naar huisnummer wanneer postcode compleet is (6 karakters)
+                    if (e.key === 'Enter' && leveringsadressen[0].postcode.length === 6) {
+                      e.preventDefault()
+                      const huisnummerInput = document.querySelector('input[placeholder="12"]') as HTMLInputElement
+                      huisnummerInput?.focus()
+                    }
+                  }}
                   placeholder="1234AB"
                   maxLength={6}
                   className="w-full px-3.5 md:px-3 py-3.5 md:py-2 text-sm md:text-sm rounded-xl border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
@@ -1133,19 +1153,21 @@ export function QuickCalculator() {
           )}
         </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          className="w-full group relative px-6 md:px-6 py-5 md:py-3.5 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-2xl md:rounded-lg font-bold text-lg md:text-base shadow-lg hover:shadow-xl hover:from-brand-teal-600 hover:to-brand-teal-700 active:scale-[0.99] transition-all duration-300 mt-2"
-        >
-          <span className="flex items-center justify-center gap-2.5 md:gap-2">
-            <MagnifyingGlass weight="bold" className="w-6 h-6 md:w-5 md:h-5" />
-            <span>Bekijk mijn aanbiedingen</span>
-          </span>
-        </button>
-        <p className="text-center text-sm md:text-xs text-gray-500 -mt-1">
-          100% vrijblijvend • Direct resultaat
-        </p>
+        {/* Submit - Sticky op mobile voor betere UX */}
+        <div className="sticky bottom-0 bg-white pt-4 -mb-5 -mx-5 md:mx-0 md:mb-0 px-5 md:px-0 md:static md:bg-transparent md:pt-0">
+          <button
+            type="submit"
+            className="w-full group relative px-6 md:px-6 py-5 md:py-3.5 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-2xl md:rounded-lg font-bold text-lg md:text-base shadow-xl hover:shadow-2xl hover:from-brand-teal-600 hover:to-brand-teal-700 active:scale-[0.99] transition-all duration-300"
+          >
+            <span className="flex items-center justify-center gap-2.5 md:gap-2">
+              <MagnifyingGlass weight="bold" className="w-6 h-6 md:w-5 md:h-5" />
+              <span>Bekijk mijn aanbiedingen</span>
+            </span>
+          </button>
+          <p className="text-center text-sm md:text-xs text-gray-500 mt-2 mb-4 md:mb-0">
+            100% vrijblijvend • Direct resultaat
+          </p>
+        </div>
       </form>
 
       {/* Trust indicators */}
