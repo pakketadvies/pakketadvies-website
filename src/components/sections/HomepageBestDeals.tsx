@@ -324,7 +324,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
       {/* Mobile: Horizontal Scroll - Full width (compensate container-custom + wrapper padding) */}
       {/* Container: 16px (1rem) on mobile, 24px (1.5rem) on sm+. Wrapper: 16px (px-4). Total: 32px mobile, 40px sm+ */}
       <div className="lg:hidden -mx-8 sm:-mx-10">
-        <div className="flex gap-3 overflow-x-auto pl-0 pr-0 pb-4 scrollbar-hide snap-x snap-mandatory">
+        <div className="flex gap-3 overflow-x-auto pl-4 pr-0 pb-4 scrollbar-hide snap-x snap-mandatory">
           {contracts.map((contract, index) => {
             const details = getContractDetails(contract)
             const rating = getRating(contract)
@@ -339,7 +339,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
               <Link
                 key={contract.id}
                 href="/calculator"
-                className={`block flex-shrink-0 w-[280px] snap-start pl-4 ${isLastCard ? 'pr-4' : ''}`}
+                className={`block flex-shrink-0 w-[280px] snap-start ${isLastCard ? 'pr-4' : ''}`}
               >
                 <div className="bg-white rounded-xl p-4 h-full border-2 border-transparent hover:border-brand-teal-500/30 transition-all">
                   {/* Position Badge */}
