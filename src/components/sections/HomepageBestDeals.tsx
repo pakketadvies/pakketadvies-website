@@ -206,8 +206,8 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
       </div>
 
       {/* Divider */}
-      <div className="border-t border-white/10 pt-4 mb-3">
-        <h3 className="text-base font-semibold text-white">
+      <div className="border-t border-white/10 pt-4">
+        <h3 className="text-base font-semibold text-white mb-3">
           Beste aanbiedingen
         </h3>
       </div>
@@ -321,10 +321,9 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
         })}
       </div>
 
-      {/* Mobile: Horizontal Scroll - Full width (compensate container-custom + wrapper padding) */}
-      {/* Container: 16px (1rem) on mobile, 24px (1.5rem) on sm+. Wrapper: 16px (px-4). Total: 32px mobile, 40px sm+ */}
-      <div className="lg:hidden -mx-8 sm:-mx-10">
-        <div className="flex gap-3 overflow-x-auto pl-4 pr-0 pb-4 scrollbar-hide snap-x snap-mandatory">
+      {/* Mobile: Horizontal Scroll */}
+      <div className="lg:hidden">
+        <div className="flex gap-3 overflow-x-auto px-2 pb-4 scrollbar-hide snap-x snap-mandatory -mx-2">
           {contracts.map((contract, index) => {
             const details = getContractDetails(contract)
             const rating = getRating(contract)
@@ -333,13 +332,12 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
             const groen = isGroen(contract)
             const looptijd = getLooptijd(contract)
             const Icon = contract.type === 'vast' ? Lock : Lightning
-            const isLastCard = index === contracts.length - 1
 
             return (
               <Link
                 key={contract.id}
                 href="/calculator"
-                className={`block flex-shrink-0 w-[280px] snap-start ${isLastCard ? 'pr-4' : ''}`}
+                className="block flex-shrink-0 w-[280px] snap-start"
               >
                 <div className="bg-white rounded-xl p-4 h-full border-2 border-transparent hover:border-brand-teal-500/30 transition-all">
                   {/* Position Badge */}

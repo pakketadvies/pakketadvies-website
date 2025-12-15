@@ -197,12 +197,12 @@ export default function ContractCard({
         </div>
       )}
 
-      <CardContent className="pt-6">
+      <CardContent className="pt-6 md:pt-6">
         {/* Leverancier met logo */}
-        <div className="mb-6 flex items-start gap-4">
+        <div className="mb-4 md:mb-6 flex items-start gap-3 md:gap-4">
           {/* Logo */}
           {contract.leverancier.logo && (
-            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg border-2 border-gray-100 p-2 flex items-center justify-center">
+            <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white rounded-lg border-2 border-gray-100 p-1.5 md:p-2 flex items-center justify-center">
               <img 
                 src={contract.leverancier.logo} 
                 alt={`${contract.leverancier.naam} logo`}
@@ -214,7 +214,7 @@ export default function ContractCard({
           {/* Naam en details */}
           <div className="flex-1 min-w-0">
             <h3 
-              className="text-xl sm:text-2xl font-bold text-brand-navy-500 mb-2 sm:mb-2.5 pr-0" 
+              className="text-lg md:text-xl lg:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2 lg:mb-2.5 pr-0" 
               title={contract.leverancier.naam}
               style={{
                 wordBreak: 'break-word',
@@ -234,29 +234,29 @@ export default function ContractCard({
             
             {/* Badges - Direct onder de naam, perfect uitgelijnd */}
             {(contract.aanbevolen || contract.populair || contract.groeneEnergie) && (
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
+              <div className="flex flex-wrap items-center gap-1 md:gap-1.5 lg:gap-2 mb-1.5 md:mb-2.5 lg:mb-3">
                 {contract.aanbevolen && (
-                  <Badge variant="success" className="shadow-md text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5">
-                    <Check weight="bold" className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 flex-shrink-0" />
+                  <Badge variant="success" className="shadow-md text-xs md:text-xs lg:text-sm px-1.5 md:px-2 lg:px-2.5 py-0.5 md:py-1 lg:py-1.5">
+                    <Check weight="bold" className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 mr-0.5 md:mr-1 flex-shrink-0" />
                     <span className="whitespace-nowrap">Aanbevolen</span>
                   </Badge>
                 )}
                 {contract.populair && !contract.aanbevolen && (
-                  <Badge variant="info" className="shadow-md text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5">
-                    <Star weight="fill" className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 flex-shrink-0" />
+                  <Badge variant="info" className="shadow-md text-xs md:text-xs lg:text-sm px-1.5 md:px-2 lg:px-2.5 py-0.5 md:py-1 lg:py-1.5">
+                    <Star weight="fill" className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 mr-0.5 md:mr-1 flex-shrink-0" />
                     <span className="whitespace-nowrap">Populair</span>
                   </Badge>
                 )}
                 {contract.groeneEnergie && (
-                  <Badge className="bg-green-100 text-green-700 border-green-200 shadow-md text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5">
-                    <Leaf weight="duotone" className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 flex-shrink-0" />
+                  <Badge className="bg-green-100 text-green-700 border-green-200 shadow-md text-xs md:text-xs lg:text-sm px-1.5 md:px-2 lg:px-2.5 py-0.5 md:py-1 lg:py-1.5">
+                    <Leaf weight="duotone" className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 mr-0.5 md:mr-1 flex-shrink-0" />
                     <span className="whitespace-nowrap">Groen</span>
                   </Badge>
                 )}
               </div>
             )}
             
-            <p className="text-sm text-gray-600 line-clamp-2 mt-0.5">
+            <p className="text-xs md:text-sm text-gray-600 line-clamp-2 mt-0.5">
               {contract.looptijd 
                 ? `Vast contract • ${contract.looptijd} jaar`
                 : contract.type === 'dynamisch'
@@ -267,61 +267,85 @@ export default function ContractCard({
           </div>
         </div>
 
-        {/* Prijs */}
-        <div className="mb-6 pb-6 border-b-2 border-gray-100">
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-4xl font-bold text-brand-navy-500">
-              €{contract.maandbedrag}
-            </span>
-            <span className="text-gray-500">/maand</span>
-          </div>
-          <div className="text-sm text-gray-500 mb-3">
-            €{contract.jaarbedrag.toLocaleString()} per jaar
-          </div>
-          {contract.besparing && contract.besparing > 0 && (
-            <Tooltip
-              title="Indicatie besparing"
-              content={
-                <div className="space-y-5">
-                  {/* Cost comparison */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-700">Jaarkosten Eneco</span>
-                      <span className="text-base font-semibold text-brand-navy-700">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-700">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
-                      <span className="text-base font-semibold text-brand-navy-700">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
-                    <div className="pt-3 mt-2 border-t-2 border-gray-200 flex justify-between items-center">
-                      <span className="text-base font-bold text-green-600">Besparing per jaar</span>
-                      <span className="text-base font-bold text-green-600">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
-                  </div>
-                  {/* Explanation */}
-                  <div className="pt-4 border-t border-gray-100 space-y-3">
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Wij berekenen de besparing met het standaard variabele contract van Eneco omdat u deze tarieven waarschijnlijk in rekening gebracht krijgt als uw vaste contract inmiddels is verlopen, of gaat krijgen zolang u niet overstapt.
-                    </p>
-                    <p className="text-sm font-medium text-gray-700 leading-relaxed">
-                      Een standaard variabel contract is een flexibel energiecontract voor onbepaalde tijd met variabele tarieven.
-                    </p>
-                  </div>
-                </div>
-              }
-              position="bottom"
-            >
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-sm cursor-pointer hover:bg-green-100 active:bg-green-200 transition-colors group">
-                <Check weight="bold" className="w-4 h-4" />
-                <span>€{contract.besparing} besparing/maand</span>
-                <Info weight="fill" className="w-4 h-4 text-green-600 opacity-60 group-hover:opacity-100 transition-opacity" />
+        {/* Prijs en Rating op één lijn op mobiel */}
+        <div className="mb-4 md:mb-6 pb-4 md:pb-6 border-b-2 border-gray-100">
+          <div className="flex items-start justify-between gap-3 mb-2 md:mb-1">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-1.5 md:gap-2 mb-1">
+                <span className="text-3xl md:text-4xl font-bold text-brand-navy-500">
+                  €{contract.maandbedrag}
+                </span>
+                <span className="text-xs md:text-base text-gray-500">/maand</span>
               </div>
-            </Tooltip>
-          )}
+              <div className="text-xs md:text-sm text-gray-500 mb-2 md:mb-3">
+                €{contract.jaarbedrag.toLocaleString()} per jaar
+              </div>
+              {contract.besparing && contract.besparing > 0 && (
+                <Tooltip
+                  title="Indicatie besparing"
+                  content={
+                    <div className="space-y-5">
+                      {/* Cost comparison */}
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-sm text-gray-700">Jaarkosten Eneco</span>
+                          <span className="text-base font-semibold text-brand-navy-700">€{((contract.besparing * 12) + contract.jaarbedrag).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-sm text-gray-700">Jaarkosten van dit contract van {contract.leverancier.naam}</span>
+                          <span className="text-base font-semibold text-brand-navy-700">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="pt-3 mt-2 border-t-2 border-gray-200 flex justify-between items-center">
+                          <span className="text-base font-bold text-green-600">Besparing per jaar</span>
+                          <span className="text-base font-bold text-green-600">€{(contract.besparing * 12).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                      {/* Explanation */}
+                      <div className="pt-4 border-t border-gray-100 space-y-3">
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          Wij berekenen de besparing met het standaard variabele contract van Eneco omdat u deze tarieven waarschijnlijk in rekening gebracht krijgt als uw vaste contract inmiddels is verlopen, of gaat krijgen zolang u niet overstapt.
+                        </p>
+                        <p className="text-sm font-medium text-gray-700 leading-relaxed">
+                          Een standaard variabel contract is een flexibel energiecontract voor onbepaalde tijd met variabele tarieven.
+                        </p>
+                      </div>
+                    </div>
+                  }
+                  position="bottom"
+                >
+                  <div className="inline-flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-xs md:text-sm cursor-pointer hover:bg-green-100 active:bg-green-200 transition-colors group">
+                    <Check weight="bold" className="w-3 h-3 md:w-4 md:h-4" />
+                    <span>€{contract.besparing}/mnd</span>
+                    <Info weight="fill" className="w-3 h-3 md:w-4 md:h-4 text-green-600 opacity-60 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </Tooltip>
+              )}
+            </div>
+            
+            {/* Rating - Rechts op mobiel */}
+            <div className="flex flex-col items-end gap-1 md:hidden flex-shrink-0">
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    weight={i < Math.floor(contract.rating) ? 'fill' : 'regular'}
+                    className={`w-3 h-3 ${
+                      i < Math.floor(contract.rating)
+                        ? 'text-yellow-500'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-gray-600 font-medium">
+                {contract.rating} ({contract.aantalReviews})
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-6">
+        {/* Rating - Desktop versie (onder prijs) */}
+        <div className="hidden md:flex items-center gap-2 mb-4 md:mb-6">
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
               <Star
@@ -341,18 +365,18 @@ export default function ContractCard({
         </div>
 
         {/* 3 Accordions */}
-        <div className="space-y-2 mb-6">
+        <div className="space-y-1.5 md:space-y-2 mb-4 md:mb-6">
           {/* Prijsdetails */}
           <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
             <button
               onClick={() => toggleAccordion('prijsdetails')}
-              className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
+              className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
             >
-              <span className="font-semibold text-brand-navy-500">Prijsdetails</span>
+              <span className="font-semibold text-sm md:text-base text-brand-navy-500">Prijsdetails</span>
               {openAccordion === 'prijsdetails' ? (
-                <CaretUp weight="bold" className="w-5 h-5 text-gray-600" />
+                <CaretUp weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               ) : (
-                <CaretDown weight="bold" className="w-5 h-5 text-gray-600" />
+                <CaretDown weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               )}
             </button>
             {openAccordion === 'prijsdetails' && (
@@ -715,13 +739,13 @@ export default function ContractCard({
           <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
             <button
               onClick={() => toggleAccordion('voorwaarden')}
-              className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
+              className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
             >
-              <span className="font-semibold text-brand-navy-500">Voorwaarden</span>
+              <span className="font-semibold text-sm md:text-base text-brand-navy-500">Voorwaarden</span>
               {openAccordion === 'voorwaarden' ? (
-                <CaretUp weight="bold" className="w-5 h-5 text-gray-600" />
+                <CaretUp weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               ) : (
-                <CaretDown weight="bold" className="w-5 h-5 text-gray-600" />
+                <CaretDown weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               )}
             </button>
             {openAccordion === 'voorwaarden' && (
@@ -804,13 +828,13 @@ export default function ContractCard({
           <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
             <button
               onClick={() => toggleAccordion('over')}
-              className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
+              className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
             >
-              <span className="font-semibold text-brand-navy-500">Over leverancier</span>
+              <span className="font-semibold text-sm md:text-base text-brand-navy-500">Over leverancier</span>
               {openAccordion === 'over' ? (
-                <CaretUp weight="bold" className="w-5 h-5 text-gray-600" />
+                <CaretUp weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               ) : (
-                <CaretDown weight="bold" className="w-5 h-5 text-gray-600" />
+                <CaretDown weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               )}
             </button>
             {openAccordion === 'over' && (
@@ -838,9 +862,9 @@ export default function ContractCard({
         </div>
 
         {/* Actions */}
-        <div className="space-y-3 pt-4 border-t-2 border-gray-100">
+        <div className="space-y-2 md:space-y-3 pt-3 md:pt-4 border-t-2 border-gray-100">
           <Button 
-            className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+            className="w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-sm md:text-base py-2.5 md:py-3"
             onClick={async () => {
               // Track InitiateCheckout event for Facebook Pixel - VOORDAT navigatie
               const eventData = {
@@ -866,7 +890,7 @@ export default function ContractCard({
           >
               Aanvragen
             </Button>
-          <button className="w-full text-gray-600 py-2 text-sm font-medium hover:text-brand-teal-600 transition-colors">
+          <button className="w-full text-gray-600 py-1.5 md:py-2 text-xs md:text-sm font-medium hover:text-brand-teal-600 transition-colors">
             Meer informatie
           </button>
         </div>
