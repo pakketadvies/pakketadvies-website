@@ -49,13 +49,6 @@ function CalculatorContent() {
 
         {/* Desktop: max-w-5xl voor meer horizontale ruimte, mobiel: max-w-3xl */}
         <div className="max-w-3xl lg:max-w-5xl mx-auto">
-          {/* Progress - hide when showing QuickStart */}
-          {!showQuickStart && (
-            <div className="mb-6 md:mb-8">
-              <ProgressBar currentStep={stap} totalSteps={TOTAL_STEPS} />
-            </div>
-          )}
-
           {/* Form Card - Desktop: compactere padding */}
           <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-6 md:p-8 lg:p-10">
             {showQuickStart ? (
