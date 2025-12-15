@@ -139,18 +139,18 @@ export default function EnergieprijzenPage() {
             >
               <span>← Terug naar kennisbank</span>
             </Link>
-
+            
             {/* Badge */}
             <div className="flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
               <ChartLine weight="duotone" className="w-5 h-5 text-brand-teal-300" />
               <span className="text-sm font-semibold text-brand-teal-200">Energieprijzen</span>
             </div>
-
+            
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Inzicht in de{' '}
               <span className="text-brand-teal-500">energiemarkt</span>
             </h1>
-            
+                  
             <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
               Bekijk de actuele en historische marktprijzen voor elektriciteit en gas. Deze prijzen geven inzicht in de energiemarkt en helpen je bij het kiezen van het juiste energiecontract.
             </p>
@@ -202,7 +202,7 @@ export default function EnergieprijzenPage() {
 
       {/* Main Content */}
       <section className="py-6 md:py-12 lg:py-16 bg-white">
-        <div className="container-custom max-w-7xl px-2 md:px-4 lg:px-6">
+              <div className="container-custom max-w-7xl px-2 md:px-4 lg:px-6">
           {/* Info Cards */}
           {huidigeData && (
             <PrijzenInfoCards

@@ -17,7 +17,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       window.history.scrollRestoration = 'manual'
     }
   }, [])
-
+  
   // Prevent overscroll (white space above page)
   useEffect(() => {
     // Prevent negative scroll position
