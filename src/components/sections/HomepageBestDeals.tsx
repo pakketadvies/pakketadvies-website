@@ -333,12 +333,13 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
             const groen = isGroen(contract)
             const looptijd = getLooptijd(contract)
             const Icon = contract.type === 'vast' ? Lock : Lightning
+            const isLastCard = index === contracts.length - 1
 
             return (
               <Link
                 key={contract.id}
                 href="/calculator"
-                className="block flex-shrink-0 w-[280px] snap-start"
+                className={`block flex-shrink-0 w-[280px] snap-start ${isLastCard ? 'pr-4' : ''}`}
               >
                 <div className="bg-white rounded-xl p-4 h-full border-2 border-transparent hover:border-brand-teal-500/30 transition-all">
                   {/* Position Badge */}
