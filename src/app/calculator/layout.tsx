@@ -11,9 +11,6 @@ export default function CalculatorLayout({
 }: {
   children: ReactNode
 }) {
-  const pathname = usePathname()
-  const isResultatenPage = pathname?.includes('/resultaten')
-  
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Calculator Content */}
