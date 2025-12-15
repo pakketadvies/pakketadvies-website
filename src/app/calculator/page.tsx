@@ -3,7 +3,6 @@
 import { Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
-import { ProgressBar } from '@/components/calculator/ProgressBar'
 import { VerbruikForm } from '@/components/calculator/VerbruikForm'
 import { BedrijfsgegevensForm } from '@/components/calculator/BedrijfsgegevensForm'
 import { QuickStartStep } from '@/components/calculator/QuickStartStep'
