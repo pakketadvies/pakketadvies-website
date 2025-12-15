@@ -2,8 +2,6 @@
 
 import type { Metadata } from 'next'
 import { ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
-import { Lightning } from '@phosphor-icons/react'
 
 // Note: Metadata must be in a separate layout.tsx file for client components
 // This is handled in the parent layout
@@ -18,56 +16,6 @@ export default function CalculatorLayout({
   
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Hero Section */}
-      <div className={`bg-brand-navy-500 relative overflow-hidden ${isResultatenPage ? 'pt-24 pb-8 md:pt-32 md:pb-16' : 'pt-32 pb-16'}`}>
-        {/* Background decorations */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container-custom relative z-10">
-          <div className={`max-w-3xl mx-auto text-center ${isResultatenPage ? 'space-y-3 md:space-y-6' : 'space-y-6'}`}>
-            {!isResultatenPage && (
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-teal-500 rounded-2xl shadow-2xl shadow-brand-teal-500/50 mb-4">
-                <Lightning weight="duotone" className="w-8 h-8 text-white" />
-              </div>
-            )}
-            
-            <h1 className={`font-display font-bold text-white leading-tight ${isResultatenPage ? 'text-2xl md:text-4xl lg:text-5xl' : 'text-4xl md:text-5xl lg:text-6xl'}`}>
-              {isResultatenPage ? (
-                <>
-                  Jouw{' '}
-                  <span className="text-brand-teal-500">
-                    resultaten
-                  </span>
-                </>
-              ) : (
-                <>
-                  Bereken je{' '}
-                  <span className="text-brand-teal-500">
-                    besparing
-                  </span>
-                </>
-              )}
-            </h1>
-            
-            {!isResultatenPage && (
-              <p className="text-xl text-gray-300 leading-relaxed">
-                In een paar minuten weten hoeveel je kunt besparen met een beter energiecontract
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Bottom wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60L60 55C120 50 240 40 360 35C480 30 600 30 720 32.5C840 35 960 40 1080 42.5C1200 45 1320 45 1380 45L1440 45V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" fill="#FFFFFF"/>
-          </svg>
-        </div>
-      </div>
-
       {/* Calculator Content */}
       <main className="flex-grow bg-gray-50 pt-24 pb-12 md:pt-28 md:pb-16">
         {children}
