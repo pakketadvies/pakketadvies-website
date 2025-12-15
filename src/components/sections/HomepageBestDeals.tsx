@@ -322,8 +322,8 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
       </div>
 
       {/* Mobile: Horizontal Scroll */}
-      <div className="lg:hidden">
-        <div className="flex gap-3 overflow-x-auto px-2 pb-4 scrollbar-hide snap-x snap-mandatory -mx-2">
+      <div className="lg:hidden -mx-4">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory pl-4">
           {contracts.map((contract, index) => {
             const details = getContractDetails(contract)
             const rating = getRating(contract)
@@ -333,11 +333,14 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
             const looptijd = getLooptijd(contract)
             const Icon = contract.type === 'vast' ? Lock : Lightning
 
+            const isLast = index === contracts.length - 1
+            
             return (
               <Link
                 key={contract.id}
                 href="/calculator"
-                className="block flex-shrink-0 w-[280px] snap-start"
+                className={`block flex-shrink-0 snap-start ${isLast ? 'pr-4' : ''}`}
+                style={{ width: 'calc(100vw - 2rem)' }}
               >
                 <div className="bg-white rounded-xl p-4 h-full border-2 border-transparent hover:border-brand-teal-500/30 transition-all">
                   {/* Position Badge */}
