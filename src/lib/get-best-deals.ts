@@ -6,7 +6,7 @@ export async function getBestDeals(limit: number = 5, type: 'alle' | 'vast' | 'd
   try {
     const supabase = await createClient()
     
-    // Get all active contracts with leverancier info
+    // Get all active contracts with leverancier info that are marked to show on homepage
     let query = supabase
       .from('contracten')
       .select(`
@@ -14,6 +14,7 @@ export async function getBestDeals(limit: number = 5, type: 'alle' | 'vast' | 'd
         leverancier:leveranciers(*)
       `)
       .eq('actief', true)
+      .eq('tonen_op_homepage', true) // Only get contracts marked for homepage
     
     // Filter by type if specified
     if (type !== 'alle') {
