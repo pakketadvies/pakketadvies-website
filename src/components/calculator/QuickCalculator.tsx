@@ -113,6 +113,9 @@ export function QuickCalculator() {
   const router = useRouter()
   const { setVerbruik, verbruik, setAddressType } = useCalculatorStore()
   
+  // Ref voor postcode input (voor auto-focus op desktop)
+  const postcodeInputRef = useRef<HTMLInputElement>(null)
+  
   // State
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
   const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
@@ -176,16 +179,20 @@ export function QuickCalculator() {
     },
   })
 
-  // Auto-focus eerste veld (postcode) bij mount
-  const postcodeInputRef = useRef<HTMLInputElement>(null)
-  
+  // Auto-focus postcode veld op desktop bij mount
   useEffect(() => {
-    // Auto-focus postcode veld na korte delay (voor betere UX)
-    const timer = setTimeout(() => {
-      postcodeInputRef.current?.focus()
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [])
+    // Check of we op desktop zijn (lg breakpoint = 1024px)
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+    
+    if (isDesktop && postcodeInputRef.current) {
+      // Kleine delay om zeker te zijn dat component volledig is gerenderd
+      const timer = setTimeout(() => {
+        postcodeInputRef.current?.focus()
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, []) // Alleen bij mount
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -711,7 +718,7 @@ export function QuickCalculator() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5 md:space-y-4 pb-4 md:pb-0">
+      <form onSubmit={onSubmit} className="space-y-5 md:space-y-4">
         {/* Leveringsadres */}
         <div className="space-y-3 md:space-y-2">
           <div className="flex items-center gap-2.5">
@@ -731,14 +738,6 @@ export function QuickCalculator() {
                   type="text"
                   value={leveringsadressen[0].postcode}
                   onChange={(e) => handleAddressChange('postcode', e.target.value.toUpperCase())}
-                  onKeyDown={(e) => {
-                    // Auto-advance naar huisnummer wanneer postcode compleet is (6 karakters)
-                    if (e.key === 'Enter' && leveringsadressen[0].postcode.length === 6) {
-                      e.preventDefault()
-                      const huisnummerInput = document.querySelector('input[placeholder="12"]') as HTMLInputElement
-                      huisnummerInput?.focus()
-                    }
-                  }}
                   placeholder="1234AB"
                   maxLength={6}
                   className="w-full px-3.5 md:px-3 py-3.5 md:py-2 text-sm md:text-sm rounded-xl border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all bg-white"
@@ -1153,21 +1152,19 @@ export function QuickCalculator() {
           )}
         </div>
 
-        {/* Submit - Sticky op mobile voor betere UX */}
-        <div className="sticky bottom-0 bg-white pt-4 -mb-5 -mx-5 md:mx-0 md:mb-0 px-5 md:px-0 md:static md:bg-transparent md:pt-0">
-          <button
-            type="submit"
-            className="w-full group relative px-6 md:px-6 py-5 md:py-3.5 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-2xl md:rounded-lg font-bold text-lg md:text-base shadow-xl hover:shadow-2xl hover:from-brand-teal-600 hover:to-brand-teal-700 active:scale-[0.99] transition-all duration-300"
-          >
-            <span className="flex items-center justify-center gap-2.5 md:gap-2">
-              <MagnifyingGlass weight="bold" className="w-6 h-6 md:w-5 md:h-5" />
-              <span>Bekijk mijn aanbiedingen</span>
-            </span>
-          </button>
-          <p className="text-center text-sm md:text-xs text-gray-500 mt-2 mb-4 md:mb-0">
-            100% vrijblijvend • Direct resultaat
-          </p>
-        </div>
+        {/* Submit */}
+        <button
+          type="submit"
+          className="w-full group relative px-6 md:px-6 py-5 md:py-3.5 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 text-white rounded-2xl md:rounded-lg font-bold text-lg md:text-base shadow-lg hover:shadow-xl hover:from-brand-teal-600 hover:to-brand-teal-700 active:scale-[0.99] transition-all duration-300 mt-2"
+        >
+          <span className="flex items-center justify-center gap-2.5 md:gap-2">
+            <MagnifyingGlass weight="bold" className="w-6 h-6 md:w-5 md:h-5" />
+            <span>Bekijk mijn aanbiedingen</span>
+          </span>
+        </button>
+        <p className="text-center text-sm md:text-xs text-gray-500 -mt-1">
+          100% vrijblijvend • Direct resultaat
+        </p>
       </form>
 
       {/* Trust indicators */}
