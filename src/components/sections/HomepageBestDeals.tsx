@@ -322,8 +322,8 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
       </div>
 
       {/* Mobile: Horizontal Scroll */}
-      <div className="lg:hidden">
-        <div className="flex gap-3 overflow-x-auto px-2 pr-4 pb-4 scrollbar-hide snap-x snap-mandatory -mx-2">
+      <div className="lg:hidden -mx-4">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory pl-4 pr-4">
           {contracts.map((contract, index) => {
             const details = getContractDetails(contract)
             const rating = getRating(contract)
