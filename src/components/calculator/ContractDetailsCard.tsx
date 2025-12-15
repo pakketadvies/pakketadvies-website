@@ -86,7 +86,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
             <span className="text-xs md:text-sm font-semibold hidden sm:inline">
               {showDetails ? 'Verberg details' : 'Bekijk details'}
             </span>
-            <ChevronDown
+            <CaretDown
               className={`w-4 h-4 md:w-5 md:h-5 transition-transform ${showDetails ? 'rotate-180' : ''}`}
               weight="bold"
             />
