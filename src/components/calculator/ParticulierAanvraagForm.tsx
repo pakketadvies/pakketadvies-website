@@ -535,9 +535,13 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   const korting = contract?.besparing ? contract.besparing * 12 : null // Jaarlijkse besparing als korting
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
-      {/* Header: Meld u nu aan */}
-      <div className="text-center mb-4 md:mb-6">
+    <>
+      {/* Contract Details Card */}
+      <ContractDetailsCard contract={contract} />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+        {/* Header: Meld u nu aan */}
+        <div className="text-center mb-4 md:mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2">
           Meld u nu aan bij {leverancierNaam}
         </h2>
