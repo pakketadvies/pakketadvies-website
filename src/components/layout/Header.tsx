@@ -30,10 +30,10 @@ export function Header() {
       isScrolled ? 'py-3' : 'py-5'
     }`}>
       <div className="container-custom">
-        <nav className={`rounded-2xl transition-all duration-300 ${
+        <nav className={`rounded-2xl transition-all duration-300 bg-white border border-gray-200 ${
           isScrolled 
-            ? 'glass border border-gray-200 shadow-xl backdrop-blur-lg' 
-            : 'bg-white/80 backdrop-blur-sm border border-gray-200'
+            ? 'shadow-xl' 
+            : 'shadow-sm'
         }`}>
           <div className="flex items-center justify-between px-6 py-3">
             {/* Logo */}
