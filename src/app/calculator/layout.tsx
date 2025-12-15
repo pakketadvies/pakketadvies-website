@@ -19,7 +19,7 @@ export default function CalculatorLayout({
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Hero Section */}
-      <div className="pt-32 pb-16 bg-brand-navy-500 relative overflow-hidden">
+      <div className={`bg-brand-navy-500 relative overflow-hidden ${isResultatenPage ? 'pt-24 pb-8 md:pt-32 md:pb-16' : 'pt-32 pb-16'}`}>
         {/* Background decorations */}
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl" />
@@ -27,12 +27,14 @@ export default function CalculatorLayout({
         </div>
 
         <div className="container-custom relative z-10">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-teal-500 rounded-2xl shadow-2xl shadow-brand-teal-500/50 mb-4">
-              <Lightning weight="duotone" className="w-8 h-8 text-white" />
-            </div>
+          <div className={`max-w-3xl mx-auto text-center ${isResultatenPage ? 'space-y-3 md:space-y-6' : 'space-y-6'}`}>
+            {!isResultatenPage && (
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-teal-500 rounded-2xl shadow-2xl shadow-brand-teal-500/50 mb-4">
+                <Lightning weight="duotone" className="w-8 h-8 text-white" />
+              </div>
+            )}
             
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+            <h1 className={`font-display font-bold text-white leading-tight ${isResultatenPage ? 'text-2xl md:text-4xl lg:text-5xl' : 'text-4xl md:text-5xl lg:text-6xl'}`}>
               {isResultatenPage ? (
                 <>
                   Jouw{' '}
@@ -50,12 +52,11 @@ export default function CalculatorLayout({
               )}
             </h1>
             
-            <p className="text-xl text-gray-300 leading-relaxed">
-              {isResultatenPage 
-                ? 'Vergelijk de beste energiecontracten op basis van jouw verbruik'
-                : 'In een paar minuten weten hoeveel je kunt besparen met een beter energiecontract'
-              }
-            </p>
+            {!isResultatenPage && (
+              <p className="text-xl text-gray-300 leading-relaxed">
+                In een paar minuten weten hoeveel je kunt besparen met een beter energiecontract
+              </p>
+            )}
           </div>
         </div>
 

@@ -932,25 +932,7 @@ function ResultatenContent() {
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className="container-custom max-w-7xl">
         {/* Header */}
-        <div className="mb-6 md:mb-8 pt-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand-navy-500 mb-2">
-                {filteredResultaten.length} {filteredResultaten.length === 1 ? 'passend contract' : 'passende contracten'}
-              </h1>
-              <p className="text-sm md:text-base text-gray-600">
-                Op basis van {verbruikElektriciteit.toLocaleString()} kWh per jaar
-                {verbruik?.leveringsadressen && verbruik.leveringsadressen.length > 1 && 
-                  ` • ${verbruik.leveringsadressen.length} leveringsadressen`
-                }
-                {isQuickCalc && ' • Snelle scan'}
-              </p>
-            </div>
-            <Button variant="outline" onClick={handleStartOpnieuw} className="w-full md:w-auto">
-              <Lightning weight="bold" className="w-5 h-5 mr-2" />
-              Start opnieuw
-            </Button>
-          </div>
+        <div className="mb-6 md:mb-8 pt-4 md:pt-6">
 
           {/* Edit Verbruik Panel - Desktop only */}
           {verbruik && (
@@ -976,12 +958,16 @@ function ResultatenContent() {
                 currentData={verbruik}
                 onSave={handleVerbruikUpdate}
                 isUpdating={isUpdating}
+                filters={filters}
+                onFiltersChange={(newFilters) => setFilters(newFilters)}
+                sortBy={sortBy}
+                onSortByChange={(newSortBy) => setSortBy(newSortBy)}
               />
             </>
           )}
 
-          {/* Filters Bar - Compact by default */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4" data-results-section>
+          {/* Filters Bar - Desktop only (mobiel filters in EditVerbruikModal) */}
+          <div className="hidden md:block bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4" data-results-section>
             {/* Main row: Quick filters + Sort */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               {/* Quick filter buttons */}
