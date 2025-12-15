@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { ChevronDown, Star, CheckCircle } from '@phosphor-icons/react'
+import { CaretDown, Star, CheckCircle } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
 
 interface ContractDetailsCardProps {
