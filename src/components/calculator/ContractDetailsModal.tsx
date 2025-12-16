@@ -53,13 +53,13 @@ export function ContractDetailsModal({
       <div className="flex border-b-2 border-gray-200 -mx-6 px-6 mb-6">
         <button
           onClick={() => setActiveTab('prijsdetails')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 font-semibold text-sm transition-colors relative ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-xs transition-colors relative ${
             activeTab === 'prijsdetails'
               ? 'text-brand-teal-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          <Calculator weight={activeTab === 'prijsdetails' ? 'bold' : 'regular'} className="w-5 h-5" />
+          <Calculator weight={activeTab === 'prijsdetails' ? 'bold' : 'regular'} className="w-4 h-4" />
           <span className="whitespace-nowrap">Prijsdetails</span>
           {activeTab === 'prijsdetails' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />
@@ -67,13 +67,13 @@ export function ContractDetailsModal({
         </button>
         <button
           onClick={() => setActiveTab('voorwaarden')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 font-semibold text-sm transition-colors relative ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-xs transition-colors relative ${
             activeTab === 'voorwaarden'
               ? 'text-brand-teal-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          <FileText weight={activeTab === 'voorwaarden' ? 'bold' : 'regular'} className="w-5 h-5" />
+          <FileText weight={activeTab === 'voorwaarden' ? 'bold' : 'regular'} className="w-4 h-4" />
           <span className="whitespace-nowrap">Voorwaarden</span>
           {activeTab === 'voorwaarden' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />
@@ -81,13 +81,13 @@ export function ContractDetailsModal({
         </button>
         <button
           onClick={() => setActiveTab('over')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 font-semibold text-sm transition-colors relative ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-xs transition-colors relative ${
             activeTab === 'over'
               ? 'text-brand-teal-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          <Info weight={activeTab === 'over' ? 'bold' : 'regular'} className="w-5 h-5" />
+          <Info weight={activeTab === 'over' ? 'bold' : 'regular'} className="w-4 h-4" />
           <span className="whitespace-nowrap">Over leverancier</span>
           {activeTab === 'over' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />
