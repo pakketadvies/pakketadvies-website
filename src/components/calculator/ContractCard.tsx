@@ -13,6 +13,7 @@ import Tooltip from '@/components/ui/Tooltip'
 import { getFriendlyDocumentUrl } from '@/lib/document-url'
 import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
 import { useFacebookPixel } from '@/lib/tracking/useFacebookPixel'
+import { ContractDetailsModal } from './ContractDetailsModal'
 
 interface ContractCardProps {
   contract: ContractOptie
@@ -106,6 +107,7 @@ export default function ContractCard({
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
 
   const toggleAccordion = (section: 'prijsdetails' | 'voorwaarden' | 'over') => {
     setOpenAccordion(openAccordion === section ? null : section)
@@ -126,6 +128,13 @@ export default function ContractCard({
       berekenKosten()
     }
   }, [openAccordion])
+
+  // BEREKEN KOSTEN wanneer modal wordt geopend (voor mobiel)
+  useEffect(() => {
+    if (isDetailsModalOpen && !breakdown && !loading) {
+      berekenKosten()
+    }
+  }, [isDetailsModalOpen])
 
   const berekenKosten = async () => {
     setLoading(true)
@@ -364,8 +373,18 @@ export default function ContractCard({
           </span>
         </div>
 
-        {/* 3 Accordions */}
-        <div className="space-y-1.5 md:space-y-2 mb-4 md:mb-6">
+        {/* Details bekijken link - Mobile only */}
+        <div className="md:hidden mb-4">
+          <button
+            onClick={() => setIsDetailsModalOpen(true)}
+            className="w-full text-center text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium py-2 underline decoration-1 underline-offset-2 transition-colors"
+          >
+            Details bekijken
+          </button>
+        </div>
+
+        {/* 3 Accordions - Desktop only */}
+        <div className="hidden md:block space-y-1.5 md:space-y-2 mb-4 md:mb-6">
           {/* Prijsdetails */}
           <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
             <button
@@ -890,11 +909,23 @@ export default function ContractCard({
           >
               Aanvragen
             </Button>
-          <button className="w-full text-gray-600 py-1.5 md:py-2 text-xs md:text-sm font-medium hover:text-brand-teal-600 transition-colors">
-            Meer informatie
-          </button>
         </div>
       </CardContent>
+
+      {/* Contract Details Modal - Mobile only */}
+      <ContractDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        contract={contract}
+        breakdown={breakdown}
+        loading={loading}
+        error={error}
+        verbruikElektriciteitNormaal={verbruikElektriciteitNormaal}
+        verbruikElektriciteitDal={verbruikElektriciteitDal}
+        verbruikGas={verbruikGas}
+        aansluitwaardeElektriciteit={aansluitwaardeElektriciteit}
+        aansluitwaardeGas={aansluitwaardeGas}
+      />
     </Card>
   )
 }

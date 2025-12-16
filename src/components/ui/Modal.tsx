@@ -58,24 +58,25 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4"
       onClick={onClose}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" />
 
-      {/* Modal */}
+      {/* Modal - Bottom sheet on mobile, centered on desktop */}
       <div
         className={cn(
-          'relative bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full',
+          'relative bg-white rounded-t-2xl md:rounded-2xl lg:rounded-3xl shadow-2xl w-full md:w-auto',
           sizeClasses[size],
-          'max-h-[90vh] overflow-y-auto'
+          'max-h-[90vh] md:max-h-[90vh] overflow-y-auto',
+          'animate-slide-up md:animate-scale-in'
         )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl md:rounded-t-3xl z-10">
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl md:rounded-t-2xl lg:rounded-t-3xl z-10">
             {title && (
               <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500">
                 {title}
