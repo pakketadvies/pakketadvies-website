@@ -195,27 +195,27 @@ export function ContractDetailsModal({
                         </summary>
                         <div className="mt-2 space-y-1 pl-2 border-l-2 border-gray-200">
                           {breakdown.energiebelasting.staffels.schijf1 && (
-                            <div className="flex justify-between">
-                              <span>0-{breakdown.energiebelasting.staffels.schijf1.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf1.tarief.toFixed(5)}</span>
-                              <span>€{breakdown.energiebelasting.staffels.schijf1.bedrag.toFixed(2)}</span>
+                            <div className="flex justify-between gap-2">
+                              <span className="flex-1 min-w-0 break-words">0-{breakdown.energiebelasting.staffels.schijf1.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf1.tarief.toFixed(5)}</span>
+                              <span className="flex-shrink-0">€{breakdown.energiebelasting.staffels.schijf1.bedrag.toFixed(2)}</span>
                             </div>
                           )}
                           {breakdown.energiebelasting.staffels.schijf2 && (
-                            <div className="flex justify-between">
-                              <span>{(breakdown.energiebelasting.staffels.schijf1?.kwh || 0).toLocaleString()}-{breakdown.energiebelasting.staffels.schijf2.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf2.tarief.toFixed(5)}</span>
-                              <span>€{breakdown.energiebelasting.staffels.schijf2.bedrag.toFixed(2)}</span>
+                            <div className="flex justify-between gap-2">
+                              <span className="flex-1 min-w-0 break-words">{(breakdown.energiebelasting.staffels.schijf1?.kwh || 0).toLocaleString()}-{breakdown.energiebelasting.staffels.schijf2.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf2.tarief.toFixed(5)}</span>
+                              <span className="flex-shrink-0">€{breakdown.energiebelasting.staffels.schijf2.bedrag.toFixed(2)}</span>
                             </div>
                           )}
                           {breakdown.energiebelasting.staffels.schijf3 && (
-                            <div className="flex justify-between">
-                              <span>{(breakdown.energiebelasting.staffels.schijf2?.kwh || 0).toLocaleString()}-{breakdown.energiebelasting.staffels.schijf3.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf3.tarief.toFixed(5)}</span>
-                              <span>€{breakdown.energiebelasting.staffels.schijf3.bedrag.toFixed(2)}</span>
+                            <div className="flex justify-between gap-2">
+                              <span className="flex-1 min-w-0 break-words">{(breakdown.energiebelasting.staffels.schijf2?.kwh || 0).toLocaleString()}-{breakdown.energiebelasting.staffels.schijf3.kwh.toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf3.tarief.toFixed(5)}</span>
+                              <span className="flex-shrink-0">€{breakdown.energiebelasting.staffels.schijf3.bedrag.toFixed(2)}</span>
                             </div>
                           )}
                           {breakdown.energiebelasting.staffels.schijf4 && (
-                            <div className="flex justify-between">
-                              <span>&gt;{(breakdown.energiebelasting.staffels.schijf3?.kwh || 0).toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf4.tarief.toFixed(5)}</span>
-                              <span>€{breakdown.energiebelasting.staffels.schijf4.bedrag.toFixed(2)}</span>
+                            <div className="flex justify-between gap-2">
+                              <span className="flex-1 min-w-0 break-words">&gt;{(breakdown.energiebelasting.staffels.schijf3?.kwh || 0).toLocaleString()} kWh × €{breakdown.energiebelasting.staffels.schijf4.tarief.toFixed(5)}</span>
+                              <span className="flex-shrink-0">€{breakdown.energiebelasting.staffels.schijf4.bedrag.toFixed(2)}</span>
                             </div>
                           )}
                         </div>
