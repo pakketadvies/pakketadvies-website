@@ -353,49 +353,80 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       .limit(limit * 2) // Get more to sort by rating/price later
 
     if (error) {
-      console.error('Error fetching contracten:', error)
+      console.error('❌ [getBestDealsInternal] Error fetching contracten:', error)
+      console.error('❌ [getBestDealsInternal] Error details:', JSON.stringify(error, null, 2))
       return { contracten: [], averagePrice: 0 }
     }
 
     if (!contracten || contracten.length === 0) {
       console.log('⚠️ [getBestDealsInternal] No contracten found in database')
+      console.log('⚠️ [getBestDealsInternal] Query filters: actief=true, tonen_op_homepage=true, type=', type)
+      // Let's check if there are ANY active contracts at all
+      const { data: allActive, error: allActiveError } = await supabase
+        .from('contracten')
+        .select('id, naam, actief, tonen_op_homepage, type')
+        .eq('actief', true)
+        .limit(10)
+      console.log('⚠️ [getBestDealsInternal] All active contracts sample:', allActive)
+      console.log('⚠️ [getBestDealsInternal] Contracts with tonen_op_homepage=true:', allActive?.filter((c: any) => c.tonen_op_homepage === true))
       return { contracten: [], averagePrice: 0 }
     }
     
     console.log('✅ [getBestDealsInternal] Found', contracten.length, 'contracts in database')
+    console.log('✅ [getBestDealsInternal] Contract IDs:', contracten.map((c: any) => ({ id: c.id, naam: c.naam, type: c.type })))
 
     // Fetch details for each contract based on type
+    console.log('🔵 [getBestDealsInternal] Fetching details for', contracten.length, 'contracts...')
     const contractenWithDetails = await Promise.all(
       contracten.map(async (contract: any) => {
-        if (contract.type === 'vast') {
-          const { data: details } = await supabase
-            .from('contract_details_vast')
-            .select('*')
-            .eq('contract_id', contract.id)
-            .single()
+        try {
+          if (contract.type === 'vast') {
+            const { data: details, error: detailsError } = await supabase
+              .from('contract_details_vast')
+              .select('*')
+              .eq('contract_id', contract.id)
+              .single()
+            
+            if (detailsError) {
+              console.error(`❌ [getBestDealsInternal] Error fetching vast details for contract ${contract.id}:`, detailsError)
+            }
+            
+            return { ...contract, details_vast: details }
+          } else if (contract.type === 'dynamisch') {
+            const { data: details, error: detailsError } = await supabase
+              .from('contract_details_dynamisch')
+              .select('*')
+              .eq('contract_id', contract.id)
+              .single()
+            
+            if (detailsError) {
+              console.error(`❌ [getBestDealsInternal] Error fetching dynamisch details for contract ${contract.id}:`, detailsError)
+            }
+            
+            return { ...contract, details_dynamisch: details }
+          } else if (contract.type === 'maatwerk') {
+            const { data: details, error: detailsError } = await supabase
+              .from('contract_details_maatwerk')
+              .select('*')
+              .eq('contract_id', contract.id)
+              .single()
+            
+            if (detailsError) {
+              console.error(`❌ [getBestDealsInternal] Error fetching maatwerk details for contract ${contract.id}:`, detailsError)
+            }
+            
+            return { ...contract, details_maatwerk: details }
+          }
           
-          return { ...contract, details_vast: details }
-        } else if (contract.type === 'dynamisch') {
-          const { data: details } = await supabase
-            .from('contract_details_dynamisch')
-            .select('*')
-            .eq('contract_id', contract.id)
-            .single()
-          
-          return { ...contract, details_dynamisch: details }
-        } else if (contract.type === 'maatwerk') {
-          const { data: details } = await supabase
-            .from('contract_details_maatwerk')
-            .select('*')
-            .eq('contract_id', contract.id)
-            .single()
-          
-          return { ...contract, details_maatwerk: details }
+          console.warn(`⚠️ [getBestDealsInternal] Unknown contract type for contract ${contract.id}:`, contract.type)
+          return contract
+        } catch (error: any) {
+          console.error(`❌ [getBestDealsInternal] Exception fetching details for contract ${contract.id}:`, error)
+          return contract
         }
-        
-        return contract
       })
     )
+    console.log('✅ [getBestDealsInternal] Fetched details for', contractenWithDetails.length, 'contracts')
 
     // Filter out contracts without details
     const validContracten = contractenWithDetails.filter((c: any) => {
@@ -404,6 +435,18 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       if (c.type === 'maatwerk') return !!c.details_maatwerk
       return false
     })
+    console.log('✅ [getBestDealsInternal] Valid contracts (with details):', validContracten.length, 'out of', contractenWithDetails.length)
+    if (validContracten.length < contractenWithDetails.length) {
+      const invalidIds = contractenWithDetails
+        .filter((c: any) => {
+          if (c.type === 'vast') return !c.details_vast
+          if (c.type === 'dynamisch') return !c.details_dynamisch
+          if (c.type === 'maatwerk') return !c.details_maatwerk
+          return true
+        })
+        .map((c: any) => c.id)
+      console.warn('⚠️ [getBestDealsInternal] Contracts without details (filtered out):', invalidIds)
+    }
 
     // Calculate prices using optimized calculation with shared data
     // Using typical MKB usage: 6000 kWh/year (4000 normaal + 2000 dal), 1200 m³/year
