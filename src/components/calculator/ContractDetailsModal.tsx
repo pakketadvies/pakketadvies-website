@@ -96,7 +96,7 @@ export function ContractDetailsModal({
       </div>
 
       {/* Tab Content - Fixed height to prevent modal from jumping */}
-      <div className="min-h-[60vh]">
+      <div className="min-h-[60vh] max-h-[60vh] overflow-y-auto">
         {/* Prijsdetails Tab */}
         {activeTab === 'prijsdetails' && (
           <div className="space-y-4">
