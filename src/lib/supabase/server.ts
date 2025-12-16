@@ -30,6 +30,24 @@ export async function createClient() {
 }
 
 /**
+ * Creates a Supabase client without cookies
+ * Use this in cached functions (unstable_cache) where cookies() cannot be used
+ * This client uses the anon key and respects RLS policies
+ */
+export function createClientWithoutCookies() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+}
+
+/**
  * Creates a Supabase client with service role key
  * This bypasses RLS policies and should only be used for admin operations
  * after verifying the user is an admin

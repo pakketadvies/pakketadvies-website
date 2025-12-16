@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClientWithoutCookies } from '@/lib/supabase/server'
 import { calculateContractCosts } from '@/lib/bereken-contract-internal'
 import { berekenEnecoModelContractKosten } from '@/lib/energie-berekening'
 import { unstable_cache } from 'next/cache'
@@ -166,6 +166,8 @@ async function calculateContractCostsOptimized(
     let kostenTeruglevering = 0
 
     if (isDynamisch) {
+      // getCurrentDynamicPrices will use createClientWithoutCookies() if no client is provided
+      // This is safe for use in cached functions
       const dynamicPricesData = await getCurrentDynamicPrices()
       const dynamicPrices = {
         elektriciteit_gemiddeld_dag: dynamicPricesData.electricityDay,
@@ -328,8 +330,9 @@ async function calculateContractCostsOptimized(
 async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') {
   console.log('🔵 [getBestDealsInternal] START - limit:', limit, 'type:', type)
   try {
-    const supabase = await createClient()
-    console.log('✅ [getBestDealsInternal] Supabase client created')
+    // Use client without cookies for use in unstable_cache
+    const supabase = createClientWithoutCookies()
+    console.log('✅ [getBestDealsInternal] Supabase client created (without cookies)')
     
     // Get all active contracts with leverancier info that are marked to show on homepage
     let query = supabase

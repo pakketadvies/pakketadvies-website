@@ -5,7 +5,7 @@
  * from/to Supabase database with intelligent caching
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createClientWithoutCookies } from '@/lib/supabase/server'
 import { fetchDayAheadPrices } from './api-client'
 
 export interface DynamicPriceRecord {
@@ -27,14 +27,16 @@ export interface DynamicPriceRecord {
  * Calculate 30-day rolling average for electricity prices
  * Used for stable, predictable pricing instead of daily fluctuations
  */
-async function get30DayAverageElectricityPrices(): Promise<{
+async function get30DayAverageElectricityPrices(supabase?: any): Promise<{
   day: number
   night: number
   single: number
   source: string
   daysUsed: number
 }> {
-  const supabase = await createClient()
+  if (!supabase) {
+    supabase = createClientWithoutCookies()
+  }
   const now = new Date()
   const thirtyDaysAgo = new Date(now)
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -126,12 +128,14 @@ async function get30DayAverageElectricityPrices(): Promise<{
  * Calculate 30-day rolling average for gas prices
  * Used for stable, predictable pricing instead of daily fluctuations
  */
-async function get30DayAverageGasPrice(): Promise<{
+async function get30DayAverageGasPrice(supabase?: any): Promise<{
   gas: number
   source: string
   daysUsed: number
 }> {
-  const supabase = await createClient()
+  if (!supabase) {
+    supabase = createClientWithoutCookies()
+  }
   const now = new Date()
   const thirtyDaysAgo = new Date(now)
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -210,7 +214,7 @@ async function get30DayAverageGasPrice(): Promise<{
  * 3. If stale, fetch from API and update database
  * 4. Return prices
  */
-export async function getCurrentDynamicPrices(): Promise<{
+export async function getCurrentDynamicPrices(supabaseClient?: any): Promise<{
   electricity: number
   electricityDay: number
   electricityNight: number
@@ -219,7 +223,8 @@ export async function getCurrentDynamicPrices(): Promise<{
   lastUpdated: Date
   isFresh: boolean
 }> {
-  const supabase = await createClient()
+  // Use provided client or create one without cookies (for use in cached functions)
+  const supabase = supabaseClient || createClientWithoutCookies()
   const now = new Date()
 
   // Get most recent price record (for freshness check)
@@ -234,14 +239,14 @@ export async function getCurrentDynamicPrices(): Promise<{
   let electricity30Day: { day: number; night: number; single: number; source: string; daysUsed: number }
   
   try {
-    electricity30Day = await get30DayAverageElectricityPrices()
+    electricity30Day = await get30DayAverageElectricityPrices(supabase)
   } catch (error) {
     console.error('❌ Failed to calculate 30-day electricity average, fetching fresh data...', error)
     
     // Fallback: fetch fresh data and use it
     try {
       const freshPrices = await fetchDayAheadPrices(now)
-      await saveDynamicPrices(freshPrices)
+      await saveDynamicPrices(freshPrices, supabase)
       
         electricity30Day = {
           day: freshPrices.electricity.day,
@@ -272,14 +277,14 @@ export async function getCurrentDynamicPrices(): Promise<{
   let gas30Day: { gas: number; source: string; daysUsed: number }
   
   try {
-    gas30Day = await get30DayAverageGasPrice()
+    gas30Day = await get30DayAverageGasPrice(supabase)
   } catch (error) {
     console.error('❌ Failed to calculate 30-day gas average, fetching fresh data...', error)
     
     // Fallback: fetch fresh data and use it
     try {
       const freshPrices = await fetchDayAheadPrices(now)
-      await saveDynamicPrices(freshPrices)
+      await saveDynamicPrices(freshPrices, supabase)
       
         gas30Day = {
           gas: freshPrices.gas.average,
@@ -335,8 +340,8 @@ export async function saveDynamicPrices(prices: {
   gas: { average: number; min: number; max: number }
   source: string
   date: string
-}): Promise<void> {
-  const supabase = await createClient()
+}, supabaseClient?: any): Promise<void> {
+  const supabase = supabaseClient || createClientWithoutCookies()
 
   const { error } = await supabase
     .from('dynamic_prices')
