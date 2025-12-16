@@ -541,26 +541,24 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
  * Cached version of getBestDeals for homepage performance
  * Cache is invalidated after 5 minutes or can be manually invalidated using tags
  */
-export const getBestDeals = async (limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') => {
-  console.log('🔵 [getBestDeals] Called with limit:', limit, 'type:', type)
-  try {
-    const cachedFn = unstable_cache(
-      getBestDealsInternal,
-      ['best-deals'], // cache key prefix
-      {
-        revalidate: 300, // 5 minutes
-        tags: ['best-deals'], // for manual cache invalidation
-      }
-    )
-    const result = await cachedFn(limit, type)
-    console.log('✅ [getBestDeals] Result:', result.contracten.length, 'contracts, averagePrice:', result.averagePrice)
-    return result
-  } catch (error: any) {
-    console.error('❌ [getBestDeals] ERROR in cached function:', error)
-    console.error('❌ [getBestDeals] Error stack:', error?.stack)
-    // Fallback to non-cached version on error
-    console.log('⚠️ [getBestDeals] Falling back to non-cached version')
-    return await getBestDealsInternal(limit, type)
+export const getBestDeals = unstable_cache(
+  async (limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') => {
+    console.log('🔵 [getBestDeals] Called with limit:', limit, 'type:', type)
+    try {
+      const result = await getBestDealsInternal(limit, type)
+      console.log('✅ [getBestDeals] Result:', result.contracten.length, 'contracts, averagePrice:', result.averagePrice)
+      return result
+    } catch (error: any) {
+      console.error('❌ [getBestDeals] ERROR:', error)
+      console.error('❌ [getBestDeals] Error stack:', error?.stack)
+      // Return empty result on error instead of throwing
+      return { contracten: [], averagePrice: 0 }
+    }
+  },
+  ['getBestDeals'], // cache key prefix - includes function name
+  {
+    revalidate: 300, // 5 minutes
+    tags: ['best-deals'], // for manual cache invalidation
   }
-}
+)
 
