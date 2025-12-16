@@ -46,15 +46,28 @@ export default async function HomePage() {
   let bestDealsData
   try {
     bestDealsData = await getBestDeals(5, 'alle')
-    console.log('✅ [HomePage] Best deals fetched:', bestDealsData.contracten.length, 'contracts')
+    console.log('✅ [HomePage] Best deals fetched:', bestDealsData?.contracten?.length || 0, 'contracts')
+    console.log('✅ [HomePage] Best deals data:', JSON.stringify(bestDealsData, null, 2))
   } catch (error: any) {
     console.error('❌ [HomePage] ERROR fetching best deals:', error)
     console.error('❌ [HomePage] Error stack:', error?.stack)
     bestDealsData = { contracten: [], averagePrice: 0 }
   }
 
+  // Add debug info to page as comment for client-side inspection
+  const debugInfo = {
+    contractCount: bestDealsData?.contracten?.length || 0,
+    averagePrice: bestDealsData?.averagePrice || 0,
+    hasContracts: (bestDealsData?.contracten?.length || 0) > 0,
+  }
+
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `console.log('🔵 [HomePage-Debug] Server-side result:', ${JSON.stringify(debugInfo)});`,
+        }}
+      />
       <OrganizationSchema />
       <Hero initialBestDeals={bestDealsData} />
       <ContractTypes />
