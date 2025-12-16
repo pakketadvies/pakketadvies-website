@@ -96,7 +96,7 @@ export function ContractDetailsModal({
       </div>
 
       {/* Tab Content - Fixed height to prevent modal from jumping */}
-      <div className="min-h-[60vh] max-h-[60vh] overflow-y-auto">
+      <div className="min-h-[60vh] max-h-[60vh] overflow-y-auto overflow-x-hidden break-words">
         {/* Prijsdetails Tab */}
         {activeTab === 'prijsdetails' && (
           <div className="space-y-4">
@@ -125,25 +125,25 @@ export function ContractDetailsModal({
                     {/* Leveringskosten stroom - met tarief details */}
                     {breakdown.leverancier.elektriciteitDetails?.type === 'dubbel' && (
                       <>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-700">
+                        <div className="flex justify-between items-center text-sm gap-2">
+                          <span className="text-gray-700 flex-1 min-w-0 break-words">
                             Leveringskosten normaal
-                            <span className="text-xs text-gray-500 ml-1">
+                            <span className="text-xs text-gray-500 ml-1 block sm:inline">
                               ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
                             </span>
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium flex-shrink-0">
                             €{breakdown.leverancier.elektriciteitDetails.normaal?.bedrag.toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-700">
+                        <div className="flex justify-between items-center text-sm gap-2">
+                          <span className="text-gray-700 flex-1 min-w-0 break-words">
                             Leveringskosten dal
-                            <span className="text-xs text-gray-500 ml-1">
+                            <span className="text-xs text-gray-500 ml-1 block sm:inline">
                               ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
                             </span>
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium flex-shrink-0">
                             €{breakdown.leverancier.elektriciteitDetails.dal?.bedrag.toFixed(2)}
                           </span>
                         </div>
@@ -151,14 +151,14 @@ export function ContractDetailsModal({
                     )}
 
                     {breakdown.leverancier.elektriciteitDetails?.type === 'enkel' && (
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Leveringskosten enkeltarief
-                          <span className="text-xs text-gray-500 ml-1">
+                          <span className="text-xs text-gray-500 ml-1 block sm:inline">
                             ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
                           </span>
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium flex-shrink-0">
                           €{breakdown.leverancier.elektriciteitDetails.enkel?.bedrag.toFixed(2)}
                         </span>
                       </div>
@@ -166,23 +166,23 @@ export function ContractDetailsModal({
 
                     {/* Fallback als er geen details zijn */}
                     {!breakdown.leverancier.elektriciteitDetails && (
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Leveringskosten stroom
                           <span className="text-xs text-gray-500 ml-1">
                             ({totaalElektriciteit.toLocaleString()} kWh)
                           </span>
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium flex-shrink-0">
                           €{breakdown.leverancier.elektriciteit.toFixed(2)}
                         </span>
                       </div>
                     )}
 
                     {/* Energiebelasting stroom */}
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-700">Energiebelasting</span>
-                      <span className="font-medium">
+                    <div className="flex justify-between items-center text-sm gap-2">
+                      <span className="text-gray-700 flex-1 min-w-0">Energiebelasting</span>
+                      <span className="font-medium flex-shrink-0">
                         €{breakdown.energiebelasting.elektriciteit.toFixed(2)}
                       </span>
                     </div>
@@ -227,19 +227,19 @@ export function ContractDetailsModal({
                   <div className="space-y-1.5 pt-2 border-t border-gray-200">
                     <p className="text-xs font-semibold text-gray-500 mb-1">Vaste kosten</p>
 
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-700">Vastrecht</span>
-                      <span className="font-medium">€{breakdown.leverancier.vastrechtStroom.toFixed(2)}</span>
+                    <div className="flex justify-between items-center text-sm gap-2">
+                      <span className="text-gray-700 flex-1 min-w-0">Vastrecht</span>
+                      <span className="font-medium flex-shrink-0">€{breakdown.leverancier.vastrechtStroom.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-700">
+                    <div className="flex justify-between items-center text-sm gap-2">
+                      <span className="text-gray-700 flex-1 min-w-0 break-words">
                         Netbeheerkosten {aansluitwaardeElektriciteit}
                         <span className="text-xs text-gray-500 ml-1">
                           ({breakdown.netbeheer.netbeheerder})
                         </span>
                       </span>
-                      <span className="font-medium">€{breakdown.netbeheer.elektriciteit.toFixed(2)}</span>
+                      <span className="font-medium flex-shrink-0">€{breakdown.netbeheer.elektriciteit.toFixed(2)}</span>
                     </div>
 
                     {/* Melding voor grootverbruik elektriciteit */}
@@ -251,9 +251,9 @@ export function ContractDetailsModal({
                       </div>
                     )}
 
-                    <div className="flex justify-between items-center text-sm text-green-700">
-                      <span>Vermindering EB</span>
-                      <span className="font-medium">-€{breakdown.energiebelasting.vermindering.toFixed(2)}</span>
+                    <div className="flex justify-between items-center text-sm text-green-700 gap-2">
+                      <span className="flex-1 min-w-0">Vermindering EB</span>
+                      <span className="font-medium flex-shrink-0">-€{breakdown.energiebelasting.vermindering.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -283,40 +283,40 @@ export function ContractDetailsModal({
 
                       {/* Leveringskosten gas - met tarief details */}
                       {breakdown.leverancier.gasDetails ? (
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-700">
+                        <div className="flex justify-between items-center text-sm gap-2">
+                          <span className="text-gray-700 flex-1 min-w-0 break-words">
                             Leveringskosten gas
-                            <span className="text-xs text-gray-500 ml-1">
+                            <span className="text-xs text-gray-500 ml-1 block sm:inline">
                               ({breakdown.leverancier.gasDetails.m3.toLocaleString()} m³ × €{breakdown.leverancier.gasDetails.tarief.toFixed(6)})
                             </span>
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium flex-shrink-0">
                             €{breakdown.leverancier.gasDetails.bedrag.toFixed(2)}
                           </span>
                         </div>
                       ) : (
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-700">
+                        <div className="flex justify-between items-center text-sm gap-2">
+                          <span className="text-gray-700 flex-1 min-w-0">
                             Leveringskosten gas
                             <span className="text-xs text-gray-500 ml-1">
                               ({verbruikGas.toLocaleString()} m³)
                             </span>
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium flex-shrink-0">
                             €{breakdown.leverancier.gas.toFixed(2)}
                           </span>
                         </div>
                       )}
 
                       {/* Energiebelasting gas */}
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Energiebelasting
                           <span className="text-xs text-gray-500 ml-1">
                             (staffel: €0,57816/m³)
                           </span>
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium flex-shrink-0">
                           €{breakdown.energiebelasting.gas.toFixed(2)}
                         </span>
                       </div>
@@ -326,19 +326,19 @@ export function ContractDetailsModal({
                     <div className="space-y-1.5 pt-2 border-t border-gray-200">
                       <p className="text-xs font-semibold text-gray-500 mb-1">Vaste kosten</p>
 
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">Vastrecht</span>
-                        <span className="font-medium">€{breakdown.leverancier.vastrechtGas.toFixed(2)}</span>
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0">Vastrecht</span>
+                        <span className="font-medium flex-shrink-0">€{breakdown.leverancier.vastrechtGas.toFixed(2)}</span>
                       </div>
 
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Netbeheerkosten {aansluitwaardeGas}
                           <span className="text-xs text-gray-500 ml-1">
                             ({breakdown.netbeheer.netbeheerder})
                           </span>
                         </span>
-                        <span className="font-medium">€{breakdown.netbeheer.gas.toFixed(2)}</span>
+                        <span className="font-medium flex-shrink-0">€{breakdown.netbeheer.gas.toFixed(2)}</span>
                       </div>
 
                       {/* Melding voor grootverbruik gas */}
@@ -378,14 +378,14 @@ export function ContractDetailsModal({
                     <div className="space-y-1.5 mb-3">
                       <p className="text-xs font-semibold text-gray-500 mb-1">Terugleverkosten</p>
 
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Kosten teruglevering
-                          <span className="text-xs text-gray-500 ml-1">
+                          <span className="text-xs text-gray-500 ml-1 block sm:inline">
                             ({breakdown.leverancier.terugleveringDetails.kwh.toLocaleString()} kWh × €{breakdown.leverancier.terugleveringDetails.tarief.toFixed(6)})
                           </span>
                         </span>
-                        <span className="font-medium text-brand-teal-700">
+                        <span className="font-medium text-brand-teal-700 flex-shrink-0">
                           €{breakdown.leverancier.terugleveringDetails.bedrag.toFixed(2)}
                         </span>
                       </div>
@@ -409,14 +409,14 @@ export function ContractDetailsModal({
                     <div className="space-y-1.5 mb-3">
                       <p className="text-xs font-semibold text-gray-500 mb-1">Opbrengst</p>
 
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Opbrengst extra teruglevering
                           <span className="text-xs text-gray-500 ml-1">
                             ({breakdown.leverancier.overschotKwh.toLocaleString()} kWh)
                           </span>
                         </span>
-                        <span className="font-medium text-green-700">
+                        <span className="font-medium text-green-700 flex-shrink-0">
                           − €{breakdown.leverancier.opbrengstOverschot.toFixed(2)}
                         </span>
                       </div>
