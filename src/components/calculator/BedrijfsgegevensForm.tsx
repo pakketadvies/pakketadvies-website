@@ -144,20 +144,42 @@ function BedrijfsgegevensFormContent() {
   
   // Haal contract op uit query param of store
   const contractId = searchParams?.get('contract')
-  const [contract, setContract] = useState<ContractOptie | null>(
-    selectedContract || (contractId && resultaten?.find(c => c.id === contractId)) || null
-  )
+  
+  // Alleen gebruik selectedContract als het overeenkomt met contractId uit URL
+  const initialContract = contractId && selectedContract && selectedContract.id === contractId
+    ? selectedContract
+    : (contractId && resultaten?.find(c => c.id === contractId)) || null
+  
+  const [contract, setContract] = useState<ContractOptie | null>(initialContract)
   const [loadingContract, setLoadingContract] = useState(false)
   const [contractError, setContractError] = useState<string | null>(null)
   
-  // Fetch contract from API als fallback (als niet in store)
+  // Fetch contract from API als fallback (als niet in store of als contractId verschilt)
   useEffect(() => {
     const loadContract = async () => {
-      // Als contract al beschikbaar is, skip
-      if (contract || !contractId) return
+      // Geen contractId, niets te laden
+      if (!contractId) return
       
-      // Als selectedContract of resultaten nog niet beschikbaar zijn, fetch van API
-      if (!selectedContract && (!resultaten || resultaten.length === 0)) {
+      // Als contract al correct is (overeenkomt met contractId), skip
+      if (contract && contract.id === contractId) return
+      
+      // Als selectedContract overeenkomt met contractId, gebruik die
+      if (selectedContract && selectedContract.id === contractId) {
+        setContract(selectedContract)
+        return
+      }
+      
+      // Als contract in resultaten staat, gebruik die
+      if (resultaten && resultaten.length > 0) {
+        const found = resultaten.find(c => c.id === contractId)
+        if (found) {
+          setContract(found)
+          setSelectedContract(found) // Zet ook in store
+          return
+        }
+      }
+      
+      // Anders: fetch van API
         setLoadingContract(true)
         setContractError(null)
         
@@ -221,23 +243,10 @@ function BedrijfsgegevensFormContent() {
           setContractError(error.message || 'Fout bij laden contract')
           setLoadingContract(false)
         }
-      }
     }
     
     loadContract()
   }, [contractId, contract, selectedContract, resultaten, setSelectedContract])
-  
-  // Update contract als selectedContract of resultaten veranderen
-  useEffect(() => {
-    if (selectedContract && selectedContract.id === contractId) {
-      setContract(selectedContract)
-    } else if (contractId && resultaten && resultaten.length > 0) {
-      const found = resultaten.find(c => c.id === contractId)
-      if (found) {
-        setContract(found)
-      }
-    }
-  }, [selectedContract, resultaten, contractId])
   
   // Debug logging
   console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
