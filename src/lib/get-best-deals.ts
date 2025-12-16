@@ -451,11 +451,11 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       console.warn('⚠️ [getBestDealsInternal] Contracts without details (filtered out):', invalidIds)
     }
 
-    // Calculate prices using optimized calculation with shared data
-    // Using typical MKB usage: 6000 kWh/year (4000 normaal + 2000 dal), 1200 m³/year
-    const defaultElektriciteitNormaal = 4000 // kWh/year
-    const defaultElektriciteitDal = 2000 // kWh/year
-    const defaultGas = 1200 // m³/year
+        // Calculate prices using optimized calculation with shared data
+        // Using specific values: 1250 kWh normaal + 900 kWh dal, 900 m³/year
+        const defaultElektriciteitNormaal = 1250 // kWh/year
+        const defaultElektriciteitDal = 900 // kWh/year
+        const defaultGas = 900 // m³/year
     const defaultPostcode = '1000AA' // Amsterdam as default
     const heeftEnkeleMeter = false // Default: dubbele meter
     const defaultAansluitwaardeElektriciteit = '3x25A'
