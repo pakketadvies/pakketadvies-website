@@ -13,6 +13,7 @@ interface HeroProps {
 }
 
 export function Hero({ initialBestDeals }: HeroProps = {} as HeroProps) {
+  console.log('🔵 [Hero] Rendered with initialBestDeals:', initialBestDeals?.contracten?.length || 0, 'contracts')
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-navy-500 pt-20 md:pt-24">
       {/* Background Image with Overlay */}

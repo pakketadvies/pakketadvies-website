@@ -42,7 +42,16 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   // Fetch best deals server-side for instant loading
-  const bestDealsData = await getBestDeals(5, 'alle')
+  console.log('🔵 [HomePage] START - Fetching best deals...')
+  let bestDealsData
+  try {
+    bestDealsData = await getBestDeals(5, 'alle')
+    console.log('✅ [HomePage] Best deals fetched:', bestDealsData.contracten.length, 'contracts')
+  } catch (error: any) {
+    console.error('❌ [HomePage] ERROR fetching best deals:', error)
+    console.error('❌ [HomePage] Error stack:', error?.stack)
+    bestDealsData = { contracten: [], averagePrice: 0 }
+  }
 
   return (
     <>

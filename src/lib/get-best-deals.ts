@@ -17,21 +17,27 @@ async function fetchSharedCalculationData(
   aansluitwaardeElektriciteit: string,
   aansluitwaardeGas: string
 ) {
+  console.log('🔵 [fetchSharedCalculationData] START - postcode:', postcode, 'elektriciteit:', aansluitwaardeElektriciteit, 'gas:', aansluitwaardeGas)
+  
   // 1. Overheidstarieven (always the same for 2025)
-  const { data: overheidsTarieven } = await supabase
+  console.log('🔵 [fetchSharedCalculationData] Fetching overheidsTarieven...')
+  const { data: overheidsTarieven, error: tarievenError } = await supabase
     .from('tarieven_overheid')
     .select('*')
     .eq('jaar', 2025)
     .eq('actief', true)
     .single()
 
-  if (!overheidsTarieven) {
+  if (tarievenError || !overheidsTarieven) {
+    console.error('❌ [fetchSharedCalculationData] Error fetching overheidsTarieven:', tarievenError)
     throw new Error('Energiebelasting tarieven niet gevonden voor 2025')
   }
+  console.log('✅ [fetchSharedCalculationData] OverheidsTarieven fetched')
 
   // 2. Netbeheerder lookup (for fixed postcode '1000AA')
+  console.log('🔵 [fetchSharedCalculationData] Looking up netbeheerder for postcode:', postcode)
   const cleanedPostcode = postcode.replace(/\s/g, '').toUpperCase()
-  const { data: postcodeData } = await supabase
+  const { data: postcodeData, error: postcodeError } = await supabase
     .from('postcode_netbeheerders')
     .select('netbeheerder_id')
     .lte('postcode_van', cleanedPostcode)
@@ -39,14 +45,17 @@ async function fetchSharedCalculationData(
     .limit(1)
     .single()
 
-  if (!postcodeData) {
+  if (postcodeError || !postcodeData) {
+    console.error('❌ [fetchSharedCalculationData] Error looking up postcode:', postcodeError)
     throw new Error('Netbeheerder niet gevonden voor deze postcode')
   }
 
   const netbeheerderId = postcodeData.netbeheerder_id
+  console.log('✅ [fetchSharedCalculationData] Netbeheerder found:', netbeheerderId)
 
   // 3. Aansluitwaarden (fetch once)
   // Voor gas: converteer eerst naar database formaat (gebruik standaard verbruik van 1200 m³ voor homepage)
+  console.log('🔵 [fetchSharedCalculationData] Fetching aansluitwaarden...')
   const gasAansluitwaardeVoorDatabase = converteerGasAansluitwaardeVoorDatabase(aansluitwaardeGas, 1200)
   
   const [elektraAansluitwaardeResult, gasAansluitwaardeResult] = await Promise.all([
@@ -66,8 +75,10 @@ async function fetchSharedCalculationData(
   const gasAansluitwaarde = gasAansluitwaardeResult.data
 
   if (!elektraAansluitwaarde) {
+    console.error('❌ [fetchSharedCalculationData] Elektra aansluitwaarde not found')
     throw new Error(`Ongeldige aansluitwaarde elektriciteit: ${aansluitwaardeElektriciteit}`)
   }
+  console.log('✅ [fetchSharedCalculationData] Aansluitwaarden fetched')
 
   // 4. Netbeheertarieven (fetch once for this postcode/aansluitwaarden combination)
   const [elektriciteitTariefResult, gasTariefResult] = await Promise.all([
@@ -100,6 +111,8 @@ async function fetchSharedCalculationData(
   if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
     netbeheerGas = 0
   }
+  
+  console.log('✅ [fetchSharedCalculationData] All shared data fetched successfully - netbeheerElektriciteit:', netbeheerElektriciteit, 'netbeheerGas:', netbeheerGas)
 
   return {
     overheidsTarieven,
@@ -129,6 +142,7 @@ async function calculateContractCostsOptimized(
     heeftDubbeleMeter: boolean
   }
 ): Promise<{ maandbedrag: number } | null> {
+  console.log('🔵 [calculateContractCostsOptimized] START - contract:', contract.id, 'type:', contract.type)
   try {
     const {
       overheidsTarieven,
@@ -298,10 +312,12 @@ async function calculateContractCostsOptimized(
     const totaalJaarInclBtw = totaalJaarExclBtw + btw
 
     const maandbedragInclBtw = totaalJaarInclBtw / 12
+    console.log('✅ [calculateContractCostsOptimized] SUCCESS - contract:', contract.id, 'maandbedrag:', maandbedragInclBtw)
 
     return { maandbedrag: maandbedragInclBtw }
-  } catch (error) {
-    console.error(`Error in calculateContractCostsOptimized for contract ${contract.id}:`, error)
+  } catch (error: any) {
+    console.error(`❌ [calculateContractCostsOptimized] ERROR for contract ${contract.id}:`, error)
+    console.error(`❌ [calculateContractCostsOptimized] Error stack:`, error?.stack)
     return null
   }
 }
@@ -310,8 +326,10 @@ async function calculateContractCostsOptimized(
  * Internal implementation (not cached)
  */
 async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') {
+  console.log('🔵 [getBestDealsInternal] START - limit:', limit, 'type:', type)
   try {
     const supabase = await createClient()
+    console.log('✅ [getBestDealsInternal] Supabase client created')
     
     // Get all active contracts with leverancier info that are marked to show on homepage
     let query = supabase
@@ -340,8 +358,11 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
     }
 
     if (!contracten || contracten.length === 0) {
+      console.log('⚠️ [getBestDealsInternal] No contracten found in database')
       return { contracten: [], averagePrice: 0 }
     }
+    
+    console.log('✅ [getBestDealsInternal] Found', contracten.length, 'contracts in database')
 
     // Fetch details for each contract based on type
     const contractenWithDetails = await Promise.all(
@@ -395,14 +416,23 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
     const defaultAansluitwaardeGas = 'G6'
 
     // OPTIMIZATION: Fetch shared data once instead of per contract
-    const sharedData = await fetchSharedCalculationData(
-      supabase,
-      defaultPostcode,
-      defaultAansluitwaardeElektriciteit,
-      defaultAansluitwaardeGas
-    )
+    console.log('🔵 [getBestDealsInternal] Fetching shared calculation data...')
+    let sharedData
+    try {
+      sharedData = await fetchSharedCalculationData(
+        supabase,
+        defaultPostcode,
+        defaultAansluitwaardeElektriciteit,
+        defaultAansluitwaardeGas
+      )
+      console.log('✅ [getBestDealsInternal] Shared data fetched successfully')
+    } catch (error: any) {
+      console.error('❌ [getBestDealsInternal] Error fetching shared data:', error)
+      throw error
+    }
 
     // Calculate Eneco model contract costs for comparison (baseline for savings)
+    console.log('🔵 [getBestDealsInternal] Calculating Eneco model costs...')
     const enecoModelKosten = await berekenEnecoModelContractKosten(
       defaultElektriciteitNormaal,
       defaultElektriciteitDal,
@@ -413,8 +443,10 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       defaultAansluitwaardeGas
     )
     const enecoModelMaandbedrag = enecoModelKosten?.maandbedrag || 0
+    console.log('✅ [getBestDealsInternal] Eneco model maandbedrag:', enecoModelMaandbedrag)
 
     // Calculate prices for each contract using optimized calculation with shared data
+    console.log('🔵 [getBestDealsInternal] Calculating prices for', validContracten.length, 'contracts...')
     const contractenMetPrijzen = await Promise.all(
       validContracten.map(async (contract: any) => {
         const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
@@ -444,18 +476,22 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
               ? Math.round(enecoModelMaandbedrag - maandbedrag)
               : 0
             
+            console.log('✅ [getBestDealsInternal] Contract', contract.id, '- maandbedrag:', maandbedrag, 'besparing:', besparing)
             return {
               ...contract,
               estimatedMaandbedrag: maandbedrag > 0 ? maandbedrag : 150,
               estimatedBesparing: besparing,
               rating: details.rating || 0,
             }
+          } else {
+            console.warn('⚠️ [getBestDealsInternal] Contract', contract.id, '- calculateContractCostsOptimized returned null')
           }
         } catch (error) {
-          console.error(`Error calculating price for contract ${contract.id}:`, error)
+          console.error(`❌ [getBestDealsInternal] Error calculating price for contract ${contract.id}:`, error)
         }
 
         // Fallback: simplified estimate if calculation fails
+        console.warn('⚠️ [getBestDealsInternal] Contract', contract.id, '- using fallback estimate')
         return {
           ...contract,
           estimatedMaandbedrag: 150, // Fallback to reasonable default
@@ -464,6 +500,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
         }
       })
     )
+    console.log('✅ [getBestDealsInternal] Calculated prices for', contractenMetPrijzen.length, 'contracts')
 
     // Calculate average price (use Eneco model as average if available)
     const averagePrice = enecoModelMaandbedrag > 0 
@@ -487,13 +524,15 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
 
     // Take top N contracts
     const topContracten = contractenMetPrijzen.slice(0, limit)
+    console.log('✅ [getBestDealsInternal] Returning', topContracten.length, 'top contracts, averagePrice:', averagePrice)
 
     return { 
       contracten: topContracten,
       averagePrice 
     }
   } catch (error: any) {
-    console.error('Error in getBestDealsInternal:', error)
+    console.error('❌ [getBestDealsInternal] ERROR:', error)
+    console.error('❌ [getBestDealsInternal] Error stack:', error?.stack)
     return { contracten: [], averagePrice: 0 }
   }
 }
@@ -502,12 +541,26 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
  * Cached version of getBestDeals for homepage performance
  * Cache is invalidated after 5 minutes or can be manually invalidated using tags
  */
-export const getBestDeals = unstable_cache(
-  getBestDealsInternal,
-  ['best-deals'], // cache key prefix
-  {
-    revalidate: 300, // 5 minutes
-    tags: ['best-deals'], // for manual cache invalidation
+export const getBestDeals = async (limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') => {
+  console.log('🔵 [getBestDeals] Called with limit:', limit, 'type:', type)
+  try {
+    const cachedFn = unstable_cache(
+      getBestDealsInternal,
+      ['best-deals'], // cache key prefix
+      {
+        revalidate: 300, // 5 minutes
+        tags: ['best-deals'], // for manual cache invalidation
+      }
+    )
+    const result = await cachedFn(limit, type)
+    console.log('✅ [getBestDeals] Result:', result.contracten.length, 'contracts, averagePrice:', result.averagePrice)
+    return result
+  } catch (error: any) {
+    console.error('❌ [getBestDeals] ERROR in cached function:', error)
+    console.error('❌ [getBestDeals] Error stack:', error?.stack)
+    // Fallback to non-cached version on error
+    console.log('⚠️ [getBestDeals] Falling back to non-cached version')
+    return await getBestDealsInternal(limit, type)
   }
-)
+}
 
