@@ -83,10 +83,10 @@ export async function GET(request: Request) {
     })
 
     // Calculate prices using the actual contract calculation for accurate results
-    // Using typical MKB usage: 6000 kWh/year (4000 normaal + 2000 dal), 1200 m³/year
-    const defaultElektriciteitNormaal = 4000 // kWh/year
-    const defaultElektriciteitDal = 2000 // kWh/year
-    const defaultGas = 1200 // m³/year
+    // Using specific values: 1250 kWh normaal + 900 kWh dal, 900 m³/year
+    const defaultElektriciteitNormaal = 1250 // kWh/year
+    const defaultElektriciteitDal = 900 // kWh/year
+    const defaultGas = 900 // m³/year
     const defaultPostcode = '1000AA' // Amsterdam as default
     const heeftEnkeleMeter = false // Default: dubbele meter
 
