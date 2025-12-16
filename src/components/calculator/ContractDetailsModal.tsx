@@ -99,7 +99,7 @@ export function ContractDetailsModal({
       <div className="min-h-[60vh] max-h-[60vh] overflow-y-auto overflow-x-hidden break-words">
         {/* Prijsdetails Tab */}
         {activeTab === 'prijsdetails' && (
-          <div className="space-y-4">
+          <div className="space-y-4 pr-2">
             {loading && (
               <div className="flex items-center justify-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal-600"></div>
@@ -453,7 +453,7 @@ export function ContractDetailsModal({
 
         {/* Voorwaarden Tab */}
         {activeTab === 'voorwaarden' && (
-          <div className="space-y-2">
+          <div className="space-y-2 pr-2">
             {contract.voorwaarden && contract.voorwaarden.length > 0 ? (() => {
               // Filter alleen documenten (PDF/DOC met URL), negeer tekstvoorwaarden
               const documenten = contract.voorwaarden
@@ -529,7 +529,7 @@ export function ContractDetailsModal({
 
         {/* Over leverancier Tab */}
         {activeTab === 'over' && (
-          <div>
+          <div className="pr-2">
             {contract.leverancier.overLeverancier ? (
               <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                 {contract.leverancier.overLeverancier}
