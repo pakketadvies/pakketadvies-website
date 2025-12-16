@@ -907,7 +907,7 @@ export default function ContractCard({
               router.push(`/calculator?stap=2&contract=${contract.id}`)
             }}
           >
-              Aanvragen
+              Aanmelden
             </Button>
         </div>
       </CardContent>
