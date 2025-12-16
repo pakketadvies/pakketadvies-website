@@ -79,20 +79,20 @@ async function get30DayAverageElectricityPrices(supabase?: any): Promise<{
   }
 
   // Calculate averages over 30 days
-  const validDays = data.filter(d => d.elektriciteit_gemiddeld_dag != null)
+  const validDays = data.filter((d: { elektriciteit_gemiddeld_dag: number | null }) => d.elektriciteit_gemiddeld_dag != null)
   
   if (validDays.length === 0) {
     throw new Error('No valid electricity price data in 30-day period')
   }
 
-  const avgDay = validDays.reduce((sum, d) => sum + d.elektriciteit_gemiddeld_dag, 0) / validDays.length
+  const avgDay = validDays.reduce((sum: number, d: { elektriciteit_gemiddeld_dag: number }) => sum + d.elektriciteit_gemiddeld_dag, 0) / validDays.length
   
   // For night: use provided night prices or estimate from day prices
   const nightPrices = validDays
-    .filter(d => d.elektriciteit_gemiddeld_nacht != null)
-    .map(d => d.elektriciteit_gemiddeld_nacht!)
+    .filter((d: { elektriciteit_gemiddeld_nacht: number | null }) => d.elektriciteit_gemiddeld_nacht != null)
+    .map((d: { elektriciteit_gemiddeld_nacht: number }) => d.elektriciteit_gemiddeld_nacht)
   const avgNight = nightPrices.length > 0
-    ? nightPrices.reduce((sum, price) => sum + price, 0) / nightPrices.length
+    ? nightPrices.reduce((sum: number, price: number) => sum + price, 0) / nightPrices.length
     : avgDay * 0.8 // Estimate: night ~20% cheaper
 
   // Single tariff = average of day and night
@@ -100,7 +100,7 @@ async function get30DayAverageElectricityPrices(supabase?: any): Promise<{
 
   // Determine source (most common in dataset)
   const sourceCounts: Record<string, number> = {}
-  validDays.forEach(d => {
+  validDays.forEach((d: { bron: string }) => {
     sourceCounts[d.bron] = (sourceCounts[d.bron] || 0) + 1
   })
   const mostCommonSource = Object.entries(sourceCounts).reduce((a, b) => 
@@ -172,17 +172,17 @@ async function get30DayAverageGasPrice(supabase?: any): Promise<{
   }
 
   // Calculate average over 30 days
-  const validDays = data.filter(d => d.gas_gemiddeld != null)
+  const validDays = data.filter((d: { gas_gemiddeld: number | null }) => d.gas_gemiddeld != null)
   
   if (validDays.length === 0) {
     throw new Error('No valid gas price data in 30-day period')
   }
 
-  const avgGas = validDays.reduce((sum, d) => sum + d.gas_gemiddeld, 0) / validDays.length
+  const avgGas = validDays.reduce((sum: number, d: { gas_gemiddeld: number }) => sum + d.gas_gemiddeld, 0) / validDays.length
 
   // Determine source (most common in dataset)
   const sourceCounts: Record<string, number> = {}
-  validDays.forEach(d => {
+  validDays.forEach((d: { bron: string }) => {
     sourceCounts[d.bron] = (sourceCounts[d.bron] || 0) + 1
   })
   const mostCommonSource = Object.entries(sourceCounts).reduce((a, b) => 
