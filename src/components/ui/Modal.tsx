@@ -71,7 +71,7 @@ export function Modal({
         className={cn(
           'relative bg-white rounded-t-2xl md:rounded-2xl lg:rounded-3xl shadow-2xl w-full md:w-auto',
           sizeClasses[size],
-          'max-h-[90vh] md:max-h-[90vh] overflow-y-auto',
+          'max-h-[90vh] md:max-h-[90vh] min-h-[60vh] md:min-h-[500px] overflow-y-auto',
           'animate-slide-up md:animate-scale-in'
         )}
         onClick={(e) => e.stopPropagation()}
