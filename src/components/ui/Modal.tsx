@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
@@ -56,9 +57,10 @@ export function Modal({
     xl: 'max-w-4xl',
   }
 
-  return (
+  // Render via portal to document.body to ensure it's above everything
+  const modalContent = typeof window !== 'undefined' ? createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4"
+      className="fixed inset-0 z-[99999] flex items-end md:items-center justify-center p-0 md:p-4"
       onClick={onClose}
     >
       {/* Backdrop */}
@@ -97,7 +99,10 @@ export function Modal({
         {/* Content */}
         <div className="p-6">{children}</div>
       </div>
-    </div>
-  )
+    </div>,
+    document.body
+  ) : null
+
+  return modalContent
 }
 
