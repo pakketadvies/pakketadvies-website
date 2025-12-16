@@ -53,7 +53,7 @@ export function ContractDetailsModal({
       <div className="flex border-b-2 border-gray-200 -mx-6 px-6 mb-6">
         <button
           onClick={() => setActiveTab('prijsdetails')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-xs transition-colors relative ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
             activeTab === 'prijsdetails'
               ? 'text-brand-teal-600'
               : 'text-gray-600 hover:text-gray-900'
@@ -67,7 +67,7 @@ export function ContractDetailsModal({
         </button>
         <button
           onClick={() => setActiveTab('voorwaarden')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-xs transition-colors relative ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
             activeTab === 'voorwaarden'
               ? 'text-brand-teal-600'
               : 'text-gray-600 hover:text-gray-900'
@@ -81,7 +81,7 @@ export function ContractDetailsModal({
         </button>
         <button
           onClick={() => setActiveTab('over')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-xs transition-colors relative ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
             activeTab === 'over'
               ? 'text-brand-teal-600'
               : 'text-gray-600 hover:text-gray-900'
