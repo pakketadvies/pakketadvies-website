@@ -1,8 +1,315 @@
 import { createClient } from '@/lib/supabase/server'
 import { calculateContractCosts } from '@/lib/bereken-contract-internal'
 import { berekenEnecoModelContractKosten } from '@/lib/energie-berekening'
+import { unstable_cache } from 'next/cache'
+import { converteerGasAansluitwaardeVoorDatabase } from '@/lib/aansluitwaarde-schatting'
+import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
+import { getCurrentDynamicPrices } from '@/lib/dynamic-pricing/database'
+import { calculateDynamicContract } from '@/lib/dynamic-pricing/calculate-dynamic-contract'
 
-export async function getBestDeals(limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') {
+/**
+ * Helper function to fetch shared/cached data that's reused across all contract calculations
+ * This optimizes performance by fetching once instead of per contract
+ */
+async function fetchSharedCalculationData(
+  supabase: any,
+  postcode: string,
+  aansluitwaardeElektriciteit: string,
+  aansluitwaardeGas: string
+) {
+  // 1. Overheidstarieven (always the same for 2025)
+  const { data: overheidsTarieven } = await supabase
+    .from('tarieven_overheid')
+    .select('*')
+    .eq('jaar', 2025)
+    .eq('actief', true)
+    .single()
+
+  if (!overheidsTarieven) {
+    throw new Error('Energiebelasting tarieven niet gevonden voor 2025')
+  }
+
+  // 2. Netbeheerder lookup (for fixed postcode '1000AA')
+  const cleanedPostcode = postcode.replace(/\s/g, '').toUpperCase()
+  const { data: postcodeData } = await supabase
+    .from('postcode_netbeheerders')
+    .select('netbeheerder_id')
+    .lte('postcode_van', cleanedPostcode)
+    .gte('postcode_tot', cleanedPostcode)
+    .limit(1)
+    .single()
+
+  if (!postcodeData) {
+    throw new Error('Netbeheerder niet gevonden voor deze postcode')
+  }
+
+  const netbeheerderId = postcodeData.netbeheerder_id
+
+  // 3. Aansluitwaarden (fetch once)
+  // Voor gas: converteer eerst naar database formaat (gebruik standaard verbruik van 1200 m³ voor homepage)
+  const gasAansluitwaardeVoorDatabase = converteerGasAansluitwaardeVoorDatabase(aansluitwaardeGas, 1200)
+  
+  const [elektraAansluitwaardeResult, gasAansluitwaardeResult] = await Promise.all([
+    supabase
+      .from('aansluitwaarden_elektriciteit')
+      .select('id, is_kleinverbruik')
+      .eq('code', aansluitwaardeElektriciteit)
+      .single(),
+    supabase
+      .from('aansluitwaarden_gas')
+      .select('id, is_kleinverbruik')
+      .eq('code', gasAansluitwaardeVoorDatabase)
+      .single(),
+  ])
+
+  const elektraAansluitwaarde = elektraAansluitwaardeResult.data
+  const gasAansluitwaarde = gasAansluitwaardeResult.data
+
+  if (!elektraAansluitwaarde) {
+    throw new Error(`Ongeldige aansluitwaarde elektriciteit: ${aansluitwaardeElektriciteit}`)
+  }
+
+  // 4. Netbeheertarieven (fetch once for this postcode/aansluitwaarden combination)
+  const [elektriciteitTariefResult, gasTariefResult] = await Promise.all([
+    supabase
+      .from('netbeheer_tarieven_elektriciteit')
+      .select('all_in_tarief_jaar')
+      .eq('netbeheerder_id', netbeheerderId)
+      .eq('jaar', 2025)
+      .eq('actief', true)
+      .eq('aansluitwaarde_id', elektraAansluitwaarde.id)
+      .single(),
+    gasAansluitwaarde
+      ? supabase
+          .from('netbeheer_tarieven_gas')
+          .select('all_in_tarief_jaar')
+          .eq('netbeheerder_id', netbeheerderId)
+          .eq('jaar', 2025)
+          .eq('actief', true)
+          .eq('aansluitwaarde_id', gasAansluitwaarde.id)
+          .single()
+      : Promise.resolve({ data: null }),
+  ])
+
+  let netbeheerElektriciteit = elektriciteitTariefResult.data?.all_in_tarief_jaar || 430
+  if (isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+    netbeheerElektriciteit = 0
+  }
+
+  let netbeheerGas = gasTariefResult.data?.all_in_tarief_jaar || 245
+  if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+    netbeheerGas = 0
+  }
+
+  return {
+    overheidsTarieven,
+    netbeheerderId,
+    elektraAansluitwaarde,
+    gasAansluitwaarde,
+    netbeheerElektriciteit,
+    netbeheerGas,
+  }
+}
+
+/**
+ * Optimized contract cost calculation using pre-fetched shared data
+ * This avoids redundant database queries for each contract
+ */
+async function calculateContractCostsOptimized(
+  contract: any,
+  details: any,
+  sharedData: Awaited<ReturnType<typeof fetchSharedCalculationData>>,
+  verbruik: {
+    elektriciteitNormaal: number
+    elektriciteitDal: number
+    gas: number
+    terugleveringJaar: number
+    aansluitwaardeElektriciteit: string
+    aansluitwaardeGas: string
+    heeftDubbeleMeter: boolean
+  }
+): Promise<{ maandbedrag: number } | null> {
+  try {
+    const {
+      overheidsTarieven,
+      elektraAansluitwaarde,
+      netbeheerElektriciteit,
+      netbeheerGas,
+    } = sharedData
+
+    const { elektriciteitNormaal, elektriciteitDal, gas, terugleveringJaar, heeftDubbeleMeter } = verbruik
+    const terugleveringKwh = terugleveringJaar || 0
+    const totaalGas = gas || 0
+    const isDynamisch = contract.type === 'dynamisch'
+    const isVastOfMaatwerk = contract.type === 'vast' || contract.type === 'maatwerk'
+
+    // LEVERANCIERSKOSTEN
+    let kostenElektriciteit = 0
+    let kostenGas = 0
+    let nettoKwh = 0
+    let overschotKwh = 0
+    let opbrengstOverschot = 0
+    let kostenTeruglevering = 0
+
+    if (isDynamisch) {
+      const dynamicPricesData = await getCurrentDynamicPrices()
+      const dynamicPrices = {
+        elektriciteit_gemiddeld_dag: dynamicPricesData.electricityDay,
+        elektriciteit_gemiddeld_nacht: dynamicPricesData.electricityNight,
+        gas_gemiddeld: dynamicPricesData.gas,
+      }
+
+      const opslagElektriciteit = details.opslag_elektriciteit_normaal || details.opslag_elektriciteit || 0
+      const opslagGas = details.opslag_gas || 0
+      const opslagTeruglevering = details.opslag_teruglevering || 0
+      const vastrechtStroomMaand = details.vastrecht_stroom_maand || 4.00
+      const vastrechtGasMaand = details.vastrecht_gas_maand || 4.00
+
+      const result = calculateDynamicContract({
+        elektriciteitNormaal,
+        elektriciteitDal,
+        gas,
+        terugleveringJaar: terugleveringKwh,
+        heeftDubbeleMeter,
+        opslagElektriciteit,
+        opslagGas,
+        opslagTeruglevering,
+        dynamicPrices,
+        vastrechtStroomMaand,
+        vastrechtGasMaand,
+      })
+
+      kostenElektriciteit = result.kostenElektriciteit
+      kostenGas = result.kostenGas
+      nettoKwh = result.nettoKwh
+      overschotKwh = result.overschotKwh
+      opbrengstOverschot = result.opbrengstOverschot
+    } else if (isVastOfMaatwerk) {
+      // Saldering logica (same as calculateContractCosts)
+      let nettoElektriciteitNormaal = elektriciteitNormaal
+      let nettoElektriciteitDal = elektriciteitDal || 0
+
+      if (terugleveringKwh > 0) {
+        if (!heeftDubbeleMeter) {
+          const totaalVerbruik = elektriciteitNormaal
+          nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringKwh)
+          nettoKwh = nettoElektriciteitNormaal
+        } else {
+          const terugleveringNormaal = terugleveringKwh / 2
+          const terugleveringDal = terugleveringKwh / 2
+          let normaal_na_aftrek = elektriciteitNormaal - terugleveringNormaal
+          let dal_na_aftrek = (elektriciteitDal || 0) - terugleveringDal
+
+          if (normaal_na_aftrek < 0) {
+            const overschot_normaal = -normaal_na_aftrek
+            dal_na_aftrek = Math.max(0, dal_na_aftrek - overschot_normaal)
+            normaal_na_aftrek = 0
+          } else if (dal_na_aftrek < 0) {
+            const overschot_dal = -dal_na_aftrek
+            normaal_na_aftrek = Math.max(0, normaal_na_aftrek - overschot_dal)
+            dal_na_aftrek = 0
+          }
+
+          nettoElektriciteitNormaal = Math.max(0, normaal_na_aftrek)
+          nettoElektriciteitDal = Math.max(0, dal_na_aftrek)
+          nettoKwh = nettoElektriciteitNormaal + nettoElektriciteitDal
+        }
+      } else {
+        nettoKwh = elektriciteitNormaal + (elektriciteitDal || 0)
+      }
+
+      const tariefElektriciteitNormaal = details.tarief_elektriciteit_normaal || 0
+      const tariefElektriciteitDal = details.tarief_elektriciteit_dal
+      const tariefElektriciteitEnkel = details.tarief_elektriciteit_enkel
+      const tariefGas = details.tarief_gas || 0
+      const tariefTerugleveringKwh = details.tarief_teruglevering_kwh || 0
+
+      // Bereken leverancierskosten
+      if (!heeftDubbeleMeter && tariefElektriciteitEnkel) {
+        kostenElektriciteit = nettoKwh * tariefElektriciteitEnkel
+      } else if (heeftDubbeleMeter && tariefElektriciteitNormaal && tariefElektriciteitDal) {
+        kostenElektriciteit = (nettoElektriciteitNormaal * tariefElektriciteitNormaal) +
+                            (nettoElektriciteitDal * tariefElektriciteitDal)
+      }
+
+      kostenGas = totaalGas * tariefGas
+      kostenTeruglevering = terugleveringKwh > 0 && tariefTerugleveringKwh 
+        ? terugleveringKwh * tariefTerugleveringKwh 
+        : 0
+    }
+
+    // Vastrecht
+    const vastrechtStroomMaand = details.vastrecht_stroom_maand || 4.00
+    const vastrechtGasMaand = details.vastrecht_gas_maand || 4.00
+    const vastrechtStroom = vastrechtStroomMaand * 12
+    const vastrechtGas = totaalGas > 0 ? vastrechtGasMaand * 12 : 0
+    const kostenVastrecht = vastrechtStroom + vastrechtGas
+
+    const subtotaalLeverancier = kostenElektriciteit + kostenGas + kostenVastrecht + kostenTeruglevering
+
+    // ENERGIEBELASTING (using pre-fetched overheidsTarieven)
+    const isGrootverbruikAansluitwaardeElektra = elektraAansluitwaarde ? !elektraAansluitwaarde.is_kleinverbruik : false
+
+    let ebElektriciteit = 0
+    const schijf1Max = overheidsTarieven.eb_elektriciteit_gv_schijf1_max || 2900
+    const schijf2Max = overheidsTarieven.eb_elektriciteit_gv_schijf2_max || 10000
+    const schijf3Max = overheidsTarieven.eb_elektriciteit_gv_schijf3_max || 50000
+
+    if (nettoKwh <= schijf1Max) {
+      ebElektriciteit = nettoKwh * overheidsTarieven.eb_elektriciteit_gv_schijf1
+    } else if (nettoKwh <= schijf2Max) {
+      const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      const bedrag2 = (nettoKwh - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      ebElektriciteit = bedrag1 + bedrag2
+    } else if (nettoKwh <= schijf3Max) {
+      const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      const bedrag2 = (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      const bedrag3 = (nettoKwh - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
+      ebElektriciteit = bedrag1 + bedrag2 + bedrag3
+    } else {
+      const bedrag1 = schijf1Max * overheidsTarieven.eb_elektriciteit_gv_schijf1
+      const bedrag2 = (schijf2Max - schijf1Max) * overheidsTarieven.eb_elektriciteit_gv_schijf2
+      const bedrag3 = (schijf3Max - schijf2Max) * overheidsTarieven.eb_elektriciteit_gv_schijf3
+      const bedrag4 = (nettoKwh - schijf3Max) * overheidsTarieven.eb_elektriciteit_gv_schijf4
+      ebElektriciteit = bedrag1 + bedrag2 + bedrag3 + bedrag4
+    }
+
+    let ebGas = 0
+    if (totaalGas > 0) {
+      const schijf1Max = overheidsTarieven.eb_gas_schijf1_max || 1000
+      if (totaalGas <= schijf1Max) {
+        ebGas = totaalGas * overheidsTarieven.eb_gas_schijf1
+      } else {
+        ebGas = schijf1Max * overheidsTarieven.eb_gas_schijf1 +
+                (totaalGas - schijf1Max) * overheidsTarieven.eb_gas_schijf2
+      }
+    }
+
+    const verminderingEB = !isGrootverbruikAansluitwaardeElektra 
+      ? overheidsTarieven.vermindering_eb_elektriciteit 
+      : 0
+
+    const subtotaalEnergiebelasting = ebElektriciteit + ebGas - verminderingEB
+    const subtotaalNetbeheer = netbeheerElektriciteit + netbeheerGas
+
+    // TOTALEN
+    const totaalJaarExclBtw = subtotaalLeverancier + subtotaalEnergiebelasting + subtotaalNetbeheer
+    const btw = totaalJaarExclBtw * (overheidsTarieven.btw_percentage / 100)
+    const totaalJaarInclBtw = totaalJaarExclBtw + btw
+
+    const maandbedragInclBtw = totaalJaarInclBtw / 12
+
+    return { maandbedrag: maandbedragInclBtw }
+  } catch (error) {
+    console.error(`Error in calculateContractCostsOptimized for contract ${contract.id}:`, error)
+    return null
+  }
+}
+
+/**
+ * Internal implementation (not cached)
+ */
+async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') {
   try {
     const supabase = await createClient()
     
@@ -77,13 +384,23 @@ export async function getBestDeals(limit: number = 5, type: 'alle' | 'vast' | 'd
       return false
     })
 
-    // Calculate prices using the actual contract calculation for accurate results
+    // Calculate prices using optimized calculation with shared data
     // Using typical MKB usage: 6000 kWh/year (4000 normaal + 2000 dal), 1200 m³/year
     const defaultElektriciteitNormaal = 4000 // kWh/year
     const defaultElektriciteitDal = 2000 // kWh/year
     const defaultGas = 1200 // m³/year
     const defaultPostcode = '1000AA' // Amsterdam as default
     const heeftEnkeleMeter = false // Default: dubbele meter
+    const defaultAansluitwaardeElektriciteit = '3x25A'
+    const defaultAansluitwaardeGas = 'G6'
+
+    // OPTIMIZATION: Fetch shared data once instead of per contract
+    const sharedData = await fetchSharedCalculationData(
+      supabase,
+      defaultPostcode,
+      defaultAansluitwaardeElektriciteit,
+      defaultAansluitwaardeGas
+    )
 
     // Calculate Eneco model contract costs for comparison (baseline for savings)
     const enecoModelKosten = await berekenEnecoModelContractKosten(
@@ -92,44 +409,35 @@ export async function getBestDeals(limit: number = 5, type: 'alle' | 'vast' | 'd
       defaultGas,
       heeftEnkeleMeter,
       supabase,
-      '3x25A',
-      'G6'
+      defaultAansluitwaardeElektriciteit,
+      defaultAansluitwaardeGas
     )
     const enecoModelMaandbedrag = enecoModelKosten?.maandbedrag || 0
 
-    // Calculate prices for each contract using the actual calculation function
+    // Calculate prices for each contract using optimized calculation with shared data
     const contractenMetPrijzen = await Promise.all(
       validContracten.map(async (contract: any) => {
         const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
         
         try {
-          // Use the actual contract calculation function for accurate pricing
-          const berekenInput = {
-            elektriciteitNormaal: defaultElektriciteitNormaal,
-            elektriciteitDal: defaultElektriciteitDal,
-            gas: defaultGas,
-            terugleveringJaar: 0,
-            aansluitwaardeElektriciteit: '3x25A',
-            aansluitwaardeGas: 'G6',
-            postcode: defaultPostcode,
-            contractType: contract.type === 'maatwerk' ? 'maatwerk' : contract.type as 'vast' | 'dynamisch' | 'maatwerk',
-            tariefElektriciteitNormaal: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_elektriciteit_normaal || 0) : 0,
-            tariefElektriciteitDal: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_elektriciteit_dal || undefined) : undefined,
-            tariefElektriciteitEnkel: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_elektriciteit_enkel || undefined) : undefined,
-            tariefGas: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_gas || 0) : 0,
-            tariefTerugleveringKwh: contract.type === 'vast' || contract.type === 'maatwerk' ? (details.tarief_teruglevering_kwh || 0) : 0,
-            opslagElektriciteit: contract.type === 'dynamisch' ? (details.opslag_elektriciteit_normaal || details.opslag_elektriciteit || 0) : undefined,
-            opslagGas: contract.type === 'dynamisch' ? (details.opslag_gas || 0) : undefined,
-            opslagTeruglevering: contract.type === 'dynamisch' ? (details.opslag_teruglevering || 0) : undefined,
-            vastrechtStroomMaand: details.vastrecht_stroom_maand || 4.00,
-            vastrechtGasMaand: details.vastrecht_gas_maand || 4.00,
-            heeftDubbeleMeter: true,
-          }
+          // Use optimized calculation function with pre-fetched shared data
+          const result = await calculateContractCostsOptimized(
+            contract,
+            details,
+            sharedData,
+            {
+              elektriciteitNormaal: defaultElektriciteitNormaal,
+              elektriciteitDal: defaultElektriciteitDal,
+              gas: defaultGas,
+              terugleveringJaar: 0,
+              aansluitwaardeElektriciteit: defaultAansluitwaardeElektriciteit,
+              aansluitwaardeGas: defaultAansluitwaardeGas,
+              heeftDubbeleMeter: true,
+            }
+          )
 
-          const berekenResult = await calculateContractCosts(berekenInput, supabase)
-
-          if (berekenResult.success && berekenResult.breakdown) {
-            const maandbedrag = Math.round(berekenResult.breakdown.totaal.maandInclBtw || 0)
+          if (result) {
+            const maandbedrag = Math.round(result.maandbedrag || 0)
             
             // Calculate savings compared to Eneco model contract
             const besparing = enecoModelMaandbedrag > 0 && maandbedrag < enecoModelMaandbedrag
@@ -185,8 +493,21 @@ export async function getBestDeals(limit: number = 5, type: 'alle' | 'vast' | 'd
       averagePrice 
     }
   } catch (error: any) {
-    console.error('Error in getBestDeals:', error)
+    console.error('Error in getBestDealsInternal:', error)
     return { contracten: [], averagePrice: 0 }
   }
 }
+
+/**
+ * Cached version of getBestDeals for homepage performance
+ * Cache is invalidated after 5 minutes or can be manually invalidated using tags
+ */
+export const getBestDeals = unstable_cache(
+  getBestDealsInternal,
+  ['best-deals'], // cache key prefix
+  {
+    revalidate: 300, // 5 minutes
+    tags: ['best-deals'], // for manual cache invalidation
+  }
+)
 
