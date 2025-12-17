@@ -843,6 +843,11 @@ export default function E2ETestPage() {
       addLog('⚡ Stap 4: Verbruik invullen...')
       
       // Scroll to form if needed
+      if (!currentIframe) {
+        updateTest(suiteIndex, 3, { status: 'failed', error: 'Iframe niet beschikbaar' })
+        return
+      }
+      
       const doc = getIframeDocument(currentIframe)
       if (doc) {
         doc.documentElement.scrollTop = 500
@@ -933,6 +938,11 @@ export default function E2ETestPage() {
       }
       
       // Check if we're on results page
+      if (!currentIframe) {
+        updateTest(suiteIndex, 4, { status: 'failed', error: 'Iframe niet beschikbaar' })
+        return
+      }
+      
       const doc = getIframeDocument(currentIframe)
       const hasResults = doc ? (
         doc.querySelector('[data-testid="contract-card"], .contract-card, [class*="result"]') !== null ||
@@ -966,6 +976,11 @@ export default function E2ETestPage() {
       addLog('📋 Stap 6: Contracten bekijken...')
       
       // If not on results page yet, navigate there
+      if (!currentIframe) {
+        updateTest(suiteIndex, 5, { status: 'failed', error: 'Iframe niet beschikbaar' })
+        return
+      }
+      
       const doc = getIframeDocument(currentIframe)
       if (!doc?.location?.href?.includes('resultaten')) {
         if (currentIframe) removeIframe(currentIframe)
@@ -999,6 +1014,11 @@ export default function E2ETestPage() {
     try {
       const startTime = Date.now()
       addLog('👁️ Stap 7: Contract details bekijken...')
+      
+      if (!currentIframe) {
+        updateTest(suiteIndex, 6, { status: 'failed', error: 'Iframe niet beschikbaar' })
+        return
+      }
       
       const doc = getIframeDocument(currentIframe)
       // Try to find detail buttons with multiple strategies
@@ -1054,6 +1074,11 @@ export default function E2ETestPage() {
       if (currentIframe) removeIframe(currentIframe)
       currentIframe = await createIframe(baseUrl + '/calculator')
       await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      if (!currentIframe) {
+        updateTest(suiteIndex, 7, { status: 'failed', error: 'Iframe niet beschikbaar' })
+        return
+      }
       
       const doc = getIframeDocument(currentIframe)
       
@@ -1117,6 +1142,11 @@ export default function E2ETestPage() {
       if (currentIframe) removeIframe(currentIframe)
       currentIframe = await createIframe(baseUrl + '/calculator/resultaten')
       await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      if (!currentIframe) {
+        updateTest(suiteIndex, 8, { status: 'failed', error: 'Iframe niet beschikbaar' })
+        return
+      }
       
       const doc = getIframeDocument(currentIframe)
       const contractCards = doc ? doc.querySelectorAll('[data-testid="contract-card"], .bg-white.rounded-xl, [class*="contract"]') : []
