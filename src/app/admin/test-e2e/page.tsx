@@ -242,13 +242,16 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
+    // Add suite to state first and get index
+    setTestSuites(prev => [...prev, suite])
+    const suiteIndex = testSuites.length
+
     // Test 1: Load homepage in iframe and check content
     suite.tests.push({
       name: 'Homepage laden in iframe',
       status: 'running',
       timestamp: Date.now(),
     })
-    setTestSuites(prev => [...prev, suite])
     
     let homepageIframe: HTMLIFrameElement | null = null
     try {
@@ -259,13 +262,13 @@ export default function E2ETestPage() {
       
       const doc = getIframeDocument(homepageIframe)
       if (doc) {
-        updateTest(0, 0, { status: 'passed', duration, details: { title: doc.title } })
+        updateTest(suiteIndex, 0, { status: 'passed', duration, details: { title: doc.title } })
         addLog('✅ Homepage geladen in iframe')
       } else {
-        updateTest(0, 0, { status: 'failed', error: 'Kan iframe document niet benaderen (mogelijk cross-origin)', duration })
+        updateTest(suiteIndex, 0, { status: 'failed', error: 'Kan iframe document niet benaderen (mogelijk cross-origin)', duration })
       }
     } catch (error: any) {
-      updateTest(0, 0, { status: 'failed', error: error.message })
+      updateTest(suiteIndex, 0, { status: 'failed', error: error.message })
       if (homepageIframe) removeIframe(homepageIframe)
     }
 
@@ -296,9 +299,9 @@ export default function E2ETestPage() {
       }
       const duration = Date.now() - startTime
       
-      updateTest(0, 1, { status: exists ? 'passed' : 'failed', duration, error: exists ? undefined : 'Sectie niet gevonden' })
+      updateTest(suiteIndex, 1, { status: exists ? 'passed' : 'failed', duration, error: exists ? undefined : 'Sectie niet gevonden' })
     } catch (error: any) {
-      updateTest(0, 1, { status: 'failed', error: error.message })
+      updateTest(suiteIndex, 1, { status: 'failed', error: error.message })
     }
 
     // Test 3: Check if contracts are displayed in iframe
@@ -324,14 +327,14 @@ export default function E2ETestPage() {
       const duration = Date.now() - startTime
       
       addLog(`${contractCount > 0 ? '✅' : '❌'} Contracten in iframe: ${contractCount} gevonden`)
-      updateTest(0, 2, { 
+      updateTest(suiteIndex, 2, { 
         status: contractCount > 0 ? 'passed' : 'failed', 
         duration,
         details: { count: contractCount },
         error: contractCount > 0 ? undefined : 'Geen contracten gevonden'
       })
     } catch (error: any) {
-      updateTest(0, 2, { status: 'failed', error: error.message })
+      updateTest(suiteIndex, 2, { status: 'failed', error: error.message })
     }
     
     // Cleanup iframe after tests
@@ -351,17 +354,17 @@ export default function E2ETestPage() {
       const result = await testAPI('/api/contracten/best-deals?limit=5&type=alle', {}, 'Best deals API')
       const duration = Date.now() - startTime
       
-      updateTest(0, 3, { 
+      updateTest(suiteIndex, 3, { 
         status: result.success ? 'passed' : 'failed', 
         duration,
         details: result.data,
         error: result.success ? undefined : result.error
       })
     } catch (error: any) {
-      updateTest(0, 3, { status: 'failed', error: error.message })
+      updateTest(suiteIndex, 3, { status: 'failed', error: error.message })
     }
 
-    updateSuiteStatus(0)
+    updateSuiteStatus(suiteIndex)
     return suite
   }
 
