@@ -76,6 +76,14 @@ export function generateNewsletterEmail(data: NewsletterEmailData, variant: 1 | 
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
   const defaultIntroText = `Beste ${recipientName || 'klant'},<br><br>We hebben uw gegevens verzameld via onze social media campagnes voor particulier en/of zakelijke energie. Via deze email willen we u graag op de hoogte brengen van onze nieuwe aanbiedingen voor deze maand.<br><br><strong style="color: ${navy};">Let op:</strong> momenteel hebben wij voor groot MKB en grootverbruikers met een verbruik boven de 75.000kWh een heel scherp tarief voor lange looptijd.<br><br>Daarnaast hebben wij aantrekkelijke opties voor eigenaren van zonnepanelen via dynamische contracten. Voor grote zakelijke klanten bieden wij strategische inkoop aan. Vergelijk direct alle aanbiedingen via <a href="${baseUrl}/calculator" style="color: ${teal}; text-decoration: underline; font-weight: 600;">${baseUrl}/calculator</a> of neem contact met ons op voor persoonlijk advies.`
 
+  // Icon SVGs - Teal versions for regular cards
+  const icons = {
+    lightning: `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M143 36 47 128l56 20-16 72 96-92-56-20 16-72Z" fill="${teal}"/></svg>`,
+    buildings: `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="64" y="96" width="128" height="128" rx="8" fill="none" stroke="${teal}" stroke-width="16"/><path d="M128 96v128M96 128h64M96 160h64M96 192h64" stroke="${teal}" stroke-width="12" stroke-linecap="round"/></svg>`,
+    briefcase: `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="72" width="192" height="144" rx="8" fill="none" stroke="${teal}" stroke-width="16"/><path d="M88 72V56a24 24 0 0 1 24-24h32a24 24 0 0 1 24 24v16" stroke="${teal}" stroke-width="16" stroke-linecap="round"/></svg>`,
+    lightningSlash: `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M143 36 47 128l56 20-16 72 49-47" stroke="${teal}" stroke-width="16" stroke-linecap="round"/><line x1="56" y1="56" x2="200" y2="200" stroke="${teal}" stroke-width="16" stroke-linecap="round"/></svg>`,
+  }
+  
   // Icon SVGs - White versions for gradient headers (better email compatibility)
   const iconsWhite = {
     lightning: `<svg width="28" height="28" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M143 36 47 128l56 20-16 72 96-92-56-20 16-72Z" fill="#FFFFFF" opacity="0.95"/></svg>`,
