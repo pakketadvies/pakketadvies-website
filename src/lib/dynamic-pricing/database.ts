@@ -249,13 +249,13 @@ export async function getCurrentDynamicPrices(supabaseClient?: any): Promise<{
       // Use service role for INSERT/UPDATE (required by RLS)
       await saveDynamicPrices(freshPrices, createServiceRoleClient())
       
-        electricity30Day = {
-          day: freshPrices.electricity.day,
-          night: freshPrices.electricity.night,
-          single: freshPrices.electricity.average,
-          source: freshPrices.source,
-          daysUsed: 1,
-        }
+      electricity30Day = {
+        day: freshPrices.electricity.day,
+        night: freshPrices.electricity.night,
+        single: freshPrices.electricity.average,
+        source: freshPrices.source,
+        daysUsed: 1,
+      }
       } catch (fetchError) {
         console.error('❌ Failed to fetch fresh electricity prices', fetchError)
         
@@ -288,11 +288,11 @@ export async function getCurrentDynamicPrices(supabaseClient?: any): Promise<{
       // Use service role for INSERT/UPDATE (required by RLS)
       await saveDynamicPrices(freshPrices, createServiceRoleClient())
       
-        gas30Day = {
-          gas: freshPrices.gas.average,
-          source: freshPrices.source,
-          daysUsed: 1,
-        }
+      gas30Day = {
+        gas: freshPrices.gas.average,
+        source: freshPrices.source,
+        daysUsed: 1,
+      }
       } catch (fetchError) {
         console.error('❌ Failed to fetch fresh gas prices', fetchError)
         
