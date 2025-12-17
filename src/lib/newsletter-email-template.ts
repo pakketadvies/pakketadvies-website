@@ -254,25 +254,64 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
   return `
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="nl" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
   <title>Energietarieven - PakketAdvies</title>
   <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
   <style type="text/css">
-    body, table, td {font-family: Arial, sans-serif !important;}
+    table {border-collapse: collapse; border-spacing: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt;}
+    img {border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic;}
+    body, table, td, p, a, li, blockquote {-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;}
+    table, td {mso-table-lspace: 0pt; mso-table-rspace: 0pt;}
+    img {-ms-interpolation-mode: bicubic;}
+    * {line-height: inherit;}
+    a[x-apple-data-detectors] {color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important;}
   </style>
   <![endif]-->
+  <!--[if !mso]><!-->
+  <style type="text/css">
+    @media only screen and (max-width: 600px) {
+      .email-container {width: 100% !important; max-width: 100% !important;}
+      .email-padding {padding: 20px !important;}
+      .email-text-center {text-align: center !important;}
+      .email-mobile-hide {display: none !important;}
+      .email-mobile-full-width {width: 100% !important; display: block !important;}
+      .email-mobile-padding {padding: 16px !important;}
+      .email-hero-text {font-size: 24px !important;}
+      .email-hero-subtext {font-size: 14px !important;}
+    }
+  </style>
+  <!--<![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: ${gray100}; line-height: 1.6; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+<body style="margin: 0; padding: 0; width: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: ${gray100};">
+  <!--[if mso | IE]>
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${gray100};">
+    <tr>
+      <td>
+  <![endif]-->
   
   <!-- Main Container -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${gray100}; padding: 20px 0;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${gray100}; padding: 20px 0;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 0; overflow: hidden;">
+      <td align="center" style="padding: 0;">
+        <!--[if mso | IE]>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width: 600px;">
+          <tr>
+            <td style="line-height: 0px; font-size: 0px; mso-line-height-rule: exactly;">
+        <![endif]-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; width: 100%;">
           
           <!-- Header with Navy Background -->
           <tr>
@@ -395,9 +434,19 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
           </tr>
 
         </table>
+        <!--[if mso | IE]>
+            </td>
+          </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
+  <!--[if mso | IE]>
+      </td>
+    </tr>
+  </table>
+  <![endif]-->
 
 </body>
 </html>

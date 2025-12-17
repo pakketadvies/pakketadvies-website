@@ -16,6 +16,7 @@ import {
   ClipboardText,
   Megaphone,
   Bug,
+  Envelope,
 } from '@phosphor-icons/react'
 
 interface AdminLayoutProps {
@@ -84,6 +85,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/test-e2e',
       icon: Bug,
       active: pathname.startsWith('/admin/test-e2e'),
+    },
+    {
+      name: 'Newsletter',
+      href: '/admin/newsletter-preview',
+      icon: Envelope,
+      active: pathname.startsWith('/admin/newsletter-preview'),
     },
   ]
 
