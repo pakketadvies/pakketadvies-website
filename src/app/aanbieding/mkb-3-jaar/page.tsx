@@ -97,8 +97,8 @@ const faqItems = [
     antwoord: 'Mocht je verbruik gedurende de looptijd veranderen (bijvoorbeeld door uitbreiding of efficiency), dan kunnen we dit bespreken en waar nodig aanpassingen maken. We blijven altijd flexibel en staan klaar om je te helpen.',
   },
   {
-    vraag: 'Wat zijn de gemiddelde zakelijke tarieven?',
-    antwoord: 'Zakelijke tarieven verschillen per leverancier en zijn afhankelijk van je verbruik, locatie en contractduur. Voor een 3-jarig MKB-contract liggen de tarieven gemiddeld tussen €0,18 en €0,23 per kWh stroom en €1,15 en €1,35 per m³ gas. Tijdens het gesprek krijg je een exacte berekening op basis van jouw situatie.',
+    vraag: 'Wat zijn de zakelijke tarieven?',
+    antwoord: 'Voor het 3-jarige MKB-aanbod betaal je €0,12830 per kWh stroom (piek), €0,12069 per kWh (dal), en €0,42355 per m³ gas. Deze tarieven zijn exclusief alle overheidsheffingen en btw, en gelden voor 3 jaar vast.',
   },
   {
     vraag: 'Wat als ik meerdere locaties heb?',
@@ -274,26 +274,33 @@ export default function MKB3JaarPage() {
                     Wat betaal je als MKB-bedrijf?
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Als MKB-bedrijf profiteer je van zakelijke tarieven. De exacte tarieven verschillen per leverancier en zijn afhankelijk van je verbruik en locatie. Gemiddeld betaal je voor een 3-jarig MKB-contract:
+                    Voor het 3-jarige MKB-aanbod gelden de volgende tarieven:
                   </p>
                   <ul className="space-y-3 mb-6">
                     <li className="flex items-start gap-3">
                       <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-semibold text-brand-navy-500">Stroom (zakelijk):</span>{' '}
-                        <span className="text-gray-600">ca. €0,18 - €0,23 per kWh</span>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief piek:</span>{' '}
+                        <span className="text-gray-600">€0,12830 per kWh</span>
                       </div>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-semibold text-brand-navy-500">Gas (zakelijk):</span>{' '}
-                        <span className="text-gray-600">ca. €1,15 - €1,35 per m³</span>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief dal:</span>{' '}
+                        <span className="text-gray-600">€0,12069 per kWh</span>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-brand-navy-500">Gastarief:</span>{' '}
+                        <span className="text-gray-600">€0,42355 per m³</span>
                       </div>
                     </li>
                   </ul>
                   <p className="text-sm text-gray-500">
-                    * Tijdens het gesprek krijg je een exacte berekening op basis van jouw bedrijfssituatie en verbruik.
+                    * Bovenstaande tarieven zijn exclusief alle overheidsheffingen en btw. 3 jaar vast.
                   </p>
                 </div>
 

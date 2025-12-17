@@ -272,14 +272,37 @@ export default function GrootzakelijkPage() {
                   <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-4">
                     Wat betaal je als grootverbruiker?
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Grootzakelijke tarieven zijn maatwerk en afhankelijk van je verbruik, locatie, contractduur en specifieke behoeften. Bij grootverbruik (75.000+ kWh) profiteer je van scherpe tarieven door volumevoordelen en strategische inkoop.
+                  <p className="text-gray-600 mb-4 font-semibold">
+                    Vanaf 75.000 kWh (zonder zonnepanelen) gelden onderstaande tarieven:
                   </p>
-                  <p className="text-gray-600 mb-4">
-                    De exacte tarieven worden individueel berekend en kunnen aanzienlijk lager zijn dan standaard zakelijke tarieven. Tijdens het gesprek bespreken we je situatie en presenteren we een maatwerk voorstel met transparante tarieven.
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief piek:</span>{' '}
+                        <span className="text-gray-600">€0,10971 per kWh</span>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief dal:</span>{' '}
+                        <span className="text-gray-600">€0,09981 per kWh</span>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-brand-navy-500">Gastarief:</span>{' '}
+                        <span className="text-gray-600">€0,37901 per m³</span>
+                      </div>
+                    </li>
+                  </ul>
+                  <p className="text-sm text-gray-500 mb-4">
+                    * Bovenstaande tarieven zijn exclusief alle overheidsheffingen en btw. 3 jaar vast.
                   </p>
-                  <p className="text-sm text-gray-500">
-                    * Voor een exacte offerte op maat, vul het formulier in en we nemen binnen 24 uur contact met je op.
+                  <p className="text-gray-600">
+                    Mogelijkheden voor strategische inkoop, aangepaste trajecten en competitieve tarieven door volumes te clusteren. Ook mogelijkheden voor eigenaren van zonnepanelen op de dynamische energiemarkt (EPEX of imbalance) inclusief slimme sturing en batterij oplossingen.
                   </p>
                 </div>
 

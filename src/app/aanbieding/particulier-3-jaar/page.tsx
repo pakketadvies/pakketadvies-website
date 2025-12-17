@@ -97,8 +97,8 @@ const faqItems = [
     antwoord: 'Ja, absoluut! Je betaalt NOOIT aan ons. Ons advies en bemiddeling is volledig gratis. Je betaalt alleen aan je energieleverancier, en wij zorgen ervoor dat je het scherpste tarief krijgt.',
   },
   {
-    vraag: 'Wat zijn de gemiddelde tarieven?',
-    antwoord: 'De tarieven verschillen per leverancier en zijn afhankelijk van je verbruik en locatie. Gemiddeld betaal je voor een 3-jarig contract tussen de €0,20 en €0,25 per kWh stroom en tussen €1,20 en €1,40 per m³ gas. Tijdens het gesprek krijg je een exacte berekening op basis van jouw situatie.',
+    vraag: 'Wat zijn de tarieven?',
+    antwoord: 'Voor het 3-jarige particulier aanbod betaal je €0,27811 per kWh stroom (piek), €0,26820 per kWh (dal), €0,27220 per kWh (enkel), en €1,21207 per m³ gas. Deze tarieven zijn inclusief alle overheidsheffingen en btw, en gelden voor 3 jaar vast.',
   },
   {
     vraag: 'Hoe snel kan ik overstappen?',
@@ -274,26 +274,40 @@ export default function Particulier3JaarPage() {
                     Wat betaal je?
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    De exacte tarieven verschillen per leverancier en zijn afhankelijk van je verbruik en locatie. Gemiddeld betaal je voor een 3-jarig contract:
+                    Voor het 3-jarige particulier aanbod gelden de volgende tarieven:
                   </p>
                   <ul className="space-y-3 mb-6">
                     <li className="flex items-start gap-3">
                       <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-semibold text-brand-navy-500">Stroom:</span>{' '}
-                        <span className="text-gray-600">ca. €0,20 - €0,25 per kWh</span>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief piek:</span>{' '}
+                        <span className="text-gray-600">€0,27811 per kWh</span>
                       </div>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-semibold text-brand-navy-500">Gas:</span>{' '}
-                        <span className="text-gray-600">ca. €1,20 - €1,40 per m³</span>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief dal:</span>{' '}
+                        <span className="text-gray-600">€0,26820 per kWh</span>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-brand-navy-500">Stroomtarief enkel:</span>{' '}
+                        <span className="text-gray-600">€0,27220 per kWh</span>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle weight="fill" className="w-6 h-6 text-brand-teal-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-brand-navy-500">Gastarief:</span>{' '}
+                        <span className="text-gray-600">€1,21207 per m³</span>
                       </div>
                     </li>
                   </ul>
                   <p className="text-sm text-gray-500">
-                    * Tijdens het gesprek krijg je een exacte berekening op basis van jouw situatie en verbruik.
+                    * Bovenstaande tarieven zijn inclusief alle overheidsheffingen en btw. 3 jaar vast.
                   </p>
                 </div>
 
