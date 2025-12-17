@@ -242,9 +242,15 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    // Add suite to state first and get index
-    setTestSuites(prev => [...prev, suite])
-    const suiteIndex = testSuites.length
+    // Add suite to state and get the index
+    let suiteIndex = 0
+    setTestSuites(prev => {
+      suiteIndex = prev.length
+      return [...prev, suite]
+    })
+    
+    // Wait for state to update
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test 1: Load homepage in iframe and check content
     suite.tests.push({
@@ -376,8 +382,12 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    setTestSuites(prev => [...prev, suite])
-    const suiteIndex = testSuites.length
+    let suiteIndex = 0
+    setTestSuites(prev => {
+      suiteIndex = prev.length
+      return [...prev, suite]
+    })
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test 1: Check calculator page status
     suite.tests.push({
@@ -445,8 +455,12 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    setTestSuites(prev => [...prev, suite])
-    const suiteIndex = testSuites.length
+    let suiteIndex = 0
+    setTestSuites(prev => {
+      suiteIndex = prev.length
+      return [...prev, suite]
+    })
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     const apiTests = [
       {
@@ -513,8 +527,12 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    setTestSuites(prev => [...prev, suite])
-    const suiteIndex = testSuites.length
+    let suiteIndex = 0
+    setTestSuites(prev => {
+      suiteIndex = prev.length
+      return [...prev, suite]
+    })
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test: Check results page status
     suite.tests.push({
@@ -580,8 +598,12 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    setTestSuites(prev => [...prev, suite])
-    const suiteIndex = testSuites.length
+    let suiteIndex = 0
+    setTestSuites(prev => {
+      suiteIndex = prev.length
+      return [...prev, suite]
+    })
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test 1: Check if Pixel is loaded
     suite.tests.push({
@@ -641,8 +663,12 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    setTestSuites(prev => [...prev, suite])
-    const suiteIndex = testSuites.length
+    let suiteIndex = 0
+    setTestSuites(prev => {
+      suiteIndex = prev.length
+      return [...prev, suite]
+    })
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test 1: Homepage fetch time
     suite.tests.push({
