@@ -15,6 +15,7 @@ import {
   CurrencyEur,
   ClipboardText,
   Megaphone,
+  Bug,
 } from '@phosphor-icons/react'
 
 interface AdminLayoutProps {
@@ -77,6 +78,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/marketing',
       icon: Megaphone,
       active: pathname.startsWith('/admin/marketing'),
+    },
+    {
+      name: 'E2E Tests',
+      href: '/admin/test-e2e',
+      icon: Bug,
+      active: pathname.startsWith('/admin/test-e2e'),
     },
   ]
 
