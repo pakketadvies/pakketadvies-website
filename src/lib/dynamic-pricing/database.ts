@@ -5,7 +5,7 @@
  * from/to Supabase database with intelligent caching
  */
 
-import { createClient, createClientWithoutCookies } from '@/lib/supabase/server'
+import { createClient, createClientWithoutCookies, createServiceRoleClient } from '@/lib/supabase/server'
 import { fetchDayAheadPrices } from './api-client'
 
 export interface DynamicPriceRecord {
@@ -246,7 +246,8 @@ export async function getCurrentDynamicPrices(supabaseClient?: any): Promise<{
     // Fallback: fetch fresh data and use it
     try {
       const freshPrices = await fetchDayAheadPrices(now)
-      await saveDynamicPrices(freshPrices, supabase)
+      // Use service role for INSERT/UPDATE (required by RLS)
+      await saveDynamicPrices(freshPrices, createServiceRoleClient())
       
         electricity30Day = {
           day: freshPrices.electricity.day,
@@ -284,7 +285,8 @@ export async function getCurrentDynamicPrices(supabaseClient?: any): Promise<{
     // Fallback: fetch fresh data and use it
     try {
       const freshPrices = await fetchDayAheadPrices(now)
-      await saveDynamicPrices(freshPrices, supabase)
+      // Use service role for INSERT/UPDATE (required by RLS)
+      await saveDynamicPrices(freshPrices, createServiceRoleClient())
       
         gas30Day = {
           gas: freshPrices.gas.average,
@@ -341,7 +343,9 @@ export async function saveDynamicPrices(prices: {
   source: string
   date: string
 }, supabaseClient?: any): Promise<void> {
-  const supabase = supabaseClient || createClientWithoutCookies()
+  // IMPORTANT: Use service role client for INSERT/UPDATE operations
+  // If no client provided, use service role (required for RLS)
+  const supabase = supabaseClient || createServiceRoleClient()
 
   const { error } = await supabase
     .from('dynamic_prices')

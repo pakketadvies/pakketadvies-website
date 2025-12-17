@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { fetchDayAheadPrices } from '@/lib/dynamic-pricing/api-client'
 import { saveDynamicPrices } from '@/lib/dynamic-pricing/database'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 
 /**
  * CRON endpoint: Update dynamic prices daily (day-ahead)
@@ -123,6 +124,9 @@ export async function GET(request: Request) {
 
     console.log('🔄 Starting daily price update...')
     
+    // Use service role client for INSERT/UPDATE operations (bypasses RLS)
+    const supabaseServiceRole = createServiceRoleClient()
+    // Use regular client for SELECT operations (respects RLS, but prices are public)
     const supabase = await createClient()
     const today = new Date()
     const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
@@ -159,12 +163,13 @@ export async function GET(request: Request) {
         console.log(`📝 Creating new price record for tomorrow...`)
       }
       
+      // Use service role for INSERT/UPDATE (required by RLS)
       await saveDynamicPrices({
         electricity: tomorrowPrices.electricity,
         gas: tomorrowPrices.gas,
         source: tomorrowPrices.source,
         date: tomorrowStr,
-      })
+      }, supabaseServiceRole)
       
       results.tomorrow = {
         success: true,
@@ -207,12 +212,13 @@ export async function GET(request: Request) {
       try {
         const todayPrices = await fetchDayAheadPrices(todayUTC)
         
+        // Use service role for INSERT/UPDATE (required by RLS)
         await saveDynamicPrices({
           electricity: todayPrices.electricity,
           gas: todayPrices.gas,
           source: todayPrices.source,
           date: todayStr,
-        })
+        }, supabaseServiceRole)
         
         results.today = {
           success: true,
