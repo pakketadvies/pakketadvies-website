@@ -40,7 +40,7 @@ export default function NewsletterPreviewPage() {
         stroomtariefEnkel: '€0,27220',
         gastarief: '€1,21207',
         details: 'Bovenstaande tarieven zijn inclusief alle overheidsheffingen en btw. 3 jaar vast.',
-        link: `${baseUrl}/calculator`,
+        link: `${baseUrl}/aanbieding/particulier-3-jaar`,
       },
       mkb: {
         title: '3-jarig vast aanbod voor het MKB',
@@ -48,7 +48,7 @@ export default function NewsletterPreviewPage() {
         stroomtariefDal: '€0,12069',
         gastarief: '€0,42355',
         details: 'Bovenstaande tarieven zijn exclusief alle overheidsheffingen en btw. 3 jaar vast.',
-        link: `${baseUrl}/calculator`,
+        link: `${baseUrl}/aanbieding/mkb-3-jaar`,
       },
       grootzakelijk: {
         title: 'Groot Zakelijk Aanbod',
@@ -58,7 +58,7 @@ export default function NewsletterPreviewPage() {
         gastarief: '€0,37901',
         details: 'Bovenstaande tarieven zijn exclusief alle overheidsheffingen en btw. 3 jaar vast.',
         extraInfo: 'Mogelijkheden voor strategische inkoop, aangepaste trajecten en competitieve tarieven door volumes te clusteren. Ook mogelijkheden voor eigenaren van zonnepanelen op de dynamische energiemarkt (EPEX of imbalance) inclusief slimme sturing en batterij oplossingen.',
-        link: `${baseUrl}/calculator`,
+        link: `${baseUrl}/aanbieding/grootzakelijk`,
       },
       dynamisch: {
         title: 'Dynamische energietarieven',
@@ -66,9 +66,9 @@ export default function NewsletterPreviewPage() {
           Dynamische tarieven bieden scherpe en flexibele prijzen gebaseerd op marktomstandigheden, zonder langetermijnverplichtingen. 
           Voor eigenaren van zonnepanelen die te maken hebben met terugleverkosten, is een dynamisch contract de enige juiste optie, 
           zodat u kosten kunt vermijden en zelfs kunt verdienen aan teruggeleverde stroom. 
-          Vergelijk direct via <a href="${baseUrl}/calculator" style="color: #00AF9B; text-decoration: underline;">${baseUrl}/calculator</a>.
+          Bekijk meer informatie op onze <a href="${baseUrl}/aanbieding/dynamisch" style="color: #00AF9B; text-decoration: underline;">dynamische tarieven pagina</a>.
         `,
-        link: `${baseUrl}/calculator`,
+        link: `${baseUrl}/aanbieding/dynamisch`,
       },
     },
     contactEmail: 'info@pakketadvies.nl',
