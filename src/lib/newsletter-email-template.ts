@@ -84,12 +84,12 @@ export function generateNewsletterEmail(data: NewsletterEmailData, variant: 1 | 
     lightningSlash: `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M143 36 47 128l56 20-16 72 49-47" stroke="${teal}" stroke-width="16" stroke-linecap="round"/><line x1="56" y1="56" x2="200" y2="200" stroke="${teal}" stroke-width="16" stroke-linecap="round"/></svg>`,
   }
   
-  // Icon SVGs - White versions for gradient headers (better email compatibility)
+  // Icon SVGs - White versions for gradient headers (optimized for email compatibility)
   const iconsWhite = {
-    lightning: `<svg width="28" height="28" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M143 36 47 128l56 20-16 72 96-92-56-20 16-72Z" fill="#FFFFFF" opacity="0.95"/></svg>`,
-    buildings: `<svg width="28" height="28" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><rect x="64" y="96" width="128" height="128" rx="8" fill="none" stroke="#FFFFFF" stroke-width="14" opacity="0.95"/><path d="M128 96v128M96 128h64M96 160h64M96 192h64" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round" opacity="0.95"/></svg>`,
-    briefcase: `<svg width="28" height="28" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="72" width="192" height="144" rx="8" fill="none" stroke="#FFFFFF" stroke-width="14" opacity="0.95"/><path d="M88 72V56a24 24 0 0 1 24-24h32a24 24 0 0 1 24 24v16" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity="0.95"/></svg>`,
-    lightningSlash: `<svg width="28" height="28" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M143 36 47 128l56 20-16 72 49-47" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity="0.95"/><line x1="56" y1="56" x2="200" y2="200" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity="0.95"/></svg>`,
+    lightning: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 3L3 14h8l-2 8 10-11h-8l2-8z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.5"/></svg>`,
+    buildings: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><path d="M12 4v16M8 8h8M8 12h8M8 16h8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    briefcase: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="7" width="20" height="14" rx="1" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    lightningSlash: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 3L3 14h6l-2 8 7-8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="4" x2="20" y2="20" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/></svg>`,
   }
 
   // Pricing table helper
