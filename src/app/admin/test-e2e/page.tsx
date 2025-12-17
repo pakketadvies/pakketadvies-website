@@ -845,7 +845,8 @@ export default function E2ETestPage() {
       // Scroll to form if needed
       if (!currentIframe) {
         updateTest(suiteIndex, 3, { status: 'failed', error: 'Iframe niet beschikbaar' })
-        return
+        updateSuiteStatus(suiteIndex)
+        return suite
       }
       
       const doc = getIframeDocument(currentIframe)
@@ -940,7 +941,8 @@ export default function E2ETestPage() {
       // Check if we're on results page
       if (!currentIframe) {
         updateTest(suiteIndex, 4, { status: 'failed', error: 'Iframe niet beschikbaar' })
-        return
+        updateSuiteStatus(suiteIndex)
+        return suite
       }
       
       const doc = getIframeDocument(currentIframe)
@@ -978,7 +980,8 @@ export default function E2ETestPage() {
       // If not on results page yet, navigate there
       if (!currentIframe) {
         updateTest(suiteIndex, 5, { status: 'failed', error: 'Iframe niet beschikbaar' })
-        return
+        updateSuiteStatus(suiteIndex)
+        return suite
       }
       
       const doc = getIframeDocument(currentIframe)
@@ -1017,7 +1020,8 @@ export default function E2ETestPage() {
       
       if (!currentIframe) {
         updateTest(suiteIndex, 6, { status: 'failed', error: 'Iframe niet beschikbaar' })
-        return
+        updateSuiteStatus(suiteIndex)
+        return suite
       }
       
       const doc = getIframeDocument(currentIframe)
@@ -1077,7 +1081,8 @@ export default function E2ETestPage() {
       
       if (!currentIframe) {
         updateTest(suiteIndex, 7, { status: 'failed', error: 'Iframe niet beschikbaar' })
-        return
+        updateSuiteStatus(suiteIndex)
+        return suite
       }
       
       const doc = getIframeDocument(currentIframe)
@@ -1145,7 +1150,8 @@ export default function E2ETestPage() {
       
       if (!currentIframe) {
         updateTest(suiteIndex, 8, { status: 'failed', error: 'Iframe niet beschikbaar' })
-        return
+        updateSuiteStatus(suiteIndex)
+        return suite
       }
       
       const doc = getIframeDocument(currentIframe)
