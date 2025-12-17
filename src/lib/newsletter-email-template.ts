@@ -1,14 +1,13 @@
 /**
  * Newsletter email template - Modern design matching website theme
  * Uses inline CSS for maximum email client compatibility
+ * Uses Phosphor Icons (SVG) instead of emojis
  */
 
 export interface NewsletterEmailData {
   baseUrl: string
   subject?: string
-  // Optional: recipient name for personalization
   recipientName?: string
-  // Offer data
   offers: {
     particulier?: {
       title: string
@@ -43,15 +42,18 @@ export interface NewsletterEmailData {
       link: string
     }
   }
-  // Intro text
   introText?: string
-  // Contact info
   contactEmail?: string
   contactPhone?: string
-  // Footer
   address?: string
   unsubscribeUrl?: string
 }
+
+// Phosphor Icons as SVG (Lightning, Buildings, Briefcase, LightningSlash)
+const LightningIcon = `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M208 128a80 80 0 1 1-80-80 80 80 0 0 1 80 80Z" fill="#00AF9B" opacity="0.2"/><path d="M143 36 47 128l56 20-16 72 96-92-56-20 16-72Z" fill="#00AF9B"/></svg>`
+const BuildingsIcon = `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="256" height="256" rx="8" fill="#00AF9B" opacity="0.2"/><path d="M152 208h-48V48l32-16 32 16v160Zm-16-144v128M96 96h64M96 128h64M96 160h64" stroke="#00AF9B" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+const BriefcaseIcon = `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="256" height="256" rx="8" fill="#00AF9B" opacity="0.2"/><rect x="32" y="72" width="192" height="144" rx="8" stroke="#00AF9B" stroke-width="16"/><path d="M88 72V56a24 24 0 0 1 24-24h32a24 24 0 0 1 24 24v16" stroke="#00AF9B" stroke-width="16"/></svg>`
+const LightningSlashIcon = `<svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M208 128a80 80 0 1 1-80-80 80 80 0 0 1 80 80Z" fill="#00AF9B" opacity="0.2"/><line x1="56" y1="56" x2="200" y2="200" stroke="#00AF9B" stroke-width="16" stroke-linecap="round"/><path d="M143 36 47 128l56 20-16 72 49-47" stroke="#00AF9B" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
 /**
  * Generate modern newsletter email HTML
@@ -68,56 +70,97 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
     unsubscribeUrl,
   } = data
 
-  // Brand colors
-  const navy = '#1A3756' // brand-navy-500
-  const navyLight = '#E1E9F1' // brand-navy-100
-  const teal = '#00AF9B' // brand-teal-500
-  const tealLight = '#E6F9F7' // brand-teal-50
-  const tealDark = '#008C7C' // brand-teal-600
+  // Brand colors matching website
+  const navy = '#1A3756'
+  const navyDark = '#102238'
+  const navyLight = '#E1E9F1'
+  const teal = '#00AF9B'
+  const tealLight = '#E6F9F7'
+  const tealDark = '#008C7C'
+  const gray50 = '#F9FAFB'
   const gray100 = '#F3F4F6'
   const gray200 = '#E5E7EB'
   const gray600 = '#4B5563'
   const gray700 = '#374151'
   const gray900 = '#111827'
+  const white = '#FFFFFF'
 
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
 
-  // Helper to generate offer card HTML
+  // Helper to generate offer card HTML with modern styling
   const generateOfferCard = (
     title: string,
     content: string,
     buttonText: string,
     buttonLink: string,
-    imageIcon?: string
+    icon: string
   ): string => {
     return `
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border-radius: 12px; overflow: hidden; margin-bottom: 24px; border: 1px solid ${gray200};">
-        <tr>
-          <td style="padding: 32px 24px;">
-            ${imageIcon ? `
-            <div style="text-align: center; margin-bottom: 20px;">
-              <div style="width: 80px; height: 80px; border-radius: 50%; background: ${tealLight}; display: inline-flex; align-items: center; justify-content: center;">
-                ${imageIcon}
-              </div>
-            </div>
-            ` : ''}
-            
-            <h3 style="color: ${navy}; font-size: 22px; font-weight: 700; margin: 0 0 16px 0; text-align: center; font-family: 'Space Grotesk', system-ui, sans-serif;">
-              ${title}
-            </h3>
-            
-            <div style="background: ${tealLight}; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-              ${content}
-            </div>
-            
-            <div style="text-align: center;">
-              <a href="${buttonLink}" style="display: inline-block; background-color: ${teal}; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; font-family: 'Plus Jakarta Sans', system-ui, sans-serif;">
-                ${buttonText}
-              </a>
-            </div>
-          </td>
-        </tr>
-      </table>
+          <!--[if mso | IE]>
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 32px;">
+            <tr>
+              <td>
+          <![endif]-->
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${white}; border: 1px solid ${gray200}; border-radius: 12px; margin-bottom: 32px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+            <tr>
+              <td style="padding: 32px 24px;" class="email-padding email-mobile-padding">
+                <!-- Icon and Title -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding-bottom: 20px;">
+                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 64px; height: 64px; background-color: ${tealLight}; border-radius: 12px; display: inline-block;">
+                        <tr>
+                          <td align="center" valign="middle" style="height: 64px; padding: 12px;">
+                            ${icon}
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding-bottom: 24px;">
+                      <h3 style="color: ${navy}; font-size: 22px; font-weight: 700; margin: 0; padding: 0; text-align: center; font-family: 'Space Grotesk', 'Arial', sans-serif; line-height: 1.3;">
+                        ${title}
+                      </h3>
+                    </td>
+                  </tr>
+                </table>
+                
+                <!-- Content Box with Teal Background -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${tealLight}; border-radius: 8px; margin-bottom: 24px;">
+                  <tr>
+                    <td style="padding: 24px;">
+                      ${content}
+                    </td>
+                  </tr>
+                </table>
+                
+                <!-- CTA Button -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding: 0;">
+                      <!--[if mso]>
+                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${buttonLink}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="8%" stroke="f" fillcolor="${teal}">
+                        <w:anchorlock/>
+                        <center style="color:#FFFFFF;font-family:Arial,sans-serif;font-size:16px;font-weight:600;">${buttonText}</center>
+                      </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-->
+                      <a href="${buttonLink}" style="display: inline-block; background-color: ${teal}; color: ${white}; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif; text-align: center; mso-hide: all;">
+                        ${buttonText}
+                      </a>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <!--[if mso | IE]>
+              </td>
+            </tr>
+          </table>
+          <![endif]-->
     `
   }
 
@@ -125,116 +168,176 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
   const particulierCard = offers.particulier ? generateOfferCard(
     offers.particulier.title,
     `
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; color: ${gray700};">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; color: ${gray700}; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief piek:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.particulier.stroomtariefPiek}</span> per kWh
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief piek:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.particulier.stroomtariefPiek}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief dal:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.particulier.stroomtariefDal}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief enkel:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.particulier.stroomtariefEnkel}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
           </td>
         </tr>
         <tr>
           <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief dal:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.particulier.stroomtariefDal}</span> per kWh
-          </td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief enkel:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.particulier.stroomtariefEnkel}</span> per kWh
-          </td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Gastarief:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.particulier.gastarief}</span> per m³
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Gastarief:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.particulier.gastarief}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per m³</td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
-      <p style="margin: 16px 0 0 0; font-size: 12px; color: ${gray600}; line-height: 1.6;">
+      <p style="margin: 16px 0 0 0; padding: 0; font-size: 12px; color: ${gray600}; line-height: 1.6; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         ${offers.particulier.details}
       </p>
     `,
     'Bekijk dit aanbod',
     offers.particulier.link,
-    '🏠'
+    LightningIcon
   ) : ''
 
   // Generate MKB offer card
   const mkbCard = offers.mkb ? generateOfferCard(
     offers.mkb.title,
     `
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; color: ${gray700};">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; color: ${gray700}; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief piek:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.mkb.stroomtariefPiek}</span> per kWh
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief piek:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.mkb.stroomtariefPiek}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief dal:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.mkb.stroomtariefDal}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
           </td>
         </tr>
         <tr>
           <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief dal:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.mkb.stroomtariefDal}</span> per kWh
-          </td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Gastarief:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.mkb.gastarief}</span> per m³
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Gastarief:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.mkb.gastarief}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per m³</td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
-      <p style="margin: 16px 0 0 0; font-size: 12px; color: ${gray600}; line-height: 1.6;">
+      <p style="margin: 16px 0 0 0; padding: 0; font-size: 12px; color: ${gray600}; line-height: 1.6; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         ${offers.mkb.details}
       </p>
     `,
     'Bekijk dit aanbod',
     offers.mkb.link,
-    '🏢'
+    BuildingsIcon
   ) : ''
 
   // Generate Grootzakelijk offer card
   const grootzakelijkCard = offers.grootzakelijk ? generateOfferCard(
     offers.grootzakelijk.title,
     `
-      <p style="margin: 0 0 16px 0; font-size: 14px; color: ${gray700};">
-        <strong style="color: ${navy};">${offers.grootzakelijk.minVerbruik}</strong>
+      <p style="margin: 0 0 16px 0; padding: 0; font-size: 14px; color: ${gray700}; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif; font-weight: 600;">
+        ${offers.grootzakelijk.minVerbruik}
       </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; color: ${gray700};">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; color: ${gray700}; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief piek:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.grootzakelijk.stroomtariefPiek}</span> per kWh
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief piek:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.grootzakelijk.stroomtariefPiek}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid ${gray200};">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Stroomtarief dal:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.grootzakelijk.stroomtariefDal}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per kWh</td>
+              </tr>
+            </table>
           </td>
         </tr>
         <tr>
           <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Stroomtarief dal:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.grootzakelijk.stroomtariefDal}</span> per kWh
-          </td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0;">
-            <strong style="color: ${navy};">Gastarief:</strong> <span style="color: ${teal}; font-weight: 600;">${offers.grootzakelijk.gastarief}</span> per m³
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="color: ${navy}; font-weight: 600;">Gastarief:</td>
+                <td align="right" style="color: ${teal}; font-weight: 700; font-size: 16px;">${offers.grootzakelijk.gastarief}</td>
+                <td style="color: ${gray600}; padding-left: 8px;">per m³</td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
       ${offers.grootzakelijk.extraInfo ? `
-      <p style="margin: 16px 0 0 0; font-size: 12px; color: ${gray600}; line-height: 1.6;">
+      <p style="margin: 16px 0 0 0; padding: 0; font-size: 12px; color: ${gray600}; line-height: 1.6; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         ${offers.grootzakelijk.extraInfo}
       </p>
       ` : ''}
-      <p style="margin: 16px 0 0 0; font-size: 12px; color: ${gray600}; line-height: 1.6;">
+      <p style="margin: 16px 0 0 0; padding: 0; font-size: 12px; color: ${gray600}; line-height: 1.6; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         ${offers.grootzakelijk.details}
       </p>
     `,
     'Bekijk dit aanbod',
     offers.grootzakelijk.link,
-    '💼'
+    BriefcaseIcon
   ) : ''
 
   // Generate Dynamisch offer card
   const dynamischCard = offers.dynamisch ? generateOfferCard(
     offers.dynamisch.title,
     `
-      <p style="margin: 0; font-size: 14px; color: ${gray700}; line-height: 1.8;">
+      <p style="margin: 0; padding: 0; font-size: 14px; color: ${gray700}; line-height: 1.8; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
         ${offers.dynamisch.description}
       </p>
     `,
     'Bekijk dynamische tarieven',
     offers.dynamisch.link,
-    '⚡'
+    LightningSlashIcon
   ) : ''
 
   // Default intro text if not provided
@@ -248,7 +351,7 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
     
     Daarnaast hebben wij aantrekkelijke opties voor eigenaren van zonnepanelen via dynamische contracten. 
     Voor grote zakelijke klanten bieden wij strategische inkoop aan. 
-    Vergelijk direct alle aanbiedingen via <a href="${baseUrl}/calculator" style="color: ${teal}; text-decoration: underline;">${baseUrl}/calculator</a> 
+    Vergelijk direct alle aanbiedingen via <a href="${baseUrl}/calculator" style="color: ${teal}; text-decoration: underline; font-weight: 600;">${baseUrl}/calculator</a> 
     of neem contact met ons op voor persoonlijk advies.
   `
 
@@ -285,17 +388,14 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
     @media only screen and (max-width: 600px) {
       .email-container {width: 100% !important; max-width: 100% !important;}
       .email-padding {padding: 20px !important;}
-      .email-text-center {text-align: center !important;}
-      .email-mobile-hide {display: none !important;}
-      .email-mobile-full-width {width: 100% !important; display: block !important;}
       .email-mobile-padding {padding: 16px !important;}
-      .email-hero-text {font-size: 24px !important;}
+      .email-hero-text {font-size: 28px !important;}
       .email-hero-subtext {font-size: 14px !important;}
     }
   </style>
   <!--<![endif]-->
 </head>
-<body style="margin: 0; padding: 0; width: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: ${gray100};">
+<body style="margin: 0; padding: 0; width: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: ${gray100}; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
   <!--[if mso | IE]>
   <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${gray100};">
     <tr>
@@ -311,13 +411,13 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
           <tr>
             <td style="line-height: 0px; font-size: 0px; mso-line-height-rule: exactly;">
         <![endif]-->
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; width: 100%;">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="background-color: ${white}; max-width: 600px; margin: 0 auto; width: 100%;">
           
           <!-- Header with Navy Background -->
           <tr>
             <td style="background: ${navy}; padding: 40px 20px; text-align: center;">
               <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto 12px auto;">
-              <p style="color: ${teal}; font-size: 12px; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+              <p style="color: ${teal}; font-size: 12px; margin: 0; padding: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
                 ONAFHANKELIJK ENERGIE VERGELIJKEN
               </p>
             </td>
@@ -325,11 +425,11 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
           <!-- Hero Banner -->
           <tr>
-            <td style="background: linear-gradient(135deg, ${navy} 0%, #2A4A6F 100%); padding: 48px 32px; text-align: center;">
-              <h1 style="color: #FFFFFF; font-size: 32px; font-weight: 700; margin: 0 0 12px 0; font-family: 'Space Grotesk', system-ui, sans-serif; line-height: 1.2;">
+            <td style="background: ${navyDark}; padding: 48px 32px; text-align: center;" class="email-padding email-mobile-padding">
+              <h1 style="color: ${white}; font-size: 32px; font-weight: 700; margin: 0 0 12px 0; padding: 0; font-family: 'Space Grotesk', 'Arial', sans-serif; line-height: 1.2;" class="email-hero-text">
                 Uw exclusieve energie aanbod
               </h1>
-              <p style="color: ${tealLight}; font-size: 16px; margin: 0; font-weight: 500;">
+              <p style="color: ${teal}; font-size: 16px; margin: 0; padding: 0; font-weight: 500; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;" class="email-hero-subtext">
                 Claim deze eindejaar aanbiedingen
               </p>
             </td>
@@ -337,8 +437,8 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
           <!-- Intro Text -->
           <tr>
-            <td style="background: #FFFFFF; padding: 40px 32px;">
-              <div style="color: ${gray700}; font-size: 16px; line-height: 1.8;">
+            <td style="background: ${white}; padding: 40px 32px;" class="email-padding email-mobile-padding">
+              <div style="color: ${gray700}; font-size: 16px; line-height: 1.8; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
                 ${introText || defaultIntroText}
               </div>
             </td>
@@ -346,7 +446,7 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
           <!-- Offers Section -->
           <tr>
-            <td style="background: ${gray100}; padding: 40px 32px;">
+            <td style="background: ${gray100}; padding: 40px 32px;" class="email-padding email-mobile-padding">
               
               ${particulierCard}
               
@@ -361,31 +461,31 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
           <!-- Contact Section -->
           <tr>
-            <td style="background: #FFFFFF; padding: 40px 32px; text-align: center;">
-              <h2 style="color: ${navy}; font-size: 24px; font-weight: 700; margin: 0 0 20px 0; font-family: 'Space Grotesk', system-ui, sans-serif;">
+            <td style="background: ${white}; padding: 40px 32px; text-align: center;" class="email-padding email-mobile-padding">
+              <h2 style="color: ${navy}; font-size: 24px; font-weight: 700; margin: 0 0 20px 0; padding: 0; font-family: 'Space Grotesk', 'Arial', sans-serif;">
                 Vragen of persoonlijk advies?
               </h2>
-              <p style="color: ${gray700}; font-size: 16px; margin: 0 0 24px 0; line-height: 1.8;">
+              <p style="color: ${gray700}; font-size: 16px; margin: 0 0 24px 0; padding: 0; line-height: 1.8; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
                 Geïnteresseerd in een van onze aantrekkelijke aanbiedingen of wilt u meer informatie over onze producten en diensten? 
                 Aarzel dan niet om contact met ons op te nemen.
               </p>
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 auto; max-width: 400px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; max-width: 400px;">
                 <tr>
                   <td align="center" style="padding: 12px 0;">
-                    <a href="mailto:${contactEmail}" style="color: ${teal}; text-decoration: none; font-weight: 600; font-size: 16px;">
-                      📧 ${contactEmail}
+                    <a href="mailto:${contactEmail}" style="color: ${teal}; text-decoration: none; font-weight: 600; font-size: 16px; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
+                      ${contactEmail}
                     </a>
                   </td>
                 </tr>
                 <tr>
                   <td align="center" style="padding: 12px 0;">
-                    <a href="tel:${contactPhone.replace(/\s/g, '')}" style="color: ${teal}; text-decoration: none; font-weight: 600; font-size: 16px;">
-                      📞 ${contactPhone}
+                    <a href="tel:${contactPhone.replace(/\s/g, '')}" style="color: ${teal}; text-decoration: none; font-weight: 600; font-size: 16px; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
+                      ${contactPhone}
                     </a>
                   </td>
                 </tr>
               </table>
-              <p style="color: ${gray600}; font-size: 14px; margin: 32px 0 0 0; font-style: italic;">
+              <p style="color: ${gray600}; font-size: 14px; margin: 32px 0 0 0; padding: 0; font-style: italic; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
                 Met energieke groet,<br>
                 <strong style="color: ${navy};">Team PakketAdvies</strong>
               </p>
@@ -394,37 +494,37 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
           <!-- Footer -->
           <tr>
-            <td style="background: ${navy}; padding: 40px 32px; text-align: center;">
+            <td style="background: ${navy}; padding: 40px 32px; text-align: center;" class="email-padding email-mobile-padding">
               <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 24px auto; opacity: 0.9;">
               
               <!-- Social Media Icons -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 auto 24px auto; max-width: 200px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto 24px auto; max-width: 200px;">
                 <tr>
                   <td align="center" style="padding: 0 8px;">
                     <a href="https://www.facebook.com/pakketadvies" style="display: inline-block; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; text-align: center; line-height: 40px; text-decoration: none;">
-                      <span style="color: #FFFFFF; font-size: 20px;">f</span>
+                      <span style="color: ${white}; font-size: 16px; font-weight: 600;">f</span>
                     </a>
                   </td>
                   <td align="center" style="padding: 0 8px;">
                     <a href="https://www.instagram.com/pakketadvies" style="display: inline-block; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; text-align: center; line-height: 40px; text-decoration: none;">
-                      <span style="color: #FFFFFF; font-size: 20px;">📷</span>
+                      <span style="color: ${white}; font-size: 16px; font-weight: 600;">ig</span>
                     </a>
                   </td>
                   <td align="center" style="padding: 0 8px;">
                     <a href="https://www.linkedin.com/company/pakketadvies" style="display: inline-block; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; text-align: center; line-height: 40px; text-decoration: none;">
-                      <span style="color: #FFFFFF; font-size: 20px;">in</span>
+                      <span style="color: ${white}; font-size: 16px; font-weight: 600;">in</span>
                     </a>
                   </td>
                 </tr>
               </table>
               
-              <p style="color: ${tealLight}; font-size: 14px; margin: 0 0 16px 0; line-height: 1.6;">
+              <p style="color: ${teal}; font-size: 14px; margin: 0 0 16px 0; padding: 0; line-height: 1.6; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
                 ${address}
               </p>
               
               ${unsubscribeUrl ? `
-              <p style="margin: 24px 0 0 0;">
-                <a href="${unsubscribeUrl}" style="color: ${tealLight}; text-decoration: underline; font-size: 12px;">
+              <p style="margin: 24px 0 0 0; padding: 0;">
+                <a href="${unsubscribeUrl}" style="color: ${teal}; text-decoration: underline; font-size: 12px; font-family: 'Plus Jakarta Sans', 'Arial', sans-serif;">
                   Uitschrijven voor deze e-mails? Gebruik onderstaande link. Unsubscribe
                 </a>
               </p>
@@ -452,4 +552,3 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 </html>
   `.trim()
 }
-
