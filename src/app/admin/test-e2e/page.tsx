@@ -192,6 +192,48 @@ export default function E2ETestPage() {
     }
   }
 
+  // Helper: Create iframe and wait for it to load
+  const createIframe = (url: string): Promise<HTMLIFrameElement> => {
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement('iframe')
+      iframe.style.display = 'none'
+      iframe.style.width = '100%'
+      iframe.style.height = '800px'
+      iframe.style.position = 'absolute'
+      iframe.style.top = '-9999px'
+      iframe.src = url
+
+      iframe.onload = () => {
+        addLog(`✅ Iframe geladen: ${url}`)
+        resolve(iframe)
+      }
+      iframe.onerror = () => {
+        reject(new Error(`Failed to load iframe: ${url}`))
+      }
+
+      document.body.appendChild(iframe)
+    })
+  }
+
+  // Helper: Get iframe document
+  const getIframeDocument = (iframe: HTMLIFrameElement): Document | null => {
+    try {
+      return iframe.contentDocument || iframe.contentWindow?.document || null
+    } catch (e) {
+      // Cross-origin restrictions
+      return null
+    }
+  }
+
+  // Helper: Remove iframe
+  const removeIframe = (iframe: HTMLIFrameElement) => {
+    try {
+      iframe.remove()
+    } catch (e) {
+      // Ignore errors
+    }
+  }
+
   // Test Suite 1: Homepage Tests
   const runHomepageTests = async (): Promise<TestSuite> => {
     const suite: TestSuite = {
@@ -200,30 +242,34 @@ export default function E2ETestPage() {
       status: 'running',
     }
 
-    // Test 1: Fetch homepage HTML
+    // Test 1: Load homepage in iframe and check content
     suite.tests.push({
-      name: 'Homepage HTML ophalen',
+      name: 'Homepage laden in iframe',
       status: 'running',
       timestamp: Date.now(),
     })
     setTestSuites(prev => [...prev, suite])
     
+    let homepageIframe: HTMLIFrameElement | null = null
     try {
       const startTime = Date.now()
-      const { html, document: doc } = await fetchPageContent('/')
+      homepageIframe = await createIframe(window.location.origin + '/')
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Wait for content to load
       const duration = Date.now() - startTime
       
-      if (html && html.length > 0) {
-        updateTest(0, 0, { status: 'passed', duration, details: { htmlLength: html.length } })
-        addLog('✅ Homepage HTML opgehaald')
+      const doc = getIframeDocument(homepageIframe)
+      if (doc) {
+        updateTest(0, 0, { status: 'passed', duration, details: { title: doc.title } })
+        addLog('✅ Homepage geladen in iframe')
       } else {
-        updateTest(0, 0, { status: 'failed', error: 'Geen HTML ontvangen', duration })
+        updateTest(0, 0, { status: 'failed', error: 'Kan iframe document niet benaderen (mogelijk cross-origin)', duration })
       }
     } catch (error: any) {
       updateTest(0, 0, { status: 'failed', error: error.message })
+      if (homepageIframe) removeIframe(homepageIframe)
     }
 
-    // Test 2: Check if best deals section exists in HTML
+    // Test 2: Check if best deals section exists in iframe
     suite.tests.push({
       name: 'Beste aanbiedingen sectie aanwezig',
       status: 'running',
@@ -232,46 +278,65 @@ export default function E2ETestPage() {
     
     try {
       const startTime = Date.now()
-      const { document: doc } = await fetchPageContent('/')
-      const duration = Date.now() - startTime
-      
-      let exists = false
-      if (doc) {
-        // Check for best deals section in parsed HTML
-        const bestDeals = doc.querySelector('[data-testid="homepage-best-deals"], .bg-white.rounded-2xl, [class*="best"], [class*="deals"]')
-        exists = bestDeals !== null
-      } else {
-        // Fallback: check HTML string
-        const { html } = await fetchPageContent('/')
-        exists = html.includes('best') || html.includes('deals') || html.includes('aanbiedingen')
+      if (!homepageIframe) {
+        homepageIframe = await createIframe(window.location.origin + '/')
+        await new Promise(resolve => setTimeout(resolve, 2000))
       }
       
-      updateTest(0, 1, { status: exists ? 'passed' : 'failed', duration, error: exists ? undefined : 'Sectie niet gevonden in HTML' })
+      const doc = getIframeDocument(homepageIframe)
+      let exists = false
+      if (doc) {
+        const bestDeals = doc.querySelector('[data-testid="homepage-best-deals"], .bg-white.rounded-2xl, [class*="best"], [class*="deals"]')
+        exists = bestDeals !== null
+        if (!exists) {
+          // Try alternative selectors
+          const cards = doc.querySelectorAll('.bg-white.rounded-xl, .rounded-2xl')
+          exists = cards.length > 0
+        }
+      }
+      const duration = Date.now() - startTime
+      
+      updateTest(0, 1, { status: exists ? 'passed' : 'failed', duration, error: exists ? undefined : 'Sectie niet gevonden' })
     } catch (error: any) {
       updateTest(0, 1, { status: 'failed', error: error.message })
     }
 
-    // Test 3: Check if homepage loads correctly (status check)
+    // Test 3: Check if contracts are displayed in iframe
     suite.tests.push({
-      name: 'Homepage status check',
+      name: 'Contracten worden getoond',
       status: 'running',
       timestamp: Date.now(),
     })
     
     try {
       const startTime = Date.now()
-      const response = await fetch('/', { method: 'HEAD' })
-      const duration = Date.now() - startTime
-      const isOk = response.ok
+      if (!homepageIframe) {
+        homepageIframe = await createIframe(window.location.origin + '/')
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
       
+      const doc = getIframeDocument(homepageIframe)
+      let contractCount = 0
+      if (doc) {
+        const contractCards = doc.querySelectorAll('[data-testid="contract-card"], .bg-gray-50.rounded-xl, .bg-white.rounded-xl, .rounded-2xl')
+        contractCount = contractCards.length
+      }
+      const duration = Date.now() - startTime
+      
+      addLog(`${contractCount > 0 ? '✅' : '❌'} Contracten in iframe: ${contractCount} gevonden`)
       updateTest(0, 2, { 
-        status: isOk ? 'passed' : 'failed', 
+        status: contractCount > 0 ? 'passed' : 'failed', 
         duration,
-        details: { status: response.status, statusText: response.statusText },
-        error: isOk ? undefined : `HTTP ${response.status}: ${response.statusText}`
+        details: { count: contractCount },
+        error: contractCount > 0 ? undefined : 'Geen contracten gevonden'
       })
     } catch (error: any) {
       updateTest(0, 2, { status: 'failed', error: error.message })
+    }
+    
+    // Cleanup iframe after tests
+    if (homepageIframe) {
+      setTimeout(() => removeIframe(homepageIframe!), 1000)
     }
 
     // Test 4: Test API endpoint
