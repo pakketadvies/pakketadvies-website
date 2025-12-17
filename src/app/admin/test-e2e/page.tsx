@@ -433,10 +433,12 @@ export default function E2ETestPage() {
     try {
       const startTime = Date.now()
       const loaded = await waitFor(() => {
-        return window.location.pathname.includes('resultaten') || 
-               document.querySelector('[data-testid="results"], .contract-card, .bg-white.rounded-xl.border') !== null ||
-               document.querySelector('h1, h2')?.textContent?.toLowerCase().includes('resultat') ||
-               document.querySelector('h1, h2')?.textContent?.toLowerCase().includes('contract')
+        const pathnameMatches = window.location.pathname.includes('resultaten')
+        const hasContractCards = document.querySelector('[data-testid="results"], .contract-card, .bg-white.rounded-xl.border') !== null
+        const heading = document.querySelector('h1, h2')
+        const headingText = heading?.textContent?.toLowerCase() || ''
+        const headingMatches = headingText.includes('resultat') || headingText.includes('contract')
+        return pathnameMatches || hasContractCards || headingMatches
       }, 10000)
       const duration = Date.now() - startTime
       
