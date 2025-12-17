@@ -36,7 +36,7 @@ const voordelen = [
   },
   {
     icon: BatteryHigh,
-    titel: 'Ideal met batterij opslag',
+    titel: 'Ideaal met batterij opslag',
     beschrijving: 'Combineer dynamische tarieven met een batterij: koop wanneer het goedkoop is, gebruik wanneer nodig.',
   },
   {
@@ -159,7 +159,7 @@ export default function DynamischPage() {
                   <Sun weight="duotone" className="w-5 h-5 text-brand-teal-300" />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-400">Ideal voor</div>
+                  <div className="text-sm text-gray-400">Ideaal voor</div>
                   <div className="font-semibold text-white">Zonnepanelen</div>
                 </div>
               </div>
