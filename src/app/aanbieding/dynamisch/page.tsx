@@ -10,7 +10,6 @@ import {
   Lightning,
   ShieldCheck,
   Clock,
-  Euro,
   CheckCircle,
   Users,
   ChartLineUp,
@@ -91,7 +90,7 @@ const faqItems = [
   },
   {
     vraag: 'Voor wie zijn dynamische tarieven geschikt?',
-    antwoord: 'Dynamische tarieven zijn vooral interessant voor huishoudens en bedrijven met zonnepanelen, een batterij, of de mogelijkheid om flexibel te verbruiken. Als je je verbruik kunt verplaatsen naar momenten met lagere prijzen (bijvoorbeeld overdag bij veel zon, of 's nachts), kun je maximaal profiteren.',
+    antwoord: 'Dynamische tarieven zijn vooral interessant voor huishoudens en bedrijven met zonnepanelen, een batterij, of de mogelijkheid om flexibel te verbruiken. Als je je verbruik kunt verplaatsen naar momenten met lagere prijzen (bijvoorbeeld overdag bij veel zon, of \'s nachts), kun je maximaal profiteren.',
   },
   {
     vraag: 'Wat als de prijzen hoog zijn?',

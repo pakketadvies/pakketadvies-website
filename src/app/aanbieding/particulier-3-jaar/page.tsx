@@ -11,7 +11,7 @@ import {
   Lightning,
   ShieldCheck,
   Clock,
-  Euro,
+  CurrencyEur,
   CheckCircle,
   Users,
   ChartLineUp,
@@ -45,7 +45,7 @@ const voordelen = [
     beschrijving: 'Wij regelen je hele overstap. Van vergelijken tot aanmelden - jij hoeft nergens aan te denken.',
   },
   {
-    icon: Euro,
+    icon: CurrencyEur,
     titel: 'Volledig gratis',
     beschrijving: 'Ons advies en bemiddeling is volledig gratis. Je betaalt alleen aan je energieleverancier.',
   },

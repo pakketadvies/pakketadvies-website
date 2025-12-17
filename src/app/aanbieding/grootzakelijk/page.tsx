@@ -10,7 +10,6 @@ import {
   Lightning,
   ShieldCheck,
   Clock,
-  Euro,
   CheckCircle,
   Users,
   ChartLineUp,

@@ -10,7 +10,7 @@ import {
   Lightning,
   ShieldCheck,
   Clock,
-  Euro,
+  CurrencyEur,
   CheckCircle,
   Users,
   ChartLineUp,
@@ -45,7 +45,7 @@ const voordelen = [
     beschrijving: 'Duidelijke maandelijkse kosten maken je budgetplanning eenvoudig en betrouwbaar.',
   },
   {
-    icon: Euro,
+    icon: CurrencyEur,
     titel: 'Volledig gratis advies',
     beschrijving: 'Ons advies en bemiddeling is volledig gratis. Je betaalt alleen aan je energieleverancier.',
   },
