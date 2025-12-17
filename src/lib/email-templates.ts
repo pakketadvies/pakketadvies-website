@@ -304,6 +304,15 @@ export interface ContactBevestigingData {
   baseUrl: string
 }
 
+export interface AanbiedingInteresseData {
+  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch'
+  naam: string
+  email: string
+  telefoon?: string
+  opmerking?: string
+  baseUrl: string
+}
+
 /**
  * Escape HTML to prevent XSS
  */
@@ -582,6 +591,165 @@ export function generateContactBevestigingEmail(data: ContactBevestigingData): s
               <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
                 Met vriendelijke groet,<br>
                 <strong style="color: white;">Het PakketAdvies team</strong>
+              </p>
+              <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
+                <a href="${baseUrl}/privacy" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Privacybeleid</a> | 
+                <a href="${baseUrl}/contact" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Contact</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `.trim()
+}
+
+/**
+ * Generate HTML email for aanbieding interesse notification (to PakketAdvies team)
+ */
+export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData): string {
+  const { aanbiedingType, naam, email, telefoon, opmerking, baseUrl } = data
+  
+  // Escape user input to prevent XSS
+  const safeNaam = escapeHtml(naam)
+  const safeEmail = escapeHtml(email)
+  const safeTelefoon = escapeHtml(telefoon)
+  const safeOpmerking = escapeHtml(opmerking)?.replace(/\n/g, '<br>')
+  
+  // Map aanbieding type to display name
+  const aanbiedingNamen: Record<string, string> = {
+    'particulier-3-jaar': 'Particulier 3-jarig aanbod',
+    'mkb-3-jaar': '3-jarig vast aanbod voor het MKB',
+    'grootzakelijk': 'Groot Zakelijk Aanbod',
+    'dynamisch': 'Dynamische energietarieven',
+  }
+  
+  const aanbiedingNaam = aanbiedingNamen[aanbiedingType] || aanbiedingType
+  
+  // Map aanbieding type to landing page URL
+  const aanbiedingUrls: Record<string, string> = {
+    'particulier-3-jaar': `${baseUrl}/aanbieding/particulier-3-jaar`,
+    'mkb-3-jaar': `${baseUrl}/aanbieding/mkb-3-jaar`,
+    'grootzakelijk': `${baseUrl}/aanbieding/grootzakelijk`,
+    'dynamisch': `${baseUrl}/aanbieding/dynamisch`,
+  }
+  
+  const aanbiedingUrl = aanbiedingUrls[aanbiedingType] || baseUrl
+  
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nieuwe interesse in aanbieding - PakketAdvies</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
+
+          <!-- Title -->
+          <tr>
+            <td style="background: #F0FDFA; padding: 30px 20px; text-align: center; border-top: 4px solid #14B8A6;">
+              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 10px 0; font-weight: bold;">🎯 Nieuwe interesse in aanbieding</h1>
+              <p style="color: #64748B; font-size: 16px; margin: 0;">Iemand heeft interesse getoond in: <strong>${aanbiedingNaam}</strong></p>
+            </td>
+          </tr>
+
+          <!-- Contact Details -->
+          <tr>
+            <td style="background: white; padding: 30px 20px;">
+              <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">Contactgegevens</h2>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Naam</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">${safeNaam}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">E-mail</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">
+                      <a href="mailto:${safeEmail}" style="color: #14B8A6; text-decoration: none;">${safeEmail}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              ${safeTelefoon ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Telefoon</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">
+                      <a href="tel:${safeTelefoon.replace(/\s/g, '')}" style="color: #14B8A6; text-decoration: none;">${safeTelefoon}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Aanbieding</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">${aanbiedingNaam}</p>
+                  </td>
+                </tr>
+              </table>
+
+              ${safeOpmerking ? `
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Opmerking</p>
+                    <div style="background: #F8FAFC; padding: 15px; border-radius: 8px; border-left: 4px solid #14B8A6;">
+                      <p style="color: #0F4C75; font-size: 16px; margin: 0; white-space: pre-wrap;">${safeOpmerking}</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="text-align: center; padding: 30px 20px; background: #F8FAFC;">
+              <a href="${aanbiedingUrl}" target="_blank" rel="noopener noreferrer" style="background: #14B8A6; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 5px; font-size: 16px; cursor: pointer;">
+                📄 Bekijk landingspagina
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: #0F4C75; padding: 30px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 20px auto;">
+              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
+                <strong style="color: white;">PakketAdvies</strong>
               </p>
               <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
                 <a href="${baseUrl}/privacy" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Privacybeleid</a> | 
