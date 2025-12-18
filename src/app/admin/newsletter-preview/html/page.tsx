@@ -1,7 +1,12 @@
 import { generateNewsletterEmail } from '@/lib/newsletter-email-template'
 import { headers } from 'next/headers'
 
-export default async function NewsletterHTMLPage() {
+export default async function NewsletterHTMLPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ variant?: string }>
+}) {
+  const params = await searchParams
   const headersList = await headers()
   const host = headersList.get('host') || 'pakketadvies.nl'
   const protocol = host.includes('localhost') ? 'http' : 'https'
@@ -70,7 +75,7 @@ export default async function NewsletterHTMLPage() {
     unsubscribeUrl: `${baseUrl}/unsubscribe`,
   }
 
-  const emailHTML = generateNewsletterEmail(emailData, 5)
+  const emailHTML = generateNewsletterEmail(emailData)
 
   return (
     <div dangerouslySetInnerHTML={{ __html: emailHTML }} />
