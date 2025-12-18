@@ -233,11 +233,11 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
               </td>
             </tr>
             <tr>
-              <td align="center" style="padding-top:10px;">
-                <table cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;border-spacing:0;">
+              <td style="padding-top:12px;">
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;border-spacing:0;">
                   <tr>
                     <td style="border-radius:18px;overflow:hidden;background:${gray50};border:1px solid ${gray200};">
-                      <img src="${officeTeamImageUrl}" alt="Team PakketAdvies" style="display:block;width:150px;height:110px;object-fit:cover;border-radius:18px;">
+                      <img src="${officeTeamImageUrl}" alt="Team PakketAdvies" style="display:block;width:100%;max-width:100%;height:auto;border-radius:18px;">
                     </td>
                   </tr>
                 </table>
