@@ -213,12 +213,12 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
         offers.dynamisch && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:18px;box-shadow:0 10px 26px rgba(0,0,0,0.08);overflow:hidden;"><tr><td style="padding:0;"><div style="background:linear-gradient(135deg,${teal} 0%,${purple} 100%);padding:22px 26px 18px 26px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle" style="padding:0;"><p style="margin:0 0 8px 0;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.85);">Dynamische tarieven</p><h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.dynamisch.title}</h3></td><td align="right" valign="middle" style="padding-left:14px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.16);color:${white};font-size:11px;font-weight:600;">Ideaal met zonnepanelen</span></td></tr></table></div></td></tr><tr><td style="padding:20px 24px 24px 24px;"><p style="margin:0 0 20px 0;font-size:14px;color:${gray700};line-height:1.8;">${offers.dynamisch.description}</p><div style="text-align:center;">${button('Bekijk dynamische tarieven', offers.dynamisch.link, `background-color:${teal};color:${white};padding:14px 32px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 4px 18px rgba(0,175,155,0.40);`)}</div></td></tr></table>`,
       ].filter(Boolean).join('')}</td></tr>
 
-      <!-- Contact / CTA section with image -->
+      <!-- Contact / CTA section with image stacked below text -->
       <tr>
         <td style="padding:4px 32px 40px 32px;text-align:left;background:${white};">
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
-              <td valign="middle" style="padding:0 0 0 0;">
+              <td style="padding:0 0 18px 0;">
                 <p style="color:${purpleDark};font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;margin:0 0 10px 0;">Persoonlijk advies</p>
                 <h2 style="color:${navy};font-size:24px;font-weight:700;margin:0 0 12px 0;font-family:'Space Grotesk',Arial,sans-serif;">Liever even sparren met een specialist?</h2>
                 <p style="color:${gray700};font-size:14px;margin:0 0 18px 0;line-height:1.8;">
@@ -231,7 +231,9 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
                   <a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${teal};text-decoration:none;font-weight:600;">${contactPhone}</a>
                 </p>
               </td>
-              <td valign="middle" align="right" style="padding-left:16px;">
+            </tr>
+            <tr>
+              <td align="center" style="padding-top:10px;">
                 <table cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;border-spacing:0;">
                   <tr>
                     <td style="border-radius:18px;overflow:hidden;background:${gray50};border:1px solid ${gray200};">
