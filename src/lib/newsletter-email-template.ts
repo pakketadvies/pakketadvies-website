@@ -184,22 +184,22 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
         <td style="padding:4px 32px 24px 32px;background:${white};">
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
-              <td style="padding:10px 14px;border-radius:999px;background:${gray50};border:1px solid ${gray200};font-size:11px;color:${gray600};">
+              <td style="padding:12px 14px;border-radius:14px;background:${gray50};border:1px solid ${gray200};border-left:3px solid ${teal};font-size:11px;color:${gray600};">
                 <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>
-                    <td style="padding:0 0 4px 0;">
-                      <span style="display:inline-block;width:10px;height:10px;border-radius:999px;background:radial-gradient(circle at 30% 30%,#A5B4FC,${purple});margin-right:6px;"></span>
-                      <span style="font-weight:600;color:${navy};font-size:11px;">PakketAdvies</span>
+                    <td valign="top" style="width:16px;padding:2px 6px 0 0;">
+                      <span style="display:inline-block;width:10px;height:10px;border-radius:999px;background:${teal};"></span>
                     </td>
-                  </tr>
-                  <tr>
-                    <td style="font-size:11px;color:${gray600};padding:0 0 6px 16px;">
-                      Onafhankelijk energieadvies voor particulieren, MKB en grootzakelijk
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 2px 16px;">
-                      <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${tealLight};color:${tealDark};font-weight:600;font-size:11px;">✓ Gratis &amp; vrijblijvend</span>
+                    <td valign="top" style="padding:0;">
+                      <p style="margin:0 0 2px 0;font-weight:600;color:${navy};font-size:11px;">
+                        PakketAdvies
+                      </p>
+                      <p style="margin:0 0 4px 0;font-size:11px;color:${gray600};">
+                        Onafhankelijk energieadvies voor particulieren, MKB en grootzakelijk
+                      </p>
+                      <p style="margin:0;font-size:11px;color:${tealDark};font-weight:600;">
+                        ✓ Gratis &amp; vrijblijvend advies
+                      </p>
                     </td>
                   </tr>
                 </table>
