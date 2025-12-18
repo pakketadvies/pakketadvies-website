@@ -8,7 +8,6 @@ import { useEffect, useState, useMemo } from 'react'
 export default function NewsletterPreviewPage() {
   const [baseUrl, setBaseUrl] = useState('https://pakketadvies.nl')
   const [copied, setCopied] = useState(false)
-  const [variant, setVariant] = useState<1 | 2 | 3 | 4 | 5>(1)
 
   useEffect(() => {
     setBaseUrl(window.location.origin)
@@ -77,7 +76,7 @@ export default function NewsletterPreviewPage() {
     unsubscribeUrl: `${baseUrl}/unsubscribe`,
   }), [baseUrl])
 
-  const emailHTML = useMemo(() => generateNewsletterEmail(emailData, variant), [emailData, variant])
+  const emailHTML = useMemo(() => generateNewsletterEmail(emailData), [emailData])
 
   return (
     <AdminLayout>
@@ -87,11 +86,11 @@ export default function NewsletterPreviewPage() {
           <div>
             <h1 className="text-3xl font-bold text-brand-navy-500 mb-2">Newsletter Email Preview</h1>
             <p className="text-gray-600">
-              Kies een van de 5 varianten hieronder. De HTML code kan worden gekopieerd voor gebruik in email marketing tools.
+              Dit is de huidige nieuwsbrief lay-out. De HTML code kan worden gekopieerd voor gebruik in email marketing tools.
             </p>
           </div>
           <a
-            href={`/admin/newsletter-preview/html?variant=${variant}`}
+            href={`/admin/newsletter-preview/html`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-teal-600 text-white rounded-lg hover:bg-brand-teal-700 transition-colors"
@@ -99,36 +98,6 @@ export default function NewsletterPreviewPage() {
             <Eye size={20} />
             Open in nieuw tabblad
           </a>
-        </div>
-
-        {/* Variant Selector */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-brand-navy-500 mb-4">Kies een variant</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[1, 2, 3, 4, 5].map((v) => (
-              <button
-                key={v}
-                onClick={() => setVariant(v as 1 | 2 | 3 | 4 | 5)}
-                className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                  variant === v
-                    ? 'bg-brand-teal-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Variant {v}
-              </button>
-            ))}
-          </div>
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
-              <strong>Variant {variant}:</strong>{' '}
-              {variant === 1 && 'Compact met icon naast titel (horizontale layout)'}
-              {variant === 2 && 'Minimalistisch met linker border accent'}
-              {variant === 3 && 'Cards met gradient header'}
-              {variant === 4 && 'Grote focus op prijzen met clean design'}
-              {variant === 5 && 'Moderne card layout met shadow en spacing'}
-            </p>
-          </div>
         </div>
 
         {/* Actions */}

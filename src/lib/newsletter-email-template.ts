@@ -1,6 +1,6 @@
 /**
- * Newsletter email template - 5 FUNDAMENTALLY different design variants
- * Each variant has different headers, hero sections, layouts, and styling
+ * Newsletter email template - variant 5 (Bold Cards)
+ * Dit is de enige (en definitieve) variant die we gebruiken.
  */
 
 export interface NewsletterEmailData {
@@ -48,7 +48,7 @@ export interface NewsletterEmailData {
   unsubscribeUrl?: string
 }
 
-export function generateNewsletterEmail(data: NewsletterEmailData, variant: 1 | 2 | 3 | 4 | 5 = 1): string {
+export function generateNewsletterEmail(data: NewsletterEmailData): string {
   const {
     baseUrl,
     recipientName,
@@ -66,6 +66,8 @@ export function generateNewsletterEmail(data: NewsletterEmailData, variant: 1 | 
   const teal = '#00AF9B'
   const tealLight = '#E6F9F7'
   const tealDark = '#008C7C'
+  const purple = '#7C3AED'
+  const purpleLight = '#EEF2FF'
   const gray50 = '#F9FAFB'
   const gray100 = '#F3F4F6'
   const gray200 = '#E5E7EB'
@@ -74,6 +76,11 @@ export function generateNewsletterEmail(data: NewsletterEmailData, variant: 1 | 
   const white = '#FFFFFF'
 
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+  const heroImageUrl = `${baseUrl}/images/hero-main.jpg`
+  const particulierImageUrl = `${baseUrl}/images/solar-roof.jpg`
+  const mkbImageUrl = `${baseUrl}/images/kantoren-office.jpg`
+  const grootzakelijkImageUrl = `${baseUrl}/images/industrie-factory.jpg`
+  const dynamischImageUrl = `${baseUrl}/images/features-dashboard.jpg`
   const defaultIntroText = `Beste ${recipientName || 'klant'},<br><br>We hebben uw gegevens verzameld via onze social media campagnes voor particulier en/of zakelijke energie. Via deze email willen we u graag op de hoogte brengen van onze nieuwe aanbiedingen voor deze maand.<br><br><strong style="color: ${navy};">Let op:</strong> momenteel hebben wij voor groot MKB en grootverbruikers met een verbruik boven de 75.000kWh een heel scherp tarief voor lange looptijd.<br><br>Daarnaast hebben wij aantrekkelijke opties voor eigenaren van zonnepanelen via dynamische contracten. Voor grote zakelijke klanten bieden wij strategische inkoop aan. Vergelijk direct alle aanbiedingen via <a href="${baseUrl}/calculator" style="color: ${teal}; text-decoration: underline; font-weight: 600;">${baseUrl}/calculator</a> of neem contact met ons op voor persoonlijk advies.`
 
   // Icon SVGs - Teal versions for regular cards
@@ -110,96 +117,325 @@ export function generateNewsletterEmail(data: NewsletterEmailData, variant: 1 | 
     return `<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${link}" style="height:44px;v-text-anchor:middle;width:220px;" arcsize="8%" stroke="f" fillcolor="${teal}"><w:anchorlock/><center style="color:#FFFFFF;font-family:Arial;font-size:15px;font-weight:600;">${text}</center></v:roundrect><![endif]--><a href="${link}" style="display: inline-block; ${btnStyle} text-decoration: none; font-family: 'Plus Jakarta Sans', Arial, sans-serif; mso-hide: all;">${text}</a>`
   }
 
-  // Generate complete email based on variant
-  let emailHTML = ''
-
-  switch (variant) {
-    case 1: {
-      // VARIANT 1: Compact Modern - Minimal header, compact layout, icon+title horizontal
-      emailHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Energietarieven</title></head><body style="margin:0;padding:0;background:${gray100};font-family:'Plus Jakarta Sans',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${gray100};padding:15px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:${white};max-width:600px;width:100%;">
-      <tr><td style="background:${navy};padding:30px 20px;text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:200px;width:100%;height:auto;"></td></tr>
-      <tr><td style="background:${teal};padding:35px 28px;text-align:center;"><h1 style="color:${white};font-size:26px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">Uw exclusieve energie aanbod</h1><p style="color:${white};font-size:14px;margin:8px 0 0 0;opacity:0.95;">Claim deze eindejaar aanbiedingen</p></td></tr>
-      <tr><td style="padding:28px;" class="email-padding"><div style="color:${gray700};font-size:15px;line-height:1.7;">${introText || defaultIntroText}</div></td></tr>
-      <tr><td style="background:${gray100};padding:28px;">${[
-        offers.particulier && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:8px;margin-bottom:20px;"><tr><td style="padding:24px;"><table width="100%"><tr><td width="36" valign="middle"><div style="width:36px;height:36px;background:${tealLight};border-radius:8px;display:flex;align-items:center;justify-content:center;">${icons.lightning}</div></td><td valign="middle" style="padding-left:12px;"><h3 style="color:${navy};font-size:18px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.particulier.title}</h3></td></tr></table><div style="background:${tealLight};border-radius:6px;padding:16px;margin:16px 0;"><div>${pricingTable(offers.particulier)}</div></div><p style="margin:0 0 20px 0;font-size:12px;color:${gray600};line-height:1.5;">${offers.particulier.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.particulier.link)}</div></td></tr></table>`,
-        offers.mkb && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:8px;margin-bottom:20px;"><tr><td style="padding:24px;"><table width="100%"><tr><td width="36" valign="middle"><div style="width:36px;height:36px;background:${tealLight};border-radius:8px;display:flex;align-items:center;justify-content:center;">${icons.buildings}</div></td><td valign="middle" style="padding-left:12px;"><h3 style="color:${navy};font-size:18px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.mkb.title}</h3></td></tr></table><div style="background:${tealLight};border-radius:6px;padding:16px;margin:16px 0;"><div>${pricingTable(offers.mkb)}</div></div><p style="margin:0 0 20px 0;font-size:12px;color:${gray600};line-height:1.5;">${offers.mkb.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.mkb.link)}</div></td></tr></table>`,
-        offers.grootzakelijk && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:8px;margin-bottom:20px;"><tr><td style="padding:24px;"><table width="100%"><tr><td width="36" valign="middle"><div style="width:36px;height:36px;background:${tealLight};border-radius:8px;display:flex;align-items:center;justify-content:center;">${icons.briefcase}</div></td><td valign="middle" style="padding-left:12px;"><h3 style="color:${navy};font-size:18px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.grootzakelijk.title}</h3></td></tr></table><p style="margin:0 0 12px 0;font-size:14px;color:${gray700};font-weight:600;">${offers.grootzakelijk.minVerbruik}</p><div style="background:${tealLight};border-radius:6px;padding:16px;margin:16px 0;"><div>${pricingTable(offers.grootzakelijk)}</div></div>${offers.grootzakelijk.extraInfo ? `<p style="margin:0 0 12px 0;font-size:12px;color:${gray600};line-height:1.5;">${offers.grootzakelijk.extraInfo}</p>` : ''}<p style="margin:0 0 20px 0;font-size:12px;color:${gray600};line-height:1.5;">${offers.grootzakelijk.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.grootzakelijk.link)}</div></td></tr></table>`,
-        offers.dynamisch && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:8px;"><tr><td style="padding:24px;"><table width="100%"><tr><td width="36" valign="middle"><div style="width:36px;height:36px;background:${tealLight};border-radius:8px;display:flex;align-items:center;justify-content:center;">${icons.lightningSlash}</div></td><td valign="middle" style="padding-left:12px;"><h3 style="color:${navy};font-size:18px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.dynamisch.title}</h3></td></tr></table><p style="margin:16px 0 20px 0;font-size:14px;color:${gray700};line-height:1.7;">${offers.dynamisch.description}</p><div style="text-align:center;">${button('Bekijk dynamische tarieven', offers.dynamisch.link)}</div></td></tr></table>`,
-      ].filter(Boolean).join('')}</td></tr>
-      <tr><td style="padding:32px 28px;text-align:center;background:${white};"><h2 style="color:${navy};font-size:20px;font-weight:700;margin:0 0 16px 0;">Vragen of persoonlijk advies?</h2><p style="color:${gray700};font-size:15px;margin:0 0 20px 0;line-height:1.6;">Geïnteresseerd? Aarzel niet om contact op te nemen.</p><div style="margin:16px 0;"><a href="mailto:${contactEmail}" style="color:${teal};text-decoration:none;font-weight:600;font-size:15px;">${contactEmail}</a></div><div><a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${teal};text-decoration:none;font-weight:600;font-size:15px;">${contactPhone}</a></div></td></tr>
-      <tr><td style="background:${navy};padding:32px 28px;text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:180px;width:100%;height:auto;opacity:0.9;margin-bottom:20px;"><p style="color:${teal};font-size:13px;margin:0 0 12px 0;">${address}</p>${unsubscribeUrl ? `<p style="margin:16px 0 0 0;"><a href="${unsubscribeUrl}" style="color:${teal};text-decoration:underline;font-size:11px;">Uitschrijven | Unsubscribe</a></p>` : ''}</td></tr>
-      </table></td></tr></table></body></html>`
-      break
-    }
-    case 2: {
-      // VARIANT 2: Bold Spacious - Large header, big typography, lots of whitespace
-      emailHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Energietarieven</title></head><body style="margin:0;padding:0;background:${white};font-family:'Plus Jakarta Sans',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${white};padding:0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:${white};max-width:600px;width:100%;">
-      <tr><td style="background:linear-gradient(135deg,${navy} 0%,${navyDark} 100%);padding:60px 40px;text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:240px;width:100%;height:auto;margin-bottom:24px;"><p style="color:${teal};font-size:11px;margin:0;text-transform:uppercase;letter-spacing:2px;font-weight:600;">ONAFHANKELIJK ENERGIE VERGELIJKEN</p></td></tr>
-      <tr><td style="background:${teal};padding:56px 40px;text-align:center;"><h1 style="color:${white};font-size:38px;font-weight:700;margin:0 0 14px 0;font-family:'Space Grotesk',Arial,sans-serif;line-height:1.2;">Uw exclusieve energie aanbod</h1><p style="color:${white};font-size:17px;margin:0;opacity:0.95;font-weight:500;">Claim deze eindejaar aanbiedingen</p></td></tr>
-      <tr><td style="padding:48px 40px;"><div style="color:${gray700};font-size:17px;line-height:1.9;">${introText || defaultIntroText}</div></td></tr>
-      <tr><td style="background:${gray50};padding:48px 40px;">${[
-        offers.particulier && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-left:5px solid ${teal};border-top:1px solid ${gray200};border-right:1px solid ${gray200};border-bottom:1px solid ${gray200};border-radius:0 12px 12px 0;margin-bottom:32px;box-shadow:0 4px 12px rgba(0,0,0,0.08);"><tr><td style="padding:40px 36px;"><table width="100%"><tr><td align="center"><div style="width:64px;height:64px;background:${tealLight};border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px;">${icons.lightning}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:26px;font-weight:700;margin:0 0 28px 0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.particulier.title}</h3></td></tr></table><div style="background:${gray50};border-radius:10px;padding:24px;margin-bottom:24px;"><div>${pricingTable(offers.particulier, true)}</div></div><p style="margin:0 0 32px 0;font-size:14px;color:${gray600};line-height:1.7;text-align:center;">${offers.particulier.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.particulier.link, `background-color:${teal};color:${white};padding:16px 36px;border-radius:8px;font-weight:600;font-size:16px;`)}</div></td></tr></table>`,
-        offers.mkb && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-left:5px solid ${teal};border-top:1px solid ${gray200};border-right:1px solid ${gray200};border-bottom:1px solid ${gray200};border-radius:0 12px 12px 0;margin-bottom:32px;box-shadow:0 4px 12px rgba(0,0,0,0.08);"><tr><td style="padding:40px 36px;"><table width="100%"><tr><td align="center"><div style="width:64px;height:64px;background:${tealLight};border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px;">${icons.buildings}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:26px;font-weight:700;margin:0 0 28px 0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.mkb.title}</h3></td></tr></table><div style="background:${gray50};border-radius:10px;padding:24px;margin-bottom:24px;"><div>${pricingTable(offers.mkb, true)}</div></div><p style="margin:0 0 32px 0;font-size:14px;color:${gray600};line-height:1.7;text-align:center;">${offers.mkb.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.mkb.link, `background-color:${teal};color:${white};padding:16px 36px;border-radius:8px;font-weight:600;font-size:16px;`)}</div></td></tr></table>`,
-        offers.grootzakelijk && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-left:5px solid ${teal};border-top:1px solid ${gray200};border-right:1px solid ${gray200};border-bottom:1px solid ${gray200};border-radius:0 12px 12px 0;margin-bottom:32px;box-shadow:0 4px 12px rgba(0,0,0,0.08);"><tr><td style="padding:40px 36px;"><table width="100%"><tr><td align="center"><div style="width:64px;height:64px;background:${tealLight};border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px;">${icons.briefcase}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:26px;font-weight:700;margin:0 0 28px 0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.grootzakelijk.title}</h3></td></tr></table><p style="margin:0 0 20px 0;font-size:15px;color:${gray700};font-weight:600;text-align:center;">${offers.grootzakelijk.minVerbruik}</p><div style="background:${gray50};border-radius:10px;padding:24px;margin-bottom:24px;"><div>${pricingTable(offers.grootzakelijk, true)}</div></div>${offers.grootzakelijk.extraInfo ? `<p style="margin:0 0 20px 0;font-size:13px;color:${gray600};line-height:1.6;text-align:center;">${offers.grootzakelijk.extraInfo}</p>` : ''}<p style="margin:0 0 32px 0;font-size:14px;color:${gray600};line-height:1.7;text-align:center;">${offers.grootzakelijk.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.grootzakelijk.link, `background-color:${teal};color:${white};padding:16px 36px;border-radius:8px;font-weight:600;font-size:16px;`)}</div></td></tr></table>`,
-        offers.dynamisch && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-left:5px solid ${teal};border-top:1px solid ${gray200};border-right:1px solid ${gray200};border-bottom:1px solid ${gray200};border-radius:0 12px 12px 0;box-shadow:0 4px 12px rgba(0,0,0,0.08);"><tr><td style="padding:40px 36px;"><table width="100%"><tr><td align="center"><div style="width:64px;height:64px;background:${tealLight};border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px;">${icons.lightningSlash}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:26px;font-weight:700;margin:0 0 28px 0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.dynamisch.title}</h3></td></tr></table><p style="margin:24px 0 32px 0;font-size:15px;color:${gray700};line-height:1.8;text-align:center;">${offers.dynamisch.description}</p><div style="text-align:center;">${button('Bekijk dynamische tarieven', offers.dynamisch.link, `background-color:${teal};color:${white};padding:16px 36px;border-radius:8px;font-weight:600;font-size:16px;`)}</div></td></tr></table>`,
-      ].filter(Boolean).join('')}</td></tr>
-      <tr><td style="padding:48px 40px;text-align:center;"><h2 style="color:${navy};font-size:28px;font-weight:700;margin:0 0 20px 0;">Vragen of persoonlijk advies?</h2><p style="color:${gray700};font-size:17px;margin:0 0 28px 0;line-height:1.8;">Geïnteresseerd in onze aanbiedingen? Neem contact op.</p><div style="margin:20px 0;"><a href="mailto:${contactEmail}" style="color:${teal};text-decoration:none;font-weight:600;font-size:16px;">${contactEmail}</a></div><div><a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${teal};text-decoration:none;font-weight:600;font-size:16px;">${contactPhone}</a></div><p style="color:${gray600};font-size:14px;margin:32px 0 0 0;font-style:italic;">Met energieke groet,<br><strong style="color:${navy};">Team PakketAdvies</strong></p></td></tr>
-      <tr><td style="background:${navy};padding:48px 40px;text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:200px;width:100%;height:auto;opacity:0.9;margin-bottom:24px;"><p style="color:${teal};font-size:14px;margin:0 0 16px 0;">${address}</p>${unsubscribeUrl ? `<p style="margin:20px 0 0 0;"><a href="${unsubscribeUrl}" style="color:${teal};text-decoration:underline;font-size:12px;">Uitschrijven | Unsubscribe</a></p>` : ''}</td></tr>
-      </table></td></tr></table></body></html>`
-      break
-    }
-    case 3: {
-      // VARIANT 3: Magazine Style - Gradient headers on cards, boxed content, editorial feel
-      emailHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Energietarieven</title></head><body style="margin:0;padding:0;background:${gray100};font-family:'Plus Jakarta Sans',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${gray100};padding:25px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:${white};max-width:600px;width:100%;border:1px solid ${gray200};">
-      <tr><td style="background:${navy};padding:45px 32px;text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:260px;width:100%;height:auto;margin-bottom:16px;"><p style="color:${teal};font-size:12px;margin:0;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">ONAFHANKELIJK ENERGIE VERGELIJKEN</p></td></tr>
-      <tr><td style="background:${navyDark};padding:52px 32px;text-align:center;"><h1 style="color:${white};font-size:34px;font-weight:700;margin:0 0 14px 0;font-family:'Space Grotesk',Arial,sans-serif;">Uw exclusieve energie aanbod</h1><p style="color:${teal};font-size:16px;margin:0;font-weight:500;">Claim deze eindejaar aanbiedingen</p></td></tr>
-      <tr><td style="padding:42px 32px;background:${white};"><div style="color:${gray700};font-size:16px;line-height:1.85;border-left:3px solid ${teal};padding-left:20px;">${introText || defaultIntroText}</div></td></tr>
-      <tr><td style="background:${gray100};padding:42px 32px;">${[
-        offers.particulier && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:12px;margin-bottom:28px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.1);"><tr><td style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:26px 28px;"><table width="100%"><tr><td width="44" valign="middle"><div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">${icons.lightning.replace(`fill="${teal}"`, 'fill="white"').replace(`stroke="${teal}"`, 'stroke="white"')}</div></td><td valign="middle" style="padding-left:16px;"><h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.particulier.title}</h3></td></tr></table></td></tr><tr><td style="padding:32px 28px;"><div style="background:${tealLight};border-radius:8px;padding:22px;margin-bottom:22px;"><div>${pricingTable(offers.particulier)}</div></div><p style="margin:0 0 28px 0;font-size:13px;color:${gray600};line-height:1.65;">${offers.particulier.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.particulier.link)}</div></td></tr></table>`,
-        offers.mkb && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:12px;margin-bottom:28px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.1);"><tr><td style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:26px 28px;"><table width="100%"><tr><td width="44" valign="middle"><div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">${icons.buildings.replace(`stroke="${teal}"`, 'stroke="white"')}</div></td><td valign="middle" style="padding-left:16px;"><h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.mkb.title}</h3></td></tr></table></td></tr><tr><td style="padding:32px 28px;"><div style="background:${tealLight};border-radius:8px;padding:22px;margin-bottom:22px;"><div>${pricingTable(offers.mkb)}</div></div><p style="margin:0 0 28px 0;font-size:13px;color:${gray600};line-height:1.65;">${offers.mkb.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.mkb.link)}</div></td></tr></table>`,
-        offers.grootzakelijk && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:12px;margin-bottom:28px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.1);"><tr><td style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:26px 28px;"><table width="100%"><tr><td width="44" valign="middle"><div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">${icons.briefcase.replace(`stroke="${teal}"`, 'stroke="white"')}</div></td><td valign="middle" style="padding-left:16px;"><h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.grootzakelijk.title}</h3></td></tr></table></td></tr><tr><td style="padding:32px 28px;"><p style="margin:0 0 18px 0;font-size:14px;color:${gray700};font-weight:600;">${offers.grootzakelijk.minVerbruik}</p><div style="background:${tealLight};border-radius:8px;padding:22px;margin-bottom:22px;"><div>${pricingTable(offers.grootzakelijk)}</div></div>${offers.grootzakelijk.extraInfo ? `<p style="margin:0 0 18px 0;font-size:12px;color:${gray600};line-height:1.6;">${offers.grootzakelijk.extraInfo}</p>` : ''}<p style="margin:0 0 28px 0;font-size:13px;color:${gray600};line-height:1.65;">${offers.grootzakelijk.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.grootzakelijk.link)}</div></td></tr></table>`,
-        offers.dynamisch && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.1);"><tr><td style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:26px 28px;"><table width="100%"><tr><td width="44" valign="middle"><div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">${icons.lightningSlash.replace(`stroke="${teal}"`, 'stroke="white"')}</div></td><td valign="middle" style="padding-left:16px;"><h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.dynamisch.title}</h3></td></tr></table></td></tr><tr><td style="padding:32px 28px;"><p style="margin:0 0 28px 0;font-size:14px;color:${gray700};line-height:1.8;">${offers.dynamisch.description}</p><div style="text-align:center;">${button('Bekijk dynamische tarieven', offers.dynamisch.link)}</div></td></tr></table>`,
-      ].filter(Boolean).join('')}</td></tr>
-      <tr><td style="padding:42px 32px;text-align:center;background:${white};border-top:2px solid ${gray200};"><h2 style="color:${navy};font-size:24px;font-weight:700;margin:0 0 18px 0;">Vragen of persoonlijk advies?</h2><p style="color:${gray700};font-size:16px;margin:0 0 24px 0;line-height:1.75;">Geïnteresseerd in onze aanbiedingen? Neem contact op.</p><div style="margin:16px 0;"><a href="mailto:${contactEmail}" style="color:${teal};text-decoration:none;font-weight:600;font-size:16px;">${contactEmail}</a></div><div><a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${teal};text-decoration:none;font-weight:600;font-size:16px;">${contactPhone}</a></div></td></tr>
-      <tr><td style="background:${navy};padding:42px 32px;text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:190px;width:100%;height:auto;opacity:0.9;margin-bottom:22px;"><p style="color:${teal};font-size:13px;margin:0 0 14px 0;">${address}</p>${unsubscribeUrl ? `<p style="margin:18px 0 0 0;"><a href="${unsubscribeUrl}" style="color:${teal};text-decoration:underline;font-size:11px;">Uitschrijven | Unsubscribe</a></p>` : ''}</td></tr>
-      </table></td></tr></table></body></html>`
-      break
-    }
-    case 4: {
-      // VARIANT 4: Minimal Clean - Very minimal, lots of white space, subtle borders
-      emailHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Energietarieven</title></head><body style="margin:0;padding:0;background:${white};font-family:'Plus Jakarta Sans',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${white};padding:30px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:${white};max-width:600px;width:100%;">
-      <tr><td style="padding:50px 35px 35px 35px;text-align:center;border-bottom:1px solid ${gray200};"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:220px;width:100%;height:auto;filter:brightness(0) invert(1);mix-blend-mode:multiply;" onerror="this.style.filter='none';this.src='${pakketAdviesLogoUrl}'"></td></tr>
-      <tr><td style="padding:50px 35px;text-align:center;"><h1 style="color:${navy};font-size:32px;font-weight:700;margin:0 0 12px 0;font-family:'Space Grotesk',Arial,sans-serif;letter-spacing:-0.5px;">Uw exclusieve energie aanbod</h1><p style="color:${gray600};font-size:15px;margin:0;font-weight:400;">Claim deze eindejaar aanbiedingen</p></td></tr>
-      <tr><td style="padding:0 35px 50px 35px;"><div style="color:${gray700};font-size:15px;line-height:1.85;max-width:520px;margin:0 auto;">${introText || defaultIntroText}</div></td></tr>
-      <tr><td style="padding:0 35px 50px 35px;">${[
-        offers.particulier && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:0;margin-bottom:24px;"><tr><td style="padding:38px 32px;"><table width="100%"><tr><td align="center"><div style="width:48px;height:48px;background:${gray50};border-radius:0;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">${icons.lightning}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:20px;font-weight:600;margin:0 0 32px 0;font-family:'Space Grotesk',Arial,sans-serif;letter-spacing:-0.3px;">${offers.particulier.title}</h3></td></tr></table><div style="background:${gray50};border-radius:0;padding:24px;margin-bottom:28px;border:1px solid ${gray200};"><div>${pricingTable(offers.particulier)}</div></div><p style="margin:0 0 32px 0;font-size:13px;color:${gray600};line-height:1.7;text-align:center;">${offers.particulier.details}</p><div style="text-align:center;"><a href="${offers.particulier.link}" style="display:inline-block;color:${teal};text-decoration:none;font-weight:500;font-size:15px;border-bottom:2px solid ${teal};padding-bottom:2px;">Bekijk dit aanbod →</a></div></td></tr></table>`,
-        offers.mkb && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:0;margin-bottom:24px;"><tr><td style="padding:38px 32px;"><table width="100%"><tr><td align="center"><div style="width:48px;height:48px;background:${gray50};border-radius:0;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">${icons.buildings}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:20px;font-weight:600;margin:0 0 32px 0;font-family:'Space Grotesk',Arial,sans-serif;letter-spacing:-0.3px;">${offers.mkb.title}</h3></td></tr></table><div style="background:${gray50};border-radius:0;padding:24px;margin-bottom:28px;border:1px solid ${gray200};"><div>${pricingTable(offers.mkb)}</div></div><p style="margin:0 0 32px 0;font-size:13px;color:${gray600};line-height:1.7;text-align:center;">${offers.mkb.details}</p><div style="text-align:center;"><a href="${offers.mkb.link}" style="display:inline-block;color:${teal};text-decoration:none;font-weight:500;font-size:15px;border-bottom:2px solid ${teal};padding-bottom:2px;">Bekijk dit aanbod →</a></div></td></tr></table>`,
-        offers.grootzakelijk && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:0;margin-bottom:24px;"><tr><td style="padding:38px 32px;"><table width="100%"><tr><td align="center"><div style="width:48px;height:48px;background:${gray50};border-radius:0;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">${icons.briefcase}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:20px;font-weight:600;margin:0 0 32px 0;font-family:'Space Grotesk',Arial,sans-serif;letter-spacing:-0.3px;">${offers.grootzakelijk.title}</h3></td></tr></table><p style="margin:0 0 20px 0;font-size:14px;color:${gray700};font-weight:500;text-align:center;">${offers.grootzakelijk.minVerbruik}</p><div style="background:${gray50};border-radius:0;padding:24px;margin-bottom:28px;border:1px solid ${gray200};"><div>${pricingTable(offers.grootzakelijk)}</div></div>${offers.grootzakelijk.extraInfo ? `<p style="margin:0 0 24px 0;font-size:12px;color:${gray600};line-height:1.65;text-align:center;">${offers.grootzakelijk.extraInfo}</p>` : ''}<p style="margin:0 0 32px 0;font-size:13px;color:${gray600};line-height:1.7;text-align:center;">${offers.grootzakelijk.details}</p><div style="text-align:center;"><a href="${offers.grootzakelijk.link}" style="display:inline-block;color:${teal};text-decoration:none;font-weight:500;font-size:15px;border-bottom:2px solid ${teal};padding-bottom:2px;">Bekijk dit aanbod →</a></div></td></tr></table>`,
-        offers.dynamisch && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border:1px solid ${gray200};border-radius:0;"><tr><td style="padding:38px 32px;"><table width="100%"><tr><td align="center"><div style="width:48px;height:48px;background:${gray50};border-radius:0;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">${icons.lightningSlash}</div></td></tr><tr><td align="center"><h3 style="color:${navy};font-size:20px;font-weight:600;margin:0 0 32px 0;font-family:'Space Grotesk',Arial,sans-serif;letter-spacing:-0.3px;">${offers.dynamisch.title}</h3></td></tr></table><p style="margin:24px 0 32px 0;font-size:14px;color:${gray700};line-height:1.85;text-align:center;">${offers.dynamisch.description}</p><div style="text-align:center;"><a href="${offers.dynamisch.link}" style="display:inline-block;color:${teal};text-decoration:none;font-weight:500;font-size:15px;border-bottom:2px solid ${teal};padding-bottom:2px;">Bekijk dynamische tarieven →</a></div></td></tr></table>`,
-      ].filter(Boolean).join('')}</td></tr>
-      <tr><td style="padding:50px 35px;text-align:center;border-top:1px solid ${gray200};"><h2 style="color:${navy};font-size:22px;font-weight:600;margin:0 0 20px 0;letter-spacing:-0.3px;">Vragen of persoonlijk advies?</h2><p style="color:${gray600};font-size:15px;margin:0 0 28px 0;line-height:1.75;">Neem contact op.</p><div style="margin:14px 0;"><a href="mailto:${contactEmail}" style="color:${teal};text-decoration:none;font-weight:500;font-size:15px;">${contactEmail}</a></div><div><a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${teal};text-decoration:none;font-weight:500;font-size:15px;">${contactPhone}</a></div></td></tr>
-      <tr><td style="padding:40px 35px;text-align:center;border-top:1px solid ${gray200};"><p style="color:${gray600};font-size:12px;margin:0 0 10px 0;">${address}</p>${unsubscribeUrl ? `<p style="margin:16px 0 0 0;"><a href="${unsubscribeUrl}" style="color:${gray600};text-decoration:underline;font-size:11px;">Uitschrijven</a></p>` : ''}</td></tr>
-      </table></td></tr></table></body></html>`
-      break
-    }
-    case 5: {
-      // VARIANT 5: Bold Cards - Large cards with visual impact, colorful accents, modern
-      emailHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Energietarieven</title></head><body style="margin:0;padding:0;background:${gray100};font-family:'Plus Jakarta Sans',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${gray100};padding:20px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:${white};max-width:600px;width:100%;border-radius:16px 16px 0 0;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
-      <tr><td style="background:linear-gradient(135deg,${navy} 0%,${teal} 100%);padding:50px 32px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="display:block;max-width:250px;width:100%;height:auto;margin:0 auto;"></td></tr></table></td></tr>
-      <tr><td style="background:${white};padding:50px 32px;text-align:center;"><h1 style="color:${navy};font-size:36px;font-weight:700;margin:0 0 16px 0;font-family:'Space Grotesk',Arial,sans-serif;line-height:1.2;"><span style="color:${teal};">Uw exclusieve</span><br>energie aanbod</h1><p style="color:${gray600};font-size:16px;margin:0;font-weight:500;">Claim deze eindejaar aanbiedingen</p></td></tr>
-      <tr><td style="padding:40px 32px;background:${gray50};"><div style="color:${gray700};font-size:16px;line-height:1.85;background:${white};padding:32px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">${introText || defaultIntroText}</div></td></tr>
-      <tr><td style="background:${gray100};padding:40px 32px;">${[
-        offers.particulier && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:16px;margin-bottom:28px;box-shadow:0 8px 20px rgba(0,0,0,0.1);overflow:hidden;"><tr><td style="padding:0;"><div style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:28px 32px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td width="56" valign="middle" style="padding:0;"><table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.25);border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"><tr><td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">${iconsWhite.lightning}</td></tr></table></td><td valign="middle" style="padding-left:20px;"><h3 style="color:${white};font-size:24px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.particulier.title}</h3></td></tr></table></div></td></tr><tr><td style="padding:36px 32px;"><div style="background:${tealLight};border-radius:12px;padding:28px;margin-bottom:24px;border:2px solid ${gray200};"><div>${pricingTable(offers.particulier, true)}</div></div><p style="margin:0 0 30px 0;font-size:13px;color:${gray600};line-height:1.7;">${offers.particulier.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.particulier.link, `background-color:${teal};color:${white};padding:16px 40px;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 14px rgba(0,175,155,0.35);`)}</div></td></tr></table>`,
-        offers.mkb && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:16px;margin-bottom:28px;box-shadow:0 8px 20px rgba(0,0,0,0.1);overflow:hidden;"><tr><td style="padding:0;"><div style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:28px 32px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td width="56" valign="middle" style="padding:0;"><table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.25);border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"><tr><td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">${iconsWhite.buildings}</td></tr></table></td><td valign="middle" style="padding-left:20px;"><h3 style="color:${white};font-size:24px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.mkb.title}</h3></td></tr></table></div></td></tr><tr><td style="padding:36px 32px;"><div style="background:${tealLight};border-radius:12px;padding:28px;margin-bottom:24px;border:2px solid ${gray200};"><div>${pricingTable(offers.mkb, true)}</div></div><p style="margin:0 0 30px 0;font-size:13px;color:${gray600};line-height:1.7;">${offers.mkb.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.mkb.link, `background-color:${teal};color:${white};padding:16px 40px;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 14px rgba(0,175,155,0.35);`)}</div></td></tr></table>`,
-        offers.grootzakelijk && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:16px;margin-bottom:28px;box-shadow:0 8px 20px rgba(0,0,0,0.1);overflow:hidden;"><tr><td style="padding:0;"><div style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:28px 32px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td width="56" valign="middle" style="padding:0;"><table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.25);border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"><tr><td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">${iconsWhite.briefcase}</td></tr></table></td><td valign="middle" style="padding-left:20px;"><h3 style="color:${white};font-size:24px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.grootzakelijk.title}</h3></td></tr></table></div></td></tr><tr><td style="padding:36px 32px;"><p style="margin:0 0 22px 0;font-size:15px;color:${gray700};font-weight:600;">${offers.grootzakelijk.minVerbruik}</p><div style="background:${tealLight};border-radius:12px;padding:28px;margin-bottom:24px;border:2px solid ${gray200};"><div>${pricingTable(offers.grootzakelijk, true)}</div></div>${offers.grootzakelijk.extraInfo ? `<p style="margin:0 0 22px 0;font-size:12px;color:${gray600};line-height:1.65;">${offers.grootzakelijk.extraInfo}</p>` : ''}<p style="margin:0 0 30px 0;font-size:13px;color:${gray600};line-height:1.7;">${offers.grootzakelijk.details}</p><div style="text-align:center;">${button('Bekijk dit aanbod', offers.grootzakelijk.link, `background-color:${teal};color:${white};padding:16px 40px;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 14px rgba(0,175,155,0.35);`)}</div></td></tr></table>`,
-        offers.dynamisch && `<table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,0.1);overflow:hidden;"><tr><td style="padding:0;"><div style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);padding:28px 32px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td width="56" valign="middle" style="padding:0;"><table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.25);border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"><tr><td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">${iconsWhite.lightningSlash}</td></tr></table></td><td valign="middle" style="padding-left:20px;"><h3 style="color:${white};font-size:24px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.dynamisch.title}</h3></td></tr></table></div></td></tr><tr><td style="padding:36px 32px;"><p style="margin:0 0 30px 0;font-size:15px;color:${gray700};line-height:1.85;">${offers.dynamisch.description}</p><div style="text-align:center;">${button('Bekijk dynamische tarieven', offers.dynamisch.link, `background-color:${teal};color:${white};padding:16px 40px;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 14px rgba(0,175,155,0.35);`)}</div></td></tr></table>`,
-      ].filter(Boolean).join('')}</td></tr>
-      <tr><td style="padding:44px 32px;text-align:center;background:${white};"><h2 style="color:${navy};font-size:26px;font-weight:700;margin:0 0 22px 0;">Vragen of persoonlijk advies?</h2><p style="color:${gray700};font-size:16px;margin:0 0 28px 0;line-height:1.8;">Geïnteresseerd? Neem contact op.</p><div style="margin:18px 0;"><a href="mailto:${contactEmail}" style="color:${teal};text-decoration:none;font-weight:600;font-size:17px;">${contactEmail}</a></div><div><a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${teal};text-decoration:none;font-weight:600;font-size:17px;">${contactPhone}</a></div></td></tr>
-      <tr><td style="background:${navy};padding:44px 32px;border-radius:0 0 16px 16px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="text-align:center;"><img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="display:block;max-width:210px;width:100%;height:auto;margin:0 auto 24px auto;opacity:0.9;"></td></tr><tr><td align="center" style="text-align:center;"><p style="color:${white};font-size:14px;margin:0 0 18px 0;">${address}</p></td></tr>${unsubscribeUrl ? `<tr><td align="center" style="text-align:center;"><p style="margin:22px 0 0 0;"><a href="${unsubscribeUrl}" style="color:${white};text-decoration:underline;font-size:12px;">Uitschrijven | Unsubscribe</a></p></td></tr>` : ''}</table></td></tr>
-      </table></td></tr></table></body></html>`
-      break
-    }
-  }
+  // Definitieve variant: Bold Cards (variant 5), opgefrist met extra kleur en afbeeldingen
+  const emailHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Energietarieven</title></head><body style="margin:0;padding:0;background:${gray100};font-family:'Plus Jakarta Sans',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${gray100};padding:20px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:${white};max-width:600px;width:100%;border-radius:16px 16px 0 0;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+    <tr><td style="background:linear-gradient(135deg,${navy} 0%,${teal} 50%,${purple} 100%);padding:18px 32px 46px 32px;border-bottom:3px solid ${purpleLight};"><table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" style="text-align:center;padding-bottom:14px;">
+          <span style="display:inline-block;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,0.12);color:${white};font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Energie deals december</span>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="text-align:center;">
+          <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="display:block;max-width:230px;width:100%;height:auto;margin:0 auto;">
+        </td>
+      </tr>
+    </table></td></tr>
+    <tr><td style="background:${white};padding:32px 32px 12px 32px;text-align:center;border-bottom:1px solid ${gray200};">
+      <h1 style="color:${navy};font-size:32px;font-weight:700;margin:0 0 10px 0;font-family:'Space Grotesk',Arial,sans-serif;line-height:1.25;">
+        <span style="color:${teal};">Uw exclusieve</span><br><span style="color:${purple};">energie aanbod</span>
+      </h1>
+      <p style="color:${gray600};font-size:15px;margin:0 0 18px 0;font-weight:500;">Scherpe eindejaarsaanbiedingen voor particulier, MKB en grootzakelijk.</p>
+    </td></tr>
+    <tr><td style="padding:0 32px 36px 32px;background:${white};">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr>
+          <td style="padding:0 0 18px 0;">
+            <img src="${heroImageUrl}" alt="Energieadvies en vergelijking" style="display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.12);">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:10px;">
+            <div style="color:${gray700};font-size:15px;line-height:1.85;background:${gray50};padding:20px 22px;border-radius:12px;border:1px solid ${gray200};">
+              ${introText || defaultIntroText}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+    <tr><td style="background:${gray100};padding:32px 24px 40px 24px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0 18px;">
+        <tr>
+          <td colspan="3" style="padding:0 8px 10px 8px;">
+            <p style="margin:0;font-size:13px;color:${gray600};text-align:center;">
+              Bekijk hieronder de aanbiedingen die wij op dit moment voor u geselecteerd hebben.
+            </p>
+          </td>
+        </tr>
+        ${[
+          offers.particulier && `<tr><td colspan="3" style="padding:0 8px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,0.12);overflow:hidden;border:1px solid ${purpleLight};">
+            <tr>
+              <td style="padding:0;">
+                <div style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 45%,${purple} 100%);padding:24px 26px 22px 26px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="56" valign="middle" style="padding:0;">
+                        <table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.20);border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.18);">
+                          <tr>
+                            <td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">
+                              ${iconsWhite.lightning}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td valign="middle" style="padding-left:18px;">
+                        <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;">Particulier</p>
+                        <h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.particulier.title}</h3>
+                      </td>
+                      <td align="right" valign="middle" style="padding-left:8px;">
+                        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.20);color:${white};font-size:11px;font-weight:600;">
+                          3 jaar vast
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 24px 24px 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td width="46%" valign="top" style="padding-right:10px;">
+                      <div style="background:${tealLight};border-radius:12px;padding:16px 14px;border:1px solid ${gray200};">
+                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:${tealDark};margin-bottom:6px;">Tarieven</div>
+                        <div>${pricingTable(offers.particulier, true)}</div>
+                      </div>
+                    </td>
+                    <td width="54%" valign="top" style="padding-left:6px;">
+                      <div style="background:${gray50};border-radius:12px;padding:14px 14px;border:1px solid ${gray200};">
+                        <p style="margin:0;font-size:12px;color:${gray600};line-height:1.7;">${offers.particulier.details}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td valign="middle" style="padding-right:10px;">
+                      <img src="${particulierImageUrl}" alt="Particulier energieaanbod" style="display:block;width:100%;max-height:120px;height:auto;border-radius:12px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,0.12);">
+                    </td>
+                    <td valign="middle" style="padding-left:4px;">
+                      <p style="margin:0;font-size:11px;color:${gray600};line-height:1.6;">
+                        Ideaal voor huishoudens die langere zekerheid willen over hun energietarieven en geen verrassingen op de jaarafrekening willen.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <div style="text-align:center;">
+                  ${button('Bekijk dit aanbod', offers.particulier.link, `background-color:${teal};color:${white};padding:14px 36px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(0,175,155,0.35);`)}
+                </div>
+              </td>
+            </tr>
+          </table></td></tr>`,
+          offers.mkb && `<tr><td colspan="3" style="padding:0 8px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,0.12);overflow:hidden;border:1px solid ${gray200};">
+            <tr>
+              <td style="padding:0;">
+                <div style="background:linear-gradient(135deg,${navyDark} 0%,${navy} 40%,${purple} 100%);padding:24px 26px 22px 26px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="56" valign="middle" style="padding:0;">
+                        <table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.20);border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.18);">
+                          <tr>
+                            <td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">
+                              ${iconsWhite.buildings}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td valign="middle" style="padding-left:18px;">
+                        <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;">MKB</p>
+                        <h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.mkb.title}</h3>
+                      </td>
+                      <td align="right" valign="middle" style="padding-left:8px;">
+                        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.18);color:${white};font-size:11px;font-weight:600;">
+                          Inclusief advies
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 24px 24px 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td width="46%" valign="top" style="padding-right:10px;">
+                      <div style="background:${gray50};border-radius:12px;padding:16px 14px;border:1px solid ${gray200};">
+                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:${navy};margin-bottom:6px;">Tarieven</div>
+                        <div>${pricingTable(offers.mkb, true)}</div>
+                      </div>
+                    </td>
+                    <td width="54%" valign="top" style="padding-left:6px;">
+                      <div style="background:${purpleLight};border-radius:12px;padding:14px 14px;border:1px solid ${gray200};">
+                        <p style="margin:0;font-size:12px;color:${gray600};line-height:1.7;">${offers.mkb.details}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td valign="middle" style="padding-right:10px;">
+                      <img src="${mkbImageUrl}" alt="MKB energieaanbod" style="display:block;width:100%;max-height:120px;height:auto;border-radius:12px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,0.12);">
+                    </td>
+                    <td valign="middle" style="padding-left:4px;">
+                      <p style="margin:0;font-size:11px;color:${gray600};line-height:1.6;">
+                        Geschikt voor kantoren, horeca en andere MKB-bedrijven die hun energiekosten voor meerdere jaren willen vastzetten.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <div style="text-align:center;">
+                  ${button('Bekijk MKB-aanbod', offers.mkb.link, `background-color:${navy};color:${white};padding:14px 36px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(26,55,86,0.4);`)}
+                </div>
+              </td>
+            </tr>
+          </table></td></tr>`,
+          offers.grootzakelijk && `<tr><td colspan="3" style="padding:0 8px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,0.12);overflow:hidden;border:1px solid ${gray200};">
+            <tr>
+              <td style="padding:0;">
+                <div style="background:linear-gradient(135deg,${navyDark} 0%,${tealDark} 40%,${purple} 95%);padding:24px 26px 22px 26px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="56" valign="middle" style="padding:0;">
+                        <table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.22);border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.18);">
+                          <tr>
+                            <td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">
+                              ${iconsWhite.briefcase}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td valign="middle" style="padding-left:18px;">
+                        <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;">Grootzakelijk</p>
+                        <h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.grootzakelijk.title}</h3>
+                      </td>
+                      <td align="right" valign="middle" style="padding-left:8px;">
+                        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.18);color:${white};font-size:11px;font-weight:600;">
+                          Vanaf 75.000 kWh
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 24px 24px 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td width="46%" valign="top" style="padding-right:10px;">
+                      <div style="background:${gray50};border-radius:12px;padding:16px 14px;border:1px solid ${gray200};">
+                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:${navy};margin-bottom:6px;">Tarieven</div>
+                        <p style="margin:0 0 6px 0;font-size:12px;color:${gray700};font-weight:600;">${offers.grootzakelijk.minVerbruik}</p>
+                        <div>${pricingTable(offers.grootzakelijk, true)}</div>
+                      </div>
+                    </td>
+                    <td width="54%" valign="top" style="padding-left:6px;">
+                      <div style="background:${purpleLight};border-radius:12px;padding:14px 14px;border:1px solid ${gray200};">
+                        ${offers.grootzakelijk.extraInfo ? `<p style="margin:0 0 6px 0;font-size:12px;color:${gray600};line-height:1.6;">${offers.grootzakelijk.extraInfo}</p>` : ''}
+                        <p style="margin:0;font-size:12px;color:${gray600};line-height:1.7;">${offers.grootzakelijk.details}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td valign="middle" style="padding-right:10px;">
+                      <img src="${grootzakelijkImageUrl}" alt="Grootzakelijk energieaanbod" style="display:block;width:100%;max-height:120px;height:auto;border-radius:12px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,0.12);">
+                    </td>
+                    <td valign="middle" style="padding-left:4px;">
+                      <p style="margin:0;font-size:11px;color:${gray600};line-height:1.6;">
+                        Voor grotere verbruikers met behoefte aan strategische inkoop, langjarige zekerheid en professionele begeleiding.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <div style="text-align:center;">
+                  ${button('Plan een grootzakelijk gesprek', offers.grootzakelijk.link, `background-color:${purple};color:${white};padding:14px 36px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 4px 16px rgba(124,58,237,0.45);`)}
+                </div>
+              </td>
+            </tr>
+          </table></td></tr>`,
+          offers.dynamisch && `<tr><td colspan="3" style="padding:0 8px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:${white};border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,0.12);overflow:hidden;border:1px solid ${gray200};">
+            <tr>
+              <td style="padding:0;">
+                <div style="background:linear-gradient(135deg,${purple} 0%,${teal} 55%,${tealDark} 100%);padding:24px 26px 22px 26px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="56" valign="middle" style="padding:0;">
+                        <table width="56" height="56" cellpadding="0" cellspacing="0" border="0" style="width:56px;height:56px;background:rgba(255,255,255,0.20);border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.18);">
+                          <tr>
+                            <td align="center" valign="middle" style="width:56px;height:56px;text-align:center;vertical-align:middle;padding:0;line-height:56px;font-size:0;">
+                              ${iconsWhite.lightningSlash}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td valign="middle" style="padding-left:18px;">
+                        <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;">Dynamisch</p>
+                        <h3 style="color:${white};font-size:22px;font-weight:700;margin:0;font-family:'Space Grotesk',Arial,sans-serif;">${offers.dynamisch.title}</h3>
+                      </td>
+                      <td align="right" valign="middle" style="padding-left:8px;">
+                        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.18);color:${white};font-size:11px;font-weight:600;">
+                          Ideaal met zonnepanelen
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 24px 24px 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+                  <tr>
+                    <td valign="top" style="padding-right:10px;">
+                      <p style="margin:0 0 10px 0;font-size:12px;color:${gray700};line-height:1.75;">${offers.dynamisch.description}</p>
+                      <p style="margin:0;font-size:11px;color:${gray600};line-height:1.7;">
+                        Perfect voor klanten met zonnepanelen, laadpaal of batterij die hun verbruik slim kunnen sturen op basis van uurtarieven.
+                      </p>
+                    </td>
+                    <td valign="top" style="padding-left:4px;">
+                      <img src="${dynamischImageUrl}" alt="Dynamische energietarieven" style="display:block;width:100%;max-height:120px;height:auto;border-radius:12px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,0.12);">
+                    </td>
+                  </tr>
+                </table>
+                <div style="text-align:center;">
+                  ${button('Bekijk dynamische tarieven', offers.dynamisch.link, `background-color:${teal};color:${white};padding:14px 36px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 4px 16px rgba(0,175,155,0.4);`)}
+                </div>
+              </td>
+            </tr>
+          </table></td></tr>`,
+        ].filter(Boolean).join('')}
+      </table>
+    </td></tr>
+    <tr><td style="padding:38px 30px 14px 30px;text-align:center;background:${white};border-top:1px solid ${gray200};">
+      <h2 style="color:${navy};font-size:22px;font-weight:700;margin:0 0 10px 0;">Vragen of persoonlijk advies?</h2>
+      <p style="color:${gray700};font-size:14px;margin:0 0 18px 0;line-height:1.7;">We helpen u graag met het kiezen van het beste pakket voor uw situatie.</p>
+      <div style="margin:10px 0;">
+        <a href="mailto:${contactEmail}" style="color:${teal};text-decoration:none;font-weight:600;font-size:15px;">${contactEmail}</a>
+      </div>
+      <div style="margin:4px 0 0 0;">
+        <a href="tel:${contactPhone.replace(/\s/g, '')}" style="color:${purple};text-decoration:none;font-weight:600;font-size:15px;">${contactPhone}</a>
+      </div>
+    </td></tr>
+    <tr><td style="background:${navy};padding:32px 28px;border-radius:0 0 16px 16px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center" style="text-align:center;">
+            <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="display:block;max-width:190px;width:100%;height:auto;margin:0 auto 18px auto;opacity:0.95;">
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="text-align:center;">
+            <p style="color:${white};font-size:13px;margin:0 0 10px 0;">${address}</p>
+          </td>
+        </tr>
+        ${unsubscribeUrl ? `<tr><td align="center" style="text-align:center;"><p style="margin:10px 0 0 0;"><a href="${unsubscribeUrl}" style="color:${white};text-decoration:underline;font-size:11px;">Uitschrijven | Unsubscribe</a></p></td></tr>` : ''}
+      </table>
+    </td></tr>
+  </table></td></tr></table></body></html>`
 
   return emailHTML
 }
