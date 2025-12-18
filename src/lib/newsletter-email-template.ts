@@ -219,7 +219,7 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
 
       <!-- Contact / CTA section with image stacked below text -->
       <tr>
-        <td style="padding:4px 32px 40px 32px;text-align:left;background:${white};">
+        <td style="padding:32px 32px 40px 32px;text-align:left;background:${white};">
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td style="padding:0 0 18px 0;">
