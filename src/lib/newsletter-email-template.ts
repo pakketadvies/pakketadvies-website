@@ -171,7 +171,7 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
       <tr>
         <td style="background:${white};padding:32px 32px 8px 32px;">
           <p style="color:${gray600};font-size:13px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;margin:0 0 12px 0;">
-            <span style="color:${purpleDark};">Persoonlijk bericht</span> van uw energiepartner
+            <span style="color:${navy};">Persoonlijk bericht</span> van uw energiepartner
           </p>
           <div style="color:${gray700};font-size:15px;line-height:1.8;background:${gray50};padding:22px 24px;border-radius:14px;border:1px solid ${gray200};">
             ${introText || defaultIntroText}
