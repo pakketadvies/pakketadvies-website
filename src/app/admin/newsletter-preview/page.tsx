@@ -76,7 +76,7 @@ export default function NewsletterPreviewPage() {
     unsubscribeUrl: `${baseUrl}/unsubscribe`,
   }), [baseUrl])
 
-  const emailHTML = useMemo(() => generateNewsletterEmail(emailData), [emailData])
+  const emailHTML = useMemo(() => generateNewsletterEmail(emailData, 5), [emailData])
 
   return (
     <AdminLayout>
@@ -86,11 +86,12 @@ export default function NewsletterPreviewPage() {
           <div>
             <h1 className="text-3xl font-bold text-brand-navy-500 mb-2">Newsletter Email Preview</h1>
             <p className="text-gray-600">
-              Dit is de huidige nieuwsbrief lay-out. De HTML code kan worden gekopieerd voor gebruik in email marketing tools.
+              Dit is de huidige nieuwsbrief-template (Variant 5: Bold Cards). De HTML code kan worden gekopieerd voor gebruik
+              in email marketing tools.
             </p>
           </div>
           <a
-            href={`/admin/newsletter-preview/html`}
+            href="/admin/newsletter-preview/html"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-teal-600 text-white rounded-lg hover:bg-brand-teal-700 transition-colors"
@@ -98,6 +99,15 @@ export default function NewsletterPreviewPage() {
             <Eye size={20} />
             Open in nieuw tabblad
           </a>
+        </div>
+
+        {/* Variant info (only Variant 5 is actief) */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-brand-navy-500 mb-2">Actieve variant</h2>
+          <p className="text-sm text-gray-600">
+            <strong>Variant 5 – Bold Cards:</strong> moderne kaart-layout met veel witruimte, schaduwen en kleurrijke accenten
+            in navy, teal en paars. Dit is de enige variant die momenteel gebruikt wordt.
+          </p>
         </div>
 
         {/* Actions */}
