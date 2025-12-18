@@ -219,7 +219,6 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td style="padding:0 0 18px 0;">
-                <p style="color:${purpleDark};font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;margin:0 0 10px 0;">Persoonlijk advies</p>
                 <h2 style="color:${navy};font-size:24px;font-weight:700;margin:0 0 12px 0;font-family:'Space Grotesk',Arial,sans-serif;">Liever even sparren met een specialist?</h2>
                 <p style="color:${gray700};font-size:14px;margin:0 0 18px 0;line-height:1.8;">
                   We helpen u graag met een vergelijking op maat, bijvoorbeeld bij meerdere locaties, zonnepanelen of complexe contracten.
