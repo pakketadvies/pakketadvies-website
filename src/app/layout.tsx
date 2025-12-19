@@ -5,6 +5,7 @@ import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
 import { PWARegistration } from "@/components/layout/PWARegistration";
 import { FacebookPixel } from "@/components/tracking/FacebookPixel";
+import { ModeProvider } from "@/context/ModeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -79,10 +80,12 @@ export default function RootLayout({
   return (
     <html lang="nl" className="overscroll-none">
       <body className={inter.className}>
-        <PWARegistration />
-        <LayoutWrapper>{children}</LayoutWrapper>
-        <InstallPrompt />
-        {facebookPixelId && <FacebookPixel pixelId={facebookPixelId} />}
+        <ModeProvider>
+          <PWARegistration />
+          <LayoutWrapper>{children}</LayoutWrapper>
+          <InstallPrompt />
+          {facebookPixelId && <FacebookPixel pixelId={facebookPixelId} />}
+        </ModeProvider>
       </body>
     </html>
   );

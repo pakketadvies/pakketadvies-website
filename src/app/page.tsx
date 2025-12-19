@@ -8,6 +8,7 @@ import { Testimonials } from '@/components/sections/Testimonials'
 import { CTA } from '@/components/sections/CTA'
 import { OrganizationSchema } from '@/components/seo/StructuredData'
 import { getBestDeals } from '@/lib/get-best-deals'
+import { HomepageContent } from '@/components/HomepageContent'
 
 export const metadata: Metadata = {
   title: 'PakketAdvies - Het beste energiecontract voor uw bedrijf',
@@ -69,13 +70,7 @@ export default async function HomePage() {
         }}
       />
       <OrganizationSchema />
-      <Hero initialBestDeals={bestDealsData} />
-      <ContractTypes />
-      <Sectors />
-      <Features />
-      <HowItWorks />
-      <Testimonials />
-      <CTA />
+      <HomepageContent initialBestDeals={bestDealsData} />
     </>
   )
 }

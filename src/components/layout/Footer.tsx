@@ -3,9 +3,35 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Envelope, Phone, MapPin, LinkedinLogo, InstagramLogo } from '@phosphor-icons/react'
+import { useMode } from '@/context/ModeContext'
 
-export function Footer() {
+function FooterContent() {
   const currentYear = new Date().getFullYear()
+  const { mode } = useMode()
+
+  // Navigation links per mode
+  const zakelijkNavLinks = [
+    { href: '/diensten', label: 'Diensten' },
+    { href: '/calculator', label: 'Bereken besparing' },
+    { href: '/kennisbank', label: 'Kennisbank' },
+    { href: '/over-ons', label: 'Over ons' },
+    { href: '/contact', label: 'Contact' },
+  ]
+
+  const particulierNavLinks = [
+    { href: '/particulier/vergelijken', label: 'Energie vergelijken' },
+    { href: '/particulier/overstappen', label: 'Overstappen' },
+    { href: '/particulier/energieprijzen', label: 'Energieprijzen' },
+    { href: '/particulier/bespaartips', label: 'Bespaartips' },
+    { href: '/over-ons', label: 'Over ons' },
+    { href: '/contact', label: 'Contact' },
+  ]
+
+  const navLinks = mode === 'particulier' ? particulierNavLinks : zakelijkNavLinks
+
+  const description = mode === 'particulier' 
+    ? 'Vergelijk energieleveranciers en bespaar tot €500 per jaar. Gratis, onafhankelijk en volledig vrijblijvend.'
+    : 'Specialist in zakelijke energiecontracten. Wij bemiddelen het beste contract voor jouw bedrijf.'
 
   return (
     <footer className="bg-brand-navy-500 text-white">
@@ -26,7 +52,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-gray-300 leading-relaxed">
-              Specialist in zakelijke energiecontracten. Wij bemiddelen het beste contract voor jouw bedrijf.
+              {description}
             </p>
             <div className="flex gap-3">
               <a
@@ -52,36 +78,14 @@ export function Footer() {
           <div>
             <h3 className="font-display text-lg font-bold mb-6">Navigatie</h3>
             <ul className="space-y-3">
-              <li>
-                <Link href="/diensten" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
-                  Diensten
-                </Link>
-              </li>
-              <li>
-                <Link href="/calculator" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
-                  Bereken besparing
-                </Link>
-              </li>
-              <li>
-                <Link href="/kennisbank" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
-                  Kennisbank
-                </Link>
-              </li>
-              <li>
-                <Link href="/over-ons" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
-                  Over ons
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
-                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
-                  Contact
-                </Link>
-              </li>
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
+                    <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -151,4 +155,8 @@ export function Footer() {
       </div>
     </footer>
   )
+}
+
+export function Footer() {
+  return <FooterContent />
 }

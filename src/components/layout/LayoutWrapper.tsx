@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
 
@@ -57,7 +57,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
   
   // Regular routes: include header and footer
-  // ModeProvider is now handled inside Header/ModeSwitch components
   return (
     <>
       <Header />

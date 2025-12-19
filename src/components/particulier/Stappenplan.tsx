@@ -1,44 +1,44 @@
 'use client'
 
-import { MagnifyingGlass, CheckCircle, ArrowsClockwise, HandCoins } from '@phosphor-icons/react'
+import { FileText, CheckCircle, Handshake, Clock } from '@phosphor-icons/react'
 
 const stappen = [
   {
     nummer: '1',
     titel: 'Vergelijk',
-    beschrijving: 'Vul je postcode en verbruik in. We vergelijken direct alle beschikbare energieleveranciers voor jou.',
-    icon: MagnifyingGlass,
+    beschrijving: 'Vul je postcode en verbruik in en vergelijk alle beschikbare energieleveranciers.',
+    icon: FileText,
   },
   {
     nummer: '2',
-    titel: 'Kies',
-    beschrijving: 'Selecteer de beste deal die bij jou past. We geven je persoonlijk advies op maat.',
+    titel: 'Kies je contract',
+    beschrijving: 'Selecteer het energiecontract dat het beste bij jou past. We helpen je met advies.',
     icon: CheckCircle,
   },
   {
     nummer: '3',
-    titel: 'Wij regelen',
-    beschrijving: 'Wij regelen het opzeggen van je oude contract en het aanmelden bij de nieuwe leverancier.',
-    icon: ArrowsClockwise,
+    titel: 'Wij regelen overstap',
+    beschrijving: 'We regelen alles voor je: opzeggen, aanmelden en activeren. Binnen 2 weken ben je overgestapt.',
+    icon: Handshake,
   },
   {
     nummer: '4',
-    titel: 'Bespaar',
-    beschrijving: 'Binnen 2 weken ben je overgestapt en bespaar je direct op je energiekosten.',
-    icon: HandCoins,
+    titel: 'Geniet van lagere kosten',
+    beschrijving: 'Vanaf de ingangsdatum profiteer je direct van lagere energiekosten.',
+    icon: Clock,
   },
 ]
 
-export function OverstappenStappenplan() {
+export function Stappenplan() {
   return (
     <section className="py-16 md:py-24 bg-gray-50">
       <div className="container-custom max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
-            Zo werkt overstappen
+            Hoe werkt het?
           </h2>
           <p className="text-lg text-gray-600">
-            In 4 simpele stappen naar een betere energieleverancier
+            In 4 simpele stappen naar een nieuwe energieleverancier
           </p>
         </div>
 

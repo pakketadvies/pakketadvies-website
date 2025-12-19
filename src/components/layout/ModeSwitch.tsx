@@ -1,78 +1,50 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useMode } from '@/context/ModeContext'
 import { usePathname, useRouter } from 'next/navigation'
-import { cn } from '@/lib/utils'
 
-interface ModeSwitchProps {
-  compact?: boolean
-}
-
-export function ModeSwitch({ compact = false }: ModeSwitchProps) {
-  const [mode, setModeState] = useState<'zakelijk' | 'particulier'>('zakelijk')
-  const [mounted, setMounted] = useState(false)
-  const pathname = usePathname()
+export function ModeSwitch() {
+  const { mode, setMode } = useMode()
   const router = useRouter()
+  const pathname = usePathname()
 
-  useEffect(() => {
-    setMounted(true)
-    // Always sync with pathname first
-    if (pathname?.startsWith('/particulier')) {
-      setModeState('particulier')
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('pakketadvies-mode', 'particulier')
-      }
-    } else {
-      setModeState('zakelijk')
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('pakketadvies-mode', 'zakelijk')
-      }
-    }
-  }, [pathname])
-
-  const setMode = (newMode: 'zakelijk' | 'particulier') => {
-    setModeState(newMode)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pakketadvies-mode', newMode)
-    }
+  const handleModeChange = (newMode: 'zakelijk' | 'particulier') => {
+    setMode(newMode)
     
-    // Navigate immediately
+    // Navigate appropriately based on mode
     if (newMode === 'particulier') {
-      router.push('/particulier')
+      // If already on particulier route, stay there
+      if (!pathname?.startsWith('/particulier')) {
+        router.push('/particulier/vergelijken')
+      }
     } else {
-      router.push('/')
+      // If on particulier route, go to homepage
+      if (pathname?.startsWith('/particulier')) {
+        router.push('/')
+      }
     }
   }
 
   return (
-    <div className={cn(
-      'flex items-center rounded-lg bg-gray-100 p-0.5',
-      compact ? 'gap-0' : 'gap-0'
-    )}>
+    <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
       <button
-        onClick={() => setMode('zakelijk')}
-        className={cn(
-          'rounded-md font-medium transition-all duration-200 text-xs',
+        onClick={() => handleModeChange('zakelijk')}
+        className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
           mode === 'zakelijk'
-            ? 'bg-brand-teal-500 text-white'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200',
-          compact ? 'px-2 py-1' : 'px-2.5 py-1.5'
-        )}
-        aria-label="Zakelijk"
+            ? 'bg-brand-teal-500 text-white shadow-md'
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
+        }`}
         aria-pressed={mode === 'zakelijk'}
       >
         Zakelijk
       </button>
       <button
-        onClick={() => setMode('particulier')}
-        className={cn(
-          'rounded-md font-medium transition-all duration-200 text-xs',
+        onClick={() => handleModeChange('particulier')}
+        className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
           mode === 'particulier'
-            ? 'bg-brand-teal-500 text-white'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200',
-          compact ? 'px-2 py-1' : 'px-2.5 py-1.5'
-        )}
-        aria-label="Particulier"
+            ? 'bg-brand-teal-500 text-white shadow-md'
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
+        }`}
         aria-pressed={mode === 'particulier'}
       >
         Particulier
