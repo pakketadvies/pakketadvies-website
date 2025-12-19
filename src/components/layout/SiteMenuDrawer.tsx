@@ -154,9 +154,6 @@ export function SiteMenuDrawer({
                 Particulier
               </button>
             </div>
-            <p className="mt-2 text-xs text-gray-500 px-1">
-              Switch de hele website inclusief menu en content.
-            </p>
           </div>
         </div>
 
