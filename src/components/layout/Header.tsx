@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { List, X } from '@phosphor-icons/react'
+import { SiteMenuDrawer } from './SiteMenuDrawer'
 
 type Audience = 'business' | 'consumer'
 const AUDIENCE_COOKIE = 'pa_audience'
@@ -65,6 +66,10 @@ export function Header() {
 
   const navLinks = audience === 'consumer' ? consumerNavLinks : businessNavLinks
   const homeHref = audience === 'consumer' ? '/particulier' : '/'
+  const primaryCta =
+    audience === 'consumer'
+      ? { href: '/particulier/energie-vergelijken', label: 'Vergelijk nu' }
+      : { href: '/calculator', label: 'Bereken besparing' }
 
   const handleSwitch = (next: Audience) => {
     if (next === audience) return
@@ -84,7 +89,7 @@ export function Header() {
             ? 'shadow-xl' 
             : 'shadow-sm'
         }`}>
-          <div className="flex items-center justify-between px-6 py-3">
+          <div className="flex items-center justify-between px-6 py-3 gap-3">
             {/* Logo */}
             <Link 
               href={homeHref}
@@ -101,41 +106,21 @@ export function Header() {
               />
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="px-4 py-2 rounded-xl text-gray-700 hover:text-brand-teal-600 hover:bg-brand-teal-50 transition-all duration-200 font-medium"
-                >
-                  {link.label}
-                </Link>
-              ))}
-
-              {/* Audience switch as menu item (option 2) */}
-              <button
-                type="button"
-                onClick={() => handleSwitch(audience === 'consumer' ? 'business' : 'consumer')}
-                className="px-4 py-2 rounded-xl text-gray-700 hover:text-brand-teal-600 hover:bg-brand-teal-50 transition-all duration-200 font-semibold"
-              >
-                {audience === 'consumer' ? 'Zakelijk' : 'Particulier'}
-              </button>
-            </div>
-
             {/* CTA Button */}
-            <div className="hidden lg:flex items-center gap-3">
-              <Link href={audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'}>
-                <button className="px-6 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-[1.02] hover:bg-brand-teal-600 transition-all duration-300 whitespace-nowrap">
-                  {audience === 'consumer' ? 'Vergelijk nu' : 'Bereken besparing'}
+            <div className="flex items-center gap-3">
+              {/* CTA: keep clean, always one line */}
+              <Link href={primaryCta.href} className="hidden sm:block">
+                <button className="px-5 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-[1.02] hover:bg-brand-teal-600 transition-all duration-300 whitespace-nowrap">
+                  <span className="hidden md:inline">{primaryCta.label}</span>
+                  <span className="md:hidden">{audience === 'consumer' ? 'Vergelijk' : 'Bereken'}</span>
                 </button>
               </Link>
-            </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              aria-label="Open menu"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6 text-gray-700" />
@@ -145,39 +130,15 @@ export function Header() {
             </button>
           </div>
 
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="lg:hidden border-t border-gray-200 px-6 py-4 space-y-2 animate-slide-down">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="block px-4 py-3 rounded-xl text-gray-700 hover:text-brand-teal-600 hover:bg-brand-teal-50 transition-all duration-200 font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-
-              {/* Audience switch as menu item (mobile) */}
-              <button
-                type="button"
-                onClick={() => handleSwitch(audience === 'consumer' ? 'business' : 'consumer')}
-                className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:text-brand-teal-600 hover:bg-brand-teal-50 transition-all duration-200 font-semibold"
-              >
-                {audience === 'consumer' ? 'Zakelijk' : 'Particulier'}
-              </button>
-
-              <Link
-                href={audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <button className="w-full px-6 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg">
-                  {audience === 'consumer' ? 'Vergelijk nu' : 'Bereken besparing'}
-                </button>
-              </Link>
-            </div>
-          )}
+          {/* Drawer menu for desktop + mobile */}
+          <SiteMenuDrawer
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+            audience={audience}
+            onSwitchAudience={handleSwitch}
+            navLinks={navLinks}
+            primaryCta={primaryCta}
+          />
         </nav>
       </div>
     </header>
