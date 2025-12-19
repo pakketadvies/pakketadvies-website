@@ -2,36 +2,27 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Envelope, Phone, MapPin, LinkedinLogo, InstagramLogo } from '@phosphor-icons/react'
-import { useMode } from '@/context/ModeContext'
 
-function FooterContent() {
+export function Footer() {
   const currentYear = new Date().getFullYear()
-  const { mode } = useMode()
+  const pathname = usePathname()
+  const [audience, setAudience] = useState<'business' | 'consumer'>('business')
 
-  // Navigation links per mode
-  const zakelijkNavLinks = [
-    { href: '/diensten', label: 'Diensten' },
-    { href: '/calculator', label: 'Bereken besparing' },
-    { href: '/kennisbank', label: 'Kennisbank' },
-    { href: '/over-ons', label: 'Over ons' },
-    { href: '/contact', label: 'Contact' },
-  ]
+  useEffect(() => {
+    // Prefer cookie (global switch), fallback to path
+    const match = typeof document !== 'undefined' ? document.cookie.match(/(?:^|; )pa_audience=([^;]*)/) : null
+    const fromCookie = match ? decodeURIComponent(match[1]) : undefined
+    if (fromCookie === 'consumer' || fromCookie === 'business') {
+      setAudience(fromCookie)
+      return
+    }
+    if (pathname?.startsWith('/particulier')) setAudience('consumer')
+  }, [pathname])
 
-  const particulierNavLinks = [
-    { href: '/particulier/vergelijken', label: 'Energie vergelijken' },
-    { href: '/particulier/overstappen', label: 'Overstappen' },
-    { href: '/particulier/energieprijzen', label: 'Energieprijzen' },
-    { href: '/particulier/bespaartips', label: 'Bespaartips' },
-    { href: '/over-ons', label: 'Over ons' },
-    { href: '/contact', label: 'Contact' },
-  ]
-
-  const navLinks = mode === 'particulier' ? particulierNavLinks : zakelijkNavLinks
-
-  const description = mode === 'particulier' 
-    ? 'Vergelijk energieleveranciers en bespaar tot €500 per jaar. Gratis, onafhankelijk en volledig vrijblijvend.'
-    : 'Specialist in zakelijke energiecontracten. Wij bemiddelen het beste contract voor jouw bedrijf.'
+  const isConsumer = audience === 'consumer'
 
   return (
     <footer className="bg-brand-navy-500 text-white">
@@ -52,7 +43,9 @@ function FooterContent() {
               </div>
             </Link>
             <p className="text-gray-300 leading-relaxed">
-              {description}
+              {isConsumer
+                ? 'Vergelijk energiecontracten voor thuis. Helder advies over vast, variabel en dynamisch — inclusief zonnepanelen.'
+                : 'Specialist in zakelijke energiecontracten. Wij bemiddelen het beste contract voor jouw bedrijf.'}
             </p>
             <div className="flex gap-3">
               <a
@@ -78,14 +71,45 @@ function FooterContent() {
           <div>
             <h3 className="font-display text-lg font-bold mb-6">Navigatie</h3>
             <ul className="space-y-3">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
-                    <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href={isConsumer ? '/particulier/energie-vergelijken' : '/diensten'}
+                  className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group"
+                >
+                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  {isConsumer ? 'Energie vergelijken' : 'Diensten'}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={isConsumer ? '/particulier' : '/calculator'}
+                  className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group"
+                >
+                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  {isConsumer ? 'Particulier home' : 'Bereken besparing'}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={isConsumer ? '/particulier/kennisbank' : '/kennisbank'}
+                  className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group"
+                >
+                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  Kennisbank
+                </Link>
+              </li>
+              <li>
+                <Link href="/over-ons" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  Over ons
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-brand-teal-500 transition-colors inline-flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full group-hover:w-2 group-hover:h-2 transition-all" />
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -93,12 +117,24 @@ function FooterContent() {
           <div>
             <h3 className="font-display text-lg font-bold mb-6">Diensten</h3>
             <ul className="space-y-3">
-              <li className="text-gray-300">Energiecontract advies</li>
-              <li className="text-gray-300">Contractvergelijking</li>
-              <li className="text-gray-300">Overstapservice</li>
-              <li className="text-gray-300">Contractbeheer</li>
-              <li className="text-gray-300">Groene energie</li>
-              <li className="text-gray-300">Batterijoplossingen</li>
+              {isConsumer ? (
+                <>
+                  <li className="text-gray-300">Energie vergelijken</li>
+                  <li className="text-gray-300">Vast / variabel / dynamisch</li>
+                  <li className="text-gray-300">Zonnepanelen & teruglevering</li>
+                  <li className="text-gray-300">Verhuizen</li>
+                  <li className="text-gray-300">Uitleg & FAQ</li>
+                </>
+              ) : (
+                <>
+                  <li className="text-gray-300">Energiecontract advies</li>
+                  <li className="text-gray-300">Contractvergelijking</li>
+                  <li className="text-gray-300">Overstapservice</li>
+                  <li className="text-gray-300">Contractbeheer</li>
+                  <li className="text-gray-300">Groene energie</li>
+                  <li className="text-gray-300">Batterijoplossingen</li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -155,8 +191,4 @@ function FooterContent() {
       </div>
     </footer>
   )
-}
-
-export function Footer() {
-  return <FooterContent />
 }
