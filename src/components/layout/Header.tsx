@@ -129,6 +129,7 @@ export function Header() {
               )}
             </button>
           </div>
+          </div>
 
           {/* Drawer menu for desktop + mobile */}
           <SiteMenuDrawer
