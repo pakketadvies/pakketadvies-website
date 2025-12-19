@@ -109,7 +109,16 @@ const verbruikSchema = z.object({
   path: ['gasJaar'],
 })
 
-export function QuickCalculator() {
+type QuickCalculatorProps = {
+  /**
+   * Where to send the user after submit.
+   * - Business default: `/calculator/resultaten`
+   * - Consumer flow: `/particulier/energie-vergelijken/resultaten`
+   */
+  resultsPath?: string
+}
+
+export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: QuickCalculatorProps) {
   const router = useRouter()
   const { setVerbruik, verbruik, setAddressType } = useCalculatorStore()
   
@@ -696,8 +705,8 @@ export function QuickCalculator() {
       // Store in Zustand (same as VerbruikForm)
       setVerbruik(verbruikData)
       
-      // Navigate to results (same as VerbruikForm)
-      router.push('/calculator/resultaten')
+      // Navigate to results (business or consumer flow)
+      router.push(resultsPath)
     },
     (errors) => {
       // On validation error, scroll to first error field

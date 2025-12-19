@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { QuickCalculator } from '@/components/calculator/QuickCalculator'
+import { WaveDivider } from '@/components/ui/WaveDivider'
 
 export const metadata: Metadata = {
   title: 'Energie vergelijken',
@@ -10,36 +12,53 @@ export const metadata: Metadata = {
 
 export default function EnergieVergelijkenPage() {
   return (
-    <div className="bg-gray-50 min-h-screen pt-28 pb-14 md:pt-32">
-      <div className="container-custom">
-        <div className="bg-white border border-gray-200 rounded-3xl p-8 md:p-10 shadow-sm">
-          <p className="text-brand-teal-600 font-semibold">Energie vergelijken</p>
-          <h1 className="mt-3 font-display text-3xl md:text-4xl font-bold text-brand-navy-600">
-            Vergelijk vaste, variabele en dynamische contracten
-          </h1>
-          <p className="mt-4 text-gray-600 leading-relaxed max-w-2xl">
-            Vergelijk contracten op een manier die je snapt. We focussen niet alleen op “prijs”, maar ook op vaste kosten, looptijd,
-            voorwaarden en (bij zonnepanelen) teruglevering.
-          </p>
+    <div className="bg-white">
+      {/* Header / Hero */}
+      <section className="relative pt-28 pb-12 md:pt-32 md:pb-16 bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 overflow-hidden">
+        <div className="container-custom relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            <div>
+              <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold">
+                Energie vergelijken
+              </p>
+              <h1 className="mt-5 font-display text-4xl md:text-5xl font-bold text-white leading-tight">
+                Vergelijk energiecontracten voor thuis
+              </h1>
+              <p className="mt-4 text-white/85 text-lg leading-relaxed max-w-xl">
+                Vergelijk contracten op een manier die je snapt. We focussen niet alleen op prijs, maar ook op vaste kosten, looptijd,
+                voorwaarden en (bij zonnepanelen) teruglevering.
+              </p>
 
-          <div className="mt-7 flex flex-col sm:flex-row gap-3">
-            <Link
-              href="/calculator"
-              className="inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-teal-500/25 hover:bg-brand-teal-600 transition-all"
-            >
-              Start met vergelijken
-            </Link>
-            <Link
-              href="/particulier/dynamisch"
-              className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-600 rounded-xl font-semibold border border-gray-200 hover:border-brand-teal-300 hover:bg-brand-teal-50 transition-all"
-            >
-              Keuzehulp: dynamisch
-            </Link>
+              <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="#vergelijken"
+                  className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
+                  Start met vergelijken
+                </Link>
+                <Link
+                  href="/particulier/dynamisch"
+                  className="inline-flex justify-center items-center px-6 py-3 bg-white/10 text-white rounded-xl font-semibold border border-white/20 hover:bg-white/15 transition-all"
+                >
+                  Keuzehulp: dynamisch
+                </Link>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div id="vergelijken" className="scroll-mt-28">
+              <QuickCalculator resultsPath="/particulier/energie-vergelijken/resultaten" />
+            </div>
           </div>
         </div>
 
+        <WaveDivider />
+      </section>
+
+      <div className="container-custom py-12">
+
         {/* What you need / common questions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <h2 className="font-display text-xl font-bold text-brand-navy-600">Wat heb je nodig?</h2>
             <ul className="mt-3 space-y-2 text-gray-600 text-sm leading-relaxed">
@@ -148,7 +167,7 @@ export default function EnergieVergelijkenPage() {
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Link
-                href="/calculator"
+                href="#vergelijken"
                 className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
               >
                 Vergelijk nu

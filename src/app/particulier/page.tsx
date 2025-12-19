@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { WaveDivider } from '@/components/ui/WaveDivider'
 
 export const metadata: Metadata = {
   title: 'Energie vergelijken voor thuis',
@@ -11,7 +12,7 @@ export default function ParticulierHomePage() {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="pt-28 pb-12 md:pt-32 md:pb-16 bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600">
+      <section className="relative pt-28 pb-12 md:pt-32 md:pb-16 bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 overflow-hidden">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
@@ -93,6 +94,8 @@ export default function ParticulierHomePage() {
             </div>
           </div>
         </div>
+
+        <WaveDivider />
       </section>
 
       {/* Choice helper */}
