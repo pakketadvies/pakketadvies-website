@@ -84,35 +84,6 @@ export function Header() {
             ? 'shadow-xl' 
             : 'shadow-sm'
         }`}>
-          {/* Desktop topbar: audience switch (Optie 1) */}
-          <div className="hidden lg:flex items-center justify-end gap-3 px-6 py-2 border-b border-gray-200">
-            <span className="text-xs font-semibold text-gray-500">Website modus:</span>
-            <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-sm">
-              <button
-                type="button"
-                onClick={() => handleSwitch('business')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  audience === 'business'
-                    ? 'bg-brand-navy-500 text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Zakelijk
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitch('consumer')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  audience === 'consumer'
-                    ? 'bg-brand-navy-500 text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Particulier
-              </button>
-            </div>
-          </div>
-
           <div className="flex items-center justify-between px-6 py-3">
             {/* Logo */}
             <Link 
@@ -141,6 +112,15 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Audience switch as menu item (option 2) */}
+              <button
+                type="button"
+                onClick={() => handleSwitch(audience === 'consumer' ? 'business' : 'consumer')}
+                className="px-4 py-2 rounded-xl text-gray-700 hover:text-brand-teal-600 hover:bg-brand-teal-50 transition-all duration-200 font-semibold"
+              >
+                {audience === 'consumer' ? 'Zakelijk' : 'Particulier'}
+              </button>
             </div>
 
             {/* CTA Button */}
@@ -168,32 +148,6 @@ export function Header() {
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
             <div className="lg:hidden border-t border-gray-200 px-6 py-4 space-y-2 animate-slide-down">
-              {/* Audience Switch (mobile) */}
-              <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 mb-2 shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => handleSwitch('business')}
-                  className={`flex-1 px-3 py-2 rounded-full text-sm font-semibold transition-all ${
-                    audience === 'business'
-                      ? 'bg-brand-navy-500 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Zakelijk
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSwitch('consumer')}
-                  className={`flex-1 px-3 py-2 rounded-full text-sm font-semibold transition-all ${
-                    audience === 'consumer'
-                      ? 'bg-brand-navy-500 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Particulier
-                </button>
-              </div>
-
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -204,6 +158,16 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Audience switch as menu item (mobile) */}
+              <button
+                type="button"
+                onClick={() => handleSwitch(audience === 'consumer' ? 'business' : 'consumer')}
+                className="w-full text-left px-4 py-3 rounded-xl text-gray-700 hover:text-brand-teal-600 hover:bg-brand-teal-50 transition-all duration-200 font-semibold"
+              >
+                {audience === 'consumer' ? 'Zakelijk' : 'Particulier'}
+              </button>
+
               <Link
                 href={audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'}
                 onClick={() => setIsMobileMenuOpen(false)}
