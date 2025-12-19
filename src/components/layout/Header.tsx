@@ -84,11 +84,40 @@ export function Header() {
             ? 'shadow-xl' 
             : 'shadow-sm'
         }`}>
+          {/* Desktop topbar: audience switch (Optie 1) */}
+          <div className="hidden lg:flex items-center justify-end gap-3 px-6 py-2 border-b border-gray-200">
+            <span className="text-xs font-semibold text-gray-500">Website modus:</span>
+            <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleSwitch('business')}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  audience === 'business'
+                    ? 'bg-brand-navy-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Zakelijk
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSwitch('consumer')}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  audience === 'consumer'
+                    ? 'bg-brand-navy-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Particulier
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between px-6 py-3">
             {/* Logo */}
             <Link 
               href={homeHref}
-              className="group transition-transform duration-300 hover:scale-105"
+              className="group transition-transform duration-300 hover:scale-105 flex-shrink-0"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Image
@@ -116,34 +145,8 @@ export function Header() {
 
             {/* CTA Button */}
             <div className="hidden lg:flex items-center gap-3">
-              {/* Audience Switch */}
-              <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => handleSwitch('business')}
-                  className={`px-3 py-2 rounded-full text-sm font-semibold transition-all ${
-                    audience === 'business'
-                      ? 'bg-brand-navy-500 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Zakelijk
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSwitch('consumer')}
-                  className={`px-3 py-2 rounded-full text-sm font-semibold transition-all ${
-                    audience === 'consumer'
-                      ? 'bg-brand-navy-500 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Particulier
-                </button>
-              </div>
-
               <Link href={audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'}>
-                <button className="px-6 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-[1.02] hover:bg-brand-teal-600 transition-all duration-300">
+                <button className="px-6 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-[1.02] hover:bg-brand-teal-600 transition-all duration-300 whitespace-nowrap">
                   {audience === 'consumer' ? 'Vergelijk nu' : 'Bereken besparing'}
                 </button>
               </Link>
