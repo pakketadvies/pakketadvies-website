@@ -16,13 +16,16 @@ export function ModeSwitch({ compact = false }: ModeSwitchProps) {
 
   useEffect(() => {
     setMounted(true)
-    // Initialize from pathname or localStorage
+    // Always sync with pathname first
     if (pathname?.startsWith('/particulier')) {
       setModeState('particulier')
-    } else if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('pakketadvies-mode') as 'zakelijk' | 'particulier' | null
-      if (stored === 'particulier' || stored === 'zakelijk') {
-        setModeState(stored)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('pakketadvies-mode', 'particulier')
+      }
+    } else {
+      setModeState('zakelijk')
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('pakketadvies-mode', 'zakelijk')
       }
     }
   }, [pathname])
@@ -32,30 +35,28 @@ export function ModeSwitch({ compact = false }: ModeSwitchProps) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('pakketadvies-mode', newMode)
     }
+    
+    // Navigate immediately
     if (newMode === 'particulier') {
-      if (!pathname?.startsWith('/particulier')) {
-        router.push('/particulier')
-      }
+      router.push('/particulier')
     } else {
-      if (pathname?.startsWith('/particulier')) {
-        router.push('/')
-      }
+      router.push('/')
     }
   }
 
   return (
     <div className={cn(
-      'flex items-center rounded-xl bg-gray-100 p-1',
-      compact ? 'gap-0.5' : 'gap-1'
+      'flex items-center rounded-lg bg-gray-100 p-0.5',
+      compact ? 'gap-0' : 'gap-0'
     )}>
       <button
         onClick={() => setMode('zakelijk')}
         className={cn(
-          'rounded-lg font-semibold transition-all duration-200',
+          'rounded-md font-medium transition-all duration-200 text-xs',
           mode === 'zakelijk'
-            ? 'bg-brand-teal-500 text-white shadow-md'
-            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200',
-          compact ? 'px-2.5 py-1.5 text-xs' : 'px-4 py-2 text-sm'
+            ? 'bg-brand-teal-500 text-white'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200',
+          compact ? 'px-2 py-1' : 'px-2.5 py-1.5'
         )}
         aria-label="Zakelijk"
         aria-pressed={mode === 'zakelijk'}
@@ -65,11 +66,11 @@ export function ModeSwitch({ compact = false }: ModeSwitchProps) {
       <button
         onClick={() => setMode('particulier')}
         className={cn(
-          'rounded-lg font-semibold transition-all duration-200',
+          'rounded-md font-medium transition-all duration-200 text-xs',
           mode === 'particulier'
-            ? 'bg-brand-teal-500 text-white shadow-md'
-            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200',
-          compact ? 'px-2.5 py-1.5 text-xs' : 'px-4 py-2 text-sm'
+            ? 'bg-brand-teal-500 text-white'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200',
+          compact ? 'px-2 py-1' : 'px-2.5 py-1.5'
         )}
         aria-label="Particulier"
         aria-pressed={mode === 'particulier'}
