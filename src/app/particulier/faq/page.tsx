@@ -15,12 +15,48 @@ const faqs = [
     a: 'Dat kan, maar hangt af van je teruglevering, verbruikspatroon en (teruglever)voorwaarden. Wij helpen je dit helder te vergelijken.',
   },
   {
+    q: 'Waar moet ik op letten behalve het tarief per kWh?',
+    a: 'Kijk ook naar vaste kosten per maand, looptijd, voorwaarden en bij zonnepanelen naar teruglevering en eventuele kosten.',
+  },
+  {
+    q: 'Wat is een goede schatting van mijn verbruik?',
+    a: 'Je jaarafrekening is het meest precies. Heb je die niet? Dan kun je beginnen met een schatting; vergelijken blijft zinvol.',
+  },
+  {
     q: 'Kan ik overstappen als ik nog een contract heb?',
     a: 'Meestal wel, maar let op eventuele opzegboete. Bij vergelijken nemen we dit mee zodat je een goede keuze maakt.',
   },
   {
     q: 'Hoe snel kan ik overstappen?',
     a: 'Dat verschilt per leverancier en contract. Vaak kan overstappen binnen enkele weken; bij verhuizing kan het sneller of direct aansluiten.',
+  },
+  {
+    q: 'Moet ik zelf mijn oude contract opzeggen?',
+    a: 'In veel gevallen wordt dit voor je geregeld bij een overstap. Bij verhuizing werkt het soms anders; check dit vooraf.',
+  },
+  {
+    q: 'Wat betekenen vaste kosten?',
+    a: 'Dat zijn maandelijkse kosten los van je verbruik. Ze kunnen de totale kosten sterk beïnvloeden, zeker bij laag verbruik.',
+  },
+  {
+    q: 'Wat als ik geen gasaansluiting heb?',
+    a: 'Dan vergelijk je alleen stroom. Dit is juist een belangrijk verschil, omdat vaste kosten en voorwaarden dan anders kunnen uitpakken.',
+  },
+  {
+    q: 'Wat is het verschil tussen enkel- en dubbeltarief?',
+    a: 'Bij dubbeltarief heb je piek/dal (dag/nacht) tarieven. Bij enkel tarief is het één prijs. Welke beter is hangt af van je verbruikspatroon.',
+  },
+  {
+    q: 'Wanneer is vast beter dan dynamisch?',
+    a: 'Vast past vaak bij mensen die zekerheid willen. Dynamisch past bij wie kan sturen op uren en risico/variatie accepteert.',
+  },
+  {
+    q: 'Waar moet ik op letten bij teruglevering?',
+    a: 'Let op terugleververgoeding, mogelijke terugleverkosten en de voorwaarden. Niet alleen het kWh-tarief is belangrijk.',
+  },
+  {
+    q: 'Kan ik later wisselen van contracttype?',
+    a: 'Dat kan vaak, maar voorwaarden en eventuele opzegkosten zijn bepalend. Daarom vergelijken we altijd op het totaalplaatje.',
   },
   {
     q: 'Waar moet ik op letten bij terugleververgoeding en -kosten?',

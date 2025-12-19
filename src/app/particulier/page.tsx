@@ -46,7 +46,7 @@ export default function ParticulierHomePage() {
             <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 border border-white/30">
               <h2 className="font-display text-2xl font-bold text-brand-navy-600">Check je voordeel</h2>
               <p className="mt-2 text-gray-600">
-                Vul je gegevens in en start direct met vergelijken. (MVP: we sturen je door naar onze vergelijkpagina.)
+                Vul je gegevens in en start direct met vergelijken. Je ziet snel welk contracttype logisch is voor jouw situatie.
               </p>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -90,6 +90,107 @@ export default function ParticulierHomePage() {
                   .
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Choice helper */}
+      <section className="py-12 bg-white">
+        <div className="container-custom">
+          <div className="max-w-3xl">
+            <h2 className="font-display text-3xl font-bold text-brand-navy-600">Welke optie past bij jou?</h2>
+            <p className="mt-2 text-gray-600">
+              Je hoeft niet alles te weten over energie. Kies het contracttype dat bij jouw voorkeuren past — wij helpen je vergelijken.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-teal-600">Vast</p>
+              <h3 className="mt-2 font-display text-xl font-bold text-brand-navy-600">Rust & zekerheid</h3>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                Je wilt voorspelbare kosten. Handig als je geen verrassingen wil en je liever “klaar” bent.
+              </p>
+              <div className="mt-4 flex gap-3">
+                <Link className="text-brand-teal-600 font-semibold hover:underline" href="/particulier/vast">
+                  Lees meer →
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-teal-600">Variabel</p>
+              <h3 className="mt-2 font-display text-xl font-bold text-brand-navy-600">Flexibel</h3>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                Je vindt flexibiliteit belangrijk en kunt omgaan met tariefwijzigingen gedurende het jaar.
+              </p>
+              <div className="mt-4 flex gap-3">
+                <Link className="text-brand-teal-600 font-semibold hover:underline" href="/particulier/variabel">
+                  Lees meer →
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-teal-600">Dynamisch</p>
+              <h3 className="mt-2 font-display text-xl font-bold text-brand-navy-600">Slim sturen</h3>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                Je kunt verbruik verplaatsen (bijv. laden/was) en wil profiteren van daluren. Vaak relevant bij zonnepanelen.
+              </p>
+              <div className="mt-4 flex gap-3">
+                <Link className="text-brand-teal-600 font-semibold hover:underline" href="/particulier/dynamisch">
+                  Lees meer →
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/particulier/energie-vergelijken"
+              className="inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-teal-500/25 hover:bg-brand-teal-600 transition-all"
+            >
+              Start met vergelijken
+            </Link>
+            <Link
+              href="/particulier/faq"
+              className="inline-flex justify-center items-center px-6 py-3 bg-white border border-gray-200 text-brand-navy-600 rounded-xl font-semibold hover:bg-brand-teal-50 hover:border-brand-teal-200 transition-all"
+            >
+              Bekijk veelgestelde vragen
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Steps (Pricewise/Gaslicht style, but PakketAdvies tone) */}
+      <section className="py-12 bg-gray-50">
+        <div className="container-custom">
+          <div className="max-w-3xl">
+            <h2 className="font-display text-3xl font-bold text-brand-navy-600">In 3 stappen geregeld</h2>
+            <p className="mt-2 text-gray-600">
+              Vergelijken hoeft niet ingewikkeld te zijn. Dit is hoe de meeste mensen het aanpakken.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <p className="text-brand-teal-600 font-semibold">1. Vul je situatie in</p>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                Denk aan adres, verbruik (schatting is oké), en of je zonnepanelen hebt.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <p className="text-brand-teal-600 font-semibold">2. Vergelijk contracten</p>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                Let niet alleen op prijs, maar ook op looptijd, vaste kosten en voorwaarden (teruglevering).
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <p className="text-brand-teal-600 font-semibold">3. Kies met vertrouwen</p>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                Twijfel je? Dan helpen we met een korte check zodat je een keuze maakt die bij je past.
+              </p>
             </div>
           </div>
         </div>
@@ -179,6 +280,32 @@ export default function ParticulierHomePage() {
                 </p>
               </div>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="py-12 bg-white">
+        <div className="container-custom">
+          <div className="bg-gradient-to-br from-brand-navy-500 to-brand-teal-600 rounded-3xl p-8 md:p-10 text-white overflow-hidden">
+            <h2 className="font-display text-3xl font-bold">Klaar om te vergelijken?</h2>
+            <p className="mt-3 text-white/85 max-w-2xl">
+              Start met vergelijken en ontdek welk contracttype logisch is voor jouw situatie — vast, variabel of dynamisch.
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/particulier/energie-vergelijken"
+                className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                Vergelijk nu
+              </Link>
+              <Link
+                href="/particulier/klantenservice"
+                className="inline-flex justify-center items-center px-6 py-3 bg-white/10 text-white rounded-xl font-semibold border border-white/20 hover:bg-white/15 transition-all"
+              >
+                Hulp nodig?
+              </Link>
+            </div>
           </div>
         </div>
       </section>

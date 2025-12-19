@@ -18,8 +18,8 @@ export default function EnergieVergelijkenPage() {
             Vergelijk vaste, variabele en dynamische contracten
           </h1>
           <p className="mt-4 text-gray-600 leading-relaxed max-w-2xl">
-            Dit is de particuliere vergelijkomgeving (MVP). We starten met een overzichtelijke flow en breiden dit stapsgewijs uit.
-            Voor nu kun je meteen door naar de calculator en daar de vergelijking doen — terwijl je in “Particulier” mode blijft.
+            Vergelijk contracten op een manier die je snapt. We focussen niet alleen op “prijs”, maar ook op vaste kosten, looptijd,
+            voorwaarden en (bij zonnepanelen) teruglevering.
           </p>
 
           <div className="mt-7 flex flex-col sm:flex-row gap-3">
@@ -27,18 +27,40 @@ export default function EnergieVergelijkenPage() {
               href="/calculator"
               className="inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-teal-500/25 hover:bg-brand-teal-600 transition-all"
             >
-              Start vergelijking
+              Start met vergelijken
             </Link>
             <Link
               href="/particulier/dynamisch"
               className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-600 rounded-xl font-semibold border border-gray-200 hover:border-brand-teal-300 hover:bg-brand-teal-50 transition-all"
             >
-              Lees over dynamisch
+              Keuzehulp: dynamisch
             </Link>
           </div>
         </div>
 
+        {/* What you need / common questions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="font-display text-xl font-bold text-brand-navy-600">Wat heb je nodig?</h2>
+            <ul className="mt-3 space-y-2 text-gray-600 text-sm leading-relaxed">
+              <li>
+                <span className="font-semibold text-brand-navy-600">Adres</span> (postcode + huisnummer)
+              </li>
+              <li>
+                <span className="font-semibold text-brand-navy-600">Verbruik</span> (schatting is oké)
+              </li>
+              <li>
+                <span className="font-semibold text-brand-navy-600">Zonnepanelen?</span> Dan ook teruglevering meenemen
+              </li>
+              <li>
+                <span className="font-semibold text-brand-navy-600">Huidig contract</span> (optioneel, voor context)
+              </li>
+            </ul>
+            <p className="mt-3 text-xs text-gray-500">
+              Tip: je jaarafrekening is handig, maar niet verplicht.
+            </p>
+          </div>
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <h2 className="font-display text-xl font-bold text-brand-navy-600">In 3 stappen</h2>
             <ol className="mt-3 space-y-2 text-gray-600 text-sm leading-relaxed">
@@ -55,28 +77,89 @@ export default function EnergieVergelijkenPage() {
           </div>
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <h2 className="font-display text-xl font-bold text-brand-navy-600">Contracttypes</h2>
-            <div className="mt-3 space-y-2">
+            <h2 className="font-display text-xl font-bold text-brand-navy-600">Keuzehulp</h2>
+            <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+              Twijfel je tussen vast, variabel of dynamisch? Begin met dit simpele uitgangspunt:
+            </p>
+            <ul className="mt-3 space-y-2 text-gray-600 text-sm leading-relaxed">
+              <li>
+                <span className="font-semibold text-brand-navy-600">Vast</span>: je wilt zekerheid
+              </li>
+              <li>
+                <span className="font-semibold text-brand-navy-600">Variabel</span>: je wilt flexibiliteit
+              </li>
+              <li>
+                <span className="font-semibold text-brand-navy-600">Dynamisch</span>: je kunt verbruik sturen (vaak met zonnepanelen)
+              </li>
+            </ul>
+            <div className="mt-4 space-y-2">
               <Link className="block text-brand-teal-600 font-semibold hover:underline" href="/particulier/vast">
-                Vast: zekerheid
+                Lees: Vast contract →
               </Link>
               <Link className="block text-brand-teal-600 font-semibold hover:underline" href="/particulier/variabel">
-                Variabel: meebewegen
+                Lees: Variabel contract →
               </Link>
               <Link className="block text-brand-teal-600 font-semibold hover:underline" href="/particulier/dynamisch">
-                Dynamisch: uurtarieven (interessant met zonnepanelen)
+                Lees: Dynamisch contract →
               </Link>
             </div>
           </div>
+        </div>
 
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <h2 className="font-display text-xl font-bold text-brand-navy-600">Veelgestelde vragen</h2>
-            <p className="mt-3 text-gray-600 text-sm leading-relaxed">
-              We bouwen een dedicated FAQ voor particulier. Tot die tijd vind je alvast veel uitleg in onze kennisbank.
-            </p>
-            <Link className="mt-3 inline-flex text-brand-teal-600 font-semibold hover:underline" href="/particulier/faq">
-              Bekijk FAQ
+        {/* FAQ teaser */}
+        <div className="mt-8 bg-white border border-gray-200 rounded-3xl p-8 md:p-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="max-w-2xl">
+              <h2 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-600">Veelgestelde vragen</h2>
+              <p className="mt-2 text-gray-600 leading-relaxed">
+                Snel antwoord op de meest voorkomende vragen over contracttypes, overstappen en zonnepanelen.
+              </p>
+            </div>
+            <Link
+              href="/particulier/faq"
+              className="inline-flex justify-center items-center px-6 py-3 bg-white border border-gray-200 text-brand-navy-600 rounded-xl font-semibold hover:bg-brand-teal-50 hover:border-brand-teal-200 transition-all"
+            >
+              Naar FAQ
             </Link>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border border-gray-200 rounded-2xl p-5">
+              <p className="font-semibold text-brand-navy-600">Waar moet ik op letten behalve prijs?</p>
+              <p className="mt-2 text-gray-600 text-sm">
+                Let vooral op vaste kosten, looptijd, voorwaarden en bij zonnepanelen teruglevering.
+              </p>
+            </div>
+            <div className="border border-gray-200 rounded-2xl p-5">
+              <p className="font-semibold text-brand-navy-600">Kan ik overstappen als ik nog een contract heb?</p>
+              <p className="mt-2 text-gray-600 text-sm">
+                Vaak wel. Houd rekening met mogelijke opzegkosten; wij helpen je dit te checken.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-8">
+          <div className="bg-gradient-to-br from-brand-navy-500 to-brand-teal-600 rounded-3xl p-8 md:p-10 text-white">
+            <h2 className="font-display text-2xl md:text-3xl font-bold">Start je vergelijking</h2>
+            <p className="mt-3 text-white/85 max-w-2xl">
+              Begin met vergelijken en ontdek wat het beste past bij jouw situatie.
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/calculator"
+                className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                Vergelijk nu
+              </Link>
+              <Link
+                href="/particulier/klantenservice"
+                className="inline-flex justify-center items-center px-6 py-3 bg-white/10 text-white rounded-xl font-semibold border border-white/20 hover:bg-white/15 transition-all"
+              >
+                Hulp nodig?
+              </Link>
+            </div>
           </div>
         </div>
       </div>
