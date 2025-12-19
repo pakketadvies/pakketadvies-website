@@ -64,6 +64,7 @@ export function Header() {
   ]
 
   const navLinks = audience === 'consumer' ? consumerNavLinks : businessNavLinks
+  const homeHref = audience === 'consumer' ? '/particulier' : '/'
 
   const handleSwitch = (next: Audience) => {
     if (next === audience) return
@@ -86,7 +87,7 @@ export function Header() {
           <div className="flex items-center justify-between px-6 py-3">
             {/* Logo */}
             <Link 
-              href="/" 
+              href={homeHref}
               className="group transition-transform duration-300 hover:scale-105"
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -116,14 +117,14 @@ export function Header() {
             {/* CTA Button */}
             <div className="hidden lg:flex items-center gap-3">
               {/* Audience Switch */}
-              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl p-1">
+              <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-sm">
                 <button
                   type="button"
                   onClick={() => handleSwitch('business')}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  className={`px-3 py-2 rounded-full text-sm font-semibold transition-all ${
                     audience === 'business'
-                      ? 'bg-brand-teal-500 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-white'
+                      ? 'bg-brand-navy-500 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   Zakelijk
@@ -131,10 +132,10 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => handleSwitch('consumer')}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  className={`px-3 py-2 rounded-full text-sm font-semibold transition-all ${
                     audience === 'consumer'
-                      ? 'bg-brand-teal-500 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-white'
+                      ? 'bg-brand-navy-500 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   Particulier
@@ -142,7 +143,7 @@ export function Header() {
               </div>
 
               <Link href={audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'}>
-                <button className="px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-105 hover:bg-brand-teal-600 transition-all duration-300">
+                <button className="px-6 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg shadow-brand-teal-500/30 hover:shadow-xl hover:shadow-brand-teal-500/40 hover:scale-[1.02] hover:bg-brand-teal-600 transition-all duration-300">
                   {audience === 'consumer' ? 'Vergelijk nu' : 'Bereken besparing'}
                 </button>
               </Link>
@@ -165,14 +166,14 @@ export function Header() {
           {isMobileMenuOpen && (
             <div className="lg:hidden border-t border-gray-200 px-6 py-4 space-y-2 animate-slide-down">
               {/* Audience Switch (mobile) */}
-              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl p-1 mb-2">
+              <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 mb-2 shadow-sm">
                 <button
                   type="button"
                   onClick={() => handleSwitch('business')}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  className={`flex-1 px-3 py-2 rounded-full text-sm font-semibold transition-all ${
                     audience === 'business'
-                      ? 'bg-brand-teal-500 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-white'
+                      ? 'bg-brand-navy-500 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   Zakelijk
@@ -180,10 +181,10 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => handleSwitch('consumer')}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  className={`flex-1 px-3 py-2 rounded-full text-sm font-semibold transition-all ${
                     audience === 'consumer'
-                      ? 'bg-brand-teal-500 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-white'
+                      ? 'bg-brand-navy-500 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   Particulier
@@ -204,7 +205,7 @@ export function Header() {
                 href={audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <button className="w-full px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg">
+                <button className="w-full px-6 py-3 bg-brand-teal-500 text-white rounded-full font-semibold shadow-lg">
                   {audience === 'consumer' ? 'Vergelijk nu' : 'Bereken besparing'}
                 </button>
               </Link>
