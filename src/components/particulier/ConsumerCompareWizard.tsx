@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
@@ -28,7 +27,6 @@ const RESULTS_PATH = '/particulier/energie-vergelijken/resultaten'
 
 export function ConsumerCompareWizard() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { setVerbruik, verbruik } = useCalculatorStore()
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -71,9 +69,14 @@ export function ConsumerCompareWizard() {
 
   // Allow deep-linking back into the wizard after /api/idin/* redirects.
   useEffect(() => {
-    const spStep = searchParams?.get('step')
-    const spMethod = searchParams?.get('method')
-    const spIdin = searchParams?.get('idin')
+    // NOTE: We intentionally do NOT use next/navigation's useSearchParams here,
+    // because Next.js requires it to be wrapped in a Suspense boundary at the page level
+    // and it can break prerendering on Vercel. Using window.location keeps this fully client-only.
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const spStep = params.get('step')
+    const spMethod = params.get('method')
+    const spIdin = params.get('idin')
 
     if (spStep === '2') setStep(2)
     if (spMethod === 'netbeheerder' || spMethod === 'manual' || spMethod === 'estimate') setMethod(spMethod)
@@ -89,8 +92,8 @@ export function ConsumerCompareWizard() {
       setStep(2)
       setMethod('netbeheerder')
     }
-    // We intentionally run this on mount / param changes
-  }, [searchParams])
+    // Run on mount
+  }, [])
 
   const isValidPostcode = (pc: string) => /^\d{4}[A-Z]{2}$/.test(pc.toUpperCase().replace(/\s/g, ''))
   const cleanPostcode = (pc: string) => pc.toUpperCase().replace(/\s/g, '')
