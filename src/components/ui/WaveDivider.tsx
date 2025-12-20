@@ -31,11 +31,11 @@ export function WaveDivider({ variant = 'hero' }: { variant?: WaveDividerVariant
           preserveAspectRatio="none"
         >
           {/* Main white background (lower crest) */}
-          <path d="M0,72 Q360,52 720,72 T1440,72 L1440,120 L0,120 Z" fill="white" />
+          <path d="M0,98 Q360,90 720,98 T1440,98 L1440,120 L0,120 Z" fill="white" />
 
           {/* Subtle teal accent line */}
           <path
-            d="M0,72 Q360,52 720,72 T1440,72"
+            d="M0,98 Q360,90 720,98 T1440,98"
             stroke="url(#energyGradientLow)"
             strokeWidth="2"
             fill="none"

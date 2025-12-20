@@ -87,7 +87,7 @@ export function Hero({ initialBestDeals }: HeroProps = {} as HeroProps) {
         </div>
       </div>
 
-      <WaveDivider />
+      <WaveDivider variant="heroLow" />
     </section>
   )
 }

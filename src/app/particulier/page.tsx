@@ -13,7 +13,7 @@ export default function ParticulierHomePage() {
     <div className="bg-white">
       {/* Hero */}
       <section className="relative pt-28 pb-12 md:pt-32 md:pb-16 bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 overflow-hidden">
-        <div className="container-custom">
+        <div className="container-custom relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
               <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold">
@@ -95,7 +95,7 @@ export default function ParticulierHomePage() {
           </div>
         </div>
 
-        <WaveDivider />
+        <WaveDivider variant="heroLow" />
       </section>
 
       {/* Choice helper */}
