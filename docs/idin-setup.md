@@ -22,6 +22,8 @@ Kopieer `docs/env.example` naar je eigen `.env.local` en vul in:
 - `IDIN_CLIENT_ID=...`
 - `IDIN_CLIENT_SECRET=...`
 - `IDIN_REDIRECT_URI=https://<jouw-domain>/api/idin/callback`
+- `IDIN_DISCOVERY_URL=https://<jouw-signicat-domain>/auth/open/.well-known/openid-configuration` *(aanrader)*
+  - of `IDIN_ISSUER_URL=https://<jouw-signicat-domain>/auth/open`
 
 ## Wat er al in code zit
 

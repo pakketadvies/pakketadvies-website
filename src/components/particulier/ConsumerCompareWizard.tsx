@@ -85,8 +85,16 @@ export function ConsumerCompareWizard() {
       // Show a friendly message on the netbeheerder card.
       const map: Record<string, string> = {
         'not-configured': 'iDIN is nog niet geconfigureerd. Voeg provider-credentials toe om dit te activeren.',
-        'not-implemented': 'iDIN provider-flow is nog niet geactiveerd. Dit zetten we live zodra de provider is ingericht.',
-        'callback-not-implemented': 'We hebben je iDIN callback ontvangen, maar de verwerking is nog niet ingericht.',
+        'unsupported-provider': 'iDIN provider is niet ondersteund in deze omgeving. Controleer IDIN_PROVIDER.',
+        'start-failed': 'iDIN starten is niet gelukt. Controleer of de Signicat OIDC discovery/issuer goed staat ingesteld.',
+        'provider-error': 'De iDIN-provider gaf een fout terug. Probeer het opnieuw.',
+        'missing-code': 'We hebben geen iDIN code ontvangen. Probeer het opnieuw.',
+        'missing-state': 'Je sessie is verlopen (iDIN state ontbreekt). Probeer het opnieuw.',
+        'state-mismatch': 'Je sessie is verlopen of ongeldig (iDIN state mismatch). Probeer het opnieuw.',
+        'token-exchange-failed': 'Inloggen gelukt, maar tokens ophalen faalde. Controleer client secret en redirect URI.',
+        'callback-failed': 'iDIN afronden is niet gelukt. Probeer het later opnieuw.',
+        'success':
+          'iDIN gelukt. Volgende stap is het ophalen van verbruiksdata via een energiedata/consent-provider (netbeheerder-koppeling).',
       }
       setIdinError(map[spIdin] || 'Er is iets misgegaan met iDIN. Probeer het later opnieuw.')
       setStep(2)
