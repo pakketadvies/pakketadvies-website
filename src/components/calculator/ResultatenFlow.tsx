@@ -722,7 +722,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-12">
       <div className="container-custom max-w-7xl">
         <div className="mb-6 md:mb-8 pt-4 md:pt-6">
           {verbruik && (
