@@ -1,25 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
 import { estimateConsumerUsage } from '@/lib/particulier-verbruik-schatting'
-
-type AddressTypeResult =
-  | {
-      type: 'particulier' | 'zakelijk'
-      message: string
-      street?: string
-      city?: string
-    }
-  | {
-      type: 'error'
-      message: string
-      street?: string
-      city?: string
-    }
+import { ConsumerAddressStartCard } from '@/components/particulier/ConsumerAddressStartCard'
 
 type MethodChoice = 'manual' | 'estimate' | 'netbeheerder'
 
@@ -29,26 +16,7 @@ export function ConsumerCompareWizard() {
   const router = useRouter()
   const { setVerbruik, verbruik } = useCalculatorStore()
 
-  const [step, setStep] = useState<1 | 2>(1)
   const [method, setMethod] = useState<MethodChoice>('manual')
-
-  // Step 1: address fields
-  const [postcode, setPostcode] = useState('')
-  const [huisnummer, setHuisnummer] = useState('')
-  const [toevoeging, setToevoeging] = useState('')
-  const [straat, setStraat] = useState('')
-  const [plaats, setPlaats] = useState('')
-  const [loadingAddress, setLoadingAddress] = useState(false)
-  const [checkingAddressType, setCheckingAddressType] = useState(false)
-  const [addressError, setAddressError] = useState('')
-  const [addressTypeResult, setAddressTypeResult] = useState<AddressTypeResult | null>(null)
-  const [manualAddressTypeOverride, setManualAddressTypeOverride] = useState<'particulier' | 'zakelijk' | null>(null)
-  const [originalBagResult, setOriginalBagResult] = useState<'particulier' | 'zakelijk' | null>(null)
-
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
-  const requestCounter = useRef(0)
-  const bagRequestCounter = useRef(0)
-  const lastLookup = useRef<string>('')
 
   // Step 2 values (manual / estimate)
   const [hasSingleMeter, setHasSingleMeter] = useState(false)
@@ -67,6 +35,14 @@ export function ConsumerCompareWizard() {
   const idinEnabled = typeof window !== 'undefined' && (process.env.NEXT_PUBLIC_IDIN_ENABLED === 'true')
   const [idinError, setIdinError] = useState<string | null>(null)
 
+  const hasCheckedAddress = useMemo(() => {
+    const a = verbruik?.leveringsadressen?.[0]
+    if (!a?.postcode || !a?.huisnummer) return false
+    if (!a?.straat || !a?.plaats) return false
+    if (!verbruik?.addressType || verbruik.addressType === null) return false
+    return true
+  }, [verbruik])
+
   // Allow deep-linking back into the wizard after /api/idin/* redirects.
   useEffect(() => {
     // NOTE: We intentionally do NOT use next/navigation's useSearchParams here,
@@ -74,11 +50,9 @@ export function ConsumerCompareWizard() {
     // and it can break prerendering on Vercel. Using window.location keeps this fully client-only.
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    const spStep = params.get('step')
     const spMethod = params.get('method')
     const spIdin = params.get('idin')
 
-    if (spStep === '2') setStep(2)
     if (spMethod === 'netbeheerder' || spMethod === 'manual' || spMethod === 'estimate') setMethod(spMethod)
 
     if (spIdin) {
@@ -98,238 +72,28 @@ export function ConsumerCompareWizard() {
           'iDIN gelukt. Volgende stap is het ophalen van verbruiksdata via een energiedata/consent-provider (netbeheerder-koppeling).',
       }
       setIdinError(map[spIdin] || 'Er is iets misgegaan met iDIN. Probeer het later opnieuw.')
-      setStep(2)
       setMethod('netbeheerder')
     }
     // Run on mount
   }, [])
 
-  const isValidPostcode = (pc: string) => /^\d{4}[A-Z]{2}$/.test(pc.toUpperCase().replace(/\s/g, ''))
-  const cleanPostcode = (pc: string) => pc.toUpperCase().replace(/\s/g, '')
-
-  const applyManualAddressType = useCallback(
-    (type: 'particulier' | 'zakelijk') => {
-      const isManualChange = originalBagResult !== null && type !== originalBagResult
-      const msg = isManualChange
-        ? `${type === 'particulier' ? 'Particulier' : 'Zakelijk'} adres (handmatig gewijzigd)\n⚠️ Je bent zelf verantwoordelijk voor de juistheid van dit adrestype`
-        : type === 'particulier'
-          ? 'Particulier adres - geschikt voor consumentencontracten'
-          : 'Zakelijk adres - geschikt voor zakelijke contracten'
-
-      setManualAddressTypeOverride(type)
-      setAddressTypeResult({
-        type,
-        message: msg,
-        street: straat,
-        city: plaats,
-      })
-    },
-    [originalBagResult, straat, plaats]
-  )
-
-  const checkAddressType = useCallback(
-    async (pc: string, hn: string, tv?: string) => {
-      if (manualAddressTypeOverride) {
-        applyManualAddressType(manualAddressTypeOverride)
-        return
-      }
-
-      const currentBagRequestId = ++bagRequestCounter.current
-      setCheckingAddressType(true)
-      setAddressTypeResult(null)
-
-      try {
-        const res = await fetch('/api/adres-check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ postcode: pc, huisnummer: hn, toevoeging: tv }),
-        })
-        const result = await res.json()
-        if (bagRequestCounter.current !== currentBagRequestId) return
-
-        const withDetails = { ...result, street: result.street ?? straat, city: result.city ?? plaats }
-        setAddressTypeResult(withDetails)
-        if (withDetails.type !== 'error') {
-          setOriginalBagResult(withDetails.type)
-        }
-      } catch {
-        if (bagRequestCounter.current === currentBagRequestId) {
-          setAddressTypeResult({ type: 'error', message: 'Kon adres type niet controleren' })
-        }
-      } finally {
-        if (bagRequestCounter.current === currentBagRequestId) setCheckingAddressType(false)
-      }
-    },
-    [manualAddressTypeOverride, applyManualAddressType, straat, plaats]
-  )
-
-  const fetchAddress = useCallback(
-    async (pc: string, hn: string, tv?: string) => {
-      const lookupKey = `${pc}-${hn}-${tv || ''}`
-      if (lastLookup.current === lookupKey) return
-
-      const currentRequestId = ++requestCounter.current
-      setLoadingAddress(true)
-      setAddressError('')
-      setAddressTypeResult(null)
-
-      try {
-        let url = `/api/postcode?postcode=${cleanPostcode(pc)}&number=${hn}`
-        if (tv && tv.trim()) url += `&addition=${encodeURIComponent(tv.trim())}`
-
-        const res = await fetch(url)
-        const data = await res.json()
-        if (requestCounter.current !== currentRequestId) return
-
-        if (!res.ok || data?.error) {
-          setStraat('')
-          setPlaats('')
-          setAddressError(data?.error || 'Adres niet gevonden')
-          setLoadingAddress(false)
-          return
-        }
-
-        lastLookup.current = lookupKey
-        setStraat(data.street || '')
-        setPlaats(data.city || '')
-
-        await checkAddressType(pc, hn, tv)
-      } catch {
-        if (requestCounter.current === currentRequestId) setAddressError('Fout bij ophalen adres')
-      } finally {
-        if (requestCounter.current === currentRequestId) setLoadingAddress(false)
-      }
-    },
-    [checkAddressType]
-  )
-
-  const scheduleLookup = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    setAddressError('')
-    setAddressTypeResult(null)
-    setManualAddressTypeOverride(null)
-    setOriginalBagResult(null)
-    setStraat('')
-    setPlaats('')
-    lastLookup.current = ''
-
-    const pc = postcode
-    const hn = huisnummer
-    if (!isValidPostcode(pc) || !hn.trim()) return
-
-    debounceRef.current = setTimeout(() => {
-      fetchAddress(pc, hn.trim(), toevoeging.trim() || undefined)
-    }, 600)
-  }, [postcode, huisnummer, toevoeging, fetchAddress])
-
-  useEffect(() => {
-    scheduleLookup()
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [scheduleLookup])
-
-  const canContinueAddress = useMemo(() => {
-    if (loadingAddress || checkingAddressType) return false
-    if (!straat || !plaats) return false
-    if (!addressTypeResult || addressTypeResult.type === 'error') return false
-    return true
-  }, [loadingAddress, checkingAddressType, straat, plaats, addressTypeResult])
-
-  const handleContinueFromAddress = () => {
-    if (!canContinueAddress || !addressTypeResult || addressTypeResult.type === 'error') return
-
-    const addressType = addressTypeResult.type
-
-    // Create an initial verbruik object so addressType is persisted in store immediately.
-    const seed: VerbruikData = {
-      leveringsadressen: [
-        {
-          postcode: cleanPostcode(postcode),
-          huisnummer: huisnummer.trim(),
-          toevoeging: toevoeging.trim() || undefined,
-          straat,
-          plaats,
-        },
-      ],
-      elektriciteitNormaal: 0,
-      elektriciteitDal: hasSingleMeter ? null : 0,
-      heeftEnkeleMeter: hasSingleMeter,
-      gasJaar: hasGas ? 0 : null,
-      geenGasaansluiting: !hasGas,
-      heeftZonnepanelen: hasSolar,
-      terugleveringJaar: hasSolar ? 0 : null,
-      meterType: hasSmartMeter ? 'slim' : 'oud',
-      aansluitwaardeElektriciteit: '3x25A',
-      aansluitwaardeGas: hasGas ? 'G6' : undefined,
-      addressType,
-      geschat: false,
-    }
-
-    setVerbruik(seed)
-    setStep(2)
-  }
-
   const baseHeader = (
     <div className="flex items-center justify-between gap-4">
       <div>
-        <p className="text-white/80 text-sm font-semibold">Stap {step} van 2</p>
         <h1 className="mt-2 font-display text-3xl md:text-4xl font-bold text-white leading-tight">
           Energie vergelijken voor thuis
         </h1>
         <p className="mt-3 text-white/80 max-w-2xl">
-          Vul je adres in en kies daarna hoe je je verbruik wilt invullen. Daarna tonen we direct de resultaten.
+          Kies hoe je je verbruik wilt invullen. Daarna tonen we direct de resultaten.
         </p>
       </div>
       <div className="hidden md:flex items-center gap-2">
-        <div className={`h-2 w-16 rounded-full ${step === 1 ? 'bg-white' : 'bg-white/30'}`} />
-        <div className={`h-2 w-16 rounded-full ${step === 2 ? 'bg-white' : 'bg-white/30'}`} />
+        <Link href="/particulier" className="text-sm font-semibold text-white/90 hover:text-white underline">
+          Adres wijzigen
+        </Link>
       </div>
     </div>
   )
-
-  const addressBadge = () => {
-    if (loadingAddress || checkingAddressType) {
-      return (
-        <div className="mt-3 text-xs text-brand-teal-100 flex items-center gap-2">
-          <div className="w-3 h-3 border-2 border-white/40 border-t-white/90 rounded-full animate-spin" />
-          <span>Adres controleren…</span>
-        </div>
-      )
-    }
-
-    if (addressError) {
-      return <div className="mt-3 text-xs text-red-200">{addressError}</div>
-    }
-
-    if (!addressTypeResult) return null
-
-    if (addressTypeResult.type === 'error') {
-      return <div className="mt-3 text-xs text-red-200">{addressTypeResult.message}</div>
-    }
-
-    const isParticulier = addressTypeResult.type === 'particulier'
-    return (
-      <div
-        className={`mt-3 rounded-xl border px-3 py-2 text-xs ${
-          isParticulier ? 'border-green-200/40 bg-green-500/10 text-green-100' : 'border-blue-200/40 bg-blue-500/10 text-blue-100'
-        }`}
-      >
-        <div className="font-semibold">
-          {straat} {huisnummer}
-          {toevoeging ? ` ${toevoeging}` : ''}, {cleanPostcode(postcode)} {plaats}
-        </div>
-        <div className="mt-1 whitespace-pre-line">{addressTypeResult.message}</div>
-        <button
-          type="button"
-          className="mt-2 underline text-white/80 hover:text-white"
-          onClick={() => applyManualAddressType(isParticulier ? 'zakelijk' : 'particulier')}
-        >
-          Wijzig naar {isParticulier ? 'zakelijk' : 'particulier'}
-        </button>
-      </div>
-    )
-  }
 
   const handleSubmitManual = () => {
     if (!verbruik?.leveringsadressen?.length) return
@@ -394,81 +158,31 @@ export function ConsumerCompareWizard() {
       </div>
 
       <div className="mt-6 bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm">
-        {step === 1 ? (
-          <>
-            <h2 className="font-display text-2xl font-bold text-brand-navy-600">1. Controleer je adres</h2>
-            <p className="mt-2 text-gray-600">We checken direct of dit een particulier of zakelijk aansluitpunt is.</p>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="sm:col-span-1">
-                <label className="text-sm font-semibold text-gray-700">Postcode</label>
-                <input
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
-                  placeholder="1234AB"
-                  value={postcode}
-                  onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-                  maxLength={6}
-                />
-              </div>
-              <div className="sm:col-span-1">
-                <label className="text-sm font-semibold text-gray-700">Huisnummer</label>
-                <input
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
-                  placeholder="12"
-                  value={huisnummer}
-                  onChange={(e) => setHuisnummer(e.target.value)}
-                />
-              </div>
-              <div className="sm:col-span-1">
-                <label className="text-sm font-semibold text-gray-700">Toev. (optioneel)</label>
-                <input
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
-                  placeholder="A"
-                  value={toevoeging}
-                  onChange={(e) => setToevoeging(e.target.value.toUpperCase())}
-                />
-              </div>
+        {!hasCheckedAddress ? (
+          <div>
+            <h2 className="font-display text-2xl font-bold text-brand-navy-600">Start met je adres</h2>
+            <p className="mt-2 text-gray-600">
+              We doen direct dezelfde adrescheck als in de calculator. Daarna kun je kiezen hoe je je verbruik invult.
+            </p>
+            <div className="mt-6">
+              <ConsumerAddressStartCard
+                variant="inline"
+                nextHref="/particulier/energie-vergelijken"
+                title="Controleer je adres"
+                description="Vul postcode, huisnummer (en eventueel toevoeging) in. We checken meteen het aansluitpunt."
+              />
             </div>
-
-            {addressBadge()}
-
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
-              <Link
-                href="/particulier"
-                className="inline-flex justify-center items-center px-6 py-3 bg-white border border-gray-200 text-brand-navy-600 rounded-xl font-semibold hover:bg-gray-50 transition-all"
-              >
-                Terug
-              </Link>
-              <button
-                type="button"
-                onClick={handleContinueFromAddress}
-                disabled={!canContinueAddress}
-                className={`inline-flex justify-center items-center px-6 py-3 rounded-xl font-semibold transition-all ${
-                  canContinueAddress
-                    ? 'bg-brand-teal-500 text-white shadow-lg shadow-brand-teal-500/25 hover:bg-brand-teal-600'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                Verder
-              </button>
-            </div>
-          </>
+          </div>
         ) : (
           <>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-display text-2xl font-bold text-brand-navy-600">2. Kies hoe je je verbruik invult</h2>
-                <p className="mt-2 text-gray-600">
-                  Kies de optie die het makkelijkst is. Daarna tonen we direct je resultaten.
-                </p>
+                <h2 className="font-display text-2xl font-bold text-brand-navy-600">Kies hoe je je verbruik invult</h2>
+                <p className="mt-2 text-gray-600">Kies de optie die het makkelijkst is. Daarna tonen we direct je resultaten.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="text-sm font-semibold text-brand-teal-600 hover:underline"
-              >
+              <Link href="/particulier" className="text-sm font-semibold text-brand-teal-600 hover:underline">
                 Adres wijzigen
-              </button>
+              </Link>
             </div>
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">

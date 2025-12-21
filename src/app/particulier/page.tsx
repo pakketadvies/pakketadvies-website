@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { WaveDivider } from '@/components/ui/WaveDivider'
+import { ConsumerAddressStartCard } from '@/components/particulier/ConsumerAddressStartCard'
 
 export const metadata: Metadata = {
   title: 'Energie vergelijken voor thuis',
@@ -43,55 +44,7 @@ export default function ParticulierHomePage() {
               </div>
             </div>
 
-            {/* Card (form-like) */}
-            <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 border border-white/30">
-              <h2 className="font-display text-2xl font-bold text-brand-navy-600">Check je voordeel</h2>
-              <p className="mt-2 text-gray-600">
-                Vul je gegevens in en start direct met vergelijken. Je ziet snel welk contracttype logisch is voor jouw situatie.
-              </p>
-
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Postcode</label>
-                  <input
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
-                    placeholder="1234AB"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Huisnummer</label>
-                  <input
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
-                    placeholder="12"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-sm font-semibold text-gray-700">Ik zit nu bij</label>
-                  <select className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500">
-                    <option>Leverancier (optioneel)</option>
-                    <option>Onbekend / Anders</option>
-                    <option>Geen i.v.m. verhuizing</option>
-                    <option>Verschillend voor gas en stroom</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <Link
-                  href="/particulier/energie-vergelijken"
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-teal-500/25 hover:bg-brand-teal-600 hover:shadow-xl transition-all"
-                >
-                  Start vergelijken
-                </Link>
-                <p className="text-xs text-gray-500">
-                  Tip: heb je zonnepanelen? Bekijk dan ook{' '}
-                  <Link className="text-brand-teal-600 underline" href="/particulier/zonnepanelen">
-                    zonnepaneel-opties
-                  </Link>
-                  .
-                </p>
-              </div>
-            </div>
+            <ConsumerAddressStartCard />
           </div>
         </div>
 
