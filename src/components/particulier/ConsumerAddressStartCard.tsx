@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
@@ -51,11 +51,14 @@ export function ConsumerAddressStartCard({
   const router = useRouter()
   const { setVerbruik } = useCalculatorStore()
 
-  const [postcode, setPostcode] = useState('')
-  const [huisnummer, setHuisnummer] = useState('')
-  const [toevoeging, setToevoeging] = useState('')
-  const [straat, setStraat] = useState('')
-  const [plaats, setPlaats] = useState('')
+  // EXACT same address model as QuickCalculator / VerbruikForm
+  const [adres, setAdres] = useState({
+    postcode: '',
+    huisnummer: '',
+    toevoeging: '',
+    straat: '',
+    plaats: '',
+  })
 
   const [loadingAddress, setLoadingAddress] = useState(false)
   const [checkingAddressType, setCheckingAddressType] = useState(false)
@@ -67,11 +70,8 @@ export function ConsumerAddressStartCard({
   // Optional (UI only)
   const [currentSupplier, setCurrentSupplier] = useState('') // not stored yet (consumer)
 
-  // Refs to avoid hook dependency loops (street/city updates would otherwise change callbacks)
-  const streetRef = useRef('')
-  const cityRef = useRef('')
-
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  // Debounce + race-condition protection (same pattern as QuickCalculator)
+  const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const requestCounter = useRef(0)
   const bagRequestCounter = useRef(0)
   const lastLookup = useRef<string>('')
@@ -92,15 +92,15 @@ export function ConsumerAddressStartCard({
       setAddressTypeResult({
         type,
         message: msg,
-        street: streetRef.current,
-        city: cityRef.current,
+        street: adres.straat,
+        city: adres.plaats,
       })
     },
-    [originalBagResult]
+    [originalBagResult, adres.straat, adres.plaats]
   )
 
   const checkAddressType = useCallback(
-    async (pc: string, hn: string, tv?: string, street?: string, city?: string) => {
+    async (postcode: string, huisnummer: string, toevoeging?: string) => {
       if (manualAddressTypeOverride) {
         applyManualAddressType(manualAddressTypeOverride)
         return
@@ -114,12 +114,16 @@ export function ConsumerAddressStartCard({
         const res = await fetch('/api/adres-check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ postcode: pc, huisnummer: hn, toevoeging: tv }),
+          body: JSON.stringify({ postcode: postcode, huisnummer: huisnummer, toevoeging: toevoeging }),
         })
         const result = await res.json()
         if (bagRequestCounter.current !== currentBagRequestId) return
 
-        const withDetails = { ...result, street: result.street ?? street, city: result.city ?? city }
+        const withDetails = {
+          ...result,
+          street: result.street ?? adres.straat,
+          city: result.city ?? adres.plaats,
+        }
         setAddressTypeResult(withDetails)
         if (withDetails.type !== 'error') {
           setOriginalBagResult(withDetails.type)
@@ -132,88 +136,104 @@ export function ConsumerAddressStartCard({
         if (bagRequestCounter.current === currentBagRequestId) setCheckingAddressType(false)
       }
     },
-    [manualAddressTypeOverride, applyManualAddressType]
+    [manualAddressTypeOverride, applyManualAddressType, adres.straat, adres.plaats]
   )
 
-  const fetchAddress = useCallback(
-    async (pc: string, hn: string, tv?: string) => {
-      const lookupKey = `${pc}-${hn}-${tv || ''}`
-      if (lastLookup.current === lookupKey) return
+  const fetchAddress = useCallback(async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    // Check of dit dezelfde lookup is als de laatste (voorkom dubbele calls) - exact zoals QuickCalculator
+    const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
+    if (lastLookup.current === lookupKey) return
 
-      const currentRequestId = ++requestCounter.current
-      setLoadingAddress(true)
-      setAddressError('')
-      setAddressTypeResult(null)
+    const currentRequestId = ++requestCounter.current
+    const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
 
-      try {
-        let url = `/api/postcode?postcode=${cleanPostcode(pc)}&number=${hn}`
-        if (tv && tv.trim()) url += `&addition=${encodeURIComponent(tv.trim())}`
+    setLoadingAddress(true)
+    setAddressError('')
 
-        const res = await fetch(url)
+    try {
+      let url = `/api/postcode?postcode=${postcodeClean}&number=${huisnummer}`
+      if (toevoeging && toevoeging.trim()) url += `&addition=${encodeURIComponent(toevoeging.trim())}`
+
+      const res = await fetch(url)
+
+      if (res.ok) {
         const data = await res.json()
         if (requestCounter.current !== currentRequestId) return
 
-        if (!res.ok || data?.error) {
-          setStraat('')
-          setPlaats('')
-          streetRef.current = ''
-          cityRef.current = ''
-          setAddressError(data?.error || 'Adres niet gevonden')
+        if (data?.error) {
+          setAddressError(data.error)
+          setAddressTypeResult(null)
+          setAdres((prev) => ({ ...prev, straat: '', plaats: '' }))
           setLoadingAddress(false)
           return
         }
 
         lastLookup.current = lookupKey
-        streetRef.current = data.street || ''
-        cityRef.current = data.city || ''
-        setStraat(streetRef.current)
-        setPlaats(cityRef.current)
+        setAdres((prev) => ({
+          ...prev,
+          straat: data.street || '',
+          plaats: data.city || '',
+        }))
 
-        await checkAddressType(pc, hn, tv, streetRef.current, cityRef.current)
-      } catch {
-        if (requestCounter.current === currentRequestId) setAddressError('Fout bij ophalen adres')
-      } finally {
-        if (requestCounter.current === currentRequestId) setLoadingAddress(false)
+        await checkAddressType(postcode, huisnummer, toevoeging)
+        return
       }
-    },
-    [checkAddressType]
-  )
 
-  const scheduleLookup = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (res.status === 404) {
+        const err = await res.json().catch(() => ({}))
+        if (requestCounter.current !== currentRequestId) return
+        setAddressError(err?.error || 'Adres niet gevonden')
+        setAddressTypeResult(null)
+        setAdres((prev) => ({ ...prev, straat: '', plaats: '' }))
+        return
+      }
 
+      if (requestCounter.current === currentRequestId) {
+        setAddressError('Kon adres niet ophalen')
+      }
+    } catch {
+      if (requestCounter.current === currentRequestId) setAddressError('Fout bij ophalen adres')
+    } finally {
+      if (requestCounter.current === currentRequestId) setLoadingAddress(false)
+    }
+  }, [checkAddressType])
+
+  const handleAddressInputChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
     setAddressError('')
     setAddressTypeResult(null)
     setManualAddressTypeOverride(null)
     setOriginalBagResult(null)
-    setStraat('')
-    setPlaats('')
-    streetRef.current = ''
-    cityRef.current = ''
-    lastLookup.current = ''
 
-    const pc = postcode
-    const hn = huisnummer
-    if (!isValidPostcode(pc) || !hn.trim()) return
+    setAdres((prev) => {
+      const next = { ...prev, [field]: value }
+      // Clear address details when user changes any of the lookup fields
+      next.straat = ''
+      next.plaats = ''
+      return next
+    })
 
-    debounceRef.current = setTimeout(() => {
-      fetchAddress(pc, hn.trim(), toevoeging.trim() || undefined)
-    }, 700)
-  }, [postcode, huisnummer, toevoeging, fetchAddress])
+    if (addressTimeoutRef.current) clearTimeout(addressTimeoutRef.current)
 
-  useEffect(() => {
-    scheduleLookup()
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+    const postcode = field === 'postcode' ? value : adres.postcode
+    const huisnummer = field === 'huisnummer' ? value : adres.huisnummer
+    const toevoeging = field === 'toevoeging' ? value : adres.toevoeging
+
+    const postcodeComplete = isValidPostcode(postcode)
+    const hasHuisnummer = huisnummer.trim().length > 0
+
+    if (postcodeComplete && hasHuisnummer) {
+      addressTimeoutRef.current = setTimeout(() => {
+        fetchAddress(postcode, huisnummer.trim(), toevoeging?.trim() || undefined)
+      }, 800) // same debounce as QuickCalculator
     }
-  }, [scheduleLookup])
+  }
 
   const canStart = useMemo(() => {
     if (loadingAddress || checkingAddressType) return false
-    if (!straat || !plaats) return false
+    if (!adres.straat || !adres.plaats) return false
     if (!addressTypeResult || addressTypeResult.type === 'error') return false
     return true
-  }, [loadingAddress, checkingAddressType, straat, plaats, addressTypeResult])
+  }, [loadingAddress, checkingAddressType, adres.straat, adres.plaats, addressTypeResult])
 
   const handleStart = () => {
     if (!canStart || !addressTypeResult || addressTypeResult.type === 'error') return
@@ -221,11 +241,11 @@ export function ConsumerAddressStartCard({
     const seed: VerbruikData = {
       leveringsadressen: [
         {
-          postcode: cleanPostcode(postcode),
-          huisnummer: huisnummer.trim(),
-          toevoeging: toevoeging.trim() || undefined,
-          straat,
-          plaats,
+          postcode: cleanPostcode(adres.postcode),
+          huisnummer: adres.huisnummer.trim(),
+          toevoeging: adres.toevoeging.trim() || undefined,
+          straat: adres.straat,
+          plaats: adres.plaats,
         },
       ],
       elektriciteitNormaal: 0,
@@ -262,8 +282,8 @@ export function ConsumerAddressStartCard({
           <input
             className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
             placeholder="1234AB"
-            value={postcode}
-            onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+            value={adres.postcode}
+            onChange={(e) => handleAddressInputChange('postcode', e.target.value.toUpperCase())}
             maxLength={6}
           />
         </div>
@@ -274,8 +294,8 @@ export function ConsumerAddressStartCard({
             <input
               className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
               placeholder="12"
-              value={huisnummer}
-              onChange={(e) => setHuisnummer(e.target.value)}
+              value={adres.huisnummer}
+              onChange={(e) => handleAddressInputChange('huisnummer', e.target.value)}
             />
           </div>
           <div className="col-span-1">
@@ -283,8 +303,8 @@ export function ConsumerAddressStartCard({
             <input
               className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-center"
               placeholder="A"
-              value={toevoeging}
-              onChange={(e) => setToevoeging(e.target.value.toUpperCase())}
+              value={adres.toevoeging}
+              onChange={(e) => handleAddressInputChange('toevoeging', e.target.value.toUpperCase())}
               maxLength={6}
             />
           </div>
@@ -323,8 +343,8 @@ export function ConsumerAddressStartCard({
           }`}
         >
           <div className="font-semibold">
-            {straat} {huisnummer}
-            {toevoeging ? ` ${toevoeging}` : ''}, {cleanPostcode(postcode)} {plaats}
+            {adres.straat} {adres.huisnummer}
+            {adres.toevoeging ? ` ${adres.toevoeging}` : ''}, {cleanPostcode(adres.postcode)} {adres.plaats}
           </div>
           <div className="mt-1 whitespace-pre-line">{addressTypeResult.message}</div>
           <button
