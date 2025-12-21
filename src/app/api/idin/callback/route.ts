@@ -88,11 +88,15 @@ export async function GET(request: Request) {
 
     // Verify the ID token (issuer, audience, nonce, signature)
     const jwks = createRemoteJWKSet(new URL(discovery.jwks_uri))
-    await jwtVerify(tokenJson.id_token, jwks, {
+    const { payload } = await jwtVerify(tokenJson.id_token, jwks, {
       issuer: discovery.issuer,
       audience: clientId,
-      nonce: stored.nonce,
     })
+    const nonce = typeof (payload as any)?.nonce === 'string' ? (payload as any).nonce : null
+    if (!nonce || nonce !== stored.nonce) {
+      url.searchParams.set('idin', 'nonce-mismatch')
+      return NextResponse.redirect(url)
+    }
 
     // NOTE: Energy consumption + supplier/end-date are NOT returned by iDIN itself.
     // That requires a separate data/consent provider integration.

@@ -92,6 +92,7 @@ export function ConsumerCompareWizard() {
         'missing-state': 'Je sessie is verlopen (iDIN state ontbreekt). Probeer het opnieuw.',
         'state-mismatch': 'Je sessie is verlopen of ongeldig (iDIN state mismatch). Probeer het opnieuw.',
         'token-exchange-failed': 'Inloggen gelukt, maar tokens ophalen faalde. Controleer client secret en redirect URI.',
+        'nonce-mismatch': 'iDIN sessie validatie faalde (nonce mismatch). Probeer het opnieuw.',
         'callback-failed': 'iDIN afronden is niet gelukt. Probeer het later opnieuw.',
         'success':
           'iDIN gelukt. Volgende stap is het ophalen van verbruiksdata via een energiedata/consent-provider (netbeheerder-koppeling).',
