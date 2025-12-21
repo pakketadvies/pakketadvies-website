@@ -67,6 +67,10 @@ export function ConsumerAddressStartCard({
   // Optional (UI only)
   const [currentSupplier, setCurrentSupplier] = useState('') // not stored yet (consumer)
 
+  // Refs to avoid hook dependency loops (street/city updates would otherwise change callbacks)
+  const streetRef = useRef('')
+  const cityRef = useRef('')
+
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const requestCounter = useRef(0)
   const bagRequestCounter = useRef(0)
@@ -88,15 +92,15 @@ export function ConsumerAddressStartCard({
       setAddressTypeResult({
         type,
         message: msg,
-        street: straat,
-        city: plaats,
+        street: streetRef.current,
+        city: cityRef.current,
       })
     },
-    [originalBagResult, straat, plaats]
+    [originalBagResult]
   )
 
   const checkAddressType = useCallback(
-    async (pc: string, hn: string, tv?: string) => {
+    async (pc: string, hn: string, tv?: string, street?: string, city?: string) => {
       if (manualAddressTypeOverride) {
         applyManualAddressType(manualAddressTypeOverride)
         return
@@ -115,7 +119,7 @@ export function ConsumerAddressStartCard({
         const result = await res.json()
         if (bagRequestCounter.current !== currentBagRequestId) return
 
-        const withDetails = { ...result, street: result.street ?? straat, city: result.city ?? plaats }
+        const withDetails = { ...result, street: result.street ?? street, city: result.city ?? city }
         setAddressTypeResult(withDetails)
         if (withDetails.type !== 'error') {
           setOriginalBagResult(withDetails.type)
@@ -128,7 +132,7 @@ export function ConsumerAddressStartCard({
         if (bagRequestCounter.current === currentBagRequestId) setCheckingAddressType(false)
       }
     },
-    [manualAddressTypeOverride, applyManualAddressType, straat, plaats]
+    [manualAddressTypeOverride, applyManualAddressType]
   )
 
   const fetchAddress = useCallback(
@@ -152,16 +156,20 @@ export function ConsumerAddressStartCard({
         if (!res.ok || data?.error) {
           setStraat('')
           setPlaats('')
+          streetRef.current = ''
+          cityRef.current = ''
           setAddressError(data?.error || 'Adres niet gevonden')
           setLoadingAddress(false)
           return
         }
 
         lastLookup.current = lookupKey
-        setStraat(data.street || '')
-        setPlaats(data.city || '')
+        streetRef.current = data.street || ''
+        cityRef.current = data.city || ''
+        setStraat(streetRef.current)
+        setPlaats(cityRef.current)
 
-        await checkAddressType(pc, hn, tv)
+        await checkAddressType(pc, hn, tv, streetRef.current, cityRef.current)
       } catch {
         if (requestCounter.current === currentRequestId) setAddressError('Fout bij ophalen adres')
       } finally {
@@ -180,6 +188,8 @@ export function ConsumerAddressStartCard({
     setOriginalBagResult(null)
     setStraat('')
     setPlaats('')
+    streetRef.current = ''
+    cityRef.current = ''
     lastLookup.current = ''
 
     const pc = postcode
