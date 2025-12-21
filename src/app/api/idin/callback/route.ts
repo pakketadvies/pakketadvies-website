@@ -17,7 +17,6 @@ export async function GET(request: Request) {
   const clientId = process.env.IDIN_CLIENT_ID
   const clientSecret = process.env.IDIN_CLIENT_SECRET
   const redirectUri = process.env.IDIN_REDIRECT_URI
-  const cookieSecret = process.env.IDIN_COOKIE_SECRET || clientSecret
 
   const url = new URL('/particulier/energie-vergelijken', process.env.NEXT_PUBLIC_SITE_URL || 'https://pakketadvies.nl')
   url.searchParams.set('step', '2')
@@ -27,6 +26,9 @@ export async function GET(request: Request) {
     url.searchParams.set('idin', 'not-configured')
     return NextResponse.redirect(url)
   }
+
+  // At this point clientSecret is guaranteed to be a string.
+  const cookieSecret = process.env.IDIN_COOKIE_SECRET || clientSecret
 
   const incoming = new URL(request.url)
   const code = incoming.searchParams.get('code')

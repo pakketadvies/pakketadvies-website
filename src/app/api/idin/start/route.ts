@@ -19,7 +19,6 @@ export async function GET() {
   const clientSecret = process.env.IDIN_CLIENT_SECRET
   const redirectUri = process.env.IDIN_REDIRECT_URI
   const scopes = (process.env.IDIN_SCOPES || 'openid profile email').trim()
-  const cookieSecret = process.env.IDIN_COOKIE_SECRET || clientSecret
 
   // If not configured, redirect back to the wizard with a friendly message (no raw JSON).
   if (!enabled || !provider || !clientId || !clientSecret || !redirectUri) {
@@ -39,6 +38,9 @@ export async function GET() {
   }
 
   try {
+    // At this point clientSecret is guaranteed to be a string.
+    const cookieSecret = process.env.IDIN_COOKIE_SECRET || clientSecret
+
     const discovery = await fetchOidcDiscovery()
     const state = createState()
     const nonce = createNonce()
