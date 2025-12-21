@@ -27,21 +27,6 @@ export default function ParticulierHomePage() {
                 Vast, variabel of dynamisch — wij helpen je helder vergelijken, met uitleg die je snapt. In een paar minuten weet je
                 wat verstandig is voor jouw situatie.
               </p>
-
-              <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/particulier/energie-vergelijken"
-                  className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-                >
-                  Vergelijk energietarieven
-                </Link>
-                <Link
-                  href="/particulier/dynamisch"
-                  className="inline-flex justify-center items-center px-6 py-3 bg-white/10 text-white rounded-xl font-semibold border border-white/20 hover:bg-white/15 transition-all"
-                >
-                  Meer over dynamisch
-                </Link>
-              </div>
             </div>
 
             <ConsumerAddressStartCard />
