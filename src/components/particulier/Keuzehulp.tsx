@@ -207,7 +207,54 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          {/* Step 1: Type tarief */}
+          {/* Step 1: Weergave */}
+          {currentStep === 'weergave' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold text-brand-navy-500 mb-2">
+                  Hoe wil je de resultaten sorteren?
+                </h3>
+                <p className="text-gray-600">
+                  Kies hoe je de energiecontracten wilt zien.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  { value: 'besparing' as const, label: 'Hoogste besparing', desc: 'Toon eerst de contracten waarmee je het meest bespaart' },
+                  { value: 'prijs-laag' as const, label: 'Laagste prijs', desc: 'Toon eerst de goedkoopste contracten' },
+                  { value: 'prijs-hoog' as const, label: 'Hoogste prijs', desc: 'Toon eerst de duurste contracten' },
+                  { value: 'rating' as const, label: 'Beste beoordeling', desc: 'Toon eerst de best beoordeelde contracten' },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      selectedSortBy === option.value
+                        ? 'border-brand-teal-500 bg-brand-teal-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="sortBy"
+                        value={option.value}
+                        checked={selectedSortBy === option.value}
+                        onChange={() => setSelectedSortBy(option.value)}
+                        className="mt-1 w-5 h-5 text-brand-teal-600"
+                      />
+                      <div className="flex-1">
+                        <span className="font-bold text-brand-navy-500">{option.label}</span>
+                        <p className="text-sm text-gray-600 mt-1">{option.desc}</p>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Type tarief */}
           {currentStep === 'type' && (
             <div className="space-y-6">
               <div>
