@@ -757,14 +757,46 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Consumer: Pricewise-style layout (sidebar + list) */}
           {audience === 'consumer' && verbruik && (
-            <div className="mt-5">
+            <div className="mt-2">
               <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <p className="text-white/80 text-sm">Resultaten</p>
                     <h1 className="text-xl md:text-2xl font-bold">
-                      Dit zijn onze {filteredResultaten.length} deals voor jou
+                      {(() => {
+                        const adres = verbruik.leveringsadressen?.[0]
+                        const adresTekst = adres?.straat && adres?.huisnummer
+                          ? `${adres.straat} ${adres.huisnummer}${adres.toevoeging ? ` ${adres.toevoeging}` : ''}`
+                          : null
+                        
+                        const totaalElektriciteit = verbruik.elektriciteitNormaal + (verbruik.elektriciteitDal || 0)
+                        const verbruikTekst = [
+                          totaalElektriciteit > 0 && `${totaalElektriciteit.toLocaleString('nl-NL')} kWh stroom`,
+                          verbruik.gasJaar && verbruik.gasJaar > 0 && `${verbruik.gasJaar.toLocaleString('nl-NL')} m³ gas`
+                        ].filter(Boolean).join(' • ')
+                        
+                        if (adresTekst && verbruikTekst) {
+                          return `Dit zijn onze ${filteredResultaten.length} deals voor ${adresTekst}`
+                        } else if (adresTekst) {
+                          return `Dit zijn onze ${filteredResultaten.length} deals voor ${adresTekst}`
+                        } else {
+                          return `Dit zijn onze ${filteredResultaten.length} deals voor jou`
+                        }
+                      })()}
                     </h1>
+                    {(() => {
+                      const totaalElektriciteit = verbruik.elektriciteitNormaal + (verbruik.elektriciteitDal || 0)
+                      const verbruikTekst = [
+                        totaalElektriciteit > 0 && `${totaalElektriciteit.toLocaleString('nl-NL')} kWh stroom`,
+                        verbruik.gasJaar && verbruik.gasJaar > 0 && `${verbruik.gasJaar.toLocaleString('nl-NL')} m³ gas`
+                      ].filter(Boolean).join(' • ')
+                      
+                      return verbruikTekst ? (
+                        <p className="text-white/90 text-sm md:text-base mt-2">
+                          {verbruikTekst}
+                        </p>
+                      ) : null
+                    })()}
                   </div>
                 </div>
               </div>
