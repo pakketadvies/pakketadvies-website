@@ -725,7 +725,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
     <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-12">
       <div className="container-custom max-w-7xl">
         <div className="mb-6 md:mb-8 pt-4 md:pt-6">
-          {verbruik && audience !== 'consumer' && (
+          {audience !== 'consumer' && verbruik && (
             <div className="mb-6 hidden lg:block">
               <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
             </div>
@@ -733,7 +733,6 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {verbruik && (
             <>
-              {/* For consumer: keep modal edit only on mobile. For business: keep it everywhere on mobile. */}
               <div className="lg:hidden">
                 <FloatingEditButton onClick={() => setIsModalOpen(true)} />
               </div>
@@ -769,40 +768,9 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
-                  {/* Desktop: edit directly in sidebar (Pricewise-style) */}
+                  {/* Pricewise-style: edit your details in the left sidebar */}
                   <div className="hidden lg:block">
-                    <EditVerbruikPanel
-                      currentData={verbruik}
-                      onUpdate={handleVerbruikUpdate}
-                      isUpdating={isUpdating}
-                      collapsible={false}
-                      defaultOpen={true}
-                    />
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-2xl p-4">
-                    <div className="font-semibold text-brand-navy-600">Jouw gegevens</div>
-                    <div className="mt-3 text-sm text-gray-700 space-y-2">
-                      <div>
-                        <div className="text-xs text-gray-500">Adres</div>
-                        <div className="font-medium">
-                          {verbruik.leveringsadressen?.[0]?.postcode} {verbruik.leveringsadressen?.[0]?.huisnummer}
-                          {verbruik.leveringsadressen?.[0]?.toevoeging ? ` ${verbruik.leveringsadressen[0].toevoeging}` : ''}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="text-xs text-gray-500">Stroom / jaar</div>
-                          <div className="font-medium">
-                            {Math.round((verbruik.elektriciteitNormaal || 0) + (verbruik.elektriciteitDal || 0))} kWh
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500">Gas / jaar</div>
-                          <div className="font-medium">{verbruik.gasJaar ? `${verbruik.gasJaar} m³` : 'geen'}</div>
-                        </div>
-                      </div>
-                    </div>
+                    <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
