@@ -1,13 +1,13 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, Variants } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { useEffect, ReactNode } from 'react'
 
 // Custom easing voor soepele, natuurlijke beweging
-const smoothEasing = [0.22, 1, 0.36, 1] // Custom cubic-bezier
+const smoothEasing = [0.22, 1, 0.36, 1] as const // Custom cubic-bezier
 
-const pageVariants = {
+const pageVariants: Variants = {
   initial: {
     opacity: 0,
     y: 20,
@@ -17,7 +17,7 @@ const pageVariants = {
     y: 0,
     transition: {
       duration: 0.3,
-      ease: smoothEasing,
+      ease: smoothEasing as [number, number, number, number],
     },
   },
   exit: {
@@ -25,7 +25,7 @@ const pageVariants = {
     y: -20,
     transition: {
       duration: 0.2,
-      ease: smoothEasing,
+      ease: smoothEasing as [number, number, number, number],
     },
   },
 }
