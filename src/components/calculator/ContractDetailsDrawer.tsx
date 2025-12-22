@@ -1,7 +1,6 @@
 'use client'
 
-import { Fragment, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { useEffect, useMemo, useState } from 'react'
 import { X, Calculator, FileText, Info } from '@phosphor-icons/react'
 import type { KostenBreakdown } from './ContractCard'
 import type { ContractOptie } from '@/types/calculator'
@@ -46,100 +45,125 @@ export function ContractDetailsDrawer({
   const [activeTab, setActiveTab] = useState<Tab>('prijsdetails')
 
   const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+
+  // Keep mounted for exit animation
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true)
+      // next tick → animate in
+      const t = setTimeout(() => setVisible(true), 10)
+      return () => clearTimeout(t)
+    }
+
+    // animate out
+    setVisible(false)
+    const t = setTimeout(() => setMounted(false), 250)
+    return () => clearTimeout(t)
+  }, [isOpen])
+
+  // Lock body scroll while mounted
+  useEffect(() => {
+    if (!mounted) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [mounted])
+
+  // ESC closes
+  useEffect(() => {
+    if (!mounted) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mounted, onClose])
+
+  const contractTypeLine = useMemo(() => {
+    return contract.type === 'dynamisch'
+      ? 'Dynamisch contract'
+      : contract.looptijd
+        ? `Vast contract • ${contract.looptijd} jaar`
+        : 'Contract'
+  }, [contract.type, contract.looptijd])
+
+  if (!mounted) return null
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-150"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/50" />
-        </Transition.Child>
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-8">
-              <Transition.Child
-                as={Fragment}
-                enter="transform transition ease-in-out duration-300"
-                enterFrom="translate-x-full"
-                enterTo="translate-x-0"
-                leave="transform transition ease-in-out duration-250"
-                leaveFrom="translate-x-0"
-                leaveTo="translate-x-full"
-              >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-full sm:max-w-2xl">
-                  <div className="flex h-full flex-col bg-white shadow-2xl">
-                    {/* Header */}
-                    <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 sm:px-6 py-4">
-                      <div className="min-w-0">
-                        <Dialog.Title className="font-bold text-brand-navy-500 text-base sm:text-lg truncate">
-                          {contract.leverancier.naam}
-                        </Dialog.Title>
-                        <div className="text-xs text-gray-500">
-                          {contract.type === 'dynamisch'
-                            ? 'Dynamisch contract'
-                            : contract.looptijd
-                              ? `Vast contract • ${contract.looptijd} jaar`
-                              : 'Contract'}
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="inline-flex items-center justify-center rounded-xl p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        <span className="sr-only">Sluiten</span>
-                        <X className="w-6 h-6" weight="bold" />
-                      </button>
-                    </div>
+      {/* Panel */}
+      <div
+        className={`absolute inset-y-0 right-0 w-screen max-w-full sm:max-w-2xl bg-white shadow-2xl transition-transform duration-300 ${
+          visible ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Details ${contract.leverancier.naam}`}
+      >
+        <div className="flex h-full flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 sm:px-6 py-4">
+            <div className="min-w-0">
+              <div className="font-bold text-brand-navy-500 text-base sm:text-lg truncate">{contract.leverancier.naam}</div>
+              <div className="text-xs text-gray-500">{contractTypeLine}</div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center justify-center rounded-xl p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <span className="sr-only">Sluiten</span>
+              <X className="w-6 h-6" weight="bold" />
+            </button>
+          </div>
 
-                    {/* Tabs */}
-                    <div className="flex border-b-2 border-gray-200 px-4 sm:px-6">
-                      <button
-                        onClick={() => setActiveTab('prijsdetails')}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
-                          activeTab === 'prijsdetails' ? 'text-brand-teal-600' : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                      >
-                        <Calculator weight={activeTab === 'prijsdetails' ? 'bold' : 'regular'} className="w-4 h-4" />
-                        <span className="whitespace-nowrap">Prijsdetails</span>
-                        {activeTab === 'prijsdetails' && (
-                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('voorwaarden')}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
-                          activeTab === 'voorwaarden' ? 'text-brand-teal-600' : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                      >
-                        <FileText weight={activeTab === 'voorwaarden' ? 'bold' : 'regular'} className="w-4 h-4" />
-                        <span className="whitespace-nowrap">Voorwaarden</span>
-                        {activeTab === 'voorwaarden' && (
-                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('over')}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
-                          activeTab === 'over' ? 'text-brand-teal-600' : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                      >
-                        <Info weight={activeTab === 'over' ? 'bold' : 'regular'} className="w-4 h-4" />
-                        <span className="whitespace-nowrap">Over leverancier</span>
-                        {activeTab === 'over' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />}
-                      </button>
-                    </div>
+          {/* Tabs */}
+          <div className="flex border-b-2 border-gray-200 px-4 sm:px-6">
+            <button
+              onClick={() => setActiveTab('prijsdetails')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
+                activeTab === 'prijsdetails' ? 'text-brand-teal-600' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Calculator weight={activeTab === 'prijsdetails' ? 'bold' : 'regular'} className="w-4 h-4" />
+              <span className="whitespace-nowrap">Prijsdetails</span>
+              {activeTab === 'prijsdetails' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />}
+            </button>
+            <button
+              onClick={() => setActiveTab('voorwaarden')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
+                activeTab === 'voorwaarden' ? 'text-brand-teal-600' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FileText weight={activeTab === 'voorwaarden' ? 'bold' : 'regular'} className="w-4 h-4" />
+              <span className="whitespace-nowrap">Voorwaarden</span>
+              {activeTab === 'voorwaarden' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />}
+            </button>
+            <button
+              onClick={() => setActiveTab('over')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-3 font-semibold text-sm transition-colors relative ${
+                activeTab === 'over' ? 'text-brand-teal-600' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Info weight={activeTab === 'over' ? 'bold' : 'regular'} className="w-4 h-4" />
+              <span className="whitespace-nowrap">Over leverancier</span>
+              {activeTab === 'over' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-teal-600" />}
+            </button>
+          </div>
 
-                    {/* Content */}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden break-words px-4 sm:px-6 py-5">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden break-words px-4 sm:px-6 py-5">
                       {/* Prijsdetails */}
                       {activeTab === 'prijsdetails' && (
                         <div className="space-y-4">
@@ -401,23 +425,18 @@ export function ContractDetailsDrawer({
                     </div>
 
                     {/* Footer */}
-                    <div className="border-t border-gray-200 px-4 sm:px-6 py-4 bg-white">
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="w-full inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        Sluiten
-                      </button>
-                    </div>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
+          <div className="border-t border-gray-200 px-4 sm:px-6 py-4 bg-white">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Sluiten
+            </button>
           </div>
         </div>
-      </Dialog>
-    </Transition.Root>
+      </div>
+    </div>
   )
 }
 
