@@ -9,7 +9,7 @@ import EditVerbruikPanel from '@/components/calculator/EditVerbruikPanel'
 import FloatingEditButton from '@/components/calculator/FloatingEditButton'
 import EditVerbruikModal from '@/components/calculator/EditVerbruikModal'
 import { useCalculatorStore } from '@/store/calculatorStore'
-import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf, ChatCircle, Phone } from '@phosphor-icons/react'
+import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf, ChatCircle, Phone, PencilSimple } from '@phosphor-icons/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Keuzehulp } from '@/components/particulier/Keuzehulp'
@@ -728,7 +728,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   return (
     <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-12">
       <div className="container-custom max-w-7xl">
-        <div className="mb-6 md:mb-8 pt-4 md:pt-6">
+        <div className="mb-6 md:mb-8 pt-2 md:pt-3">
           {audience !== 'consumer' && verbruik && (
             <div className="mb-6 hidden lg:block">
               <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
@@ -792,9 +792,20 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                       ].filter(Boolean).join(' • ')
                       
                       return verbruikTekst ? (
-                        <p className="text-white/90 text-sm md:text-base mt-2">
-                          {verbruikTekst}
-                        </p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-2">
+                          <p className="text-white/90 text-sm md:text-base">
+                            {verbruikTekst}
+                          </p>
+                          <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 text-white/90 hover:text-white text-sm font-medium transition-colors group self-start sm:self-auto"
+                          >
+                            <PencilSimple size={14} weight="bold" className="group-hover:text-white transition-colors" />
+                            <span className="underline decoration-white/40 group-hover:decoration-white transition-colors">
+                              Verbruik aanpassen
+                            </span>
+                          </button>
+                        </div>
                       ) : null
                     })()}
                   </div>
