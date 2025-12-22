@@ -49,13 +49,10 @@ export async function middleware(request: NextRequest) {
   // - Visiting /particulier* => consumer
   // - Visiting anything else (non-admin) => business (default)
   if (pathname.startsWith('/particulier')) {
-    if (audience !== 'consumer') {
-      setAudienceCookie(res, hostname, 'consumer')
-    }
+    // Always set both host-only + domain cookie to keep www/apex consistent
+    setAudienceCookie(res, hostname, 'consumer')
   } else if (!pathname.startsWith('/admin')) {
-    if (audience !== 'business') {
-      setAudienceCookie(res, hostname, 'business')
-    }
+    setAudienceCookie(res, hostname, 'business')
   }
 
   return res
