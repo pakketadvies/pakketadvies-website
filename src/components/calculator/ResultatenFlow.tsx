@@ -770,7 +770,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
                   {/* Pricewise-style: edit your details in the left sidebar */}
                   <div className="hidden lg:block">
-                    <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
+                    <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} layout="sidebar" />
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">

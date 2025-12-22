@@ -11,6 +11,12 @@ interface EditVerbruikPanelProps {
   onUpdate: (newData: VerbruikData) => void
   isUpdating: boolean
   /**
+   * Layout variant:
+   * - wide: original layout intended for wide containers
+   * - sidebar: compact layout that avoids overflow in narrow sidebars
+   */
+  layout?: 'wide' | 'sidebar'
+  /**
    * If true, panel can be collapsed/expanded via header. Defaults to true.
    * For Pricewise-style sidebars we keep it always open.
    */
@@ -25,6 +31,7 @@ export default function EditVerbruikPanel({
   currentData,
   onUpdate,
   isUpdating,
+  layout = 'wide',
   collapsible = true,
   defaultOpen = false,
 }: EditVerbruikPanelProps) {
@@ -365,9 +372,10 @@ export default function EditVerbruikPanel({
 
   const totaalElektriciteit = formData.elektriciteitNormaal + (formData.elektriciteitDal || 0)
   const effectiveOpen = collapsible ? isOpen : true
+  const isSidebar = layout === 'sidebar'
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300">
+    <div className="min-w-0 max-w-full bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300">
       {/* Header - Altijd zichtbaar */}
       {collapsible ? (
         <button
@@ -378,9 +386,9 @@ export default function EditVerbruikPanel({
             <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center group-hover:bg-brand-teal-200 transition-colors">
               <PencilSimple weight="duotone" className="w-5 h-5 text-brand-teal-600" />
             </div>
-            <div className="text-left">
+            <div className="text-left min-w-0">
               <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 leading-snug break-words">
                 {totaalElektriciteit.toLocaleString()} kWh stroom
                 {formData.heeftZonnepanelen && formData.terugleveringJaar
                   ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering`
@@ -434,7 +442,9 @@ export default function EditVerbruikPanel({
 
       {/* Edit Form - Collapsible */}
       {effectiveOpen && (
-        <div className="px-4 md:px-6 pb-6 space-y-5 animate-slide-down border-t-2 border-gray-100 pt-6">
+        <div
+          className={`px-4 pb-6 space-y-5 animate-slide-down border-t-2 border-gray-100 pt-6 ${isSidebar ? '' : 'md:px-6'}`}
+        >
           
           {/* 1. LEVERADRES - Altijd bovenaan, full width */}
           <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
@@ -444,8 +454,8 @@ export default function EditVerbruikPanel({
             </div>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-8 gap-3">
-                <div className="col-span-4">
+              <div className={isSidebar ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-8 gap-3'}>
+                <div className={isSidebar ? '' : 'col-span-4'}>
                   <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
                     Postcode
                   </label>
@@ -458,7 +468,7 @@ export default function EditVerbruikPanel({
                     className="w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className={isSidebar ? '' : 'col-span-2'}>
                   <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
                     Huisnr.
                   </label>
@@ -470,7 +480,7 @@ export default function EditVerbruikPanel({
                     className="w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className={isSidebar ? '' : 'col-span-2'}>
                   <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
                     Toev.
                   </label>
@@ -480,7 +490,9 @@ export default function EditVerbruikPanel({
                     onChange={(e) => handleAddressChange('toevoeging', e.target.value.toUpperCase())}
                     placeholder="A"
                     maxLength={4}
-                    className="w-full px-3 py-2.5 text-sm text-center rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all"
+                    className={`w-full px-3 py-2.5 text-sm rounded-lg border-2 border-gray-200 focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 transition-all ${
+                      isSidebar ? '' : 'text-center'
+                    }`}
                   />
                 </div>
               </div>
@@ -570,7 +582,7 @@ export default function EditVerbruikPanel({
           </div>
 
           {/* 2 & 3. ELEKTRICITEIT & ZONNEPANELEN - Desktop: 2 kolommen, Mobiel: stack */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className={isSidebar ? 'grid grid-cols-1 gap-5' : 'grid grid-cols-1 lg:grid-cols-2 gap-5'}>
             
             {/* 2. Elektriciteit */}
             <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
@@ -608,7 +620,7 @@ export default function EditVerbruikPanel({
                 </label>
 
                 {/* Verbruik velden */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className={isSidebar ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-2 gap-3'}>
                   <div>
                     <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
                       {formData.heeftEnkeleMeter ? 'Totaal verbruik' : 'Normaal tarief'}
@@ -691,7 +703,7 @@ export default function EditVerbruikPanel({
                 )}
                 
                 {/* Spacer om hoogte gelijk te maken met elektriciteit sectie */}
-                {!formData.heeftZonnepanelen && (
+                {!formData.heeftZonnepanelen && !isSidebar && (
                   <div className="h-20"></div>
                 )}
               </div>
@@ -699,7 +711,7 @@ export default function EditVerbruikPanel({
           </div>
 
           {/* 4 & 5. GAS & AANSLUITWAARDEN - Desktop: 2 kolommen, Mobiel: stack */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className={isSidebar ? 'grid grid-cols-1 gap-5' : 'grid grid-cols-1 lg:grid-cols-2 gap-5'}>
             
             {/* 4. Gas */}
             <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
@@ -794,11 +806,11 @@ export default function EditVerbruikPanel({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-100">
+          <div className={isSidebar ? 'flex flex-col gap-3 pt-4 border-t-2 border-gray-100' : 'flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-100'}>
             <Button
               onClick={handleSubmit}
               disabled={!hasChanges || isUpdating}
-              className="flex-1 sm:flex-initial"
+              className={isSidebar ? 'w-full' : 'flex-1 sm:flex-initial'}
             >
               {isUpdating ? (
                 <>
@@ -817,14 +829,14 @@ export default function EditVerbruikPanel({
               variant="outline"
               onClick={handleReset}
               disabled={!hasChanges || isUpdating}
-              className="flex-1 sm:flex-initial"
+              className={isSidebar ? 'w-full' : 'flex-1 sm:flex-initial'}
             >
               <X weight="bold" className="w-5 h-5" />
               Annuleren
             </Button>
             
             {hasChanges && (
-              <div className="sm:ml-auto flex items-center gap-2 text-sm text-brand-teal-600 font-medium">
+              <div className={isSidebar ? 'flex items-center gap-2 text-sm text-brand-teal-600 font-medium' : 'sm:ml-auto flex items-center gap-2 text-sm text-brand-teal-600 font-medium'}>
                 <PencilSimple weight="bold" className="w-4 h-4" />
                 Niet opgeslagen wijzigingen
               </div>
