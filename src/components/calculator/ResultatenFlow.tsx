@@ -895,6 +895,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
           )}
 
           {/* Business: existing layout */}
+          {audience !== 'consumer' && (
           <div className="hidden md:block bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4" data-results-section>
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">
@@ -1009,6 +1010,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* If consumer layout is active, we already rendered results above */}
