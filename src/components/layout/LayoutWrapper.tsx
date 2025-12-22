@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
-import { PageTransition } from './PageTransition'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -49,22 +48,24 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     }
   }, [])
   
+  // Scroll naar top bij route change (zonder animatie)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [pathname])
+  
   // Check if we're on an admin route
   const isAdminRoute = pathname?.startsWith('/admin')
   
   if (isAdminRoute) {
-    // Admin routes: no header/footer, no transitions, just children
+    // Admin routes: no header/footer, just children
     return <>{children}</>
   }
   
-  // Regular routes: include header, footer, and page transitions
-  // Header and Footer blijven fixed, alleen main content wordt geanimeerd
+  // Regular routes: include header and footer, no page transitions
   return (
     <>
       <Header />
-      <PageTransition>
-        <main>{children}</main>
-      </PageTransition>
+      <main>{children}</main>
       <Footer />
     </>
   )
