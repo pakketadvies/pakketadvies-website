@@ -1013,52 +1013,59 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
         {/* If consumer layout is active, we already rendered results above */}
         {audience === 'consumer' && verbruik ? null : (
-        {filteredResultaten.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center">
-            <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
-            <Button variant="outline" onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}>
-              Reset filters
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredResultaten.map((contract, index) => (
-              <ContractCard
-                key={contract.id}
-                contract={contract}
-                meterType={verbruik?.meterType || 'weet_niet'}
-                heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
-                verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
-                verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
-                verbruikGas={verbruik?.gasJaar || 0}
-                terugleveringJaar={verbruik?.terugleveringJaar || 0}
-                aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
-                aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
-                postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
-                position={index + 1}
-              />
-            ))}
-          </div>
-        )}
+          <>
+            {filteredResultaten.length === 0 ? (
+              <div className="bg-white rounded-2xl p-12 text-center">
+                <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
+                <Button
+                  variant="outline"
+                  onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
+                >
+                  Reset filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredResultaten.map((contract, index) => (
+                  <ContractCard
+                    key={contract.id}
+                    contract={contract}
+                    meterType={verbruik?.meterType || 'weet_niet'}
+                    heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
+                    verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
+                    verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
+                    verbruikGas={verbruik?.gasJaar || 0}
+                    terugleveringJaar={verbruik?.terugleveringJaar || 0}
+                    aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
+                    aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
+                    postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
+                    position={index + 1}
+                  />
+                ))}
+              </div>
+            )}
 
-        <div className="mt-12 bg-white rounded-2xl p-6 md:p-8 text-center shadow-md">
-          <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-3">Hulp nodig bij het kiezen?</h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto text-sm md:text-base">
-            {audience === 'consumer'
-              ? 'We helpen je graag om het contract te kiezen dat past bij jouw huishouden.'
-              : 'Onze energiespecialisten helpen je graag om het beste contract te vinden dat perfect bij jouw bedrijf past.'}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <Link href="/contact?reason=advies">
-              <Button className="w-full sm:w-auto">{audience === 'consumer' ? 'Vraag hulp bij kiezen' : 'Vraag persoonlijk advies'}</Button>
-            </Link>
-            <Link href="tel:+31850477065">
-              <Button variant="outline" className="w-full sm:w-auto">
-                Bel 085 047 7065
-              </Button>
-            </Link>
-          </div>
-        </div>
+            <div className="mt-12 bg-white rounded-2xl p-6 md:p-8 text-center shadow-md">
+              <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-3">Hulp nodig bij het kiezen?</h2>
+              <p className="text-gray-600 mb-6 max-w-2xl mx-auto text-sm md:text-base">
+                {audience === 'consumer'
+                  ? 'We helpen je graag om het contract te kiezen dat past bij jouw huishouden.'
+                  : 'Onze energiespecialisten helpen je graag om het beste contract te vinden dat perfect bij jouw bedrijf past.'}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                <Link href="/contact?reason=advies">
+                  <Button className="w-full sm:w-auto">
+                    {audience === 'consumer' ? 'Vraag hulp bij kiezen' : 'Vraag persoonlijk advies'}
+                  </Button>
+                </Link>
+                <Link href="tel:+31850477065">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Bel 085 047 7065
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
