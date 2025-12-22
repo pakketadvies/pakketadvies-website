@@ -725,7 +725,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
     <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-12">
       <div className="container-custom max-w-7xl">
         <div className="mb-6 md:mb-8 pt-4 md:pt-6">
-          {verbruik && (
+          {verbruik && audience !== 'consumer' && (
             <div className="mb-6 hidden lg:block">
               <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
             </div>
@@ -733,6 +733,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {verbruik && (
             <>
+              {/* For consumer: keep modal edit only on mobile. For business: keep it everywhere on mobile. */}
               <div className="lg:hidden">
                 <FloatingEditButton onClick={() => setIsModalOpen(true)} />
               </div>
@@ -762,19 +763,17 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                       Dit zijn onze {filteredResultaten.length} deals voor jou
                     </h1>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-semibold transition-colors"
-                  >
-                    Wijzig gegevens
-                  </button>
                 </div>
               </div>
 
               <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+                  {/* Desktop: edit directly in sidebar (Pricewise-style) */}
+                  <div className="hidden lg:block">
+                    <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
+                  </div>
+
                   <div className="bg-white border border-gray-200 rounded-2xl p-4">
                     <div className="font-semibold text-brand-navy-600">Jouw gegevens</div>
                     <div className="mt-3 text-sm text-gray-700 space-y-2">
