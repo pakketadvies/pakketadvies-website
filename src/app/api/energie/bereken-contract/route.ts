@@ -639,9 +639,19 @@ export async function POST(request: Request) {
     })
     
   } catch (error: any) {
-    console.error('Error in energie/bereken-contract:', error)
+    console.error('❌ Error in energie/bereken-contract:', error)
+    console.error('Error stack:', error.stack)
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      body: error.body,
+    })
     return NextResponse.json(
-      { error: 'Fout bij berekenen energiekosten', details: error.message },
+      { 
+        error: 'Fout bij berekenen energiekosten', 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
