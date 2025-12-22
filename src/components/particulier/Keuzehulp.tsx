@@ -186,10 +186,11 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
 
         {/* Progress indicator */}
         <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <div className="flex items-start justify-between gap-1 sm:gap-2">
+          <div className="flex items-start">
             {steps.map((step, index) => (
-              <div key={step} className="flex items-start flex-1 min-w-0">
-                <div className="flex flex-col items-center flex-1 min-w-0">
+              <div key={step} className="flex items-start flex-1" style={{ minWidth: 0 }}>
+                {/* Step circle and label */}
+                <div className="flex flex-col items-center flex-1" style={{ minWidth: 0 }}>
                   <div
                     className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors flex-shrink-0 ${
                       index < currentStepIndex
@@ -206,7 +207,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
                     )}
                   </div>
                   <span
-                    className={`mt-1.5 sm:mt-2 text-[10px] sm:text-xs font-medium text-center leading-tight ${
+                    className={`mt-1.5 sm:mt-2 text-[10px] sm:text-xs font-medium text-center leading-tight px-0.5 ${
                       index === currentStepIndex ? 'text-brand-teal-600' : 'text-gray-500'
                     }`}
                   >
@@ -219,11 +220,13 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
                           : 'Duurzaamheid'}
                   </span>
                 </div>
+                {/* Connector line */}
                 {index < steps.length - 1 && (
                   <div
-                    className={`h-0.5 flex-1 mx-1 sm:mx-2 mt-4 transition-colors flex-shrink-0 ${
+                    className={`h-0.5 flex-1 mx-1 sm:mx-2 mt-4 transition-colors ${
                       index < currentStepIndex ? 'bg-brand-teal-500' : 'bg-gray-200'
                     }`}
+                    style={{ minWidth: '8px' }}
                   />
                 )}
               </div>
