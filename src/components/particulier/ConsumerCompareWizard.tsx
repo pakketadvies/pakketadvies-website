@@ -77,24 +77,6 @@ export function ConsumerCompareWizard() {
     // Run on mount
   }, [])
 
-  const baseHeader = (
-    <div className="flex items-center justify-between gap-4">
-      <div>
-        <h1 className="mt-2 font-display text-3xl md:text-4xl font-bold text-white leading-tight">
-          Energie vergelijken voor thuis
-        </h1>
-        <p className="mt-3 text-white/80 max-w-2xl">
-          Kies hoe je je verbruik wilt invullen. Daarna tonen we direct de resultaten.
-        </p>
-      </div>
-      <div className="hidden md:flex items-center gap-2">
-        <Link href="/particulier" className="text-sm font-semibold text-white/90 hover:text-white underline">
-          Adres wijzigen
-        </Link>
-      </div>
-    </div>
-  )
-
   const handleSubmitManual = () => {
     if (!verbruik?.leveringsadressen?.length) return
 
@@ -153,11 +135,7 @@ export function ConsumerCompareWizard() {
 
   return (
     <div className="w-full">
-      <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-3xl p-6 md:p-10 text-white">
-        {baseHeader}
-      </div>
-
-      <div className="mt-6 bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm">
         {!hasCheckedAddress ? (
           <div>
             <h2 className="font-display text-2xl font-bold text-brand-navy-600">Start met je adres</h2>
