@@ -12,6 +12,7 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf, ChatCircle, Phone } from '@phosphor-icons/react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Keuzehulp } from '@/components/particulier/Keuzehulp'
 import type { ContractOptie, VerbruikData } from '@/types/calculator'
 import {
   isGrootverbruik,
