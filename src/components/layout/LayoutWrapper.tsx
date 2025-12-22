@@ -57,7 +57,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
   
-  // Regular routes: include header and footer with smooth page transitions
+  // Regular routes: include header, footer, and page transitions
+  // Header and Footer blijven fixed, alleen main content wordt geanimeerd
   return (
     <>
       <Header />
