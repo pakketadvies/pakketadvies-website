@@ -178,7 +178,13 @@ export function ConsumerContractRowCard({
                   <div className="text-3xl font-bold text-brand-navy-500">€{contract.maandbedrag}</div>
                   <div className="text-sm text-gray-500">/maand</div>
                 </div>
-                <div className="text-xs text-gray-500">€{contract.jaarbedrag.toLocaleString()} / jaar</div>
+                <div className="text-xs text-gray-500 mb-1">€{contract.jaarbedrag.toLocaleString()} / jaar</div>
+                {contract.besparing && contract.besparing > 0 && (
+                  <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 rounded-lg px-2 py-1 text-xs font-semibold border border-green-200 md:ml-auto">
+                    <Check className="w-3 h-3" weight="bold" />
+                    <span>€{contract.besparing}/mnd besparing</span>
+                  </div>
+                )}
               </div>
 
               <Button
