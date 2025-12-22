@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Calculator, FileText, Info } from '@phosphor-icons/react'
 import type { KostenBreakdown } from './ContractCard'
 import type { ContractOptie } from '@/types/calculator'
@@ -93,7 +94,7 @@ export function ContractDetailsDrawer({
 
   if (!mounted) return null
 
-  return (
+  const content = (
     <div className="fixed inset-0 z-[120]">
       {/* Backdrop */}
       <div
@@ -438,6 +439,14 @@ export function ContractDetailsDrawer({
       </div>
     </div>
   )
+
+  // Render via portal to escape any stacking contexts (e.g. parent transforms),
+  // ensuring the drawer always sits above the fixed header.
+  if (typeof document !== 'undefined') {
+    return createPortal(content, document.body)
+  }
+
+  return content
 }
 
 
