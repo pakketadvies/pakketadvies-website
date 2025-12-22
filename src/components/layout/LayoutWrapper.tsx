@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { PageTransition } from './PageTransition'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -52,15 +53,17 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const isAdminRoute = pathname?.startsWith('/admin')
   
   if (isAdminRoute) {
-    // Admin routes: no header/footer, just children
+    // Admin routes: no header/footer, no transitions, just children
     return <>{children}</>
   }
   
-  // Regular routes: include header and footer
+  // Regular routes: include header and footer with smooth page transitions
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <PageTransition>
+        <main>{children}</main>
+      </PageTransition>
       <Footer />
     </>
   )
