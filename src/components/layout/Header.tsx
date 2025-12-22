@@ -6,17 +6,27 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { List, X } from '@phosphor-icons/react'
 import { SiteMenuDrawer } from './SiteMenuDrawer'
-import { AUDIENCE_COOKIE, getAudienceFromPath, type Audience } from '@/lib/audience'
 
-function getCookie(name: string): string | undefined {
-  if (typeof document === 'undefined') return undefined
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}=([^;]*)`))
-  return match ? decodeURIComponent(match[1]) : undefined
+type Audience = 'business' | 'consumer'
+const AUDIENCE_COOKIE = 'pa_audience'
+
+function getCookieDomain(): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  const host = window.location.hostname
+  if (host === 'pakketadvies.nl' || host.endsWith('.pakketadvies.nl')) return '.pakketadvies.nl'
+  return undefined
 }
 
 function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 365) {
   if (typeof document === 'undefined') return
+  // Set host-only cookie (works on localhost + keeps existing host-only cookie in sync)
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=${maxAgeSeconds}; Path=/; SameSite=Lax`
+
+  // Also set domain cookie so www + apex share the same audience preference
+  const domain = getCookieDomain()
+  if (domain) {
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=${maxAgeSeconds}; Path=/; Domain=${domain}; SameSite=Lax`
+  }
 }
 
 export function Header() {
@@ -35,20 +45,10 @@ export function Header() {
   }, [])
 
   useEffect(() => {
-    // IMPORTANT: UI should reflect where the user *is*, not an old cookie value.
-    // Cookie can lag behind during client transitions, so we derive from route first.
-    const routeAudience = getAudienceFromPath(pathname)
-
-    // Option B: on "/" we show the last chosen audience (cookie), otherwise we reflect the route.
-    if (pathname === '/') {
-      const fromCookie = getCookie(AUDIENCE_COOKIE) as Audience | undefined
-      if (fromCookie === 'business' || fromCookie === 'consumer') {
-        setAudience(fromCookie)
-        return
-      }
-    }
-
-    setAudience(routeAudience)
+    // UI should reflect the *current route* (active experience), not the remembered cookie.
+    // The cookie is only used as "last chosen" for "/" redirect behavior.
+    const nextAudience: Audience = pathname?.startsWith('/particulier') ? 'consumer' : 'business'
+    setAudience(nextAudience)
   }, [pathname])
 
   const businessNavLinks = [
@@ -78,10 +78,13 @@ export function Header() {
 
   const handleSwitch = (next: Audience) => {
     if (next === audience) return
-    setAudience(next)
     setCookie(AUDIENCE_COOKIE, next)
     setIsMobileMenuOpen(false)
-    router.push(next === 'consumer' ? '/particulier' : '/')
+    // Ensure cookie write is applied before Next.js starts the navigation/RSC fetch
+    setTimeout(() => {
+      router.push(next === 'consumer' ? '/particulier' : '/')
+      router.refresh()
+    }, 0)
   }
 
   return (

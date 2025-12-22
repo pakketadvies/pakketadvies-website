@@ -1,12 +1,12 @@
 // Service Worker voor PakketAdvies PWA
 // Versie: 1.0.0
 
-const CACHE_NAME = 'pakketadvies-v1';
-const RUNTIME_CACHE = 'pakketadvies-runtime-v1';
+// Bump cache version to invalidate older buggy caches (especially cached "/")
+const CACHE_NAME = 'pakketadvies-v2';
+const RUNTIME_CACHE = 'pakketadvies-runtime-v2';
 
 // Assets die direct gecached moeten worden
 const STATIC_ASSETS = [
-  '/',
   '/icon-192x192.png',
   '/icon-512x512.png',
   '/apple-icon.png',
@@ -70,9 +70,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Never cache navigations/documents.
+  // Our app uses cookie-based redirects ("/" -> "/particulier"), so caching HTML (or "/") can trap users in the wrong experience.
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(request, { redirect: 'follow' }).catch(() => {
+        return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+      })
+    )
+    return
+  }
+
   // Skip API calls and external resources
   if (
     url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/_next/') ||
     url.hostname !== self.location.hostname ||
     url.protocol === 'chrome-extension:'
   ) {
@@ -112,10 +124,7 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            // If network fails and no cache, return offline page
-            if (request.destination === 'document') {
-              return caches.match('/');
-            }
+            return undefined
           });
       })
   );
