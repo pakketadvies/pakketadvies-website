@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Pencil, CheckCircle, XCircle, Star } from '@phosphor-icons/react'
 import DeleteContractButton from './DeleteContractButton'
+import DuplicateContractButton from './DuplicateContractButton'
 import type { Contract } from '@/types/admin'
 
 interface ContractenListProps {
@@ -167,6 +168,7 @@ export default function ContractenList({ contracten }: ContractenListProps) {
                           >
                             <Pencil size={20} className="text-gray-600" />
                           </Link>
+                          <DuplicateContractButton id={contract.id} naam={contract.naam} />
                           <DeleteContractButton id={contract.id} naam={contract.naam} />
                         </div>
                       </td>
@@ -193,6 +195,7 @@ export default function ContractenList({ contracten }: ContractenListProps) {
                     >
                       <Pencil size={20} className="text-gray-600" />
                     </Link>
+                    <DuplicateContractButton id={contract.id} naam={contract.naam} />
                     <DeleteContractButton id={contract.id} naam={contract.naam} />
                   </div>
                 </div>
