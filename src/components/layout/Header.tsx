@@ -77,14 +77,17 @@ export function Header() {
       : { href: '/calculator', label: 'Bereken besparing' }
 
   const handleSwitch = (next: Audience) => {
-    if (next === audience) return
+    // Check based on current pathname, not state (which might be stale)
+    const currentAudience: Audience = pathname?.startsWith('/particulier') ? 'consumer' : 'business'
+    if (next === currentAudience) return
+    
+    // Update state immediately for UI feedback
+    setAudience(next)
     setCookie(AUDIENCE_COOKIE, next)
     setIsMobileMenuOpen(false)
-    // Ensure cookie write is applied before Next.js starts the navigation/RSC fetch
-    setTimeout(() => {
-      router.push(next === 'consumer' ? '/particulier' : '/')
-      router.refresh()
-    }, 0)
+    
+    // Navigate to the target route
+    router.push(next === 'consumer' ? '/particulier' : '/')
   }
 
   return (
