@@ -79,7 +79,7 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
   // Brand assets
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
   const heroImageUrl = `${baseUrl}/images/hero-main.jpg`
-  const officeTeamImageUrl = `${baseUrl}/images/office-team.jpg`
+  const officeTeamImageUrl = `${baseUrl}/images/gevel.jpg`
   const defaultIntroText = `Beste ${recipientName || 'klant'},<br><br>We hebben uw gegevens verzameld via onze social media campagnes voor particulier en/of zakelijke energie. Via deze email willen we u graag op de hoogte brengen van onze nieuwe aanbiedingen voor deze maand.<br><br><strong style="color: ${navy};">Let op:</strong> momenteel hebben wij voor groot MKB en grootverbruikers met een verbruik boven de 75.000kWh een heel scherp tarief voor lange looptijd.<br><br>Daarnaast hebben wij aantrekkelijke opties voor eigenaren van zonnepanelen via dynamische contracten. Voor grote zakelijke klanten bieden wij strategische inkoop aan. Vergelijk direct alle aanbiedingen via <a href="${baseUrl}/calculator" style="color: ${teal}; text-decoration: underline; font-weight: 600;">${baseUrl}/calculator</a> of neem contact met ons op voor persoonlijk advies.`
 
   // Icon SVGs - Teal versions for regular cards (kept for potential future variants)
