@@ -771,7 +771,13 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
                   {/* Desktop: edit directly in sidebar (Pricewise-style) */}
                   <div className="hidden lg:block">
-                    <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
+                    <EditVerbruikPanel
+                      currentData={verbruik}
+                      onUpdate={handleVerbruikUpdate}
+                      isUpdating={isUpdating}
+                      collapsible={false}
+                      defaultOpen={true}
+                    />
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-2xl p-4">

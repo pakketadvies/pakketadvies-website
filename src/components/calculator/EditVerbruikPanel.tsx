@@ -10,11 +10,26 @@ interface EditVerbruikPanelProps {
   currentData: VerbruikData
   onUpdate: (newData: VerbruikData) => void
   isUpdating: boolean
+  /**
+   * If true, panel can be collapsed/expanded via header. Defaults to true.
+   * For Pricewise-style sidebars we keep it always open.
+   */
+  collapsible?: boolean
+  /**
+   * Initial open state (only relevant when collapsible=true).
+   */
+  defaultOpen?: boolean
 }
 
-export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }: EditVerbruikPanelProps) {
+export default function EditVerbruikPanel({
+  currentData,
+  onUpdate,
+  isUpdating,
+  collapsible = true,
+  defaultOpen = false,
+}: EditVerbruikPanelProps) {
   const { setAddressType } = useCalculatorStore()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(defaultOpen)
   const [formData, setFormData] = useState<VerbruikData>(currentData)
   const [hasChanges, setHasChanges] = useState(false)
   // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
@@ -349,46 +364,76 @@ export default function EditVerbruikPanel({ currentData, onUpdate, isUpdating }:
   }
 
   const totaalElektriciteit = formData.elektriciteitNormaal + (formData.elektriciteitDal || 0)
+  const effectiveOpen = collapsible ? isOpen : true
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300">
       {/* Header - Altijd zichtbaar */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors group focus:outline-none"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center group-hover:bg-brand-teal-200 transition-colors">
-            <PencilSimple weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+      {collapsible ? (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors group focus:outline-none"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center group-hover:bg-brand-teal-200 transition-colors">
+              <PencilSimple weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
+              <p className="text-sm text-gray-600">
+                {totaalElektriciteit.toLocaleString()} kWh stroom
+                {formData.heeftZonnepanelen && formData.terugleveringJaar
+                  ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering`
+                  : ''}
+                {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
+                {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
+              </p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="text-lg font-bold text-brand-navy-500">Verbruik aanpassen</h3>
-            <p className="text-sm text-gray-600">
-              {totaalElektriciteit.toLocaleString()} kWh stroom
-              {formData.heeftZonnepanelen && formData.terugleveringJaar ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering` : ''}
-              {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
-              {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
-            </p>
+
+          <div className="flex items-center gap-3">
+            {hasChanges && !isOpen && (
+              <span className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-brand-teal-100 text-brand-teal-700 rounded-lg text-sm font-medium">
+                <PencilSimple weight="bold" className="w-4 h-4" />
+                Niet opgeslagen
+              </span>
+            )}
+            {isOpen ? (
+              <CaretUp weight="bold" className="w-6 h-6 text-gray-400" />
+            ) : (
+              <CaretDown weight="bold" className="w-6 h-6 text-gray-400" />
+            )}
           </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {hasChanges && !isOpen && (
+        </button>
+      ) : (
+        <div className="w-full px-4 md:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-teal-100 rounded-lg flex items-center justify-center">
+              <PencilSimple weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-lg font-bold text-brand-navy-500">Gegevens aanpassen</h3>
+              <p className="text-sm text-gray-600">
+                {totaalElektriciteit.toLocaleString()} kWh stroom
+                {formData.heeftZonnepanelen && formData.terugleveringJaar
+                  ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering`
+                  : ''}
+                {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
+                {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
+              </p>
+            </div>
+          </div>
+          {hasChanges && (
             <span className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-brand-teal-100 text-brand-teal-700 rounded-lg text-sm font-medium">
               <PencilSimple weight="bold" className="w-4 h-4" />
               Niet opgeslagen
             </span>
           )}
-          {isOpen ? (
-            <CaretUp weight="bold" className="w-6 h-6 text-gray-400" />
-          ) : (
-            <CaretDown weight="bold" className="w-6 h-6 text-gray-400" />
-          )}
         </div>
-      </button>
+      )}
 
       {/* Edit Form - Collapsible */}
-      {isOpen && (
+      {effectiveOpen && (
         <div className="px-4 md:px-6 pb-6 space-y-5 animate-slide-down border-t-2 border-gray-100 pt-6">
           
           {/* 1. LEVERADRES - Altijd bovenaan, full width */}
