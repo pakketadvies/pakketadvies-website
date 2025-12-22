@@ -5,21 +5,16 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Envelope, Phone, MapPin, LinkedinLogo, InstagramLogo } from '@phosphor-icons/react'
+import { getAudienceFromPath, type Audience } from '@/lib/audience'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
   const pathname = usePathname()
-  const [audience, setAudience] = useState<'business' | 'consumer'>('business')
+  const [audience, setAudience] = useState<Audience>('business')
 
   useEffect(() => {
-    // Prefer cookie (global switch), fallback to path
-    const match = typeof document !== 'undefined' ? document.cookie.match(/(?:^|; )pa_audience=([^;]*)/) : null
-    const fromCookie = match ? decodeURIComponent(match[1]) : undefined
-    if (fromCookie === 'consumer' || fromCookie === 'business') {
-      setAudience(fromCookie)
-      return
-    }
-    if (pathname?.startsWith('/particulier')) setAudience('consumer')
+    // Keep footer in sync with the current route (cookie can lag during transitions).
+    setAudience(getAudienceFromPath(pathname))
   }, [pathname])
 
   const isConsumer = audience === 'consumer'

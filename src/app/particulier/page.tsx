@@ -23,7 +23,7 @@ export default function ParticulierHomePage() {
               <h1 className="mt-5 font-display text-4xl md:text-5xl font-bold text-white leading-tight">
                 Vind het energiecontract dat bij jou past
               </h1>
-              <p className="mt-4 text-white/85 text-lg leading-relaxed max-w-xl">
+              <p className="hidden md:block mt-4 text-white/85 text-lg leading-relaxed max-w-xl">
                 Vast, variabel of dynamisch — wij helpen je helder vergelijken, met uitleg die je snapt. In een paar minuten weet je
                 wat verstandig is voor jouw situatie.
               </p>

@@ -1,7 +1,7 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
+import { AUDIENCE_COOKIE, getAudienceFromPath } from '@/lib/audience'
 
-const AUDIENCE_COOKIE = 'pa_audience'
 const AUDIENCE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
 
 export async function middleware(request: NextRequest) {
@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const audience = request.cookies.get(AUDIENCE_COOKIE)?.value
+  const routeAudience = getAudienceFromPath(pathname)
 
   // Optie B: "/" follows last selected audience
   if (pathname === '/' && audience === 'consumer') {
@@ -26,20 +27,11 @@ export async function middleware(request: NextRequest) {
 
   const res = await updateSession(request)
 
-  // Persist audience choice based on where the user is
-  // - Visiting /particulier* => consumer
-  // - Visiting anything else (non-admin) => business (default)
-  if (pathname.startsWith('/particulier')) {
-    if (audience !== 'consumer') {
-      res.cookies.set(AUDIENCE_COOKIE, 'consumer', {
-        path: '/',
-        maxAge: AUDIENCE_MAX_AGE,
-        sameSite: 'lax',
-      })
-    }
-  } else if (!pathname.startsWith('/admin')) {
-    if (audience !== 'business') {
-      res.cookies.set(AUDIENCE_COOKIE, 'business', {
+  // Persist audience based on current route (single source of truth)
+  // Note: don't overwrite on admin routes.
+  if (!pathname.startsWith('/admin')) {
+    if (audience !== routeAudience) {
+      res.cookies.set(AUDIENCE_COOKIE, routeAudience, {
         path: '/',
         maxAge: AUDIENCE_MAX_AGE,
         sameSite: 'lax',

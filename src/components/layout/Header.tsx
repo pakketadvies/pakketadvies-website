@@ -6,9 +6,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { List, X } from '@phosphor-icons/react'
 import { SiteMenuDrawer } from './SiteMenuDrawer'
-
-type Audience = 'business' | 'consumer'
-const AUDIENCE_COOKIE = 'pa_audience'
+import { AUDIENCE_COOKIE, getAudienceFromPath, type Audience } from '@/lib/audience'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -37,13 +35,20 @@ export function Header() {
   }, [])
 
   useEffect(() => {
-    const fromCookie = getCookie(AUDIENCE_COOKIE) as Audience | undefined
-    if (fromCookie === 'business' || fromCookie === 'consumer') {
-      setAudience(fromCookie)
-      return
+    // IMPORTANT: UI should reflect where the user *is*, not an old cookie value.
+    // Cookie can lag behind during client transitions, so we derive from route first.
+    const routeAudience = getAudienceFromPath(pathname)
+
+    // Option B: on "/" we show the last chosen audience (cookie), otherwise we reflect the route.
+    if (pathname === '/') {
+      const fromCookie = getCookie(AUDIENCE_COOKIE) as Audience | undefined
+      if (fromCookie === 'business' || fromCookie === 'consumer') {
+        setAudience(fromCookie)
+        return
+      }
     }
-    // Fallback: infer from route
-    if (pathname?.startsWith('/particulier')) setAudience('consumer')
+
+    setAudience(routeAudience)
   }, [pathname])
 
   const businessNavLinks = [
