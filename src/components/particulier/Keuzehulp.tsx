@@ -185,13 +185,13 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
         </div>
 
         {/* Progress indicator */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-start justify-between gap-1 sm:gap-2">
             {steps.map((step, index) => (
-              <div key={step} className="flex items-center flex-1">
-                <div className="flex flex-col items-center flex-1">
+              <div key={step} className="flex items-start flex-1 min-w-0">
+                <div className="flex flex-col items-center flex-1 min-w-0">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors flex-shrink-0 ${
                       index < currentStepIndex
                         ? 'bg-brand-teal-500 text-white'
                         : index === currentStepIndex
@@ -200,13 +200,13 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
                     }`}
                   >
                     {index < currentStepIndex ? (
-                      <Check size={16} weight="bold" />
+                      <Check size={14} weight="bold" className="sm:w-4 sm:h-4" />
                     ) : (
                       index + 1
                     )}
                   </div>
                   <span
-                    className={`mt-2 text-xs font-medium ${
+                    className={`mt-1.5 sm:mt-2 text-[10px] sm:text-xs font-medium text-center leading-tight ${
                       index === currentStepIndex ? 'text-brand-teal-600' : 'text-gray-500'
                     }`}
                   >
@@ -221,7 +221,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`h-0.5 flex-1 mx-2 transition-colors ${
+                    className={`h-0.5 flex-1 mx-1 sm:mx-2 mt-4 transition-colors flex-shrink-0 ${
                       index < currentStepIndex ? 'bg-brand-teal-500' : 'bg-gray-200'
                     }`}
                   />

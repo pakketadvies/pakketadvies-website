@@ -757,7 +757,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Consumer: Pricewise-style layout (sidebar + list) */}
           {audience === 'consumer' && verbruik && (
-            <div className="mt-2">
+            <div>
               <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
