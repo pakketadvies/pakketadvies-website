@@ -849,6 +849,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                       <ContractCard
                         key={contract.id}
                         contract={contract}
+                        variant="compact"
                         meterType={verbruik?.meterType || 'weet_niet'}
                         heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
                         verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}

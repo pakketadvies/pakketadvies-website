@@ -17,6 +17,12 @@ import { ContractDetailsModal } from './ContractDetailsModal'
 
 interface ContractCardProps {
   contract: ContractOptie
+  /**
+   * Visual density variant.
+   * - default: current full card (business-style)
+   * - compact: shorter list-style card (consumer results, Pricewise-like)
+   */
+  variant?: 'default' | 'compact'
   meterType: 'slim' | 'oud' | 'weet_niet' | 'enkel'
   heeftEnkeleMeter: boolean
   // Verbruik voor kostenbreakdown
@@ -89,6 +95,7 @@ export interface KostenBreakdown {
 
 export default function ContractCard({ 
   contract, 
+  variant = 'default',
   meterType, 
   heeftEnkeleMeter,
   verbruikElektriciteitNormaal,
@@ -190,6 +197,7 @@ export default function ContractCard({
   }
 
   const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+  const isCompact = variant === 'compact'
 
   return (
     <Card
@@ -206,12 +214,16 @@ export default function ContractCard({
         </div>
       )}
 
-      <CardContent className="pt-6 md:pt-6">
+      <CardContent className={isCompact ? 'pt-4' : 'pt-6 md:pt-6'}>
         {/* Leverancier met logo */}
-        <div className="mb-4 md:mb-6 flex items-start gap-3 md:gap-4">
+        <div className={`${isCompact ? 'mb-3' : 'mb-4 md:mb-6'} flex items-start gap-3 md:gap-4`}>
           {/* Logo */}
           {contract.leverancier.logo && (
-            <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white rounded-lg border-2 border-gray-100 p-1.5 md:p-2 flex items-center justify-center">
+            <div
+              className={`flex-shrink-0 bg-white rounded-lg border-2 border-gray-100 flex items-center justify-center ${
+                isCompact ? 'w-10 h-10 p-1.5' : 'w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 p-1.5 md:p-2'
+              }`}
+            >
               <img 
                 src={contract.leverancier.logo} 
                 alt={`${contract.leverancier.naam} logo`}
@@ -223,7 +235,9 @@ export default function ContractCard({
           {/* Naam en details */}
           <div className="flex-1 min-w-0">
             <h3 
-              className="text-lg md:text-xl lg:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2 lg:mb-2.5 pr-0" 
+              className={`font-bold text-brand-navy-500 pr-0 ${
+                isCompact ? 'text-base md:text-lg mb-1' : 'text-lg md:text-xl lg:text-2xl mb-1.5 md:mb-2 lg:mb-2.5'
+              }`}
               title={contract.leverancier.naam}
               style={{
                 wordBreak: 'break-word',
@@ -243,7 +257,7 @@ export default function ContractCard({
             
             {/* Badges - Direct onder de naam, perfect uitgelijnd */}
             {(contract.aanbevolen || contract.populair || contract.groeneEnergie) && (
-              <div className="flex flex-wrap items-center gap-1 md:gap-1.5 lg:gap-2 mb-1.5 md:mb-2.5 lg:mb-3">
+              <div className={`flex flex-wrap items-center gap-1 md:gap-1.5 lg:gap-2 ${isCompact ? 'mb-1' : 'mb-1.5 md:mb-2.5 lg:mb-3'}`}>
                 {contract.aanbevolen && (
                   <Badge variant="success" className="shadow-md text-xs md:text-xs lg:text-sm px-1.5 md:px-2 lg:px-2.5 py-0.5 md:py-1 lg:py-1.5">
                     <Check weight="bold" className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 mr-0.5 md:mr-1 flex-shrink-0" />
@@ -265,7 +279,7 @@ export default function ContractCard({
               </div>
             )}
             
-            <p className="text-xs md:text-sm text-gray-600 line-clamp-2 mt-0.5">
+            <p className={`text-xs md:text-sm text-gray-600 ${isCompact ? 'line-clamp-1' : 'line-clamp-2'} mt-0.5`}>
               {contract.looptijd 
                 ? `Vast contract • ${contract.looptijd} jaar`
                 : contract.type === 'dynamisch'
@@ -277,16 +291,16 @@ export default function ContractCard({
         </div>
 
         {/* Prijs en Rating op één lijn op mobiel */}
-        <div className="mb-4 md:mb-6 pb-4 md:pb-6 border-b-2 border-gray-100">
-          <div className="flex items-start justify-between gap-3 mb-2 md:mb-1">
+        <div className={`${isCompact ? 'mb-3 pb-3' : 'mb-4 md:mb-6 pb-4 md:pb-6'} border-b-2 border-gray-100`}>
+          <div className={`flex items-start justify-between gap-3 ${isCompact ? 'mb-1' : 'mb-2 md:mb-1'}`}>
             <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1.5 md:gap-2 mb-1">
-                <span className="text-3xl md:text-4xl font-bold text-brand-navy-500">
+              <div className={`flex items-baseline gap-1.5 md:gap-2 ${isCompact ? 'mb-0.5' : 'mb-1'}`}>
+                <span className={`${isCompact ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl'} font-bold text-brand-navy-500`}>
                   €{contract.maandbedrag}
                 </span>
-                <span className="text-xs md:text-base text-gray-500">/maand</span>
+                <span className={`${isCompact ? 'text-xs md:text-sm' : 'text-xs md:text-base'} text-gray-500`}>/maand</span>
               </div>
-              <div className="text-xs md:text-sm text-gray-500 mb-2 md:mb-3">
+              <div className={`${isCompact ? 'text-xs mb-1.5' : 'text-xs md:text-sm mb-2 md:mb-3'} text-gray-500`}>
                 €{contract.jaarbedrag.toLocaleString()} per jaar
               </div>
               {contract.besparing && contract.besparing > 0 && (
@@ -322,7 +336,9 @@ export default function ContractCard({
                   }
                   position="bottom"
                 >
-                  <div className="inline-flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold text-xs md:text-sm cursor-pointer hover:bg-green-100 active:bg-green-200 transition-colors group">
+                  <div className={`inline-flex items-center gap-1 bg-green-50 text-green-700 rounded-lg font-semibold cursor-pointer hover:bg-green-100 active:bg-green-200 transition-colors group ${
+                    isCompact ? 'px-2 py-1 text-xs' : 'px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm'
+                  }`}>
                     <Check weight="bold" className="w-3 h-3 md:w-4 md:h-4" />
                     <span>€{contract.besparing}/mnd</span>
                     <Info weight="fill" className="w-3 h-3 md:w-4 md:h-4 text-green-600 opacity-60 group-hover:opacity-100 transition-opacity" />
@@ -354,6 +370,7 @@ export default function ContractCard({
         </div>
 
         {/* Rating - Desktop versie (onder prijs) */}
+        {!isCompact && (
         <div className="hidden md:flex items-center gap-2 mb-4 md:mb-6">
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
@@ -372,9 +389,10 @@ export default function ContractCard({
             {contract.rating} ({contract.aantalReviews})
           </span>
         </div>
+        )}
 
-        {/* Details bekijken link - Mobile only */}
-        <div className="md:hidden mb-4">
+        {/* Details bekijken link - always for compact, mobile-only for default */}
+        <div className={`${isCompact ? 'mb-3' : 'md:hidden mb-4'}`}>
           <button
             onClick={() => setIsDetailsModalOpen(true)}
             className="w-full text-center text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium py-2 underline decoration-1 underline-offset-2 transition-colors"
@@ -384,6 +402,7 @@ export default function ContractCard({
         </div>
 
         {/* 3 Accordions - Desktop only */}
+        {!isCompact && (
         <div className="hidden md:block space-y-1.5 md:space-y-2 mb-4 md:mb-6">
           {/* Prijsdetails */}
           <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
@@ -879,11 +898,14 @@ export default function ContractCard({
             )}
           </div>
         </div>
+        )}
 
         {/* Actions */}
-        <div className="space-y-2 md:space-y-3 pt-3 md:pt-4 border-t-2 border-gray-100">
+        <div className={`${isCompact ? 'pt-2' : 'space-y-2 md:space-y-3 pt-3 md:pt-4'} border-t-2 border-gray-100`}>
           <Button 
-            className="w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-sm md:text-base py-2.5 md:py-3"
+            className={`w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-sm md:text-base ${
+              isCompact ? 'py-2' : 'py-2.5 md:py-3'
+            }`}
             onClick={async () => {
               // Track InitiateCheckout event for Facebook Pixel - VOORDAT navigatie
               const eventData = {
