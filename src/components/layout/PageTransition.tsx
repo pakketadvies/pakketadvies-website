@@ -7,21 +7,21 @@ import { ReactNode, useEffect } from 'react'
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 20,
+    x: 100, // Start van rechts
   },
   animate: {
     opacity: 1,
-    y: 0,
+    x: 0, // Eindpositie
     transition: {
-      duration: 0.3,
+      duration: 0.4,
       ease: [0.22, 1, 0.36, 1] as const, // Custom easing voor soepele, natuurlijke beweging
     },
   },
   exit: {
     opacity: 0,
-    y: -20,
+    x: -100, // Gaat naar links weg
     transition: {
-      duration: 0.2,
+      duration: 0.3,
       ease: [0.22, 1, 0.36, 1] as const,
     },
   },
@@ -53,6 +53,7 @@ export function PageTransition({ children }: PageTransitionProps) {
         exit="exit"
         variants={pageVariants}
         className="min-h-screen"
+        style={{ willChange: 'transform, opacity' }} // Performance optimalisatie
       >
         {children}
       </motion.div>
