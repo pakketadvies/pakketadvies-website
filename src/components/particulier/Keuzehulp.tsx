@@ -29,6 +29,8 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
   const [selectedType, setSelectedType] = useState<TariefType>(null)
   const [selectedLooptijd, setSelectedLooptijd] = useState<Looptijd>(null)
   const [selectedDuurzaamheid, setSelectedDuurzaamheid] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   // Initialize from current filters
   useEffect(() => {
@@ -46,16 +48,40 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
     }
   }, [isOpen, currentFilters])
 
-  // Close on Escape key
+  // Keep mounted for exit animation (same as ContractDetailsDrawer)
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose()
-      }
+    if (isOpen) {
+      setMounted(true)
+      // next tick → animate in
+      const t = setTimeout(() => setVisible(true), 10)
+      return () => clearTimeout(t)
     }
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
-  }, [isOpen, onClose])
+
+    // animate out
+    setVisible(false)
+    const t = setTimeout(() => setMounted(false), 250)
+    return () => clearTimeout(t)
+  }, [isOpen])
+
+  // Lock body scroll while mounted
+  useEffect(() => {
+    if (!mounted) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [mounted])
+
+  // ESC closes
+  useEffect(() => {
+    if (!mounted) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mounted, onClose])
 
   const steps: Step[] = ['weergave', 'type', 'looptijd', 'duurzaamheid']
   const currentStepIndex = steps.indexOf(currentStep)
@@ -127,20 +153,20 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
     setSelectedDuurzaamheid(false)
   }
 
-  if (!isOpen) return null
+  if (!mounted) return null
 
   return (
-    <>
+    <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
         onClick={onClose}
       />
 
       {/* Slide-in panel (desktop) / Full screen (mobile) */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 bg-white shadow-2xl transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : 'translate-x-full'}
+        className={`absolute inset-y-0 right-0 bg-white shadow-2xl transition-transform duration-300 ease-in-out
+          ${visible ? 'translate-x-0' : 'translate-x-full'}
           w-full md:w-[600px] lg:w-[700px]
           flex flex-col
           max-h-screen overflow-hidden`}
@@ -498,7 +524,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
           </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
