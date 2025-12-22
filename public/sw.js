@@ -74,8 +74,14 @@ self.addEventListener('fetch', (event) => {
           return cachedResponse;
         }
 
-        return fetch(request)
+        return fetch(request, { redirect: 'follow' })
           .then((response) => {
+            // Handle redirects - don't cache redirect responses
+            if (response.redirected) {
+              // If redirected, return the final response but don't cache the redirect
+              return response;
+            }
+
             // Don't cache if not a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
