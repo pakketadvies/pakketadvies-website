@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X, CaretRight, Info, Check } from '@phosphor-icons/react'
 
 type TariefType = 'vast' | 'variabel' | 'dynamisch' | null
@@ -155,7 +156,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
 
   if (!mounted) return null
 
-  return (
+  const content = (
     <div className="fixed inset-0 z-[120]">
       {/* Backdrop */}
       <div
@@ -529,5 +530,13 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
       </div>
     </div>
   )
+
+  // Render via portal to escape any stacking contexts (e.g. parent transforms),
+  // ensuring the Keuzehulp always sits above the fixed header.
+  if (typeof document !== 'undefined') {
+    return createPortal(content, document.body)
+  }
+
+  return content
 }
 
