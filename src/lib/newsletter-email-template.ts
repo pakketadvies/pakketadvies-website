@@ -167,6 +167,33 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
         </td>
       </tr>
 
+      <!-- Einde van het jaar callout -->
+      <tr>
+        <td style="background:${white};padding:24px 32px 0 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:linear-gradient(135deg,${teal} 0%,${tealDark} 100%);border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,175,155,0.25);">
+            <tr>
+              <td style="padding:20px 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td style="padding:0;">
+                      <p style="color:${white};font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin:0 0 8px 0;opacity:0.95;">
+                        ⏰ Einde van het jaar in zicht
+                      </p>
+                      <h2 style="color:${white};font-size:20px;line-height:1.3;font-weight:700;margin:0 0 10px 0;font-family:'Space Grotesk',Arial,sans-serif;">
+                        Nu is het perfecte moment om uw energiezaken goed te regelen
+                      </h2>
+                      <p style="color:rgba(255,255,255,0.95);font-size:14px;line-height:1.7;margin:0;">
+                        Profiteer van onze <strong style="color:${white};">eindejaarsaanbiedingen</strong> en start 2025 met de scherpste energietarieven. Veel leveranciers bieden nu extra voordelige voorwaarden voor langere contracten. Laat u niet verrassen door prijsstijgingen – regel het nu en geniet van zekerheid.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
       <!-- Intro / personal message -->
       <tr>
         <td style="background:${white};padding:32px 32px 8px 32px;">
