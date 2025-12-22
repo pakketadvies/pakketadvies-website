@@ -170,7 +170,7 @@ export function ConsumerContractRowCard({
             </div>
 
             {/* Right: price + CTA */}
-            <div className="flex flex-col sm:flex-row md:flex-row gap-3 md:items-center md:justify-end">
+            <div className="flex flex-row flex-wrap gap-3 items-center justify-between md:justify-end">
               {/* Price box LEFT of CTA */}
               <div className="rounded-2xl bg-gray-50 border border-gray-200 px-4 py-3 md:text-right">
                 <div className="text-xs text-gray-500">kosten p.m.</div>
@@ -182,7 +182,7 @@ export function ConsumerContractRowCard({
               </div>
 
               <Button
-                className="w-full sm:w-auto md:w-auto bg-brand-teal-500 hover:bg-brand-teal-600 px-6"
+                className="w-full sm:w-auto md:w-auto bg-brand-teal-500 hover:bg-brand-teal-600 px-6 flex-shrink-0"
                 onClick={() => {
                   setSelectedContract(contract)
                   router.push(`/calculator?stap=2&contract=${contract.id}`)
