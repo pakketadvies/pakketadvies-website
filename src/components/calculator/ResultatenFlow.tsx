@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import ContractCard from '@/components/calculator/ContractCard'
+import { ConsumerContractRowCard } from '@/components/calculator/ConsumerContractRowCard'
 import EditVerbruikPanel from '@/components/calculator/EditVerbruikPanel'
 import FloatingEditButton from '@/components/calculator/FloatingEditButton'
 import EditVerbruikModal from '@/components/calculator/EditVerbruikModal'
@@ -846,10 +847,9 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                     </div>
                   ) : (
                     filteredResultaten.map((contract, index) => (
-                      <ContractCard
+                      <ConsumerContractRowCard
                         key={contract.id}
                         contract={contract}
-                        variant="compact"
                         meterType={verbruik?.meterType || 'weet_niet'}
                         heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
                         verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
