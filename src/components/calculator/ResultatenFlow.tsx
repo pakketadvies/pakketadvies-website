@@ -388,6 +388,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   const [error, setError] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isKeuzehulpOpen, setIsKeuzehulpOpen] = useState(false)
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [filters, setFilters] = useState({
@@ -785,13 +786,13 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                         </div>
                       </div>
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <Link
-                          href="/contact"
+                        <button
+                          onClick={() => setIsKeuzehulpOpen(true)}
                           className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-brand-navy-600 rounded-xl font-semibold text-sm hover:bg-white/95 transition-colors shadow-lg"
                         >
                           <ChatCircle weight="bold" className="w-4 h-4" />
                           Start keuzehulp
-                        </Link>
+                        </button>
                         <a
                           href="tel:0850477065"
                           className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 text-white border border-white/20 rounded-xl font-semibold text-sm hover:bg-white/20 transition-colors"
@@ -818,63 +819,69 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                     <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} layout="sidebar" />
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
-                    <div className="font-semibold text-brand-navy-600">Weergave</div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-2">Sorteren op</label>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
-                      >
-                        <option value="besparing">Hoogste besparing</option>
-                        <option value="prijs-laag">Laagste prijs</option>
-                        <option value="prijs-hoog">Hoogste prijs</option>
-                        <option value="rating">Beste beoordeling</option>
-                      </select>
+                  {/* Filters - alleen op desktop zichtbaar, op mobiel in Keuzehulp */}
+                  <div className="hidden lg:block space-y-4">
+                    <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                      <div className="font-semibold text-brand-navy-600">Weergave</div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-2">Sorteren op</label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value as any)}
+                          className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
+                        >
+                          <option value="besparing">Hoogste besparing</option>
+                          <option value="prijs-laag">Laagste prijs</option>
+                          <option value="prijs-hoog">Hoogste prijs</option>
+                          <option value="rating">Beste beoordeling</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
-                    <div className="font-semibold text-brand-navy-600">Contract</div>
-                    <div className="space-y-2 text-sm">
-                      {(['alle', 'vast', 'dynamisch'] as const).map((t) => (
-                        <label key={t} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="contractType"
-                            checked={filters.type === t}
-                            onChange={() => setFilters({ ...filters, type: t })}
-                            className="text-brand-teal-600"
-                          />
-                          <span className="text-gray-700">
-                            {t === 'alle' ? 'Alle typen' : t === 'vast' ? 'Vast' : 'Dynamisch'}
-                          </span>
-                        </label>
-                      ))}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                      <div className="font-semibold text-brand-navy-600">Contract</div>
+                      <div className="space-y-2 text-sm">
+                        {(['alle', 'vast', 'dynamisch'] as const).map((t) => (
+                          <label key={t} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="contractType"
+                              checked={filters.type === t}
+                              onChange={() => setFilters({ ...filters, type: t })}
+                              className="text-brand-teal-600"
+                            />
+                            <span className="text-gray-700">
+                              {t === 'alle' ? 'Alle typen' : t === 'vast' ? 'Vast' : 'Dynamisch'}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
-                    <div className="font-semibold text-brand-navy-600">Duurzaamheid</div>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm">
-                      <input
-                        type="checkbox"
-                        checked={filters.groeneEnergie}
-                        onChange={() => setFilters({ ...filters, groeneEnergie: !filters.groeneEnergie })}
-                        className="text-brand-teal-600"
-                      />
-                      <span className="text-gray-700">Alleen groene stroom</span>
-                    </label>
-                  </div>
+                    <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                      <div className="font-semibold text-brand-navy-600">Duurzaamheid</div>
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
+                        <input
+                          type="checkbox"
+                          checked={filters.groeneEnergie}
+                          onChange={() => setFilters({ ...filters, groeneEnergie: !filters.groeneEnergie })}
+                          className="text-brand-teal-600"
+                        />
+                        <span className="text-gray-700">Alleen groene stroom</span>
+                      </label>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
-                    className="w-full px-4 py-3 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Filters herstellen
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })
+                        setSortBy('besparing')
+                      }}
+                      className="w-full px-4 py-3 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Filters herstellen
+                    </button>
+                  </div>
                 </aside>
 
                 {/* Results list */}
@@ -909,6 +916,18 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                   )}
                 </section>
               </div>
+
+              {/* Keuzehulp component */}
+              <Keuzehulp
+                isOpen={isKeuzehulpOpen}
+                onClose={() => setIsKeuzehulpOpen(false)}
+                onApplyFilters={(newFilters) => {
+                  setFilters({ type: newFilters.type, groeneEnergie: newFilters.groeneEnergie, maxPrijs: 99999, minRating: 0 })
+                  setSortBy(newFilters.sortBy)
+                  setIsKeuzehulpOpen(false)
+                }}
+                currentFilters={{ ...filters, sortBy }}
+              />
             </div>
           )}
 
