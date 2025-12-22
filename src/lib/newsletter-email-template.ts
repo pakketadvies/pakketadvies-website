@@ -158,8 +158,11 @@ export function generateNewsletterEmail(data: NewsletterEmailData): string {
                       <h1 style="color:${white};font-size:28px;line-height:1.3;font-weight:700;margin:0 0 12px 0;font-family:'Space Grotesk',Arial,sans-serif;">
                         Nu is het perfecte moment om uw energiezaken goed te regelen
                       </h1>
-                      <p style="color:rgba(255,255,255,0.92);font-size:15px;line-height:1.75;margin:0;max-width:520px;">
+                      <p style="color:rgba(255,255,255,0.92);font-size:15px;line-height:1.75;margin:0 0 16px 0;max-width:520px;">
                         Profiteer van onze <strong style="color:${white};font-weight:700;">eindejaarsaanbiedingen</strong> en start 2025 met de scherpste energietarieven. Veel leveranciers bieden nu extra voordelige voorwaarden voor langere contracten. Laat u niet verrassen door prijsstijgingen – regel het nu en geniet van zekerheid.
+                      </p>
+                      <p style="color:rgba(255,255,255,0.95);font-size:15px;line-height:1.75;margin:0;max-width:520px;">
+                        <strong style="color:${white};font-weight:700;">Heeft u zonnepanelen?</strong> Dan zijn <strong style="color:${purpleLight};font-weight:700;">dynamische tarieven</strong> nu extra interessant. Profiteer van marktprijzen en verdien aan uw teruglevering. <a href="${baseUrl}/particulier/dynamisch" style="color:${purpleLight};text-decoration:underline;font-weight:600;">Bekijk dynamische tarieven →</a>
                       </p>
                     </td>
                   </tr>
