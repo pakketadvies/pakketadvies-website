@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
+import { estimateConsumerUsage } from '@/lib/particulier-verbruik-schatting'
 
 type AddressTypeResult =
   | {
@@ -41,6 +42,7 @@ type ConsumerAddressStartCardProps = {
 }
 
 const DEFAULT_NEXT = '/particulier/energie-vergelijken'
+const RESULTS_PATH = '/particulier/energie-vergelijken/resultaten'
 
 export function ConsumerAddressStartCard({
   nextHref = DEFAULT_NEXT,
@@ -238,6 +240,9 @@ export function ConsumerAddressStartCard({
   const handleStart = () => {
     if (!canStart || !addressTypeResult || addressTypeResult.type === 'error') return
 
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+    const directToResults = variant === 'heroCard' && isDesktop
+
     const seed: VerbruikData = {
       leveringsadressen: [
         {
@@ -262,6 +267,31 @@ export function ConsumerAddressStartCard({
       geschat: false,
     }
 
+    if (directToResults) {
+      // Desktop: skip the "verbruik invullen" step and go straight to results with a sensible estimate.
+      const est = estimateConsumerUsage({
+        householdSize: 2,
+        hasGas: true,
+        hasSolar: false,
+        hasSmartMeter: true,
+      })
+
+      const withEstimate: VerbruikData = {
+        ...seed,
+        elektriciteitNormaal: est.electricityNormalKwh,
+        elektriciteitDal: est.electricityOffPeakKwh,
+        gasJaar: est.gasM3,
+        geenGasaansluiting: false,
+        meterType: est.meterType,
+        geschat: true,
+      }
+
+      setVerbruik(withEstimate)
+      router.push(RESULTS_PATH)
+      return
+    }
+
+    // Mobile (and inline usage): keep the next step where the user can enter their exact usage.
     setVerbruik(seed)
     router.push(nextHref)
   }

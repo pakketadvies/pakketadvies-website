@@ -751,6 +751,150 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
             </>
           )}
 
+          {/* Consumer: Pricewise-style layout (sidebar + list) */}
+          {audience === 'consumer' && verbruik && (
+            <div className="mt-2">
+              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <p className="text-white/80 text-sm">Resultaten</p>
+                    <h1 className="text-xl md:text-2xl font-bold">
+                      Dit zijn onze {filteredResultaten.length} deals voor jou
+                    </h1>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-semibold transition-colors"
+                  >
+                    Wijzig gegevens
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+                {/* Sidebar */}
+                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+                  <div className="bg-white border border-gray-200 rounded-2xl p-4">
+                    <div className="font-semibold text-brand-navy-600">Jouw gegevens</div>
+                    <div className="mt-3 text-sm text-gray-700 space-y-2">
+                      <div>
+                        <div className="text-xs text-gray-500">Adres</div>
+                        <div className="font-medium">
+                          {verbruik.leveringsadressen?.[0]?.postcode} {verbruik.leveringsadressen?.[0]?.huisnummer}
+                          {verbruik.leveringsadressen?.[0]?.toevoeging ? ` ${verbruik.leveringsadressen[0].toevoeging}` : ''}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="text-xs text-gray-500">Stroom / jaar</div>
+                          <div className="font-medium">
+                            {Math.round((verbruik.elektriciteitNormaal || 0) + (verbruik.elektriciteitDal || 0))} kWh
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Gas / jaar</div>
+                          <div className="font-medium">{verbruik.gasJaar ? `${verbruik.gasJaar} m³` : 'geen'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                    <div className="font-semibold text-brand-navy-600">Weergave</div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-2">Sorteren op</label>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                        className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
+                      >
+                        <option value="besparing">Hoogste besparing</option>
+                        <option value="prijs-laag">Laagste prijs</option>
+                        <option value="prijs-hoog">Hoogste prijs</option>
+                        <option value="rating">Beste beoordeling</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                    <div className="font-semibold text-brand-navy-600">Contract</div>
+                    <div className="space-y-2 text-sm">
+                      {(['alle', 'vast', 'dynamisch'] as const).map((t) => (
+                        <label key={t} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="contractType"
+                            checked={filters.type === t}
+                            onChange={() => setFilters({ ...filters, type: t })}
+                            className="text-brand-teal-600"
+                          />
+                          <span className="text-gray-700">
+                            {t === 'alle' ? 'Alle typen' : t === 'vast' ? 'Vast' : 'Dynamisch'}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                    <div className="font-semibold text-brand-navy-600">Duurzaamheid</div>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={filters.groeneEnergie}
+                        onChange={() => setFilters({ ...filters, groeneEnergie: !filters.groeneEnergie })}
+                        className="text-brand-teal-600"
+                      />
+                      <span className="text-gray-700">Alleen groene stroom</span>
+                    </label>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
+                    className="w-full px-4 py-3 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Filters herstellen
+                  </button>
+                </aside>
+
+                {/* Results list */}
+                <section className="space-y-4">
+                  {filteredResultaten.length === 0 ? (
+                    <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
+                      <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
+                      >
+                        Reset filters
+                      </Button>
+                    </div>
+                  ) : (
+                    filteredResultaten.map((contract, index) => (
+                      <ContractCard
+                        key={contract.id}
+                        contract={contract}
+                        meterType={verbruik?.meterType || 'weet_niet'}
+                        heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
+                        verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
+                        verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
+                        verbruikGas={verbruik?.gasJaar || 0}
+                        terugleveringJaar={verbruik?.terugleveringJaar || 0}
+                        aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
+                        aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
+                        postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
+                        position={index + 1}
+                      />
+                    ))
+                  )}
+                </section>
+              </div>
+            </div>
+          )}
+
+          {/* Business: existing layout */}
           <div className="hidden md:block bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4" data-results-section>
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">
@@ -867,6 +1011,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
           </div>
         </div>
 
+        {/* If consumer layout is active, we already rendered results above */}
+        {audience === 'consumer' && verbruik ? null : (
         {filteredResultaten.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center">
             <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
@@ -913,6 +1059,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
             </Link>
           </div>
         </div>
+        )}
       </div>
     </div>
   )
