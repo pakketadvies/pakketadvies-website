@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { ContractOptie } from '@/types/calculator'
 import type { KostenBreakdown } from './ContractCard'
-import { ContractDetailsModal } from './ContractDetailsModal'
+import { ContractDetailsDrawer } from './ContractDetailsDrawer'
 
 type Props = {
   contract: ContractOptie
@@ -139,7 +139,7 @@ export function ConsumerContractRowCard({
             <div className="min-w-0">
               <div className="flex items-start gap-3">
                 {contract.leverancier.logo ? (
-                  <div className="w-10 h-10 bg-white rounded-md border border-gray-100 p-1.5 flex items-center justify-center flex-shrink-0">
+                  <div className="w-14 h-14 bg-white rounded-lg border border-gray-100 p-2 flex items-center justify-center flex-shrink-0">
                     <img src={contract.leverancier.logo} alt={`${contract.leverancier.naam} logo`} className="w-full h-full object-contain" />
                   </div>
                 ) : null}
@@ -170,18 +170,19 @@ export function ConsumerContractRowCard({
             </div>
 
             {/* Right: price + CTA */}
-            <div className="flex flex-col sm:flex-row md:flex-col gap-2 md:items-end">
-              <div className="rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 md:text-right">
+            <div className="flex flex-col sm:flex-row md:flex-row gap-3 md:items-center md:justify-end">
+              {/* Price box LEFT of CTA */}
+              <div className="rounded-2xl bg-gray-50 border border-gray-200 px-4 py-3 md:text-right">
                 <div className="text-xs text-gray-500">kosten p.m.</div>
                 <div className="flex items-baseline gap-1 md:justify-end">
-                  <div className="text-2xl font-bold text-brand-navy-500">€{contract.maandbedrag}</div>
-                  <div className="text-xs text-gray-500">/maand</div>
+                  <div className="text-3xl font-bold text-brand-navy-500">€{contract.maandbedrag}</div>
+                  <div className="text-sm text-gray-500">/maand</div>
                 </div>
                 <div className="text-xs text-gray-500">€{contract.jaarbedrag.toLocaleString()} / jaar</div>
               </div>
 
               <Button
-                className="w-full sm:w-auto md:w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+                className="w-full sm:w-auto md:w-auto bg-brand-teal-500 hover:bg-brand-teal-600 px-6"
                 onClick={() => {
                   setSelectedContract(contract)
                   router.push(`/calculator?stap=2&contract=${contract.id}`)
@@ -206,7 +207,7 @@ export function ConsumerContractRowCard({
         </CardContent>
       </Card>
 
-      <ContractDetailsModal
+      <ContractDetailsDrawer
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         contract={contract}
