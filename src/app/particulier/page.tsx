@@ -17,7 +17,7 @@ export default function ParticulierHomePage() {
         <div className="container-custom relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
-              <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold">
+              <p className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold">
                 Energie vergelijken voor thuis
               </p>
               <h1 className="mt-5 font-display text-4xl md:text-5xl font-bold text-white leading-tight">
