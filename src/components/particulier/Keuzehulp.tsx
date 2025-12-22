@@ -338,11 +338,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
             </div>
           )}
 
-          {/* Step 2: Looptijd (alleen voor vast tarief) */}
-            </div>
-          )}
-
-          {/* Step 2: Looptijd (alleen voor vast tarief) */}
+          {/* Step 3: Looptijd (alleen voor vast tarief) */}
           {currentStep === 'looptijd' && (
             <div className="space-y-6">
               <div>
