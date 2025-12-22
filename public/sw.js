@@ -21,7 +21,20 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
+        // Use Promise.all with individual fetch calls to handle redirects properly
+        return Promise.all(
+          STATIC_ASSETS.map((url) => {
+            return fetch(url, { redirect: 'follow' })
+              .then((response) => {
+                if (response.ok) {
+                  return cache.put(url, response);
+                }
+              })
+              .catch((error) => {
+                console.warn('[Service Worker] Failed to cache:', url, error);
+              });
+          })
+        );
       })
       .then(() => self.skipWaiting())
   );
