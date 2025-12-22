@@ -2,8 +2,8 @@
 // Versie: 1.0.0
 
 // Bump cache version to invalidate older buggy caches (especially cached "/")
-const CACHE_NAME = 'pakketadvies-v2';
-const RUNTIME_CACHE = 'pakketadvies-runtime-v2';
+const CACHE_NAME = 'pakketadvies-v3';
+const RUNTIME_CACHE = 'pakketadvies-runtime-v3';
 
 // Assets die direct gecached moeten worden
 const STATIC_ASSETS = [
@@ -70,15 +70,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Never cache navigations/documents.
-  // Our app uses cookie-based redirects ("/" -> "/particulier"), so caching HTML (or "/") can trap users in the wrong experience.
-  if (request.mode === 'navigate' || request.destination === 'document') {
+  // NEVER intercept "/" (root) because it is cookie-dependent ("/" -> "/particulier") and redirects can break SW fetch if request.redirect isn't "follow".
+  // This prevents "redirected response was used for a request whose redirect mode is not 'follow'".
+  if (url.pathname === '/' && !url.search) {
     event.respondWith(
-      fetch(request, { redirect: 'follow' }).catch(() => {
+      fetch(url.href, { redirect: 'follow', credentials: 'include' }).catch(() => {
         return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
       })
     )
-    return
+    return;
+  }
+
+  // Never cache navigations/documents.
+  // Our app uses cookie-based redirects, so caching HTML can trap users in the wrong experience.
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(url.href, { redirect: 'follow', credentials: 'include' }).catch(() => {
+        return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+      })
+    )
+    return;
   }
 
   // Skip API calls and external resources
@@ -99,7 +110,7 @@ self.addEventListener('fetch', (event) => {
           return cachedResponse;
         }
 
-        return fetch(request, { redirect: 'follow' })
+        return fetch(url.href, { redirect: 'follow', credentials: 'include' })
           .then((response) => {
             // Handle redirects - don't cache redirect responses
             if (response.redirected) {
@@ -124,7 +135,7 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            return undefined
+            return new Response('Network error', { status: 502, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
           });
       })
   );
