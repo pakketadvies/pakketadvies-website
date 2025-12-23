@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
@@ -44,6 +44,40 @@ type ConsumerAddressStartCardProps = {
 const DEFAULT_NEXT = '/particulier/energie-vergelijken'
 const RESULTS_PATH = '/particulier/energie-vergelijken/resultaten'
 
+// Volledige lijst van Nederlandse energieleveranciers (2024-2025)
+const ALLE_LEVERANCIERS = [
+  'ANWB Energie',
+  'Budget Energie',
+  'CleanEnergy',
+  'Coolblue Energie',
+  'Delta',
+  'Eneco',
+  'Energiedirect.nl',
+  'Engie',
+  'Essent',
+  'Frank Energie',
+  'Gewoon Energie',
+  'Greenchoice',
+  'HVC Energie',
+  'Innova',
+  'Mega',
+  'NextEnergy',
+  'NLE',
+  'NieuweStroom',
+  'OM | nieuwe energie',
+  'Oxxio',
+  'Powerpeers',
+  'Pure Energie',
+  'Sepa Green Energy',
+  'Shell Energy',
+  'United Consumers',
+  'Vandebron',
+  'Vattenfall',
+  'Vrijopnaam',
+  'Zelfstroom',
+  'Zonneplan',
+].sort()
+
 export function ConsumerAddressStartCard({
   nextHref = DEFAULT_NEXT,
   title = 'Check je voordeel',
@@ -71,8 +105,6 @@ export function ConsumerAddressStartCard({
 
   // Optional (UI only)
   const [currentSupplier, setCurrentSupplier] = useState('') // not stored yet (consumer)
-  const [leveranciers, setLeveranciers] = useState<Array<{ id: string; naam: string }>>([])
-  const [loadingLeveranciers, setLoadingLeveranciers] = useState(false)
 
   // Debounce + race-condition protection (same pattern as QuickCalculator)
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -232,24 +264,6 @@ export function ConsumerAddressStartCard({
     }
   }
 
-  // Load leveranciers on mount
-  useEffect(() => {
-    const loadLeveranciers = async () => {
-      setLoadingLeveranciers(true)
-      try {
-        const res = await fetch('/api/leveranciers')
-        if (res.ok) {
-          const data = await res.json()
-          setLeveranciers(data.leveranciers || [])
-        }
-      } catch (err) {
-        console.error('Error loading leveranciers:', err)
-      } finally {
-        setLoadingLeveranciers(false)
-      }
-    }
-    loadLeveranciers()
-  }, [])
 
   const canStart = useMemo(() => {
     if (loadingAddress || checkingAddressType) return false
@@ -364,15 +378,16 @@ export function ConsumerAddressStartCard({
         <div className="sm:col-span-2">
           <label className="text-sm font-semibold text-gray-700">Ik zit nu bij</label>
           <select
-            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
-            value={currentSupplier}
+            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900"
+            value={currentSupplier || ''}
             onChange={(e) => setCurrentSupplier(e.target.value)}
-            disabled={loadingLeveranciers}
           >
-            <option value="">Selecteer je huidige leverancier (optioneel)</option>
-            {leveranciers.map((leverancier) => (
-              <option key={leverancier.id} value={leverancier.id}>
-                {leverancier.naam}
+            <option value="" disabled>
+              Selecteer je huidige leverancier (optioneel)
+            </option>
+            {ALLE_LEVERANCIERS.map((leverancier) => (
+              <option key={leverancier} value={leverancier}>
+                {leverancier}
               </option>
             ))}
             <option value="onbekend">Onbekend / Anders</option>
