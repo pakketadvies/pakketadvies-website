@@ -9,7 +9,7 @@ import EditVerbruikPanel from '@/components/calculator/EditVerbruikPanel'
 import FloatingEditButton from '@/components/calculator/FloatingEditButton'
 import EditVerbruikModal from '@/components/calculator/EditVerbruikModal'
 import { useCalculatorStore } from '@/store/calculatorStore'
-import { Lightning, SlidersHorizontal, X, ArrowsDownUp, Leaf, ChatCircle, Phone, PencilSimple } from '@phosphor-icons/react'
+import { X, ChatCircle, Phone, PencilSimple } from '@phosphor-icons/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Keuzehulp } from '@/components/particulier/Keuzehulp'
@@ -391,7 +391,6 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isKeuzehulpOpen, setIsKeuzehulpOpen] = useState(false)
 
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [filters, setFilters] = useState({
     type: 'alle' as 'alle' | 'vast' | 'dynamisch',
     groeneEnergie: false,
@@ -728,13 +727,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   return (
     <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-12">
       <div className="container-custom max-w-7xl">
-        <div className={`mb-6 md:mb-8 ${audience === 'consumer' ? 'pt-0' : 'pt-2 md:pt-3'}`}>
-          {audience !== 'consumer' && verbruik && (
-            <div className="mb-6 hidden lg:block">
-              <EditVerbruikPanel currentData={verbruik} onUpdate={handleVerbruikUpdate} isUpdating={isUpdating} />
-            </div>
-          )}
-
+        <div className="mb-6 md:mb-8 pt-0">
           {verbruik && (
             <>
               <div className="lg:hidden">
@@ -755,8 +748,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
             </>
           )}
 
-          {/* Consumer: Pricewise-style layout (sidebar + list) */}
-          {audience === 'consumer' && verbruik && (
+          {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
+          {verbruik && (
             <div>
               <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -974,182 +967,6 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               />
             </div>
           )}
-
-          {/* Business: existing layout */}
-          {audience !== 'consumer' && (
-          <div className="hidden md:block bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4" data-results-section>
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setFilters({ ...filters, type: 'alle' })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    filters.type === 'alle'
-                      ? 'bg-brand-teal-500 text-white shadow-md'
-                      : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
-                  }`}
-                >
-                  Alle
-                </button>
-                <button
-                  onClick={() => setFilters({ ...filters, type: 'vast' })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    filters.type === 'vast'
-                      ? 'bg-brand-teal-500 text-white shadow-md'
-                      : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
-                  }`}
-                >
-                  Vast
-                </button>
-                <button
-                  onClick={() => setFilters({ ...filters, type: 'dynamisch' })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    filters.type === 'dynamisch'
-                      ? 'bg-brand-teal-500 text-white shadow-md'
-                      : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
-                  }`}
-                >
-                  Dynamisch
-                </button>
-                <button
-                  onClick={() => setFilters({ ...filters, groeneEnergie: !filters.groeneEnergie })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-                    filters.groeneEnergie ? 'bg-green-500 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <Leaf weight="duotone" className="w-4 h-4" />
-                  Groen
-                </button>
-
-                <button
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-2"
-                >
-                  <SlidersHorizontal weight="bold" className="w-4 h-4" />
-                  Meer filters
-                  {showAdvancedFilters ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <ArrowsDownUp weight="bold" className="w-5 h-5 text-gray-500 hidden sm:block" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
-                >
-                  <option value="besparing">Hoogste besparing</option>
-                  <option value="prijs-laag">Laagste prijs</option>
-                  <option value="prijs-hoog">Hoogste prijs</option>
-                  <option value="rating">Beste beoordeling</option>
-                </select>
-              </div>
-            </div>
-
-            {showAdvancedFilters && (
-              <div className="pt-3 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-slide-down">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-2">Min. beoordeling</label>
-                  <select
-                    value={filters.minRating}
-                    onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent"
-                  >
-                    <option value="0">Alle</option>
-                    <option value="4">4+ sterren</option>
-                    <option value="4.5">4.5+ sterren</option>
-                    <option value="4.8">4.8+ sterren</option>
-                  </select>
-                </div>
-
-                <div className="flex items-end">
-                  <Link
-                    href="/producten/dynamisch-contract"
-                    className="w-full px-4 py-2 text-sm font-medium text-brand-teal-600 hover:text-brand-teal-700 hover:bg-brand-teal-50 rounded-lg transition-colors border-2 border-brand-teal-200 hover:border-brand-teal-300 flex items-center justify-center gap-2"
-                  >
-                    <Lightning weight="duotone" className="w-4 h-4" />
-                    Hoe werkt dynamisch?
-                  </Link>
-                </div>
-
-                <div className="flex items-end">
-                  <button
-                    onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <X weight="bold" className="w-4 h-4 inline mr-1" />
-                    Reset filters
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          )}
-        </div>
-
-        {/* If consumer layout is active, we already rendered results above */}
-        {audience === 'consumer' && verbruik ? null : (
-          <>
-            {filteredResultaten.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
-                <Button
-                  variant="outline"
-                  onClick={() => setFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })}
-                >
-                  Reset filters
-                </Button>
-              </div>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredResultaten.map((contract, index) => (
-                  <ContractCard
-                    key={contract.id}
-                    contract={contract}
-                    meterType={verbruik?.meterType || 'weet_niet'}
-                    heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
-                    verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
-                    verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
-                    verbruikGas={verbruik?.gasJaar || 0}
-                    terugleveringJaar={verbruik?.terugleveringJaar || 0}
-                    aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
-                    aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
-                    postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
-                    position={index + 1}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className="mt-12 bg-white rounded-2xl p-6 md:p-8 text-center shadow-md">
-              <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-3">Hulp nodig bij het kiezen?</h2>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto text-sm md:text-base">
-                {audience === 'consumer'
-                  ? 'We helpen je graag om het contract te kiezen dat past bij jouw huishouden.'
-                  : 'Onze energiespecialisten helpen je graag om het beste contract te vinden dat perfect bij jouw bedrijf past.'}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-                <Link href="/contact?reason=advies">
-                  <Button className="w-full sm:w-auto">
-                    {audience === 'consumer' ? 'Vraag hulp bij kiezen' : 'Vraag persoonlijk advies'}
-                  </Button>
-                </Link>
-                <Link href="tel:+31850477065">
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    Bel 085 047 7065
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   )
