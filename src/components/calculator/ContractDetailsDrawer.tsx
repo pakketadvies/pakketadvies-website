@@ -352,7 +352,9 @@ export function ContractDetailsDrawer({
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold text-brand-navy-500">Totaal (incl. btw)</span>
                                   <span className="font-bold text-brand-navy-500">
-                                    €{(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw).toFixed(0)}/mnd
+                                    {/* Use contract.maandbedrag (from results page calculation) instead of breakdown total */}
+                                    {/* This ensures consistency between results page and details drawer */}
+                                    €{contract.maandbedrag?.toFixed(0) ?? (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw).toFixed(0)}/mnd
                                   </span>
                                 </div>
                               </div>
