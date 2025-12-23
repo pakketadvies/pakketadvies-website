@@ -14,7 +14,7 @@ export default function CalculatorLayout({
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Calculator Content */}
-      <main className="flex-grow bg-gray-50 pt-24 pb-12 md:pt-28 md:pb-16">
+      <main className="flex-grow bg-gray-50">
         {children}
       </main>
     </div>
