@@ -754,7 +754,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
             {verbruik && (
               <div>
                 {/* DEBUG: Space above blue banner (GEEL - tussen content en blauwe banner) */}
-                <div className="bg-yellow-300 border-4 border-yellow-600 mb-5">
+                <div className="bg-yellow-300 border-4 border-yellow-600" style={{ marginBottom: '20px' }}>
                   <div className="rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
@@ -810,7 +810,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </div>
                 </div>
                 {/* DEBUG: Space below blue banner (GROEN - tussen blauwe banner en contract cards) */}
-                <div className="bg-green-300 border-4 border-green-600 mb-5">
+                <div className="bg-green-300 border-4 border-green-600" style={{ marginBottom: '20px' }}>
                   <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
