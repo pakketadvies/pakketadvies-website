@@ -727,7 +727,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className="container-custom max-w-7xl">
-        <div className="pt-12 md:pt-16">
+        <div className="pt-24 md:pt-28">
           {verbruik && (
             <>
               <div className="lg:hidden">
@@ -750,7 +750,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
           {verbruik && (
-            <div>
+            <div className="mt-5">
               <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
