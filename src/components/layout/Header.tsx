@@ -83,11 +83,15 @@ export function Header() {
     
     // Update state immediately for UI feedback
     setAudience(next)
-    setCookie(AUDIENCE_COOKIE, next)
     setIsMobileMenuOpen(false)
     
-    // Navigate to the target route
-    router.push(next === 'consumer' ? '/particulier' : '/')
+    // Set cookie first
+    setCookie(AUDIENCE_COOKIE, next)
+    
+    // Use window.location for a full page reload to ensure cookie is read by middleware
+    // This ensures the middleware sees the updated cookie value
+    const targetPath = next === 'consumer' ? '/particulier' : '/'
+    window.location.href = targetPath
   }
 
   return (
