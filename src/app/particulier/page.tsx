@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { WaveDivider } from '@/components/ui/WaveDivider'
 import { ConsumerAddressStartCard } from '@/components/particulier/ConsumerAddressStartCard'
 
 export const metadata: Metadata = {
@@ -13,7 +12,25 @@ export default function ParticulierHomePage() {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="relative pt-28 pb-12 md:pt-32 md:pb-16 bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 overflow-hidden">
+      <section className="bg-brand-navy-500 text-white py-16 md:py-24 pb-20 md:pb-28 pt-32 md:pt-40 relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/hero-main.jpg"
+            alt="Professional office team"
+            fill
+            className="object-cover opacity-10"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-navy-500/95 via-brand-navy-600/90 to-brand-navy-700/95" />
+        </div>
+
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        </div>
+        
         <div className="container-custom relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
@@ -33,7 +50,34 @@ export default function ParticulierHomePage() {
           </div>
         </div>
 
-        <WaveDivider variant="heroLow" />
+        {/* Bottom transition */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden">
+          <svg 
+            viewBox="0 0 1440 120" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="w-full h-20 md:h-24 lg:h-auto"
+            preserveAspectRatio="none"
+          >
+            <path d="M0,95 Q360,65 720,95 T1440,95 L1440,120 L0,120 Z" fill="white"/>
+            <path 
+              d="M0,95 Q360,65 720,95 T1440,95" 
+              stroke="url(#energyGradient)" 
+              strokeWidth="2" 
+              fill="none"
+              opacity="0.4"
+            />
+            <defs>
+              <linearGradient id="energyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#00AF9B" stopOpacity="0" />
+                <stop offset="20%" stopColor="#00AF9B" stopOpacity="1" />
+                <stop offset="50%" stopColor="#00AF9B" stopOpacity="1" />
+                <stop offset="80%" stopColor="#00AF9B" stopOpacity="1" />
+                <stop offset="100%" stopColor="#00AF9B" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
       </section>
 
       {/* Choice helper */}

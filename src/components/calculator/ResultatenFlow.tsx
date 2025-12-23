@@ -727,7 +727,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   return (
     <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-12">
       <div className="container-custom max-w-7xl">
-        <div className="mb-6 md:mb-8 pt-0">
+        <div className="mb-6 md:mb-8">
           {verbruik && (
             <>
               <div className="lg:hidden">
@@ -809,15 +809,15 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
                   {/* Help mij kiezen sectie */}
-                  <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-2xl p-5 text-white overflow-hidden relative">
+                  <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-2xl p-4 text-white overflow-hidden relative">
                     <div className="relative z-10">
-                      <div className="flex items-start gap-3 mb-4">
+                      <div className="flex items-start gap-3 mb-3">
                         <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                           <ChatCircle weight="duotone" className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-lg mb-1">Help mij kiezen</h3>
-                          <p className="text-white/90 text-sm leading-relaxed">
+                          <h3 className="font-bold text-base mb-1">Help mij kiezen</h3>
+                          <p className="text-white/90 text-xs leading-relaxed">
                             Vind een passende energiedeal met persoonlijk advies van onze experts.
                           </p>
                         </div>
@@ -825,28 +825,28 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                       <div className="flex flex-col sm:flex-row gap-2">
                         <button
                           onClick={() => setIsKeuzehulpOpen(true)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-brand-navy-600 rounded-xl font-semibold text-sm hover:bg-white/95 transition-colors shadow-lg"
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-white text-brand-navy-600 rounded-xl font-semibold text-xs hover:bg-white/95 transition-colors shadow-lg"
                         >
-                          <ChatCircle weight="bold" className="w-4 h-4" />
+                          <ChatCircle weight="bold" className="w-3.5 h-3.5" />
                           Start keuzehulp
                         </button>
                         <a
                           href="tel:0850477065"
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 text-white border border-white/20 rounded-xl font-semibold text-sm hover:bg-white/20 transition-colors"
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-white/10 text-white border border-white/20 rounded-xl font-semibold text-xs hover:bg-white/20 transition-colors"
                         >
-                          <Phone weight="bold" className="w-4 h-4" />
+                          <Phone weight="bold" className="w-3.5 h-3.5" />
                           Bel ons
                         </a>
                       </div>
                     </div>
                     {/* Background image */}
-                    <div className="absolute bottom-0 right-0 w-28 h-28 md:w-36 md:h-36 opacity-30 pointer-events-none overflow-hidden rounded-bl-2xl relative">
+                    <div className="absolute bottom-0 right-0 w-24 h-24 md:w-32 md:h-32 opacity-20 pointer-events-none overflow-hidden rounded-bl-2xl">
                       <Image
                         src="/images/office-team.jpg"
                         alt="Team PakketAdvies"
                         fill
                         className="object-cover object-center"
-                        sizes="(max-width: 768px) 112px, 144px"
+                        sizes="(max-width: 768px) 96px, 128px"
                       />
                     </div>
                   </div>
