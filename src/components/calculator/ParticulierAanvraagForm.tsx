@@ -22,7 +22,8 @@ import {
   Warning,
   XCircle,
   ArrowsClockwise,
-  MagnifyingGlass
+  MagnifyingGlass,
+  ArrowLeft
 } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
 import { ContractDetailsCard } from './ContractDetailsCard'
@@ -534,8 +535,33 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   const leverancierNaam = contract?.leverancier.naam || 'Energieleverancier'
   const korting = contract?.besparing ? contract.besparing * 12 : null // Jaarlijkse besparing als korting
 
+  // Determine back URL based on where user came from
+  const getBackUrl = () => {
+    // Check if we have a referrer or can determine the results page
+    if (typeof window !== 'undefined') {
+      const referrer = document.referrer
+      if (referrer.includes('/particulier/energie-vergelijken/resultaten')) {
+        return '/particulier/energie-vergelijken/resultaten'
+      }
+    }
+    // Default to results page
+    return '/particulier/energie-vergelijken/resultaten'
+  }
+
   return (
     <>
+      {/* Back button */}
+      <div className="mb-4 md:mb-6">
+        <button
+          type="button"
+          onClick={() => router.push(getBackUrl())}
+          className="inline-flex items-center gap-2 text-brand-teal-600 hover:text-brand-teal-700 font-medium text-sm md:text-base transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-0.5 transition-transform" weight="bold" />
+          <span>Terug naar resultaten</span>
+        </button>
+      </div>
+
       {/* Contract Details Card */}
       <ContractDetailsCard contract={contract} />
 

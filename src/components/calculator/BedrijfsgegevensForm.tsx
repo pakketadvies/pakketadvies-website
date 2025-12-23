@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone, ArrowsClockwise } from '@phosphor-icons/react'
+import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone, ArrowsClockwise, ArrowLeft } from '@phosphor-icons/react'
 import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 import { bepaalContractType } from '@/lib/contract-type'
 import { ParticulierAanvraagForm } from './ParticulierAanvraagForm'
@@ -758,8 +758,36 @@ function BedrijfsgegevensFormContent() {
   const wanneerOverstappen = watch('wanneerOverstappen')
   const leveringsadres = verbruik?.leveringsadressen?.[0] || null
 
+  // Determine back URL based on where user came from
+  const getBackUrl = () => {
+    // Check if we have a referrer or can determine the results page
+    if (typeof window !== 'undefined') {
+      const referrer = document.referrer
+      if (referrer.includes('/calculator/resultaten')) {
+        return '/calculator/resultaten'
+      }
+      if (referrer.includes('/calculator')) {
+        return '/calculator'
+      }
+    }
+    // Default to calculator (which shows results if verbruik is set)
+    return '/calculator'
+  }
+
   return (
     <>
+      {/* Back button */}
+      <div className="mb-4 md:mb-6">
+        <button
+          type="button"
+          onClick={() => router.push(getBackUrl())}
+          className="inline-flex items-center gap-2 text-brand-teal-600 hover:text-brand-teal-700 font-medium text-sm md:text-base transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-0.5 transition-transform" weight="bold" />
+          <span>Terug naar resultaten</span>
+        </button>
+      </div>
+
       {/* Contract Details Card */}
       <ContractDetailsCard contract={contract} />
 
