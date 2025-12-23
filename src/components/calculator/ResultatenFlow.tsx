@@ -725,34 +725,38 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 md:pt-24 pb-12">
-      <div className="container-custom max-w-7xl">
-        <div>
-          {verbruik && (
-            <>
-              <div className="lg:hidden">
-                <FloatingEditButton onClick={() => setIsModalOpen(true)} />
-              </div>
+    <div className="min-h-screen bg-gray-50 pb-12">
+      {/* DEBUG: Padding-top space (ROOD - tussen header en content) */}
+      <div className="bg-red-300 border-4 border-red-600 pt-20 md:pt-24">
+        <div className="container-custom max-w-7xl">
+          <div>
+            {verbruik && (
+              <>
+                <div className="lg:hidden">
+                  <FloatingEditButton onClick={() => setIsModalOpen(true)} />
+                </div>
 
-              <EditVerbruikModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                currentData={verbruik}
-                onSave={handleVerbruikUpdate}
-                isUpdating={isUpdating}
-                filters={filters}
-                onFiltersChange={(newFilters) => setFilters(newFilters)}
-                sortBy={sortBy}
-                onSortByChange={(newSortBy) => setSortBy(newSortBy)}
-              />
-            </>
-          )}
+                <EditVerbruikModal
+                  isOpen={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  currentData={verbruik}
+                  onSave={handleVerbruikUpdate}
+                  isUpdating={isUpdating}
+                  filters={filters}
+                  onFiltersChange={(newFilters) => setFilters(newFilters)}
+                  sortBy={sortBy}
+                  onSortByChange={(newSortBy) => setSortBy(newSortBy)}
+                />
+              </>
+            )}
 
-          {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
-          {verbruik && (
-            <div>
-              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
+            {verbruik && (
+              <div>
+                {/* DEBUG: Space above blue banner (GEEL - tussen content en blauwe banner) */}
+                <div className="bg-yellow-300 border-4 border-yellow-600 mb-5">
+                  <div className="rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <p className="text-white/80 text-sm">Resultaten</p>
                     <h1 className="text-xl md:text-2xl font-bold">
@@ -801,11 +805,13 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                         </div>
                       ) : null
                     })()}
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+                </div>
+                {/* DEBUG: Space below blue banner (GROEN - tussen blauwe banner en contract cards) */}
+                <div className="bg-green-300 border-4 border-green-600 mb-5">
+                  <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
                   {/* Help mij kiezen sectie */}
@@ -952,7 +958,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                     ))
                   )}
                 </section>
-              </div>
+                  </div>
+                </div>
 
               {/* Keuzehulp component */}
               <Keuzehulp
@@ -967,6 +974,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               />
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>
