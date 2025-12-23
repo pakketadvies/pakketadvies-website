@@ -891,7 +891,11 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
                 <span className="absolute right-3 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
               </div>
               {errors.elektriciteitNormaal && (
-                <p className="mt-1.5 text-xs text-red-600">{errors.elektriciteitNormaal.message}</p>
+                <p className="mt-1.5 text-xs text-red-600">
+                  {errors.elektriciteitNormaal.message?.includes('Invalid input') || errors.elektriciteitNormaal.message?.includes('expected number')
+                    ? 'Vul je verbruik in' 
+                    : errors.elektriciteitNormaal.message || 'Vul je verbruik in'}
+                </p>
               )}
             </div>
 
