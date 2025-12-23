@@ -840,7 +840,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                       </div>
                     </div>
                     {/* Background image */}
-                    <div className="absolute bottom-0 right-0 w-28 h-28 md:w-36 md:h-36 opacity-30 pointer-events-none overflow-hidden rounded-bl-2xl">
+                    <div className="absolute bottom-0 right-0 w-28 h-28 md:w-36 md:h-36 opacity-30 pointer-events-none overflow-hidden rounded-bl-2xl relative">
                       <Image
                         src="/images/office-team.jpg"
                         alt="Team PakketAdvies"
@@ -967,6 +967,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               />
             </div>
           )}
+        </div>
       </div>
     </div>
   )
