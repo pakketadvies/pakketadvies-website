@@ -33,6 +33,7 @@ export function ConsumerContractRowCard({
   verbruikElektriciteitNormaal,
   verbruikElektriciteitDal,
   verbruikGas,
+  terugleveringJaar,
   aansluitwaardeElektriciteit,
   aansluitwaardeGas,
   postcode,
@@ -45,6 +46,11 @@ export function ConsumerContractRowCard({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Haal contract details op (exact zoals in ContractCard)
+  const details = contract.type === 'vast' 
+    ? (contract as any).details_vast 
+    : (contract as any).details_dynamisch
+
   // Lazy-load breakdown only when opening details.
   useEffect(() => {
     if (!isDetailsOpen) return
@@ -56,31 +62,37 @@ export function ConsumerContractRowCard({
         setLoading(true)
         setError(null)
 
-        const heeftDubbeleMeter = heeftEnkeleMeter === true ? false : !heeftEnkeleMeter
         const res = await fetch('/api/energie/bereken-contract', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            // Verbruik
             elektriciteitNormaal: verbruikElektriciteitNormaal,
             elektriciteitDal: verbruikElektriciteitDal,
             gas: verbruikGas,
-            terugleveringJaar: 0,
+            terugleveringJaar: terugleveringJaar || 0,
+            
+            // Aansluitwaarden
             aansluitwaardeElektriciteit,
             aansluitwaardeGas,
+            
+            // Postcode
             postcode,
+            
+            // Contract details (exact zoals in ContractCard)
             contractType: contract.type,
-            // We already have calculated costs in ResultatenFlow, but breakdown needs these:
-            tariefElektriciteitNormaal: contract.tariefElektriciteit || 0,
-            tariefElektriciteitDal: contract.tariefElektriciteitDal || 0,
-            tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel || 0,
-            tariefGas: contract.tariefGas || 0,
-            tariefTerugleveringKwh: 0,
-            opslagElektriciteit: 0,
-            opslagGas: 0,
-            opslagTeruglevering: 0,
-            vastrechtStroomMaand: 4.0,
-            vastrechtGasMaand: 4.0,
-            heeftDubbeleMeter,
+            tariefElektriciteitNormaal: contract.tariefElektriciteit,
+            tariefElektriciteitDal: contract.tariefElektriciteitDal,
+            tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
+            tariefGas: contract.tariefGas,
+            tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
+            // Dynamische contract opslagen
+            opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
+            opslagGas: details?.opslag_gas || 0,
+            opslagTeruglevering: details?.opslag_teruglevering || 0,
+            vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
+            vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
+            heeftDubbeleMeter: !heeftEnkeleMeter,
           }),
         })
 
@@ -106,10 +118,12 @@ export function ConsumerContractRowCard({
     contract.tariefElektriciteitDal,
     contract.tariefElektriciteitEnkel,
     contract.tariefGas,
+    details,
     heeftEnkeleMeter,
     verbruikElektriciteitNormaal,
     verbruikElektriciteitDal,
     verbruikGas,
+    terugleveringJaar,
     aansluitwaardeElektriciteit,
     aansluitwaardeGas,
     postcode,
