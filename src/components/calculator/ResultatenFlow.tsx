@@ -727,7 +727,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* DEBUG: Padding-top space (ROOD - tussen header en content) */}
-      <div className="bg-red-300 border-4 border-red-600 pt-20 md:pt-24">
+      <div className="bg-red-300 border-4 border-red-600 pt-5 md:pt-6">
         <div className="container-custom max-w-7xl">
           <div>
             {verbruik && (
