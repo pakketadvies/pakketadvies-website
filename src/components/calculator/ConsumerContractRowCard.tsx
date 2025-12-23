@@ -208,16 +208,6 @@ export function ConsumerContractRowCard({
               Aanmelden
             </Button>
 
-            {/* Details link - compact */}
-            <button
-              type="button"
-              onClick={() => setIsDetailsOpen(true)}
-              className="w-full text-center text-sm font-medium text-brand-teal-700 hover:text-brand-teal-800 inline-flex items-center justify-center gap-1.5 py-2 transition-colors"
-            >
-              <Info className="w-4 h-4" weight="fill" />
-              <span>Alle details</span>
-              <CaretRight className="w-3.5 h-3.5" weight="bold" />
-            </button>
           </div>
 
           {/* Desktop: Horizontal compact layout (Pricewise-style) */}
@@ -268,7 +258,7 @@ export function ConsumerContractRowCard({
               )}
             </div>
 
-            {/* Right: CTA Button + Details link */}
+            {/* Right: CTA Button */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <Button
                 className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
@@ -279,18 +269,21 @@ export function ConsumerContractRowCard({
               >
                 Aanmelden
               </Button>
-              <button
-                type="button"
-                onClick={() => setIsDetailsOpen(true)}
-                className="text-sm font-medium text-brand-teal-700 hover:text-brand-teal-800 inline-flex items-center gap-1 transition-colors whitespace-nowrap"
-              >
-                <Info className="w-4 h-4" weight="fill" />
-                <span className="hidden lg:inline">Details</span>
-                <CaretRight className="w-3.5 h-3.5" weight="bold" />
-              </button>
             </div>
           </div>
         </CardContent>
+
+        {/* Details link below card (Pricewise-style) - Desktop and Mobile */}
+        <div className="px-4 md:px-4 pb-2 md:pb-2">
+          <button
+            type="button"
+            onClick={() => setIsDetailsOpen(true)}
+            className="text-sm font-medium text-brand-teal-700 hover:text-brand-teal-800 inline-flex items-center gap-1.5 transition-colors group"
+          >
+            <CaretRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" weight="bold" />
+            <span>Alle details van dit pakket</span>
+          </button>
+        </div>
       </Card>
 
       <ContractDetailsDrawer
