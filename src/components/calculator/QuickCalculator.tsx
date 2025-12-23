@@ -913,14 +913,22 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
                   <span className="absolute right-3 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
                 </div>
                 {errors.elektriciteitDal && (
-                  <p className="mt-1.5 text-xs text-red-600">{errors.elektriciteitDal.message}</p>
+                  <p className="mt-1.5 text-xs text-red-600">
+                    {errors.elektriciteitDal.message?.includes('Invalid input') || errors.elektriciteitDal.message?.includes('expected number')
+                      ? 'Vul een geldig getal in' 
+                      : errors.elektriciteitDal.message || 'Vul een geldig getal in'}
+                  </p>
                 )}
               </div>
             )}
           </div>
 
           {errors.elektriciteitDal && heeftEnkeleMeter && (
-            <p className="text-xs text-red-600">{errors.elektriciteitDal.message}</p>
+            <p className="text-xs text-red-600">
+              {errors.elektriciteitDal.message?.includes('Invalid input') || errors.elektriciteitDal.message?.includes('expected number')
+                ? 'Vul een geldig getal in' 
+                : errors.elektriciteitDal.message || 'Vul een geldig getal in'}
+            </p>
           )}
 
           <label className="flex items-start gap-3 cursor-pointer p-3.5 rounded-xl border-2 border-gray-200 bg-white hover:border-brand-teal-300 hover:bg-brand-teal-50/30 active:bg-brand-teal-50 transition-all">
@@ -995,7 +1003,11 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
               <span className="absolute right-3 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">kWh</span>
             </div>
             {errors.terugleveringJaar && (
-              <p className="mt-1.5 text-xs text-red-600">{errors.terugleveringJaar.message}</p>
+              <p className="mt-1.5 text-xs text-red-600">
+                {errors.terugleveringJaar.message?.includes('Invalid input') || errors.terugleveringJaar.message?.includes('expected number')
+                  ? 'Vul een geldig getal in' 
+                  : errors.terugleveringJaar.message || 'Vul een geldig getal in'}
+              </p>
             )}
           </div>
         )}
@@ -1021,13 +1033,21 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
                 <span className="absolute right-3 md:right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">m³</span>
               </div>
               {errors.gasJaar && (
-                <p className="mt-1.5 text-xs text-red-600">{errors.gasJaar.message}</p>
+                <p className="mt-1.5 text-xs text-red-600">
+                  {errors.gasJaar.message?.includes('Invalid input') || errors.gasJaar.message?.includes('expected number')
+                    ? 'Vul een geldig getal in' 
+                    : errors.gasJaar.message || 'Vul een geldig getal in'}
+                </p>
               )}
             </div>
           )}
 
           {errors.gasJaar && geenGasaansluiting && (
-            <p className="text-xs text-red-600">{errors.gasJaar.message}</p>
+            <p className="text-xs text-red-600">
+              {errors.gasJaar.message?.includes('Invalid input') || errors.gasJaar.message?.includes('expected number')
+                ? 'Vul een geldig getal in' 
+                : errors.gasJaar.message || 'Vul een geldig getal in'}
+            </p>
           )}
 
           <label className="flex items-start gap-3 cursor-pointer p-3.5 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors border-2 border-gray-200">
