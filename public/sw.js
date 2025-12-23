@@ -1,11 +1,10 @@
 // Service Worker voor PakketAdvies PWA
-// Versie: 1.0.0
+// Versie: 2.0.0 - Navigations volledig bypassen, alleen statische assets cachen
 
-// Bump cache version to invalidate older buggy caches (especially cached "/")
-const CACHE_NAME = 'pakketadvies-v3';
-const RUNTIME_CACHE = 'pakketadvies-runtime-v3';
+const CACHE_NAME = 'pakketadvies-v4';
+const RUNTIME_CACHE = 'pakketadvies-runtime-v4';
 
-// Assets die direct gecached moeten worden
+// Assets die direct gecached moeten worden (alleen statische assets)
 const STATIC_ASSETS = [
   '/icon-192x192.png',
   '/icon-512x512.png',
@@ -21,12 +20,11 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Caching static assets');
-        // Use Promise.all with individual fetch calls to handle redirects properly
         return Promise.all(
           STATIC_ASSETS.map((url) => {
             return fetch(url, { redirect: 'follow' })
               .then((response) => {
-                if (response.ok) {
+                if (response.ok && !response.redirected) {
                   return cache.put(url, response);
                 }
               })
@@ -60,7 +58,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - BYPASS ALL NAVIGATIONS, only cache static assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -70,29 +68,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // NEVER intercept "/" (root) because it is cookie-dependent ("/" -> "/particulier") and redirects can break SW fetch if request.redirect isn't "follow".
-  // This prevents "redirected response was used for a request whose redirect mode is not 'follow'".
-  if (url.pathname === '/' && !url.search) {
-    event.respondWith(
-      fetch(url.href, { redirect: 'follow', credentials: 'include' }).catch(() => {
-        return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
-      })
-    )
+  // CRITICAL: BYPASS ALL NAVIGATIONS/DOCUMENTS
+  // This prevents Safari redirect errors and ensures cookie-based redirects work correctly.
+  // Navigations always go directly to the server, never through the service worker.
+  if (
+    request.mode === 'navigate' ||
+    request.destination === 'document' ||
+    request.headers.get('accept')?.includes('text/html')
+  ) {
+    // Let the browser handle navigation requests directly (bypass SW)
     return;
   }
 
-  // Never cache navigations/documents.
-  // Our app uses cookie-based redirects, so caching HTML can trap users in the wrong experience.
-  if (request.mode === 'navigate' || request.destination === 'document') {
-    event.respondWith(
-      fetch(url.href, { redirect: 'follow', credentials: 'include' }).catch(() => {
-        return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
-      })
-    )
-    return;
-  }
-
-  // Skip API calls and external resources
+  // Skip API calls and Next.js internal routes
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/_next/') ||
@@ -102,6 +90,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Only cache static assets (images, fonts, CSS, JS, etc.)
   // Strategy: Cache First, then Network
   event.respondWith(
     caches.match(request)
@@ -112,29 +101,39 @@ self.addEventListener('fetch', (event) => {
 
         return fetch(url.href, { redirect: 'follow', credentials: 'include' })
           .then((response) => {
-            // Handle redirects - don't cache redirect responses
+            // Never cache redirects
             if (response.redirected) {
-              // If redirected, return the final response but don't cache the redirect
               return response;
             }
 
-            // Don't cache if not a valid response
+            // Only cache successful, non-redirected, basic responses
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // Clone the response
-            const responseToCache = response.clone();
+            // Only cache static assets (images, fonts, CSS, JS)
+            const contentType = response.headers.get('content-type') || '';
+            const isStaticAsset = 
+              contentType.startsWith('image/') ||
+              contentType.startsWith('font/') ||
+              contentType.includes('font/') ||
+              contentType.startsWith('text/css') ||
+              contentType.startsWith('application/javascript') ||
+              contentType.startsWith('text/javascript') ||
+              url.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot|css|js)$/i);
 
-            // Cache the response
-            caches.open(RUNTIME_CACHE)
-              .then((cache) => {
-                cache.put(request, responseToCache);
-              });
+            if (isStaticAsset) {
+              const responseToCache = response.clone();
+              caches.open(RUNTIME_CACHE)
+                .then((cache) => {
+                  cache.put(request, responseToCache);
+                });
+            }
 
             return response;
           })
           .catch(() => {
+            // If network fails and no cache, return error
             return new Response('Network error', { status: 502, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
           });
       })
