@@ -345,7 +345,7 @@ export function ConsumerAddressStartCard({
         <div>
           <label className="text-sm font-semibold text-gray-700">Postcode</label>
           <input
-            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
+            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900 bg-white"
             placeholder="1234AB"
             value={adres.postcode}
             onChange={(e) => handleAddressInputChange('postcode', e.target.value.toUpperCase())}
@@ -357,7 +357,7 @@ export function ConsumerAddressStartCard({
           <div className="col-span-2">
             <label className="text-sm font-semibold text-gray-700">Huisnummer</label>
             <input
-              className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
+              className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900 bg-white"
               placeholder="12"
               value={adres.huisnummer}
               onChange={(e) => handleAddressInputChange('huisnummer', e.target.value)}
@@ -366,7 +366,7 @@ export function ConsumerAddressStartCard({
           <div className="col-span-1">
             <label className="text-sm font-semibold text-gray-700">Toev.</label>
             <input
-              className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-center"
+              className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-center text-gray-900 bg-white"
               placeholder="A"
               value={adres.toevoeging}
               onChange={(e) => handleAddressInputChange('toevoeging', e.target.value.toUpperCase())}
@@ -378,7 +378,7 @@ export function ConsumerAddressStartCard({
         <div className="sm:col-span-2">
           <label className="text-sm font-semibold text-gray-700">Ik zit nu bij</label>
           <select
-            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900"
+            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900 bg-white"
             value={currentSupplier || ''}
             onChange={(e) => setCurrentSupplier(e.target.value)}
           >
