@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
@@ -71,6 +71,8 @@ export function ConsumerAddressStartCard({
 
   // Optional (UI only)
   const [currentSupplier, setCurrentSupplier] = useState('') // not stored yet (consumer)
+  const [leveranciers, setLeveranciers] = useState<Array<{ id: string; naam: string }>>([])
+  const [loadingLeveranciers, setLoadingLeveranciers] = useState(false)
 
   // Debounce + race-condition protection (same pattern as QuickCalculator)
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -230,6 +232,25 @@ export function ConsumerAddressStartCard({
     }
   }
 
+  // Load leveranciers on mount
+  useEffect(() => {
+    const loadLeveranciers = async () => {
+      setLoadingLeveranciers(true)
+      try {
+        const res = await fetch('/api/leveranciers')
+        if (res.ok) {
+          const data = await res.json()
+          setLeveranciers(data.leveranciers || [])
+        }
+      } catch (err) {
+        console.error('Error loading leveranciers:', err)
+      } finally {
+        setLoadingLeveranciers(false)
+      }
+    }
+    loadLeveranciers()
+  }, [])
+
   const canStart = useMemo(() => {
     if (loadingAddress || checkingAddressType) return false
     if (!adres.straat || !adres.plaats) return false
@@ -346,8 +367,14 @@ export function ConsumerAddressStartCard({
             className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
             value={currentSupplier}
             onChange={(e) => setCurrentSupplier(e.target.value)}
+            disabled={loadingLeveranciers}
           >
-            <option value="">Leverancier (optioneel)</option>
+            <option value="">Selecteer je huidige leverancier (optioneel)</option>
+            {leveranciers.map((leverancier) => (
+              <option key={leverancier.id} value={leverancier.id}>
+                {leverancier.naam}
+              </option>
+            ))}
             <option value="onbekend">Onbekend / Anders</option>
             <option value="verhuizen">Geen i.v.m. verhuizing</option>
             <option value="verschillend">Verschillend voor gas en stroom</option>
