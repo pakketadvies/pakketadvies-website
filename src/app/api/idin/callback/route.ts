@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
-import { fetchOidcDiscovery, verifyPayload } from '@/lib/idin/signicatOidc'
+import { fetchOidcDiscovery, verifyPayload, signPayload } from '@/lib/idin/signicatOidc'
+import { fetchConsumptionFromEDSN, getEDSNConfig } from '@/lib/idin/edsn-api'
+import logger from '@/lib/logger'
 
 /**
  * iDIN callback endpoint (placeholder).
@@ -98,9 +100,84 @@ export async function GET(request: Request) {
       return NextResponse.redirect(url)
     }
 
-    // NOTE: Energy consumption + supplier/end-date are NOT returned by iDIN itself.
-    // That requires a separate data/consent provider integration.
-    url.searchParams.set('idin', 'success')
+    // Extract user data from ID token payload
+    // Signicat iDIN returns verified identity attributes in the ID token
+    const userData = {
+      // BSN is typically in 'sub' or a custom claim (check Signicat docs)
+      bsn: (payload as any)?.sub || (payload as any)?.bsn || (payload as any)?.claims?.bsn,
+      // Name
+      voornaam: (payload as any)?.given_name || (payload as any)?.voornaam,
+      achternaam: (payload as any)?.family_name || (payload as any)?.achternaam,
+      // Address (if available in token)
+      postcode: (payload as any)?.postal_code || (payload as any)?.postcode,
+      huisnummer: (payload as any)?.house_number || (payload as any)?.huisnummer,
+      toevoeging: (payload as any)?.house_number_addition || (payload as any)?.toevoeging,
+      straat: (payload as any)?.street_address || (payload as any)?.straat,
+      plaats: (payload as any)?.locality || (payload as any)?.plaats,
+    }
+
+    logger.info('[iDIN Callback] User data extracted from ID token:', {
+      hasBsn: !!userData.bsn,
+      hasName: !!(userData.voornaam && userData.achternaam),
+      hasAddress: !!(userData.postcode && userData.huisnummer),
+    })
+
+    // STAP 2: Haal verbruiksdata op via EDSN (als geconfigureerd)
+    let consumptionData = null
+    const edsnConfig = getEDSNConfig()
+    
+    if (edsnConfig && userData.bsn && userData.postcode && userData.huisnummer) {
+      logger.info('[iDIN Callback] Fetching consumption data from EDSN...')
+      
+      const edsnResponse = await fetchConsumptionFromEDSN(edsnConfig, {
+        bsn: userData.bsn,
+        postcode: userData.postcode,
+        huisnummer: userData.huisnummer,
+        toevoeging: userData.toevoeging,
+      })
+
+      if (edsnResponse.success && edsnResponse.data) {
+        consumptionData = edsnResponse.data
+        logger.info('[iDIN Callback] EDSN data fetched successfully:', {
+          hasElectricity: !!(consumptionData.elektriciteitNormaal),
+          hasGas: !!(consumptionData.gasJaar),
+          hasFeedIn: !!(consumptionData.terugleveringJaar),
+        })
+      } else {
+        logger.warn('[iDIN Callback] EDSN data fetch failed:', edsnResponse.error)
+        // Continue without consumption data - user can still fill manually
+      }
+    } else {
+      logger.info('[iDIN Callback] EDSN not configured or missing required data, skipping consumption fetch')
+    }
+
+    // STAP 3: Store data in session/cookie for retrieval on redirect
+    // We store the consumption data temporarily so the wizard can pick it up
+    const sessionData = {
+      idinVerified: true,
+      userData,
+      consumptionData,
+      timestamp: Date.now(),
+    }
+
+    // Store in signed cookie (expires in 10 minutes)
+    const sessionCookie = signPayload(sessionData, cookieSecret)
+    jar.set('pa_idin_session', sessionCookie, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+      path: '/',
+      maxAge: 10 * 60, // 10 minutes
+    })
+
+    // Redirect with success status
+    if (consumptionData) {
+      url.searchParams.set('idin', 'success-with-data')
+    } else {
+      url.searchParams.set('idin', 'success')
+      url.searchParams.set('message', 'iDIN verificatie gelukt. Vul je verbruik handmatig in.')
+    }
+    
     return NextResponse.redirect(url)
   } catch {
     url.searchParams.set('idin', 'callback-failed')

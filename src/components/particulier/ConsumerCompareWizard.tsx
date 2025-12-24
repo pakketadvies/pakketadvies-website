@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
@@ -34,6 +34,7 @@ export function ConsumerCompareWizard() {
   // iDIN enable gating (until provider configured)
   const idinEnabled = typeof window !== 'undefined' && (process.env.NEXT_PUBLIC_IDIN_ENABLED === 'true')
   const [idinError, setIdinError] = useState<string | null>(null)
+  const [idinLoading, setIdinLoading] = useState(false)
 
   const hasCheckedAddress = useMemo(() => {
     const a = verbruik?.leveringsadressen?.[0]
@@ -42,6 +43,72 @@ export function ConsumerCompareWizard() {
     if (!verbruik?.addressType || verbruik.addressType === null) return false
     return true
   }, [verbruik])
+
+  // Fetch iDIN session data (user data + consumption data)
+  const fetchIdinSessionData = useCallback(async () => {
+    setIdinLoading(true)
+    try {
+      const response = await fetch('/api/idin/session')
+      if (!response.ok) {
+        throw new Error('Failed to fetch session data')
+      }
+
+      const result = await response.json()
+      if (result.success && result.data) {
+        const { userData, consumptionData } = result.data
+
+        // If we have consumption data, auto-fill the form
+        if (consumptionData && verbruik) {
+          const updated: VerbruikData = {
+            ...verbruik,
+            // Verbruik data
+            elektriciteitNormaal: consumptionData.elektriciteitNormaal || verbruik.elektriciteitNormaal || 0,
+            elektriciteitDal: consumptionData.elektriciteitDal || verbruik.elektriciteitDal || null,
+            heeftEnkeleMeter: consumptionData.heeftEnkeleMeter ?? verbruik.heeftEnkeleMeter ?? false,
+            gasJaar: consumptionData.gasJaar || verbruik.gasJaar || null,
+            geenGasaansluiting: consumptionData.geenGasaansluiting ?? verbruik.geenGasaansluiting ?? false,
+            terugleveringJaar: consumptionData.terugleveringJaar || verbruik.terugleveringJaar || null,
+            heeftZonnepanelen: !!consumptionData.terugleveringJaar || verbruik.heeftZonnepanelen || false,
+            // Mark as not estimated (real data from netbeheerder)
+            geschat: false,
+          }
+
+          setVerbruik(updated)
+
+          // Auto-fill form fields
+          if (consumptionData.elektriciteitNormaal) {
+            setElectricityNormal(consumptionData.elektriciteitNormaal)
+          }
+          if (consumptionData.elektriciteitDal) {
+            setElectricityOffPeak(consumptionData.elektriciteitDal)
+          }
+          if (consumptionData.heeftEnkeleMeter !== undefined) {
+            setHasSingleMeter(consumptionData.heeftEnkeleMeter)
+          }
+          if (consumptionData.gasJaar) {
+            setGasM3(consumptionData.gasJaar)
+            setHasGas(!consumptionData.geenGasaansluiting)
+          }
+          if (consumptionData.terugleveringJaar) {
+            setFeedInKwh(consumptionData.terugleveringJaar)
+            setHasSolar(true)
+          }
+
+          // Show success message - check URL params again
+          const currentParams = new URLSearchParams(window.location.search)
+          const currentIdin = currentParams.get('idin')
+          if (currentIdin === 'success-with-data') {
+            setIdinError(null) // Clear error, show success
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('Error fetching iDIN session data:', error)
+      // Don't show error to user - they can still fill manually
+    } finally {
+      setIdinLoading(false)
+    }
+  }, [verbruik, setVerbruik])
 
   // Allow deep-linking back into the wizard after /api/idin/* redirects.
   useEffect(() => {
@@ -69,13 +136,23 @@ export function ConsumerCompareWizard() {
         'nonce-mismatch': 'iDIN sessie validatie faalde (nonce mismatch). Probeer het opnieuw.',
         'callback-failed': 'iDIN afronden is niet gelukt. Probeer het later opnieuw.',
         'success':
-          'iDIN gelukt. Volgende stap is het ophalen van verbruiksdata via een energiedata/consent-provider (netbeheerder-koppeling).',
+          'iDIN verificatie gelukt. Verbruiksdata wordt opgehaald...',
+        'success-with-data':
+          'iDIN gelukt! Je verbruiksdata is opgehaald en ingevuld.',
       }
       setIdinError(map[spIdin] || 'Er is iets misgegaan met iDIN. Probeer het later opnieuw.')
       setMethod('netbeheerder')
+
+      // If success, try to fetch session data
+      if (spIdin === 'success' || spIdin === 'success-with-data') {
+        // Fetch session data after a short delay to ensure cookie is set
+        setTimeout(() => {
+          fetchIdinSessionData()
+        }, 500)
+      }
     }
     // Run on mount
-  }, [])
+  }, [fetchIdinSessionData])
 
   const handleSubmitManual = () => {
     if (!verbruik?.leveringsadressen?.length) return
