@@ -8,6 +8,7 @@ import { Testimonials } from '@/components/sections/Testimonials'
 import { CTA } from '@/components/sections/CTA'
 import { OrganizationSchema } from '@/components/seo/StructuredData'
 import { getBestDeals } from '@/lib/get-best-deals'
+import { logger } from '@/lib/logger'
 
 export const metadata: Metadata = {
   title: 'PakketAdvies - Het beste energiecontract voor uw bedrijf',
@@ -42,32 +43,19 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   // Fetch best deals server-side for instant loading
-  console.log('🔵 [HomePage] START - Fetching best deals...')
+  logger.info('HomePage', 'Fetching best deals...')
   let bestDealsData
   try {
     bestDealsData = await getBestDeals(5, 'alle')
-    console.log('✅ [HomePage] Best deals fetched:', bestDealsData?.contracten?.length || 0, 'contracts')
-    console.log('✅ [HomePage] Best deals data:', JSON.stringify(bestDealsData, null, 2))
+    logger.info('HomePage', `Best deals fetched: ${bestDealsData?.contracten?.length || 0} contracts`)
   } catch (error: any) {
-    console.error('❌ [HomePage] ERROR fetching best deals:', error)
-    console.error('❌ [HomePage] Error stack:', error?.stack)
+    logger.error('HomePage ERROR fetching best deals:', error)
+    logger.error('HomePage Error stack:', error?.stack)
     bestDealsData = { contracten: [], averagePrice: 0 }
-  }
-
-  // Add debug info to page as comment for client-side inspection
-  const debugInfo = {
-    contractCount: bestDealsData?.contracten?.length || 0,
-    averagePrice: bestDealsData?.averagePrice || 0,
-    hasContracts: (bestDealsData?.contracten?.length || 0) > 0,
   }
 
   return (
     <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `console.log('🔵 [HomePage-Debug] Server-side result:', ${JSON.stringify(debugInfo)});`,
-        }}
-      />
       <OrganizationSchema />
       <Hero initialBestDeals={bestDealsData} />
       <ContractTypes />

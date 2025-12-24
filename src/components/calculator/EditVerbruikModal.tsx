@@ -53,6 +53,7 @@ export default function EditVerbruikModal({
     if (isOpen) {
       setFormData(currentData)
       setHasChanges(false)
+      setShowAdvancedFilters(false) // Reset advanced filters section when modal opens
       if (filters) {
         setLocalFilters(filters)
       }
@@ -95,6 +96,7 @@ export default function EditVerbruikModal({
   const handleCancel = () => {
     setFormData(currentData)
     setHasChanges(false)
+    setShowAdvancedFilters(false) // Reset advanced filters section
     onClose()
   }
 

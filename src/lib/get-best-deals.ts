@@ -6,6 +6,7 @@ import { converteerGasAansluitwaardeVoorDatabase } from '@/lib/aansluitwaarde-sc
 import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
 import { getCurrentDynamicPrices } from '@/lib/dynamic-pricing/database'
 import { calculateDynamicContract } from '@/lib/dynamic-pricing/calculate-dynamic-contract'
+import { logger } from '@/lib/logger'
 
 /**
  * Helper function to fetch shared/cached data that's reused across all contract calculations
@@ -17,10 +18,10 @@ async function fetchSharedCalculationData(
   aansluitwaardeElektriciteit: string,
   aansluitwaardeGas: string
 ) {
-  console.log('🔵 [fetchSharedCalculationData] START - postcode:', postcode, 'elektriciteit:', aansluitwaardeElektriciteit, 'gas:', aansluitwaardeGas)
+  logger.debug('fetchSharedCalculationData', 'START', { postcode, aansluitwaardeElektriciteit, aansluitwaardeGas })
   
   // 1. Overheidstarieven (always the same for 2025)
-  console.log('🔵 [fetchSharedCalculationData] Fetching overheidsTarieven...')
+  logger.debug('fetchSharedCalculationData', 'Fetching overheidsTarieven...')
   const { data: overheidsTarieven, error: tarievenError } = await supabase
     .from('tarieven_overheid')
     .select('*')
@@ -29,13 +30,13 @@ async function fetchSharedCalculationData(
     .single()
 
   if (tarievenError || !overheidsTarieven) {
-    console.error('❌ [fetchSharedCalculationData] Error fetching overheidsTarieven:', tarievenError)
+    logger.error('fetchSharedCalculationData Error fetching overheidsTarieven:', tarievenError)
     throw new Error('Energiebelasting tarieven niet gevonden voor 2025')
   }
-  console.log('✅ [fetchSharedCalculationData] OverheidsTarieven fetched')
+  logger.debug('fetchSharedCalculationData', 'OverheidsTarieven fetched')
 
   // 2. Netbeheerder lookup (for fixed postcode '1000AA')
-  console.log('🔵 [fetchSharedCalculationData] Looking up netbeheerder for postcode:', postcode)
+  logger.debug('fetchSharedCalculationData', 'Looking up netbeheerder for postcode:', postcode)
   const cleanedPostcode = postcode.replace(/\s/g, '').toUpperCase()
   const { data: postcodeData, error: postcodeError } = await supabase
     .from('postcode_netbeheerders')
@@ -46,16 +47,16 @@ async function fetchSharedCalculationData(
     .single()
 
   if (postcodeError || !postcodeData) {
-    console.error('❌ [fetchSharedCalculationData] Error looking up postcode:', postcodeError)
+    logger.error('fetchSharedCalculationData Error looking up postcode:', postcodeError)
     throw new Error('Netbeheerder niet gevonden voor deze postcode')
   }
 
   const netbeheerderId = postcodeData.netbeheerder_id
-  console.log('✅ [fetchSharedCalculationData] Netbeheerder found:', netbeheerderId)
+  logger.debug('fetchSharedCalculationData', 'Netbeheerder found:', netbeheerderId)
 
   // 3. Aansluitwaarden (fetch once)
   // Voor gas: converteer eerst naar database formaat (gebruik standaard verbruik van 1200 m³ voor homepage)
-  console.log('🔵 [fetchSharedCalculationData] Fetching aansluitwaarden...')
+  logger.debug('fetchSharedCalculationData', 'Fetching aansluitwaarden...')
   const gasAansluitwaardeVoorDatabase = converteerGasAansluitwaardeVoorDatabase(aansluitwaardeGas, 1200)
   
   const [elektraAansluitwaardeResult, gasAansluitwaardeResult] = await Promise.all([
@@ -75,10 +76,10 @@ async function fetchSharedCalculationData(
   const gasAansluitwaarde = gasAansluitwaardeResult.data
 
   if (!elektraAansluitwaarde) {
-    console.error('❌ [fetchSharedCalculationData] Elektra aansluitwaarde not found')
+    logger.error('fetchSharedCalculationData Elektra aansluitwaarde not found')
     throw new Error(`Ongeldige aansluitwaarde elektriciteit: ${aansluitwaardeElektriciteit}`)
   }
-  console.log('✅ [fetchSharedCalculationData] Aansluitwaarden fetched')
+  logger.debug('fetchSharedCalculationData', 'Aansluitwaarden fetched')
 
   // 4. Netbeheertarieven (fetch once for this postcode/aansluitwaarden combination)
   const [elektriciteitTariefResult, gasTariefResult] = await Promise.all([
@@ -112,7 +113,7 @@ async function fetchSharedCalculationData(
     netbeheerGas = 0
   }
   
-  console.log('✅ [fetchSharedCalculationData] All shared data fetched successfully - netbeheerElektriciteit:', netbeheerElektriciteit, 'netbeheerGas:', netbeheerGas)
+  logger.debug('fetchSharedCalculationData', 'All shared data fetched successfully', { netbeheerElektriciteit, netbeheerGas })
 
   return {
     overheidsTarieven,
@@ -142,7 +143,7 @@ async function calculateContractCostsOptimized(
     heeftDubbeleMeter: boolean
   }
 ): Promise<{ maandbedrag: number } | null> {
-  console.log('🔵 [calculateContractCostsOptimized] START - contract:', contract.id, 'type:', contract.type)
+  logger.debug('calculateContractCostsOptimized', 'START', { contractId: contract.id, type: contract.type })
   try {
     const {
       overheidsTarieven,
@@ -314,12 +315,12 @@ async function calculateContractCostsOptimized(
     const totaalJaarInclBtw = totaalJaarExclBtw + btw
 
     const maandbedragInclBtw = totaalJaarInclBtw / 12
-    console.log('✅ [calculateContractCostsOptimized] SUCCESS - contract:', contract.id, 'maandbedrag:', maandbedragInclBtw)
+    logger.debug('calculateContractCostsOptimized', 'SUCCESS', { contractId: contract.id, maandbedrag: maandbedragInclBtw })
 
     return { maandbedrag: maandbedragInclBtw }
   } catch (error: any) {
-    console.error(`❌ [calculateContractCostsOptimized] ERROR for contract ${contract.id}:`, error)
-    console.error(`❌ [calculateContractCostsOptimized] Error stack:`, error?.stack)
+    logger.error(`calculateContractCostsOptimized ERROR for contract ${contract.id}:`, error)
+    logger.error(`calculateContractCostsOptimized Error stack:`, error?.stack)
     return null
   }
 }
@@ -328,11 +329,11 @@ async function calculateContractCostsOptimized(
  * Internal implementation (not cached)
  */
 async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') {
-  console.log('🔵 [getBestDealsInternal] START - limit:', limit, 'type:', type)
+  logger.debug('getBestDealsInternal', 'START', { limit, type })
   try {
     // Use client without cookies for use in unstable_cache
     const supabase = createClientWithoutCookies()
-    console.log('✅ [getBestDealsInternal] Supabase client created (without cookies)')
+    logger.debug('getBestDealsInternal', 'Supabase client created (without cookies)')
     
     // Get all active contracts with leverancier info that are marked to show on homepage
     let query = supabase
@@ -356,30 +357,30 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       .limit(limit * 2) // Get more to sort by rating/price later
 
     if (error) {
-      console.error('❌ [getBestDealsInternal] Error fetching contracten:', error)
-      console.error('❌ [getBestDealsInternal] Error details:', JSON.stringify(error, null, 2))
+      logger.error('getBestDealsInternal Error fetching contracten:', error)
+      logger.error('getBestDealsInternal Error details:', JSON.stringify(error, null, 2))
       return { contracten: [], averagePrice: 0 }
     }
 
     if (!contracten || contracten.length === 0) {
-      console.log('⚠️ [getBestDealsInternal] No contracten found in database')
-      console.log('⚠️ [getBestDealsInternal] Query filters: actief=true, tonen_op_homepage=true, type=', type)
+      logger.warn('getBestDealsInternal No contracten found in database')
+      logger.warn('getBestDealsInternal Query filters:', { actief: true, tonen_op_homepage: true, type })
       // Let's check if there are ANY active contracts at all
       const { data: allActive, error: allActiveError } = await supabase
         .from('contracten')
         .select('id, naam, actief, tonen_op_homepage, type')
         .eq('actief', true)
         .limit(10)
-      console.log('⚠️ [getBestDealsInternal] All active contracts sample:', allActive)
-      console.log('⚠️ [getBestDealsInternal] Contracts with tonen_op_homepage=true:', allActive?.filter((c: any) => c.tonen_op_homepage === true))
+      logger.warn('getBestDealsInternal All active contracts sample:', allActive)
+      logger.warn('getBestDealsInternal Contracts with tonen_op_homepage=true:', allActive?.filter((c: any) => c.tonen_op_homepage === true))
       return { contracten: [], averagePrice: 0 }
     }
     
-    console.log('✅ [getBestDealsInternal] Found', contracten.length, 'contracts in database')
-    console.log('✅ [getBestDealsInternal] Contract IDs:', contracten.map((c: any) => ({ id: c.id, naam: c.naam, type: c.type })))
+    logger.debug('getBestDealsInternal', `Found ${contracten.length} contracts in database`)
+    logger.debug('getBestDealsInternal', 'Contract IDs:', contracten.map((c: any) => ({ id: c.id, naam: c.naam, type: c.type })))
 
     // Fetch details for each contract based on type
-    console.log('🔵 [getBestDealsInternal] Fetching details for', contracten.length, 'contracts...')
+    logger.debug('getBestDealsInternal', `Fetching details for ${contracten.length} contracts...`)
     const contractenWithDetails = await Promise.all(
       contracten.map(async (contract: any) => {
         try {
@@ -391,7 +392,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
               .single()
             
             if (detailsError) {
-              console.error(`❌ [getBestDealsInternal] Error fetching vast details for contract ${contract.id}:`, detailsError)
+              logger.error(`getBestDealsInternal Error fetching vast details for contract ${contract.id}:`, detailsError)
             }
             
             return { ...contract, details_vast: details }
@@ -403,7 +404,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
               .single()
             
             if (detailsError) {
-              console.error(`❌ [getBestDealsInternal] Error fetching dynamisch details for contract ${contract.id}:`, detailsError)
+              logger.error(`getBestDealsInternal Error fetching dynamisch details for contract ${contract.id}:`, detailsError)
             }
             
             return { ...contract, details_dynamisch: details }
@@ -415,21 +416,21 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
               .single()
             
             if (detailsError) {
-              console.error(`❌ [getBestDealsInternal] Error fetching maatwerk details for contract ${contract.id}:`, detailsError)
+              logger.error(`getBestDealsInternal Error fetching maatwerk details for contract ${contract.id}:`, detailsError)
             }
             
             return { ...contract, details_maatwerk: details }
           }
           
-          console.warn(`⚠️ [getBestDealsInternal] Unknown contract type for contract ${contract.id}:`, contract.type)
+          logger.warn(`getBestDealsInternal Unknown contract type for contract ${contract.id}:`, contract.type)
           return contract
         } catch (error: any) {
-          console.error(`❌ [getBestDealsInternal] Exception fetching details for contract ${contract.id}:`, error)
+          logger.error(`getBestDealsInternal Exception fetching details for contract ${contract.id}:`, error)
           return contract
         }
       })
     )
-    console.log('✅ [getBestDealsInternal] Fetched details for', contractenWithDetails.length, 'contracts')
+    logger.debug('getBestDealsInternal', `Fetched details for ${contractenWithDetails.length} contracts`)
 
     // Filter out contracts without details
     const validContracten = contractenWithDetails.filter((c: any) => {
@@ -438,7 +439,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       if (c.type === 'maatwerk') return !!c.details_maatwerk
       return false
     })
-    console.log('✅ [getBestDealsInternal] Valid contracts (with details):', validContracten.length, 'out of', contractenWithDetails.length)
+    logger.debug('getBestDealsInternal', `Valid contracts (with details): ${validContracten.length} out of ${contractenWithDetails.length}`)
     if (validContracten.length < contractenWithDetails.length) {
       const invalidIds = contractenWithDetails
         .filter((c: any) => {
@@ -448,7 +449,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
           return true
         })
         .map((c: any) => c.id)
-      console.warn('⚠️ [getBestDealsInternal] Contracts without details (filtered out):', invalidIds)
+      logger.warn('getBestDealsInternal Contracts without details (filtered out):', invalidIds)
     }
 
         // Calculate prices using optimized calculation with shared data
@@ -462,7 +463,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
     const defaultAansluitwaardeGas = 'G6'
 
     // OPTIMIZATION: Fetch shared data once instead of per contract
-    console.log('🔵 [getBestDealsInternal] Fetching shared calculation data...')
+    logger.debug('getBestDealsInternal', 'Fetching shared calculation data...')
     let sharedData
     try {
       sharedData = await fetchSharedCalculationData(
@@ -471,14 +472,14 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
         defaultAansluitwaardeElektriciteit,
         defaultAansluitwaardeGas
       )
-      console.log('✅ [getBestDealsInternal] Shared data fetched successfully')
+      logger.debug('getBestDealsInternal', 'Shared data fetched successfully')
     } catch (error: any) {
-      console.error('❌ [getBestDealsInternal] Error fetching shared data:', error)
+      logger.error('getBestDealsInternal Error fetching shared data:', error)
       throw error
     }
 
     // Calculate Eneco model contract costs for comparison (baseline for savings)
-    console.log('🔵 [getBestDealsInternal] Calculating Eneco model costs...')
+    logger.debug('getBestDealsInternal', 'Calculating Eneco model costs...')
     const enecoModelKosten = await berekenEnecoModelContractKosten(
       defaultElektriciteitNormaal,
       defaultElektriciteitDal,
@@ -489,10 +490,10 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
       defaultAansluitwaardeGas
     )
     const enecoModelMaandbedrag = enecoModelKosten?.maandbedrag || 0
-    console.log('✅ [getBestDealsInternal] Eneco model maandbedrag:', enecoModelMaandbedrag)
+    logger.debug('getBestDealsInternal', 'Eneco model maandbedrag:', enecoModelMaandbedrag)
 
     // Calculate prices for each contract using optimized calculation with shared data
-    console.log('🔵 [getBestDealsInternal] Calculating prices for', validContracten.length, 'contracts...')
+    logger.debug('getBestDealsInternal', `Calculating prices for ${validContracten.length} contracts...`)
     const contractenMetPrijzen = await Promise.all(
       validContracten.map(async (contract: any) => {
         const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
@@ -522,7 +523,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
               ? Math.round(enecoModelMaandbedrag - maandbedrag)
               : 0
             
-            console.log('✅ [getBestDealsInternal] Contract', contract.id, '- maandbedrag:', maandbedrag, 'besparing:', besparing)
+            logger.debug('getBestDealsInternal', `Contract ${contract.id} - maandbedrag: ${maandbedrag}, besparing: ${besparing}`)
             return {
               ...contract,
               estimatedMaandbedrag: maandbedrag > 0 ? maandbedrag : 150,
@@ -530,14 +531,14 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
               rating: details.rating || 0,
             }
           } else {
-            console.warn('⚠️ [getBestDealsInternal] Contract', contract.id, '- calculateContractCostsOptimized returned null')
+            logger.warn(`getBestDealsInternal Contract ${contract.id} - calculateContractCostsOptimized returned null`)
           }
         } catch (error) {
-          console.error(`❌ [getBestDealsInternal] Error calculating price for contract ${contract.id}:`, error)
+          logger.error(`getBestDealsInternal Error calculating price for contract ${contract.id}:`, error)
         }
 
         // Fallback: simplified estimate if calculation fails
-        console.warn('⚠️ [getBestDealsInternal] Contract', contract.id, '- using fallback estimate')
+        logger.warn(`getBestDealsInternal Contract ${contract.id} - using fallback estimate`)
         return {
           ...contract,
           estimatedMaandbedrag: 150, // Fallback to reasonable default
@@ -546,7 +547,7 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
         }
       })
     )
-    console.log('✅ [getBestDealsInternal] Calculated prices for', contractenMetPrijzen.length, 'contracts')
+    logger.debug('getBestDealsInternal', `Calculated prices for ${contractenMetPrijzen.length} contracts`)
 
     // Calculate average price (use Eneco model as average if available)
     const averagePrice = enecoModelMaandbedrag > 0 
@@ -570,15 +571,15 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
 
     // Take top N contracts
     const topContracten = contractenMetPrijzen.slice(0, limit)
-    console.log('✅ [getBestDealsInternal] Returning', topContracten.length, 'top contracts, averagePrice:', averagePrice)
+    logger.debug('getBestDealsInternal', `Returning ${topContracten.length} top contracts, averagePrice: ${averagePrice}`)
 
     return { 
       contracten: topContracten,
       averagePrice 
     }
   } catch (error: any) {
-    console.error('❌ [getBestDealsInternal] ERROR:', error)
-    console.error('❌ [getBestDealsInternal] Error stack:', error?.stack)
+    logger.error('getBestDealsInternal ERROR:', error)
+    logger.error('getBestDealsInternal Error stack:', error?.stack)
     return { contracten: [], averagePrice: 0 }
   }
 }
@@ -589,14 +590,14 @@ async function getBestDealsInternal(limit: number = 5, type: 'alle' | 'vast' | '
  */
 export const getBestDeals = unstable_cache(
   async (limit: number = 5, type: 'alle' | 'vast' | 'dynamisch' = 'alle') => {
-    console.log('🔵 [getBestDeals] Called with limit:', limit, 'type:', type)
+    logger.debug('getBestDeals', 'Called', { limit, type })
     try {
       const result = await getBestDealsInternal(limit, type)
-      console.log('✅ [getBestDeals] Result:', result.contracten.length, 'contracts, averagePrice:', result.averagePrice)
+      logger.debug('getBestDeals', 'Result', { contractCount: result.contracten.length, averagePrice: result.averagePrice })
       return result
     } catch (error: any) {
-      console.error('❌ [getBestDeals] ERROR:', error)
-      console.error('❌ [getBestDeals] Error stack:', error?.stack)
+      logger.error('getBestDeals ERROR:', error)
+      logger.error('getBestDeals Error stack:', error?.stack)
       // Return empty result on error instead of throwing
       return { contracten: [], averagePrice: 0 }
     }
