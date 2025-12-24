@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import ContractCard from '@/components/calculator/ContractCard'
@@ -391,6 +391,11 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isKeuzehulpOpen, setIsKeuzehulpOpen] = useState(false)
 
+  // Explicit close handler for modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false)
+  }, [])
+
   const [filters, setFilters] = useState({
     type: 'alle' as 'alle' | 'vast' | 'dynamisch',
     groeneEnergie: false,
@@ -736,7 +741,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
               <EditVerbruikModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseModal}
                 currentData={verbruik}
                 onSave={handleVerbruikUpdate}
                 isUpdating={isUpdating}

@@ -94,10 +94,15 @@ export default function EditVerbruikModal({
   }
 
   const handleCancel = () => {
+    // Reset all state first
     setFormData(currentData)
     setHasChanges(false)
     setShowAdvancedFilters(false) // Reset advanced filters section
-    onClose()
+    
+    // Close the modal - ensure onClose is called
+    if (onClose) {
+      onClose()
+    }
   }
 
   const handleFormChange = (newData: VerbruikData) => {
