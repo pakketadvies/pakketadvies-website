@@ -562,8 +562,9 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               const { breakdown } = await kostenResponse.json()
               return {
                 ...contract,
-                exactMaandbedrag: Math.round(breakdown.totaal.maandExclBtw),
-                exactJaarbedrag: Math.round(breakdown.totaal.jaarExclBtw),
+                // Gebruik maandInclBtw en jaarInclBtw voor consistentie met email en display
+                exactMaandbedrag: Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw),
+                exactJaarbedrag: Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw),
                 breakdown,
               }
             }

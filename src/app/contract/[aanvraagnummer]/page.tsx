@@ -11,24 +11,7 @@ interface PageProps {
 async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer: string; token?: string }) {
   const supabase = await createClient()
 
-  // First, verify access token if provided
-  if (token) {
-    const { data: accessData } = await supabase
-      .from('contract_viewer_access')
-      .select('aanvraag_id, accessed_at')
-      .eq('access_token', token)
-      .single()
-
-    if (accessData) {
-      // Update accessed_at
-      await supabase
-        .from('contract_viewer_access')
-        .update({ accessed_at: new Date().toISOString() })
-        .eq('access_token', token)
-    }
-  }
-
-  // Fetch aanvraag by aanvraagnummer
+  // Fetch aanvraag by aanvraagnummer first
   const { data: aanvraag, error: aanvraagError } = await supabase
     .from('contractaanvragen')
     .select(`
@@ -51,6 +34,50 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
 
   if (aanvraagError || !aanvraag) {
     redirect('/contract/niet-gevonden')
+  }
+
+  // Verify access token if provided (after fetching aanvraag to get aanvraag_id)
+  if (token) {
+    const { data: accessData, error: tokenError } = await supabase
+      .from('contract_viewer_access')
+      .select('aanvraag_id, accessed_at, expires_at')
+      .eq('access_token', token)
+      .eq('aanvraag_id', aanvraag.id)
+      .single()
+
+    // Check if token is valid and not expired
+    if (!accessData || tokenError) {
+      // Token invalid or not found - redirect to error page
+      redirect('/contract/niet-gevonden')
+    }
+
+    // Check if token is expired
+    if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
+      redirect('/contract/niet-gevonden')
+    }
+
+    // Update accessed_at if token is valid
+    if (accessData) {
+      await supabase
+        .from('contract_viewer_access')
+        .update({ accessed_at: new Date().toISOString() })
+        .eq('access_token', token)
+    }
+  } else {
+    // No token provided - check if there's a valid token in database
+    const { data: accessData } = await supabase
+      .from('contract_viewer_access')
+      .select('access_token, expires_at')
+      .eq('aanvraag_id', aanvraag.id)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // If no valid token found, redirect to error page
+    if (!accessData) {
+      redirect('/contract/niet-gevonden')
+    }
   }
 
   // Extract data

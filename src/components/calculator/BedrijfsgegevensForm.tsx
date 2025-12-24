@@ -154,6 +154,31 @@ function BedrijfsgegevensFormContent() {
   const [loadingContract, setLoadingContract] = useState(false)
   const [contractError, setContractError] = useState<string | null>(null)
   
+  // ALLE HOOKS MOETEN BOVEN DE EARLY RETURN STAAN (React Rules of Hooks)
+  // Form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // KvK number lookup states
+  const [kvkNummer, setKvkNummer] = useState('')
+  const [kvkLoading, setKvkLoading] = useState(false)
+  const [kvkError, setKvkError] = useState<string | null>(null)
+  const [kvkSuccess, setKvkSuccess] = useState(false)
+  
+  // Autocomplete states
+  const [bedrijfsnaamInput, setBedrijfsnaamInput] = useState('')
+  const [searchResults, setSearchResults] = useState<KvkSearchResult[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Correspondentieadres checkbox
+  const [zelfdeAlsLeveradres, setZelfdeAlsLeveradres] = useState(false)
+  
+  // IBAN Calculator modal
+  const [showIbanCalculator, setShowIbanCalculator] = useState(false)
+  
   // Fetch contract from API als fallback (als niet in store of als contractId verschilt)
   useEffect(() => {
     const loadContract = async () => {
@@ -307,30 +332,6 @@ function BedrijfsgegevensFormContent() {
   }
   
   // Anders: zakelijk formulier (bestaande logica)
-  
-  // Form submission state
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  
-  // KvK number lookup states
-  const [kvkNummer, setKvkNummer] = useState('')
-  const [kvkLoading, setKvkLoading] = useState(false)
-  const [kvkError, setKvkError] = useState<string | null>(null)
-  const [kvkSuccess, setKvkSuccess] = useState(false)
-  
-  // Autocomplete states
-  const [bedrijfsnaamInput, setBedrijfsnaamInput] = useState('')
-  const [searchResults, setSearchResults] = useState<KvkSearchResult[]>([])
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
-  // Correspondentieadres checkbox
-  const [zelfdeAlsLeveradres, setZelfdeAlsLeveradres] = useState(false)
-  
-  // IBAN Calculator modal
-  const [showIbanCalculator, setShowIbanCalculator] = useState(false)
 
   const {
     register,

@@ -576,10 +576,10 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
           U komt geen moment zonder stroom en gas te zitten.
         </p>
         
-        {/* Korting badge (als van toepassing) */}
+        {/* Besparing per jaar badge (als van toepassing) */}
         {korting && korting > 0 && (
           <div className="inline-flex items-center gap-1.5 md:gap-2 bg-green-100 text-green-700 border-2 border-green-300 rounded-xl px-3 py-1.5 md:px-4 md:py-2 font-bold text-base md:text-lg">
-            <span>Korting</span>
+            <span>Besparing per jaar</span>
             <span className="text-xl md:text-2xl">€ {korting.toLocaleString('nl-NL')},-</span>
           </div>
         )}
