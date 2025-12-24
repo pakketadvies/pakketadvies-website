@@ -319,8 +319,14 @@ export default function ContractViewer({
   // Get costs - use opgeslagen breakdown from verbruik_data (vastgelegd bij aanvraag)
   // Dit zorgt ervoor dat het maandbedrag altijd hetzelfde blijft, ook als tarieven later veranderen
   // opgeslagenBreakdown is al gedefinieerd bovenaan de component (regel 65)
-  const maandbedrag = verbruikData?.maandbedrag || (opgeslagenBreakdown?.totaal?.maandInclBtw ? Math.round(opgeslagenBreakdown.totaal.maandInclBtw) : (opgeslagenBreakdown?.totaal?.maandExclBtw ? Math.round(opgeslagenBreakdown.totaal.maandExclBtw * 1.21) : 0))
-  const jaarbedrag = verbruikData?.jaarbedrag || (opgeslagenBreakdown?.totaal?.jaarInclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarInclBtw) : (opgeslagenBreakdown?.totaal?.jaarExclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarExclBtw * 1.21) : (maandbedrag > 0 ? maandbedrag * 12 : 0)))
+  // Bepaal of zakelijk of particulier op basis van addressType
+  const isZakelijk = verbruikData?.addressType === 'zakelijk'
+  const maandbedrag = verbruikData?.maandbedrag || (isZakelijk 
+    ? (opgeslagenBreakdown?.totaal?.maandExclBtw ? Math.round(opgeslagenBreakdown.totaal.maandExclBtw) : 0)
+    : (opgeslagenBreakdown?.totaal?.maandInclBtw ? Math.round(opgeslagenBreakdown.totaal.maandInclBtw) : (opgeslagenBreakdown?.totaal?.maandExclBtw ? Math.round(opgeslagenBreakdown.totaal.maandExclBtw * 1.21) : 0)))
+  const jaarbedrag = verbruikData?.jaarbedrag || (isZakelijk
+    ? (opgeslagenBreakdown?.totaal?.jaarExclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarExclBtw) : (maandbedrag > 0 ? maandbedrag * 12 : 0))
+    : (opgeslagenBreakdown?.totaal?.jaarInclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarInclBtw) : (opgeslagenBreakdown?.totaal?.jaarExclBtw ? Math.round(opgeslagenBreakdown.totaal.jaarExclBtw * 1.21) : (maandbedrag > 0 ? maandbedrag * 12 : 0))))
   const besparing = verbruikData?.besparing
 
   // Status badge
@@ -379,9 +385,9 @@ export default function ContractViewer({
 
             {/* Maandbedrag Box */}
             <div className="bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 rounded-xl p-6 md:p-8 text-white text-center mb-6">
-              <p className="text-sm uppercase tracking-wider mb-2 opacity-90">Uw maandbedrag</p>
+              <p className="text-sm uppercase tracking-wider mb-2 opacity-90">Uw maandbedrag {isZakelijk ? '(excl. btw)' : '(incl. btw)'}</p>
               <p className="text-4xl md:text-5xl font-bold mb-2">{formatCurrency(maandbedrag)}</p>
-              <p className="text-lg opacity-90 mb-4">per maand ({formatCurrency(jaarbedrag)} per jaar)</p>
+              <p className="text-lg opacity-90 mb-4">per maand ({formatCurrency(jaarbedrag)} per jaar {isZakelijk ? 'excl. btw' : 'incl. btw'})</p>
               {besparing && besparing > 0 && (
                 <p className="text-sm opacity-80">
                   U bespaart {formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief
@@ -545,15 +551,19 @@ export default function ContractViewer({
                         {/* Totaal */}
                         <div className="bg-brand-teal-50 rounded-lg p-4 border-2 border-brand-teal-200">
                           <div className="flex justify-between items-center">
-                            <span className="text-lg font-bold text-brand-navy-500">Totaal per jaar (excl. BTW):</span>
+                            <span className="text-lg font-bold text-brand-navy-500">
+                              Totaal per jaar {isZakelijk ? '(excl. BTW)' : '(incl. BTW)'}:
+                            </span>
                             <span className="text-2xl font-bold text-brand-teal-600">
-                              {formatCurrency(breakdown.totaal.jaarExclBtw)}
+                              {formatCurrency(isZakelijk ? breakdown.totaal.jaarExclBtw : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))}
                             </span>
                           </div>
                           <div className="flex justify-between items-center mt-2">
-                            <span className="text-sm text-gray-600">Totaal per maand (excl. BTW):</span>
+                            <span className="text-sm text-gray-600">
+                              Totaal per maand {isZakelijk ? '(excl. BTW)' : '(incl. BTW)'}:
+                            </span>
                             <span className="text-lg font-semibold text-brand-navy-500">
-                              {formatCurrency(breakdown.totaal.maandExclBtw)}
+                              {formatCurrency(isZakelijk ? breakdown.totaal.maandExclBtw : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))}
                             </span>
                           </div>
                         </div>

@@ -31,6 +31,7 @@ export interface EmailBevestigingData {
   maandbedrag: number
   jaarbedrag: number
   besparing?: number
+  isZakelijk?: boolean // NIEUW: voor BTW label in email template
   contractViewerUrl: string
   baseUrl: string
 }
@@ -53,6 +54,7 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
     besparing,
     contractViewerUrl,
     baseUrl,
+    isZakelijk = false, // Default naar particulier (incl BTW)
   } = data
 
   // Format currency
@@ -116,9 +118,9 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
           <!-- Maandbedrag Box (Groot & Opvallend) -->
           <tr>
             <td style="background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%); padding: 40px 20px; text-align: center; margin: 0;">
-              <p style="color: white; font-size: 14px; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Uw maandbedrag</p>
+              <p style="color: white; font-size: 14px; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Uw maandbedrag ${isZakelijk ? '(excl. btw)' : '(incl. btw)'}</p>
               <p style="color: white; font-size: 48px; font-weight: bold; margin: 0 0 5px 0;">${formatCurrency(maandbedrag)}</p>
-              <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 0 0 30px 0;">per maand (${formatCurrency(jaarbedrag)} per jaar)</p>
+              <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 0 0 30px 0;">per maand (${formatCurrency(jaarbedrag)} per jaar ${isZakelijk ? 'excl. btw' : 'incl. btw'})</p>
               ${besparing && besparing > 0 ? `<p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 20px 0;">U bespaart ${formatCurrency(besparing)} per jaar ten opzichte van het gemiddelde tarief</p>` : ''}
               <a href="${contractViewerUrl}" target="_blank" rel="noopener noreferrer" style="background: white; color: #14B8A6; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px; cursor: pointer;">
                 📊 Bekijk volledige berekening

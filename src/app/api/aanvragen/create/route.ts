@@ -133,9 +133,17 @@ export async function POST(request: Request) {
             const berekenResult = await calculateContractCosts(berekenInput, supabase)
             
             if (berekenResult.success && berekenResult.breakdown) {
-              // Sla afgeronde bedragen op (zonder decimalen)
-              verbruikDataMetBedragen.maandbedrag = Math.round(berekenResult.breakdown.totaal.maandInclBtw)
-              verbruikDataMetBedragen.jaarbedrag = Math.round(berekenResult.breakdown.totaal.jaarInclBtw)
+              // Bepaal of zakelijk of particulier op basis van addressType
+              const isZakelijk = verbruikDataMetBedragen.addressType === 'zakelijk'
+              
+              // Voor zakelijk: sla excl BTW op, voor particulier: sla incl BTW op
+              if (isZakelijk) {
+                verbruikDataMetBedragen.maandbedrag = Math.round(berekenResult.breakdown.totaal.maandExclBtw)
+                verbruikDataMetBedragen.jaarbedrag = Math.round(berekenResult.breakdown.totaal.jaarExclBtw)
+              } else {
+                verbruikDataMetBedragen.maandbedrag = Math.round(berekenResult.breakdown.totaal.maandInclBtw ?? berekenResult.breakdown.totaal.maandExclBtw)
+                verbruikDataMetBedragen.jaarbedrag = Math.round(berekenResult.breakdown.totaal.jaarInclBtw ?? berekenResult.breakdown.totaal.jaarExclBtw)
+              }
               
               // Sla de volledige breakdown op voor gebruik in online viewer
               // Dit zorgt ervoor dat de berekening altijd hetzelfde blijft, ook als tarieven later veranderen

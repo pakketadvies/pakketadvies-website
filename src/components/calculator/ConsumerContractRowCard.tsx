@@ -39,7 +39,7 @@ export function ConsumerContractRowCard({
   postcode,
 }: Props) {
   const router = useRouter()
-  const { setSelectedContract } = useCalculatorStore()
+  const { setSelectedContract, verbruik } = useCalculatorStore()
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
@@ -312,6 +312,7 @@ export function ConsumerContractRowCard({
         verbruikGas={verbruikGas}
         aansluitwaardeElektriciteit={aansluitwaardeElektriciteit}
         aansluitwaardeGas={aansluitwaardeGas}
+        addressType={verbruik?.addressType}
       />
     </>
   )

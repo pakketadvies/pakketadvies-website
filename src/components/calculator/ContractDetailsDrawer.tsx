@@ -23,6 +23,7 @@ interface ContractDetailsDrawerProps {
   verbruikGas: number
   aansluitwaardeElektriciteit: string
   aansluitwaardeGas: string
+  addressType?: 'particulier' | 'zakelijk' | null // NIEUW: voor BTW bepaling
 }
 
 /**
@@ -42,7 +43,9 @@ export function ContractDetailsDrawer({
   verbruikGas,
   aansluitwaardeElektriciteit,
   aansluitwaardeGas,
+  addressType,
 }: ContractDetailsDrawerProps) {
+  const isZakelijk = addressType === 'zakelijk'
   const [activeTab, setActiveTab] = useState<Tab>('prijsdetails')
 
   const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
@@ -350,11 +353,13 @@ export function ContractDetailsDrawer({
                               {/* TOTAL */}
                               <div className="pt-4 border-t-2 border-gray-300 bg-gray-50 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4">
                                 <div className="flex justify-between items-center">
-                                  <span className="font-bold text-brand-navy-500">Totaal (incl. btw)</span>
+                                  <span className="font-bold text-brand-navy-500">
+                                    Totaal {isZakelijk ? '(excl. btw)' : '(incl. btw)'}
+                                  </span>
                                   <span className="font-bold text-brand-navy-500">
                                     {/* Use contract.maandbedrag (from results page calculation) instead of breakdown total */}
                                     {/* This ensures consistency between results page and details drawer */}
-                                    €{contract.maandbedrag?.toFixed(0) ?? (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw).toFixed(0)}/mnd
+                                    €{contract.maandbedrag?.toFixed(0) ?? (isZakelijk ? breakdown.totaal.maandExclBtw : breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw).toFixed(0)}/mnd
                                   </span>
                                 </div>
                               </div>

@@ -198,10 +198,12 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
 
     // Get maandbedrag/jaarbedrag from verbruik_data (already calculated in API route)
     // This ensures instant display in email without delay
+    // Bepaal of zakelijk of particulier op basis van addressType
+    const isZakelijk = verbruikData?.addressType === 'zakelijk'
     let maandbedrag = verbruikData?.maandbedrag || 0
     let jaarbedrag = verbruikData?.jaarbedrag || 0
     
-    console.log('💰 [sendBevestigingEmail] Maandbedrag/jaarbedrag from verbruik_data:', { maandbedrag, jaarbedrag })
+    console.log('💰 [sendBevestigingEmail] Maandbedrag/jaarbedrag from verbruik_data:', { maandbedrag, jaarbedrag, isZakelijk })
     
     // FALLBACK: Only calculate if not already in verbruik_data (for backward compatibility)
     // This should rarely happen as calculation is done in API route before saving
@@ -269,11 +271,15 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
           }, supabase)
           
           if (result.success && result.breakdown) {
-            jaarbedrag = Math.round(result.breakdown.totaal.jaarExclBtw)
-            // Gebruik maandInclBtw voor consistentie (zoals in create route)
-            maandbedrag = Math.round(result.breakdown.totaal.maandInclBtw)
-            jaarbedrag = Math.round(result.breakdown.totaal.jaarInclBtw)
-            console.log('✅ [sendBevestigingEmail] Costs calculated (fallback):', { maandbedrag, jaarbedrag })
+            // Voor zakelijk: gebruik excl BTW, voor particulier: gebruik incl BTW
+            if (isZakelijk) {
+              maandbedrag = Math.round(result.breakdown.totaal.maandExclBtw)
+              jaarbedrag = Math.round(result.breakdown.totaal.jaarExclBtw)
+            } else {
+              maandbedrag = Math.round(result.breakdown.totaal.maandInclBtw ?? result.breakdown.totaal.maandExclBtw)
+              jaarbedrag = Math.round(result.breakdown.totaal.jaarInclBtw ?? result.breakdown.totaal.jaarExclBtw)
+            }
+            console.log('✅ [sendBevestigingEmail] Costs calculated (fallback):', { maandbedrag, jaarbedrag, isZakelijk })
           } else {
             console.warn('⚠️ [sendBevestigingEmail] Calculation failed:', result.error)
           }

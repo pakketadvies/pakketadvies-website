@@ -300,12 +300,15 @@ const transformContractToOptie = (
   terugleveringJaar: number = 0,
   aansluitwaardeElektriciteit?: string,
   aansluitwaardeGas?: string,
-  enecoModelMaandbedrag?: number | null
+  enecoModelMaandbedrag?: number | null,
+  addressType?: 'particulier' | 'zakelijk' | null // NIEUW: voor BTW bepaling
 ): ContractOptie | null => {
   let maandbedrag: number
   let jaarbedrag: number
+  const isZakelijk = addressType === 'zakelijk'
 
   if (contract.exactMaandbedrag && contract.exactJaarbedrag) {
+    // exactMaandbedrag is al correct (excl BTW voor zakelijk, incl BTW voor particulier)
     maandbedrag = contract.exactMaandbedrag
     jaarbedrag = contract.exactJaarbedrag
   } else {
@@ -320,8 +323,15 @@ const transformContractToOptie = (
       aansluitwaardeGas,
       enecoModelMaandbedrag
     )
-    maandbedrag = berekend.maandbedrag
-    jaarbedrag = berekend.jaarbedrag
+    // berekenContractKostenVereenvoudigd geeft altijd incl BTW terug
+    // Voor zakelijk moeten we BTW eraf halen
+    if (isZakelijk) {
+      maandbedrag = Math.round(berekend.maandbedrag / 1.21)
+      jaarbedrag = Math.round(berekend.jaarbedrag / 1.21)
+    } else {
+      maandbedrag = berekend.maandbedrag
+      jaarbedrag = berekend.jaarbedrag
+    }
   }
 
   const leverancier = contract.leverancier || {}
@@ -560,11 +570,17 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
             if (kostenResponse.ok) {
               const { breakdown } = await kostenResponse.json()
+              // Bepaal of zakelijk of particulier op basis van addressType
+              const isZakelijk = data?.addressType === 'zakelijk'
               return {
                 ...contract,
-                // Gebruik maandInclBtw en jaarInclBtw voor consistentie met email en display
-                exactMaandbedrag: Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw),
-                exactJaarbedrag: Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw),
+                // Voor zakelijk: gebruik excl BTW, voor particulier: gebruik incl BTW
+                exactMaandbedrag: isZakelijk 
+                  ? Math.round(breakdown.totaal.maandExclBtw)
+                  : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw),
+                exactJaarbedrag: isZakelijk
+                  ? Math.round(breakdown.totaal.jaarExclBtw)
+                  : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw),
                 breakdown,
               }
             }
@@ -608,7 +624,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
             data?.terugleveringJaar || 0,
             aansluitwaardeElektriciteit,
             aansluitwaardeGas,
-            enecoModelMaandbedrag
+            enecoModelMaandbedrag,
+            data?.addressType || verbruik?.addressType // NIEUW: doorgeven addressType voor BTW bepaling
           )
         )
         .filter((c: any) => c !== null) as ContractOptie[]
