@@ -89,10 +89,13 @@ export async function sendReviewRequestEmail(aanvraagId: string) {
 
     // Generate Google Review URL
     // Google Maps Place ID for PakketAdvies (Stavangerweg 13, 9723JC Groningen)
-    // You'll need to get the actual Place ID from Google Maps
-    // For now, using a generic Google review link
+    // TODO: Replace with actual Google Place ID from Google Maps
+    // To get Place ID: https://developers.google.com/maps/documentation/places/web-service/place-id
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
-    const googleReviewUrl = `https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID` // TODO: Replace with actual Place ID
+    // Using Google Maps search URL as fallback until Place ID is configured
+    const googleReviewUrl = process.env.GOOGLE_PLACE_ID 
+      ? `https://search.google.com/local/writereview?placeid=${process.env.GOOGLE_PLACE_ID}`
+      : `https://www.google.com/maps/search/?api=1&query=PakketAdvies+Stavangerweg+13+Groningen`
 
     // Prepare email data
     const emailData: ReviewRequestEmailData = {
