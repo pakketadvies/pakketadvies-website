@@ -26,6 +26,7 @@ export function ConsumerCompareWizard() {
   const [gasM3, setGasM3] = useState<number | ''>('')
   const [hasSolar, setHasSolar] = useState(false)
   const [feedInKwh, setFeedInKwh] = useState<number | ''>('')
+  const [numberOfSolarPanels, setNumberOfSolarPanels] = useState<number | ''>(1) // Aantal zonnepanelen voor estimate mode
   const [hasSmartMeter, setHasSmartMeter] = useState(true)
 
   // Estimate inputs
@@ -191,6 +192,11 @@ export function ConsumerCompareWizard() {
       hasSmartMeter,
     })
 
+    // Bereken teruglevering: aantal zonnepanelen * 385 kWh per paneel
+    const calculatedFeedIn = hasSolar && typeof numberOfSolarPanels === 'number' && numberOfSolarPanels > 0
+      ? numberOfSolarPanels * 385
+      : null
+
     const updated: VerbruikData = {
       ...verbruik,
       elektriciteitNormaal: est.electricityNormalKwh,
@@ -199,7 +205,7 @@ export function ConsumerCompareWizard() {
       gasJaar: hasGas ? est.gasM3 : null,
       geenGasaansluiting: !hasGas,
       heeftZonnepanelen: hasSolar,
-      terugleveringJaar: hasSolar ? 0 : null,
+      terugleveringJaar: calculatedFeedIn,
       meterType: est.meterType,
       aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '3x25A',
       aansluitwaardeGas: hasGas ? (verbruik.aansluitwaardeGas || 'G6') : undefined,
@@ -460,7 +466,12 @@ export function ConsumerCompareWizard() {
                     <input
                       type="checkbox"
                       checked={hasSolar}
-                      onChange={(e) => setHasSolar(e.target.checked)}
+                      onChange={(e) => {
+                        setHasSolar(e.target.checked)
+                        if (!e.target.checked) {
+                          setNumberOfSolarPanels(1) // Reset naar 1 wanneer uitgeschakeld
+                        }
+                      }}
                       className="mt-1 w-5 h-5 rounded border-gray-300 text-brand-teal-600"
                     />
                     <div>
@@ -468,6 +479,47 @@ export function ConsumerCompareWizard() {
                       <div className="text-sm text-gray-600">We houden rekening met teruglevering</div>
                     </div>
                   </label>
+
+                  {hasSolar && (
+                    <div className="md:col-span-2 border border-gray-200 rounded-2xl p-4 bg-gray-50">
+                      <label className="block text-sm font-semibold text-brand-navy-600 mb-2">
+                        Aantal zonnepanelen
+                      </label>
+                      <p className="text-xs text-gray-600 mb-3">
+                        Per zonnepaneel wordt 385 kWh per jaar van je verbruik afgetrokken (teruglevering).
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setNumberOfSolarPanels((n) => Math.max(1, (typeof n === 'number' ? n : 1) - 1))}
+                          className="w-10 h-10 rounded-xl border border-gray-300 bg-white font-bold text-brand-navy-600 hover:bg-gray-50 transition-colors"
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={numberOfSolarPanels}
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? '' : Math.max(1, Math.min(50, Number(e.target.value)))
+                            setNumberOfSolarPanels(val)
+                          }}
+                          className="w-20 px-3 py-2 text-center rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 font-semibold text-brand-navy-600"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNumberOfSolarPanels((n) => Math.min(50, (typeof n === 'number' ? n : 1) + 1))}
+                          className="w-10 h-10 rounded-xl border border-gray-300 bg-white font-bold text-brand-navy-600 hover:bg-gray-50 transition-colors"
+                        >
+                          +
+                        </button>
+                        <div className="flex-1 text-sm text-gray-600">
+                          = <span className="font-semibold text-brand-navy-600">{(typeof numberOfSolarPanels === 'number' ? numberOfSolarPanels : 1) * 385} kWh</span> teruglevering per jaar
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 rounded-2xl bg-gray-50 border border-gray-200 p-4">
@@ -478,11 +530,17 @@ export function ConsumerCompareWizard() {
                       hasSolar,
                       hasSmartMeter,
                     })
+                    const calculatedFeedIn = hasSolar && typeof numberOfSolarPanels === 'number' && numberOfSolarPanels > 0
+                      ? numberOfSolarPanels * 385
+                      : 0
                     return (
                       <div className="text-sm text-gray-700 space-y-1">
                         <div>
                           <span className="font-semibold">Stroom</span>: {est.electricityNormalKwh} kWh/jaar normaal{' '}
                           {!hasSingleMeter && <>+ {est.electricityOffPeakKwh} kWh/jaar dal</>}
+                          {hasSolar && calculatedFeedIn > 0 && (
+                            <span className="text-brand-teal-600"> (teruglevering: -{calculatedFeedIn} kWh/jaar)</span>
+                          )}
                         </div>
                         <div>
                           <span className="font-semibold">Gas</span>: {hasGas ? `${est.gasM3} m³/jaar` : 'geen gas'}
