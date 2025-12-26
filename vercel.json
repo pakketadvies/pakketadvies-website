@@ -9,6 +9,10 @@
     {
       "path": "/api/cron/update-dynamic-prices",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/send-review-emails",
+      "schedule": "0 10 * * *"
     }
   ]
 }

@@ -2,8 +2,43 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Variabel energiecontract',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/variabel' },
+  title: 'Variabel energiecontract | PakketAdvies',
+  description:
+    'Een variabel energiecontract geeft flexibiliteit: je kunt op elk moment opzeggen zonder boete. Het tarief kan wel wijzigen. Ideaal als je flexibiliteit belangrijk vindt. Vergelijk variabele contracten.',
+  keywords: [
+    'variabel energiecontract',
+    'variabele energietarieven',
+    'flexibel energiecontract',
+    'variabel contract stroom en gas',
+    'energiecontract variabel',
+  ],
+  openGraph: {
+    title: 'Variabel energiecontract | PakketAdvies',
+    description:
+      'Een variabel energiecontract geeft flexibiliteit: je kunt op elk moment opzeggen zonder boete. Het tarief kan wel wijzigen. Vergelijk variabele contracten.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/variabel',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/hero-main.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Variabel energiecontract',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Variabel energiecontract | PakketAdvies',
+    description: 'Een variabel energiecontract geeft flexibiliteit: opzeggen zonder boete. Vergelijk variabele contracten.',
+    images: ['https://pakketadvies.nl/images/hero-main.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/variabel',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function VariabelPage() {

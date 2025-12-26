@@ -2,8 +2,44 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Zonnepanelen & energiecontract',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/zonnepanelen' },
+  title: 'Zonnepanelen & energiecontract | PakketAdvies',
+  description:
+    'Heb je zonnepanelen? Dan is het belangrijk om het juiste energiecontract te kiezen. Vergelijk contracten met gunstige teruglevervoorwaarden en bespaar maximaal op je energierekening.',
+  keywords: [
+    'zonnepanelen energiecontract',
+    'teruglevering zonnepanelen',
+    'energiecontract met zonnepanelen',
+    'salderen energie',
+    'terugleververgoeding',
+    'zonnepanelen terugleveren',
+  ],
+  openGraph: {
+    title: 'Zonnepanelen & energiecontract | PakketAdvies',
+    description:
+      'Heb je zonnepanelen? Dan is het belangrijk om het juiste energiecontract te kiezen. Vergelijk contracten met gunstige teruglevervoorwaarden.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/zonnepanelen',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/solar-roof.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Zonnepanelen & energiecontract',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zonnepanelen & energiecontract | PakketAdvies',
+    description: 'Heb je zonnepanelen? Vergelijk contracten met gunstige teruglevervoorwaarden en bespaar maximaal.',
+    images: ['https://pakketadvies.nl/images/solar-roof.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/zonnepanelen',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function ZonnepanelenPage() {

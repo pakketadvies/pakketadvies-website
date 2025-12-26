@@ -1,0 +1,34 @@
+# robots.txt for pakketadvies.nl
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /calculator/resultaten
+Disallow: /particulier/energie-vergelijken/resultaten
+
+# Disallow internal/testing pages
+Disallow: /contract/niet-gevonden
+Disallow: /offline.html
+
+# Allow important pages
+Allow: /
+Allow: /particulier
+Allow: /calculator
+Allow: /kennisbank
+Allow: /sectoren
+Allow: /producten
+Allow: /diensten
+Allow: /over-ons
+Allow: /contact
+
+# Sitemap location
+Sitemap: https://pakketadvies.nl/sitemap.xml
+
+# Crawl-delay (optional, remove if not needed)
+# Crawl-delay: 1
+

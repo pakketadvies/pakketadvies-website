@@ -2,8 +2,43 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Klantenservice',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/klantenservice' },
+  title: 'Klantenservice | PakketAdvies',
+  description:
+    'Heb je vragen over je energiecontract of energie vergelijken? Onze klantenservice helpt je graag verder. Neem contact met ons op via telefoon, email of chat.',
+  keywords: [
+    'klantenservice energie',
+    'energie hulp',
+    'energie vragen',
+    'contact energie',
+    'energie support',
+  ],
+  openGraph: {
+    title: 'Klantenservice | PakketAdvies',
+    description:
+      'Heb je vragen over je energiecontract of energie vergelijken? Onze klantenservice helpt je graag verder.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/klantenservice',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/hero-main.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Klantenservice',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Klantenservice | PakketAdvies',
+    description: 'Heb je vragen over je energiecontract? Onze klantenservice helpt je graag verder.',
+    images: ['https://pakketadvies.nl/images/hero-main.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/klantenservice',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function KlantenservicePage() {

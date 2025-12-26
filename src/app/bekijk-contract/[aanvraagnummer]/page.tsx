@@ -31,14 +31,15 @@ export default async function BekijkContractRedirectPage(props: PageProps) {
     .single()
 
   if (aanvraag) {
+    // NULL expires_at = permanent access, or expires_at > now = still valid
     const { data: accessData } = await supabase
       .from('contract_viewer_access')
       .select('access_token')
       .eq('aanvraag_id', aanvraag.id)
-      .gt('expires_at', new Date().toISOString())
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
 
     if (accessData?.access_token) {
       redirect(`/contract/${aanvraagnummer}?token=${accessData.access_token}`)

@@ -1,0 +1,30 @@
+Onderwerp: API Toegang voor Energieverbruiksdata Integratie
+
+Beste EDSN team,
+
+Ik neem contact met u op namens PakketAdvies (pakketadvies.nl), een energievergelijker voor zowel particulieren als zakelijke klanten in Nederland.
+
+Wij zijn momenteel bezig met het implementeren van een iDIN-integratie waarmee gebruikers hun energieverbruik automatisch kunnen ophalen bij hun netbeheerder. Hiervoor hebben wij toegang nodig tot de EDSN API om verbruiksdata op te halen.
+
+Onze use case:
+- Gebruikers identificeren zich via iDIN (via Signicat)
+- Na verificatie willen wij via EDSN API het energieverbruik ophalen (elektriciteit, gas, teruglevering)
+- Daarnaast willen wij de huidige leverancier en contract einddatum opvragen
+- Deze data wordt gebruikt om automatisch een nauwkeurige energievergelijking te maken
+
+Wij hebben al een technische implementatie klaar staan en zijn klaar om te testen zodra wij API credentials ontvangen.
+
+Kunnen jullie ons helpen met:
+1. API toegang voor productie omgeving
+2. Test credentials voor ontwikkeling en testen
+3. Technische documentatie voor de API endpoints
+4. Eventuele kosten en contractvoorwaarden
+
+Graag horen wij van jullie wanneer het mogelijk is om te starten.
+
+Met vriendelijke groet,
+
+Rick Schlimback
+PakketAdvies
+pakketadvies.nl
+

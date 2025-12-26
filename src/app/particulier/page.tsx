@@ -4,8 +4,47 @@ import Image from 'next/image'
 import { ConsumerAddressStartCard } from '@/components/particulier/ConsumerAddressStartCard'
 
 export const metadata: Metadata = {
-  title: 'Energie vergelijken voor thuis',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier' },
+  title: 'Energie vergelijken voor thuis | PakketAdvies',
+  description:
+    'Vergelijk energiecontracten voor thuis: vast, variabel of dynamisch. Ontdek wat het beste past bij jouw situatie en bespaar tot 30% op je energierekening. Gratis en vrijblijvend advies.',
+  keywords: [
+    'energie vergelijken particulier',
+    'energiecontract thuis',
+    'stroom en gas vergelijken',
+    'dynamisch energiecontract',
+    'vast energiecontract',
+    'variabel energiecontract',
+    'energie besparen thuis',
+    'energieleverancier vergelijken',
+  ],
+  openGraph: {
+    title: 'Energie vergelijken voor thuis | PakketAdvies',
+    description:
+      'Vergelijk energiecontracten voor thuis: vast, variabel of dynamisch. Ontdek wat het beste past bij jouw situatie en bespaar tot 30% op je energierekening.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/hero-main.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Energie vergelijken voor thuis',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Energie vergelijken voor thuis | PakketAdvies',
+    description:
+      'Vergelijk energiecontracten voor thuis: vast, variabel of dynamisch. Ontdek wat het beste past bij jouw situatie en bespaar tot 30%.',
+    images: ['https://pakketadvies.nl/images/hero-main.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function ParticulierHomePage() {

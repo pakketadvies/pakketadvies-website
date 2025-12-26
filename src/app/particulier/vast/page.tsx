@@ -1,14 +1,58 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { BreadcrumbSchema } from '@/components/seo/StructuredData'
 
 export const metadata: Metadata = {
-  title: 'Vast energiecontract',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/vast' },
+  title: 'Vast energiecontract | PakketAdvies',
+  description:
+    'Een vast energiecontract geeft prijszekerheid: je tarief blijft gelijk gedurende de looptijd. Ideaal als je rust wilt en liever niet elke maand aan je contract denkt. Vergelijk vaste contracten en bespaar.',
+  keywords: [
+    'vast energiecontract',
+    'vaste energietarieven',
+    'prijszekerheid energie',
+    'vast contract stroom en gas',
+    'energiecontract vast',
+  ],
+  openGraph: {
+    title: 'Vast energiecontract | PakketAdvies',
+    description:
+      'Een vast energiecontract geeft prijszekerheid: je tarief blijft gelijk gedurende de looptijd. Ideaal als je rust wilt. Vergelijk vaste contracten en bespaar.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/vast',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/contract-signing.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Vast energiecontract',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vast energiecontract | PakketAdvies',
+    description: 'Een vast energiecontract geeft prijszekerheid. Vergelijk vaste contracten en bespaar.',
+    images: ['https://pakketadvies.nl/images/contract-signing.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/vast',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function VastPage() {
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://pakketadvies.nl' },
+    { name: 'Particulier', url: 'https://pakketadvies.nl/particulier' },
+    { name: 'Vast energiecontract', url: 'https://pakketadvies.nl/particulier/vast' },
+  ]
+
   return (
-    <div className="bg-gray-50 min-h-screen pt-28 pb-14 md:pt-32">
+    <>
+      <BreadcrumbSchema items={breadcrumbs} />
+      <div className="bg-gray-50 min-h-screen pt-28 pb-14 md:pt-32">
       <div className="container-custom">
         <div className="bg-white border border-gray-200 rounded-3xl p-8 md:p-10">
           <p className="text-brand-teal-600 font-semibold">Vast contract</p>
@@ -91,6 +135,7 @@ export default function VastPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

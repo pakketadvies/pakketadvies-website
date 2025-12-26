@@ -332,18 +332,23 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     // Generate access token for contract viewer
     const accessToken = crypto.randomUUID()
     
-    // Store access token in database (valid for 7 days)
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 7)
-    
-    console.log('📧 [sendBevestigingEmail] Storing access token...')
-    await supabase
+    // Store access token in database (permanent access - no expiration)
+    console.log('📧 [sendBevestigingEmail] Storing access token (permanent access)...')
+    const { error: tokenError } = await supabase
       .from('contract_viewer_access')
       .insert({
         aanvraag_id: aanvraagId,
         access_token: accessToken,
-        expires_at: expiresAt.toISOString(),
+        expires_at: null, // NULL = permanent access
       })
+    
+    if (tokenError) {
+      console.error('❌ [sendBevestigingEmail] Error storing access token:', tokenError.message)
+      // Continue anyway - email will still be sent, but contract viewer link might not work
+      // This is a non-critical error
+    } else {
+      console.log('✅ [sendBevestigingEmail] Access token stored successfully')
+    }
 
     // Use a more trusted redirect URL structure for email clients
     // This is less likely to be blocked than direct contract viewer links

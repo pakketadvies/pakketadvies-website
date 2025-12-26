@@ -1,8 +1,44 @@
 import type { Metadata } from 'next'
+import { FAQSchema } from '@/components/seo/StructuredData'
 
 export const metadata: Metadata = {
-  title: 'Veelgestelde vragen',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/faq' },
+  title: 'Veelgestelde vragen | PakketAdvies',
+  description:
+    'Veelgestelde vragen over energiecontracten, energie vergelijken, vast vs variabel vs dynamisch, zonnepanelen en meer. Vind snel antwoorden op je vragen.',
+  keywords: [
+    'energie faq',
+    'veelgestelde vragen energie',
+    'energiecontract vragen',
+    'energie advies',
+    'energie uitleg',
+  ],
+  openGraph: {
+    title: 'Veelgestelde vragen | PakketAdvies',
+    description:
+      'Veelgestelde vragen over energiecontracten, energie vergelijken, vast vs variabel vs dynamisch, zonnepanelen en meer.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/faq',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/hero-main.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Veelgestelde vragen',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Veelgestelde vragen | PakketAdvies',
+    description: 'Veelgestelde vragen over energiecontracten, energie vergelijken en meer.',
+    images: ['https://pakketadvies.nl/images/hero-main.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/faq',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 const faqs = [
@@ -65,29 +101,38 @@ const faqs = [
 ]
 
 export default function ParticulierFaqPage() {
-  return (
-    <div className="bg-gray-50 min-h-screen pt-28 pb-14 md:pt-32">
-      <div className="container-custom">
-        <div className="bg-white border border-gray-200 rounded-3xl p-8 md:p-10">
-          <p className="text-brand-teal-600 font-semibold">FAQ</p>
-          <h1 className="mt-3 font-display text-3xl md:text-4xl font-bold text-brand-navy-600">
-            Veelgestelde vragen (Particulier)
-          </h1>
-          <p className="mt-4 text-gray-600 leading-relaxed max-w-2xl">
-            Antwoorden in consumententaal. We breiden deze lijst uit op basis van de vragen die we het vaakst krijgen.
-          </p>
+  // Transform FAQs for structured data
+  const faqQuestions = faqs.map((f) => ({
+    question: f.q,
+    answer: f.a,
+  }))
 
-          <div className="mt-8 space-y-4">
-            {faqs.map((f) => (
-              <div key={f.q} className="border border-gray-200 rounded-2xl p-6">
-                <h2 className="font-semibold text-brand-navy-600">{f.q}</h2>
-                <p className="mt-2 text-gray-600 leading-relaxed text-sm">{f.a}</p>
-              </div>
-            ))}
+  return (
+    <>
+      <FAQSchema questions={faqQuestions} />
+      <div className="bg-gray-50 min-h-screen pt-28 pb-14 md:pt-32">
+        <div className="container-custom">
+          <div className="bg-white border border-gray-200 rounded-3xl p-8 md:p-10">
+            <p className="text-brand-teal-600 font-semibold">FAQ</p>
+            <h1 className="mt-3 font-display text-3xl md:text-4xl font-bold text-brand-navy-600">
+              Veelgestelde vragen (Particulier)
+            </h1>
+            <p className="mt-4 text-gray-600 leading-relaxed max-w-2xl">
+              Antwoorden in consumententaal. We breiden deze lijst uit op basis van de vragen die we het vaakst krijgen.
+            </p>
+
+            <div className="mt-8 space-y-4">
+              {faqs.map((f) => (
+                <div key={f.q} className="border border-gray-200 rounded-2xl p-6">
+                  <h2 className="font-semibold text-brand-navy-600">{f.q}</h2>
+                  <p className="mt-2 text-gray-600 leading-relaxed text-sm">{f.a}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

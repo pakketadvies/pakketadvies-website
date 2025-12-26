@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import Image from 'next/image'
 import Link from 'next/link'
+import { LocalBusinessSchema } from '@/components/seo/StructuredData'
 import { 
   Phone, 
   Envelope, 
@@ -160,7 +161,9 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <LocalBusinessSchema />
+      <div className="min-h-screen bg-white">
       {/* Hero */}
       <section className="bg-brand-navy-500 text-white py-16 md:py-24 pb-20 md:pb-28 pt-32 md:pt-40 relative overflow-hidden">
         {/* Background Image */}
@@ -697,5 +700,6 @@ export default function ContactPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

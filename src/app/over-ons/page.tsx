@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import Image from 'next/image'
-import { FAQSchema } from '@/components/seo/StructuredData'
+import { FAQSchema, LocalBusinessSchema } from '@/components/seo/StructuredData'
 import { 
   Lightning,
   Clock,
@@ -138,7 +138,9 @@ export default function OverOnsPage() {
   }))
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <LocalBusinessSchema />
+      <div className="min-h-screen bg-white">
       {/* Hero */}
       <section className="bg-brand-navy-500 text-white py-16 md:py-24 pb-20 md:pb-28 pt-32 md:pt-40 relative overflow-hidden">
         {/* Background Image */}
@@ -739,5 +741,6 @@ export default function OverOnsPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

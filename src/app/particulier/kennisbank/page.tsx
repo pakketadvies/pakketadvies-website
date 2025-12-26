@@ -2,8 +2,43 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Kennisbank (Particulier)',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/kennisbank' },
+  title: 'Kennisbank | PakketAdvies - Artikelen over energie voor thuis',
+  description:
+    'Lees artikelen over energie voor thuis: vast vs variabel vs dynamisch, zonnepanelen, energie besparen, verhuizen en meer. De kennisbank van PakketAdvies met actuele informatie en tips.',
+  keywords: [
+    'energie artikelen particulier',
+    'energiekennisbank thuis',
+    'energie informatie particulier',
+    'energiecontracten uitleg',
+    'energiebesparing tips thuis',
+  ],
+  openGraph: {
+    title: 'Kennisbank | PakketAdvies - Artikelen over energie voor thuis',
+    description:
+      'Lees artikelen over energie voor thuis: vast vs variabel vs dynamisch, zonnepanelen, energie besparen en meer.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/kennisbank',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/hero-main.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Kennisbank',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kennisbank | PakketAdvies - Artikelen over energie voor thuis',
+    description: 'Lees artikelen over energie voor thuis: vast vs variabel vs dynamisch, zonnepanelen en meer.',
+    images: ['https://pakketadvies.nl/images/hero-main.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/kennisbank',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 const items = [

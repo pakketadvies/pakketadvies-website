@@ -2,8 +2,43 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Verhuizen en energie',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/verhuizen' },
+  title: 'Verhuizen en energie | PakketAdvies',
+  description:
+    'Verhuizen? Regel je energiecontract op tijd. Wij helpen je het beste contract te vinden voor je nieuwe adres. Vergelijk energiecontracten en bespaar direct vanaf je verhuisdatum.',
+  keywords: [
+    'verhuizen energie',
+    'energiecontract verhuizen',
+    'energie overstappen verhuizen',
+    'nieuwe woning energie',
+    'verhuizen energie regelen',
+  ],
+  openGraph: {
+    title: 'Verhuizen en energie | PakketAdvies',
+    description:
+      'Verhuizen? Regel je energiecontract op tijd. Wij helpen je het beste contract te vinden voor je nieuwe adres. Vergelijk energiecontracten en bespaar.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/verhuizen',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/hero-main.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Verhuizen en energie',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Verhuizen en energie | PakketAdvies',
+    description: 'Verhuizen? Regel je energiecontract op tijd. Vergelijk energiecontracten en bespaar direct.',
+    images: ['https://pakketadvies.nl/images/hero-main.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/verhuizen',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function VerhuizenPage() {

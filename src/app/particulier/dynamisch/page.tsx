@@ -2,8 +2,44 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Dynamisch energiecontract',
-  alternates: { canonical: 'https://pakketadvies.nl/particulier/dynamisch' },
+  title: 'Dynamisch energiecontract | PakketAdvies',
+  description:
+    'Dynamische energietarieven volgen de marktprijzen: stroomprijs per uur, gasprijs per dag. Ideaal als je flexibel bent met je verbruik en wilt profiteren van lage prijzen. Vergelijk dynamische contracten.',
+  keywords: [
+    'dynamisch energiecontract',
+    'dynamische energietarieven',
+    'uurprijs stroom',
+    'dynamisch contract',
+    'energie marktprijzen',
+    'flexibel energiecontract',
+  ],
+  openGraph: {
+    title: 'Dynamisch energiecontract | PakketAdvies',
+    description:
+      'Dynamische energietarieven volgen de marktprijzen: stroomprijs per uur, gasprijs per dag. Ideaal als je flexibel bent met je verbruik. Vergelijk dynamische contracten.',
+    type: 'website',
+    url: 'https://pakketadvies.nl/particulier/dynamisch',
+    siteName: 'PakketAdvies',
+    locale: 'nl_NL',
+    images: [
+      {
+        url: 'https://pakketadvies.nl/images/solar-roof.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'PakketAdvies - Dynamisch energiecontract',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dynamisch energiecontract | PakketAdvies',
+    description: 'Dynamische energietarieven volgen de marktprijzen. Ideaal als je flexibel bent met je verbruik.',
+    images: ['https://pakketadvies.nl/images/solar-roof.jpg'],
+  },
+  alternates: {
+    canonical: 'https://pakketadvies.nl/particulier/dynamisch',
+  },
+  metadataBase: new URL('https://pakketadvies.nl'),
 }
 
 export default function DynamischPage() {

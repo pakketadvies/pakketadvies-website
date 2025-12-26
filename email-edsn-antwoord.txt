@@ -1,0 +1,61 @@
+Beste Anna,
+
+Bedankt voor je uitgebreide reactie. Dit helpt ons enorm om de juiste route te bepalen.
+
+Onze situatie:
+Wij zijn PakketAdvies, een onafhankelijke energieprijsvergelijker die bedrijven en particulieren helpt om de beste energiedeal te vinden. Onze klanten kunnen momenteel handmatig hun verbruik invullen, maar we willen graag de gebruikerservaring verbeteren door het verbruik automatisch op te halen na iDIN verificatie.
+
+Wat we nodig hebben:
+- Jaarlijks verbruik elektriciteit (kWh) - bij voorkeur gesplitst in normaal/dal indien van toepassing
+- Jaarlijks verbruik gas (m³)
+- Eventuele teruglevering (kWh) indien van toepassing
+- Type meter (enkele of dubbele meter voor elektriciteit)
+
+We hebben GEEN behoefte aan:
+- Leveranciersinformatie
+- Contracteinddatum
+- Persoonlijke gegevens (behalve wat nodig is voor iDIN verificatie)
+
+Vragen:
+
+1. Registratie type:
+   - Als we alleen jaarverbruik willen ophalen (geen meterstanden), is EPV dan voldoende?
+   - Of moeten we ons als ODA registreren om jaarverbruik op te halen?
+   - Wat is het verschil in toegang tot data tussen EPV en ODA?
+
+2. iDIN integratie:
+   - Ondersteunt EDSN iDIN verificatie voor het ophalen van verbruiksdata?
+   - Is er een API endpoint beschikbaar die we kunnen aanroepen na iDIN verificatie?
+   - Welke documentatie kunnen we gebruiken voor de integratie?
+
+3. EDX Platform:
+   - Je noemt het EDX Developer portal. Is dit een alternatief voor EDSN?
+   - Werkt EDX ook met iDIN, of alleen met DigiD/eHerkenning?
+   - Kunnen we via EDX hetzelfde bereiken (verbruik ophalen na identificatie)?
+
+4. Registratie proces:
+   - Wat zijn de kosten voor registratie als EPV respectievelijk ODA?
+   - Hoe lang duurt het registratieproces?
+   - Zijn er kwalificatie-eisen voor ODA? Zo ja, welke?
+
+5. Toekomst (2026):
+   - Je noemt het toestemmingsregister (mijnenergiedata.nl). Zal dit de huidige EDSN API vervangen?
+   - Moeten we nu al rekening houden met deze wijziging in onze implementatie?
+
+6. Technische details:
+   - Hebben jullie API documentatie beschikbaar die we kunnen inzien?
+   - Is er een sandbox/test omgeving waar we kunnen ontwikkelen?
+   - Welke authenticatiemethode gebruiken jullie (OAuth2, API keys, etc.)?
+
+Onze voorkeur:
+We willen graag zo snel mogelijk starten met het ophalen van verbruiksdata via iDIN. Als EPV voldoende is voor onze use case, dan zouden we daar graag mee starten. Als ODA vereist is, dan willen we graag weten wat de stappen zijn om ons te registreren en te kwalificeren.
+
+Kunnen jullie ons helpen om de juiste route te bepalen? We staan open voor een gesprek om dit verder te bespreken.
+
+Met vriendelijke groet,
+
+[Naam]
+PakketAdvies
+info@pakketadvies.nl
+085 047 7065
+

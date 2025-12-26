@@ -52,6 +52,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     }
 
     // Check if token is expired
+    // NULL expires_at = permanent access (no expiration)
     if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
       redirect('/contract/niet-gevonden')
     }
@@ -65,14 +66,15 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     }
   } else {
     // No token provided - check if there's a valid token in database
+    // NULL expires_at = permanent access, or expires_at > now = still valid
     const { data: accessData } = await supabase
       .from('contract_viewer_access')
       .select('access_token, expires_at')
       .eq('aanvraag_id', aanvraag.id)
-      .gt('expires_at', new Date().toISOString())
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
 
     // If no valid token found, redirect to error page
     if (!accessData) {

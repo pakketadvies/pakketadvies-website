@@ -248,6 +248,16 @@ export function generateBevestigingEmail(data: EmailBevestigingData): string {
             </td>
           </tr>
 
+          <!-- Subtiele Review Vermelding -->
+          <tr>
+            <td style="background: #F8FAFC; padding: 30px 20px; text-align: center; border-top: 1px solid #E2E8F0;">
+              <p style="color: #64748B; font-size: 14px; margin: 0 0 10px 0; line-height: 1.6;">
+                💬 Tevreden met onze service?<br>
+                Als je tevreden bent met hoe we je hebben geholpen, zouden we het enorm waarderen als je een korte review achterlaat op Google. Dit helpt andere bedrijven om ook de beste energiecontracten te vinden.
+              </p>
+            </td>
+          </tr>
+
           <!-- Contact Sectie -->
           <tr>
             <td style="background: #F8FAFC; padding: 30px 20px; text-align: center;">
