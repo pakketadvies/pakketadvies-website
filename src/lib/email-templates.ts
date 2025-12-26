@@ -779,3 +779,123 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
 </html>
   `.trim()
 }
+
+export interface ReviewRequestEmailData {
+  klantNaam: string
+  leverancierNaam: string
+  contractNaam: string
+  baseUrl: string
+  googleReviewUrl: string
+}
+
+/**
+ * Generate the HTML email template for review request
+ * Sent 1 week after contract activation
+ */
+export function generateReviewRequestEmail(data: ReviewRequestEmailData): string {
+  const {
+    klantNaam,
+    leverancierNaam,
+    contractNaam,
+    baseUrl,
+    googleReviewUrl,
+  } = data
+
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoe bevalt je nieuwe energiecontract? - PakketAdvies</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  
+  <!-- Main Container -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px; background: white;">
+              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 20px 0; font-weight: bold; line-height: 1.3;">
+                Beste ${klantNaam},
+              </h1>
+              
+              <p style="color: #64748B; font-size: 16px; margin: 0 0 20px 0; line-height: 1.6;">
+                Een week geleden is je energiecontract bij <strong style="color: #0F4C75;">${leverancierNaam}</strong> actief geworden. 
+                We hopen dat alles goed verloopt en dat je tevreden bent met je nieuwe contract <strong style="color: #0F4C75;">${contractNaam}</strong>.
+              </p>
+
+              <p style="color: #64748B; font-size: 16px; margin: 0 0 30px 0; line-height: 1.6;">
+                💬 <strong style="color: #0F4C75;">Hoe bevalt het?</strong><br>
+                We zouden het enorm waarderen als je een korte review achterlaat op Google. Dit helpt andere bedrijven om ook de beste energiecontracten te vinden.
+              </p>
+
+              <!-- Google Review Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${googleReviewUrl}" target="_blank" rel="noopener noreferrer" style="background: linear-gradient(135deg, #4285F4 0%, #34A853 50%, #FBBC04 100%); color: white; padding: 20px 40px; border-radius: 12px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3); transition: all 0.3s ease;">
+                      ⭐ Laat een Google Review achter
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #64748B; font-size: 14px; margin: 20px 0 0 0; line-height: 1.6; text-align: center;">
+                Het duurt maar een minuutje en helpt ons enorm! 🙏
+              </p>
+            </td>
+          </tr>
+
+          <!-- Contact Sectie -->
+          <tr>
+            <td style="background: #F8FAFC; padding: 30px 20px; text-align: center; border-top: 1px solid #E2E8F0;">
+              <h3 style="color: #0F4C75; font-size: 18px; margin: 0 0 15px 0; font-weight: bold;">📞 Vragen of feedback?</h3>
+              <p style="color: #64748B; font-size: 14px; margin: 0 0 10px 0;">Als je vragen hebt of feedback wilt delen, neem gerust contact met ons op. We staan altijd voor je klaar.</p>
+              <p style="color: #0F4C75; font-size: 14px; margin: 5px 0;">
+                <a href="mailto:info@pakketadvies.nl" style="color: #14B8A6; text-decoration: none;">info@pakketadvies.nl</a>
+              </p>
+              <p style="color: #0F4C75; font-size: 14px; margin: 5px 0;">
+                <a href="tel:0850477065" style="color: #14B8A6; text-decoration: none;">085 047 7065</a>
+              </p>
+              <p style="color: #64748B; font-size: 12px; margin: 10px 0 0 0;">Ma-Vr: 09:00 - 17:00</p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: #0F4C75; padding: 30px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 20px auto;">
+              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
+                Met vriendelijke groet,<br>
+                <strong style="color: white;">Het PakketAdvies team</strong>
+              </p>
+              <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
+                <a href="${baseUrl}/privacy" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Privacybeleid</a> | 
+                <a href="${baseUrl}/contact" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Contact</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `.trim()
+}
