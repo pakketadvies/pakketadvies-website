@@ -974,7 +974,7 @@ export function generateInterneNotificatieEmail(data: EmailInterneNotificatieDat
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hoe bevalt je nieuwe energiecontract? - PakketAdvies</title>
+  <title>Nieuwe contractaanvraag - ${aanvraagnummer}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
   
@@ -991,66 +991,113 @@ export function generateInterneNotificatieEmail(data: EmailInterneNotificatieDat
             </td>
           </tr>
 
+          <!-- Alert Header -->
+          <tr>
+            <td style="background: #FEF3C7; padding: 20px; text-align: center; border-top: 4px solid #F59E0B;">
+              <h1 style="color: #92400E; font-size: 24px; margin: 0; font-weight: bold;">🔔 Nieuwe Contractaanvraag</h1>
+              <p style="color: #92400E; font-size: 16px; margin: 10px 0 0 0; font-weight: 600;">${aanvraagnummer}</p>
+            </td>
+          </tr>
+
           <!-- Main Content -->
           <tr>
             <td style="padding: 40px 30px; background: white;">
-              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 20px 0; font-weight: bold; line-height: 1.3;">
-                Beste ${klantNaam},
-              </h1>
               
-              <p style="color: #64748B; font-size: 16px; margin: 0 0 20px 0; line-height: 1.6;">
-                Een week geleden is je energiecontract bij <strong style="color: #0F4C75;">${leverancierNaam}</strong> actief geworden. 
-                We hopen dat alles goed verloopt en dat je tevreden bent met je nieuwe contract <strong style="color: #0F4C75;">${contractNaam}</strong>.
-              </p>
+              <!-- Contract Info -->
+              <div style="background: #F0FDFA; border-left: 4px solid #14B8A6; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Contract Details</h2>
+                <table width="100%" cellpadding="5" cellspacing="0" style="color: #64748B; font-size: 14px;">
+                  <tr>
+                    <td style="width: 40%; font-weight: 600; color: #0F4C75;">Contract:</td>
+                    <td>${contractNaam}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Leverancier:</td>
+                    <td>${leverancierNaam}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Type:</td>
+                    <td><span style="text-transform: capitalize;">${aanvraagType}</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Maandbedrag:</td>
+                    <td><strong style="color: #0F4C75; font-size: 16px;">${formatCurrency(maandbedrag)} ${btwLabel}</strong></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Jaarbedrag:</td>
+                    <td><strong style="color: #0F4C75; font-size: 16px;">${formatCurrency(jaarbedrag)} ${btwLabel}</strong></td>
+                  </tr>
+                </table>
+              </div>
 
-              <p style="color: #64748B; font-size: 16px; margin: 0 0 30px 0; line-height: 1.6;">
-                💬 <strong style="color: #0F4C75;">Hoe bevalt het?</strong><br>
-                We zouden het enorm waarderen als je een korte review achterlaat op Google. Dit helpt andere bedrijven om ook de beste energiecontracten te vinden.
-              </p>
+              <!-- Klantgegevens -->
+              <div style="background: #F8FAFC; border-left: 4px solid #0F4C75; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Klantgegevens</h2>
+                <table width="100%" cellpadding="5" cellspacing="0" style="color: #64748B; font-size: 14px;">
+                  <tr>
+                    <td style="width: 40%; font-weight: 600; color: #0F4C75;">Naam:</td>
+                    <td>${klantNaam}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Email:</td>
+                    <td><a href="mailto:${klantEmail}" style="color: #14B8A6; text-decoration: none;">${klantEmail}</a></td>
+                  </tr>
+                  ${klantTelefoon ? `
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Telefoon:</td>
+                    <td><a href="tel:${klantTelefoon}" style="color: #14B8A6; text-decoration: none;">${klantTelefoon}</a></td>
+                  </tr>
+                  ` : ''}
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Adres:</td>
+                    <td>${adres.straat} ${adres.huisnummer}${adres.toevoeging ? ' ' + adres.toevoeging : ''}<br>${adres.postcode} ${adres.plaats}</td>
+                  </tr>
+                </table>
+              </div>
 
-              <!-- Google Review Button -->
+              <!-- Verbruik -->
+              <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Verbruik</h2>
+                <table width="100%" cellpadding="5" cellspacing="0" style="color: #64748B; font-size: 14px;">
+                  <tr>
+                    <td style="width: 40%; font-weight: 600; color: #0F4C75;">Elektriciteit:</td>
+                    <td>${verbruik.elektriciteitTotaal.toLocaleString('nl-NL')} kWh/jaar${verbruik.heeftEnkeleMeter ? ' (enkele meter)' : verbruik.elektriciteitDal ? ` (${verbruik.elektriciteitNormaal?.toLocaleString('nl-NL')} normaal / ${verbruik.elektriciteitDal?.toLocaleString('nl-NL')} dal)` : ''}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Gas:</td>
+                    <td>${verbruik.gas.toLocaleString('nl-NL')} m³/jaar</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Aansluitwaarde:</td>
+                    <td>${aansluitwaarden.elektriciteit} / ${aansluitwaarden.gas}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Action Button -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${googleReviewUrl}" target="_blank" rel="noopener noreferrer" style="background: linear-gradient(135deg, #4285F4 0%, #34A853 50%, #FBBC04 100%); color: white; padding: 20px 40px; border-radius: 12px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3); transition: all 0.3s ease;">
-                      ⭐ Laat een Google Review achter
+                    <a href="${adminUrl}" style="display: inline-block; background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); color: #FFFFFF; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
+                      Bekijk Aanvraag in Admin
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="color: #64748B; font-size: 14px; margin: 20px 0 0 0; line-height: 1.6; text-align: center;">
-                Het duurt maar een minuutje en helpt ons enorm! 🙏
+              <p style="color: #64748B; font-size: 14px; margin: 30px 0 0 0; text-align: center; line-height: 1.6;">
+                Deze email is automatisch gegenereerd bij het aanmaken van een nieuwe contractaanvraag.
               </p>
-            </td>
-          </tr>
 
-          <!-- Contact Sectie -->
-          <tr>
-            <td style="background: #F8FAFC; padding: 30px 20px; text-align: center; border-top: 1px solid #E2E8F0;">
-              <h3 style="color: #0F4C75; font-size: 18px; margin: 0 0 15px 0; font-weight: bold;">📞 Vragen of feedback?</h3>
-              <p style="color: #64748B; font-size: 14px; margin: 0 0 10px 0;">Als je vragen hebt of feedback wilt delen, neem gerust contact met ons op. We staan altijd voor je klaar.</p>
-              <p style="color: #0F4C75; font-size: 14px; margin: 5px 0;">
-                <a href="mailto:info@pakketadvies.nl" style="color: #14B8A6; text-decoration: none;">info@pakketadvies.nl</a>
-              </p>
-              <p style="color: #0F4C75; font-size: 14px; margin: 5px 0;">
-                <a href="tel:0850477065" style="color: #14B8A6; text-decoration: none;">085 047 7065</a>
-              </p>
-              <p style="color: #64748B; font-size: 12px; margin: 10px 0 0 0;">Ma-Vr: 09:00 - 17:00</p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background: #0F4C75; padding: 30px 20px; text-align: center;">
-              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 20px auto;">
-              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
-                Met vriendelijke groet,<br>
-                <strong style="color: white;">Het PakketAdvies team</strong>
-              </p>
-              <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
-                <a href="${baseUrl}/privacy" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Privacybeleid</a> | 
-                <a href="${baseUrl}/contact" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Contact</a>
+            <td style="background: #F8FAFC; padding: 30px 20px; text-align: center; border-top: 1px solid #E2E8F0;">
+              <p style="color: #94A3B8; font-size: 12px; margin: 0; line-height: 1.6;">
+                PakketAdvies - Energieadvies op maat<br>
+                <a href="${baseUrl}" style="color: #14B8A6; text-decoration: none;">${baseUrl}</a>
               </p>
             </td>
           </tr>
@@ -1059,7 +1106,6 @@ export function generateInterneNotificatieEmail(data: EmailInterneNotificatieDat
       </td>
     </tr>
   </table>
-
 </body>
 </html>
   `.trim()
