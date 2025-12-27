@@ -339,8 +339,10 @@ export async function POST(request: Request) {
         const sendInternalEmail = async () => {
           try {
             console.log('📧 [create] Starting internal notification email process...')
+            console.log('📧 [create] About to import sendInterneNotificatieEmail...')
             const { sendInterneNotificatieEmail } = await import('@/lib/send-email-internal')
-            console.log('📧 [create] sendInterneNotificatieEmail imported, calling for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
+            console.log('✅ [create] sendInterneNotificatieEmail imported successfully')
+            console.log('📧 [create] Calling sendInterneNotificatieEmail for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
             const notifResult = await sendInterneNotificatieEmail(data.id, aanvraagnummer)
             console.log('✅ [create] Internal notification email sent successfully:', JSON.stringify(notifResult))
           } catch (notifError: any) {
@@ -357,7 +359,12 @@ export async function POST(request: Request) {
         }
         // Start the async function (don't await - fire and forget)
         sendInternalEmail().catch((err) => {
-          console.error('❌ [create] Unhandled error in internal notification email promise:', err)
+          console.error('❌ [create] Unhandled error in internal notification email promise:', {
+            message: err?.message,
+            stack: err?.stack,
+            name: err?.name,
+            fullError: JSON.stringify(err, Object.getOwnPropertyNames(err))
+          })
         })
       } finally {
         // Restore original console functions
