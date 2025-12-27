@@ -53,6 +53,44 @@ interface ContractViewerProps {
   gegevensData: any
 }
 
+/**
+ * Helper function om logs naar server te sturen voor debugging
+ */
+async function sendLog(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: any) {
+  // Log ook naar console (voor desktop debugging)
+  const logMessage = `[ContractViewer] ${message}`
+  if (level === 'error') {
+    console.error(logMessage, data)
+  } else if (level === 'warn') {
+    console.warn(logMessage, data)
+  } else {
+    console.log(logMessage, data)
+  }
+
+  // Stuur ook naar server voor mobiele debugging
+  try {
+    await fetch('/api/debug-logs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        level,
+        message,
+        data: data || {},
+        url: typeof window !== 'undefined' ? window.location.href : 'Unknown',
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch((err) => {
+      // Fail silently - logging is non-critical
+      console.warn('[ContractViewer] Failed to send log to server:', err)
+    })
+  } catch (err) {
+    // Fail silently
+  }
+}
+
 export default function ContractViewer({
   aanvraag,
   contract,
@@ -71,6 +109,17 @@ export default function ContractViewer({
   const [currentPrices, setCurrentPrices] = useState<any>(null)
   const [loadingPrices, setLoadingPrices] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+
+  // Log component mount
+  useEffect(() => {
+    sendLog('info', 'Client-side: ContractViewer component mounted', {
+      aanvraagnummer: aanvraag.aanvraagnummer,
+      contractType: contract.type,
+      hasVerbruikData: !!verbruikData,
+      hasGegevensData: !!gegevensData,
+      hasBreakdown: !!opgeslagenBreakdown,
+    })
+  }, [])
 
   // Load current prices and history for dynamic contracts
   const loadPriceData = async () => {

@@ -11,6 +11,22 @@ interface PageProps {
 async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer: string; token?: string }) {
   const supabase = await createClient()
 
+  // Log start of contract viewer (server-side)
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        level: 'info',
+        message: '[ContractViewer] Server-side: Starting contract viewer',
+        data: { aanvraagnummer, hasToken: !!token, tokenLength: token?.length },
+        url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+        userAgent: 'server-side',
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {}) // Fail silently
+  } catch {}
+
   // Clean and validate token (mobile email clients sometimes add extra characters)
   let cleanToken = token
   if (token) {
@@ -48,6 +64,20 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     .single()
 
   if (aanvraagError || !aanvraag) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: 'error',
+          message: '[ContractViewer] Server-side: Aanvraag not found',
+          data: { aanvraagnummer, error: aanvraagError?.message },
+          url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+          userAgent: 'server-side',
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {})
+    } catch {}
     redirect('/contract/niet-gevonden')
   }
 
@@ -62,6 +92,26 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
 
     // Check if token is valid and not expired
     if (!accessData || tokenError) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            level: 'warn',
+            message: '[ContractViewer] Server-side: Token verification failed, trying fallback',
+            data: { 
+              tokenError: tokenError?.message,
+              hasAccessData: !!accessData,
+              aanvraagId: aanvraag.id,
+              cleanTokenLength: cleanToken.length
+            },
+            url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+            userAgent: 'server-side',
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(() => {})
+      } catch {}
+
       // Token invalid or not found - try to find valid token in database as fallback
       const { data: fallbackAccessData } = await supabase
         .from('contract_viewer_access')
@@ -73,11 +123,39 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
         .maybeSingle()
 
       if (fallbackAccessData?.access_token) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              level: 'info',
+              message: '[ContractViewer] Server-side: Using fallback token',
+              data: { fallbackTokenLength: fallbackAccessData.access_token.length },
+              url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+              userAgent: 'server-side',
+              timestamp: new Date().toISOString(),
+            }),
+          }).catch(() => {})
+        } catch {}
         // Redirect with valid token from database
         const encodedToken = encodeURIComponent(fallbackAccessData.access_token)
         redirect(`/contract/${aanvraagnummer}?token=${encodedToken}`)
       }
       
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            level: 'error',
+            message: '[ContractViewer] Server-side: No valid token found, redirecting to error page',
+            data: { aanvraagId: aanvraag.id },
+            url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+            userAgent: 'server-side',
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(() => {})
+      } catch {}
       // No valid token found - redirect to error page
       redirect('/contract/niet-gevonden')
     }
@@ -85,6 +163,20 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     // Check if token is expired
     // NULL expires_at = permanent access (no expiration)
     if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            level: 'error',
+            message: '[ContractViewer] Server-side: Token expired',
+            data: { expiresAt: accessData.expires_at },
+            url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+            userAgent: 'server-side',
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(() => {})
+      } catch {}
       redirect('/contract/niet-gevonden')
     }
 
@@ -95,6 +187,21 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
         .update({ accessed_at: new Date().toISOString() })
         .eq('access_token', cleanToken)
     }
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: 'info',
+          message: '[ContractViewer] Server-side: Token verified successfully, rendering viewer',
+          data: { aanvraagId: aanvraag.id, contractId: aanvraag.contract_id },
+          url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+          userAgent: 'server-side',
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {})
+    } catch {}
   } else {
     // No token provided - check if there's a valid token in database
     // NULL expires_at = permanent access, or expires_at > now = still valid
