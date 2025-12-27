@@ -1,31 +1,38 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 /**
  * Client-side redirect voor mobiele email clients
- * Sommige email clients op mobiel kunnen server-side redirects niet goed verwerken
- * Deze component haalt de token uit de URL en redirect direct naar de contract viewer
- * 
- * Werkt ook als fallback als server-side redirect faalt
+ * Gebruikt window.location voor betrouwbare URL parsing op alle platforms
+ * Dit werkt altijd, ook op mobiele browsers en email clients
  */
 export function ClientRedirect() {
-  const params = useParams()
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const aanvraagnummer = params?.aanvraagnummer as string
-  const token = searchParams?.get('token')
   const [error, setError] = useState<string | null>(null)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   useEffect(() => {
-    if (!aanvraagnummer) {
+    // Use window.location for reliable URL parsing on all platforms (especially mobile)
+    if (typeof window === 'undefined') return
+
+    const url = new URL(window.location.href)
+    const pathParts = url.pathname.split('/')
+    const aanvraagnummer = pathParts[pathParts.length - 1] // Last part of path
+    const token = url.searchParams.get('token')
+
+    if (!aanvraagnummer || aanvraagnummer === 'bekijk-contract') {
       setError('Aanvraagnummer ontbreekt')
+      setTimeout(() => {
+        router.replace('/contract/niet-gevonden')
+      }, 2000)
       return
     }
 
-    // If token is provided, redirect immediately
+    // If token is provided in URL, redirect immediately
     if (token) {
+      setIsRedirecting(true)
       // Clean token (remove whitespace, decode if needed)
       let cleanToken = token.trim().replace(/\s+/g, '')
       try {
@@ -36,13 +43,14 @@ export function ClientRedirect() {
         cleanToken = token.trim()
       }
 
-      // Redirect to contract viewer with properly encoded token
+      // Use window.location for redirect (more reliable on mobile than router.replace)
       const encodedToken = encodeURIComponent(cleanToken)
-      router.replace(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+      window.location.href = `/contract/${aanvraagnummer}?token=${encodedToken}`
       return
     }
 
     // If no token, try to fetch from API (fallback)
+    setIsRedirecting(true)
     const fetchToken = async () => {
       try {
         const response = await fetch(`/api/contract-viewer-token?aanvraagnummer=${encodeURIComponent(aanvraagnummer)}`)
@@ -50,24 +58,25 @@ export function ClientRedirect() {
           const data = await response.json()
           if (data.token) {
             const encodedToken = encodeURIComponent(data.token)
-            router.replace(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+            // Use window.location for redirect (more reliable on mobile)
+            window.location.href = `/contract/${aanvraagnummer}?token=${encodedToken}`
             return
           }
         }
         // If no token found, redirect to error page
-        router.replace('/contract/niet-gevonden')
+        window.location.href = '/contract/niet-gevonden'
       } catch (err) {
         console.error('Error fetching token:', err)
         setError('Fout bij ophalen contract token')
         // Redirect to error page after delay
         setTimeout(() => {
-          router.replace('/contract/niet-gevonden')
+          window.location.href = '/contract/niet-gevonden'
         }, 2000)
       }
     }
 
     fetchToken()
-  }, [token, aanvraagnummer, router])
+  }, [router])
 
   if (error) {
     return (
