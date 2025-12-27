@@ -540,17 +540,22 @@ export async function sendInterneNotificatieEmail(aanvraagId: string, aanvraagnu
     console.log('📧 [sendInterneNotificatieEmail] Starting internal notification email for:', { aanvraagId, aanvraagnummer })
 
     // Check Resend API key
+    console.log('📧 [sendInterneNotificatieEmail] Checking RESEND_API_KEY...')
     if (!process.env.RESEND_API_KEY) {
       console.error('❌ [sendInterneNotificatieEmail] RESEND_API_KEY is not set')
       throw new Error('Email service niet geconfigureerd')
     }
+    console.log('✅ [sendInterneNotificatieEmail] RESEND_API_KEY is set')
 
     // Use service role key to fetch aanvraag data
+    console.log('📧 [sendInterneNotificatieEmail] Checking SUPABASE_SERVICE_ROLE_KEY...')
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('❌ [sendInterneNotificatieEmail] SUPABASE_SERVICE_ROLE_KEY is not set')
       throw new Error('Server configuration error')
     }
+    console.log('✅ [sendInterneNotificatieEmail] SUPABASE_SERVICE_ROLE_KEY is set')
 
+    console.log('📧 [sendInterneNotificatieEmail] Creating Supabase client...')
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -561,22 +566,28 @@ export async function sendInterneNotificatieEmail(aanvraagId: string, aanvraagnu
         }
       }
     )
+    console.log('✅ [sendInterneNotificatieEmail] Supabase client created')
 
     // Fetch aanvraag data (same as sendBevestigingEmail)
+    console.log('📧 [sendInterneNotificatieEmail] Fetching aanvraag data from database...')
     const { data: aanvraag, error: aanvraagError } = await supabase
       .from('contractaanvragen')
       .select('*')
       .eq('id', aanvraagId)
       .single()
+    console.log('📧 [sendInterneNotificatieEmail] Database query completed')
 
     if (aanvraagError || !aanvraag) {
       console.error('❌ [sendInterneNotificatieEmail] Error fetching aanvraag:', aanvraagError)
       throw new Error(`Aanvraag niet gevonden: ${aanvraagError?.message || 'Unknown error'}`)
     }
+    console.log('✅ [sendInterneNotificatieEmail] Aanvraag found:', aanvraag.id)
 
     // Extract data
+    console.log('📧 [sendInterneNotificatieEmail] Extracting data from aanvraag...')
     const verbruikData = aanvraag.verbruik_data
     const gegevensData = aanvraag.gegevens_data
+    console.log('✅ [sendInterneNotificatieEmail] Data extracted')
 
     // Get klant naam
     const klantNaam = gegevensData?.bedrijfsnaam || 
@@ -625,8 +636,11 @@ export async function sendInterneNotificatieEmail(aanvraagId: string, aanvraagnu
     let jaarbedrag = verbruikData?.jaarbedrag || 0
 
     // Base URL
+    console.log('📧 [sendInterneNotificatieEmail] Preparing email data...')
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
     const adminUrl = `${baseUrl}/admin/aanvragen/${aanvraagId}`
+    console.log('📧 [sendInterneNotificatieEmail] Base URL:', baseUrl)
+    console.log('📧 [sendInterneNotificatieEmail] Admin URL:', adminUrl)
 
     // Generate email HTML
     const emailData: EmailInterneNotificatieData = {
@@ -647,16 +661,20 @@ export async function sendInterneNotificatieEmail(aanvraagId: string, aanvraagnu
       baseUrl,
     }
 
+    console.log('📧 [sendInterneNotificatieEmail] Generating email HTML...')
     let emailHtml: string
     try {
       emailHtml = generateInterneNotificatieEmail(emailData)
+      console.log('✅ [sendInterneNotificatieEmail] Email HTML generated, length:', emailHtml.length)
     } catch (htmlError: any) {
       console.error('❌ [sendInterneNotificatieEmail] Error generating email HTML:', htmlError)
       throw new Error(`Fout bij genereren email HTML: ${htmlError.message}`)
     }
 
     // Initialize Resend
+    console.log('📧 [sendInterneNotificatieEmail] Initializing Resend...')
     const resend = new Resend(process.env.RESEND_API_KEY)
+    console.log('✅ [sendInterneNotificatieEmail] Resend initialized')
 
     // Send email to info@pakketadvies.nl
     const toEmail = 'info@pakketadvies.nl'
