@@ -1,6 +1,4 @@
 import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { ClientRedirect } from './client-redirect'
 
 interface PageProps {
@@ -14,12 +12,12 @@ interface PageProps {
  * 
  * MOBIEL FIX: 
  * - Gebruik ALTIJD client-side redirect (werkt op alle platforms)
- * - Client-side component haalt token uit URL of via API
- * - Server-side redirects kunnen problemen geven op mobiele email clients
+ * - Client-side component gebruikt window.location voor betrouwbare URL parsing
+ * - Werkt op desktop, mobiel, en alle email clients
  */
 async function BekijkContractRedirectContent(props: PageProps) {
   // Always use client-side redirect for maximum compatibility
-  // This works on both desktop and mobile, and handles all edge cases
+  // Client component uses window.location which works on all platforms
   return <ClientRedirect />
 }
 
