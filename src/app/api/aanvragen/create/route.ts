@@ -354,22 +354,29 @@ export async function POST(request: Request) {
 
     // Send internal notification email (after confirmation email, fire and forget but with better logging)
     // This runs after the response is sent, so it doesn't block the user
-    ;(async () => {
+    // IMPORTANT: We use Promise.resolve().then() to ensure it runs even if the response is sent
+    Promise.resolve().then(async () => {
       try {
+        console.log('📧 [create] Starting internal notification email process...')
         const { sendInterneNotificatieEmail } = await import('@/lib/send-email-internal')
-        console.log('📧 [create] Triggering internal notification email for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
+        console.log('📧 [create] sendInterneNotificatieEmail imported, calling for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
         const notifResult = await sendInterneNotificatieEmail(data.id, aanvraagnummer)
-        console.log('✅ [create] Internal notification email sent successfully:', notifResult)
+        console.log('✅ [create] Internal notification email sent successfully:', JSON.stringify(notifResult))
       } catch (notifError: any) {
         console.error('❌ [create] Error sending internal notification email (non-blocking):', {
           message: notifError?.message,
           stack: notifError?.stack,
           name: notifError?.name,
+          code: notifError?.code,
           aanvraagId: data.id,
-          aanvraagnummer: aanvraagnummer
+          aanvraagnummer: aanvraagnummer,
+          fullError: JSON.stringify(notifError, Object.getOwnPropertyNames(notifError))
         })
+        // Also log to a file or external service if needed
       }
-    })()
+    }).catch((err) => {
+      console.error('❌ [create] Unhandled error in internal notification email promise:', err)
+    })
 
     return NextResponse.json<CreateAanvraagResponse>({
       success: true,
