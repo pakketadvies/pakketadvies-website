@@ -44,21 +44,89 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
 
   // Fetch aanvraag by aanvraagnummer first (without nested selects to avoid "Cannot coerce" error)
   // We'll fetch contract and leverancier separately
-  const { data: aanvraag, error: aanvraagError } = await supabase
+  // Use service role client to bypass RLS (this is a public contract viewer)
+  let aanvraag: any = null
+  let aanvraagError: any = null
+
+  // First try with regular client
+  const { data: regularAanvraag, error: regularError } = await supabase
     .from('contractaanvragen')
     .select('*')
     .eq('aanvraagnummer', aanvraagnummer)
     .maybeSingle()
 
-  if (aanvraagError || !aanvraag) {
+  if (regularError) {
+    aanvraagError = regularError
+  } else if (regularAanvraag) {
+    aanvraag = regularAanvraag
+  }
+
+  // If not found, try with service role client (bypasses RLS)
+  if (!aanvraag && !aanvraagError) {
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const { createClient } = await import('@supabase/supabase-js')
+      const serviceSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      )
+
+      const { data: serviceAanvraag, error: serviceError } = await serviceSupabase
+        .from('contractaanvragen')
+        .select('*')
+        .eq('aanvraagnummer', aanvraagnummer)
+        .maybeSingle()
+
+      if (serviceError) {
+        aanvraagError = serviceError
+      } else if (serviceAanvraag) {
+        aanvraag = serviceAanvraag
+      }
+    }
+  }
+
+  if (aanvraagError) {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           level: 'error',
-          message: '[ContractViewer] Server-side: Aanvraag not found',
-          data: { aanvraagnummer, error: aanvraagError?.message, code: aanvraagError?.code },
+          message: '[ContractViewer] Server-side: Database error fetching aanvraag',
+          data: { 
+            aanvraagnummer, 
+            error: aanvraagError.message, 
+            code: aanvraagError.code,
+            details: aanvraagError.details,
+            hint: aanvraagError.hint
+          },
+          url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+          userAgent: 'server-side',
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {})
+    } catch {}
+    redirect('/contract/niet-gevonden')
+  }
+
+  if (!aanvraag) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: 'error',
+          message: '[ContractViewer] Server-side: Aanvraag not found in database',
+          data: { 
+            aanvraagnummer,
+            triedRegularClient: true,
+            triedServiceClient: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+          },
           url: typeof window !== 'undefined' ? window.location.href : 'server-side',
           userAgent: 'server-side',
           timestamp: new Date().toISOString(),
