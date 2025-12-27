@@ -17,56 +17,76 @@ export function ClientRedirect() {
     // Use window.location for reliable URL parsing on all platforms (especially mobile)
     if (typeof window === 'undefined') return
 
+    console.log('🔍 [ClientRedirect] Starting redirect process...')
+    console.log('🔍 [ClientRedirect] Current URL:', window.location.href)
+
     const url = new URL(window.location.href)
     const pathParts = url.pathname.split('/')
     const aanvraagnummer = pathParts[pathParts.length - 1] // Last part of path
     const token = url.searchParams.get('token')
 
+    console.log('🔍 [ClientRedirect] Aanvraagnummer:', aanvraagnummer)
+    console.log('🔍 [ClientRedirect] Token from URL:', token ? 'present' : 'missing')
+
     if (!aanvraagnummer || aanvraagnummer === 'bekijk-contract') {
+      console.error('❌ [ClientRedirect] Aanvraagnummer ontbreekt')
       setError('Aanvraagnummer ontbreekt')
       setTimeout(() => {
-        router.replace('/contract/niet-gevonden')
+        window.location.href = '/contract/niet-gevonden'
       }, 2000)
       return
     }
 
     // If token is provided in URL, redirect immediately
     if (token) {
+      console.log('✅ [ClientRedirect] Token found in URL, redirecting...')
       setIsRedirecting(true)
       // Clean token (remove whitespace, decode if needed)
       let cleanToken = token.trim().replace(/\s+/g, '')
       try {
         // Try to decode if it was double-encoded
         cleanToken = decodeURIComponent(cleanToken)
+        console.log('✅ [ClientRedirect] Token decoded successfully')
       } catch (e) {
         // If decoding fails, use original (might already be decoded)
         cleanToken = token.trim()
+        console.log('⚠️ [ClientRedirect] Token decode failed, using original')
       }
 
       // Use window.location for redirect (more reliable on mobile than router.replace)
       const encodedToken = encodeURIComponent(cleanToken)
-      window.location.href = `/contract/${aanvraagnummer}?token=${encodedToken}`
+      const redirectUrl = `/contract/${aanvraagnummer}?token=${encodedToken}`
+      console.log('🔄 [ClientRedirect] Redirecting to:', redirectUrl)
+      window.location.href = redirectUrl
       return
     }
 
     // If no token, try to fetch from API (fallback)
+    console.log('📡 [ClientRedirect] No token in URL, fetching from API...')
     setIsRedirecting(true)
     const fetchToken = async () => {
       try {
-        const response = await fetch(`/api/contract-viewer-token?aanvraagnummer=${encodeURIComponent(aanvraagnummer)}`)
+        const apiUrl = `/api/contract-viewer-token?aanvraagnummer=${encodeURIComponent(aanvraagnummer)}`
+        console.log('📡 [ClientRedirect] Fetching token from:', apiUrl)
+        const response = await fetch(apiUrl)
+        console.log('📡 [ClientRedirect] API response status:', response.status)
         if (response.ok) {
           const data = await response.json()
+          console.log('📡 [ClientRedirect] API response data:', data)
           if (data.token) {
             const encodedToken = encodeURIComponent(data.token)
+            const redirectUrl = `/contract/${aanvraagnummer}?token=${encodedToken}`
+            console.log('🔄 [ClientRedirect] Redirecting with API token to:', redirectUrl)
             // Use window.location for redirect (more reliable on mobile)
-            window.location.href = `/contract/${aanvraagnummer}?token=${encodedToken}`
+            window.location.href = redirectUrl
             return
           }
         }
         // If no token found, redirect to error page
+        console.error('❌ [ClientRedirect] No token found in API response')
         window.location.href = '/contract/niet-gevonden'
       } catch (err) {
-        console.error('Error fetching token:', err)
+        console.error('❌ [ClientRedirect] Error fetching token:', err)
         setError('Fout bij ophalen contract token')
         // Redirect to error page after delay
         setTimeout(() => {
