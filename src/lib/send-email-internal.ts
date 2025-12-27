@@ -352,7 +352,9 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
 
     // Use a more trusted redirect URL structure for email clients
     // This is less likely to be blocked than direct contract viewer links
-    const contractViewerUrl = `${baseUrl}/bekijk-contract/${aanvraagnummer}?token=${accessToken}`
+    // Properly encode token for mobile email client compatibility
+    const encodedToken = encodeURIComponent(accessToken)
+    const contractViewerUrl = `${baseUrl}/bekijk-contract/${aanvraagnummer}?token=${encodedToken}`
 
     // Prepare email data
     const emailData: EmailBevestigingData = {
