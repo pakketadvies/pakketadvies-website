@@ -13,8 +13,9 @@ interface PageProps {
  * Deze route is minder verdacht voor email clients dan directe contract viewer links
  * 
  * MOBIEL FIX: 
- * - Server-side redirect voor desktop/normale browsers
- * - Client-side fallback voor mobiele email clients die redirects niet goed verwerken
+ * - Probeer eerst server-side redirect (werkt op desktop)
+ * - Als dat niet werkt, gebruik client-side fallback (werkt altijd op mobiel)
+ * - Client-side component haalt token uit URL en redirect direct
  */
 async function BekijkContractRedirectContent(props: PageProps) {
   const params = await props.params
@@ -31,11 +32,16 @@ async function BekijkContractRedirectContent(props: PageProps) {
     }
   }
 
-  // If token is provided, redirect to contract viewer with properly encoded token
+  // If token is provided, try server-side redirect first
   if (token) {
-    // Use encodeURIComponent to ensure proper URL encoding for mobile email clients
-    const encodedToken = encodeURIComponent(token)
-    redirect(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+    try {
+      // Use encodeURIComponent to ensure proper URL encoding for mobile email clients
+      const encodedToken = encodeURIComponent(token)
+      redirect(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+    } catch (e) {
+      // If redirect fails (e.g., on mobile), fall through to client-side redirect
+      console.warn('⚠️ [BekijkContractRedirect] Server-side redirect failed, using client-side fallback')
+    }
   }
 
   // Otherwise, try to find the latest access token for this aanvraagnummer
@@ -69,14 +75,20 @@ async function BekijkContractRedirectContent(props: PageProps) {
     }
 
     if (accessData?.access_token) {
-      // Properly encode token for redirect
-      const encodedToken = encodeURIComponent(accessData.access_token)
-      redirect(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+      try {
+        // Properly encode token for redirect
+        const encodedToken = encodeURIComponent(accessData.access_token)
+        redirect(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+      } catch (e) {
+        // If redirect fails, fall through to client-side redirect
+        console.warn('⚠️ [BekijkContractRedirect] Server-side redirect with DB token failed, using client-side fallback')
+      }
     }
   }
 
   // Fallback: Use client-side redirect for mobile email clients
   // This handles cases where server-side redirects don't work on mobile
+  // The client-side component will extract token from URL and redirect
   return <ClientRedirect />
 }
 
