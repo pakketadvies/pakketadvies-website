@@ -803,43 +803,50 @@ export function generateReviewRequestEmail(data: ReviewRequestEmailData): string
 
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
 
-export interface EmailInterneNotificatieData {
-  aanvraagnummer: string
-  aanvraagType: 'particulier' | 'zakelijk'
-  contractNaam: string
-  leverancierNaam: string
-  klantNaam: string
-  klantEmail: string
-  klantTelefoon?: string
-  adres: {
-    straat: string
-    huisnummer: string
-    toevoeging?: string
-    postcode: string
-    plaats: string
-  }
-  verbruik: {
-    elektriciteitNormaal?: number
-    elektriciteitDal?: number | null
-    elektriciteitTotaal: number
-    heeftEnkeleMeter?: boolean
-    gas: number
-  }
-  aansluitwaarden: {
-    elektriciteit: string
-    gas: string
-  }
-  maandbedrag: number
-  jaarbedrag: number
-  isZakelijk?: boolean
-  adminUrl: string
-  baseUrl: string
-}
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoe bevalt je nieuwe energiecontract? - PakketAdvies</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  
+  <!-- Main Container -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
 
-/**
- * Generate the HTML email template for internal notification (to info@pakketadvies.nl)
- */
-export function generateInterneNotificatieEmail(data: EmailInterneNotificatieData): string {
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px; background: white;">
+              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 20px 0; font-weight: bold; line-height: 1.3;">
+                Beste ${klantNaam},
+              </h1>
+              
+              <p style="color: #64748B; font-size: 16px; margin: 0 0 20px 0; line-height: 1.6;">
+                Een week geleden is je energiecontract bij <strong style="color: #0F4C75;">${leverancierNaam}</strong> actief geworden. 
+                We hopen dat alles goed verloopt en dat je tevreden bent met je nieuwe contract <strong style="color: #0F4C75;">${contractNaam}</strong>.
+              </p>
+
+              <p style="color: #64748B; font-size: 16px; margin: 0 0 30px 0; line-height: 1.6;">
+                💬 <strong style="color: #0F4C75;">Hoe bevalt het?</strong><br>
+                We zouden het enorm waarderen als je een korte review achterlaat op Google. Dit helpt andere bedrijven om ook de beste energiecontracten te vinden.
+              </p>
+
+              <!-- Google Review Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                <tr>
+                  <td align="center">
   const {
     aanvraagnummer,
     aanvraagType,
