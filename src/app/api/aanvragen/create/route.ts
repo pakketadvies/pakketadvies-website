@@ -333,19 +333,6 @@ export async function POST(request: Request) {
         const result = await sendBevestigingEmail(data.id, aanvraagnummer)
         emailSuccess = true
         logToClient('✅ [create] Confirmation email sent successfully for aanvraag: ' + data.id + ' Result: ' + JSON.stringify(result))
-        
-        // Send internal notification email (fire and forget)
-        ;(async () => {
-          try {
-            const { sendInterneNotificatieEmail } = await import('@/lib/send-email-internal')
-            logToClient('📧 [create] Triggering internal notification email...')
-            await sendInterneNotificatieEmail(data.id, aanvraagnummer)
-            logToClient('✅ [create] Internal notification email sent successfully')
-          } catch (notifError: any) {
-            logToClient('❌ [create] Error sending internal notification email (non-blocking): ' + notifError?.message)
-            console.error('❌ [create] Error sending internal notification email (non-blocking):', notifError)
-          }
-        })()
       } finally {
         // Restore original console functions
         console.log = originalConsoleLog
@@ -364,6 +351,25 @@ export async function POST(request: Request) {
         cause: error?.cause,
       }, null, 2))
     }
+
+    // Send internal notification email (after confirmation email, fire and forget but with better logging)
+    // This runs after the response is sent, so it doesn't block the user
+    ;(async () => {
+      try {
+        const { sendInterneNotificatieEmail } = await import('@/lib/send-email-internal')
+        console.log('📧 [create] Triggering internal notification email for aanvraag:', data.id, 'aanvraagnummer:', aanvraagnummer)
+        const notifResult = await sendInterneNotificatieEmail(data.id, aanvraagnummer)
+        console.log('✅ [create] Internal notification email sent successfully:', notifResult)
+      } catch (notifError: any) {
+        console.error('❌ [create] Error sending internal notification email (non-blocking):', {
+          message: notifError?.message,
+          stack: notifError?.stack,
+          name: notifError?.name,
+          aanvraagId: data.id,
+          aanvraagnummer: aanvraagnummer
+        })
+      }
+    })()
 
     return NextResponse.json<CreateAanvraagResponse>({
       success: true,
