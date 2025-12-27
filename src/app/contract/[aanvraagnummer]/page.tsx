@@ -274,8 +274,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   // Extract data
   const verbruikData = aanvraag.verbruik_data
   const gegevensData = aanvraag.gegevens_data
-  const contract = aanvraag.contract as any
-  const leverancier = contract?.leverancier
+  // contract and leverancier are already fetched above
 
   if (!contract || !leverancier) {
     try {
