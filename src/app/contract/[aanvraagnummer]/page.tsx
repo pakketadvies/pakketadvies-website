@@ -227,8 +227,42 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   const leverancier = contract?.leverancier
 
   if (!contract || !leverancier) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: 'error',
+          message: '[ContractViewer] Server-side: Contract or leverancier missing',
+          data: { hasContract: !!contract, hasLeverancier: !!leverancier, contractId: aanvraag.contract_id },
+          url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+          userAgent: 'server-side',
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {})
+    } catch {}
     redirect('/contract/niet-gevonden')
   }
+
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        level: 'info',
+        message: '[ContractViewer] Server-side: All checks passed, rendering ContractViewer component',
+        data: { 
+          contractType: contract.type,
+          leverancierId: leverancier.id,
+          hasVerbruikData: !!verbruikData,
+          hasGegevensData: !!gegevensData
+        },
+        url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+        userAgent: 'server-side',
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {})
+  } catch {}
 
   // Fetch contract details based on type
   let contractDetails: any = null
