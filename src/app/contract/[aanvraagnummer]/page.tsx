@@ -11,6 +11,21 @@ interface PageProps {
 async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer: string; token?: string }) {
   const supabase = await createClient()
 
+  // Clean and validate token (mobile email clients sometimes add extra characters)
+  let cleanToken = token
+  if (token) {
+    cleanToken = token.trim()
+    // Remove any whitespace that might have been added by email clients
+    cleanToken = cleanToken.replace(/\s+/g, '')
+    // Decode if it was double-encoded
+    try {
+      cleanToken = decodeURIComponent(cleanToken)
+    } catch (e) {
+      // If decoding fails, use original token
+      cleanToken = token.trim()
+    }
+  }
+
   // Fetch aanvraag by aanvraagnummer first
   const { data: aanvraag, error: aanvraagError } = await supabase
     .from('contractaanvragen')
@@ -37,17 +52,33 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
   }
 
   // Verify access token if provided (after fetching aanvraag to get aanvraag_id)
-  if (token) {
+  if (cleanToken) {
     const { data: accessData, error: tokenError } = await supabase
       .from('contract_viewer_access')
       .select('aanvraag_id, accessed_at, expires_at')
-      .eq('access_token', token)
+      .eq('access_token', cleanToken)
       .eq('aanvraag_id', aanvraag.id)
       .single()
 
     // Check if token is valid and not expired
     if (!accessData || tokenError) {
-      // Token invalid or not found - redirect to error page
+      // Token invalid or not found - try to find valid token in database as fallback
+      const { data: fallbackAccessData } = await supabase
+        .from('contract_viewer_access')
+        .select('access_token, expires_at')
+        .eq('aanvraag_id', aanvraag.id)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (fallbackAccessData?.access_token) {
+        // Redirect with valid token from database
+        const encodedToken = encodeURIComponent(fallbackAccessData.access_token)
+        redirect(`/contract/${aanvraagnummer}?token=${encodedToken}`)
+      }
+      
+      // No valid token found - redirect to error page
       redirect('/contract/niet-gevonden')
     }
 
@@ -62,7 +93,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
       await supabase
         .from('contract_viewer_access')
         .update({ accessed_at: new Date().toISOString() })
-        .eq('access_token', token)
+        .eq('access_token', cleanToken)
     }
   } else {
     // No token provided - check if there's a valid token in database
