@@ -42,26 +42,13 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
     }
   }
 
-  // Fetch aanvraag by aanvraagnummer first
+  // Fetch aanvraag by aanvraagnummer first (without nested selects to avoid "Cannot coerce" error)
+  // We'll fetch contract and leverancier separately
   const { data: aanvraag, error: aanvraagError } = await supabase
     .from('contractaanvragen')
-    .select(`
-      *,
-      contract:contracten(
-        id,
-        naam,
-        type,
-        leverancier:leveranciers(
-          id,
-          naam,
-          logo_url,
-          website,
-          over_leverancier
-        )
-      )
-    `)
+    .select('*')
     .eq('aanvraagnummer', aanvraagnummer)
-    .single()
+    .maybeSingle()
 
   if (aanvraagError || !aanvraag) {
     try {
@@ -71,7 +58,7 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
         body: JSON.stringify({
           level: 'error',
           message: '[ContractViewer] Server-side: Aanvraag not found',
-          data: { aanvraagnummer, error: aanvraagError?.message },
+          data: { aanvraagnummer, error: aanvraagError?.message, code: aanvraagError?.code },
           url: typeof window !== 'undefined' ? window.location.href : 'server-side',
           userAgent: 'server-side',
           timestamp: new Date().toISOString(),
@@ -79,6 +66,70 @@ async function ContractViewerContent({ aanvraagnummer, token }: { aanvraagnummer
       }).catch(() => {})
     } catch {}
     redirect('/contract/niet-gevonden')
+  }
+
+  // Fetch contract separately (to avoid nested select issues)
+  let contract: any = null
+  let leverancier: any = null
+
+  if (aanvraag.contract_id) {
+    const { data: contractData, error: contractError } = await supabase
+      .from('contracten')
+      .select(`
+        id,
+        naam,
+        type,
+        leverancier_id
+      `)
+      .eq('id', aanvraag.contract_id)
+      .maybeSingle()
+
+    if (contractError) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            level: 'error',
+            message: '[ContractViewer] Server-side: Error fetching contract',
+            data: { contractId: aanvraag.contract_id, error: contractError.message },
+            url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+            userAgent: 'server-side',
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(() => {})
+      } catch {}
+    } else {
+      contract = contractData
+    }
+
+    // Fetch leverancier separately
+    if (contract?.leverancier_id) {
+      const { data: leverancierData, error: leverancierError } = await supabase
+        .from('leveranciers')
+        .select('id, naam, logo_url, website, over_leverancier')
+        .eq('id', contract.leverancier_id)
+        .maybeSingle()
+
+      if (leverancierError) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'}/api/debug-logs`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              level: 'error',
+              message: '[ContractViewer] Server-side: Error fetching leverancier',
+              data: { leverancierId: contract.leverancier_id, error: leverancierError.message },
+              url: typeof window !== 'undefined' ? window.location.href : 'server-side',
+              userAgent: 'server-side',
+              timestamp: new Date().toISOString(),
+            }),
+          }).catch(() => {})
+        } catch {}
+      } else {
+        leverancier = leverancierData
+      }
+    }
   }
 
   // Verify access token if provided (after fetching aanvraag to get aanvraag_id)
