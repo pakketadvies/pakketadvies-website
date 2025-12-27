@@ -1,6 +1,7 @@
-import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { ClientRedirect } from './client-redirect'
 
 interface PageProps {
   params: Promise<{ aanvraagnummer: string }>
@@ -11,9 +12,11 @@ interface PageProps {
  * Redirect route voor email links
  * Deze route is minder verdacht voor email clients dan directe contract viewer links
  * 
- * MOBIEL FIX: Gebruik encodeURIComponent voor token om URL encoding problemen te voorkomen
+ * MOBIEL FIX: 
+ * - Server-side redirect voor desktop/normale browsers
+ * - Client-side fallback voor mobiele email clients die redirects niet goed verwerken
  */
-export default async function BekijkContractRedirectPage(props: PageProps) {
+async function BekijkContractRedirectContent(props: PageProps) {
   const params = await props.params
   const searchParams = await props.searchParams
   const aanvraagnummer = params.aanvraagnummer
@@ -72,7 +75,23 @@ export default async function BekijkContractRedirectPage(props: PageProps) {
     }
   }
 
-  // Fallback: redirect to contract page without token (will show error)
-  redirect(`/contract/${aanvraagnummer}`)
+  // Fallback: Use client-side redirect for mobile email clients
+  // This handles cases where server-side redirects don't work on mobile
+  return <ClientRedirect />
+}
+
+export default function BekijkContractRedirectPage(props: PageProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Contract laden...</p>
+        </div>
+      </div>
+    }>
+      <BekijkContractRedirectContent {...props} />
+    </Suspense>
+  )
 }
 

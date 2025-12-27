@@ -14,9 +14,9 @@ export default function ContractNietGevondenPage() {
           Het contract dat u zoekt kon niet worden gevonden. Dit kan gebeuren als:
         </p>
         <ul className="text-left text-gray-600 mb-6 space-y-2">
-          <li>• De link is verlopen (links zijn 7 dagen geldig)</li>
           <li>• De link is onjuist of beschadigd</li>
           <li>• Het contract is verwijderd</li>
+          <li>• Er is een technisch probleem opgetreden</li>
         </ul>
         <div className="flex flex-col gap-3">
           <Link 
