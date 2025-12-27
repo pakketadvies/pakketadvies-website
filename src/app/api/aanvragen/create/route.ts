@@ -252,10 +252,18 @@ export async function POST(request: Request) {
         // Send confirmation email (fire and forget)
         ;(async () => {
           try {
-            const { sendBevestigingEmail } = await import('@/lib/send-email-internal')
+            const { sendBevestigingEmail, sendInterneNotificatieEmail } = await import('@/lib/send-email-internal')
             console.log('📧 [create-retry] Triggering email send for aanvraag:', retryData.id, 'aanvraagnummer:', aanvraagnummer)
             await sendBevestigingEmail(retryData.id, aanvraagnummer)
-            console.log('✅ [create-retry] Email sent successfully')
+            console.log('✅ [create-retry] Confirmation email sent successfully')
+            
+            // Send internal notification email (fire and forget)
+            try {
+              await sendInterneNotificatieEmail(retryData.id, aanvraagnummer)
+              console.log('✅ [create-retry] Internal notification email sent successfully')
+            } catch (notifError: any) {
+              console.error('❌ [create-retry] Error sending internal notification email (non-blocking):', notifError)
+            }
           } catch (error: any) {
             console.error('❌ [create-retry] Error sending confirmation email (non-blocking):', error)
           }
@@ -324,7 +332,20 @@ export async function POST(request: Request) {
       try {
         const result = await sendBevestigingEmail(data.id, aanvraagnummer)
         emailSuccess = true
-        logToClient('✅ [create] Email sent successfully for aanvraag: ' + data.id + ' Result: ' + JSON.stringify(result))
+        logToClient('✅ [create] Confirmation email sent successfully for aanvraag: ' + data.id + ' Result: ' + JSON.stringify(result))
+        
+        // Send internal notification email (fire and forget)
+        ;(async () => {
+          try {
+            const { sendInterneNotificatieEmail } = await import('@/lib/send-email-internal')
+            logToClient('📧 [create] Triggering internal notification email...')
+            await sendInterneNotificatieEmail(data.id, aanvraagnummer)
+            logToClient('✅ [create] Internal notification email sent successfully')
+          } catch (notifError: any) {
+            logToClient('❌ [create] Error sending internal notification email (non-blocking): ' + notifError?.message)
+            console.error('❌ [create] Error sending internal notification email (non-blocking):', notifError)
+          }
+        })()
       } finally {
         // Restore original console functions
         console.log = originalConsoleLog

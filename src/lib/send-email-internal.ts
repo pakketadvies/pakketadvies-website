@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
-import { generateBevestigingEmail, type EmailBevestigingData } from '@/lib/email-templates'
+import { generateBevestigingEmail, type EmailBevestigingData, generateInterneNotificatieEmail, type EmailInterneNotificatieData } from '@/lib/email-templates'
 
 /**
  * Internal function to send confirmation email
@@ -527,6 +527,179 @@ export async function sendBevestigingEmail(aanvraagId: string, aanvraagnummer: s
     return { success: true, emailId: emailResult?.id }
   } catch (error: any) {
     console.error('❌ [sendBevestigingEmail] Unexpected error:', error)
+    throw error
+  }
+}
+
+/**
+ * Internal function to send internal notification email to info@pakketadvies.nl
+ * Can be called directly from other API routes without HTTP fetch
+ */
+export async function sendInterneNotificatieEmail(aanvraagId: string, aanvraagnummer: string) {
+  try {
+    console.log('📧 [sendInterneNotificatieEmail] Starting internal notification email for:', { aanvraagId, aanvraagnummer })
+
+    // Check Resend API key
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ [sendInterneNotificatieEmail] RESEND_API_KEY is not set')
+      throw new Error('Email service niet geconfigureerd')
+    }
+
+    // Use service role key to fetch aanvraag data
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('❌ [sendInterneNotificatieEmail] SUPABASE_SERVICE_ROLE_KEY is not set')
+      throw new Error('Server configuration error')
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    // Fetch aanvraag data (same as sendBevestigingEmail)
+    const { data: aanvraag, error: aanvraagError } = await supabase
+      .from('contractaanvragen')
+      .select('*')
+      .eq('id', aanvraagId)
+      .single()
+
+    if (aanvraagError || !aanvraag) {
+      console.error('❌ [sendInterneNotificatieEmail] Error fetching aanvraag:', aanvraagError)
+      throw new Error(`Aanvraag niet gevonden: ${aanvraagError?.message || 'Unknown error'}`)
+    }
+
+    // Extract data
+    const verbruikData = aanvraag.verbruik_data
+    const gegevensData = aanvraag.gegevens_data
+
+    // Get klant naam
+    const klantNaam = gegevensData?.bedrijfsnaam || 
+                      `${gegevensData?.aanhef === 'dhr' ? 'Dhr.' : 'Mevr.'} ${gegevensData?.voornaam || ''} ${gegevensData?.achternaam || ''}`.trim() ||
+                      gegevensData?.achternaam ||
+                      'Klant'
+
+    // Get email and phone
+    const klantEmail = gegevensData?.emailadres || gegevensData?.email || ''
+    const klantTelefoon = gegevensData?.telefoonnummer || gegevensData?.telefoon || undefined
+
+    // Get address from verbruik_data (first leveringsadres)
+    const leveringsadres = verbruikData?.leveringsadressen?.[0] || {}
+    const adres = {
+      straat: leveringsadres.straat || '',
+      huisnummer: leveringsadres.huisnummer || '',
+      toevoeging: leveringsadres.toevoeging || undefined,
+      postcode: leveringsadres.postcode || '',
+      plaats: leveringsadres.plaats || '',
+    }
+
+    // Get verbruik
+    const elektriciteitNormaal = verbruikData?.elektriciteitNormaal || 0
+    const elektriciteitDal = verbruikData?.elektriciteitDal || 0
+    const elektriciteitTotaal = elektriciteitNormaal + elektriciteitDal
+    const heeftEnkeleMeter = verbruikData?.heeftEnkeleMeter || false
+    const gasJaar = verbruikData?.gasJaar || verbruikData?.gas || 0
+    
+    const verbruik = {
+      elektriciteitNormaal: heeftEnkeleMeter ? undefined : elektriciteitNormaal,
+      elektriciteitDal: heeftEnkeleMeter ? undefined : (verbruikData?.elektriciteitDal || null),
+      elektriciteitTotaal,
+      heeftEnkeleMeter,
+      gas: gasJaar,
+    }
+
+    // Get aansluitwaarden
+    const aansluitwaarden = {
+      elektriciteit: verbruikData?.aansluitwaardeElektriciteit || 'Onbekend',
+      gas: verbruikData?.aansluitwaardeGas || 'Onbekend',
+    }
+
+    // Get maandbedrag/jaarbedrag
+    const isZakelijk = verbruikData?.addressType === 'zakelijk'
+    let maandbedrag = verbruikData?.maandbedrag || 0
+    let jaarbedrag = verbruikData?.jaarbedrag || 0
+
+    // Base URL
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
+    const adminUrl = `${baseUrl}/admin/aanvragen/${aanvraagId}`
+
+    // Generate email HTML
+    const emailData: EmailInterneNotificatieData = {
+      aanvraagnummer,
+      aanvraagType: aanvraag.aanvraag_type as 'particulier' | 'zakelijk',
+      contractNaam: aanvraag.contract_naam,
+      leverancierNaam: aanvraag.leverancier_naam,
+      klantNaam,
+      klantEmail,
+      klantTelefoon,
+      adres,
+      verbruik,
+      aansluitwaarden,
+      maandbedrag,
+      jaarbedrag,
+      isZakelijk,
+      adminUrl,
+      baseUrl,
+    }
+
+    let emailHtml: string
+    try {
+      emailHtml = generateInterneNotificatieEmail(emailData)
+    } catch (htmlError: any) {
+      console.error('❌ [sendInterneNotificatieEmail] Error generating email HTML:', htmlError)
+      throw new Error(`Fout bij genereren email HTML: ${htmlError.message}`)
+    }
+
+    // Initialize Resend
+    const resend = new Resend(process.env.RESEND_API_KEY)
+
+    // Send email to info@pakketadvies.nl
+    const toEmail = 'info@pakketadvies.nl'
+    console.log('📧 [sendInterneNotificatieEmail] Sending email via Resend to:', toEmail)
+    
+    const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
+      .trim()
+      .replace(/^["']|["']$/g, '') // Remove quotes
+
+    let emailResult: any
+    let emailError: any
+    
+    try {
+      const result = await resend.emails.send({
+        from: fromEmail,
+        to: toEmail,
+        subject: `🔔 Nieuwe contractaanvraag: ${aanvraagnummer} - ${klantNaam}`,
+        html: emailHtml,
+      })
+      emailResult = result.data
+      emailError = result.error
+    } catch (sendError: any) {
+      console.error('❌ [sendInterneNotificatieEmail] Exception during Resend send:', {
+        message: sendError.message,
+        stack: sendError.stack,
+        name: sendError.name,
+      })
+      throw sendError
+    }
+
+    if (emailError) {
+      console.error('❌ [sendInterneNotificatieEmail] Error sending email via Resend:', {
+        error: emailError,
+        message: emailError?.message,
+        name: emailError?.name,
+      })
+      throw new Error(`Fout bij verzenden email: ${emailError.message || 'Unknown error'}`)
+    }
+
+    console.log('✅ [sendInterneNotificatieEmail] Email sent successfully, ID:', emailResult?.id)
+    return { success: true, emailId: emailResult?.id }
+  } catch (error: any) {
+    console.error('❌ [sendInterneNotificatieEmail] Unexpected error:', error)
     throw error
   }
 }

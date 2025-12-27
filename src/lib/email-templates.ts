@@ -803,6 +803,217 @@ export function generateReviewRequestEmail(data: ReviewRequestEmailData): string
 
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
 
+export interface EmailInterneNotificatieData {
+  aanvraagnummer: string
+  aanvraagType: 'particulier' | 'zakelijk'
+  contractNaam: string
+  leverancierNaam: string
+  klantNaam: string
+  klantEmail: string
+  klantTelefoon?: string
+  adres: {
+    straat: string
+    huisnummer: string
+    toevoeging?: string
+    postcode: string
+    plaats: string
+  }
+  verbruik: {
+    elektriciteitNormaal?: number
+    elektriciteitDal?: number | null
+    elektriciteitTotaal: number
+    heeftEnkeleMeter?: boolean
+    gas: number
+  }
+  aansluitwaarden: {
+    elektriciteit: string
+    gas: string
+  }
+  maandbedrag: number
+  jaarbedrag: number
+  isZakelijk?: boolean
+  adminUrl: string
+  baseUrl: string
+}
+
+/**
+ * Generate the HTML email template for internal notification (to info@pakketadvies.nl)
+ */
+export function generateInterneNotificatieEmail(data: EmailInterneNotificatieData): string {
+  const {
+    aanvraagnummer,
+    aanvraagType,
+    contractNaam,
+    leverancierNaam,
+    klantNaam,
+    klantEmail,
+    klantTelefoon,
+    adres,
+    verbruik,
+    aansluitwaarden,
+    maandbedrag,
+    jaarbedrag,
+    isZakelijk = false,
+    adminUrl,
+    baseUrl,
+  } = data
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('nl-NL', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+  const btwLabel = isZakelijk ? 'excl. BTW' : 'incl. BTW'
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nieuwe contractaanvraag - ${aanvraagnummer}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  
+  <!-- Main Container -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
+
+          <!-- Alert Header -->
+          <tr>
+            <td style="background: #FEF3C7; padding: 20px; text-align: center; border-top: 4px solid #F59E0B;">
+              <h1 style="color: #92400E; font-size: 24px; margin: 0; font-weight: bold;">🔔 Nieuwe Contractaanvraag</h1>
+              <p style="color: #92400E; font-size: 16px; margin: 10px 0 0 0; font-weight: 600;">${aanvraagnummer}</p>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px; background: white;">
+              
+              <!-- Contract Info -->
+              <div style="background: #F0FDFA; border-left: 4px solid #14B8A6; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Contract Details</h2>
+                <table width="100%" cellpadding="5" cellspacing="0" style="color: #64748B; font-size: 14px;">
+                  <tr>
+                    <td style="width: 40%; font-weight: 600; color: #0F4C75;">Contract:</td>
+                    <td>${contractNaam}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Leverancier:</td>
+                    <td>${leverancierNaam}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Type:</td>
+                    <td><span style="text-transform: capitalize;">${aanvraagType}</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Maandbedrag:</td>
+                    <td><strong style="color: #0F4C75; font-size: 16px;">${formatCurrency(maandbedrag)} ${btwLabel}</strong></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Jaarbedrag:</td>
+                    <td><strong style="color: #0F4C75; font-size: 16px;">${formatCurrency(jaarbedrag)} ${btwLabel}</strong></td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Klantgegevens -->
+              <div style="background: #F8FAFC; border-left: 4px solid #0F4C75; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Klantgegevens</h2>
+                <table width="100%" cellpadding="5" cellspacing="0" style="color: #64748B; font-size: 14px;">
+                  <tr>
+                    <td style="width: 40%; font-weight: 600; color: #0F4C75;">Naam:</td>
+                    <td>${klantNaam}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Email:</td>
+                    <td><a href="mailto:${klantEmail}" style="color: #14B8A6; text-decoration: none;">${klantEmail}</a></td>
+                  </tr>
+                  ${klantTelefoon ? `
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Telefoon:</td>
+                    <td><a href="tel:${klantTelefoon}" style="color: #14B8A6; text-decoration: none;">${klantTelefoon}</a></td>
+                  </tr>
+                  ` : ''}
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Adres:</td>
+                    <td>${adres.straat} ${adres.huisnummer}${adres.toevoeging ? ' ' + adres.toevoeging : ''}<br>${adres.postcode} ${adres.plaats}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Verbruik -->
+              <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                <h2 style="color: #0F4C75; font-size: 20px; margin: 0 0 15px 0; font-weight: bold;">Verbruik</h2>
+                <table width="100%" cellpadding="5" cellspacing="0" style="color: #64748B; font-size: 14px;">
+                  <tr>
+                    <td style="width: 40%; font-weight: 600; color: #0F4C75;">Elektriciteit:</td>
+                    <td>${verbruik.elektriciteitTotaal.toLocaleString('nl-NL')} kWh/jaar${verbruik.heeftEnkeleMeter ? ' (enkele meter)' : verbruik.elektriciteitDal ? ` (${verbruik.elektriciteitNormaal?.toLocaleString('nl-NL')} normaal / ${verbruik.elektriciteitDal?.toLocaleString('nl-NL')} dal)` : ''}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Gas:</td>
+                    <td>${verbruik.gas.toLocaleString('nl-NL')} m³/jaar</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #0F4C75;">Aansluitwaarde:</td>
+                    <td>${aansluitwaarden.elektriciteit} / ${aansluitwaarden.gas}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Action Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${adminUrl}" style="display: inline-block; background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); color: #FFFFFF; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
+                      Bekijk Aanvraag in Admin
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #64748B; font-size: 14px; margin: 30px 0 0 0; text-align: center; line-height: 1.6;">
+                Deze email is automatisch gegenereerd bij het aanmaken van een nieuwe contractaanvraag.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: #F8FAFC; padding: 30px 20px; text-align: center; border-top: 1px solid #E2E8F0;">
+              <p style="color: #94A3B8; font-size: 12px; margin: 0; line-height: 1.6;">
+                PakketAdvies - Energieadvies op maat<br>
+                <a href="${baseUrl}" style="color: #14B8A6; text-decoration: none;">${baseUrl}</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `
+}
+
   return `
 <!DOCTYPE html>
 <html lang="nl">
