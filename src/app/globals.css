@@ -568,9 +568,12 @@ select:focus {
    PAGE TRANSITIONS - CSS View Transitions API
    ============================================ */
 
-/* Enable View Transitions API for automatic page transitions */
+/* Enable View Transitions API, but NOT automatic navigation transitions
+ * We use programmatic transitions via startViewTransition() for full control
+ * This prevents automatic transitions on state updates (like setVerbruik)
+ */
 @view-transition {
-  navigation: auto;
+  navigation: none; /* Changed from 'auto' to 'none' - we control transitions manually */
 }
 
 /* Base transition timing */
