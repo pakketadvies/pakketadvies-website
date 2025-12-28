@@ -50,11 +50,14 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const [transitionStage, setTransitionStage] = useState<'enter' | 'exit'>('enter')
   const [useFallback, setUseFallback] = useState(true) // Start with true, check on mount
   const prevPathnameRef = useRef<string>(pathname)
+  const useFallbackRef = useRef<boolean>(true) // Use ref to avoid effect re-triggers
 
   // Check if we should use fallback on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setUseFallback(!supportsViewTransitions())
+      const supports = !supportsViewTransitions()
+      setUseFallback(supports)
+      useFallbackRef.current = supports
     }
   }, [])
 
@@ -63,6 +66,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   useEffect(() => {
     const pathnameChanged = prevPathnameRef.current !== pathname
     const childrenChanged = displayChildren !== children
+    const currentUseFallback = useFallbackRef.current
 
     // Logging to identify the problem
     logToAdmin('info', 'PageTransition effect triggered', {
@@ -70,37 +74,43 @@ export function PageTransition({ children }: { children: ReactNode }) {
       prevPathname: prevPathnameRef.current,
       pathnameChanged,
       childrenChanged,
-      useFallback,
+      useFallback: currentUseFallback,
       transitionStage,
     })
 
-    if (!useFallback) {
-      // View Transitions API handles the transition automatically
-      // Just update children when pathname changes
-      if (pathnameChanged) {
-        logToAdmin('info', 'View Transitions: pathname changed, updating children', {
-          from: prevPathnameRef.current,
-          to: pathname,
+    // CRITICAL: Only trigger transition if pathname actually changed
+    // Ignore children changes that happen without pathname change
+    if (!pathnameChanged) {
+      // Pathname didn't change - just update children silently (no transition)
+      if (childrenChanged) {
+        logToAdmin('warn', 'PageTransition: children changed but pathname did not - NO TRANSITION', {
+          pathname,
+          reason: 'State update likely caused re-render',
         })
-        setDisplayChildren(children)
-        prevPathnameRef.current = pathname
-      } else {
-        // Pathname didn't change, just update children silently (no transition)
-        if (childrenChanged) {
-          logToAdmin('warn', 'View Transitions: children changed but pathname did not', {
-            pathname,
-            reason: 'State update likely caused re-render',
-          })
-        }
+        // Still update children, but without transition
         setDisplayChildren(children)
       }
       return
     }
 
-    // Fallback: Manual transition management
-    if (pathnameChanged) {
-      // Pathname changed - trigger transition
-      logToAdmin('info', 'Fallback: pathname changed, triggering transition', {
+    // Pathname changed - this is a real navigation, trigger transition
+    logToAdmin('info', 'PageTransition: pathname changed, triggering transition', {
+      from: prevPathnameRef.current,
+      to: pathname,
+      useFallback: currentUseFallback,
+    })
+
+    if (!currentUseFallback) {
+      // View Transitions API handles the transition automatically
+      logToAdmin('info', 'View Transitions: pathname changed, updating children', {
+        from: prevPathnameRef.current,
+        to: pathname,
+      })
+      setDisplayChildren(children)
+      prevPathnameRef.current = pathname
+    } else {
+      // Fallback: Manual transition management
+      logToAdmin('info', 'Fallback: pathname changed, triggering manual transition', {
         from: prevPathnameRef.current,
         to: pathname,
       })
@@ -114,17 +124,12 @@ export function PageTransition({ children }: { children: ReactNode }) {
         prevPathnameRef.current = pathname
       }, 250) // Match exit duration
       return () => clearTimeout(timer)
-    } else {
-      // Pathname didn't change - just update children silently (no transition)
-      if (childrenChanged) {
-        logToAdmin('warn', 'Fallback: children changed but pathname did not - NO TRANSITION', {
-          pathname,
-          reason: 'State update likely caused re-render',
-        })
-      }
-      setDisplayChildren(children)
     }
-  }, [pathname, children, useFallback, displayChildren, transitionStage])
+    // CRITICAL FIX: Only depend on pathname and children
+    // Don't include useFallback, displayChildren, or transitionStage in deps
+    // This prevents the effect from re-running when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, children])
 
   // If View Transitions API is supported, render children directly
   // The browser will handle the transition automatically via CSS
