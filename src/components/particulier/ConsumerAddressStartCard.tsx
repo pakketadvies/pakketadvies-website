@@ -355,19 +355,22 @@ export function ConsumerAddressStartCard({
         hasEstimate: !!withEstimate,
       })
       
-      setVerbruik(withEstimate)
-      
-      logToAdmin('info', 'handleSubmit: Desktop - setVerbruik called, about to call startViewTransition', {
-        RESULTS_PATH,
-        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-      })
-      
-      // Use view transition for smooth navigation
+      // CRITICAL FIX: Call setVerbruik INSIDE the startViewTransition callback
+      // This prevents the state update from triggering a View Transition on the current page
       startViewTransition(() => {
-        logToAdmin('info', 'handleSubmit: Desktop - Inside startViewTransition callback, calling router.push to RESULTS_PATH', {
+        logToAdmin('info', 'handleSubmit: Desktop - Inside startViewTransition callback, calling setVerbruik and router.push', {
           RESULTS_PATH,
           currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
         })
+        
+        // Set verbruik INSIDE the transition callback, so it happens during the transition
+        setVerbruik(withEstimate)
+        
+        logToAdmin('info', 'handleSubmit: Desktop - setVerbruik called inside callback, now calling router.push', {
+          RESULTS_PATH,
+          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+        })
+        
         router.push(RESULTS_PATH)
       })
       
@@ -385,19 +388,23 @@ export function ConsumerAddressStartCard({
       hasSeed: !!seed,
     })
     
-    setVerbruik(seed)
-    
-    logToAdmin('info', 'handleSubmit: setVerbruik called, about to call startViewTransition', {
-      nextHref,
-      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-    })
-    
-    // Use view transition for smooth navigation
+    // CRITICAL FIX: Call setVerbruik INSIDE the startViewTransition callback
+    // This prevents the state update from triggering a View Transition on the current page
+    // The View Transition will only happen when router.push is called
     startViewTransition(() => {
-      logToAdmin('info', 'handleSubmit: Inside startViewTransition callback, calling router.push', {
+      logToAdmin('info', 'handleSubmit: Inside startViewTransition callback, calling setVerbruik and router.push', {
         nextHref,
         currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
       })
+      
+      // Set verbruik INSIDE the transition callback, so it happens during the transition
+      setVerbruik(seed)
+      
+      logToAdmin('info', 'handleSubmit: setVerbruik called inside callback, now calling router.push', {
+        nextHref,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      })
+      
       router.push(nextHref)
     })
     
