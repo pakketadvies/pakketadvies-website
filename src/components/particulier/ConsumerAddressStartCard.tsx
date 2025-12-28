@@ -355,28 +355,20 @@ export function ConsumerAddressStartCard({
         hasEstimate: !!withEstimate,
       })
       
-      // CRITICAL FIX: Call setVerbruik INSIDE the startViewTransition callback
-      // This prevents the state update from triggering a View Transition on the current page
-      startViewTransition(() => {
-        logToAdmin('info', 'handleSubmit: Desktop - Inside startViewTransition callback, calling setVerbruik and router.push', {
-          RESULTS_PATH,
-          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-        })
-        
-        // Set verbruik INSIDE the transition callback, so it happens during the transition
-        setVerbruik(withEstimate)
-        
-        logToAdmin('info', 'handleSubmit: Desktop - setVerbruik called inside callback, now calling router.push', {
-          RESULTS_PATH,
-          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-        })
-        
-        router.push(RESULTS_PATH)
+      // CRITICAL FIX: Don't use View Transitions API for this navigation
+      // The View Transitions API triggers on DOM updates, and setVerbruik causes a re-render
+      // which triggers a transition of the current page before navigation
+      // Instead, set verbruik first, then navigate normally (fallback CSS transitions will handle it)
+      setVerbruik(withEstimate)
+      
+      logToAdmin('info', 'handleSubmit: Desktop - setVerbruik called, now navigating WITHOUT View Transitions API', {
+        RESULTS_PATH,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
       })
       
-      logToAdmin('info', 'handleSubmit: Desktop - startViewTransition called (async, may not have executed yet)', {
-        RESULTS_PATH,
-      })
+      // Navigate without View Transitions API - the fallback CSS transitions will handle it
+      // This prevents the double slide issue
+      router.push(RESULTS_PATH)
       
       return
     }
@@ -388,29 +380,20 @@ export function ConsumerAddressStartCard({
       hasSeed: !!seed,
     })
     
-    // CRITICAL FIX: Call setVerbruik INSIDE the startViewTransition callback
-    // This prevents the state update from triggering a View Transition on the current page
-    // The View Transition will only happen when router.push is called
-    startViewTransition(() => {
-      logToAdmin('info', 'handleSubmit: Inside startViewTransition callback, calling setVerbruik and router.push', {
-        nextHref,
-        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-      })
-      
-      // Set verbruik INSIDE the transition callback, so it happens during the transition
-      setVerbruik(seed)
-      
-      logToAdmin('info', 'handleSubmit: setVerbruik called inside callback, now calling router.push', {
-        nextHref,
-        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-      })
-      
-      router.push(nextHref)
+    // CRITICAL FIX: Don't use View Transitions API for this navigation
+    // The View Transitions API triggers on DOM updates, and setVerbruik causes a re-render
+    // which triggers a transition of the current page before navigation
+    // Instead, set verbruik first, then navigate normally (fallback CSS transitions will handle it)
+    setVerbruik(seed)
+    
+    logToAdmin('info', 'handleSubmit: setVerbruik called, now navigating WITHOUT View Transitions API', {
+      nextHref,
+      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
     })
     
-    logToAdmin('info', 'handleSubmit: startViewTransition called (async, may not have executed yet)', {
-      nextHref,
-    })
+    // Navigate without View Transitions API - the fallback CSS transitions will handle it
+    // This prevents the double slide issue
+    router.push(nextHref)
   }
 
   const shell =
