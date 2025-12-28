@@ -355,20 +355,31 @@ export function ConsumerAddressStartCard({
         hasEstimate: !!withEstimate,
       })
       
-      // CRITICAL FIX: Don't use View Transitions API for this navigation
-      // The View Transitions API triggers on DOM updates, and setVerbruik causes a re-render
-      // which triggers a transition of the current page before navigation
-      // Instead, set verbruik first, then navigate normally (fallback CSS transitions will handle it)
-      setVerbruik(withEstimate)
-      
-      logToAdmin('info', 'handleSubmit: Desktop - setVerbruik called, now navigating WITHOUT View Transitions API', {
-        RESULTS_PATH,
-        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      // CRITICAL FIX: Call router.push FIRST, then setVerbruik AFTER navigation starts
+      // This prevents setVerbruik from causing a re-render that triggers a transition on the current page
+      startViewTransition(() => {
+        logToAdmin('info', 'handleSubmit: Desktop - Inside startViewTransition callback, calling router.push FIRST', {
+          RESULTS_PATH,
+          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+        })
+        
+        // Navigate FIRST - this starts the transition
+        router.push(RESULTS_PATH)
+        
+        // Then set verbruik AFTER navigation has started
+        // Use setTimeout to ensure it happens after the navigation is initiated
+        setTimeout(() => {
+          logToAdmin('info', 'handleSubmit: Desktop - Navigation started, now calling setVerbruik', {
+            RESULTS_PATH,
+            currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+          })
+          setVerbruik(withEstimate)
+        }, 0) // Use 0ms timeout to defer to next event loop tick
       })
       
-      // Navigate without View Transitions API - the fallback CSS transitions will handle it
-      // This prevents the double slide issue
-      router.push(RESULTS_PATH)
+      logToAdmin('info', 'handleSubmit: Desktop - startViewTransition called (async, may not have executed yet)', {
+        RESULTS_PATH,
+      })
       
       return
     }
@@ -380,20 +391,33 @@ export function ConsumerAddressStartCard({
       hasSeed: !!seed,
     })
     
-    // CRITICAL FIX: Don't use View Transitions API for this navigation
-    // The View Transitions API triggers on DOM updates, and setVerbruik causes a re-render
-    // which triggers a transition of the current page before navigation
-    // Instead, set verbruik first, then navigate normally (fallback CSS transitions will handle it)
-    setVerbruik(seed)
-    
-    logToAdmin('info', 'handleSubmit: setVerbruik called, now navigating WITHOUT View Transitions API', {
-      nextHref,
-      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+    // CRITICAL FIX: Call router.push FIRST, then setVerbruik AFTER navigation starts
+    // This prevents setVerbruik from causing a re-render that triggers a transition on the current page
+    // On iPhone (Safari), this is especially important because it uses the fallback CSS transitions
+    startViewTransition(() => {
+      logToAdmin('info', 'handleSubmit: Inside startViewTransition callback, calling router.push FIRST', {
+        nextHref,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      })
+      
+      // Navigate FIRST - this starts the transition
+      router.push(nextHref)
+      
+      // Then set verbruik AFTER navigation has started
+      // Use setTimeout to ensure it happens after the navigation is initiated
+      // This prevents the re-render from interfering with the transition
+      setTimeout(() => {
+        logToAdmin('info', 'handleSubmit: Navigation started, now calling setVerbruik', {
+          nextHref,
+          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+        })
+        setVerbruik(seed)
+      }, 0) // Use 0ms timeout to defer to next event loop tick
     })
     
-    // Navigate without View Transitions API - the fallback CSS transitions will handle it
-    // This prevents the double slide issue
-    router.push(nextHref)
+    logToAdmin('info', 'handleSubmit: startViewTransition called (async, may not have executed yet)', {
+      nextHref,
+    })
   }
 
   const shell =

@@ -51,6 +51,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const [useFallback, setUseFallback] = useState(true) // Start with true, check on mount
   const prevPathnameRef = useRef<string>(pathname)
   const useFallbackRef = useRef<boolean>(true) // Use ref to avoid effect re-triggers
+  const isTransitioningRef = useRef<boolean>(false) // Track if we're currently transitioning
 
   // Check if we should use fallback on mount
   useEffect(() => {
@@ -86,9 +87,13 @@ export function PageTransition({ children }: { children: ReactNode }) {
         logToAdmin('warn', 'PageTransition: children changed but pathname did not - NO TRANSITION', {
           pathname,
           reason: 'State update likely caused re-render',
+          isTransitioning: isTransitioningRef.current,
         })
-        // Still update children, but without transition
-        setDisplayChildren(children)
+        // CRITICAL: If we're already transitioning, don't update children yet
+        // This prevents the double slide on iPhone
+        if (!isTransitioningRef.current) {
+          setDisplayChildren(children)
+        }
       }
       return
     }
@@ -98,6 +103,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
       from: prevPathnameRef.current,
       to: pathname,
       useFallback: currentUseFallback,
+      isTransitioning: isTransitioningRef.current,
     })
 
     if (!currentUseFallback) {
@@ -110,6 +116,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
       prevPathnameRef.current = pathname
     } else {
       // Fallback: Manual transition management
+      // CRITICAL: Set transitioning flag to prevent other updates during transition
+      isTransitioningRef.current = true
+      
       logToAdmin('info', 'Fallback: pathname changed, triggering manual transition', {
         from: prevPathnameRef.current,
         to: pathname,
@@ -122,8 +131,16 @@ export function PageTransition({ children }: { children: ReactNode }) {
         setDisplayChildren(children)
         setTransitionStage('enter')
         prevPathnameRef.current = pathname
+        
+        // Clear transitioning flag after transition completes
+        setTimeout(() => {
+          isTransitioningRef.current = false
+        }, 300) // Slightly longer than transition duration
       }, 250) // Match exit duration
-      return () => clearTimeout(timer)
+      return () => {
+        clearTimeout(timer)
+        isTransitioningRef.current = false
+      }
     }
     // CRITICAL FIX: Only depend on pathname and children
     // Don't include useFallback, displayChildren, or transitionStage in deps
