@@ -8,6 +8,33 @@ import type { VerbruikData } from '@/types/calculator'
 import { estimateConsumerUsage } from '@/lib/particulier-verbruik-schatting'
 import { startViewTransition } from '@/lib/view-transitions'
 
+/**
+ * Send log to debug-logs API
+ */
+async function logToAdmin(level: string, message: string, data?: any) {
+  try {
+    await fetch('/api/debug-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        level,
+        message,
+        data: {
+          ...data,
+          component: 'ConsumerAddressStartCard',
+          timestamp: new Date().toISOString(),
+        },
+        url: typeof window !== 'undefined' ? window.location.href : 'SSR',
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR',
+        timestamp: new Date().toISOString(),
+      }),
+    })
+  } catch (error) {
+    // Silently fail - logging is non-critical
+    console.error('[ConsumerAddressStartCard] Failed to send log:', error)
+  }
+}
+
 type AddressTypeResult =
   | {
       type: 'particulier' | 'zakelijk'
@@ -322,19 +349,60 @@ export function ConsumerAddressStartCard({
         geschat: true,
       }
 
+      logToAdmin('info', 'handleSubmit: Desktop - About to call setVerbruik and router.push to RESULTS_PATH', {
+        RESULTS_PATH,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+        hasEstimate: !!withEstimate,
+      })
+      
       setVerbruik(withEstimate)
+      
+      logToAdmin('info', 'handleSubmit: Desktop - setVerbruik called, about to call startViewTransition', {
+        RESULTS_PATH,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      })
+      
       // Use view transition for smooth navigation
       startViewTransition(() => {
+        logToAdmin('info', 'handleSubmit: Desktop - Inside startViewTransition callback, calling router.push to RESULTS_PATH', {
+          RESULTS_PATH,
+          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+        })
         router.push(RESULTS_PATH)
       })
+      
+      logToAdmin('info', 'handleSubmit: Desktop - startViewTransition called (async, may not have executed yet)', {
+        RESULTS_PATH,
+      })
+      
       return
     }
 
     // Mobile (and inline usage): keep the next step where the user can enter their exact usage.
+    logToAdmin('info', 'handleSubmit: About to call setVerbruik and router.push', {
+      nextHref,
+      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      hasSeed: !!seed,
+    })
+    
     setVerbruik(seed)
+    
+    logToAdmin('info', 'handleSubmit: setVerbruik called, about to call startViewTransition', {
+      nextHref,
+      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+    })
+    
     // Use view transition for smooth navigation
     startViewTransition(() => {
+      logToAdmin('info', 'handleSubmit: Inside startViewTransition callback, calling router.push', {
+        nextHref,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      })
       router.push(nextHref)
+    })
+    
+    logToAdmin('info', 'handleSubmit: startViewTransition called (async, may not have executed yet)', {
+      nextHref,
     })
   }
 
