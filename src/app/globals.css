@@ -563,3 +563,136 @@ select:focus {
 .success-checkmark {
   animation: checkmark-scale 300ms ease-out;
 }
+
+/* ============================================
+   PAGE TRANSITIONS - CSS View Transitions API
+   ============================================ */
+
+/* Enable View Transitions API for automatic page transitions */
+@view-transition {
+  navigation: auto;
+}
+
+/* Base transition timing */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile: Native app-style slide from right */
+@media (max-width: 768px) {
+  ::view-transition-old(root) {
+    animation-name: slide-out-left;
+  }
+  ::view-transition-new(root) {
+    animation-name: slide-in-right;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-out-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Desktop: Subtle fade + slide */
+@media (min-width: 769px) {
+  ::view-transition-old(root) {
+    animation-name: fade-out-left;
+  }
+  ::view-transition-new(root) {
+    animation-name: fade-in-right;
+  }
+}
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+@keyframes fade-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* ============================================
+   FALLBACK: Custom CSS Transitions
+   (For browsers without View Transitions support)
+   ============================================ */
+
+.page-transition-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.page-transition-enter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+/* Desktop: Subtler transitions */
+@media (min-width: 769px) {
+  .page-transition-enter {
+    transform: translateX(30px);
+  }
+  .page-transition-exit-active {
+    transform: translateX(-30px);
+  }
+}
+
+/* Respect prefers-reduced-motion for fallback */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter,
+  .page-transition-enter-active,
+  .page-transition-exit,
+  .page-transition-exit-active {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

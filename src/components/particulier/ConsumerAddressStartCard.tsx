@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
 import { estimateConsumerUsage } from '@/lib/particulier-verbruik-schatting'
+import { startViewTransition } from '@/lib/view-transitions'
 
 type AddressTypeResult =
   | {
@@ -322,13 +323,19 @@ export function ConsumerAddressStartCard({
       }
 
       setVerbruik(withEstimate)
-      router.push(RESULTS_PATH)
+      // Use view transition for smooth navigation
+      startViewTransition(() => {
+        router.push(RESULTS_PATH)
+      })
       return
     }
 
     // Mobile (and inline usage): keep the next step where the user can enter their exact usage.
     setVerbruik(seed)
-    router.push(nextHref)
+    // Use view transition for smooth navigation
+    startViewTransition(() => {
+      router.push(nextHref)
+    })
   }
 
   const shell =

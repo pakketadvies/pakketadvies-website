@@ -93,10 +93,17 @@ export function SiteMenuDrawer({
   // Keep mounted for exit animation
   useEffect(() => {
     if (isOpen) {
+      // Always reset visible to false first to ensure transition can restart
+      setVisible(false)
       setMounted(true)
-      // Next tick → animate in
-      const t = setTimeout(() => setVisible(true), 10)
-      return () => clearTimeout(t)
+      // Next tick → animate in (use requestAnimationFrame for smoother animation)
+      const rafId = requestAnimationFrame(() => {
+        const t = setTimeout(() => setVisible(true), 16) // ~1 frame delay
+        return () => clearTimeout(t)
+      })
+      return () => {
+        cancelAnimationFrame(rafId)
+      }
     }
 
     // Animate out

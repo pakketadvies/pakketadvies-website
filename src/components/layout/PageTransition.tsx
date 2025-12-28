@@ -1,63 +1,69 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { ReactNode, useEffect } from 'react'
+import { useEffect, useState, ReactNode } from 'react'
+import { supportsViewTransitions } from '@/lib/view-transitions'
 
-const pageVariants = {
-  initial: {
-    opacity: 0,
-    x: 100, // Start van rechts
-  },
-  animate: {
-    opacity: 1,
-    x: 0, // Eindpositie
-    transition: {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1] as const, // Custom easing voor soepele, natuurlijke beweging
-    },
-  },
-  exit: {
-    opacity: 0,
-    x: -100, // Gaat naar links weg
-    transition: {
-      duration: 0.3,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  },
-}
-
-interface PageTransitionProps {
-  children: ReactNode
-}
-
-export function PageTransition({ children }: PageTransitionProps) {
+/**
+ * PageTransition component
+ * 
+ * Provides smooth page transitions using:
+ * 1. CSS View Transitions API (if supported) - zero JS, native browser optimization
+ * 2. Custom CSS fallback (for browsers without View Transitions support)
+ * 
+ * Mobile: Slide from right (native app feel)
+ * Desktop: Subtle fade + slide
+ */
+export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const [displayChildren, setDisplayChildren] = useState(children)
+  const [transitionStage, setTransitionStage] = useState<'enter' | 'exit'>('enter')
+  const [useFallback, setUseFallback] = useState(true) // Start with true, check on mount
 
-  // Scroll naar top bij route change (na animatie start)
+  // Check if we should use fallback on mount
   useEffect(() => {
-    // Kleine delay om smooth scroll te voorkomen tijdens transitie
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' })
-    }, 50)
+    if (typeof window !== 'undefined') {
+      setUseFallback(!supportsViewTransitions())
+    }
+  }, [])
 
-    return () => clearTimeout(timer)
-  }, [pathname])
+  // If View Transitions API is supported, let the browser handle it
+  // We just need to update children on pathname change
+  useEffect(() => {
+    if (!useFallback) {
+      // View Transitions API handles the transition automatically
+      // Just update children immediately
+      setDisplayChildren(children)
+      return
+    }
 
+    // Fallback: Manual transition management
+    if (children !== displayChildren) {
+      setTransitionStage('exit')
+      const timer = setTimeout(() => {
+        setDisplayChildren(children)
+        setTransitionStage('enter')
+      }, 250) // Match exit duration
+      return () => clearTimeout(timer)
+    }
+  }, [children, displayChildren, useFallback, pathname])
+
+  // If View Transitions API is supported, render children directly
+  // The browser will handle the transition automatically via CSS
+  if (!useFallback) {
+    return <>{children}</>
+  }
+
+  // Fallback: Custom CSS transitions for browsers without View Transitions support
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={pathname}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={pageVariants}
-        className="min-h-screen"
-        style={{ willChange: 'transform, opacity' }} // Performance optimalisatie
+    <div className="page-transition-container">
+      <div
+        className={`page-transition-${transitionStage} ${
+          transitionStage === 'enter' ? 'page-transition-enter-active' : 'page-transition-exit-active'
+        }`}
       >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+        {displayChildren}
+      </div>
+    </div>
   )
 }
-
