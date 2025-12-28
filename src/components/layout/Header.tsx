@@ -131,17 +131,22 @@ export function Header() {
                 </button>
               </Link>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button with transform animation */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
-              aria-label="Open menu"
+              className="p-2 rounded-xl hover:bg-gray-100 transition-colors relative w-10 h-10 flex items-center justify-center"
+              aria-label={isMobileMenuOpen ? "Sluit menu" : "Open menu"}
             >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6 text-gray-700" />
-              ) : (
-                <List className="w-6 h-6 text-gray-700" />
-              )}
+              <X 
+                className={`w-6 h-6 text-gray-700 absolute transition-all duration-200 ${
+                  isMobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-0'
+                }`}
+              />
+              <List 
+                className={`w-6 h-6 text-gray-700 absolute transition-all duration-200 ${
+                  isMobileMenuOpen ? 'opacity-0 rotate-90 scale-0' : 'opacity-100 rotate-0 scale-100'
+                }`}
+              />
             </button>
           </div>
             </div>

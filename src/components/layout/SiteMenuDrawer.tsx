@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { X } from '@phosphor-icons/react'
 
 type Audience = 'business' | 'consumer'
@@ -87,7 +87,25 @@ export function SiteMenuDrawer({
     ]
   }, [audience, navLinks])
 
-  if (!isOpen) return null
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+
+  // Keep mounted for exit animation
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true)
+      // Next tick → animate in
+      const t = setTimeout(() => setVisible(true), 10)
+      return () => clearTimeout(t)
+    }
+
+    // Animate out
+    setVisible(false)
+    const t = setTimeout(() => setMounted(false), 300)
+    return () => clearTimeout(t)
+  }, [isOpen])
+
+  if (!mounted) return null
 
   return (
     <div className="fixed inset-0 z-[100]">
@@ -96,7 +114,9 @@ export function SiteMenuDrawer({
         type="button"
         aria-label="Sluit menu"
         onClick={onClose}
-        className="absolute inset-0 bg-black/40"
+        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+          visible ? 'opacity-100' : 'opacity-0'
+        }`}
       />
 
       {/* Panel */}
@@ -105,7 +125,9 @@ export function SiteMenuDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"
-        className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl border-l border-gray-200 flex flex-col"
+        className={`absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl border-l border-gray-200 flex flex-col transition-transform duration-300 ease-out ${
+          visible ? 'translate-x-0' : 'translate-x-full'
+        }`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {/* Header */}

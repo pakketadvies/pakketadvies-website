@@ -276,3 +276,290 @@ select {
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+/* ============================================
+   ENHANCED ANIMATIONS - Performance Optimized
+   ============================================ */
+
+/* Fade-in-up for staggered card animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 300ms ease-out;
+  animation-fill-mode: both;
+}
+
+/* Slide-in from right (for drawers) */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 300ms ease-out;
+}
+
+/* Slide-in from left */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 300ms ease-out;
+}
+
+/* Error message slide-down */
+@keyframes slide-down-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+  }
+}
+
+.animate-slide-down-fade {
+  animation: slide-down-fade 200ms ease-out;
+  overflow: hidden;
+}
+
+/* Success checkmark */
+@keyframes checkmark-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-checkmark {
+  animation: checkmark-scale 300ms ease-out;
+}
+
+/* Skeleton pulse */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.animate-skeleton {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite,
+    skeleton-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Button loading spinner */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Page load fade-in */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-fade-in {
+  animation: page-fade-in 200ms ease-out;
+}
+
+/* Dropdown slide-down */
+@keyframes dropdown-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown-slide 150ms ease-out;
+  transform-origin: top;
+}
+
+/* Tooltip fade + scale */
+@keyframes tooltip-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-tooltip {
+  animation: tooltip-fade 200ms ease-out;
+}
+
+/* Progress bar smooth */
+.progress-bar {
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   PROGRESSIVE ENHANCEMENT - Device Detection
+   ============================================ */
+
+/* Reduced motion - disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Low-end device optimizations */
+.low-end-device .animate-fade-in-up {
+  animation-duration: 150ms;
+  animation-delay: 0ms !important; /* No stagger */
+}
+
+.low-end-device .stagger-animation {
+  animation-delay: 0ms !important;
+}
+
+/* Mid-range device optimizations */
+.mid-range-device .animate-fade-in-up {
+  animation-duration: 250ms;
+}
+
+.mid-range-device .stagger-animation:nth-child(n+6) {
+  animation-delay: 0ms !important; /* Limit to 5 items */
+}
+
+/* High-end and desktop - full animations */
+.high-end-device .animate-fade-in-up,
+.desktop-device .animate-fade-in-up {
+  animation-duration: 300ms;
+}
+
+/* Stagger delays for cards */
+.stagger-animation:nth-child(1) { animation-delay: 0ms; }
+.stagger-animation:nth-child(2) { animation-delay: 50ms; }
+.stagger-animation:nth-child(3) { animation-delay: 100ms; }
+.stagger-animation:nth-child(4) { animation-delay: 150ms; }
+.stagger-animation:nth-child(5) { animation-delay: 200ms; }
+.stagger-animation:nth-child(6) { animation-delay: 250ms; }
+.stagger-animation:nth-child(7) { animation-delay: 300ms; }
+.stagger-animation:nth-child(8) { animation-delay: 350ms; }
+.stagger-animation:nth-child(9) { animation-delay: 400ms; }
+.stagger-animation:nth-child(10) { animation-delay: 450ms; }
+.stagger-animation:nth-child(n+11) { animation-delay: 500ms; }
+
+/* Mid-range: slower stagger */
+.mid-range-device .stagger-animation:nth-child(2) { animation-delay: 75ms; }
+.mid-range-device .stagger-animation:nth-child(3) { animation-delay: 150ms; }
+.mid-range-device .stagger-animation:nth-child(4) { animation-delay: 225ms; }
+.mid-range-device .stagger-animation:nth-child(5) { animation-delay: 300ms; }
+
+/* Scroll-triggered animation class */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.scroll-animate.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Disable scroll animations on low-end devices */
+.low-end-device .scroll-animate {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* Dropdown/Select focus animation */
+select:focus {
+  transform: scale(1.01);
+  transition: transform 150ms ease-out;
+}
+
+/* Success checkmark animation */
+.success-checkmark {
+  animation: checkmark-scale 300ms ease-out;
+}

@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { useScrollAnimations } from '@/lib/scroll-animations'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -52,6 +53,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [pathname])
+
+  // Initialize scroll-triggered animations
+  useEffect(() => {
+    return useScrollAnimations()
+  }, [])
   
   // Check if we're on an admin route
   const isAdminRoute = pathname?.startsWith('/admin')
@@ -61,11 +67,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
   
-  // Regular routes: include header and footer, no page transitions
+  // Regular routes: include header and footer, with page fade-in
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main className="page-fade-in">{children}</main>
       <Footer />
     </>
   )

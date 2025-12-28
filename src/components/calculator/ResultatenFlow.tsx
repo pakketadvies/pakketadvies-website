@@ -889,7 +889,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as any)}
-                          className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
+                          className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all animate-dropdown"
                         >
                           <option value="besparing">Hoogste besparing</option>
                           <option value="prijs-laag">Laagste prijs</option>

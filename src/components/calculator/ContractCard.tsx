@@ -201,7 +201,7 @@ export default function ContractCard({
 
   return (
     <Card
-      className={`relative hover:shadow-xl transition-shadow duration-300 ${
+      className={`relative hover:shadow-xl transition-shadow duration-300 stagger-animation animate-fade-in-up ${
         contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
       }`}
     >
