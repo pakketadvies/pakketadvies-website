@@ -61,7 +61,8 @@ export function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
   }
 
   // Validate measurement ID format (G-XXXXXXXXXX)
-  const safeMeasurementId = measurementId.replace(/[^G-0-9A-Z]/gi, '')
+  // Escape hyphen or place it at the end of character class
+  const safeMeasurementId = measurementId.replace(/[^G0-9A-Z-]/gi, '')
 
   if (!safeMeasurementId || !safeMeasurementId.startsWith('G-')) {
     console.error('Invalid Google Analytics Measurement ID:', measurementId)
