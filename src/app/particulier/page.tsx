@@ -51,7 +51,7 @@ export default function ParticulierHomePage() {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="bg-brand-navy-500 text-white py-12 md:py-24 pb-20 md:pb-28 pt-20 md:pt-40 relative overflow-hidden">
+      <section className="bg-brand-navy-500 text-white py-12 md:py-16 pb-20 md:pb-28 pt-24 md:pt-32 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
@@ -71,42 +71,75 @@ export default function ParticulierHomePage() {
         </div>
         
         <div className="container-custom relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 items-center">
-            {/* Mobile: Compact layout with benefit-focused headline */}
-            <div className="lg:hidden">
-              <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
+          {/* Mobile Layout */}
+          <div className="lg:hidden">
+            <div className="text-center mb-6">
+              <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
                 Bespaar tot{' '}
                 <span className="text-brand-teal-400">€500 per jaar</span>
               </h1>
-              <p className="mt-3 text-white/90 text-base leading-relaxed">
+              <p className="text-white/90 text-base md:text-lg leading-relaxed px-4">
                 Vergelijk gratis en vind je beste deal
               </p>
             </div>
 
-            {/* Desktop: Original layout */}
-            <div className="hidden lg:block">
-              <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold">
-                Energie vergelijken voor thuis
-              </p>
-              <h1 className="mt-5 font-display text-5xl font-bold text-white leading-tight">
-                Vind het energiecontract dat bij jou past
-              </h1>
-              <p className="mt-4 text-white/85 text-lg leading-relaxed max-w-xl">
-                Vast, variabel of dynamisch — wij helpen je helder vergelijken, met uitleg die je snapt. In een paar minuten weet je wat verstandig is voor jouw situatie.
-              </p>
-            </div>
+            <ConsumerAddressStartCard />
 
-            <div className="lg:col-start-2">
-              <ConsumerAddressStartCard />
-              
-              {/* Mobile: Extra motivatie onder formulier */}
-              <div className="lg:hidden mt-4 flex items-center justify-center gap-2 text-white/80 text-sm">
-                <svg className="w-4 h-4 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
+            {/* Trust indicators & motivation - Mobile */}
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-center gap-2 text-white/80 text-sm">
+                <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Gratis vergelijken</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-white/80 text-sm">
+                <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
                 <span>In 2 minuten klaar</span>
               </div>
             </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden lg:grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold mb-6">
+                Energie vergelijken voor thuis
+              </p>
+              <h1 className="font-display text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
+                Bespaar tot{' '}
+                <span className="text-brand-teal-400">€500 per jaar</span>
+              </h1>
+              <p className="text-white/90 text-xl leading-relaxed max-w-xl mb-6">
+                Vergelijk gratis en vind je beste deal. Vast, variabel of dynamisch — wij helpen je helder vergelijken, met uitleg die je snapt.
+              </p>
+              
+              {/* Trust indicators - Desktop */}
+              <div className="flex items-center gap-6 text-white/80">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">Gratis vergelijken</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">In 2 minuten klaar</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-brand-teal-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                  </svg>
+                  <span className="text-sm font-medium">2.500+ reviews</span>
+                </div>
+              </div>
+            </div>
+
+            <ConsumerAddressStartCard />
           </div>
         </div>
 
