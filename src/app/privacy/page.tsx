@@ -1,3 +1,5 @@
+'use client'
+
 import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WaveDivider } from '@/components/ui/WaveDivider'
