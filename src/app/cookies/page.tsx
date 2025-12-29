@@ -1,18 +1,9 @@
 'use client'
 
-import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WaveDivider } from '@/components/ui/WaveDivider'
 import { Cookie, ChartBar, ShieldCheck, Gear, Envelope } from '@phosphor-icons/react'
 import Link from 'next/link'
-
-export const metadata: Metadata = {
-  title: 'Cookieverklaring | PakketAdvies',
-  description: 'Lees onze cookieverklaring om te zien welke cookies PakketAdvies gebruikt en waarvoor.',
-  alternates: {
-    canonical: 'https://pakketadvies.nl/cookies',
-  },
-}
 
 export default function CookiesPage() {
   const lastUpdated = '27 december 2024'

@@ -1,18 +1,9 @@
 'use client'
 
-import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WaveDivider } from '@/components/ui/WaveDivider'
 import { FileText, Scales, CheckCircle, Warning, Envelope } from '@phosphor-icons/react'
 import Link from 'next/link'
-
-export const metadata: Metadata = {
-  title: 'Algemene voorwaarden | PakketAdvies',
-  description: 'Lees de algemene voorwaarden van PakketAdvies voor het gebruik van onze diensten en website.',
-  alternates: {
-    canonical: 'https://pakketadvies.nl/algemene-voorwaarden',
-  },
-}
 
 export default function AlgemeneVoorwaardenPage() {
   const lastUpdated = '27 december 2024'

@@ -1,18 +1,9 @@
 'use client'
 
-import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WaveDivider } from '@/components/ui/WaveDivider'
 import { ShieldCheck, Lock, Eye, FileText, Envelope } from '@phosphor-icons/react'
 import Link from 'next/link'
-
-export const metadata: Metadata = {
-  title: 'Privacyverklaring | PakketAdvies',
-  description: 'Lees onze privacyverklaring om te zien hoe PakketAdvies omgaat met uw persoonsgegevens en privacy.',
-  alternates: {
-    canonical: 'https://pakketadvies.nl/privacy',
-  },
-}
 
 export default function PrivacyPage() {
   const lastUpdated = '27 december 2024'
