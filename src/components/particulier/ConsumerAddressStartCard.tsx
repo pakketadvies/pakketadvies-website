@@ -333,19 +333,19 @@ export function ConsumerAddressStartCard({
 
   const shell =
     variant === 'inline'
-      ? 'bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm'
-      : 'bg-white rounded-2xl shadow-2xl p-6 md:p-8 border border-white/30'
+      ? 'bg-white border border-gray-200 rounded-3xl p-4 md:p-6 lg:p-8 shadow-sm'
+      : 'bg-white rounded-2xl shadow-2xl p-4 md:p-6 lg:p-8 border border-white/30'
 
   return (
     <div className={shell}>
-      <h2 className="font-display text-2xl font-bold text-brand-navy-600">{title}</h2>
-      <p className="mt-2 text-gray-600">{description}</p>
+      <h2 className="font-display text-xl md:text-2xl font-bold text-brand-navy-600">{title}</h2>
+      <p className="hidden md:block mt-2 text-gray-600">{description}</p>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="mt-4 md:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
         <div>
-          <label className="text-sm font-semibold text-gray-700">Postcode</label>
+          <label className="text-xs md:text-sm font-semibold text-gray-700">Postcode</label>
           <input
-            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900 bg-white"
+            className="mt-1.5 md:mt-2 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-sm md:text-base text-gray-900 bg-white"
             placeholder="1234AB"
             value={adres.postcode}
             onChange={(e) => handleAddressInputChange('postcode', e.target.value.toUpperCase())}
@@ -353,20 +353,20 @@ export function ConsumerAddressStartCard({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
           <div className="col-span-2">
-            <label className="text-sm font-semibold text-gray-700">Huisnummer</label>
+            <label className="text-xs md:text-sm font-semibold text-gray-700">Huisnummer</label>
             <input
-              className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900 bg-white"
+              className="mt-1.5 md:mt-2 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-sm md:text-base text-gray-900 bg-white"
               placeholder="12"
               value={adres.huisnummer}
               onChange={(e) => handleAddressInputChange('huisnummer', e.target.value)}
             />
           </div>
           <div className="col-span-1">
-            <label className="text-sm font-semibold text-gray-700">Toev.</label>
+            <label className="text-xs md:text-sm font-semibold text-gray-700">Toev.</label>
             <input
-              className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-center text-gray-900 bg-white"
+              className="mt-1.5 md:mt-2 w-full px-2 md:px-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-center text-sm md:text-base text-gray-900 bg-white"
               placeholder="A"
               value={adres.toevoeging}
               onChange={(e) => handleAddressInputChange('toevoeging', e.target.value.toUpperCase())}
@@ -376,9 +376,11 @@ export function ConsumerAddressStartCard({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="text-sm font-semibold text-gray-700">Ik zit nu bij</label>
+          <label className="text-xs md:text-sm font-semibold text-gray-700">
+            Ik zit nu bij <span className="text-gray-500 font-normal text-xs">(optioneel)</span>
+          </label>
           <select
-            className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-gray-900 bg-white"
+            className="mt-1.5 md:mt-2 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 text-sm md:text-base text-gray-900 bg-white"
             value={currentSupplier || ''}
             onChange={(e) => setCurrentSupplier(e.target.value)}
           >
@@ -398,17 +400,17 @@ export function ConsumerAddressStartCard({
       </div>
 
       {(loadingAddress || checkingAddressType) && (
-        <div className="mt-3 text-xs text-brand-teal-600 flex items-center gap-2">
+        <div className="mt-2 md:mt-3 text-xs text-brand-teal-600 flex items-center gap-2">
           <div className="w-3 h-3 border-2 border-brand-teal-300 border-t-brand-teal-600 rounded-full animate-spin" />
           <span>Adres controleren…</span>
         </div>
       )}
 
-      {addressError && <div className="mt-3 text-xs text-red-600">{addressError}</div>}
+      {addressError && <div className="mt-2 md:mt-3 text-xs text-red-600">{addressError}</div>}
 
       {addressTypeResult && addressTypeResult.type !== 'error' && (
         <div
-          className={`mt-3 rounded-xl border px-3 py-2 text-xs ${
+          className={`mt-2 md:mt-3 rounded-xl border px-3 py-2 text-xs ${
             addressTypeResult.type === 'particulier'
               ? 'border-green-200 bg-green-50 text-green-900'
               : 'border-blue-200 bg-blue-50 text-blue-900'
@@ -429,12 +431,12 @@ export function ConsumerAddressStartCard({
         </div>
       )}
 
-      <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div className="mt-4 md:mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 md:gap-3">
         <button
           type="button"
           onClick={handleStart}
           disabled={!canStart}
-          className={`w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 rounded-xl font-semibold shadow-lg transition-all ${
+          className={`w-full sm:w-auto inline-flex justify-center items-center px-5 md:px-6 py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base shadow-lg transition-all ${
             canStart
               ? 'bg-brand-teal-500 text-white shadow-brand-teal-500/25 hover:bg-brand-teal-600 hover:shadow-xl'
               : 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
@@ -442,7 +444,7 @@ export function ConsumerAddressStartCard({
         >
           Start vergelijken
         </button>
-        <p className="text-xs text-gray-500">
+        <p className="hidden md:block text-xs text-gray-500">
           Tip: heb je zonnepanelen? Bekijk dan ook{' '}
           <Link className="text-brand-teal-600 underline" href="/particulier/zonnepanelen">
             zonnepaneel-opties
