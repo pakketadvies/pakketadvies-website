@@ -385,7 +385,7 @@ export function ConsumerAddressStartCard({
             onChange={(e) => setCurrentSupplier(e.target.value)}
           >
             <option value="" disabled>
-              Selecteer je huidige leverancier (optioneel)
+              Selecteer leverancier
             </option>
             {ALLE_LEVERANCIERS.map((leverancier) => (
               <option key={leverancier} value={leverancier}>
