@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WaveDivider } from '@/components/ui/WaveDivider'
-import { Cookie, ChartBar, ShieldCheck, Settings, Envelope } from '@phosphor-icons/react'
+import { Cookie, ChartBar, ShieldCheck, Gear, Envelope } from '@phosphor-icons/react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -88,7 +88,7 @@ export default function CookiesPage() {
                 <div className="mb-6 pb-6 border-b border-gray-200">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Settings weight="duotone" className="w-5 h-5 text-brand-teal-600" />
+                      <Gear weight="duotone" className="w-5 h-5 text-brand-teal-600" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">

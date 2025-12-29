@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WaveDivider } from '@/components/ui/WaveDivider'
-import { FileText, Scale, CheckCircle, AlertCircle, Envelope } from '@phosphor-icons/react'
+import { FileText, Scales, CheckCircle, Warning, Envelope } from '@phosphor-icons/react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function AlgemeneVoorwaardenPage() {
         <div className="container-custom relative z-10">
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
-              <Scale weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+              <Scales weight="duotone" className="w-5 h-5 text-brand-teal-300" />
               <span className="text-sm font-semibold text-brand-teal-200">Juridisch</span>
             </div>
 
@@ -217,7 +217,7 @@ export default function AlgemeneVoorwaardenPage() {
               <CardContent className="pt-8">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="w-12 h-12 bg-brand-teal-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <AlertCircle weight="duotone" className="w-6 h-6 text-brand-teal-600" />
+                    <Warning weight="duotone" className="w-6 h-6 text-brand-teal-600" />
                   </div>
                   <div className="flex-1">
                     <h2 className="font-display text-2xl md:text-3xl font-bold text-brand-navy-500 mb-4">
