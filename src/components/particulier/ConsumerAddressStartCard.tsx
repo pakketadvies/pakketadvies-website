@@ -436,9 +436,9 @@ export function ConsumerAddressStartCard({
           type="button"
           onClick={handleStart}
           disabled={!canStart}
-          className={`w-full sm:w-auto inline-flex justify-center items-center px-5 md:px-6 py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base shadow-lg transition-all ${
+          className={`w-full sm:w-auto inline-flex justify-center items-center px-6 md:px-8 py-3.5 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg transition-all ${
             canStart
-              ? 'bg-brand-teal-500 text-white shadow-brand-teal-500/25 hover:bg-brand-teal-600 hover:shadow-xl'
+              ? 'bg-brand-teal-500 text-white shadow-brand-teal-500/25 hover:bg-brand-teal-600 hover:shadow-xl active:scale-98'
               : 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
           }`}
         >
