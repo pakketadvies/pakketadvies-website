@@ -1434,6 +1434,17 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         }}
       />
       </form>
+
+      {/* Verbruik Edit Modal */}
+      {verbruik && (
+        <EditVerbruikModal
+          isOpen={showVerbruikModal}
+          onClose={() => setShowVerbruikModal(false)}
+          currentData={verbruik}
+          onSave={handleVerbruikUpdate}
+          isUpdating={isUpdatingVerbruik}
+        />
+      )}
     </>
   )
 }
