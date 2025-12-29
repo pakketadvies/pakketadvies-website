@@ -4,8 +4,6 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
-import { PageTransition } from './PageTransition'
-import { useScrollAnimations } from '@/lib/scroll-animations'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -51,33 +49,23 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }, [])
   
   // Scroll naar top bij route change (zonder animatie)
-  // Note: View Transitions API will handle smooth scrolling during transition
   useEffect(() => {
-    // Use instant scroll for View Transitions API, or smooth for fallback
-    const supportsVT = typeof document !== 'undefined' && 'startViewTransition' in document
-    window.scrollTo({ top: 0, behavior: supportsVT ? 'instant' : 'auto' })
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }, [pathname])
-
-  // Initialize scroll-triggered animations
-  useEffect(() => {
-    return useScrollAnimations()
-  }, [])
   
   // Check if we're on an admin route
   const isAdminRoute = pathname?.startsWith('/admin')
   
   if (isAdminRoute) {
-    // Admin routes: no header/footer, no transitions, just children
+    // Admin routes: no header/footer, just children
     return <>{children}</>
   }
   
-  // Regular routes: include header and footer, with page transitions
+  // Regular routes: include header and footer, no page transitions
   return (
     <>
       <Header />
-      <PageTransition>
-        <main>{children}</main>
-      </PageTransition>
+      <main>{children}</main>
       <Footer />
     </>
   )

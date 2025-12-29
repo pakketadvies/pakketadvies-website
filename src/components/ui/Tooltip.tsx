@@ -139,7 +139,7 @@ export default function Tooltip({ content, children, className, position = 'bott
             {/* Modal - Better centered and sized */}
             <div
               ref={tooltipRef}
-              className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-6 p-6 pointer-events-auto animate-tooltip"
+              className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-6 p-6 pointer-events-auto animate-scale-in"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}

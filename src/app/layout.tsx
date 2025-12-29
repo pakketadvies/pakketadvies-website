@@ -5,7 +5,6 @@ import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
 import { PWARegistration } from "@/components/layout/PWARegistration";
 import { FacebookPixel } from "@/components/tracking/FacebookPixel";
-import { DeviceDetectionInit } from "@/components/layout/DeviceDetectionInit";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -80,7 +79,6 @@ export default function RootLayout({
   return (
     <html lang="nl" className="overscroll-none">
       <body className={inter.className}>
-        <DeviceDetectionInit />
         <PWARegistration />
         <LayoutWrapper>{children}</LayoutWrapper>
         <InstallPrompt />

@@ -1,447 +1,375 @@
-# 🎬 Animaties Overzicht - PakketAdvies Website
+# 📊 Animaties Overzicht - PakketAdvies Website
 
-## 📊 Samenvatting
-
-**Huidige Status**: De website heeft **zeer weinig animaties**. De meeste interacties zijn statisch of hebben alleen basis hover-effecten.
-
-**Performance Prioriteit**: ✅ Alle voorgestelde animaties zijn CSS-based (geen JavaScript libraries) en gebruiken `transform` en `opacity` voor optimale performance.
+**Datum:** 27 december 2025  
+**Status:** Analyse van bestaande animaties en suggesties voor verbetering
 
 ---
 
-## ✅ BESTAANDE ANIMATIES
+## 🎯 Samenvatting
 
-### 1. **CSS Keyframes (globals.css)**
-- ✅ `slide-down` - 0.3s ease-out
-- ✅ `slide-up` - 0.3s ease-out  
-- ✅ `scale-in` - 0.2s ease-out
-- ✅ `fade-in` - 0.2s ease-out
-- ✅ `bounce-in` - 0.5s ease-out
-- ✅ `pulse-slow` - 4s infinite
-- ✅ `float` - 3s infinite
+De website heeft momenteel **minimale animaties**. De meeste animaties zijn:
+- **CSS transitions** op hover states (buttons, cards, links)
+- **Tailwind utility classes** voor fade-in/slide-in effecten
+- **Geen** complexe JavaScript animaties (Framer Motion is verwijderd)
+- **Geen** page transitions meer (PageTransition component is verwijderd)
 
-**Gebruik**: Zeer beperkt, vooral in `contract/bevestiging` pagina.
+**Performance:** ✅ Goed - alle animaties zijn CSS-based en lightweight.
 
-### 2. **Hover Effecten (Tailwind Classes)**
+---
 
-#### **Buttons** (`Button.tsx`)
-- ✅ `hover:scale-105` - 5% scale op hover
-- ✅ `transition-all duration-300` - 300ms transitions
-- ✅ `hover:shadow-xl` - Shadow versterking
-- ✅ **Desktop & Mobile**: Beide
+## 📋 BESTAANDE ANIMATIES
 
-#### **Cards** (`Card.tsx`)
-- ✅ `hover:shadow-lg` - Shadow versterking
-- ✅ `hover:-translate-y-0.5` - Subtiele lift (2px)
-- ✅ `transition-all duration-250` - 250ms transitions
-- ✅ **Desktop & Mobile**: Beide
+### 1. **CSS Transitions (Tailwind)**
 
-#### **Contract Cards** (`ContractCard.tsx`, `ConsumerContractRowCard.tsx`)
-- ✅ `hover:shadow-lg` - Shadow versterking
-- ✅ `transition-all duration-200` - 200ms transitions
-- ✅ **Desktop & Mobile**: Beide
+#### **Hover States**
+- **Buttons** (`Button.tsx`):
+  - `hover:scale-105` - lichte scale op hover (alle varianten)
+  - `hover:shadow-xl` - shadow versterking
+  - `transition-all duration-300` - vloeiende overgang
+  - **Desktop & Mobile:** ✅ Beide
 
-### 3. **Drawer/Slide-over Animaties**
+- **Cards** (`ContractCard.tsx`, `ConsumerContractRowCard.tsx`):
+  - `hover:shadow-lg` - shadow versterking op hover
+  - `transition-all duration-200` - snelle overgang
+  - **Desktop & Mobile:** ✅ Beide (maar minder zichtbaar op mobile)
+
+- **Links** (verschillende componenten):
+  - `hover:text-brand-teal-700` - kleur verandering
+  - `hover:bg-brand-teal-50` - achtergrond verandering
+  - `transition-colors` - kleur overgang
+  - **Desktop & Mobile:** ✅ Beide
+
+- **Icons** (pijltjes, etc.):
+  - `group-hover:translate-x-0.5` - kleine beweging op hover
+  - `transition-transform` - transform overgang
+  - **Desktop & Mobile:** ✅ Beide
+
+#### **Focus States**
+- `focus:ring-2 focus:ring-offset-2` - focus ring voor accessibility
+- **Desktop & Mobile:** ✅ Beide
+
+#### **Active States**
+- `active:bg-gray-200` - feedback bij klik
+- **Desktop & Mobile:** ✅ Beide
+
+---
+
+### 2. **Custom CSS Animations** (`globals.css`)
+
+#### **Defined Keyframes:**
+1. **`slide-down`** (0.3s ease-out)
+   - Gebruikt: ✅ `animate-slide-down` class
+   - Locaties: Form success/error messages, dropdowns
+   - **Desktop & Mobile:** ✅ Beide
+
+2. **`slide-up`** (0.3s ease-out)
+   - Gebruikt: ✅ `animate-slide-up` class
+   - Locaties: Modals (mobile), bottom sheets
+   - **Desktop & Mobile:** ✅ Beide (meer op mobile)
+
+3. **`scale-in`** (0.2s ease-out)
+   - Gebruikt: ✅ `animate-scale-in` class
+   - Locaties: Modals (desktop), tooltips
+   - **Desktop & Mobile:** ✅ Beide
+
+4. **`fade-in`** (0.2s ease-out)
+   - Gebruikt: ✅ `animate-fade-in` class
+   - Locaties: Tooltips, overlays
+   - **Desktop & Mobile:** ✅ Beide
+
+5. **`bounce-in`** (0.5s ease-out)
+   - Gebruikt: ❌ **NIET GEBRUIKT**
+   - **Status:** Gedefinieerd maar niet gebruikt
+
+6. **`pulse-slow`** (4s infinite)
+   - Gebruikt: ❌ **NIET GEBRUIKT**
+   - **Status:** Gedefinieerd maar niet gebruikt
+
+7. **`float`** (3s infinite)
+   - Gebruikt: ❌ **NIET GEBRUIKT**
+   - **Status:** Gedefinieerd maar niet gebruikt
+
+#### **Utility Classes:**
+- **`hover-lift`** (globals.css):
+  - `transform: translateY(-4px)` + shadow op hover
+  - Gebruikt: ✅ `HowItWorks.tsx` cards
+  - **Desktop & Mobile:** ✅ Beide
+
+---
+
+### 3. **Component-Specific Animations**
 
 #### **SiteMenuDrawer** (`SiteMenuDrawer.tsx`)
-- ❌ **GEEN animatie** - Drawer verschijnt direct zonder slide-in effect
-- **Desktop**: Slide-in van rechts (420px width)
-- **Mobile**: Full-screen overlay
+- **Animatie:** ❌ **GEEN**
+- **Status:** Drawer verschijnt direct zonder animatie
+- **Desktop & Mobile:** ❌ Geen animatie op beide
 
 #### **ContractDetailsDrawer** (`ContractDetailsDrawer.tsx`)
-- ✅ **Mount/unmount animatie** - 250ms fade + slide
-- ✅ `visible` state met 10ms delay voor smooth entry
-- ✅ **Desktop**: Slide-in van rechts
-- ✅ **Mobile**: Full-screen slide-in
+- **Animatie:** ⚠️ **PARTIEEL**
+- **Status:** Gebruikt `mounted` + `visible` state met `setTimeout` voor fade-in
+- **Implementatie:** CSS-based via conditional classes
+- **Desktop & Mobile:** ✅ Beide (slide-in from right)
 
 #### **Keuzehulp** (`Keuzehulp.tsx`)
-- ✅ **Zelfde animatie** als ContractDetailsDrawer
-- ✅ 250ms fade + slide
-- ✅ **Desktop**: Slide-in van rechts
-- ✅ **Mobile**: Full-screen slide-in
+- **Animatie:** ⚠️ **PARTIEEL**
+- **Status:** Zelfde als ContractDetailsDrawer (mounted/visible pattern)
+- **Desktop & Mobile:** ✅ Beide (slide-in from right)
 
-### 4. **Modal Animaties** (`Modal.tsx`)
-- ✅ `animate-slide-up` - Mobile: bottom sheet slide-up
-- ✅ `animate-scale-in` - Desktop: centered scale-in
-- ✅ Backdrop fade-in
-- ✅ **Desktop & Mobile**: Verschillende animaties
+#### **Modal** (`Modal.tsx`)
+- **Animatie:** ✅ **JA**
+- **Mobile:** `animate-slide-up` (van onder)
+- **Desktop:** `animate-scale-in` (centered scale)
+- **Backdrop:** `transition-opacity` fade-in
+- **Desktop & Mobile:** ✅ Beide (verschillende animaties)
 
-### 5. **HowItWorks Sectie** (`HowItWorks.tsx`)
-- ✅ `hover-lift` class - Card lift op hover
-- ✅ `group-hover:scale-110` - Icon/badge scale op hover
-- ✅ `group-hover:bg-brand-purple-500` - Color transition
-- ✅ `transition-all duration-300` - 300ms transitions
-- ✅ `animationDelay` per step (0.1s stagger)
-- ✅ **Alleen Desktop**: Hover effecten werken niet op mobile
+#### **Tooltip** (`Tooltip.tsx`)
+- **Animatie:** ✅ **JA**
+- **Backdrop:** `animate-fade-in`
+- **Content:** `animate-scale-in`
+- **Desktop & Mobile:** ✅ Beide
 
-### 6. **Loading States**
+#### **ProgressBar** (`ProgressBar.tsx`)
+- **Animatie:** ✅ **JA**
+- **Status:** `transition-all duration-500 ease-out` op progress bar
+- **Desktop & Mobile:** ✅ Beide
 
-#### **Spinners**
-- ✅ `animate-spin` - Tailwind default spinner
-- ✅ Gebruikt in: PrijzenGrafiek, PrijzenTabel, etc.
-- ✅ **Desktop & Mobile**: Beide
+#### **Loading Spinners**
+- **Animatie:** ✅ **JA**
+- **Status:** `animate-spin` (Tailwind default)
+- **Locaties:** Forms, buttons, data loading
+- **Desktop & Mobile:** ✅ Beide
 
-#### **Skeleton Loaders**
-- ❌ **GEEN** - Geen skeleton loaders geïmplementeerd
-
-### 7. **Form Inputs** (`Input.tsx`)
-- ✅ `focus:ring-2` - Focus ring
-- ✅ `transition-colors` - Color transitions
-- ✅ **Desktop & Mobile**: Beide
-
-### 8. **Bevestiging Pagina** (`contract/bevestiging/page.tsx`)
-- ✅ `animate-scale-in` - Custom scale-in animatie
-- ✅ `animate-slide-up` - Staggered slide-up
-- ✅ `animate-bounce-slow` - Slow bounce animatie
-- ✅ Confetti effect (canvas-confetti library)
-- ✅ **Desktop & Mobile**: Beide
+#### **Form Success/Error Messages**
+- **Animatie:** ✅ **JA**
+- **Status:** `animate-slide-down` voor nieuwe messages
+- **Desktop & Mobile:** ✅ Beide
 
 ---
 
-## ❌ ONTBREKENDE ANIMATIES
+### 4. **Page-Specific Animations**
 
-### **Kritieke Gebieden (High Impact, Low Performance Cost)**
-
-#### 1. **Page Transitions**
-- ❌ **GEEN** - Pagina's laden zonder fade/slide
-- **Impact**: ⭐⭐⭐⭐⭐ (Zeer hoog)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: Subtiele fade-in (200ms) bij page load
-
-#### 2. **Scroll-triggered Animaties**
-- ❌ **GEEN** - Content verschijnt direct zonder animatie
-- **Impact**: ⭐⭐⭐⭐ (Hoog)
-- **Performance**: ✅ Goed (Intersection Observer + CSS)
-- **Voorstel**: Fade-in + slide-up voor cards/sections bij scroll
-
-#### 3. **List Items (Staggered Animation)**
-- ❌ **GEEN** - Contract cards verschijnen allemaal tegelijk
-- **Impact**: ⭐⭐⭐⭐ (Hoog)
-- **Performance**: ✅ Goed (CSS animation-delay)
-- **Voorstel**: Staggered fade-in voor contract cards (50ms delay per item)
-
-#### 4. **Button States**
-- ⚠️ **Beperkt** - Alleen hover, geen loading/active states
-- **Impact**: ⭐⭐⭐ (Medium)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: 
-  - Loading spinner animatie
-  - Active state (scale-down)
-  - Success state (checkmark fade-in)
-
-#### 5. **Form Validation**
-- ❌ **GEEN** - Errors verschijnen direct zonder animatie
-- **Impact**: ⭐⭐⭐ (Medium)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: Slide-down + fade-in voor error messages
-
-#### 6. **Dropdown/Select Menus**
-- ❌ **GEEN** - Dropdowns openen direct
-- **Impact**: ⭐⭐⭐ (Medium)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: Fade-in + slide-down (150ms)
-
-#### 7. **Tooltips** (`Tooltip.tsx`)
-- ⚠️ **Beperkt** - Alleen basis fade
-- **Impact**: ⭐⭐ (Laag)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: Verbeterde fade-in + scale (200ms)
-
-#### 8. **Skeleton Loaders**
-- ❌ **GEEN** - Alleen spinners
-- **Impact**: ⭐⭐⭐⭐ (Hoog - UX)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: Pulse animatie voor skeleton cards
-
-#### 9. **Header/Navigation**
-- ❌ **GEEN** - Header is statisch
-- **Impact**: ⭐⭐ (Laag)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: 
-  - Subtiele shadow op scroll (desktop)
-  - Menu icon transform (hamburger → X)
-
-#### 10. **Search/Filter Results**
-- ❌ **GEEN** - Results verschijnen direct
-- **Impact**: ⭐⭐⭐ (Medium)
-- **Performance**: ✅ Goed (CSS only)
-- **Voorstel**: Fade-in voor nieuwe results
+#### **Bevestiging Page** (`contract/bevestiging/page.tsx`)
+- **Animatie:** ✅ **JA** (custom inline styles)
+- **Animations:**
+  - `scale-in` (0.5s) - voor success icon
+  - `slide-up` (0.6s) - voor content met delays
+  - `bounce-slow` (2s infinite) - voor floating effect
+- **Confetti:** ✅ `canvas-confetti` library
+- **Desktop & Mobile:** ✅ Beide
 
 ---
 
-## 🎯 VOORGESTELDE ANIMATIES (Prioriteit)
+## 🚫 VERWIJDERDE ANIMATIES
 
-### **Fase 1: High Impact, Zero Performance Cost** ⚡
+1. **Page Transitions** (`PageTransition.tsx`)
+   - **Status:** ❌ Verwijderd (gebruiker wilde dit niet)
+   - **Reden:** Te opvallend, storend voor gebruikerservaring
 
-#### 1. **Page Load Fade-in**
-- **Type**: Fade-in (200ms)
-- **Waar**: Alle pagina's
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
-
-#### 2. **Contract Cards Staggered Animation**
-- **Type**: Fade-in + slide-up (staggered 50ms)
-- **Waar**: Results pagina (zowel business als consumer)
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS animation-delay)
-
-#### 3. **Button Loading State**
-- **Type**: Spinner fade-in + button scale-down (150ms)
-- **Waar**: Alle submit buttons
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
-
-#### 4. **Form Error Messages**
-- **Type**: Slide-down + fade-in (200ms)
-- **Waar**: Alle form validatie errors
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
-
-#### 5. **SiteMenuDrawer Slide-in**
-- **Type**: Slide-in van rechts (300ms ease-out)
-- **Waar**: SiteMenuDrawer component
-- **Desktop**: ✅ (420px width)
-- **Mobile**: ✅ (full-screen)
-- **Performance**: ✅ Excellent (CSS transform)
+2. **Framer Motion**
+   - **Status:** ❌ Verwijderd uit package.json
+   - **Reden:** Performance, bundle size
 
 ---
 
-### **Fase 2: Medium Impact, Low Performance Cost** 🚀
+## 💡 SUGGESTIES VOOR NIEUWE ANIMATIES
 
-#### 6. **Scroll-triggered Animations (Intersection Observer)**
-- **Type**: Fade-in + slide-up bij scroll
-- **Waar**: Sections, cards, features
-- **Desktop**: ✅
-- **Mobile**: ⚠️ Optioneel (kan performance impact hebben)
-- **Performance**: ✅ Goed (lazy loading met Intersection Observer)
+### **PRIORITEIT 1: Hoog Impact, Laag Risico**
 
-#### 7. **Skeleton Loaders**
-- **Type**: Pulse animatie
-- **Waar**: Loading states (contracts, data tables)
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
+#### 1. **SiteMenuDrawer Slide-In Animatie**
+- **Wat:** Slide-in van rechts naar links (desktop) / full-screen fade-in (mobile)
+- **Waarom:** Nu verschijnt menu direct, voelt abrupt
+- **Performance:** ✅ CSS transform (will-change: transform)
+- **Desktop:** Slide van rechts (300ms ease-out)
+- **Mobile:** Fade-in + slide-up (250ms ease-out)
+- **Impact:** ⭐⭐⭐⭐⭐ (Groot - eerste indruk)
 
-#### 8. **Dropdown/Select Animations**
-- **Type**: Fade-in + slide-down (150ms)
-- **Waar**: Alle dropdowns, selects
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
+#### 2. **Contract Cards Staggered Fade-In**
+- **Wat:** Contract cards verschijnen met kleine delay tussen elkaar
+- **Waarom:** Maakt results page levendiger, helpt scannen
+- **Performance:** ✅ CSS only, geen JS
+- **Implementatie:** `animation-delay` per card (0.05s increments)
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐⭐ (Middel-Hoog)
 
-#### 9. **Tooltip Improvements**
-- **Type**: Fade-in + scale (200ms)
-- **Waar**: Tooltip component
-- **Desktop**: ✅
-- **Mobile**: ❌ (tooltips werken niet goed op mobile)
-- **Performance**: ✅ Excellent (CSS only)
+#### 3. **Form Field Focus Animations**
+- **Wat:** Subtle scale-up (1.02x) + border color transition op focus
+- **Waarom:** Betere feedback, modernere feel
+- **Performance:** ✅ CSS only
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐ (Middel)
 
-#### 10. **Header Scroll Shadow**
-- **Type**: Box-shadow transition (200ms)
-- **Waar**: Header component
-- **Desktop**: ✅
-- **Mobile**: ❌ (niet nodig)
-- **Performance**: ✅ Excellent (CSS only)
+#### 4. **Button Loading State**
+- **Wat:** Spinner fade-in + button text fade-out tijdens loading
+- **Waarom:** Duidelijke feedback dat actie wordt verwerkt
+- **Performance:** ✅ CSS transitions
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐⭐ (Middel-Hoog)
 
----
-
-### **Fase 3: Nice-to-Have, Low Performance Cost** ✨
-
-#### 11. **Menu Icon Transform**
-- **Type**: Hamburger → X transform (200ms)
-- **Waar**: Header menu button
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
-
-#### 12. **Success States**
-- **Type**: Checkmark fade-in + scale (300ms)
-- **Waar**: Form submissions, actions
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
-
-#### 13. **Number Counters**
-- **Type**: Count-up animatie (voor statistieken)
-- **Waar**: Homepage, over-ons pagina
-- **Desktop**: ✅
-- **Mobile**: ⚠️ Optioneel (JavaScript nodig)
-- **Performance**: ⚠️ Medium (JavaScript, maar alleen bij scroll)
-
-#### 14. **Progress Bar Animation**
-- **Type**: Width transition (smooth)
-- **Waar**: Calculator progress bar
-- **Desktop**: ✅
-- **Mobile**: ✅
-- **Performance**: ✅ Excellent (CSS only)
-
-#### 15. **Card Hover Improvements**
-- **Type**: Meer subtiele lift + shadow
-- **Waar**: Alle cards
-- **Desktop**: ✅
-- **Mobile**: ❌ (hover werkt niet)
-- **Performance**: ✅ Excellent (CSS only)
+#### 5. **Accordion/Collapsible Sections**
+- **Wat:** Smooth height transition bij openen/sluiten
+- **Waarom:** ContractCard accordions voelen nu abrupt
+- **Performance:** ⚠️ CSS `max-height` transition (kan tricky zijn)
+- **Alternatief:** JavaScript met `requestAnimationFrame` voor smooth animatie
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐⭐ (Middel-Hoog)
 
 ---
 
-## 📱 DESKTOP vs MOBILE
+### **PRIORITEIT 2: Nice-to-Have, Subtle**
 
-### **Desktop Only Animaties**
-- ✅ Hover effects (cards, buttons)
-- ✅ Header scroll shadow
-- ✅ Menu icon transform (optioneel)
+#### 6. **Scroll-Triggered Animations (Intersection Observer)**
+- **Wat:** Fade-in + slide-up wanneer elementen in viewport komen
+- **Waarom:** Maakt lange pagina's levendiger
+- **Performance:** ⚠️ Intersection Observer (lightweight, maar extra JS)
+- **Locaties:** 
+  - Hero sections
+  - Feature cards
+  - Testimonials
+  - "How it Works" sections
+- **Desktop & Mobile:** ✅ Beide (maar minder op mobile voor performance)
+- **Impact:** ⭐⭐⭐ (Middel)
 
-### **Mobile Only Animaties**
-- ✅ Bottom sheet slide-up (modals)
-- ✅ Full-screen drawer slide-in
+#### 7. **Skeleton Loading States**
+- **Wat:** Shimmer/pulse effect tijdens data loading
+- **Waarom:** Betere UX dan lege states of spinners
+- **Performance:** ✅ CSS animation (pulse)
+- **Locaties:** Contract cards, results page
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐⭐ (Middel-Hoog)
 
-### **Beide Platforms**
-- ✅ Page load fade-in
-- ✅ Staggered card animations
-- ✅ Button loading states
-- ✅ Form error animations
-- ✅ Drawer slide-in
-- ✅ Skeleton loaders
-- ✅ Dropdown animations
+#### 8. **Toast Notifications**
+- **Wat:** Slide-in from top + fade-out na timeout
+- **Waarom:** Betere feedback dan inline messages
+- **Performance:** ✅ CSS transitions
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐ (Middel)
 
----
+#### 9. **Input Validation Feedback**
+- **Wat:** Subtle shake animation bij invalid input
+- **Waarom:** Duidelijke visuele feedback
+- **Performance:** ✅ CSS keyframe animation (0.3s)
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐ (Laag-Middel)
 
-## ⚡ PERFORMANCE OVERWEGINGEN
-
-### **✅ Goed (CSS Only)**
-- Alle voorgestelde animaties gebruiken `transform` en `opacity`
-- Geen `width`, `height`, `top`, `left` animaties (trigger layout)
-- Hardware-accelerated (GPU)
-- Geen JavaScript libraries nodig
-
-### **⚠️ Let Op**
-- **Intersection Observer**: Kan performance impact hebben op mobile met veel elements
-- **Number Counters**: JavaScript nodig, maar alleen bij scroll (lazy)
-- **Scroll-triggered**: Gebruik `will-change` spaarzaam
-
-### **❌ Vermijden**
-- ❌ Framer Motion of andere JS animation libraries (te zwaar)
-- ❌ Animaties op `width`/`height` (layout thrashing)
-- ❌ Te veel simultane animaties (>10 tegelijk)
-- ❌ Animaties tijdens scroll op mobile (kan janky zijn)
-
----
-
-## 🎨 ANIMATIE TIMING
-
-### **Snelle Interacties** (100-200ms)
-- Button clicks
-- Hover states
-- Dropdowns
-- Tooltips
-
-### **Medium Interacties** (200-300ms)
-- Page transitions
-- Drawer slide-in
-- Form errors
-- Card hover
-
-### **Langzame Interacties** (300-500ms)
-- Page load fade-in
-- Staggered animations
-- Success states
-
-### **Infinite Animations** (alleen subtiel)
-- Pulse (loading)
-- Float (decoratief, spaarzaam)
+#### 10. **Hover Card Lift Effect (Verbetering)**
+- **Wat:** Contract cards krijgen meer lift + shadow op hover
+- **Waarom:** Maakt interactie duidelijker
+- **Performance:** ✅ CSS transform (will-change)
+- **Desktop:** ✅ (hover werkt niet op mobile)
+- **Impact:** ⭐⭐⭐ (Middel)
 
 ---
 
-## 📋 IMPLEMENTATIE CHECKLIST
+### **PRIORITEIT 3: Advanced, Optioneel**
 
-### **Fase 1 (High Priority)**
-- [ ] Page load fade-in
-- [ ] Contract cards staggered animation
-- [ ] Button loading state
-- [ ] Form error animations
-- [ ] SiteMenuDrawer slide-in
+#### 11. **Micro-Interactions**
+- **Wat:** 
+  - Checkbox/radio button checkmark animation
+  - Switch toggle animation
+  - Badge count-up animation
+- **Waarom:** Maakt UI levendiger, premium feel
+- **Performance:** ✅ CSS transitions
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐ (Laag-Middel)
 
-### **Fase 2 (Medium Priority)**
-- [ ] Scroll-triggered animations (optioneel)
-- [ ] Skeleton loaders
-- [ ] Dropdown animations
-- [ ] Tooltip improvements
-- [ ] Header scroll shadow
+#### 12. **Progress Indicators**
+- **Wat:** Smooth progress bar animations (beyond current basic transition)
+- **Waarom:** Betere feedback tijdens multi-step forms
+- **Performance:** ✅ CSS transitions
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐⭐ (Middel)
 
-### **Fase 3 (Nice-to-Have)**
-- [ ] Menu icon transform
-- [ ] Success states
-- [ ] Number counters (optioneel)
-- [ ] Progress bar animation
-- [ ] Card hover improvements
+#### 13. **Parallax Effects (Subtle)**
+- **Wat:** Background images bewegen langzamer dan content bij scroll
+- **Waarom:** Depth gevoel, premium look
+- **Performance:** ⚠️ Kan performance impact hebben op mobile
+- **Locaties:** Hero sections
+- **Desktop:** ✅ (alleen desktop)
+- **Mobile:** ❌ (skip voor performance)
+- **Impact:** ⭐⭐ (Laag-Middel)
 
----
-
-## 🔍 SPECIFIEKE COMPONENTEN ANALYSE
-
-### **Header** (`Header.tsx`)
-- **Huidig**: Geen animaties
-- **Voorstel**: 
-  - Menu icon transform (hamburger → X)
-  - Scroll shadow (desktop)
-  - Audience switch smooth transition
-
-### **SiteMenuDrawer** (`SiteMenuDrawer.tsx`)
-- **Huidig**: Geen slide-in animatie
-- **Voorstel**: Slide-in van rechts (300ms ease-out)
-
-### **Contract Cards** (`ContractCard.tsx`, `ConsumerContractRowCard.tsx`)
-- **Huidig**: Alleen hover shadow
-- **Voorstel**: 
-  - Staggered fade-in bij load
-  - Verbeterde hover lift
-  - Loading skeleton
-
-### **Forms** (`BedrijfsgegevensForm.tsx`, `ParticulierAanvraagForm.tsx`)
-- **Huidig**: Geen animaties
-- **Voorstel**: 
-  - Error message slide-down
-  - Success state checkmark
-  - Loading button state
-
-### **Calculator Flow** (`CalculatorFlow.tsx`)
-- **Huidig**: Geen animaties
-- **Voorstel**: 
-  - Step transition fade
-  - Progress bar smooth animation
-
-### **Results Page** (`ResultatenFlow.tsx`)
-- **Huidig**: Geen animaties
-- **Voorstel**: 
-  - Staggered card fade-in
-  - Filter results fade-in
+#### 14. **Number Count-Up Animation**
+- **Wat:** Cijfers tellen op van 0 naar eindwaarde
+- **Waarom:** Visueel aantrekkelijk voor statistieken
+- **Performance:** ⚠️ JavaScript (maar lightweight)
+- **Locaties:** Homepage stats, results page savings
+- **Desktop & Mobile:** ✅ Beide
+- **Impact:** ⭐⭐ (Laag-Middel)
 
 ---
 
-## 💡 AANBEVELINGEN
+## ⚠️ ANIMATIES OM TE VERMIJDEN
 
-1. **Start met Fase 1** - High impact, zero performance cost
-2. **Test op mobile** - Zorg dat animaties niet janky zijn
-3. **Gebruik `prefers-reduced-motion`** - Respecteer gebruikersvoorkeuren
-4. **Performance budget** - Max 60fps, gebruik `will-change` spaarzaam
-5. **Consistentie** - Gebruik dezelfde timing curves (ease-out voor meeste)
-
----
-
-## 🚫 WAT NIET TOEVOEGEN
-
-- ❌ Parallax scrolling (performance killer)
-- ❌ Auto-playing video backgrounds
-- ❌ Complexe 3D transforms
-- ❌ Te veel simultane animaties
-- ❌ Animaties die layout shifts veroorzaken
-- ❌ JavaScript animation libraries (Framer Motion, etc.)
+1. **Auto-playing animations** (distracting)
+2. **Heavy JavaScript animations** (performance)
+3. **Page transitions** (gebruiker wilde dit niet)
+4. **Parallax op mobile** (performance killer)
+5. **Complex 3D transforms** (browser support, performance)
 
 ---
 
-**Laatste Update**: 27 december 2025
-**Status**: Klaar voor implementatie review
+## 📊 PERFORMANCE OVERWEGINGEN
+
+### **Best Practices:**
+- ✅ Gebruik `transform` en `opacity` (GPU-accelerated)
+- ✅ Gebruik `will-change` voor elementen die geanimeerd worden
+- ✅ Vermijd animeren van `width`, `height`, `top`, `left` (layout thrashing)
+- ✅ Gebruik `prefers-reduced-motion` media query voor accessibility
+- ✅ Limiteer animaties op mobile (batterij, performance)
+
+### **CSS vs JavaScript:**
+- ✅ **CSS:** Voor simpele transitions, hover states, fade-in/slide-in
+- ⚠️ **JavaScript:** Alleen voor complexe animaties (accordion height, scroll-triggered)
+
+### **Mobile-Specific:**
+- ✅ Kortere durations (200-300ms vs 300-500ms desktop)
+- ✅ Minder animaties tegelijk
+- ✅ Geen parallax
+- ✅ Geen auto-playing animations
+
+---
+
+## 🎨 ANIMATIE STIJL GUIDELINES
+
+### **Timing:**
+- **Fast:** 150-200ms (micro-interactions, hover)
+- **Normal:** 250-300ms (buttons, cards, modals)
+- **Slow:** 400-500ms (page transitions, complex animations)
+
+### **Easing:**
+- **Ease-out:** Meeste animaties (natuurlijk gevoel)
+- **Ease-in-out:** Voor symmetrische animaties
+- **Cubic-bezier:** Voor custom feel (sparingly)
+
+### **Principles:**
+1. **Subtle:** Animaties moeten niet opvallen, maar wel merkbaar zijn
+2. **Purposeful:** Elke animatie heeft een doel (feedback, guidance, delight)
+3. **Consistent:** Zelfde type animaties gebruiken voor zelfde acties
+4. **Accessible:** Respecteer `prefers-reduced-motion`
+
+---
+
+## 📝 IMPLEMENTATIE CHECKLIST
+
+### **Voor elke nieuwe animatie:**
+- [ ] Performance test (Lighthouse, Chrome DevTools)
+- [ ] Mobile test (verschillende devices)
+- [ ] Accessibility check (`prefers-reduced-motion`)
+- [ ] Cross-browser test (Chrome, Firefox, Safari)
+- [ ] User testing (optioneel, maar aanbevolen)
+
+---
+
+## 🚀 VOLGENDE STAPPEN
+
+1. **Review dit document** met het team
+2. **Prioriteer** welke animaties toe te voegen
+3. **Implementeer** één voor één (niet alles tegelijk)
+4. **Test** performance en UX impact
+5. **Itereer** op basis van feedback
+
+---
+
+**Laatste update:** 27 december 2025  
+**Auteur:** AI Assistant (Auto)
 

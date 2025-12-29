@@ -6,34 +6,6 @@ import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
 import { estimateConsumerUsage } from '@/lib/particulier-verbruik-schatting'
-import { startViewTransition } from '@/lib/view-transitions'
-
-/**
- * Send log to debug-logs API
- */
-async function logToAdmin(level: string, message: string, data?: any) {
-  try {
-    await fetch('/api/debug-logs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        level,
-        message,
-        data: {
-          ...data,
-          component: 'ConsumerAddressStartCard',
-          timestamp: new Date().toISOString(),
-        },
-        url: typeof window !== 'undefined' ? window.location.href : 'SSR',
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR',
-        timestamp: new Date().toISOString(),
-      }),
-    })
-  } catch (error) {
-    // Silently fail - logging is non-critical
-    console.error('[ConsumerAddressStartCard] Failed to send log:', error)
-  }
-}
 
 type AddressTypeResult =
   | {
@@ -349,75 +321,14 @@ export function ConsumerAddressStartCard({
         geschat: true,
       }
 
-      logToAdmin('info', 'handleSubmit: Desktop - About to call setVerbruik and router.push to RESULTS_PATH', {
-        RESULTS_PATH,
-        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-        hasEstimate: !!withEstimate,
-      })
-      
-      // CRITICAL FIX: Call router.push FIRST, then setVerbruik AFTER navigation starts
-      // This prevents setVerbruik from causing a re-render that triggers a transition on the current page
-      startViewTransition(() => {
-        logToAdmin('info', 'handleSubmit: Desktop - Inside startViewTransition callback, calling router.push FIRST', {
-          RESULTS_PATH,
-          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-        })
-        
-        // Navigate FIRST - this starts the transition
-        router.push(RESULTS_PATH)
-        
-        // Then set verbruik AFTER navigation has started
-        // Use setTimeout to ensure it happens after the navigation is initiated
-        setTimeout(() => {
-          logToAdmin('info', 'handleSubmit: Desktop - Navigation started, now calling setVerbruik', {
-            RESULTS_PATH,
-            currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-          })
-          setVerbruik(withEstimate)
-        }, 0) // Use 0ms timeout to defer to next event loop tick
-      })
-      
-      logToAdmin('info', 'handleSubmit: Desktop - startViewTransition called (async, may not have executed yet)', {
-        RESULTS_PATH,
-      })
-      
+      setVerbruik(withEstimate)
+      router.push(RESULTS_PATH)
       return
     }
 
     // Mobile (and inline usage): keep the next step where the user can enter their exact usage.
-    logToAdmin('info', 'handleSubmit: About to call setVerbruik and router.push', {
-      nextHref,
-      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-      hasSeed: !!seed,
-    })
-    
-    // CRITICAL FIX: Call router.push FIRST, then setVerbruik AFTER navigation starts
-    // This prevents setVerbruik from causing a re-render that triggers a transition on the current page
-    // On iPhone (Safari), this is especially important because it uses the fallback CSS transitions
-    startViewTransition(() => {
-      logToAdmin('info', 'handleSubmit: Inside startViewTransition callback, calling router.push FIRST', {
-        nextHref,
-        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-      })
-      
-      // Navigate FIRST - this starts the transition
-      router.push(nextHref)
-      
-      // Then set verbruik AFTER navigation has started
-      // Use setTimeout to ensure it happens after the navigation is initiated
-      // This prevents the re-render from interfering with the transition
-      setTimeout(() => {
-        logToAdmin('info', 'handleSubmit: Navigation started, now calling setVerbruik', {
-          nextHref,
-          currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
-        })
-        setVerbruik(seed)
-      }, 0) // Use 0ms timeout to defer to next event loop tick
-    })
-    
-    logToAdmin('info', 'handleSubmit: startViewTransition called (async, may not have executed yet)', {
-      nextHref,
-    })
+    setVerbruik(seed)
+    router.push(nextHref)
   }
 
   const shell =

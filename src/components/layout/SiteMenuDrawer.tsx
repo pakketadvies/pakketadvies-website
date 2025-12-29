@@ -27,20 +27,37 @@ export function SiteMenuDrawer({
 }: SiteMenuDrawerProps) {
   const closeBtnRef = useRef<HTMLButtonElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+
+  // Keep mounted for exit animation
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true)
+      // Next tick → animate in
+      const t = setTimeout(() => setVisible(true), 10)
+      return () => clearTimeout(t)
+    }
+
+    // Animate out
+    setVisible(false)
+    const t = setTimeout(() => setMounted(false), 300)
+    return () => clearTimeout(t)
+  }, [isOpen])
 
   // Lock body scroll when open (important for mobile)
   useEffect(() => {
-    if (!isOpen) return
+    if (!mounted) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = prev
     }
-  }, [isOpen])
+  }, [mounted])
 
   // ESC to close + focus on open
   useEffect(() => {
-    if (!isOpen) return
+    if (!mounted) return
     closeBtnRef.current?.focus()
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -68,7 +85,7 @@ export function SiteMenuDrawer({
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [isOpen, onClose])
+  }, [mounted, onClose])
 
   const groupedLinks = useMemo(() => {
     if (audience !== 'consumer') {
@@ -86,31 +103,6 @@ export function SiteMenuDrawer({
       { title: 'Meer', links: rest },
     ]
   }, [audience, navLinks])
-
-  const [mounted, setMounted] = useState(false)
-  const [visible, setVisible] = useState(false)
-
-  // Keep mounted for exit animation
-  useEffect(() => {
-    if (isOpen) {
-      // Always reset visible to false first to ensure transition can restart
-      setVisible(false)
-      setMounted(true)
-      // Next tick → animate in (use requestAnimationFrame for smoother animation)
-      const rafId = requestAnimationFrame(() => {
-        const t = setTimeout(() => setVisible(true), 16) // ~1 frame delay
-        return () => clearTimeout(t)
-      })
-      return () => {
-        cancelAnimationFrame(rafId)
-      }
-    }
-
-    // Animate out
-    setVisible(false)
-    const t = setTimeout(() => setMounted(false), 300)
-    return () => clearTimeout(t)
-  }, [isOpen])
 
   if (!mounted) return null
 
@@ -133,9 +125,14 @@ export function SiteMenuDrawer({
         aria-modal="true"
         aria-label="Site menu"
         className={`absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl border-l border-gray-200 flex flex-col transition-transform duration-300 ease-out ${
-          visible ? 'translate-x-0' : 'translate-x-full'
+          visible
+            ? 'translate-x-0'
+            : 'translate-x-full sm:translate-x-full'
         }`}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{ 
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          willChange: 'transform'
+        }}
       >
         {/* Header */}
         <div className="p-5 border-b border-gray-200 flex items-center justify-between">

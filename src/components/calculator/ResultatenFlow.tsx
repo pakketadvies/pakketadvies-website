@@ -889,7 +889,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as any)}
-                          className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all animate-dropdown"
+                          className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
                         >
                           <option value="besparing">Hoogste besparing</option>
                           <option value="prijs-laag">Laagste prijs</option>
@@ -959,20 +959,28 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                     </div>
                   ) : (
                     filteredResultaten.map((contract, index) => (
-                      <ConsumerContractRowCard
+                      <div
                         key={contract.id}
-                        contract={contract}
-                        meterType={verbruik?.meterType || 'weet_niet'}
-                        heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
-                        verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
-                        verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
-                        verbruikGas={verbruik?.gasJaar || 0}
-                        terugleveringJaar={verbruik?.terugleveringJaar || 0}
-                        aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
-                        aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
-                        postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
-                        position={index + 1}
-                      />
+                        className="animate-fade-in"
+                        style={{
+                          animationDelay: `${index * 0.05}s`,
+                          animationFillMode: 'both',
+                        }}
+                      >
+                        <ConsumerContractRowCard
+                          contract={contract}
+                          meterType={verbruik?.meterType || 'weet_niet'}
+                          heeftEnkeleMeter={verbruik?.heeftEnkeleMeter || false}
+                          verbruikElektriciteitNormaal={verbruik?.elektriciteitNormaal || 0}
+                          verbruikElektriciteitDal={verbruik?.elektriciteitDal || 0}
+                          verbruikGas={verbruik?.gasJaar || 0}
+                          terugleveringJaar={verbruik?.terugleveringJaar || 0}
+                          aansluitwaardeElektriciteit={verbruik?.aansluitwaardeElektriciteit || '3x25A'}
+                          aansluitwaardeGas={verbruik?.aansluitwaardeGas || 'G6'}
+                          postcode={verbruik?.leveringsadressen?.[0]?.postcode || ''}
+                          position={index + 1}
+                        />
+                      </div>
                     ))
                   )}
                 </section>

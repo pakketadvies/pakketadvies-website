@@ -201,7 +201,7 @@ export default function ContractCard({
 
   return (
     <Card
-      className={`relative hover:shadow-xl transition-shadow duration-300 stagger-animation animate-fade-in-up ${
+      className={`relative hover:shadow-xl transition-shadow duration-300 ${
         contract.aanbevolen ? 'ring-2 ring-brand-teal-500' : ''
       }`}
     >
@@ -417,8 +417,13 @@ export default function ContractCard({
                 <CaretDown weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               )}
             </button>
-            {openAccordion === 'prijsdetails' && (
-              <div className="p-4 bg-white space-y-4 animate-slide-down">
+            <div
+              className={`accordion-content ${openAccordion === 'prijsdetails' ? 'open' : 'closed'}`}
+              style={{
+                maxHeight: openAccordion === 'prijsdetails' ? '2000px' : '0',
+              }}
+            >
+              <div className="p-4 bg-white space-y-4">
                 {loading && (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-teal-600"></div>
@@ -770,7 +775,7 @@ export default function ContractCard({
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Voorwaarden */}
@@ -786,8 +791,13 @@ export default function ContractCard({
                 <CaretDown weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               )}
             </button>
-            {openAccordion === 'voorwaarden' && (
-              <div className="p-4 bg-white space-y-2 animate-slide-down">
+            <div
+              className={`accordion-content ${openAccordion === 'voorwaarden' ? 'open' : 'closed'}`}
+              style={{
+                maxHeight: openAccordion === 'voorwaarden' ? '2000px' : '0',
+              }}
+            >
+              <div className="p-4 bg-white space-y-2">
                 {contract.voorwaarden && contract.voorwaarden.length > 0 ? (() => {
                   // Filter alleen documenten (PDF/DOC met URL), negeer tekstvoorwaarden
                   const documenten = contract.voorwaarden
@@ -859,7 +869,7 @@ export default function ContractCard({
                   </>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Over leverancier */}
@@ -875,8 +885,13 @@ export default function ContractCard({
                 <CaretDown weight="bold" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
               )}
             </button>
-            {openAccordion === 'over' && (
-              <div className="p-4 bg-white animate-slide-down">
+            <div
+              className={`accordion-content ${openAccordion === 'over' ? 'open' : 'closed'}`}
+              style={{
+                maxHeight: openAccordion === 'over' ? '2000px' : '0',
+              }}
+            >
+              <div className="p-4 bg-white">
                 {contract.leverancier.overLeverancier ? (
                   <p className="text-sm text-gray-700 whitespace-pre-line">
                     {contract.leverancier.overLeverancier}

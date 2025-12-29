@@ -1,170 +1,63 @@
 'use client'
 
+import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState, useRef, ReactNode } from 'react'
-import { supportsViewTransitions } from '@/lib/view-transitions'
+import { ReactNode, useEffect } from 'react'
 
-/**
- * Send log to debug-logs API
- */
-async function logToAdmin(level: string, message: string, data?: any) {
-  try {
-    await fetch('/api/debug-logs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        level,
-        message,
-        data: {
-          ...data,
-          component: 'PageTransition',
-          timestamp: new Date().toISOString(),
-        },
-        url: typeof window !== 'undefined' ? window.location.href : 'SSR',
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR',
-        timestamp: new Date().toISOString(),
-      }),
-    })
-  } catch (error) {
-    // Silently fail - logging is non-critical
-    console.error('[PageTransition] Failed to send log:', error)
-  }
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: 100, // Start van rechts
+  },
+  animate: {
+    opacity: 1,
+    x: 0, // Eindpositie
+    transition: {
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1] as const, // Custom easing voor soepele, natuurlijke beweging
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: -100, // Gaat naar links weg
+    transition: {
+      duration: 0.3,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
 }
 
-/**
- * PageTransition component
- * 
- * Provides smooth page transitions using:
- * 1. CSS View Transitions API (if supported) - zero JS, native browser optimization
- * 2. Custom CSS fallback (for browsers without View Transitions support)
- * 
- * Mobile: Slide from right (native app feel)
- * Desktop: Subtle fade + slide
- * 
- * IMPORTANT: Only transitions on pathname changes, not on children changes.
- * This prevents false transitions when state updates cause re-renders.
- */
-export function PageTransition({ children }: { children: ReactNode }) {
+interface PageTransitionProps {
+  children: ReactNode
+}
+
+export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname()
-  const [displayChildren, setDisplayChildren] = useState(children)
-  const [transitionStage, setTransitionStage] = useState<'enter' | 'exit'>('enter')
-  const [useFallback, setUseFallback] = useState(true) // Start with true, check on mount
-  const prevPathnameRef = useRef<string>(pathname)
-  const useFallbackRef = useRef<boolean>(true) // Use ref to avoid effect re-triggers
-  const isTransitioningRef = useRef<boolean>(false) // Track if we're currently transitioning
 
-  // Check if we should use fallback on mount
+  // Scroll naar top bij route change (na animatie start)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const supports = !supportsViewTransitions()
-      setUseFallback(supports)
-      useFallbackRef.current = supports
-    }
-  }, [])
+    // Kleine delay om smooth scroll te voorkomen tijdens transitie
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }, 50)
 
-  // Only transition on pathname changes, not on children changes
-  // This prevents false transitions when state updates cause re-renders
-  useEffect(() => {
-    const pathnameChanged = prevPathnameRef.current !== pathname
-    const childrenChanged = displayChildren !== children
-    const currentUseFallback = useFallbackRef.current
+    return () => clearTimeout(timer)
+  }, [pathname])
 
-    // Logging to identify the problem
-    logToAdmin('info', 'PageTransition effect triggered', {
-      pathname,
-      prevPathname: prevPathnameRef.current,
-      pathnameChanged,
-      childrenChanged,
-      useFallback: currentUseFallback,
-      transitionStage,
-    })
-
-    // CRITICAL: Only trigger transition if pathname actually changed
-    // Ignore children changes that happen without pathname change
-    if (!pathnameChanged) {
-      // Pathname didn't change - just update children silently (no transition)
-      if (childrenChanged) {
-        logToAdmin('warn', 'PageTransition: children changed but pathname did not - NO TRANSITION', {
-          pathname,
-          reason: 'State update likely caused re-render',
-          isTransitioning: isTransitioningRef.current,
-        })
-        // CRITICAL: If we're already transitioning, don't update children yet
-        // This prevents the double slide on iPhone
-        if (!isTransitioningRef.current) {
-          setDisplayChildren(children)
-        }
-      }
-      return
-    }
-
-    // Pathname changed - this is a real navigation, trigger transition
-    logToAdmin('info', 'PageTransition: pathname changed, triggering transition', {
-      from: prevPathnameRef.current,
-      to: pathname,
-      useFallback: currentUseFallback,
-      isTransitioning: isTransitioningRef.current,
-    })
-
-    if (!currentUseFallback) {
-      // View Transitions API handles the transition automatically
-      logToAdmin('info', 'View Transitions: pathname changed, updating children', {
-        from: prevPathnameRef.current,
-        to: pathname,
-      })
-      setDisplayChildren(children)
-      prevPathnameRef.current = pathname
-    } else {
-      // Fallback: Manual transition management
-      // CRITICAL: Set transitioning flag to prevent other updates during transition
-      isTransitioningRef.current = true
-      
-      logToAdmin('info', 'Fallback: pathname changed, triggering manual transition', {
-        from: prevPathnameRef.current,
-        to: pathname,
-      })
-      setTransitionStage('exit')
-      const timer = setTimeout(() => {
-        logToAdmin('info', 'Fallback: transition exit complete, entering new page', {
-          pathname,
-        })
-        setDisplayChildren(children)
-        setTransitionStage('enter')
-        prevPathnameRef.current = pathname
-        
-        // Clear transitioning flag after transition completes
-        setTimeout(() => {
-          isTransitioningRef.current = false
-        }, 300) // Slightly longer than transition duration
-      }, 250) // Match exit duration
-      return () => {
-        clearTimeout(timer)
-        isTransitioningRef.current = false
-      }
-    }
-    // CRITICAL FIX: Only depend on pathname and children
-    // Don't include useFallback, displayChildren, or transitionStage in deps
-    // This prevents the effect from re-running when state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, children])
-
-  // If View Transitions API is supported, render children directly
-  // The browser will handle the transition automatically via CSS
-  // We still use displayChildren to ensure smooth updates, but no manual transition logic
-  if (!useFallback) {
-    return <>{displayChildren}</>
-  }
-
-  // Fallback: Custom CSS transitions for browsers without View Transitions support
   return (
-    <div className="page-transition-container">
-      <div
-        className={`page-transition-${transitionStage} ${
-          transitionStage === 'enter' ? 'page-transition-enter-active' : 'page-transition-exit-active'
-        }`}
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={pathname}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        className="min-h-screen"
+        style={{ willChange: 'transform, opacity' }} // Performance optimalisatie
       >
-        {displayChildren}
-      </div>
-    </div>
+        {children}
+      </motion.div>
+    </AnimatePresence>
   )
 }
+
