@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { CookieBanner } from './CookieBanner'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -67,6 +68,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <Header />
       <main>{children}</main>
       <Footer />
+      <CookieBanner />
     </>
   )
 }

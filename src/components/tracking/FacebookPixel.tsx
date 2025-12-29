@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Script from 'next/script'
 import { usePathname } from 'next/navigation'
+import { isCategoryAllowed } from '@/lib/cookies'
 
 declare global {
   interface Window {
@@ -21,19 +22,48 @@ interface FacebookPixelProps {
 
 export function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname()
+  const [shouldLoad, setShouldLoad] = useState(false)
 
   useEffect(() => {
-    // Track page view on route change
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+    // Check if marketing cookies are allowed
+    // Facebook Pixel is considered a marketing cookie
+    if (typeof window !== 'undefined') {
+      const allowed = isCategoryAllowed('marketing')
+      setShouldLoad(allowed)
+
+      // Listen for cookie preference changes
+      const handleCookieChange = () => {
+        const nowAllowed = isCategoryAllowed('marketing')
+        setShouldLoad(nowAllowed)
+        if (nowAllowed && typeof window.fbq === 'function') {
+          // Track page view if pixel is already loaded
+          try {
+            window.fbq('track', 'PageView')
+          } catch (error) {
+            console.error('Facebook Pixel tracking error:', error)
+          }
+        }
+      }
+
+      window.addEventListener('cookiePreferencesChanged', handleCookieChange)
+      return () => {
+        window.removeEventListener('cookiePreferencesChanged', handleCookieChange)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    // Track page view on route change (only if pixel is loaded and allowed)
+    if (shouldLoad && typeof window !== 'undefined' && typeof window.fbq === 'function') {
       try {
         window.fbq('track', 'PageView')
       } catch (error) {
         console.error('Facebook Pixel tracking error:', error)
       }
     }
-  }, [pathname])
+  }, [pathname, shouldLoad])
 
-  if (!pixelId || !pixelId.trim()) {
+  if (!pixelId || !pixelId.trim() || !shouldLoad) {
     return null
   }
 
