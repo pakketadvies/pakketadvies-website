@@ -358,7 +358,15 @@ function BedrijfsgegevensFormContent() {
   
   // Debug logging
   console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
-  console.log('🔍 BedrijfsgegevensForm - Verbruik:', verbruik ? { addressType: verbruik.addressType } : 'null')
+  console.log('🔍 BedrijfsgegevensForm - Verbruik:', verbruik ? { 
+    addressType: verbruik.addressType,
+    elektriciteitNormaal: verbruik.elektriciteitNormaal,
+    gasJaar: verbruik.gasJaar,
+    hasLeveringsadressen: verbruik.leveringsadressen?.length || 0,
+    geschat: verbruik.geschat
+  } : 'null')
+  console.log('🔍 BedrijfsgegevensForm - isDirect:', isDirect, 'contractId:', contractId)
+  console.log('🔍 BedrijfsgegevensForm - Will show verbruik card:', !!verbruik)
   
   // Loading state
   if (loadingContract) {
