@@ -27,7 +27,9 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
   useEffect(() => {
     // Check if marketing cookies are allowed
     // Facebook Pixel is considered a marketing cookie
+    // IMPORTANT: Check immediately on mount, don't wait for hydration
     if (typeof window !== 'undefined') {
+      // Initial check - don't load if not allowed
       const allowed = isCategoryAllowed('marketing')
       setShouldLoad(allowed)
 
