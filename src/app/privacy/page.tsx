@@ -69,7 +69,6 @@ export default function PrivacyPage() {
                     <div className="text-sm text-gray-600 space-y-1">
                       <p><strong>Bedrijfsnaam:</strong> PakketAdvies</p>
                       <p><strong>Adres:</strong> Stavangerweg 13, 9723 JC Groningen</p>
-                      <p><strong>KvK-nummer:</strong> [KvK-nummer]</p>
                       <p><strong>E-mail:</strong> <Link href="mailto:info@pakketadvies.nl" className="text-brand-teal-600 hover:underline">info@pakketadvies.nl</Link></p>
                       <p><strong>Telefoon:</strong> <Link href="tel:+31850477065" className="text-brand-teal-600 hover:underline">085 047 7065</Link></p>
                     </div>
