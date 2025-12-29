@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone, ArrowsClockwise, ArrowLeft } from '@phosphor-icons/react'
+import { Buildings, ShieldCheck, MagnifyingGlass, CheckCircle, XCircle, CaretDown, MapPin, Warning, House, CreditCard, Calendar, User, Envelope, Phone, ArrowsClockwise, ArrowLeft, Lightning, Flame, Sun, PencilSimple } from '@phosphor-icons/react'
 import { Storefront, ForkKnife, Factory, FirstAid, GraduationCap, Briefcase, SquaresFour } from '@phosphor-icons/react'
 import { bepaalContractType } from '@/lib/contract-type'
 import { ParticulierAanvraagForm } from './ParticulierAanvraagForm'
@@ -18,6 +18,7 @@ import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
 import type { ContractOptie } from '@/types/calculator'
+import EditVerbruikModal from './EditVerbruikModal'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -178,6 +179,29 @@ function BedrijfsgegevensFormContent() {
   
   // IBAN Calculator modal
   const [showIbanCalculator, setShowIbanCalculator] = useState(false)
+  
+  // Verbruik edit modal
+  const [showVerbruikModal, setShowVerbruikModal] = useState(false)
+  const [isUpdatingVerbruik, setIsUpdatingVerbruik] = useState(false)
+  
+  // Handler voor verbruik update
+  const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
+    if (!newVerbruik) return
+    
+    setIsUpdatingVerbruik(true)
+    try {
+      // Update verbruik in store
+      setVerbruik(newVerbruik)
+      // Sluit modal na korte delay voor UX
+      setTimeout(() => {
+        setShowVerbruikModal(false)
+        setIsUpdatingVerbruik(false)
+      }, 300)
+    } catch (error) {
+      console.error('Error updating verbruik:', error)
+      setIsUpdatingVerbruik(false)
+    }
+  }
   
   // Fetch contract from API als fallback (als niet in store of als contractId verschilt)
   useEffect(() => {
@@ -870,6 +894,95 @@ function BedrijfsgegevensFormContent() {
           )}
         </div>
       </div>
+
+      {/* Energieverbruik Card */}
+      {verbruik && (
+        <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm">
+          <div className="p-4 md:p-6">
+            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
+                <Lightning weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              </div>
+              <h2 className="text-lg md:text-xl font-bold text-brand-navy-500">Energieverbruik</h2>
+            </div>
+
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex-1">
+                  {/* Verbruik details */}
+                  <div className="space-y-2">
+                    {/* Elektriciteit */}
+                    <div className="flex items-center gap-2">
+                      <Lightning weight="duotone" className="w-4 h-4 text-brand-teal-600 flex-shrink-0" />
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold text-brand-navy-500">Elektriciteit:</span>
+                        <span className="text-sm text-gray-700 ml-2">
+                          {verbruik.heeftEnkeleMeter ? (
+                            <>
+                              {verbruik.elektriciteitNormaal?.toLocaleString('nl-NL') || 0} kWh (enkele meter)
+                            </>
+                          ) : (
+                            <>
+                              {verbruik.elektriciteitNormaal?.toLocaleString('nl-NL') || 0} kWh normaal
+                              {verbruik.elektriciteitDal && verbruik.elektriciteitDal > 0 && (
+                                <> • {verbruik.elektriciteitDal.toLocaleString('nl-NL')} kWh dal</>
+                              )}
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Gas */}
+                    {verbruik.gasJaar && verbruik.gasJaar > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Flame weight="duotone" className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="text-sm font-semibold text-brand-navy-500">Gas:</span>
+                          <span className="text-sm text-gray-700 ml-2">
+                            {verbruik.gasJaar.toLocaleString('nl-NL')} m³/jaar
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Zonnepanelen */}
+                    {verbruik.heeftZonnepanelen && verbruik.terugleveringJaar && verbruik.terugleveringJaar > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Sun weight="duotone" className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="text-sm font-semibold text-brand-navy-500">Teruglevering:</span>
+                          <span className="text-sm text-gray-700 ml-2">
+                            {verbruik.terugleveringJaar.toLocaleString('nl-NL')} kWh/jaar
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Badge en knop */}
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-200">
+                {verbruik.geschat && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-xs font-semibold">
+                    <Warning weight="duotone" className="w-3.5 h-3.5" />
+                    Geschat verbruik
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowVerbruikModal(true)}
+                  className="ml-auto inline-flex items-center gap-2 px-4 py-2 bg-brand-teal-500 hover:bg-brand-teal-600 text-white rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md"
+                >
+                  <PencilSimple weight="bold" className="w-4 h-4" />
+                  Verbruik wijzigen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Unified KvK Search - Naam OF Nummer */}
       <div className="bg-gradient-to-br from-brand-teal-50 to-brand-navy-50 border-2 border-brand-teal-200 rounded-xl md:rounded-2xl p-4 md:p-6">
@@ -1575,6 +1688,17 @@ function BedrijfsgegevensFormContent() {
         </Button>
       </div>
       </form>
+
+      {/* Verbruik Edit Modal */}
+      {verbruik && (
+        <EditVerbruikModal
+          isOpen={showVerbruikModal}
+          onClose={() => setShowVerbruikModal(false)}
+          currentData={verbruik}
+          onSave={handleVerbruikUpdate}
+          isUpdating={isUpdatingVerbruik}
+        />
+      )}
     </>
   )
 }
