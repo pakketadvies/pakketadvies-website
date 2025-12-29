@@ -19,6 +19,7 @@ import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
 import type { ContractOptie } from '@/types/calculator'
 import EditVerbruikModal from './EditVerbruikModal'
+import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -145,6 +146,7 @@ function BedrijfsgegevensFormContent() {
   
   // Haal contract op uit query param of store
   const contractId = searchParams?.get('contract')
+  const isDirect = searchParams?.get('direct') === 'true'
   
   // Alleen gebruik selectedContract als het overeenkomt met contractId uit URL
   const initialContract = contractId && selectedContract && selectedContract.id === contractId
@@ -296,6 +298,37 @@ function BedrijfsgegevensFormContent() {
     
     loadContract()
   }, [contractId, contract, selectedContract, resultaten, setSelectedContract])
+  
+  // Stel standaard verbruik in wanneer direct=true en er nog geen verbruikswaarden zijn
+  useEffect(() => {
+    if (isDirect && contractId && (!verbruik || !verbruik.elektriciteitNormaal)) {
+      // Standaard verbruikswaarden (zoals in QuickStartStep en best-deals API)
+      const standaardVerbruik = {
+        elektriciteitNormaal: 4000, // kWh/jaar
+        elektriciteitDal: 2000, // kWh/jaar
+        gasJaar: 1200, // m³/jaar
+        heeftEnkeleMeter: false, // Dubbele meter
+        heeftZonnepanelen: false,
+        terugleveringJaar: 0,
+        geenGasaansluiting: false,
+        meterType: 'slim' as const,
+        geschat: true, // Markeer als geschat
+      }
+
+      // Schat aansluitwaarden op basis van standaard verbruik
+      const totaalElektriciteit = standaardVerbruik.elektriciteitNormaal + standaardVerbruik.elektriciteitDal
+      const schatting = schatAansluitwaarden(totaalElektriciteit, standaardVerbruik.gasJaar)
+
+      // Zet standaard verbruik in store (behoud bestaande adressen als die er zijn)
+      setVerbruik({
+        ...standaardVerbruik,
+        aansluitwaardeElektriciteit: schatting.elektriciteit,
+        aansluitwaardeGas: schatting.gas,
+        addressType: verbruik?.addressType || null, // Behoud bestaande addressType als die er is
+        leveringsadressen: verbruik?.leveringsadressen || [], // Behoud bestaande adressen als die er zijn
+      })
+    }
+  }, [isDirect, verbruik, contractId, setVerbruik])
   
   // Debug logging
   console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
