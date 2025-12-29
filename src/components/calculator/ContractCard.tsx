@@ -910,7 +910,7 @@ export default function ContractCard({
                   </a>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
         )}
