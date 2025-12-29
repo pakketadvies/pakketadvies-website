@@ -186,6 +186,9 @@ function BedrijfsgegevensFormContent() {
   const [showVerbruikModal, setShowVerbruikModal] = useState(false)
   const [isUpdatingVerbruik, setIsUpdatingVerbruik] = useState(false)
   
+  // Ref om bij te houden of we al standaard verbruik hebben ingesteld (voorkomt meerdere keren instellen)
+  const heeftStandaardVerbruikGeinsteld = useRef(false)
+  
   // Handler voor verbruik update
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
     if (!newVerbruik) return
@@ -301,7 +304,27 @@ function BedrijfsgegevensFormContent() {
   
   // Stel standaard verbruik in wanneer direct=true en er nog geen verbruikswaarden zijn
   useEffect(() => {
-    if (isDirect && contractId && (!verbruik || !verbruik.elektriciteitNormaal)) {
+    // Reset ref wanneer isDirect of contractId verandert
+    if (isDirect && contractId) {
+      heeftStandaardVerbruikGeinsteld.current = false
+    }
+  }, [isDirect, contractId])
+  
+  useEffect(() => {
+    // Alleen uitvoeren als direct=true, er is een contractId, en we hebben nog geen standaard verbruik ingesteld
+    const heeftGeenVerbruik = !verbruik || !verbruik.elektriciteitNormaal || verbruik.elektriciteitNormaal === 0
+    
+    if (isDirect && contractId && heeftGeenVerbruik && !heeftStandaardVerbruikGeinsteld.current) {
+      console.log('🔵 [BedrijfsgegevensForm] Setting default verbruik for direct contract selection', {
+        isDirect,
+        contractId,
+        hasVerbruik: !!verbruik,
+        hasElektriciteitNormaal: !!verbruik?.elektriciteitNormaal
+      })
+      
+      // Markeer dat we standaard verbruik gaan instellen
+      heeftStandaardVerbruikGeinsteld.current = true
+      
       // Standaard verbruikswaarden (zoals in QuickStartStep en best-deals API)
       const standaardVerbruik = {
         elektriciteitNormaal: 4000, // kWh/jaar
@@ -320,15 +343,18 @@ function BedrijfsgegevensFormContent() {
       const schatting = schatAansluitwaarden(totaalElektriciteit, standaardVerbruik.gasJaar)
 
       // Zet standaard verbruik in store (behoud bestaande adressen als die er zijn)
-      setVerbruik({
+      const nieuwVerbruik = {
         ...standaardVerbruik,
         aansluitwaardeElektriciteit: schatting.elektriciteit,
         aansluitwaardeGas: schatting.gas,
         addressType: verbruik?.addressType || null, // Behoud bestaande addressType als die er is
         leveringsadressen: verbruik?.leveringsadressen || [], // Behoud bestaande adressen als die er zijn
-      })
+      }
+      
+      console.log('✅ [BedrijfsgegevensForm] Setting verbruik:', nieuwVerbruik)
+      setVerbruik(nieuwVerbruik)
     }
-  }, [isDirect, verbruik, contractId, setVerbruik])
+  }, [isDirect, contractId, verbruik, setVerbruik]) // Nu wel verbruik in dependencies, maar ref voorkomt infinite loop
   
   // Debug logging
   console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
