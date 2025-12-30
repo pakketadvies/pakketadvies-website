@@ -755,7 +755,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Conditionele padding: alleen voor consumer (particulier) omdat business (zakelijk) al CalculatorLayout padding heeft */}
       <div className={audience === 'consumer' ? 'pt-24 md:pt-28' : ''}>
-          {verbruik && (
+        {verbruik && (
             <>
               <div className="lg:hidden">
                 <FloatingEditButton onClick={() => setIsModalOpen(true)} />
@@ -1004,9 +1004,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
           )}
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
 export function ResultatenFlow({ audience }: { audience: AudienceMode }) {
   return (
