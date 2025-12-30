@@ -1399,7 +1399,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
                   Uw gegevens worden via een beveiligde verbinding verstuurd
                 </div>
                 <div className="text-xs text-gray-600">
-                  Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
+                  Beveiligd met rate limiting en spam detection - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
                 </div>
               </div>
             </div>
