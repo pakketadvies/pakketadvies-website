@@ -154,6 +154,7 @@ export function Turnstile({
 /**
  * Execute Turnstile and get token
  * This is a helper function for programmatic token generation
+ * Note: This function is not currently used, but kept for future reference
  */
 export async function executeTurnstile(siteKey: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -162,7 +163,7 @@ export async function executeTurnstile(siteKey: string): Promise<string> {
       return
     }
 
-    // Create a temporary container
+    // Create a temporary container (hidden)
     const container = document.createElement('div')
     container.style.display = 'none'
     document.body.appendChild(container)
@@ -186,7 +187,7 @@ export async function executeTurnstile(siteKey: string): Promise<string> {
           document.body.removeChild(container)
           reject(new Error('Turnstile verification failed'))
         },
-        size: 'invisible', // Invisible mode for programmatic execution
+        size: 'normal', // Use normal size (container is hidden anyway)
       })
     } catch (error) {
       document.body.removeChild(container)
