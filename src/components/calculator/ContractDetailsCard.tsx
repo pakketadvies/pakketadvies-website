@@ -258,8 +258,8 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
       verbruik.gasJaar || 0,
       verbruik.heeftEnkeleMeter || false,
       verbruik.terugleveringJaar || 0,
-      verbruik.aansluitwaarden?.elektriciteit,
-      verbruik.aansluitwaarden?.gas,
+      verbruik.aansluitwaardeElektriciteit,
+      verbruik.aansluitwaardeGas,
       verbruik.addressType || null
     )
   }, [contract, verbruik])
