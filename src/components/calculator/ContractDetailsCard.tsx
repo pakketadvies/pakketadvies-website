@@ -172,13 +172,13 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
 
             {/* Prominente prijsinformatie */}
             <div className="space-y-2 mb-3">
-              {/* Maandbedrag - gebruik breakdown als beschikbaar, anders contract.maandbedrag */}
+              {/* Maandbedrag - gebruik breakdown als beschikbaar, anders contract.exactMaandbedrag of contract.maandbedrag */}
               {(() => {
                 const maandbedrag = breakdown && !loadingBreakdown
                   ? (isZakelijk 
                       ? breakdown.totaal.maandExclBtw
                       : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
-                  : contract.maandbedrag
+                  : (contract.exactMaandbedrag ?? contract.maandbedrag)
                 
                 if (maandbedrag > 0) {
                   return (

@@ -193,13 +193,13 @@ export function ConsumerContractRowCard({
                   <div className="text-xs text-gray-500 mb-0.5">kosten per maand</div>
                   <div className="flex items-baseline gap-1.5">
                     {(() => {
-                      // Gebruik breakdown als beschikbaar, anders contract.maandbedrag
+                      // Gebruik breakdown als beschikbaar, anders contract.exactMaandbedrag of contract.maandbedrag
                       // Formatteer exact hetzelfde als ContractDetailsCard (2 decimalen)
                       const maandbedrag = breakdown && !loading
                         ? (isZakelijk 
                             ? breakdown.totaal.maandExclBtw
                             : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
-                        : contract.maandbedrag
+                        : (contract.exactMaandbedrag ?? contract.maandbedrag)
                       
                       const formatted = maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                       
@@ -213,13 +213,13 @@ export function ConsumerContractRowCard({
                   </div>
                   <div className="text-xs text-gray-500 mt-0.5">
                     {(() => {
-                      // Gebruik breakdown als beschikbaar, anders contract.jaarbedrag
+                      // Gebruik breakdown als beschikbaar, anders contract.exactJaarbedrag of contract.jaarbedrag
                       // Formatteer exact hetzelfde als ContractDetailsCard (2 decimalen)
                       const jaarbedrag = breakdown && !loading
                         ? (isZakelijk 
                             ? breakdown.totaal.jaarExclBtw
                             : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
-                        : contract.jaarbedrag
+                        : (contract.exactJaarbedrag ?? contract.jaarbedrag)
                       
                       const formatted = jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                       return `€${formatted} per jaar`
