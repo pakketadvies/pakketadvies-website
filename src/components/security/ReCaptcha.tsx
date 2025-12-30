@@ -29,7 +29,7 @@ export function ReCaptcha({ onVerify, onError }: ReCaptchaProps) {
     }
 
     // Check if script is already loaded
-    if (window.grecaptcha && window.grecaptcha.ready) {
+    if (typeof window !== 'undefined' && window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
       setIsReady(true)
       if (onVerify) {
         onVerify(null) // Signal that reCAPTCHA is ready

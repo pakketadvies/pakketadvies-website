@@ -460,7 +460,12 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
       // Get reCAPTCHA token
       let recaptchaToken: string | null = null
-      if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && window.grecaptcha) {
+      if (
+        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY &&
+        typeof window !== 'undefined' &&
+        window.grecaptcha &&
+        typeof window.grecaptcha.execute === 'function'
+      ) {
         try {
           recaptchaToken = await window.grecaptcha.execute(
             process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
