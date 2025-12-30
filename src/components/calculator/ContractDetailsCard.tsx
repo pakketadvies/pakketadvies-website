@@ -171,31 +171,59 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
 
             {/* Prominente prijsinformatie */}
             <div className="space-y-2 mb-3">
-              {/* Maandbedrag */}
-              {contract.maandbedrag > 0 && (
-                <div className="flex items-center gap-2">
-                  <CurrencyEur className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                  <span className="text-base md:text-lg font-bold text-brand-navy-500">
-                    {formatCurrency(contract.maandbedrag)}/maand
-                  </span>
-                  {isZakelijk && (
-                    <span className="text-xs text-gray-500">(excl. BTW)</span>
-                  )}
-                </div>
-              )}
+              {/* Maandbedrag - gebruik breakdown als beschikbaar, anders contract.maandbedrag */}
+              {(() => {
+                const maandbedrag = breakdown && !loadingBreakdown
+                  ? (isZakelijk 
+                      ? breakdown.totaal.maandExclBtw 
+                      : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
+                  : contract.maandbedrag
+                
+                if (maandbedrag > 0) {
+                  return (
+                    <div className="flex items-center gap-2">
+                      <CurrencyEur className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                      <span className="text-base md:text-lg font-bold text-brand-navy-500">
+                        {formatCurrency(maandbedrag)}/maand
+                      </span>
+                      {isZakelijk && (
+                        <span className="text-xs text-gray-500">(excl. BTW)</span>
+                      )}
+                      {!isZakelijk && !breakdown && (
+                        <span className="text-xs text-gray-500">(geschat)</span>
+                      )}
+                    </div>
+                  )
+                }
+                return null
+              })()}
 
-              {/* Jaarbedrag */}
-              {contract.jaarbedrag > 0 && (
-                <div className="flex items-center gap-2">
-                  <ChartLine className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                  <span className="text-sm md:text-base font-semibold text-gray-700">
-                    {formatCurrency(contract.jaarbedrag)}/jaar
-                  </span>
-                  {isZakelijk && (
-                    <span className="text-xs text-gray-500">(excl. BTW)</span>
-                  )}
-                </div>
-              )}
+              {/* Jaarbedrag - gebruik breakdown als beschikbaar, anders contract.jaarbedrag */}
+              {(() => {
+                const jaarbedrag = breakdown && !loadingBreakdown
+                  ? (isZakelijk 
+                      ? breakdown.totaal.jaarExclBtw 
+                      : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
+                  : contract.jaarbedrag
+                
+                if (jaarbedrag > 0) {
+                  return (
+                    <div className="flex items-center gap-2">
+                      <ChartLine className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                      <span className="text-sm md:text-base font-semibold text-gray-700">
+                        {formatCurrency(jaarbedrag)}/jaar
+                      </span>
+                      {isZakelijk && (
+                        <span className="text-xs text-gray-500">(excl. BTW)</span>
+                      )}
+                      {!isZakelijk && !breakdown && (
+                        <span className="text-xs text-gray-500">(geschat)</span>
+                      )}
+                    </div>
+                  )
+                }
+                return null
+              })()}
 
               {/* Besparing */}
               {besparing && besparing > 0 && (
