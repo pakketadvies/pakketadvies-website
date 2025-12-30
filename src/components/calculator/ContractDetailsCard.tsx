@@ -199,13 +199,13 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
                 return null
               })()}
 
-              {/* Jaarbedrag - gebruik breakdown als beschikbaar, anders contract.jaarbedrag */}
+              {/* Jaarbedrag - gebruik breakdown als beschikbaar, anders contract.exactJaarbedrag of contract.jaarbedrag */}
               {(() => {
                 const jaarbedrag = breakdown && !loadingBreakdown
                   ? (isZakelijk 
                       ? breakdown.totaal.jaarExclBtw
                       : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
-                  : contract.jaarbedrag
+                  : (contract.exactJaarbedrag ?? contract.jaarbedrag)
                 
                 if (jaarbedrag > 0) {
                   return (
