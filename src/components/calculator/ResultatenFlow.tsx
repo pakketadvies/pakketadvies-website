@@ -950,7 +950,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </aside>
 
                 {/* Results list */}
-                <section className="space-y-4">
+                <section className="space-y-4 px-4 lg:px-0">
                   {filteredResultaten.length === 0 ? (
                     <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
                       <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
