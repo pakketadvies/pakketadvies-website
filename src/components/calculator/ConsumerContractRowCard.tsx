@@ -216,7 +216,15 @@ export function ConsumerContractRowCard({
               className="w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-brand-teal-500/25 hover:shadow-xl hover:shadow-brand-teal-500/30 transition-all duration-200"
               onClick={() => {
                 setSelectedContract(contract)
-                router.push(`/calculator?stap=2&contract=${contract.id}`)
+                // Voeg berekende waardes toe aan URL voor mobiele compatibility
+                const params = new URLSearchParams({
+                  stap: '2',
+                  contract: contract.id,
+                  maandbedrag: contract.maandbedrag.toString(),
+                  jaarbedrag: contract.jaarbedrag.toString(),
+                  besparing: (contract.besparing || 0).toString(),
+                })
+                router.push(`/calculator?${params.toString()}`)
               }}
             >
               Aanmelden
@@ -278,7 +286,15 @@ export function ConsumerContractRowCard({
                 className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
                 onClick={() => {
                   setSelectedContract(contract)
-                  router.push(`/calculator?stap=2&contract=${contract.id}`)
+                  // Voeg berekende waardes toe aan URL voor mobiele compatibility
+                  const params = new URLSearchParams({
+                    stap: '2',
+                    contract: contract.id,
+                    maandbedrag: contract.maandbedrag.toString(),
+                    jaarbedrag: contract.jaarbedrag.toString(),
+                    besparing: (contract.besparing || 0).toString(),
+                  })
+                  router.push(`/calculator?${params.toString()}`)
                 }}
               >
                 Aanmelden

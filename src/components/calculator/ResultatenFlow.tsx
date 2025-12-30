@@ -835,7 +835,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
               <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
                 {/* Sidebar */}
-                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+                <aside className="px-5 space-y-4 lg:sticky lg:top-28 lg:self-start">
                   {/* Help mij kiezen sectie */}
                   <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-2xl p-4 text-white overflow-hidden relative">
                     <div className="relative z-10">
@@ -950,7 +950,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </aside>
 
                 {/* Results list */}
-                <section className="space-y-4">
+                <section className="px-5 space-y-4">
                   {filteredResultaten.length === 0 ? (
                     <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
                       <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>

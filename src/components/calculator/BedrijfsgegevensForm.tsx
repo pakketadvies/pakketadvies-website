@@ -154,6 +154,13 @@ function BedrijfsgegevensFormContent() {
   const contractId = searchParams?.get('contract')
   const isDirect = searchParams?.get('direct') === 'true'
   
+  // Haal berekende waardes uit URL (voor mobiele compatibility)
+  const urlMaandbedrag = searchParams?.get('maandbedrag') ? parseFloat(searchParams.get('maandbedrag')!) : null
+  const urlJaarbedrag = searchParams?.get('jaarbedrag') ? parseFloat(searchParams.get('jaarbedrag')!) : null
+  const urlBesparing = searchParams?.get('besparing') ? parseFloat(searchParams.get('besparing')!) : null
+  
+  console.log('📱 [BedrijfsgegevensForm] URL params:', { contractId, urlMaandbedrag, urlJaarbedrag, urlBesparing })
+  
   // Alleen gebruik selectedContract als het overeenkomt met contractId uit URL
   const initialContract = contractId && selectedContract && selectedContract.id === contractId
     ? selectedContract
@@ -274,8 +281,8 @@ function BedrijfsgegevensFormContent() {
             },
             type: rawContract.type === 'maatwerk' ? 'vast' : rawContract.type,
             looptijd: rawContract.details_vast?.looptijd || rawContract.details_maatwerk?.looptijd || 1,
-            maandbedrag: 0, // Wordt later berekend
-            jaarbedrag: 0, // Wordt later berekend
+            maandbedrag: urlMaandbedrag !== null ? urlMaandbedrag : 0, // Gebruik URL waarde of 0
+            jaarbedrag: urlJaarbedrag !== null ? urlJaarbedrag : 0, // Gebruik URL waarde of 0
             tariefElektriciteit: rawContract.details_vast?.tarief_elektriciteit_normaal || rawContract.details_dynamisch?.opslag_elektriciteit_normaal || rawContract.details_maatwerk?.tarief_elektriciteit_normaal || 0,
             tariefElektriciteitDal: rawContract.details_vast?.tarief_elektriciteit_dal || undefined,
             tariefElektriciteitEnkel: rawContract.details_vast?.tarief_elektriciteit_enkel || rawContract.details_maatwerk?.tarief_elektriciteit_enkel || undefined,
@@ -288,12 +295,17 @@ function BedrijfsgegevensFormContent() {
             voorwaarden: rawContract.details_vast?.voorwaarden || rawContract.details_dynamisch?.voorwaarden || rawContract.details_maatwerk?.voorwaarden || [],
             opzegtermijn: rawContract.details_vast?.opzegtermijn || rawContract.details_dynamisch?.opzegtermijn || rawContract.details_maatwerk?.opzegtermijn || 1,
             bijzonderheden: rawContract.details_vast?.bijzonderheden || rawContract.details_dynamisch?.bijzonderheden || rawContract.details_maatwerk?.bijzonderheden || [],
-            besparing: 0, // Wordt later berekend
+            besparing: urlBesparing !== null ? urlBesparing : 0, // Gebruik URL waarde of 0
             aanbevolen: rawContract.aanbevolen || false,
             populair: rawContract.populair || false,
           }
           
           console.log('✅ [BedrijfsgegevensForm] Contract transformed:', transformedContract.id, transformedContract.targetAudience)
+          console.log('💰 [BedrijfsgegevensForm] Contract prices:', { 
+            maandbedrag: transformedContract.maandbedrag, 
+            jaarbedrag: transformedContract.jaarbedrag, 
+            besparing: transformedContract.besparing 
+          })
           
           setContract(transformedContract)
           setSelectedContract(transformedContract) // Zet ook in store voor volgende keer

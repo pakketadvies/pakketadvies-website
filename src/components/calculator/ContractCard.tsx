@@ -940,8 +940,15 @@ export default function ContractCard({
               
               // Sla gekozen contract op in store
               setSelectedContract(contract)
-              // Navigeer naar stap 2
-              router.push(`/calculator?stap=2&contract=${contract.id}`)
+              // Navigeer naar stap 2 met berekende waardes voor mobiele compatibility
+              const params = new URLSearchParams({
+                stap: '2',
+                contract: contract.id,
+                maandbedrag: (contract.maandbedrag || 0).toString(),
+                jaarbedrag: (contract.jaarbedrag || 0).toString(),
+                besparing: (contract.besparing || 0).toString(),
+              })
+              router.push(`/calculator?${params.toString()}`)
             }}
           >
               Aanmelden
