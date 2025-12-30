@@ -85,8 +85,6 @@ export interface ContractOptie {
   looptijd?: number // Optional: only for vast contracts, undefined for dynamic
   maandbedrag: number
   jaarbedrag: number
-  exactMaandbedrag?: number // NIEUW: exact maandbedrag van volledige breakdown berekening (zonder Math.round)
-  exactJaarbedrag?: number // NIEUW: exact jaarbedrag van volledige breakdown berekening (zonder Math.round)
   tariefElektriciteit: number
   tariefElektriciteitEnkel?: number // Voor enkele meters
   tariefElektriciteitDal?: number // Voor dubbele meters (nacht)
@@ -103,6 +101,10 @@ export interface ContractOptie {
   breakdown?: any // Kosten breakdown voor prijsdetails (optioneel)
   targetAudience?: 'particulier' | 'zakelijk' | 'both' // NIEUW: voor particulier/zakelijk filtering
   contractNaam?: string // NIEUW: naam van het contract (bijv. "NL Groene Stroom en Aardgas")
+  // NIEUW: details objecten voor tarieven display in ContractDetailsCard
+  details_vast?: any
+  details_dynamisch?: any
+  details_maatwerk?: any
 }
 
 export interface Leverancier {
