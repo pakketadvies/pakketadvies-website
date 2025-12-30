@@ -81,7 +81,7 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
           tariefGas: contract.tariefGas,
           tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
           // Dynamische contract opslagen
-          opslagElektriciteit: details?.opslag_elektriciteit || 0,
+          opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
           opslagGas: details?.opslag_gas || 0,
           opslagTeruglevering: details?.opslag_teruglevering || 0,
           vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
@@ -176,8 +176,8 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
               {(() => {
                 const maandbedrag = breakdown && !loadingBreakdown
                   ? (isZakelijk 
-                      ? breakdown.totaal.maandExclBtw 
-                      : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
+                      ? Math.round(breakdown.totaal.maandExclBtw)
+                      : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
                   : contract.maandbedrag
                 
                 if (maandbedrag > 0) {
@@ -202,9 +202,9 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
               {/* Jaarbedrag - gebruik breakdown als beschikbaar, anders contract.jaarbedrag */}
               {(() => {
                 const jaarbedrag = breakdown && !loadingBreakdown
-                  ? (isZakelijk 
-                      ? breakdown.totaal.jaarExclBtw 
-                      : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
+                  ? (isZakelijk
+                      ? Math.round(breakdown.totaal.jaarExclBtw)
+                      : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
                   : contract.jaarbedrag
                 
                 if (jaarbedrag > 0) {
