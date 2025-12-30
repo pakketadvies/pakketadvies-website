@@ -45,16 +45,18 @@ export function ConsumerContractRowCard({
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const addressType = verbruik?.addressType || null
+  const isZakelijk = addressType === 'zakelijk'
 
   // Haal contract details op (exact zoals in ContractCard)
   const details = contract.type === 'vast' 
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
-  // Lazy-load breakdown only when opening details.
+  // Haal breakdown direct op (niet alleen bij uitklappen) om prijsinformatie correct te tonen
   useEffect(() => {
-    if (!isDetailsOpen) return
     if (breakdown) return
+    if (loading) return
 
     let cancelled = false
     const run = async () => {
