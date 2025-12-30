@@ -37,6 +37,7 @@ import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
 import EditVerbruikModal from './EditVerbruikModal'
+import { ReCaptcha } from '@/components/security/ReCaptcha'
 
 const particulierAanvraagSchema = z.object({
   // Klant check
@@ -453,7 +454,22 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
     try {
       if (!contract || !verbruik) {
         alert('Er is een fout opgetreden. Probeer het opnieuw.')
+        setIsSubmitting(false)
         return
+      }
+
+      // Get reCAPTCHA token
+      let recaptchaToken: string | null = null
+      if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && window.grecaptcha) {
+        try {
+          recaptchaToken = await window.grecaptcha.execute(
+            process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+            { action: 'submit_contract_application' }
+          )
+        } catch (error) {
+          console.error('reCAPTCHA error:', error)
+          // Continue without token if reCAPTCHA fails (graceful degradation)
+        }
       }
 
       // Prepare gegevens_data (particulier)
@@ -511,7 +527,10 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(aanvraagData),
+        body: JSON.stringify({
+          ...aanvraagData,
+          recaptcha_token: recaptchaToken, // Include reCAPTCHA token
+        }),
       })
 
       const result = await response.json()
@@ -1363,21 +1382,23 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </Button>
             </div>
 
-            {/* Security badges */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
-              <div className="flex flex-wrap items-center gap-4 justify-center">
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
-                  <span>Secure GlobalSign</span>
-                </div>
-                <div className="text-xs text-gray-600">
-                  Uw gegevens worden via een beveiligde verbinding verstuurd
-                </div>
-                <div className="text-xs text-gray-600">
-                  Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
+            {/* Security badges - alleen tonen wanneer reCAPTCHA geconfigureerd is */}
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
+                <div className="flex flex-wrap items-center gap-4 justify-center">
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
+                    <span>Secure GlobalSign</span>
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Uw gegevens worden via een beveiligde verbinding verstuurd
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -1450,6 +1471,18 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
           isUpdating={isUpdatingVerbruik}
         />
       )}
+
+      {/* reCAPTCHA Component (invisible) */}
+      <ReCaptcha
+        onVerify={(token) => {
+          // Token is automatically included in form submission
+          console.log('reCAPTCHA verified:', token ? 'Token received' : 'No token')
+        }}
+        onError={(error) => {
+          console.warn('reCAPTCHA error:', error)
+          // Graceful degradation: continue without reCAPTCHA if it fails
+        }}
+      />
     </>
   )
 }

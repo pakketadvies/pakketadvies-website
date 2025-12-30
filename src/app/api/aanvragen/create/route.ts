@@ -9,9 +9,63 @@ import { calculateContractCosts } from '@/lib/bereken-contract-internal'
  * Creates a new contract application (aanvraag) with a unique aanvraagnummer
  * Uses service role key to bypass RLS for public form submissions
  */
+/**
+ * Verify reCAPTCHA token with Google
+ */
+async function verifyRecaptcha(token: string | null | undefined): Promise<{ success: boolean; score?: number; error?: string }> {
+  if (!token) {
+    // If no token provided and reCAPTCHA is not configured, allow request (graceful degradation)
+    if (!process.env.RECAPTCHA_SECRET_KEY) {
+      return { success: true }
+    }
+    return { success: false, error: 'reCAPTCHA token missing' }
+  }
+
+  if (!process.env.RECAPTCHA_SECRET_KEY) {
+    // reCAPTCHA not configured, allow request
+    return { success: true }
+  }
+
+  try {
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
+    })
+
+    const data = await response.json()
+    
+    if (!data.success) {
+      return { 
+        success: false, 
+        error: data['error-codes']?.join(', ') || 'reCAPTCHA verification failed' 
+      }
+    }
+
+    // Check score (0.0 = bot, 1.0 = human)
+    // Threshold: 0.5 (recommended by Google)
+    const score = data.score || 0
+    if (score < 0.5) {
+      return { 
+        success: false, 
+        score,
+        error: 'reCAPTCHA score too low (possible bot)' 
+      }
+    }
+
+    return { success: true, score }
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error)
+    // On error, allow request (graceful degradation)
+    return { success: true }
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    const body: CreateAanvraagRequest = await request.json()
+    const body: CreateAanvraagRequest & { recaptcha_token?: string } = await request.json()
     
     // Validatie
     if (!body.contract_id || !body.verbruik_data || !body.gegevens_data) {
@@ -21,6 +75,19 @@ export async function POST(request: Request) {
           error: 'Ontbrekende verplichte velden: contract_id, verbruik_data, gegevens_data' 
         },
         { status: 400 }
+      )
+    }
+
+    // Verify reCAPTCHA token
+    const recaptchaResult = await verifyRecaptcha(body.recaptcha_token)
+    if (!recaptchaResult.success) {
+      console.warn('reCAPTCHA verification failed:', recaptchaResult.error, 'Score:', recaptchaResult.score)
+      return NextResponse.json<CreateAanvraagResponse>(
+        { 
+          success: false, 
+          error: 'Beveiligingscontrole mislukt. Probeer het opnieuw.' 
+        },
+        { status: 403 }
       )
     }
 
