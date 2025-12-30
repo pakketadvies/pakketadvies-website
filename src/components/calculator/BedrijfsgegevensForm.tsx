@@ -1721,13 +1721,10 @@ function BedrijfsgegevensFormContent() {
 
             {/* Security badges */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
-              <div className="flex flex-wrap items-center gap-4 justify-center">
+              <div className="flex flex-col items-center gap-3 text-center">
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
-                  <span>Secure GlobalSign</span>
-                </div>
-                <div className="text-xs text-gray-600">
-                  Uw gegevens worden via een beveiligde verbinding verstuurd
+                  <span>Uw gegevens worden via een beveiligde verbinding verstuurd</span>
                 </div>
                 <div className="text-xs text-gray-600">
                   Beveiligd met rate limiting en spam detection - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
