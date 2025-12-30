@@ -52,19 +52,23 @@ export function Turnstile({
   useEffect(() => {
     // Check if already loaded
     if (window.turnstile) {
+      console.log('[Turnstile] Script already loaded')
       setIsLoaded(true)
       return
     }
 
+    console.log('[Turnstile] Loading script...')
     const script = document.createElement('script')
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
     script.async = true
     script.defer = true
     script.onload = () => {
+      console.log('[Turnstile] Script loaded successfully')
       setIsLoaded(true)
       setError(null)
     }
-    script.onerror = () => {
+    script.onerror = (err) => {
+      console.error('[Turnstile] Script load error:', err)
       setError('Kon Turnstile niet laden')
       setIsLoaded(false)
     }
@@ -111,21 +115,29 @@ export function Turnstile({
     }
 
     try {
+      console.log('[Turnstile] Rendering widget with site key:', trimmedSiteKey?.substring(0, 10) + '...')
+      console.log('[Turnstile] Container element:', containerRef.current)
+      console.log('[Turnstile] Window.turnstile available:', !!window.turnstile)
+      console.log('[Turnstile] Current URL:', window.location.href)
+      
       const widgetId = window.turnstile.render(containerRef.current, {
         sitekey: trimmedSiteKey,
         callback: (token: string) => {
+          console.log('[Turnstile] Success! Token received:', token?.substring(0, 20) + '...')
           onSuccess(token)
         },
         'error-callback': (error?: any) => {
           console.error('[Turnstile] Error callback triggered:', error)
-          console.error('[Turnstile] Site key used:', trimmedSiteKey)
+          console.error('[Turnstile] Site key used:', trimmedSiteKey?.substring(0, 10) + '...')
           console.error('[Turnstile] Container:', containerRef.current)
+          console.error('[Turnstile] Current URL:', window.location.href)
           setError('Turnstile verificatie mislukt')
           if (onError) {
             onError()
           }
         },
         'expired-callback': () => {
+          console.warn('[Turnstile] Token expired')
           setError('Turnstile verificatie verlopen')
           if (onExpire) {
             onExpire()
@@ -136,9 +148,10 @@ export function Turnstile({
         language,
       })
 
+      console.log('[Turnstile] Widget rendered with ID:', widgetId)
       widgetIdRef.current = widgetId
     } catch (err) {
-      console.error('Error rendering Turnstile:', err)
+      console.error('[Turnstile] Error rendering widget:', err)
       setError('Kon Turnstile widget niet renderen')
     }
   }, [isLoaded, siteKey, theme, size, language, onSuccess, onError, onExpire])
