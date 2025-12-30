@@ -63,6 +63,7 @@ export interface CreateAanvraagResponse {
   success: boolean
   aanvraag?: ContractAanvraag
   aanvraagnummer?: string
+  message?: string
   error?: string
   emailLogs?: string[]
   emailSuccess?: boolean
