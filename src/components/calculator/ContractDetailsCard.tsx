@@ -269,63 +269,97 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
                 Tarieven
               </h4>
               <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-2 md:space-y-3">
-                {/* Elektriciteit tarieven */}
-                {details.tarief_elektriciteit_enkel && (
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                      <span className="text-gray-700">Elektriciteit (enkel tarief):</span>
-                    </div>
-                    <span className="font-semibold text-brand-navy-500">
-                      €{details.tarief_elektriciteit_enkel.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                    </span>
-                  </div>
+                {/* Voor vast contract: toon tarieven */}
+                {contract.type === 'vast' && (
+                  <>
+                    {details.tarief_elektriciteit_enkel && (
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                          <span className="text-gray-700">Elektriciteit (enkel tarief):</span>
+                        </div>
+                        <span className="font-semibold text-brand-navy-500">
+                          €{details.tarief_elektriciteit_enkel.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                        </span>
+                      </div>
+                    )}
+                    {details.tarief_elektriciteit_normaal && (
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                          <span className="text-gray-700">Elektriciteit normaal:</span>
+                        </div>
+                        <span className="font-semibold text-brand-navy-500">
+                          €{details.tarief_elektriciteit_normaal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                        </span>
+                      </div>
+                    )}
+                    {details.tarief_elektriciteit_dal && (
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                          <span className="text-gray-700">Elektriciteit dal:</span>
+                        </div>
+                        <span className="font-semibold text-brand-navy-500">
+                          €{details.tarief_elektriciteit_dal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                        </span>
+                      </div>
+                    )}
+                    {details.tarief_gas && (
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Flame className="w-4 h-4 text-orange-500" weight="bold" />
+                          <span className="text-gray-700">Gas:</span>
+                        </div>
+                        <span className="font-semibold text-brand-navy-500">
+                          €{details.tarief_gas.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/m³
+                        </span>
+                      </div>
+                    )}
+                    {details.tarief_teruglevering_kwh !== undefined && (
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Lightning className="w-4 h-4 text-yellow-500" weight="bold" />
+                          <span className="text-gray-700">Teruglevering:</span>
+                        </div>
+                        <span className="font-semibold text-brand-navy-500">
+                          €{details.tarief_teruglevering_kwh.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
-                {details.tarief_elektriciteit_normaal && (
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                      <span className="text-gray-700">Elektriciteit normaal:</span>
+                
+                {/* Voor dynamisch contract: toon opslagen */}
+                {contract.type === 'dynamisch' && (
+                  <>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                        <span className="text-gray-700">Opslag elektriciteit:</span>
+                      </div>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{details.opslag_elektriciteit?.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) || '0,0000'}/kWh
+                      </span>
                     </div>
-                    <span className="font-semibold text-brand-navy-500">
-                      €{details.tarief_elektriciteit_normaal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                    </span>
-                  </div>
-                )}
-                {details.tarief_elektriciteit_dal && (
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                      <span className="text-gray-700">Elektriciteit dal:</span>
+                    {details.opslag_gas && (
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Flame className="w-4 h-4 text-orange-500" weight="bold" />
+                          <span className="text-gray-700">Opslag gas:</span>
+                        </div>
+                        <span className="font-semibold text-brand-navy-500">
+                          €{details.opslag_gas.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/m³
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500 italic pt-1">
+                      * Tarieven = spotprijs + opslag (variabel per uur/dag)
                     </div>
-                    <span className="font-semibold text-brand-navy-500">
-                      €{details.tarief_elektriciteit_dal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                    </span>
-                  </div>
+                  </>
                 )}
-                {details.tarief_gas && (
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-orange-500" weight="bold" />
-                      <span className="text-gray-700">Gas:</span>
-                    </div>
-                    <span className="font-semibold text-brand-navy-500">
-                      €{details.tarief_gas.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/m³
-                    </span>
-                  </div>
-                )}
-                {details.tarief_teruglevering_kwh !== undefined && (
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Lightning className="w-4 h-4 text-yellow-500" weight="bold" />
-                      <span className="text-gray-700">Teruglevering:</span>
-                    </div>
-                    <span className="font-semibold text-brand-navy-500">
-                      €{details.tarief_teruglevering_kwh.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                    </span>
-                  </div>
-                )}
-                {/* Vastrechten */}
+                
+                {/* Vastrechten (voor beide types) */}
                 <div className="pt-2 border-t border-gray-200 space-y-2">
                   {details.vastrecht_stroom_maand && (
                     <div className="flex items-center justify-between text-sm">
