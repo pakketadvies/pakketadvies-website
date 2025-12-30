@@ -192,10 +192,34 @@ export function ConsumerContractRowCard({
                 <div className="flex-1">
                   <div className="text-xs text-gray-500 mb-0.5">kosten per maand</div>
                   <div className="flex items-baseline gap-1.5">
-                    <div className="text-4xl font-bold text-brand-navy-500">€{contract.maandbedrag}</div>
-                    <div className="text-base text-gray-500">/maand</div>
+                    {(() => {
+                      // Gebruik breakdown als beschikbaar, anders contract.maandbedrag
+                      const maandbedrag = breakdown && !loading
+                        ? (isZakelijk 
+                            ? Math.round(breakdown.totaal.maandExclBtw)
+                            : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
+                        : contract.maandbedrag
+                      
+                      return (
+                        <>
+                          <div className="text-4xl font-bold text-brand-navy-500">€{maandbedrag}</div>
+                          <div className="text-base text-gray-500">/maand</div>
+                        </>
+                      )
+                    })()}
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">€{contract.jaarbedrag.toLocaleString('nl-NL')} per jaar</div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {(() => {
+                      // Gebruik breakdown als beschikbaar, anders contract.jaarbedrag
+                      const jaarbedrag = breakdown && !loading
+                        ? (isZakelijk 
+                            ? Math.round(breakdown.totaal.jaarExclBtw)
+                            : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
+                        : contract.jaarbedrag
+                      
+                      return `€${jaarbedrag.toLocaleString('nl-NL')} per jaar`
+                    })()}
+                  </div>
                 </div>
                 
                 {/* Saving badge - prominent if available */}
