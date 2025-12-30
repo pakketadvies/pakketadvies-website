@@ -245,7 +245,7 @@ const berekenContractKostenVereenvoudigd = (
 
 export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   const [showDetails, setShowDetails] = useState(false)
-  const { verbruik, addressType } = useCalculatorStore()
+  const { verbruik } = useCalculatorStore()
 
   if (!contract || !verbruik) return null
 
@@ -260,9 +260,9 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
       verbruik.terugleveringJaar || 0,
       verbruik.aansluitwaarden?.elektriciteit,
       verbruik.aansluitwaarden?.gas,
-      addressType
+      verbruik.addressType || null
     )
-  }, [contract, verbruik, addressType])
+  }, [contract, verbruik])
 
   const getContractTypeLabel = () => {
     if (contract.type === 'vast') {
@@ -273,7 +273,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
 
   const rating = contract.rating || 0
   const reviews = contract.aantalReviews || 0
-  const isZakelijk = addressType === 'zakelijk'
+  const isZakelijk = verbruik.addressType === 'zakelijk'
 
   return (
     <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg mb-6 overflow-hidden">
