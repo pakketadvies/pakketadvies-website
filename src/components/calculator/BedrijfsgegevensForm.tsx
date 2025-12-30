@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -1651,21 +1652,25 @@ function BedrijfsgegevensFormContent() {
             <div className="p-3 md:p-4 rounded-xl bg-gray-50 border border-gray-200">
               <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
                 Door aan te melden gaat u akkoord met de{' '}
-                <button
-                  type="button"
-                  className="text-brand-teal-600 hover:underline font-medium"
+                <Link
+                  href="/algemene-voorwaarden"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-teal-600 hover:text-brand-teal-700 underline font-medium"
                 >
                   algemene voorwaarden
-                </button>
+                </Link>
                 {' '}en sluit u een overeenkomst met betalingsverplichting met {leverancierNaam}. 
                 U heeft 14 kalenderdagen bedenktijd na ontvangst contract leverancier. 
                 U geeft tevens toestemming voor verwerking van uw gegevens conform het{' '}
-                <button
-                  type="button"
-                  className="text-brand-teal-600 hover:underline font-medium"
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-teal-600 hover:text-brand-teal-700 underline font-medium"
                 >
                   privacybeleid
-                </button>
+                </Link>
                 .
               </p>
             </div>
@@ -1700,7 +1705,7 @@ function BedrijfsgegevensFormContent() {
                   Uw gegevens worden via een beveiligde verbinding verstuurd
                 </div>
                 <div className="text-xs text-gray-600">
-                  Beveiligd met reCAPTCHA - <a href="#" className="text-brand-teal-600 hover:underline">Privacy</a> - <a href="#" className="text-brand-teal-600 hover:underline">Voorwaarden</a>
+                  Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
                 </div>
               </div>
             </div>
