@@ -21,7 +21,6 @@ import { convertToISODate } from '@/lib/date-utils'
 import type { ContractOptie } from '@/types/calculator'
 import EditVerbruikModal from './EditVerbruikModal'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
-import { Turnstile } from '@/components/security/Turnstile'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -158,10 +157,6 @@ function BedrijfsgegevensFormContent() {
   const [contract, setContract] = useState<ContractOptie | null>(initialContract)
   const [loadingContract, setLoadingContract] = useState(false)
   const [contractError, setContractError] = useState<string | null>(null)
-  
-  // Turnstile state
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-  const [turnstileError, setTurnstileError] = useState<string | null>(null)
   
   // ALLE HOOKS MOETEN BOVEN DE EARLY RETURN STAAN (React Rules of Hooks)
   // Form submission state
@@ -713,8 +708,6 @@ function BedrijfsgegevensFormContent() {
 
   const onSubmit = async (data: BedrijfsgegevensFormData) => {
     setIsSubmitting(true)
-    setTurnstileError(null)
-    
     try {
       if (!contract) {
         console.error('❌ [BedrijfsgegevensForm] No contract available on submit')
@@ -731,14 +724,6 @@ function BedrijfsgegevensFormContent() {
       }
       
       console.log('✅ [BedrijfsgegevensForm] Submitting with contract:', contract.id, contract.contractNaam)
-
-      // Check Turnstile token
-      const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
-      if (siteKey && !turnstileToken) {
-        setTurnstileError('Beveiligingsverificatie ontbreekt. Wacht even en probeer het opnieuw.')
-        setIsSubmitting(false)
-        return
-      }
 
       // Prepare gegevens_data (zakelijk)
       const gegevensData = {
@@ -801,7 +786,7 @@ function BedrijfsgegevensFormContent() {
         },
         body: JSON.stringify({
           ...aanvraagData,
-          turnstile_token: turnstileToken,
+          website: data.website || '', // Honeypot field - altijd leeg voor legitieme gebruikers
         }),
       })
 
@@ -903,6 +888,23 @@ function BedrijfsgegevensFormContent() {
       <ContractDetailsCard contract={contract} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+        {/* Honeypot field - verborgen, bots vullen dit in */}
+        <input
+          type="text"
+          {...register('website')}
+          tabIndex={-1}
+          autoComplete="off"
+          style={{ 
+            position: 'absolute',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            pointerEvents: 'none'
+          }}
+          aria-hidden="true"
+        />
+        
         {/* Header: Meld u nu aan */}
         <div className="text-center mb-4 md:mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2">
@@ -1723,44 +1725,10 @@ function BedrijfsgegevensFormContent() {
                   Uw gegevens worden via een beveiligde verbinding verstuurd
                 </div>
                 <div className="text-xs text-gray-600">
-                  Beveiligd met Cloudflare Turnstile - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
+                  Beveiligd met rate limiting en spam detection - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
                 </div>
               </div>
             </div>
-
-            {/* Turnstile Widget - Invisible */}
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-              <div className="flex justify-center mt-4">
-                <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''}
-                  onSuccess={(token) => {
-                    setTurnstileToken(token)
-                    setTurnstileError(null)
-                  }}
-                  onError={() => {
-                    setTurnstileError('Beveiligingsverificatie mislukt. Ververs de pagina en probeer het opnieuw.')
-                    setTurnstileToken(null)
-                  }}
-                  onExpire={() => {
-                    setTurnstileError('Beveiligingsverificatie verlopen. Ververs de pagina en probeer het opnieuw.')
-                    setTurnstileToken(null)
-                  }}
-                  theme="light"
-                  size="normal"
-                  language="nl"
-                />
-              </div>
-            )}
-
-            {/* Turnstile Error Display */}
-            {turnstileError && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 mt-4">
-                <p className="text-sm text-red-700 flex items-center gap-2">
-                  <Warning weight="duotone" className="w-4 h-4 flex-shrink-0" />
-                  {turnstileError}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

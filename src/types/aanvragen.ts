@@ -57,7 +57,6 @@ export interface CreateAanvraagRequest {
   nieuwsbrief?: boolean
   heeft_andere_correspondentie_adres?: boolean
   correspondentie_adres?: any
-  turnstile_token?: string // Cloudflare Turnstile verification token
 }
 
 export interface CreateAanvraagResponse {

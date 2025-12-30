@@ -37,7 +37,6 @@ import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
 import EditVerbruikModal from './EditVerbruikModal'
-import { Turnstile } from '@/components/security/Turnstile'
 
 const particulierAanvraagSchema = z.object({
   // Klant check
@@ -105,6 +104,11 @@ const particulierAanvraagSchema = z.object({
   privacy: z.boolean().optional(),
   herinneringContract: z.boolean(),
   nieuwsbrief: z.boolean(),
+  
+  // Honeypot field (verborgen, bots vullen dit in)
+  website: z.string().optional().refine((val) => !val || val === '', {
+    message: 'Spam detected',
+  }),
 }).refine(data => data.emailadres === data.herhaalEmailadres, {
   message: 'E-mailadressen komen niet overeen',
   path: ['herhaalEmailadres'],
@@ -162,10 +166,6 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   // Verbruik edit modal
   const [showVerbruikModal, setShowVerbruikModal] = useState(false)
   const [isUpdatingVerbruik, setIsUpdatingVerbruik] = useState(false)
-  
-  // Turnstile state
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-  const [turnstileError, setTurnstileError] = useState<string | null>(null)
   
   // Handler voor verbruik update
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
@@ -455,20 +455,9 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
   const onSubmit = async (data: ParticulierAanvraagFormData) => {
     setIsSubmitting(true)
-    setTurnstileError(null)
-    
     try {
       if (!contract || !verbruik) {
         alert('Er is een fout opgetreden. Probeer het opnieuw.')
-        setIsSubmitting(false)
-        return
-      }
-
-      // Check Turnstile token
-      const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
-      if (siteKey && !turnstileToken) {
-        setTurnstileError('Beveiligingsverificatie ontbreekt. Wacht even en probeer het opnieuw.')
-        setIsSubmitting(false)
         return
       }
 
@@ -529,7 +518,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         },
         body: JSON.stringify({
           ...aanvraagData,
-          turnstile_token: turnstileToken,
+          website: data.website || '', // Honeypot field - altijd leeg voor legitieme gebruikers
         }),
       })
 
@@ -614,6 +603,23 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       <ContractDetailsCard contract={contract} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+        {/* Honeypot field - verborgen, bots vullen dit in */}
+        <input
+          type="text"
+          {...register('website')}
+          tabIndex={-1}
+          autoComplete="off"
+          style={{ 
+            position: 'absolute',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            pointerEvents: 'none'
+          }}
+          aria-hidden="true"
+        />
+        
         {/* Header: Meld u nu aan */}
         <div className="text-center mb-4 md:mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2">
@@ -1393,44 +1399,10 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
                   Uw gegevens worden via een beveiligde verbinding verstuurd
                 </div>
                 <div className="text-xs text-gray-600">
-                  Beveiligd met Cloudflare Turnstile - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
+                  Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
                 </div>
               </div>
             </div>
-
-            {/* Turnstile Widget - Invisible */}
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-              <div className="flex justify-center mt-4">
-                <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''}
-                  onSuccess={(token) => {
-                    setTurnstileToken(token)
-                    setTurnstileError(null)
-                  }}
-                  onError={() => {
-                    setTurnstileError('Beveiligingsverificatie mislukt. Ververs de pagina en probeer het opnieuw.')
-                    setTurnstileToken(null)
-                  }}
-                  onExpire={() => {
-                    setTurnstileError('Beveiligingsverificatie verlopen. Ververs de pagina en probeer het opnieuw.')
-                    setTurnstileToken(null)
-                  }}
-                  theme="light"
-                  size="normal"
-                  language="nl"
-                />
-              </div>
-            )}
-
-            {/* Turnstile Error Display */}
-            {turnstileError && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 mt-4">
-                <p className="text-sm text-red-700 flex items-center gap-2">
-                  <Warning weight="duotone" className="w-4 h-4 flex-shrink-0" />
-                  {turnstileError}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

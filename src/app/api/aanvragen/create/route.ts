@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { CreateAanvraagRequest, CreateAanvraagResponse } from '@/types/aanvragen'
 import { calculateContractCosts } from '@/lib/bereken-contract-internal'
+import { checkRateLimit, getClientIP } from '@/lib/security/rate-limiter'
+import { validateEmail } from '@/lib/security/email-validation'
+import { performSpamCheck } from '@/lib/security/spam-detection'
 
 /**
  * POST /api/aanvragen/create
@@ -11,9 +14,97 @@ import { calculateContractCosts } from '@/lib/bereken-contract-internal'
  */
 export async function POST(request: Request) {
   try {
+    // ============================================
+    // 1. RATE LIMITING
+    // ============================================
+    const clientIP = getClientIP(request)
+    const rateLimit = checkRateLimit(clientIP, 5, 3600000) // Max 5 requests per uur
+    
+    if (!rateLimit.allowed) {
+      console.warn(`🚫 [Rate Limit] Blocked request from IP: ${clientIP}`)
+      return NextResponse.json<CreateAanvraagResponse>(
+        { 
+          success: false, 
+          error: rateLimit.error || 'Te veel aanvragen. Probeer het later opnieuw.' 
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+            'X-RateLimit-Limit': '5',
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+            'X-RateLimit-Reset': new Date(rateLimit.resetTime).toISOString()
+          }
+        }
+      )
+    }
+    
     const body: CreateAanvraagRequest = await request.json()
     
-    // Validatie
+    // ============================================
+    // 2. HONEYPOT CHECK
+    // ============================================
+    const honeypotValue = (body as any).website
+    if (honeypotValue && honeypotValue.trim().length > 0) {
+      console.warn(`🚫 [Spam] Honeypot triggered from IP: ${clientIP}`)
+      // Return success om bot niet te waarschuwen, maar sla niet op
+      return NextResponse.json<CreateAanvraagResponse>(
+        { 
+          success: true,
+          aanvraagnummer: 'SPAM-BLOCKED',
+          message: 'Aanvraag ontvangen'
+        },
+        { status: 200 }
+      )
+    }
+    
+    // ============================================
+    // 3. EMAIL VALIDATIE
+    // ============================================
+    const email = body.gegevens_data?.email || body.gegevens_data?.emailadres
+    if (email) {
+      const emailValidation = validateEmail(email)
+      if (!emailValidation.valid) {
+        console.warn(`🚫 [Spam] Invalid email from IP: ${clientIP}`, emailValidation.error)
+        return NextResponse.json<CreateAanvraagResponse>(
+          { 
+            success: false, 
+            error: emailValidation.error || 'Ongeldig e-mailadres' 
+          },
+          { status: 400 }
+        )
+      }
+    }
+    
+    // ============================================
+    // 4. SPAM DETECTION
+    // ============================================
+    const spamCheck = performSpamCheck({
+      website: honeypotValue,
+      email: email,
+      telefoon: body.gegevens_data?.telefoon || body.gegevens_data?.telefoonnummer,
+      voornaam: body.gegevens_data?.voornaam,
+      achternaam: body.gegevens_data?.achternaam,
+      submitTime: Date.now(),
+      // formLoadTime wordt niet meegestuurd, maar kan later worden toegevoegd
+    })
+    
+    if (spamCheck.isSpam) {
+      console.warn(`🚫 [Spam] Spam detected from IP: ${clientIP}`, spamCheck.reasons)
+      // Return success om bot niet te waarschuwen, maar sla niet op
+      return NextResponse.json<CreateAanvraagResponse>(
+        { 
+          success: true,
+          aanvraagnummer: 'SPAM-BLOCKED',
+          message: 'Aanvraag ontvangen'
+        },
+        { status: 200 }
+      )
+    }
+    
+    // ============================================
+    // 5. BASIS VALIDATIE
+    // ============================================
     if (!body.contract_id || !body.verbruik_data || !body.gegevens_data) {
       return NextResponse.json<CreateAanvraagResponse>(
         { 
@@ -22,73 +113,6 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       )
-    }
-
-    // Cloudflare Turnstile validatie
-    const turnstileToken = body.turnstile_token
-    if (process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
-      if (!turnstileToken) {
-        return NextResponse.json<CreateAanvraagResponse>(
-          { 
-            success: false, 
-            error: 'Beveiligingsverificatie ontbreekt. Ververs de pagina en probeer het opnieuw.' 
-          },
-          { status: 403 }
-        )
-      }
-
-      // Verify token with Cloudflare
-      try {
-        const verifyResponse = await fetch(
-          'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              secret: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
-              response: turnstileToken,
-              // Optionally include remote IP for better security
-              remoteip: request.headers.get('x-forwarded-for') || 
-                       request.headers.get('x-real-ip') || 
-                       undefined,
-            }),
-          }
-        )
-
-        const verifyData = await verifyResponse.json()
-
-        if (!verifyData.success) {
-          console.error('[Turnstile] Verification failed:', verifyData)
-          return NextResponse.json<CreateAanvraagResponse>(
-            { 
-              success: false, 
-              error: 'Beveiligingsverificatie mislukt. Probeer het opnieuw.' 
-            },
-            { status: 403 }
-          )
-        }
-
-        // Optional: Check for specific error codes
-        if (verifyData['error-codes'] && verifyData['error-codes'].length > 0) {
-          const errorCodes = verifyData['error-codes']
-          // Log for monitoring but don't block in case of minor issues
-          console.warn('[Turnstile] Verification warnings:', errorCodes)
-        }
-      } catch (error) {
-        console.error('[Turnstile] Verification error:', error)
-        // In production, fail securely. In development, allow for testing.
-        if (process.env.NODE_ENV === 'production') {
-          return NextResponse.json<CreateAanvraagResponse>(
-            { 
-              success: false, 
-              error: 'Beveiligingsverificatie kon niet worden uitgevoerd. Probeer het later opnieuw.' 
-            },
-            { status: 503 }
-          )
-        }
-      }
     }
 
     // Use service role key for public inserts (bypasses RLS)
