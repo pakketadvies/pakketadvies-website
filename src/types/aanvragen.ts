@@ -57,6 +57,7 @@ export interface CreateAanvraagRequest {
   nieuwsbrief?: boolean
   heeft_andere_correspondentie_adres?: boolean
   correspondentie_adres?: any
+  recaptcha_token?: string | null
 }
 
 export interface CreateAanvraagResponse {

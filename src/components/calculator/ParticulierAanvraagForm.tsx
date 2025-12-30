@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
@@ -37,7 +37,7 @@ import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
 import EditVerbruikModal from './EditVerbruikModal'
-import { ReCaptcha } from '@/components/security/ReCaptcha'
+import { ReCaptcha, executeReCaptcha } from '@/components/security/ReCaptcha'
 
 const particulierAanvraagSchema = z.object({
   // Klant check
@@ -163,95 +163,6 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   const [showVerbruikModal, setShowVerbruikModal] = useState(false)
   const [isUpdatingVerbruik, setIsUpdatingVerbruik] = useState(false)
   
-  // State voor herberekende prijzen
-  const [recalculatedPrices, setRecalculatedPrices] = useState<{
-    maandbedrag: number | null
-    besparing: number | null
-  } | null>(null)
-  
-  // Functie om contractprijzen opnieuw te berekenen
-  const recalculateContractPrices = async (currentVerbruik: typeof verbruik) => {
-    if (!contract || !currentVerbruik) return
-
-    try {
-      const leveringsadres = currentVerbruik.leveringsadressen?.[0]
-      if (!leveringsadres?.postcode) return
-
-      const response = await fetch('/api/energie/bereken-contract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Verbruik
-          elektriciteitNormaal: currentVerbruik.elektriciteitNormaal || 0,
-          elektriciteitDal: currentVerbruik.elektriciteitDal || 0,
-          gas: currentVerbruik.gasJaar || 0,
-          terugleveringJaar: currentVerbruik.terugleveringJaar || 0,
-          
-          // Aansluitwaarden
-          aansluitwaardeElektriciteit: currentVerbruik.aansluitwaardeElektriciteit || 0,
-          aansluitwaardeGas: currentVerbruik.aansluitwaardeGas || 0,
-          
-          // Postcode
-          postcode: leveringsadres.postcode.replace(/\s/g, ''),
-          
-          // Contract details
-          contractType: contract.type,
-          tariefElektriciteit: contract.tariefElektriciteit,
-          tariefElektriciteitDal: contract.tariefElektriciteitDal,
-          tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
-          tariefGas: contract.tariefGas,
-          tariefTerugleveringKwh: contract.type === 'vast' 
-            ? (contract as any).details_vast?.tarief_teruglevering_kwh || 0
-            : 0,
-          opslagElektriciteit: contract.type === 'dynamisch'
-            ? ((contract as any).details_dynamisch?.opslag_elektriciteit || (contract as any).details_dynamisch?.opslag_elektriciteit_normaal || 0)
-            : 0,
-          opslagGas: contract.type === 'dynamisch' 
-            ? ((contract as any).details_dynamisch?.opslag_gas || 0)
-            : 0,
-          opslagTeruglevering: contract.type === 'dynamisch'
-            ? ((contract as any).details_dynamisch?.opslag_teruglevering || 0)
-            : 0,
-          vastrechtStroomMaand: contract.type === 'vast'
-            ? ((contract as any).details_vast?.vastrecht_stroom_maand || 4.00)
-            : 4.00,
-          vastrechtGasMaand: contract.type === 'vast'
-            ? ((contract as any).details_vast?.vastrecht_gas_maand || 4.00)
-            : 4.00,
-          heeftDubbeleMeter: !currentVerbruik.heeftEnkeleMeter,
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        const maandbedrag = data.totaal?.maandInclBtw || data.totaal?.maandExclBtw || 0
-        
-        // Bereken besparing (vergelijk met gemiddelde prijs, of gebruik oorspronkelijke besparing als referentie)
-        // Voor nu gebruiken we de oorspronkelijke besparing als referentie en passen we deze proportioneel aan
-        const oorspronkelijkMaandbedrag = contract.maandbedrag || 0
-        const oorspronkelijkeBesparing = contract.besparing || 0
-        
-        // Als het nieuwe maandbedrag lager is dan het oorspronkelijke, is er besparing
-        // Anders berekenen we de besparing proportioneel
-        let nieuweBesparing = oorspronkelijkeBesparing
-        if (oorspronkelijkMaandbedrag > 0 && maandbedrag !== oorspronkelijkMaandbedrag) {
-          // Proportionele aanpassing van besparing
-          const factor = maandbedrag / oorspronkelijkMaandbedrag
-          nieuweBesparing = oorspronkelijkeBesparing * factor
-        }
-
-        setRecalculatedPrices({
-          maandbedrag: Math.round(maandbedrag * 100) / 100, // Rond af op 2 decimalen
-          besparing: Math.round(nieuweBesparing * 100) / 100,
-        })
-      }
-    } catch (error) {
-      console.error('Error recalculating contract prices:', error)
-      // Bij fout, reset naar originele prijzen
-      setRecalculatedPrices(null)
-    }
-  }
-  
   // Handler voor verbruik update
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
     if (!newVerbruik) return
@@ -260,10 +171,6 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
     try {
       // Update verbruik in store
       setVerbruik(newVerbruik)
-      
-      // Herbereken contractprijzen met nieuw verbruik
-      await recalculateContractPrices(newVerbruik)
-      
       // Sluit modal na korte delay voor UX
       setTimeout(() => {
         setShowVerbruikModal(false)
@@ -274,17 +181,6 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       setIsUpdatingVerbruik(false)
     }
   }
-  
-  // Herbereken prijzen wanneer verbruik verandert (bij eerste load of externe wijziging)
-  useEffect(() => {
-    if (verbruik && contract) {
-      // Alleen herberekenen als er nog geen herberekende prijzen zijn
-      // (anders wordt dit bij elke render opnieuw gedaan)
-      if (!recalculatedPrices) {
-        recalculateContractPrices(verbruik)
-      }
-    }
-  }, [verbruik, contract]) // eslint-disable-line react-hooks/exhaustive-deps
   
   // Address change states
   const [editPostcode, setEditPostcode] = useState('')
@@ -562,70 +458,21 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         return
       }
 
-      // Get reCAPTCHA token (silently fail if not available)
+      // Get reCAPTCHA token
       let recaptchaToken: string | null = null
       const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
       
-      if (siteKey && typeof window !== 'undefined') {
+      if (siteKey) {
         try {
-          // Wait for grecaptcha to be available and ready (max 2 seconds)
-          let grecaptchaReady = false
-          
-          // Check if grecaptcha is already loaded
-          if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
-            await new Promise<void>((resolve) => {
-              const timeout = setTimeout(() => {
-                resolve() // Timeout after 2 seconds
-              }, 2000)
-              
-              window.grecaptcha!.ready(() => {
-                clearTimeout(timeout)
-                grecaptchaReady = true
-                resolve()
-              })
-            })
-          } else {
-            // Wait for grecaptcha to load (max 2 seconds)
-            await new Promise<void>((resolve) => {
-              const maxWait = 2000 // 2 seconds
-              const startTime = Date.now()
-              
-              const checkGrecaptcha = () => {
-                if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
-                  window.grecaptcha.ready(() => {
-                    grecaptchaReady = true
-                    resolve()
-                  })
-                } else if (Date.now() - startTime > maxWait) {
-                  resolve() // Continue without token
-                } else {
-                  setTimeout(checkGrecaptcha, 100)
-                }
-              }
-              
-              checkGrecaptcha()
-            })
+          recaptchaToken = await executeReCaptcha(siteKey, 'submit_contract_application')
+        } catch (error) {
+          console.error('[ParticulierAanvraagForm] reCAPTCHA error:', error)
+          // Continue without token in development, but warn
+          if (process.env.NODE_ENV === 'production') {
+            alert('Beveiligingscontrole mislukt. Probeer het opnieuw.')
+            setIsSubmitting(false)
+            return
           }
-          
-          // Now execute reCAPTCHA if ready (silently catch errors)
-          if (grecaptchaReady && window.grecaptcha && typeof window.grecaptcha.execute === 'function') {
-            try {
-              recaptchaToken = await Promise.race([
-                window.grecaptcha.execute(siteKey, {
-                  action: 'submit_contract_application'
-                }),
-                new Promise<string>((_, reject) => 
-                  setTimeout(() => reject(new Error('Timeout')), 2000)
-                )
-              ]) as string
-            } catch (executeError: any) {
-              // Silently fail - continue without token (graceful degradation)
-              recaptchaToken = null
-            }
-          }
-        } catch (error: any) {
-          // Silently fail - continue without token (graceful degradation)
-          recaptchaToken = null
         }
       }
 
@@ -684,10 +531,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...aanvraagData,
-          recaptcha_token: recaptchaToken, // Include reCAPTCHA token
-        }),
+        body: JSON.stringify(aanvraagData),
       })
 
       const result = await response.json()
@@ -738,18 +582,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
 
   const contractNaam = contract?.contractNaam || `${contract?.type === 'vast' ? 'Vast' : 'Dynamisch'} contract`
   const leverancierNaam = contract?.leverancier.naam || 'Energieleverancier'
-  
-  // Gebruik herberekende prijzen als beschikbaar, anders originele prijzen
-  const maandbedrag = recalculatedPrices?.maandbedrag ?? contract?.maandbedrag ?? 0
-  const maandelijkseBesparing = recalculatedPrices?.besparing ?? contract?.besparing ?? 0
-  const korting = maandelijkseBesparing ? maandelijkseBesparing * 12 : null // Jaarlijkse besparing als korting
-  
-  // Update contract object met nieuwe prijzen voor ContractDetailsCard
-  const updatedContract = contract ? {
-    ...contract,
-    maandbedrag: maandbedrag,
-    besparing: maandelijkseBesparing,
-  } : null
+  const korting = contract?.besparing ? contract.besparing * 12 : null // Jaarlijkse besparing als korting
 
   // Determine back URL based on where user came from
   const getBackUrl = () => {
@@ -779,7 +612,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       </div>
 
       {/* Contract Details Card */}
-      <ContractDetailsCard contract={updatedContract} />
+      <ContractDetailsCard contract={contract} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
         {/* Header: Meld u nu aan */}
@@ -1550,23 +1383,21 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
               </Button>
             </div>
 
-            {/* Security badges - alleen tonen wanneer reCAPTCHA geconfigureerd is */}
-            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
-                <div className="flex flex-wrap items-center gap-4 justify-center">
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
-                    <span>Secure GlobalSign</span>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Uw gegevens worden via een beveiligde verbinding verstuurd
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
-                  </div>
+            {/* Security badges */}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 md:p-4">
+              <div className="flex flex-wrap items-center gap-4 justify-center">
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <ShieldCheck weight="duotone" className="w-4 h-4 text-brand-teal-600" />
+                  <span>Secure GlobalSign</span>
+                </div>
+                <div className="text-xs text-gray-600">
+                  Uw gegevens worden via een beveiligde verbinding verstuurd
+                </div>
+                <div className="text-xs text-gray-600">
+                  Beveiligd met reCAPTCHA - <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Privacy</Link> - <Link href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brand-teal-600 hover:underline">Voorwaarden</Link>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -1641,15 +1472,17 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       )}
 
       {/* reCAPTCHA Component (invisible) */}
-      <ReCaptcha
-        onVerify={() => {
-          // Token is automatically included in form submission
-          // Silently handle - no logging to avoid console spam
-        }}
-        onError={() => {
-          // Silently handle errors - graceful degradation
-        }}
-      />
+      {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+        <ReCaptcha
+          siteKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+          onLoad={() => {
+            // Silently loaded
+          }}
+          onError={(error) => {
+            console.error('[ParticulierAanvraagForm] reCAPTCHA load error:', error)
+          }}
+        />
+      )}
     </>
   )
 }

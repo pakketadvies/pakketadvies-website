@@ -14,16 +14,13 @@ import { calculateContractCosts } from '@/lib/bereken-contract-internal'
  */
 async function verifyRecaptcha(token: string | null | undefined): Promise<{ success: boolean; score?: number; error?: string }> {
   if (!token) {
-    // If no token provided and reCAPTCHA is not configured, allow request (graceful degradation)
-    if (!process.env.RECAPTCHA_SECRET_KEY) {
-      return { success: true }
-    }
-    return { success: false, error: 'reCAPTCHA token missing' }
+    return { success: false, error: 'No reCAPTCHA token provided' }
   }
 
-  if (!process.env.RECAPTCHA_SECRET_KEY) {
-    // reCAPTCHA not configured, allow request
-    return { success: true }
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY
+  if (!secretKey) {
+    console.warn('[reCAPTCHA] RECAPTCHA_SECRET_KEY not configured, skipping verification')
+    return { success: true } // Allow in development if not configured
   }
 
   try {
@@ -32,40 +29,38 @@ async function verifyRecaptcha(token: string | null | undefined): Promise<{ succ
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
+      body: new URLSearchParams({
+        secret: secretKey,
+        response: token,
+      }),
     })
 
     const data = await response.json()
-    
+
     if (!data.success) {
-      return { 
-        success: false, 
-        error: data['error-codes']?.join(', ') || 'reCAPTCHA verification failed' 
-      }
+      console.error('[reCAPTCHA] Verification failed:', data['error-codes'])
+      return { success: false, error: data['error-codes']?.join(', ') || 'Verification failed' }
     }
 
-    // Check score (0.0 = bot, 1.0 = human)
-    // Threshold: 0.5 (recommended by Google)
     const score = data.score || 0
-    if (score < 0.5) {
-      return { 
-        success: false, 
-        score,
-        error: 'reCAPTCHA score too low (possible bot)' 
-      }
+    const threshold = 0.5 // Standard threshold for reCAPTCHA v3
+
+    if (score < threshold) {
+      console.warn(`[reCAPTCHA] Score too low: ${score} (threshold: ${threshold})`)
+      return { success: false, score, error: `Score too low: ${score}` }
     }
 
+    console.log(`[reCAPTCHA] Verification successful, score: ${score}`)
     return { success: true, score }
-  } catch (error) {
-    console.error('reCAPTCHA verification error:', error)
-    // On error, allow request (graceful degradation)
-    return { success: true }
+  } catch (error: any) {
+    console.error('[reCAPTCHA] Error verifying token:', error)
+    return { success: false, error: error.message || 'Verification error' }
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body: CreateAanvraagRequest & { recaptcha_token?: string } = await request.json()
+    const body: CreateAanvraagRequest = await request.json()
     
     // Validatie
     if (!body.contract_id || !body.verbruik_data || !body.gegevens_data) {
@@ -78,12 +73,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verify reCAPTCHA token (only if configured and token is provided)
-    if (process.env.RECAPTCHA_SECRET_KEY && body.recaptcha_token) {
+    // Verify reCAPTCHA token (only in production or if configured)
+    if (process.env.NODE_ENV === 'production' || process.env.RECAPTCHA_SECRET_KEY) {
       const recaptchaResult = await verifyRecaptcha(body.recaptcha_token)
       if (!recaptchaResult.success) {
-        console.warn('reCAPTCHA verification failed:', recaptchaResult.error, 'Score:', recaptchaResult.score)
-        // Only block if token was provided but verification failed
+        console.error('[create] reCAPTCHA verification failed:', recaptchaResult.error)
         return NextResponse.json<CreateAanvraagResponse>(
           { 
             success: false, 
@@ -92,14 +86,6 @@ export async function POST(request: Request) {
           { status: 403 }
         )
       }
-      console.log('✅ reCAPTCHA verified successfully, score:', recaptchaResult.score)
-    } else if (process.env.RECAPTCHA_SECRET_KEY && !body.recaptcha_token) {
-      // reCAPTCHA is configured but no token provided - likely configuration issue
-      // Allow request for now (graceful degradation) but log warning
-      console.warn('⚠️ reCAPTCHA configured but no token provided - allowing request (graceful degradation)')
-    } else {
-      // reCAPTCHA not configured, allow request
-      console.log('ℹ️ reCAPTCHA not configured, skipping verification')
     }
 
     // Use service role key for public inserts (bypasses RLS)
