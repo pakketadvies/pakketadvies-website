@@ -1,5 +1,7 @@
 # 🔒 Cloudflare Turnstile Setup Guide
 
+> ✅ **Status**: Environment variables zijn toegevoegd aan Vercel (Production, Preview, Development)
+
 ## Stap 1: Cloudflare Account Aanmaken
 
 1. Ga naar [Cloudflare Dashboard](https://dash.cloudflare.com/)
