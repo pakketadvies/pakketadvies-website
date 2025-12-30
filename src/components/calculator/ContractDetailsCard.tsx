@@ -264,50 +264,86 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               Tarieven
             </h4>
             <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-2">
-              {/* Elektriciteit tarieven */}
-              {contract.tariefElektriciteitEnkel && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700">Elektriciteit enkeltarief:</span>
-                  <span className="font-semibold text-brand-navy-500">
-                    €{contract.tariefElektriciteitEnkel.toFixed(6)}/kWh
-                  </span>
-                </div>
-              )}
-              {contract.tariefElektriciteit && !contract.tariefElektriciteitEnkel && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700">Elektriciteit normaal:</span>
-                  <span className="font-semibold text-brand-navy-500">
-                    €{contract.tariefElektriciteit.toFixed(6)}/kWh
-                  </span>
-                </div>
-              )}
-              {contract.tariefElektriciteitDal && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700">Elektriciteit dal:</span>
-                  <span className="font-semibold text-brand-navy-500">
-                    €{contract.tariefElektriciteitDal.toFixed(6)}/kWh
-                  </span>
-                </div>
+              {/* Vast contract: normale tarieven */}
+              {contract.type === 'vast' && (
+                <>
+                  {/* Elektriciteit tarieven */}
+                  {contract.tariefElektriciteitEnkel && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Elektriciteit enkeltarief:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{contract.tariefElektriciteitEnkel.toFixed(6)}/kWh
+                      </span>
+                    </div>
+                  )}
+                  {contract.tariefElektriciteit && !contract.tariefElektriciteitEnkel && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Elektriciteit normaal:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{contract.tariefElektriciteit.toFixed(6)}/kWh
+                      </span>
+                    </div>
+                  )}
+                  {contract.tariefElektriciteitDal && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Elektriciteit dal:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{contract.tariefElektriciteitDal.toFixed(6)}/kWh
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Gas tarief */}
+                  {contract.tariefGas && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Gas:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{contract.tariefGas.toFixed(6)}/m³
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Teruglevering tarief */}
+                  {details?.tarief_teruglevering_kwh && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Teruglevering:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{details.tarief_teruglevering_kwh.toFixed(6)}/kWh
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
 
-              {/* Gas tarief */}
-              {contract.tariefGas && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700">Gas:</span>
-                  <span className="font-semibold text-brand-navy-500">
-                    €{contract.tariefGas.toFixed(6)}/m³
-                  </span>
-                </div>
-              )}
-
-              {/* Teruglevering tarief */}
-              {details?.tarief_teruglevering_kwh && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700">Teruglevering:</span>
-                  <span className="font-semibold text-brand-navy-500">
-                    €{details.tarief_teruglevering_kwh.toFixed(6)}/kWh
-                  </span>
-                </div>
+              {/* Dynamisch contract: opslagen bovenop spotprijs */}
+              {contract.type === 'dynamisch' && (
+                <>
+                  <p className="text-xs font-semibold text-gray-500 mb-2">Opslagen bovenop spotprijs:</p>
+                  {(details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal) && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Opslag elektriciteit:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{(details.opslag_elektriciteit || details.opslag_elektriciteit_normaal).toFixed(6)}/kWh
+                      </span>
+                    </div>
+                  )}
+                  {details?.opslag_gas && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Opslag gas:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{details.opslag_gas.toFixed(6)}/m³
+                      </span>
+                    </div>
+                  )}
+                  {details?.opslag_teruglevering && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Opslag teruglevering:</span>
+                      <span className="font-semibold text-brand-navy-500">
+                        €{details.opslag_teruglevering.toFixed(6)}/kWh
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Vastrechten */}
