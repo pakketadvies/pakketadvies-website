@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { CaretDown, Star, CheckCircle, CurrencyEur, ChartBar, Leaf, Info } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
 import { useCalculatorStore } from '@/store/calculatorStore'
+import { debugLogger } from '@/lib/debug-logger'
 
 interface ContractDetailsCardProps {
   contract: ContractOptie | null
@@ -16,7 +17,23 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   const [loadingBreakdown, setLoadingBreakdown] = useState(false)
   const { verbruik } = useCalculatorStore()
 
-  if (!contract) return null
+  // 📱 DEBUG: Log component mount op mobiel
+  useEffect(() => {
+    debugLogger.info('ContractDetailsCard - Component mounted', {
+      hasContract: !!contract,
+      contractId: contract?.id,
+      contractNaam: contract?.contractNaam,
+      maandbedrag: contract?.maandbedrag,
+      jaarbedrag: contract?.jaarbedrag,
+      besparing: contract?.besparing,
+      hasBreakdown: !!(contract as any)?.breakdown,
+    })
+  }, [])
+
+  if (!contract) {
+    debugLogger.warn('ContractDetailsCard - No contract provided')
+    return null
+  }
 
   const getContractTypeLabel = () => {
     if (contract.type === 'vast') {
@@ -29,20 +46,31 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   const rating = contract.rating || 0
   const reviews = contract.aantalReviews || 0
 
+  // 📱 DEBUG: Log berekende waardes
+  useEffect(() => {
+    debugLogger.info('ContractDetailsCard - Calculated values', {
+      besparing,
+      rating,
+      reviews,
+      contractType: contract.type,
+    })
+  }, [besparing, rating, reviews, contract.type])
+
   // Haal contract details op voor tarieven
   const details = contract.type === 'vast' 
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
-  // Debug: log details om te zien wat erin zit
+  // 📱 DEBUG: Log details om te zien wat erin zit
   useEffect(() => {
-    console.log('🔍 ContractDetailsCard DEBUG:', {
+    debugLogger.info('ContractDetailsCard - Contract details', {
       contractType: contract.type,
       hasDetails: !!details,
-      details: details,
+      hasDetailsVast: !!(contract as any).details_vast,
+      hasDetailsDynamisch: !!(contract as any).details_dynamisch,
       opslag_elektriciteit: details?.opslag_elektriciteit,
       opslag_elektriciteit_normaal: details?.opslag_elektriciteit_normaal,
-      opslag_gas: details?.opslag_gas
+      opslag_gas: details?.opslag_gas,
     })
   }, [contract.type, details])
 
@@ -50,8 +78,18 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   // Als dat zo is, gebruik die in plaats van opnieuw berekenen
   useEffect(() => {
     if (showDetails && !breakdown && !loadingBreakdown) {
+      // 📱 DEBUG: Log breakdown check
+      debugLogger.info('ContractDetailsCard - Breakdown check', {
+        showDetails,
+        hasBreakdown: !!breakdown,
+        hasContractBreakdown: !!(contract as any).breakdown,
+        loadingBreakdown,
+        hasVerbruik: !!verbruik,
+      })
+
       // Als het contract al een breakdown heeft, gebruik die direct
       if ((contract as any).breakdown) {
+        debugLogger.info('ContractDetailsCard - Using existing breakdown from contract')
         setBreakdown((contract as any).breakdown)
         return
       }
@@ -59,55 +97,83 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
       // Anders: haal breakdown op via API (fallback voor oude/cached contracten)
       if (verbruik) {
         setLoadingBreakdown(true)
+        debugLogger.info('ContractDetailsCard - Fetching breakdown from API')
         
         const fetchBreakdown = async () => {
           try {
+            const payload = {
+              // Verbruik
+              elektriciteitNormaal: verbruik.elektriciteitNormaal || 0,
+              elektriciteitDal: verbruik.elektriciteitDal || 0,
+              gas: verbruik.gasJaar || 0,
+              terugleveringJaar: verbruik.terugleveringJaar || 0,
+              
+              // Aansluitwaarden
+              aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '1x25A',
+              aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
+              
+              // Postcode
+              postcode: verbruik.leveringsadressen?.[0]?.postcode?.replace(/\s/g, '') || '',
+              
+              // Contract details
+              contractType: contract.type,
+              tariefElektriciteitNormaal: contract.tariefElektriciteit,
+              tariefElektriciteitDal: contract.tariefElektriciteitDal,
+              tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
+              tariefGas: contract.tariefGas,
+              tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
+              // Dynamische contract opslagen
+              opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
+              opslagGas: details?.opslag_gas || 0,
+              opslagTeruglevering: details?.opslag_teruglevering || 0,
+              vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
+              vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
+              heeftDubbeleMeter: !verbruik.heeftEnkeleMeter,
+            }
+
+            debugLogger.info('ContractDetailsCard - API request payload', payload)
+
             const response = await fetch('/api/energie/bereken-contract', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                // Verbruik
-                elektriciteitNormaal: verbruik.elektriciteitNormaal || 0,
-                elektriciteitDal: verbruik.elektriciteitDal || 0,
-                gas: verbruik.gasJaar || 0,
-                terugleveringJaar: verbruik.terugleveringJaar || 0,
-                
-                // Aansluitwaarden
-                aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '1x25A',
-                aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
-                
-                // Postcode
-                postcode: verbruik.leveringsadressen?.[0]?.postcode?.replace(/\s/g, '') || '',
-                
-                // Contract details
-                contractType: contract.type,
-                tariefElektriciteitNormaal: contract.tariefElektriciteit,
-                tariefElektriciteitDal: contract.tariefElektriciteitDal,
-                tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
-                tariefGas: contract.tariefGas,
-                tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
-                // Dynamische contract opslagen
-                opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
-                opslagGas: details?.opslag_gas || 0,
-                opslagTeruglevering: details?.opslag_teruglevering || 0,
-                vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
-                vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
-                heeftDubbeleMeter: !verbruik.heeftEnkeleMeter,
-              }),
+              body: JSON.stringify(payload),
+            })
+
+            debugLogger.info('ContractDetailsCard - API response', {
+              ok: response.ok,
+              status: response.status,
+              statusText: response.statusText,
             })
 
             if (response.ok) {
               const data = await response.json()
+              debugLogger.info('ContractDetailsCard - API response data received', {
+                hasBreakdown: !!data.breakdown,
+                breakdownKeys: data.breakdown ? Object.keys(data.breakdown) : [],
+              })
               setBreakdown(data.breakdown)
+            } else {
+              const errorText = await response.text()
+              debugLogger.error('ContractDetailsCard - API error response', {
+                status: response.status,
+                errorText,
+              })
             }
-          } catch (error) {
+          } catch (error: any) {
+            debugLogger.error('ContractDetailsCard - Fetch error', {
+              error: error.message,
+              stack: error.stack,
+            })
             console.error('Error fetching breakdown:', error)
           } finally {
             setLoadingBreakdown(false)
+            debugLogger.info('ContractDetailsCard - Fetch complete')
           }
         }
 
         fetchBreakdown()
+      } else {
+        debugLogger.warn('ContractDetailsCard - No verbruik data available')
       }
     }
   }, [showDetails, breakdown, loadingBreakdown, contract, verbruik, details])
@@ -187,19 +253,34 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                   <span className="text-sm md:text-base font-bold">
                     {formatCurrency(contract.jaarbedrag)}/jaar
                   </span>
-                </div>
-              )}
+              </div>
+            )}
 
-              {/* Besparing */}
-              {besparing && besparing > 0 && (
+            {/* Besparing */}
+            {besparing && besparing > 0 && (
                 <div className="flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg px-3 py-1.5">
                   <CheckCircle className="w-4 h-4" weight="bold" />
                   <span className="text-sm md:text-base font-bold">
                     {formatCurrency(besparing)} besparing/jaar
-                  </span>
-                </div>
-              )}
+                </span>
+              </div>
+            )}
             </div>
+
+            {/* 📱 DEBUG: Log waarom labels niet renderen */}
+            {(() => {
+              const debugInfo = {
+                maandbedrag: contract.maandbedrag,
+                maandbedragGreaterThanZero: contract.maandbedrag > 0,
+                jaarbedrag: contract.jaarbedrag,
+                jaarbedragGreaterThanZero: contract.jaarbedrag > 0,
+                besparing,
+                besparingExists: !!besparing,
+                besparingGreaterThanZero: besparing && besparing > 0,
+              }
+              debugLogger.info('ContractDetailsCard - Rendering price badges', debugInfo)
+              return null
+            })()}
           </div>
 
           {/* Toggle Details Button */}
@@ -227,39 +308,39 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               <Info className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
               Contractdetails
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              {/* Contract Type */}
-              <div>
-                <span className="text-gray-600">Type:</span>
-                <span className="ml-2 font-semibold text-brand-navy-500">
-                  {getContractTypeLabel()}
-                </span>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            {/* Contract Type */}
+            <div>
+              <span className="text-gray-600">Type:</span>
+              <span className="ml-2 font-semibold text-brand-navy-500">
+                {getContractTypeLabel()}
+              </span>
+            </div>
 
-              {/* Groene Energie */}
-              {contract.groeneEnergie && (
-                <div>
-                  <span className="text-gray-600">Energie:</span>
+            {/* Groene Energie */}
+            {contract.groeneEnergie && (
+              <div>
+                <span className="text-gray-600">Energie:</span>
                   <span className="ml-2 font-semibold text-green-600 flex items-center gap-1">
                     <Leaf className="w-4 h-4" weight="bold" />
-                    100% Groen
-                  </span>
-                </div>
-              )}
-
-              {/* Opzegtermijn */}
-              <div>
-                <span className="text-gray-600">Opzegtermijn:</span>
-                <span className="ml-2 font-semibold text-brand-navy-500">
-                  {contract.opzegtermijn} maand{contract.opzegtermijn !== 1 ? 'en' : ''}
+                  100% Groen
                 </span>
               </div>
+            )}
+
+            {/* Opzegtermijn */}
+            <div>
+              <span className="text-gray-600">Opzegtermijn:</span>
+              <span className="ml-2 font-semibold text-brand-navy-500">
+                {contract.opzegtermijn} maand{contract.opzegtermijn !== 1 ? 'en' : ''}
+              </span>
+            </div>
 
               {/* Maandbedrag (ook hier voor volledigheid) */}
-              {contract.maandbedrag > 0 && (
-                <div>
-                  <span className="text-gray-600">Maandbedrag:</span>
-                  <span className="ml-2 font-semibold text-brand-navy-500">
+            {contract.maandbedrag > 0 && (
+              <div>
+                <span className="text-gray-600">Maandbedrag:</span>
+                <span className="ml-2 font-semibold text-brand-navy-500">
                     {formatCurrency(contract.maandbedrag)}
                   </span>
                   {isZakelijk && <span className="text-xs text-gray-500 ml-1">(excl. BTW)</span>}
@@ -551,10 +632,10 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                           </span>
                           <span className="font-semibold text-brand-navy-500">
                             {formatCurrency(breakdown.netbeheer.gas || 0, true)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                </span>
+              </div>
+            )}
+          </div>
                   </div>
                 )}
 

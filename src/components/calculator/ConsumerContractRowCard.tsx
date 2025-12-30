@@ -138,7 +138,7 @@ export function ConsumerContractRowCard({
 
   return (
     <>
-      <Card className="relative border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 w-full max-w-full overflow-hidden">
+      <Card className="relative border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200">
         {position !== undefined && (
           <div className="absolute -top-2.5 -left-2.5 z-10">
             <div className="w-8 h-8 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 text-white rounded-full flex items-center justify-center shadow-lg font-bold text-sm border-2 border-white">
