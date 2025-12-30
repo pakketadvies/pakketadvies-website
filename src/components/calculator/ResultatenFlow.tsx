@@ -753,7 +753,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="container-custom max-w-7xl">
+      <div className="max-w-7xl mx-auto">
         {/* Conditionele padding: alleen voor consumer (particulier) omdat business (zakelijk) al CalculatorLayout padding heeft */}
         <div className={audience === 'consumer' ? 'pt-24 md:pt-28' : ''}>
           {verbruik && (
