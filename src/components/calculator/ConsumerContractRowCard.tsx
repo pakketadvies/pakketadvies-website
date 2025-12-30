@@ -194,15 +194,18 @@ export function ConsumerContractRowCard({
                   <div className="flex items-baseline gap-1.5">
                     {(() => {
                       // Gebruik breakdown als beschikbaar, anders contract.maandbedrag
+                      // Formatteer exact hetzelfde als ContractDetailsCard (2 decimalen)
                       const maandbedrag = breakdown && !loading
                         ? (isZakelijk 
-                            ? Math.round(breakdown.totaal.maandExclBtw)
-                            : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
+                            ? breakdown.totaal.maandExclBtw
+                            : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
                         : contract.maandbedrag
+                      
+                      const formatted = maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                       
                       return (
                         <>
-                          <div className="text-4xl font-bold text-brand-navy-500">€{maandbedrag}</div>
+                          <div className="text-4xl font-bold text-brand-navy-500">€{formatted}</div>
                           <div className="text-base text-gray-500">/maand</div>
                         </>
                       )
@@ -211,13 +214,15 @@ export function ConsumerContractRowCard({
                   <div className="text-xs text-gray-500 mt-0.5">
                     {(() => {
                       // Gebruik breakdown als beschikbaar, anders contract.jaarbedrag
+                      // Formatteer exact hetzelfde als ContractDetailsCard (2 decimalen)
                       const jaarbedrag = breakdown && !loading
                         ? (isZakelijk 
-                            ? Math.round(breakdown.totaal.jaarExclBtw)
-                            : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
+                            ? breakdown.totaal.jaarExclBtw
+                            : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
                         : contract.jaarbedrag
                       
-                      return `€${jaarbedrag.toLocaleString('nl-NL')} per jaar`
+                      const formatted = jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      return `€${formatted} per jaar`
                     })()}
                   </div>
                 </div>

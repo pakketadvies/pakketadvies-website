@@ -176,8 +176,8 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
               {(() => {
                 const maandbedrag = breakdown && !loadingBreakdown
                   ? (isZakelijk 
-                      ? Math.round(breakdown.totaal.maandExclBtw)
-                      : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
+                      ? breakdown.totaal.maandExclBtw
+                      : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
                   : contract.maandbedrag
                 
                 if (maandbedrag > 0) {
@@ -202,9 +202,9 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
               {/* Jaarbedrag - gebruik breakdown als beschikbaar, anders contract.jaarbedrag */}
               {(() => {
                 const jaarbedrag = breakdown && !loadingBreakdown
-                  ? (isZakelijk
-                      ? Math.round(breakdown.totaal.jaarExclBtw)
-                      : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
+                  ? (isZakelijk 
+                      ? breakdown.totaal.jaarExclBtw
+                      : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
                   : contract.jaarbedrag
                 
                 if (jaarbedrag > 0) {
