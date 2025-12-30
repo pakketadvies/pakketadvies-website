@@ -1,110 +1,268 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { 
-  CaretDown, 
-  Star, 
-  CheckCircle, 
-  CurrencyEur, 
-  ChartLine, 
-  Leaf,
-  Lightning,
-  Flame,
-  Calculator,
-  Info
-} from '@phosphor-icons/react'
-import type { ContractOptie, VerbruikData } from '@/types/calculator'
-import type { KostenBreakdown } from './ContractCard'
+import { CaretDown, Star, CheckCircle, CurrencyEur, Calendar, Leaf, Calculator, Lightning, Flame, Sun, FileText } from '@phosphor-icons/react'
+import type { ContractOptie } from '@/types/calculator'
+import { useCalculatorStore } from '@/store/calculatorStore'
+import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
 
 interface ContractDetailsCardProps {
   contract: ContractOptie | null
-  verbruik?: VerbruikData | null
-  addressType?: 'particulier' | 'zakelijk' | null
 }
 
-export function ContractDetailsCard({ contract, verbruik, addressType }: ContractDetailsCardProps) {
-  const [showDetails, setShowDetails] = useState(false)
-  const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(null)
-  const [loadingBreakdown, setLoadingBreakdown] = useState(false)
-  const [breakdownError, setBreakdownError] = useState<string | null>(null)
+// EXACT DEZELFDE BEREKENING ALS IN ResultatenFlow.tsx
+const berekenContractKostenVereenvoudigd = (
+  contract: any,
+  verbruikElektriciteitNormaal: number,
+  verbruikElektriciteitDal: number,
+  verbruikGas: number,
+  heeftEnkeleMeter: boolean = false,
+  terugleveringJaar: number = 0,
+  aansluitwaardeElektriciteit?: string,
+  aansluitwaardeGas?: string,
+  addressType?: 'particulier' | 'zakelijk' | null
+): { 
+  maandbedrag: number
+  jaarbedrag: number
+  besparing: number
+  breakdown: {
+    leverancier: number
+    energiebelasting: number
+    netbeheer: number
+    btw: number
+    totaalExclBtw: number
+    totaalInclBtw: number
+  }
+  tarieven: {
+    elektriciteitNormaal?: number
+    elektriciteitDal?: number
+    elektriciteitEnkel?: number
+    gas?: number
+    teruglevering?: number
+    vastrechtStroom: number
+    vastrechtGas: number
+  }
+} => {
+  let totaalJaar = 0
+  let leverancierKosten = 0
 
-  // Haal breakdown op zodra verbruik beschikbaar is (niet alleen bij uitklappen)
-  // Dit zorgt ervoor dat de prijsinformatie direct correct is
-  useEffect(() => {
-    if (!breakdown && !loadingBreakdown && verbruik && contract) {
-      fetchBreakdown()
-    }
-  }, [breakdown, loadingBreakdown, verbruik, contract])
+  // ============================================
+  // STAP 1: SALDERINGSREGELING TOEPASSEN
+  // ============================================
+  let nettoElektriciteitNormaal = verbruikElektriciteitNormaal
+  let nettoElektriciteitDal = verbruikElektriciteitDal
 
-  const fetchBreakdown = async () => {
-    if (!verbruik || !contract) return
+  if (terugleveringJaar > 0) {
+    if (heeftEnkeleMeter) {
+      const totaalVerbruik = verbruikElektriciteitNormaal + verbruikElektriciteitDal
+      const nettoTotaal = Math.max(0, totaalVerbruik - terugleveringJaar)
+      nettoElektriciteitNormaal = nettoTotaal
+      nettoElektriciteitDal = 0
+    } else {
+      const terugleveringNormaal = terugleveringJaar / 2
+      const terugleveringDal = terugleveringJaar / 2
 
-    setLoadingBreakdown(true)
-    setBreakdownError(null)
+      let normaal_na_aftrek = verbruikElektriciteitNormaal - terugleveringNormaal
+      let dal_na_aftrek = verbruikElektriciteitDal - terugleveringDal
 
-    try {
-      const leveringsadres = verbruik.leveringsadressen?.[0]
-      if (!leveringsadres?.postcode) {
-        setBreakdownError('Postcode ontbreekt')
-        setLoadingBreakdown(false)
-        return
+      if (normaal_na_aftrek < 0) {
+        const overschot_normaal = -normaal_na_aftrek
+        dal_na_aftrek = Math.max(0, dal_na_aftrek - overschot_normaal)
+        normaal_na_aftrek = 0
+      } else if (dal_na_aftrek < 0) {
+        const overschot_dal = -dal_na_aftrek
+        normaal_na_aftrek = Math.max(0, normaal_na_aftrek - overschot_dal)
+        dal_na_aftrek = 0
       }
 
-      // Haal contract details op
-      const details = contract.type === 'vast' 
-        ? (contract as any).details_vast 
-        : (contract as any).details_dynamisch
-
-      const response = await fetch('/api/energie/bereken-contract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Verbruik
-          elektriciteitNormaal: verbruik.elektriciteitNormaal || 0,
-          elektriciteitDal: verbruik.elektriciteitDal || 0,
-          gas: verbruik.gasJaar || 0,
-          terugleveringJaar: verbruik.terugleveringJaar || 0,
-          
-          // Aansluitwaarden
-          aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '3x25A',
-          aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
-          
-          // Postcode
-          postcode: leveringsadres.postcode.replace(/\s/g, ''),
-          
-          // Contract details
-          contractType: contract.type,
-          tariefElektriciteitNormaal: contract.tariefElektriciteit,
-          tariefElektriciteitDal: contract.tariefElektriciteitDal,
-          tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
-          tariefGas: contract.tariefGas,
-          tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
-          // Dynamische contract opslagen
-          opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
-          opslagGas: details?.opslag_gas || 0,
-          opslagTeruglevering: details?.opslag_teruglevering || 0,
-          vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
-          vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
-          heeftDubbeleMeter: !verbruik.heeftEnkeleMeter,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Fout bij ophalen berekening')
-      }
-
-      const data = await response.json()
-      setBreakdown(data.breakdown)
-    } catch (error: any) {
-      console.error('Error fetching breakdown:', error)
-      setBreakdownError(error.message || 'Fout bij ophalen berekening')
-    } finally {
-      setLoadingBreakdown(false)
+      nettoElektriciteitNormaal = Math.max(0, normaal_na_aftrek)
+      nettoElektriciteitDal = Math.max(0, dal_na_aftrek)
     }
   }
 
-  if (!contract) return null
+  const isZakelijk = addressType === 'zakelijk'
+
+  if (contract.type === 'vast' && contract.details_vast) {
+    const {
+      tarief_elektriciteit_enkel,
+      tarief_elektriciteit_normaal,
+      tarief_elektriciteit_dal,
+      tarief_gas,
+      tarief_teruglevering_kwh,
+      vastrecht_stroom_maand,
+      vastrecht_gas_maand,
+      vaste_kosten_maand,
+    } = contract.details_vast
+
+    if (heeftEnkeleMeter && tarief_elektriciteit_enkel) {
+      const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
+      leverancierKosten =
+        totaalElektriciteit * tarief_elektriciteit_enkel +
+        verbruikGas * (tarief_gas || 0) +
+        (vastrecht_stroom_maand || vaste_kosten_maand || 4) * 12 +
+        (verbruikGas > 0 ? (vastrecht_gas_maand || 0) * 12 : 0)
+    } else if (!heeftEnkeleMeter && tarief_elektriciteit_normaal && tarief_elektriciteit_dal) {
+      leverancierKosten =
+        nettoElektriciteitNormaal * tarief_elektriciteit_normaal +
+        nettoElektriciteitDal * tarief_elektriciteit_dal +
+        verbruikGas * (tarief_gas || 0) +
+        (vastrecht_stroom_maand || vaste_kosten_maand || 4) * 12 +
+        (verbruikGas > 0 ? (vastrecht_gas_maand || 0) * 12 : 0)
+    } else {
+      const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
+      const tariefElektriciteit = tarief_elektriciteit_enkel || tarief_elektriciteit_normaal || 0
+      leverancierKosten =
+        totaalElektriciteit * tariefElektriciteit +
+        verbruikGas * (tarief_gas || 0) +
+        (vastrecht_stroom_maand || vaste_kosten_maand || 4) * 12 +
+        (verbruikGas > 0 ? (vastrecht_gas_maand || 0) * 12 : 0)
+    }
+
+    if (terugleveringJaar > 0 && tarief_teruglevering_kwh) {
+      leverancierKosten += terugleveringJaar * tarief_teruglevering_kwh
+    }
+
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
+    const ebElektriciteit = totaalElektriciteit * 0.10154
+    const ebGas = verbruikGas * 0.57816
+    const vermindering = 524.95
+
+    let netbeheerElektriciteit = 430.0
+    if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+      netbeheerElektriciteit = 0
+    }
+    let netbeheerGas = verbruikGas > 0 ? 245.0 : 0
+    if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+      netbeheerGas = 0
+    }
+    const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
+
+    const energiebelasting = ebElektriciteit + ebGas - vermindering
+    totaalJaar = leverancierKosten + energiebelasting + netbeheerKosten
+
+    const totaalExclBtw = totaalJaar
+    const btw = isZakelijk ? totaalExclBtw * 0.21 : 0
+    totaalJaar = totaalExclBtw + btw
+
+    return {
+      maandbedrag: totaalJaar / 12,
+      jaarbedrag: totaalJaar,
+      besparing: contract.besparing ? contract.besparing * 12 : 0,
+      breakdown: {
+        leverancier: leverancierKosten,
+        energiebelasting,
+        netbeheer: netbeheerKosten,
+        btw,
+        totaalExclBtw,
+        totaalInclBtw: totaalJaar,
+      },
+      tarieven: {
+        elektriciteitNormaal: tarief_elektriciteit_normaal || undefined,
+        elektriciteitDal: tarief_elektriciteit_dal || undefined,
+        elektriciteitEnkel: tarief_elektriciteit_enkel || undefined,
+        gas: tarief_gas || undefined,
+        teruglevering: tarief_teruglevering_kwh || undefined,
+        vastrechtStroom: vastrecht_stroom_maand || vaste_kosten_maand || 4,
+        vastrechtGas: vastrecht_gas_maand || 0,
+      },
+    }
+  } else if (contract.type === 'dynamisch' && contract.details_dynamisch) {
+    const { opslag_elektriciteit, opslag_elektriciteit_normaal, opslag_gas, vastrecht_stroom_maand, vastrecht_gas_maand } = contract.details_dynamisch
+    const marktPrijsElektriciteit = 0.2
+    const marktPrijsGas = 0.8
+    const opslagElektriciteit = opslag_elektriciteit || opslag_elektriciteit_normaal || 0
+
+    const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
+    leverancierKosten =
+      totaalElektriciteit * (marktPrijsElektriciteit + opslagElektriciteit) +
+      verbruikGas * (marktPrijsGas + (opslag_gas || 0)) +
+      (vastrecht_stroom_maand || 0) * 12 +
+      (verbruikGas > 0 ? (vastrecht_gas_maand || 0) * 12 : 0)
+
+    const ebElektriciteit = totaalElektriciteit * 0.10154
+    const ebGas = verbruikGas * 0.57816
+    const vermindering = 524.95
+
+    let netbeheerElektriciteit = 430.0
+    if (aansluitwaardeElektriciteit && isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit)) {
+      netbeheerElektriciteit = 0
+    }
+    let netbeheerGas = verbruikGas > 0 ? 245.0 : 0
+    if (aansluitwaardeGas && isGrootverbruikGasAansluitwaarde(aansluitwaardeGas)) {
+      netbeheerGas = 0
+    }
+    const netbeheerKosten = netbeheerElektriciteit + netbeheerGas
+
+    const energiebelasting = ebElektriciteit + ebGas - vermindering
+    totaalJaar = leverancierKosten + energiebelasting + netbeheerKosten
+
+    const totaalExclBtw = totaalJaar
+    const btw = isZakelijk ? totaalExclBtw * 0.21 : 0
+    totaalJaar = totaalExclBtw + btw
+
+    return {
+      maandbedrag: totaalJaar / 12,
+      jaarbedrag: totaalJaar,
+      besparing: contract.besparing ? contract.besparing * 12 : 0,
+      breakdown: {
+        leverancier: leverancierKosten,
+        energiebelasting,
+        netbeheer: netbeheerKosten,
+        btw,
+        totaalExclBtw,
+        totaalInclBtw: totaalJaar,
+      },
+      tarieven: {
+        elektriciteitNormaal: marktPrijsElektriciteit + opslagElektriciteit,
+        elektriciteitDal: marktPrijsElektriciteit + opslagElektriciteit,
+        gas: marktPrijsGas + (opslag_gas || 0),
+        vastrechtStroom: vastrecht_stroom_maand || 0,
+        vastrechtGas: vastrecht_gas_maand || 0,
+      },
+    }
+  }
+
+  // Fallback
+  return {
+    maandbedrag: contract.maandbedrag || 0,
+    jaarbedrag: contract.jaarbedrag || 0,
+    besparing: contract.besparing ? contract.besparing * 12 : 0,
+    breakdown: {
+      leverancier: 0,
+      energiebelasting: 0,
+      netbeheer: 0,
+      btw: 0,
+      totaalExclBtw: 0,
+      totaalInclBtw: 0,
+    },
+    tarieven: {
+      vastrechtStroom: 0,
+      vastrechtGas: 0,
+    },
+  }
+}
+
+export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
+  const [showDetails, setShowDetails] = useState(false)
+  const { verbruik, addressType } = useCalculatorStore()
+
+  if (!contract || !verbruik) return null
+
+  // Bereken kosten met EXACT dezelfde logica als resultatenpagina
+  const berekening = useMemo(() => {
+    return berekenContractKostenVereenvoudigd(
+      contract,
+      verbruik.elektriciteitNormaal || 0,
+      verbruik.elektriciteitDal || 0,
+      verbruik.gasJaar || 0,
+      verbruik.heeftEnkeleMeter || false,
+      verbruik.terugleveringJaar || 0,
+      verbruik.aansluitwaarden?.elektriciteit,
+      verbruik.aansluitwaarden?.gas,
+      addressType
+    )
+  }, [contract, verbruik, addressType])
 
   const getContractTypeLabel = () => {
     if (contract.type === 'vast') {
@@ -113,20 +271,9 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
     return 'Dynamisch contract'
   }
 
-  const besparing = contract.besparing ? contract.besparing * 12 : null // Jaarlijkse besparing
   const rating = contract.rating || 0
   const reviews = contract.aantalReviews || 0
   const isZakelijk = addressType === 'zakelijk'
-
-  // Format currency helper
-  const formatCurrency = (amount: number) => {
-    return `€${amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  }
-
-  // Haal contract details op voor tarieven
-  const details = contract.type === 'vast' 
-    ? (contract as any).details_vast 
-    : (contract as any).details_dynamisch
 
   return (
     <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg mb-6 overflow-hidden">
@@ -157,7 +304,7 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
 
             {/* Rating */}
             {rating > 0 && (
-              <div className="flex items-center gap-1.5 mb-3">
+              <div className="flex items-center gap-1.5 mb-2">
                 <Star className="w-3.5 h-3.5 text-yellow-400" weight="fill" />
                 <span className="text-xs font-semibold text-gray-700">
                   {rating.toFixed(1)}
@@ -171,67 +318,24 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
             )}
 
             {/* Prominente prijsinformatie */}
-            <div className="space-y-2 mb-3">
-              {/* Maandbedrag - gebruik breakdown als beschikbaar, anders contract.exactMaandbedrag of contract.maandbedrag */}
-              {(() => {
-                const maandbedrag = breakdown && !loadingBreakdown
-                  ? (isZakelijk 
-                      ? breakdown.totaal.maandExclBtw
-                      : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
-                  : (contract.exactMaandbedrag ?? contract.maandbedrag)
-                
-                if (maandbedrag > 0) {
-                  return (
-                    <div className="flex items-center gap-2">
-                      <CurrencyEur className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                      <span className="text-base md:text-lg font-bold text-brand-navy-500">
-                        {formatCurrency(maandbedrag)}/maand
-                      </span>
-                      {isZakelijk && (
-                        <span className="text-xs text-gray-500">(excl. BTW)</span>
-                      )}
-                      {!isZakelijk && !breakdown && (
-                        <span className="text-xs text-gray-500">(geschat)</span>
-                      )}
-                    </div>
-                  )
-                }
-                return null
-              })()}
-
-              {/* Jaarbedrag - gebruik breakdown als beschikbaar, anders contract.exactJaarbedrag of contract.jaarbedrag */}
-              {(() => {
-                const jaarbedrag = breakdown && !loadingBreakdown
-                  ? (isZakelijk 
-                      ? breakdown.totaal.jaarExclBtw
-                      : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
-                  : (contract.exactJaarbedrag ?? contract.jaarbedrag)
-                
-                if (jaarbedrag > 0) {
-                  return (
-                    <div className="flex items-center gap-2">
-                      <ChartLine className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                      <span className="text-sm md:text-base font-semibold text-gray-700">
-                        {formatCurrency(jaarbedrag)}/jaar
-                      </span>
-                      {isZakelijk && (
-                        <span className="text-xs text-gray-500">(excl. BTW)</span>
-                      )}
-                      {!isZakelijk && !breakdown && (
-                        <span className="text-xs text-gray-500">(geschat)</span>
-                      )}
-                    </div>
-                  )
-                }
-                return null
-              })()}
-
-              {/* Besparing */}
-              {besparing && besparing > 0 && (
-                <div className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg px-2.5 py-1 mt-1">
+            <div className="flex flex-col gap-1.5 mt-3">
+              <div className="flex items-center gap-2">
+                <CurrencyEur className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                <span className="text-base md:text-lg font-bold text-brand-navy-500">
+                  €{berekening.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/maand
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                <span className="text-sm md:text-base font-semibold text-gray-700">
+                  €{berekening.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar
+                </span>
+              </div>
+              {berekening.besparing > 0 && (
+                <div className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg px-2.5 py-1 mt-1 w-fit">
                   <CheckCircle className="w-3.5 h-3.5" weight="bold" />
                   <span className="text-xs font-semibold">
-                    €{besparing.toLocaleString('nl-NL')} besparing/jaar
+                    €{berekening.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} besparing/jaar
                   </span>
                 </div>
               )}
@@ -256,11 +360,11 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
 
       {/* Expanded Details */}
       {showDetails && (
-        <div className="border-t border-gray-200 bg-gray-50 p-4 md:p-5 space-y-4 md:space-y-5">
+        <div className="border-t border-gray-200 bg-gray-50 p-4 md:p-5 space-y-4">
           {/* Contractdetails */}
           <div>
-            <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-              <Info className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
+            <h4 className="text-sm font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4" weight="bold" />
               Contractdetails
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
@@ -270,17 +374,15 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
                   {getContractTypeLabel()}
                 </span>
               </div>
-
               {contract.groeneEnergie && (
                 <div>
                   <span className="text-gray-600">Energie:</span>
                   <span className="ml-2 font-semibold text-green-600 flex items-center gap-1">
-                    <Leaf className="w-3.5 h-3.5" weight="bold" />
+                    <Leaf className="w-4 h-4" weight="bold" />
                     100% Groen
                   </span>
                 </div>
               )}
-
               <div>
                 <span className="text-gray-600">Opzegtermijn:</span>
                 <span className="ml-2 font-semibold text-brand-navy-500">
@@ -291,275 +393,156 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
           </div>
 
           {/* Tarieven */}
-          {details && (
-            <div>
-              <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-                <Calculator className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
-                Tarieven
-              </h4>
-              <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-2 md:space-y-3">
-                {/* Voor vast contract: toon tarieven */}
-                {contract.type === 'vast' && (
-                  <>
-                    {details.tarief_elektriciteit_enkel && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                          <span className="text-gray-700">Elektriciteit (enkel tarief):</span>
-                        </div>
-                        <span className="font-semibold text-brand-navy-500">
-                          €{details.tarief_elektriciteit_enkel.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                        </span>
-                      </div>
-                    )}
-                    {details.tarief_elektriciteit_normaal && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                          <span className="text-gray-700">Elektriciteit normaal:</span>
-                        </div>
-                        <span className="font-semibold text-brand-navy-500">
-                          €{details.tarief_elektriciteit_normaal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                        </span>
-                      </div>
-                    )}
-                    {details.tarief_elektriciteit_dal && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                          <span className="text-gray-700">Elektriciteit dal:</span>
-                        </div>
-                        <span className="font-semibold text-brand-navy-500">
-                          €{details.tarief_elektriciteit_dal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                        </span>
-                      </div>
-                    )}
-                    {details.tarief_gas && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Flame className="w-4 h-4 text-orange-500" weight="bold" />
-                          <span className="text-gray-700">Gas:</span>
-                        </div>
-                        <span className="font-semibold text-brand-navy-500">
-                          €{details.tarief_gas.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/m³
-                        </span>
-                      </div>
-                    )}
-                    {details.tarief_teruglevering_kwh !== undefined && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Lightning className="w-4 h-4 text-yellow-500" weight="bold" />
-                          <span className="text-gray-700">Teruglevering:</span>
-                        </div>
-                        <span className="font-semibold text-brand-navy-500">
-                          €{details.tarief_teruglevering_kwh.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-                
-                {/* Voor dynamisch contract: toon opslagen */}
-                {contract.type === 'dynamisch' && (
-                  <>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
-                        <span className="text-gray-700">Opslag elektriciteit:</span>
-                      </div>
-                      <span className="font-semibold text-brand-navy-500">
-                        €{details.opslag_elektriciteit?.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) || '0,0000'}/kWh
-                      </span>
-                    </div>
-                    {details.opslag_gas && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Flame className="w-4 h-4 text-orange-500" weight="bold" />
-                          <span className="text-gray-700">Opslag gas:</span>
-                        </div>
-                        <span className="font-semibold text-brand-navy-500">
-                          €{details.opslag_gas.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/m³
-                        </span>
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-500 italic pt-1">
-                      * Tarieven = spotprijs + opslag (variabel per uur/dag)
-                    </div>
-                  </>
-                )}
-                
-                {/* Vastrechten (voor beide types) */}
-                <div className="pt-2 border-t border-gray-200 space-y-2">
-                  {details.vastrecht_stroom_maand && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-700">Vastrecht stroom:</span>
-                      <span className="font-semibold text-brand-navy-500">
-                        €{details.vastrecht_stroom_maand.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/maand
-                      </span>
-                    </div>
-                  )}
-                  {details.vastrecht_gas_maand && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-700">Vastrecht gas:</span>
-                      <span className="font-semibold text-brand-navy-500">
-                        €{details.vastrecht_gas_maand.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/maand
-                      </span>
-                    </div>
-                  )}
+          <div>
+            <h4 className="text-sm font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
+              <Calculator className="w-4 h-4" weight="bold" />
+              Tarieven
+            </h4>
+            <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-2 text-sm">
+              {berekening.tarieven.elektriciteitEnkel && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 flex items-center gap-1.5">
+                    <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                    Elektriciteit (enkele meter):
+                  </span>
+                  <span className="font-semibold text-brand-navy-500">
+                    €{berekening.tarieven.elektriciteitEnkel.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                  </span>
                 </div>
+              )}
+              {berekening.tarieven.elektriciteitNormaal && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 flex items-center gap-1.5">
+                    <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                    Elektriciteit normaal:
+                  </span>
+                  <span className="font-semibold text-brand-navy-500">
+                    €{berekening.tarieven.elektriciteitNormaal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                  </span>
+                </div>
+              )}
+              {berekening.tarieven.elektriciteitDal && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 flex items-center gap-1.5">
+                    <Lightning className="w-4 h-4 text-brand-teal-600" weight="bold" />
+                    Elektriciteit dal:
+                  </span>
+                  <span className="font-semibold text-brand-navy-500">
+                    €{berekening.tarieven.elektriciteitDal.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                  </span>
+                </div>
+              )}
+              {berekening.tarieven.gas && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 flex items-center gap-1.5">
+                    <Flame className="w-4 h-4 text-orange-500" weight="bold" />
+                    Gas:
+                  </span>
+                  <span className="font-semibold text-brand-navy-500">
+                    €{berekening.tarieven.gas.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/m³
+                  </span>
+                </div>
+              )}
+              {berekening.tarieven.teruglevering !== undefined && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 flex items-center gap-1.5">
+                    <Sun className="w-4 h-4 text-yellow-500" weight="bold" />
+                    Teruglevering:
+                  </span>
+                  <span className="font-semibold text-brand-navy-500">
+                    €{berekening.tarieven.teruglevering.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}/kWh
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                <span className="text-gray-600">Vastrecht stroom:</span>
+                <span className="font-semibold text-brand-navy-500">
+                  €{berekening.tarieven.vastrechtStroom.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/maand
+                </span>
               </div>
+              {verbruik.gasJaar && verbruik.gasJaar > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Vastrecht gas:</span>
+                  <span className="font-semibold text-brand-navy-500">
+                    €{berekening.tarieven.vastrechtGas.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/maand
+                  </span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Berekening */}
-          {loadingBreakdown && (
-            <div className="text-center py-4">
-              <div className="inline-block w-6 h-6 border-2 border-brand-teal-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-600 mt-2">Berekening wordt opgehaald...</p>
-            </div>
-          )}
-
-          {breakdownError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-700">{breakdownError}</p>
-            </div>
-          )}
-
-          {breakdown && !loadingBreakdown && (
-            <div>
-              <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
-                <Calculator className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
-                Berekening (op basis van jouw verbruik)
-              </h4>
-              <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-3">
-                {/* Leverancier kosten */}
-                <div>
-                  <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Leverancier</h5>
-                  <div className="space-y-1.5 text-sm">
-                    {breakdown.leverancier.elektriciteitDetails && (
-                      <>
-                        {breakdown.leverancier.elektriciteitDetails.enkel && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-700">
-                              Elektriciteit: {breakdown.leverancier.elektriciteitDetails.enkel.kwh.toLocaleString('nl-NL')} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel.tarief.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-                            </span>
-                            <span className="font-semibold text-brand-navy-500">
-                              {formatCurrency(breakdown.leverancier.elektriciteitDetails.enkel.bedrag)}
-                            </span>
-                          </div>
-                        )}
-                        {breakdown.leverancier.elektriciteitDetails.normaal && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-700">
-                              Elektriciteit normaal: {breakdown.leverancier.elektriciteitDetails.normaal.kwh.toLocaleString('nl-NL')} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal.tarief.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-                            </span>
-                            <span className="font-semibold text-brand-navy-500">
-                              {formatCurrency(breakdown.leverancier.elektriciteitDetails.normaal.bedrag)}
-                            </span>
-                          </div>
-                        )}
-                        {breakdown.leverancier.elektriciteitDetails.dal && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-700">
-                              Elektriciteit dal: {breakdown.leverancier.elektriciteitDetails.dal.kwh.toLocaleString('nl-NL')} kWh × €{breakdown.leverancier.elektriciteitDetails.dal.tarief.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-                            </span>
-                            <span className="font-semibold text-brand-navy-500">
-                              {formatCurrency(breakdown.leverancier.elektriciteitDetails.dal.bedrag)}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                    {breakdown.leverancier.gasDetails && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-700">
-                          Gas: {breakdown.leverancier.gasDetails.m3.toLocaleString('nl-NL')} m³ × €{breakdown.leverancier.gasDetails.tarief.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-                        </span>
-                        <span className="font-semibold text-brand-navy-500">
-                          {formatCurrency(breakdown.leverancier.gasDetails.bedrag)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex justify-between pt-2 border-t border-gray-200">
-                      <span className="text-gray-700">Vastrecht:</span>
-                      <span className="font-semibold text-brand-navy-500">
-                        {formatCurrency(breakdown.leverancier.vastrecht)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-gray-200 font-semibold">
-                      <span className="text-brand-navy-500">Subtotaal leverancier:</span>
-                      <span className="text-brand-navy-500">
-                        {formatCurrency(breakdown.leverancier.subtotaal)}
-                      </span>
-                    </div>
-                  </div>
+          <div>
+            <h4 className="text-sm font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
+              <Calculator className="w-4 h-4" weight="bold" />
+              Berekening (op basis van jouw verbruik)
+            </h4>
+            <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-2 text-sm">
+              {/* Verbruik details */}
+              {verbruik.heeftEnkeleMeter ? (
+                <div className="text-gray-700">
+                  <span className="font-semibold">Elektriciteit:</span> {(verbruik.elektriciteitNormaal || 0) + (verbruik.elektriciteitDal || 0)} kWh (enkele meter)
                 </div>
-
-                {/* Netbeheer */}
-                <div>
-                  <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Netbeheer</h5>
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-700">Netbeheerder: {breakdown.netbeheer.netbeheerder}</span>
+              ) : (
+                <>
+                  {verbruik.elektriciteitNormaal && verbruik.elektriciteitNormaal > 0 && (
+                    <div className="text-gray-700">
+                      <span className="font-semibold">Elektriciteit normaal:</span> {verbruik.elektriciteitNormaal.toLocaleString('nl-NL')} kWh
                     </div>
-                    <div className="flex justify-between pt-2 border-t border-gray-200 font-semibold">
-                      <span className="text-brand-navy-500">Subtotaal netbeheer:</span>
-                      <span className="text-brand-navy-500">
-                        {formatCurrency(breakdown.netbeheer.subtotaal)}
-                      </span>
+                  )}
+                  {verbruik.elektriciteitDal && verbruik.elektriciteitDal > 0 && (
+                    <div className="text-gray-700">
+                      <span className="font-semibold">Elektriciteit dal:</span> {verbruik.elektriciteitDal.toLocaleString('nl-NL')} kWh
                     </div>
-                  </div>
+                  )}
+                </>
+              )}
+              {verbruik.gasJaar && verbruik.gasJaar > 0 && (
+                <div className="text-gray-700">
+                  <span className="font-semibold">Gas:</span> {verbruik.gasJaar.toLocaleString('nl-NL')} m³/jaar
                 </div>
-
-                {/* Energiebelasting */}
-                <div>
-                  <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Energiebelasting</h5>
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between pt-2 border-t border-gray-200 font-semibold">
-                      <span className="text-brand-navy-500">Subtotaal energiebelasting:</span>
-                      <span className="text-brand-navy-500">
-                        {formatCurrency(breakdown.energiebelasting.subtotaal)}
-                      </span>
-                    </div>
-                  </div>
+              )}
+              {verbruik.terugleveringJaar && verbruik.terugleveringJaar > 0 && (
+                <div className="text-gray-700">
+                  <span className="font-semibold">Teruglevering:</span> {verbruik.terugleveringJaar.toLocaleString('nl-NL')} kWh/jaar
                 </div>
+              )}
 
-                {/* Totaal */}
-                <div className="bg-brand-teal-50 rounded-lg p-3 md:p-4 border-2 border-brand-teal-200 mt-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-base md:text-lg font-bold text-brand-navy-500">
-                      Totaal per jaar {isZakelijk ? '(excl. BTW)' : '(incl. BTW)'}:
-                    </span>
-                    <span className="text-xl md:text-2xl font-bold text-brand-teal-600">
-                      {formatCurrency(
-                        isZakelijk 
-                          ? breakdown.totaal.jaarExclBtw 
-                          : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw)
-                      )}
-                    </span>
+              <div className="pt-3 border-t border-gray-200 space-y-1.5">
+                <div className="flex justify-between text-gray-700">
+                  <span>Leverancier:</span>
+                  <span className="font-semibold">€{berekening.breakdown.leverancier.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</span>
+                </div>
+                <div className="flex justify-between text-gray-700">
+                  <span>Energiebelasting:</span>
+                  <span className="font-semibold">€{berekening.breakdown.energiebelasting.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</span>
+                </div>
+                <div className="flex justify-between text-gray-700">
+                  <span>Netbeheerder:</span>
+                  <span className="font-semibold">€{berekening.breakdown.netbeheer.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</span>
+                </div>
+                {isZakelijk && (
+                  <div className="flex justify-between text-gray-700">
+                    <span>BTW (21%):</span>
+                    <span className="font-semibold">€{berekening.breakdown.btw.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
-                      Totaal per maand {isZakelijk ? '(excl. BTW)' : '(incl. BTW)'}:
-                    </span>
-                    <span className="text-lg font-semibold text-brand-navy-500">
-                      {formatCurrency(
-                        isZakelijk 
-                          ? breakdown.totaal.maandExclBtw 
-                          : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw)
-                      )}
-                    </span>
-                  </div>
+                )}
+                <div className="pt-2 border-t-2 border-brand-teal-500 flex justify-between font-bold text-brand-navy-500">
+                  <span>Totaal {isZakelijk ? '(incl. BTW)' : '(incl. BTW)'}:</span>
+                  <span>€{berekening.breakdown.totaalInclBtw.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</span>
+                </div>
+                <div className="text-xs text-gray-500 text-center pt-1">
+                  (€{berekening.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/maand)
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Bijzonderheden */}
           {contract.bijzonderheden && contract.bijzonderheden.length > 0 && (
             <div>
-              <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3">Bijzonderheden</h4>
-              <ul className="space-y-2">
+              <h4 className="text-sm font-bold text-brand-navy-500 mb-2">Bijzonderheden</h4>
+              <ul className="space-y-1.5">
                 {contract.bijzonderheden.map((bijzonderheid, index) => (
                   <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
