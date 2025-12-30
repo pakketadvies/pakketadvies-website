@@ -34,59 +34,69 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
-  // Haal breakdown op wanneer details worden uitgeklapt
+  // Check of het contract al een breakdown heeft (van de resultatenpagina)
+  // Als dat zo is, gebruik die in plaats van opnieuw berekenen
   useEffect(() => {
-    if (showDetails && !breakdown && !loadingBreakdown && verbruik) {
-      setLoadingBreakdown(true)
-      
-      const fetchBreakdown = async () => {
-        try {
-          const response = await fetch('/api/energie/bereken-contract', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              // Verbruik
-              elektriciteitNormaal: verbruik.elektriciteitNormaal || 0,
-              elektriciteitDal: verbruik.elektriciteitDal || 0,
-              gas: verbruik.gasJaar || 0,
-              terugleveringJaar: verbruik.terugleveringJaar || 0,
-              
-              // Aansluitwaarden
-              aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '1x25A',
-              aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
-              
-              // Postcode
-              postcode: verbruik.leveringsadressen?.[0]?.postcode?.replace(/\s/g, '') || '',
-              
-              // Contract details
-              contractType: contract.type,
-              tariefElektriciteitNormaal: contract.tariefElektriciteit,
-              tariefElektriciteitDal: contract.tariefElektriciteitDal,
-              tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
-              tariefGas: contract.tariefGas,
-              tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
-              // Dynamische contract opslagen
-              opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
-              opslagGas: details?.opslag_gas || 0,
-              opslagTeruglevering: details?.opslag_teruglevering || 0,
-              vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
-              vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
-              heeftDubbeleMeter: !verbruik.heeftEnkeleMeter,
-            }),
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            setBreakdown(data.breakdown)
-          }
-        } catch (error) {
-          console.error('Error fetching breakdown:', error)
-        } finally {
-          setLoadingBreakdown(false)
-        }
+    if (showDetails && !breakdown && !loadingBreakdown) {
+      // Als het contract al een breakdown heeft, gebruik die direct
+      if ((contract as any).breakdown) {
+        setBreakdown((contract as any).breakdown)
+        return
       }
+      
+      // Anders: haal breakdown op via API (fallback voor oude/cached contracten)
+      if (verbruik) {
+        setLoadingBreakdown(true)
+        
+        const fetchBreakdown = async () => {
+          try {
+            const response = await fetch('/api/energie/bereken-contract', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                // Verbruik
+                elektriciteitNormaal: verbruik.elektriciteitNormaal || 0,
+                elektriciteitDal: verbruik.elektriciteitDal || 0,
+                gas: verbruik.gasJaar || 0,
+                terugleveringJaar: verbruik.terugleveringJaar || 0,
+                
+                // Aansluitwaarden
+                aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '1x25A',
+                aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
+                
+                // Postcode
+                postcode: verbruik.leveringsadressen?.[0]?.postcode?.replace(/\s/g, '') || '',
+                
+                // Contract details
+                contractType: contract.type,
+                tariefElektriciteitNormaal: contract.tariefElektriciteit,
+                tariefElektriciteitDal: contract.tariefElektriciteitDal,
+                tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
+                tariefGas: contract.tariefGas,
+                tariefTerugleveringKwh: details?.tarief_teruglevering_kwh || 0,
+                // Dynamische contract opslagen
+                opslagElektriciteit: details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal || 0,
+                opslagGas: details?.opslag_gas || 0,
+                opslagTeruglevering: details?.opslag_teruglevering || 0,
+                vastrechtStroomMaand: details?.vastrecht_stroom_maand || 4.00,
+                vastrechtGasMaand: details?.vastrecht_gas_maand || 4.00,
+                heeftDubbeleMeter: !verbruik.heeftEnkeleMeter,
+              }),
+            })
 
-      fetchBreakdown()
+            if (response.ok) {
+              const data = await response.json()
+              setBreakdown(data.breakdown)
+            }
+          } catch (error) {
+            console.error('Error fetching breakdown:', error)
+          } finally {
+            setLoadingBreakdown(false)
+          }
+        }
+
+        fetchBreakdown()
+      }
     }
   }, [showDetails, breakdown, loadingBreakdown, contract, verbruik, details])
 
