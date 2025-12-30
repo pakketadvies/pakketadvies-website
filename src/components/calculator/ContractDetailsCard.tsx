@@ -66,8 +66,8 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
           terugleveringJaar: verbruik.terugleveringJaar || 0,
           
           // Aansluitwaarden
-          aansluitwaardeElektriciteit: verbruik.aansluitwaarden?.elektriciteit || '3x25A',
-          aansluitwaardeGas: verbruik.aansluitwaarden?.gas || 'G4',
+          aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '3x25A',
+          aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
           
           // Postcode
           postcode: leveringsadres.postcode.replace(/\s/g, ''),
