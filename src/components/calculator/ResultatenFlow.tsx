@@ -385,6 +385,10 @@ const transformContractToOptie = (
     aanbevolen: contract.aanbevolen || false,
     populair: contract.populair || false,
     breakdown: contract.breakdown || undefined,
+    // NIEUW: voeg details_vast en details_dynamisch toe zodat ContractDetailsCard deze kan gebruiken
+    details_vast: contract.details_vast || undefined,
+    details_dynamisch: contract.details_dynamisch || undefined,
+    details_maatwerk: contract.details_maatwerk || undefined,
   }
 }
 
@@ -575,13 +579,12 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               return {
                 ...contract,
                 // Voor zakelijk: gebruik excl BTW, voor particulier: gebruik incl BTW
-                // Gebruik exacte waarden (zonder Math.round) voor consistentie met breakdown API
                 exactMaandbedrag: isZakelijk 
-                  ? breakdown.totaal.maandExclBtw
-                  : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw),
+                  ? Math.round(breakdown.totaal.maandExclBtw)
+                  : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw),
                 exactJaarbedrag: isZakelijk
-                  ? breakdown.totaal.jaarExclBtw
-                  : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw),
+                  ? Math.round(breakdown.totaal.jaarExclBtw)
+                  : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw),
                 breakdown,
               }
             }
