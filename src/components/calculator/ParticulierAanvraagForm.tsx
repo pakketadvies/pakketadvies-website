@@ -566,31 +566,57 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
       let recaptchaToken: string | null = null
       const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
       
-      if (siteKey && typeof window !== 'undefined' && window.grecaptcha) {
+      if (siteKey && typeof window !== 'undefined') {
         try {
-          // Wait for grecaptcha to be ready
-          await new Promise<void>((resolve) => {
-            if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
-              window.grecaptcha.ready(() => {
+          // Wait for grecaptcha to be available and ready
+          let grecaptchaReady = false
+          
+          // Check if grecaptcha is already loaded
+          if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+            await new Promise<void>((resolve) => {
+              window.grecaptcha!.ready(() => {
+                grecaptchaReady = true
                 resolve()
               })
-            } else {
-              resolve() // If ready is not available, continue anyway
-            }
-          })
-          
-          // Now execute reCAPTCHA
-          if (window.grecaptcha && typeof window.grecaptcha.execute === 'function') {
-            recaptchaToken = await window.grecaptcha.execute(siteKey, {
-              action: 'submit_contract_application'
             })
+          } else {
+            // Wait for grecaptcha to load (max 5 seconds)
+            await new Promise<void>((resolve, reject) => {
+              const maxWait = 5000 // 5 seconds
+              const startTime = Date.now()
+              
+              const checkGrecaptcha = () => {
+                if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+                  window.grecaptcha.ready(() => {
+                    grecaptchaReady = true
+                    resolve()
+                  })
+                } else if (Date.now() - startTime > maxWait) {
+                  console.warn('reCAPTCHA not loaded within timeout, continuing without token')
+                  resolve() // Continue without token
+                } else {
+                  setTimeout(checkGrecaptcha, 100)
+                }
+              }
+              
+              checkGrecaptcha()
+            })
+          }
+          
+          // Now execute reCAPTCHA if ready
+          if (grecaptchaReady && window.grecaptcha && typeof window.grecaptcha.execute === 'function') {
+            try {
+              recaptchaToken = await window.grecaptcha.execute(siteKey, {
+                action: 'submit_contract_application'
+              })
+              console.log('✅ reCAPTCHA token received')
+            } catch (executeError: any) {
+              console.error('reCAPTCHA execute error:', executeError)
+              // Continue without token (graceful degradation)
+            }
           }
         } catch (error: any) {
           console.error('reCAPTCHA error:', error)
-          // If error is about invalid site key, log it but continue (graceful degradation)
-          if (error?.message?.includes('Invalid site key')) {
-            console.warn('reCAPTCHA site key may not be configured correctly for this domain')
-          }
           // Continue without token if reCAPTCHA fails (graceful degradation)
         }
       }
