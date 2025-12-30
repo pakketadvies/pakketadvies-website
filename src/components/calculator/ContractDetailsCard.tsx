@@ -52,8 +52,8 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               terugleveringJaar: verbruik.terugleveringJaar || 0,
               
               // Aansluitwaarden
-              aansluitwaardeElektriciteit: verbruik.aansluitwaarden?.elektriciteit || '1x25A',
-              aansluitwaardeGas: verbruik.aansluitwaarden?.gas || 'G4',
+              aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit || '1x25A',
+              aansluitwaardeGas: verbruik.aansluitwaardeGas || 'G4',
               
               // Postcode
               postcode: verbruik.leveringsadressen?.[0]?.postcode?.replace(/\s/g, '') || '',
@@ -359,7 +359,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               </h4>
               <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-3">
                 {/* Elektriciteit */}
-                {verbruik && (verbruik.elektriciteitNormaal > 0 || verbruik.elektriciteitDal > 0) && (
+                {verbruik && (verbruik.elektriciteitNormaal > 0 || (verbruik.elektriciteitDal && verbruik.elektriciteitDal > 0)) && (
                   <div>
                     <p className="text-xs font-semibold text-gray-500 mb-2">Elektriciteit</p>
                     <div className="space-y-1.5">
@@ -411,7 +411,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                           <span className="text-gray-700">
                             Leveringskosten stroom
                             <span className="text-xs text-gray-500 ml-1">
-                              ({(verbruik.elektriciteitNormaal + (verbruik.elektriciteitDal || 0)).toLocaleString()} kWh)
+                              ({(verbruik.elektriciteitNormaal + (verbruik.elektriciteitDal ?? 0)).toLocaleString()} kWh)
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">
@@ -449,7 +449,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                 )}
 
                 {/* Gas */}
-                {verbruik && verbruik.gasJaar > 0 && breakdown.leverancier.gas !== undefined && (
+                {verbruik && verbruik.gasJaar !== null && verbruik.gasJaar > 0 && breakdown.leverancier.gas !== undefined && (
                   <div className="pt-3 border-t border-gray-200">
                     <p className="text-xs font-semibold text-gray-500 mb-2">Gas</p>
                     <div className="space-y-1.5">
