@@ -85,6 +85,8 @@ export interface ContractOptie {
   looptijd?: number // Optional: only for vast contracts, undefined for dynamic
   maandbedrag: number
   jaarbedrag: number
+  exactMaandbedrag?: number // NIEUW: exact maandbedrag van volledige breakdown berekening (zonder Math.round)
+  exactJaarbedrag?: number // NIEUW: exact jaarbedrag van volledige breakdown berekening (zonder Math.round)
   tariefElektriciteit: number
   tariefElektriciteitEnkel?: number // Voor enkele meters
   tariefElektriciteitDal?: number // Voor dubbele meters (nacht)
