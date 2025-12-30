@@ -113,8 +113,8 @@ export function ConsumerContractRowCard({
       cancelled = true
     }
   }, [
-    isDetailsOpen,
     breakdown,
+    loading,
     contract.type,
     contract.tariefElektriciteit,
     contract.tariefElektriciteitDal,
