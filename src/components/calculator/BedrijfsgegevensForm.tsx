@@ -188,10 +188,98 @@ function BedrijfsgegevensFormContent() {
   const [showVerbruikModal, setShowVerbruikModal] = useState(false)
   const [isUpdatingVerbruik, setIsUpdatingVerbruik] = useState(false)
   
+  // State voor herberekende prijzen
+  const [recalculatedPrices, setRecalculatedPrices] = useState<{
+    maandbedrag: number | null
+    besparing: number | null
+  } | null>(null)
+  
   // Ref om bij te houden of we al standaard verbruik hebben ingesteld (voorkomt meerdere keren instellen)
   const heeftStandaardVerbruikGeinsteld = useRef(false)
   
   // Handler voor verbruik update
+  // Functie om contractprijzen opnieuw te berekenen
+  const recalculateContractPrices = async (currentVerbruik: typeof verbruik) => {
+    if (!contract || !currentVerbruik) return
+
+    try {
+      const leveringsadres = currentVerbruik.leveringsadressen?.[0]
+      if (!leveringsadres?.postcode) return
+
+      const response = await fetch('/api/energie/bereken-contract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // Verbruik
+          elektriciteitNormaal: currentVerbruik.elektriciteitNormaal || 0,
+          elektriciteitDal: currentVerbruik.elektriciteitDal || 0,
+          gas: currentVerbruik.gasJaar || 0,
+          terugleveringJaar: currentVerbruik.terugleveringJaar || 0,
+          
+          // Aansluitwaarden
+          aansluitwaardeElektriciteit: currentVerbruik.aansluitwaardeElektriciteit || 0,
+          aansluitwaardeGas: currentVerbruik.aansluitwaardeGas || 0,
+          
+          // Postcode
+          postcode: leveringsadres.postcode.replace(/\s/g, ''),
+          
+          // Contract details
+          contractType: contract.type,
+          tariefElektriciteit: contract.tariefElektriciteit,
+          tariefElektriciteitDal: contract.tariefElektriciteitDal,
+          tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
+          tariefGas: contract.tariefGas,
+          tariefTerugleveringKwh: contract.type === 'vast' 
+            ? (contract as any).details_vast?.tarief_teruglevering_kwh || 0
+            : 0,
+          opslagElektriciteit: contract.type === 'dynamisch'
+            ? ((contract as any).details_dynamisch?.opslag_elektriciteit || (contract as any).details_dynamisch?.opslag_elektriciteit_normaal || 0)
+            : 0,
+          opslagGas: contract.type === 'dynamisch' 
+            ? ((contract as any).details_dynamisch?.opslag_gas || 0)
+            : 0,
+          opslagTeruglevering: contract.type === 'dynamisch'
+            ? ((contract as any).details_dynamisch?.opslag_teruglevering || 0)
+            : 0,
+          vastrechtStroomMaand: contract.type === 'vast'
+            ? ((contract as any).details_vast?.vastrecht_stroom_maand || 4.00)
+            : 4.00,
+          vastrechtGasMaand: contract.type === 'vast'
+            ? ((contract as any).details_vast?.vastrecht_gas_maand || 4.00)
+            : 4.00,
+          heeftDubbeleMeter: !currentVerbruik.heeftEnkeleMeter,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        const maandbedrag = data.totaal?.maandExclBtw || 0 // Zakelijk is excl. BTW
+        
+        // Bereken besparing (vergelijk met gemiddelde prijs, of gebruik oorspronkelijke besparing als referentie)
+        const oorspronkelijkMaandbedrag = contract.maandbedrag || 0
+        const oorspronkelijkeBesparing = contract.besparing || 0
+        
+        // Als het nieuwe maandbedrag lager is dan het oorspronkelijke, is er besparing
+        // Anders berekenen we de besparing proportioneel
+        let nieuweBesparing = oorspronkelijkeBesparing
+        if (oorspronkelijkMaandbedrag > 0 && maandbedrag !== oorspronkelijkMaandbedrag) {
+          // Proportionele aanpassing van besparing
+          const factor = maandbedrag / oorspronkelijkMaandbedrag
+          nieuweBesparing = oorspronkelijkeBesparing * factor
+        }
+
+        setRecalculatedPrices({
+          maandbedrag: Math.round(maandbedrag * 100) / 100, // Rond af op 2 decimalen
+          besparing: Math.round(nieuweBesparing * 100) / 100,
+        })
+      }
+    } catch (error) {
+      console.error('Error recalculating contract prices:', error)
+      // Bij fout, reset naar originele prijzen
+      setRecalculatedPrices(null)
+    }
+  }
+  
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
     if (!newVerbruik) return
     
@@ -199,6 +287,10 @@ function BedrijfsgegevensFormContent() {
     try {
       // Update verbruik in store
       setVerbruik(newVerbruik)
+      
+      // Herbereken contractprijzen met nieuw verbruik
+      await recalculateContractPrices(newVerbruik)
+      
       // Sluit modal na korte delay voor UX
       setTimeout(() => {
         setShowVerbruikModal(false)
@@ -209,6 +301,17 @@ function BedrijfsgegevensFormContent() {
       setIsUpdatingVerbruik(false)
     }
   }
+  
+  // Herbereken prijzen wanneer verbruik verandert (bij eerste load of externe wijziging)
+  useEffect(() => {
+    if (verbruik && contract) {
+      // Alleen herberekenen als er nog geen herberekende prijzen zijn
+      // (anders wordt dit bij elke render opnieuw gedaan)
+      if (!recalculatedPrices) {
+        recalculateContractPrices(verbruik)
+      }
+    }
+  }, [verbruik, contract]) // eslint-disable-line react-hooks/exhaustive-deps
   
   // Fetch contract from API als fallback (als niet in store of als contractId verschilt)
   useEffect(() => {
@@ -905,7 +1008,17 @@ function BedrijfsgegevensFormContent() {
       </div>
 
       {/* Contract Details Card */}
-      <ContractDetailsCard contract={contract} />
+      {/* Update contract object met nieuwe prijzen voor ContractDetailsCard */}
+      {(() => {
+        const maandbedrag = recalculatedPrices?.maandbedrag ?? contract?.maandbedrag ?? 0
+        const besparing = recalculatedPrices?.besparing ?? contract?.besparing ?? 0
+        const updatedContract = contract ? {
+          ...contract,
+          maandbedrag: maandbedrag,
+          besparing: besparing,
+        } : null
+        return <ContractDetailsCard contract={updatedContract} />
+      })()}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
         {/* Header: Meld u nu aan */}
