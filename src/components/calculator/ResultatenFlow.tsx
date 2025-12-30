@@ -753,9 +753,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Conditionele padding: alleen voor consumer (particulier) omdat business (zakelijk) al CalculatorLayout padding heeft */}
-        <div className={audience === 'consumer' ? 'pt-24 md:pt-28' : ''}>
+      {/* Conditionele padding: alleen voor consumer (particulier) omdat business (zakelijk) al CalculatorLayout padding heeft */}
+      <div className={audience === 'consumer' ? 'pt-24 md:pt-28' : ''}>
           {verbruik && (
             <>
               <div className="lg:hidden">
@@ -778,8 +777,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
           {verbruik && (
-            <div className="mt-5 px-4 lg:px-0">
-              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
+            <div className="mt-5">
+              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-4 py-4 lg:mx-auto lg:max-w-7xl lg:px-5">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <p className="text-white/80 text-sm">Resultaten</p>
@@ -833,7 +832,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </div>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+              <div className="grid gap-6 lg:grid-cols-[340px_1fr] px-4 lg:mx-auto lg:max-w-7xl lg:px-0">
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
                   {/* Help mij kiezen sectie */}
