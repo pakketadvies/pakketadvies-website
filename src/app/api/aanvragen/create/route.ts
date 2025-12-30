@@ -9,55 +9,6 @@ import { calculateContractCosts } from '@/lib/bereken-contract-internal'
  * Creates a new contract application (aanvraag) with a unique aanvraagnummer
  * Uses service role key to bypass RLS for public form submissions
  */
-/**
- * Verify reCAPTCHA token with Google
- */
-async function verifyRecaptcha(token: string | null | undefined): Promise<{ success: boolean; score?: number; error?: string }> {
-  if (!token) {
-    return { success: false, error: 'No reCAPTCHA token provided' }
-  }
-
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY
-  if (!secretKey) {
-    console.warn('[reCAPTCHA] RECAPTCHA_SECRET_KEY not configured, skipping verification')
-    return { success: true } // Allow in development if not configured
-  }
-
-  try {
-    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        secret: secretKey,
-        response: token,
-      }),
-    })
-
-    const data = await response.json()
-
-    if (!data.success) {
-      console.error('[reCAPTCHA] Verification failed:', data['error-codes'])
-      return { success: false, error: data['error-codes']?.join(', ') || 'Verification failed' }
-    }
-
-    const score = data.score || 0
-    const threshold = 0.5 // Standard threshold for reCAPTCHA v3
-
-    if (score < threshold) {
-      console.warn(`[reCAPTCHA] Score too low: ${score} (threshold: ${threshold})`)
-      return { success: false, score, error: `Score too low: ${score}` }
-    }
-
-    console.log(`[reCAPTCHA] Verification successful, score: ${score}`)
-    return { success: true, score }
-  } catch (error: any) {
-    console.error('[reCAPTCHA] Error verifying token:', error)
-    return { success: false, error: error.message || 'Verification error' }
-  }
-}
-
 export async function POST(request: Request) {
   try {
     const body: CreateAanvraagRequest = await request.json()
@@ -73,18 +24,70 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verify reCAPTCHA token (only in production or if configured)
-    if (process.env.NODE_ENV === 'production' || process.env.RECAPTCHA_SECRET_KEY) {
-      const recaptchaResult = await verifyRecaptcha(body.recaptcha_token)
-      if (!recaptchaResult.success) {
-        console.error('[create] reCAPTCHA verification failed:', recaptchaResult.error)
+    // Cloudflare Turnstile validatie
+    const turnstileToken = body.turnstile_token
+    if (process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
+      if (!turnstileToken) {
         return NextResponse.json<CreateAanvraagResponse>(
           { 
             success: false, 
-            error: 'Beveiligingscontrole mislukt. Probeer het opnieuw.' 
+            error: 'Beveiligingsverificatie ontbreekt. Ververs de pagina en probeer het opnieuw.' 
           },
           { status: 403 }
         )
+      }
+
+      // Verify token with Cloudflare
+      try {
+        const verifyResponse = await fetch(
+          'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              secret: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+              response: turnstileToken,
+              // Optionally include remote IP for better security
+              remoteip: request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       undefined,
+            }),
+          }
+        )
+
+        const verifyData = await verifyResponse.json()
+
+        if (!verifyData.success) {
+          console.error('[Turnstile] Verification failed:', verifyData)
+          return NextResponse.json<CreateAanvraagResponse>(
+            { 
+              success: false, 
+              error: 'Beveiligingsverificatie mislukt. Probeer het opnieuw.' 
+            },
+            { status: 403 }
+          )
+        }
+
+        // Optional: Check for specific error codes
+        if (verifyData['error-codes'] && verifyData['error-codes'].length > 0) {
+          const errorCodes = verifyData['error-codes']
+          // Log for monitoring but don't block in case of minor issues
+          console.warn('[Turnstile] Verification warnings:', errorCodes)
+        }
+      } catch (error) {
+        console.error('[Turnstile] Verification error:', error)
+        // In production, fail securely. In development, allow for testing.
+        if (process.env.NODE_ENV === 'production') {
+          return NextResponse.json<CreateAanvraagResponse>(
+            { 
+              success: false, 
+              error: 'Beveiligingsverificatie kon niet worden uitgevoerd. Probeer het later opnieuw.' 
+            },
+            { status: 503 }
+          )
+        }
       }
     }
 
