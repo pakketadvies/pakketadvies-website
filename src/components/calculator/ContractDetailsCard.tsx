@@ -29,12 +29,13 @@ export function ContractDetailsCard({ contract, verbruik, addressType }: Contrac
   const [loadingBreakdown, setLoadingBreakdown] = useState(false)
   const [breakdownError, setBreakdownError] = useState<string | null>(null)
 
-  // Haal breakdown op wanneer details worden uitgeklapt
+  // Haal breakdown op zodra verbruik beschikbaar is (niet alleen bij uitklappen)
+  // Dit zorgt ervoor dat de prijsinformatie direct correct is
   useEffect(() => {
-    if (showDetails && !breakdown && !loadingBreakdown && verbruik && contract) {
+    if (!breakdown && !loadingBreakdown && verbruik && contract) {
       fetchBreakdown()
     }
-  }, [showDetails, breakdown, loadingBreakdown, verbruik, contract])
+  }, [breakdown, loadingBreakdown, verbruik, contract])
 
   const fetchBreakdown = async () => {
     if (!verbruik || !contract) return
