@@ -81,16 +81,35 @@ export async function executeReCaptcha(
     return null
   }
 
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[reCAPTCHA] Executing with:', {
+      siteKey: siteKey?.substring(0, 20) + '...',
+      action,
+      domain: window.location.hostname,
+      grecaptchaAvailable: !!window.grecaptcha,
+    })
+  }
+
   try {
     return new Promise((resolve, reject) => {
       window.grecaptcha!.ready(() => {
         window.grecaptcha!
           .execute(siteKey, { action })
           .then((token) => {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[reCAPTCHA] Token generated successfully:', token?.substring(0, 20) + '...')
+            }
             resolve(token)
           })
           .catch((error) => {
             console.error('[reCAPTCHA] Execute error:', error)
+            console.error('[reCAPTCHA] Error details:', {
+              message: error?.message,
+              name: error?.name,
+              siteKey: siteKey?.substring(0, 20) + '...',
+              domain: window.location.hostname,
+            })
             reject(error)
           })
       })
