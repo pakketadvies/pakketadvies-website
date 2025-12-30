@@ -1402,7 +1402,7 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
             {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
               <div className="flex justify-center mt-4">
                 <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''}
                   onSuccess={(token) => {
                     setTurnstileToken(token)
                     setTurnstileError(null)

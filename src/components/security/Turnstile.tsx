@@ -88,7 +88,10 @@ export function Turnstile({
 
   // Render widget when script is loaded
   useEffect(() => {
-    if (!isLoaded || !window.turnstile || !containerRef.current || !siteKey) {
+    // Trim siteKey to remove any whitespace/newlines
+    const trimmedSiteKey = siteKey?.trim()
+    
+    if (!isLoaded || !window.turnstile || !containerRef.current || !trimmedSiteKey) {
       return
     }
 
@@ -109,7 +112,7 @@ export function Turnstile({
 
     try {
       const widgetId = window.turnstile.render(containerRef.current, {
-        sitekey: siteKey,
+        sitekey: trimmedSiteKey,
         callback: (token: string) => {
           onSuccess(token)
         },
@@ -137,7 +140,10 @@ export function Turnstile({
     }
   }, [isLoaded, siteKey, theme, size, language, onSuccess, onError, onExpire])
 
-  if (!siteKey) {
+  // Trim siteKey to remove any whitespace/newlines
+  const trimmedSiteKey = siteKey?.trim()
+  
+  if (!trimmedSiteKey) {
     return null
   }
 
