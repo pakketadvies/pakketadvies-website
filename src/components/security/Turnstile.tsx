@@ -116,7 +116,10 @@ export function Turnstile({
         callback: (token: string) => {
           onSuccess(token)
         },
-        'error-callback': () => {
+        'error-callback': (error?: any) => {
+          console.error('[Turnstile] Error callback triggered:', error)
+          console.error('[Turnstile] Site key used:', trimmedSiteKey)
+          console.error('[Turnstile] Container:', containerRef.current)
           setError('Turnstile verificatie mislukt')
           if (onError) {
             onError()
