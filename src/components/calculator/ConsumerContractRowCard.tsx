@@ -45,18 +45,16 @@ export function ConsumerContractRowCard({
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const addressType = verbruik?.addressType || null
-  const isZakelijk = addressType === 'zakelijk'
 
   // Haal contract details op (exact zoals in ContractCard)
   const details = contract.type === 'vast' 
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
-  // Haal breakdown direct op (niet alleen bij uitklappen) om prijsinformatie correct te tonen
+  // Lazy-load breakdown only when opening details.
   useEffect(() => {
+    if (!isDetailsOpen) return
     if (breakdown) return
-    if (loading) return
 
     let cancelled = false
     const run = async () => {
@@ -113,8 +111,8 @@ export function ConsumerContractRowCard({
       cancelled = true
     }
   }, [
+    isDetailsOpen,
     breakdown,
-    loading,
     contract.type,
     contract.tariefElektriciteit,
     contract.tariefElektriciteitDal,
@@ -192,39 +190,10 @@ export function ConsumerContractRowCard({
                 <div className="flex-1">
                   <div className="text-xs text-gray-500 mb-0.5">kosten per maand</div>
                   <div className="flex items-baseline gap-1.5">
-                    {(() => {
-                      // Gebruik breakdown als beschikbaar, anders contract.exactMaandbedrag of contract.maandbedrag
-                      // Formatteer exact hetzelfde als ContractDetailsCard (2 decimalen)
-                      const maandbedrag = breakdown && !loading
-                        ? (isZakelijk 
-                            ? breakdown.totaal.maandExclBtw
-                            : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw))
-                        : (contract.exactMaandbedrag ?? contract.maandbedrag)
-                      
-                      const formatted = maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      
-                      return (
-                        <>
-                          <div className="text-4xl font-bold text-brand-navy-500">€{formatted}</div>
-                          <div className="text-base text-gray-500">/maand</div>
-                        </>
-                      )
-                    })()}
+                    <div className="text-4xl font-bold text-brand-navy-500">€{contract.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    <div className="text-base text-gray-500">/maand</div>
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">
-                    {(() => {
-                      // Gebruik breakdown als beschikbaar, anders contract.exactJaarbedrag of contract.jaarbedrag
-                      // Formatteer exact hetzelfde als ContractDetailsCard (2 decimalen)
-                      const jaarbedrag = breakdown && !loading
-                        ? (isZakelijk 
-                            ? breakdown.totaal.jaarExclBtw
-                            : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw))
-                        : (contract.exactJaarbedrag ?? contract.jaarbedrag)
-                      
-                      const formatted = jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      return `€${formatted} per jaar`
-                    })()}
-                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} per jaar</div>
                 </div>
                 
                 {/* Saving badge - prominent if available */}
@@ -233,7 +202,7 @@ export function ConsumerContractRowCard({
                     <div className="inline-flex items-center gap-1.5 bg-gradient-to-br from-green-50 to-green-100 text-green-700 rounded-xl px-3 py-2 text-sm font-bold border-2 border-green-300 shadow-sm">
                       <Check className="w-4 h-4" weight="bold" />
                       <div className="flex flex-col">
-                        <span className="leading-tight">€{contract.besparing}/mnd</span>
+                        <span className="leading-tight">€{contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd</span>
                         <span className="text-xs font-semibold text-green-600 leading-tight">besparing</span>
                       </div>
                     </div>
@@ -291,14 +260,14 @@ export function ConsumerContractRowCard({
             {/* Middle: Price + Saving badge */}
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
-                <div className="text-2xl font-bold text-brand-navy-500">€{contract.maandbedrag}</div>
+                <div className="text-2xl font-bold text-brand-navy-500">€{contract.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 <div className="text-sm text-gray-500">/mnd</div>
               </div>
-              <div className="text-xs text-gray-500">€{contract.jaarbedrag.toLocaleString('nl-NL')}/jaar</div>
+              <div className="text-xs text-gray-500">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</div>
               {contract.besparing && contract.besparing > 0 && (
                 <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 rounded-lg px-2 py-1 text-xs font-semibold border border-green-200">
                   <Check className="w-3 h-3" weight="bold" />
-                  <span>€{contract.besparing}/mnd besparing</span>
+                  <span>€{contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd besparing</span>
                 </div>
               )}
             </div>
