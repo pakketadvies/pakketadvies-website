@@ -34,6 +34,18 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
     ? (contract as any).details_vast 
     : (contract as any).details_dynamisch
 
+  // Debug: log details om te zien wat erin zit
+  useEffect(() => {
+    console.log('🔍 ContractDetailsCard DEBUG:', {
+      contractType: contract.type,
+      hasDetails: !!details,
+      details: details,
+      opslag_elektriciteit: details?.opslag_elektriciteit,
+      opslag_elektriciteit_normaal: details?.opslag_elektriciteit_normaal,
+      opslag_gas: details?.opslag_gas
+    })
+  }, [contract.type, details])
+
   // Check of het contract al een breakdown heeft (van de resultatenpagina)
   // Als dat zo is, gebruik die in plaats van opnieuw berekenen
   useEffect(() => {
