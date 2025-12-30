@@ -829,27 +829,32 @@ function BedrijfsgegevensFormContent() {
       
       console.log('✅ [BedrijfsgegevensForm] Submitting with contract:', contract.id, contract.contractNaam)
 
-      // Get reCAPTCHA token
+      // Get reCAPTCHA token (silently fail if not available)
       let recaptchaToken: string | null = null
       const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
       
       if (siteKey && typeof window !== 'undefined') {
         try {
-          // Wait for grecaptcha to be available and ready
+          // Wait for grecaptcha to be available and ready (max 2 seconds)
           let grecaptchaReady = false
           
           // Check if grecaptcha is already loaded
           if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
             await new Promise<void>((resolve) => {
+              const timeout = setTimeout(() => {
+                resolve() // Timeout after 2 seconds
+              }, 2000)
+              
               window.grecaptcha!.ready(() => {
+                clearTimeout(timeout)
                 grecaptchaReady = true
                 resolve()
               })
             })
           } else {
-            // Wait for grecaptcha to load (max 5 seconds)
-            await new Promise<void>((resolve, reject) => {
-              const maxWait = 5000 // 5 seconds
+            // Wait for grecaptcha to load (max 2 seconds)
+            await new Promise<void>((resolve) => {
+              const maxWait = 2000 // 2 seconds
               const startTime = Date.now()
               
               const checkGrecaptcha = () => {
@@ -859,7 +864,6 @@ function BedrijfsgegevensFormContent() {
                     resolve()
                   })
                 } else if (Date.now() - startTime > maxWait) {
-                  console.warn('reCAPTCHA not loaded within timeout, continuing without token')
                   resolve() // Continue without token
                 } else {
                   setTimeout(checkGrecaptcha, 100)
@@ -870,21 +874,25 @@ function BedrijfsgegevensFormContent() {
             })
           }
           
-          // Now execute reCAPTCHA if ready
+          // Now execute reCAPTCHA if ready (silently catch errors)
           if (grecaptchaReady && window.grecaptcha && typeof window.grecaptcha.execute === 'function') {
             try {
-              recaptchaToken = await window.grecaptcha.execute(siteKey, {
-                action: 'submit_contract_application'
-              })
-              console.log('✅ reCAPTCHA token received')
+              recaptchaToken = await Promise.race([
+                window.grecaptcha.execute(siteKey, {
+                  action: 'submit_contract_application'
+                }),
+                new Promise<string>((_, reject) => 
+                  setTimeout(() => reject(new Error('Timeout')), 2000)
+                )
+              ]) as string
             } catch (executeError: any) {
-              console.error('reCAPTCHA execute error:', executeError)
-              // Continue without token (graceful degradation)
+              // Silently fail - continue without token (graceful degradation)
+              recaptchaToken = null
             }
           }
         } catch (error: any) {
-          console.error('reCAPTCHA error:', error)
-          // Continue without token if reCAPTCHA fails (graceful degradation)
+          // Silently fail - continue without token (graceful degradation)
+          recaptchaToken = null
         }
       }
 
@@ -1952,13 +1960,12 @@ function BedrijfsgegevensFormContent() {
 
       {/* reCAPTCHA Component (invisible) */}
       <ReCaptcha
-        onVerify={(token) => {
+        onVerify={() => {
           // Token is automatically included in form submission
-          console.log('reCAPTCHA verified:', token ? 'Token received' : 'No token')
+          // Silently handle - no logging to avoid console spam
         }}
-        onError={(error) => {
-          console.warn('reCAPTCHA error:', error)
-          // Graceful degradation: continue without reCAPTCHA if it fails
+        onError={() => {
+          // Silently handle errors - graceful degradation
         }}
       />
     </>
