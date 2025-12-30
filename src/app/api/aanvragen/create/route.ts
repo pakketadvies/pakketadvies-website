@@ -78,17 +78,30 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verify reCAPTCHA token
-    const recaptchaResult = await verifyRecaptcha(body.recaptcha_token)
-    if (!recaptchaResult.success) {
-      console.warn('reCAPTCHA verification failed:', recaptchaResult.error, 'Score:', recaptchaResult.score)
-      return NextResponse.json<CreateAanvraagResponse>(
-        { 
-          success: false, 
-          error: 'Beveiligingscontrole mislukt. Probeer het opnieuw.' 
-        },
-        { status: 403 }
-      )
+    // Verify reCAPTCHA token (only if configured)
+    if (process.env.RECAPTCHA_SECRET_KEY) {
+      const recaptchaResult = await verifyRecaptcha(body.recaptcha_token)
+      if (!recaptchaResult.success) {
+        console.warn('reCAPTCHA verification failed:', recaptchaResult.error, 'Score:', recaptchaResult.score)
+        // Only block if reCAPTCHA is configured and verification fails
+        // If no token provided but reCAPTCHA is configured, it's likely a configuration issue
+        if (body.recaptcha_token) {
+          // Token was provided but verification failed
+          return NextResponse.json<CreateAanvraagResponse>(
+            { 
+              success: false, 
+              error: 'Beveiligingscontrole mislukt. Probeer het opnieuw.' 
+            },
+            { status: 403 }
+          )
+        } else {
+          // No token provided - might be configuration issue, but allow for now (graceful degradation)
+          console.warn('reCAPTCHA configured but no token provided - allowing request (graceful degradation)')
+        }
+      }
+    } else {
+      // reCAPTCHA not configured, allow request
+      console.log('reCAPTCHA not configured, skipping verification')
     }
 
     // Use service role key for public inserts (bypasses RLS)

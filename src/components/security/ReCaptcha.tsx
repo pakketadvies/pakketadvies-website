@@ -19,12 +19,14 @@ declare global {
 export function ReCaptcha({ onVerify, onError }: ReCaptchaProps) {
   const [isReady, setIsReady] = useState(false)
   const scriptLoaded = useRef(false)
+  const readyCallback = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 
     if (!siteKey) {
       // reCAPTCHA not configured, that's okay (graceful degradation)
+      console.warn('reCAPTCHA site key not configured')
       return
     }
 
@@ -45,20 +47,25 @@ export function ReCaptcha({ onVerify, onError }: ReCaptchaProps) {
       script.async = true
       script.defer = true
       script.onload = () => {
-        if (window.grecaptcha && window.grecaptcha.ready) {
-          window.grecaptcha.ready(() => {
-            setIsReady(true)
-            if (onVerify) {
-              onVerify(null) // Signal that reCAPTCHA is ready
+        // Wait a bit for grecaptcha to be fully initialized
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+            window.grecaptcha.ready(() => {
+              setIsReady(true)
+              if (onVerify) {
+                onVerify(null) // Signal that reCAPTCHA is ready
+              }
+            })
+          } else {
+            console.error('reCAPTCHA script loaded but grecaptcha object not available')
+            if (onError) {
+              onError(new Error('reCAPTCHA failed to initialize'))
             }
-          })
-        } else {
-          if (onError) {
-            onError(new Error('reCAPTCHA failed to load'))
           }
-        }
+        }, 100)
       }
       script.onerror = () => {
+        console.error('Failed to load reCAPTCHA script')
         if (onError) {
           onError(new Error('Failed to load reCAPTCHA script'))
         }

@@ -831,19 +831,33 @@ function BedrijfsgegevensFormContent() {
 
       // Get reCAPTCHA token
       let recaptchaToken: string | null = null
-      if (
-        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY &&
-        typeof window !== 'undefined' &&
-        window.grecaptcha &&
-        typeof window.grecaptcha.execute === 'function'
-      ) {
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+      
+      if (siteKey && typeof window !== 'undefined' && window.grecaptcha) {
         try {
-          recaptchaToken = await window.grecaptcha.execute(
-            process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-            { action: 'submit_contract_application' }
-          )
-        } catch (error) {
+          // Wait for grecaptcha to be ready
+          await new Promise<void>((resolve) => {
+            if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+              window.grecaptcha.ready(() => {
+                resolve()
+              })
+            } else {
+              resolve() // If ready is not available, continue anyway
+            }
+          })
+          
+          // Now execute reCAPTCHA
+          if (window.grecaptcha && typeof window.grecaptcha.execute === 'function') {
+            recaptchaToken = await window.grecaptcha.execute(siteKey, {
+              action: 'submit_contract_application'
+            })
+          }
+        } catch (error: any) {
           console.error('reCAPTCHA error:', error)
+          // If error is about invalid site key, log it but continue (graceful degradation)
+          if (error?.message?.includes('Invalid site key')) {
+            console.warn('reCAPTCHA site key may not be configured correctly for this domain')
+          }
           // Continue without token if reCAPTCHA fails (graceful degradation)
         }
       }
