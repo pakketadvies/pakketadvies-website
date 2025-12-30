@@ -890,11 +890,7 @@ function BedrijfsgegevensFormContent() {
       </div>
 
       {/* Contract Details Card */}
-      <ContractDetailsCard 
-        contract={contract} 
-        verbruik={verbruik}
-        addressType="zakelijk"
-      />
+      <ContractDetailsCard contract={contract} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
         {/* Honeypot field - verborgen, bots vullen dit in */}
