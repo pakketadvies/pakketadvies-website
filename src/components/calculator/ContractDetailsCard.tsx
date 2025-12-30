@@ -91,12 +91,17 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   }, [showDetails, breakdown, loadingBreakdown, contract, verbruik, details])
 
   // Format currency helper
-  const formatCurrency = (amount: number, inclBtw: boolean = false) => {
-    const amountToShow = inclBtw ? (amount * 1.21) : amount
-    return `€${amountToShow.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  // contract.maandbedrag en contract.jaarbedrag zijn AL correct (incl. BTW voor particulier, excl. BTW voor zakelijk)
+  // breakdown items zijn excl. BTW, dus daar moeten we wel BTW toevoegen voor particulier
+  const formatCurrency = (amount: number, isBreakdownItem: boolean = false) => {
+    // Voor breakdown items: voeg BTW toe voor particulier
+    if (isBreakdownItem && !isZakelijk) {
+      amount = amount * 1.21
+    }
+    return `€${amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
 
-  // Bepaal of zakelijk of particulier (voor BTW)
+  // Bepaal of zakelijk of particulier (voor BTW indicatie)
   const isZakelijk = verbruik?.addressType === 'zakelijk'
 
   return (
@@ -148,7 +153,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                 <div className="flex items-center gap-1.5 bg-brand-teal-50 text-brand-teal-700 border border-brand-teal-200 rounded-lg px-3 py-1.5">
                   <CurrencyEur className="w-4 h-4" weight="bold" />
                   <span className="text-sm md:text-base font-bold">
-                    {formatCurrency(contract.maandbedrag, !isZakelijk)}/maand
+                    {formatCurrency(contract.maandbedrag)}/maand
                   </span>
                 </div>
               )}
@@ -158,7 +163,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                 <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg px-3 py-1.5">
                   <ChartBar className="w-4 h-4" weight="bold" />
                   <span className="text-sm md:text-base font-bold">
-                    {formatCurrency(contract.jaarbedrag, !isZakelijk)}/jaar
+                    {formatCurrency(contract.jaarbedrag)}/jaar
                   </span>
                 </div>
               )}
@@ -168,7 +173,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                 <div className="flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg px-3 py-1.5">
                   <CheckCircle className="w-4 h-4" weight="bold" />
                   <span className="text-sm md:text-base font-bold">
-                    {formatCurrency(besparing, !isZakelijk)} besparing/jaar
+                    {formatCurrency(besparing)} besparing/jaar
                   </span>
                 </div>
               )}
@@ -233,7 +238,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                 <div>
                   <span className="text-gray-600">Maandbedrag:</span>
                   <span className="ml-2 font-semibold text-brand-navy-500">
-                    {formatCurrency(contract.maandbedrag, !isZakelijk)}
+                    {formatCurrency(contract.maandbedrag)}
                   </span>
                   {isZakelijk && <span className="text-xs text-gray-500 ml-1">(excl. BTW)</span>}
                   {!isZakelijk && <span className="text-xs text-gray-500 ml-1">(incl. BTW)</span>}
@@ -303,7 +308,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Vastrecht stroom:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        {formatCurrency(details.vastrecht_stroom_maand, !isZakelijk)}/maand
+                        {formatCurrency(details.vastrecht_stroom_maand, false)}/maand
                       </span>
                     </div>
                   )}
@@ -311,7 +316,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Vastrecht gas:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        {formatCurrency(details.vastrecht_gas_maand, !isZakelijk)}/maand
+                        {formatCurrency(details.vastrecht_gas_maand, false)}/maand
                       </span>
                     </div>
                   )}
@@ -374,7 +379,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                                 </span>
                               </span>
                               <span className="font-semibold text-brand-navy-500">
-                                {formatCurrency(breakdown.leverancier.elektriciteitDetails.normaal?.bedrag || 0, !isZakelijk)}
+                                {formatCurrency(breakdown.leverancier.elektriciteitDetails.normaal?.bedrag || 0, true)}
                               </span>
                             </div>
                           )}
@@ -387,7 +392,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                                 </span>
                               </span>
                               <span className="font-semibold text-brand-navy-500">
-                                {formatCurrency(breakdown.leverancier.elektriciteitDetails.dal?.bedrag || 0, !isZakelijk)}
+                                {formatCurrency(breakdown.leverancier.elektriciteitDetails.dal?.bedrag || 0, true)}
                               </span>
                             </div>
                           )}
@@ -402,7 +407,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">
-                            {formatCurrency(breakdown.leverancier.elektriciteitDetails.enkel?.bedrag || 0, !isZakelijk)}
+                            {formatCurrency(breakdown.leverancier.elektriciteitDetails.enkel?.bedrag || 0, true)}
                           </span>
                         </div>
                       )}
@@ -415,20 +420,20 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">
-                            {formatCurrency(breakdown.leverancier.elektriciteit || 0, !isZakelijk)}
+                            {formatCurrency(breakdown.leverancier.elektriciteit || 0, true)}
                           </span>
                         </div>
                       )}
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-700">Energiebelasting</span>
                         <span className="font-semibold text-brand-navy-500">
-                          {formatCurrency(breakdown.energiebelasting.elektriciteit || 0, !isZakelijk)}
+                          {formatCurrency(breakdown.energiebelasting.elektriciteit || 0, true)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-700">Vastrecht stroom</span>
                         <span className="font-semibold text-brand-navy-500">
-                          {formatCurrency(breakdown.leverancier.vastrechtStroom || 0, !isZakelijk)}
+                          {formatCurrency(breakdown.leverancier.vastrechtStroom || 0, true)}
                         </span>
                       </div>
                       {breakdown.netbeheer && (
@@ -440,7 +445,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                             )}
                           </span>
                           <span className="font-semibold text-brand-navy-500">
-                            {formatCurrency(breakdown.netbeheer.elektriciteit || 0, !isZakelijk)}
+                            {formatCurrency(breakdown.netbeheer.elektriciteit || 0, true)}
                           </span>
                         </div>
                       )}
@@ -462,20 +467,20 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">
-                            {formatCurrency(breakdown.leverancier.gasDetails.bedrag || 0, !isZakelijk)}
+                            {formatCurrency(breakdown.leverancier.gasDetails.bedrag || 0, true)}
                           </span>
                         </div>
                       )}
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-700">Energiebelasting</span>
                         <span className="font-semibold text-brand-navy-500">
-                          {formatCurrency(breakdown.energiebelasting.gas || 0, !isZakelijk)}
+                          {formatCurrency(breakdown.energiebelasting.gas || 0, true)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-700">Vastrecht gas</span>
                         <span className="font-semibold text-brand-navy-500">
-                          {formatCurrency(breakdown.leverancier.vastrechtGas || 0, !isZakelijk)}
+                          {formatCurrency(breakdown.leverancier.vastrechtGas || 0, true)}
                         </span>
                       </div>
                       {breakdown.netbeheer && (
@@ -487,7 +492,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                             )}
                           </span>
                           <span className="font-semibold text-brand-navy-500">
-                            {formatCurrency(breakdown.netbeheer.gas || 0, !isZakelijk)}
+                            {formatCurrency(breakdown.netbeheer.gas || 0, true)}
                           </span>
                         </div>
                       )}
@@ -503,7 +508,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                         Totaal per jaar {isZakelijk ? '(excl. BTW)' : '(incl. BTW)'}:
                       </span>
                       <span className="text-lg font-bold text-brand-teal-600">
-                        {formatCurrency(isZakelijk ? breakdown.totaal.jaarExclBtw : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw), !isZakelijk)}
+                        {formatCurrency(isZakelijk ? breakdown.totaal.jaarExclBtw : (breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw), false)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -511,7 +516,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                         Totaal per maand {isZakelijk ? '(excl. BTW)' : '(incl. BTW)'}:
                       </span>
                       <span className="text-base font-semibold text-brand-navy-500">
-                        {formatCurrency(isZakelijk ? breakdown.totaal.maandExclBtw : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw), !isZakelijk)}
+                        {formatCurrency(isZakelijk ? breakdown.totaal.maandExclBtw : (breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw), false)}
                       </span>
                     </div>
                   </div>
