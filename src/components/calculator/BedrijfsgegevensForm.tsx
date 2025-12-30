@@ -94,6 +94,11 @@ const bedrijfsgegevensSchema = z.object({
   privacy: z.boolean().optional(),
   herinneringContract: z.boolean(),
   nieuwsbrief: z.boolean(),
+  
+  // Honeypot field (verborgen, bots vullen dit in)
+  website: z.string().optional().refine((val) => !val || val === '', {
+    message: 'Spam detected',
+  }),
 }).refine(data => data.email === data.herhaalEmail, {
   message: 'E-mailadressen komen niet overeen',
   path: ['herhaalEmail'],
