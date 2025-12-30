@@ -778,7 +778,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
           {verbruik && (
-            <div className="mt-5">
+            <div className="mt-5 px-4 lg:px-0">
               <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white px-5 py-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
@@ -950,7 +950,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </aside>
 
                 {/* Results list */}
-                <section className="space-y-4 px-4 lg:px-0">
+                <section className="space-y-4">
                   {filteredResultaten.length === 0 ? (
                     <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
                       <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
