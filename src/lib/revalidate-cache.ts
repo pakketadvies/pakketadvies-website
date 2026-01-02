@@ -1,15 +1,15 @@
 /**
- * Revalidate Next.js cache tags
+ * Revalidate Next.js cache paths
  * Call this after updating contracts in admin to refresh homepage carousel
  */
-export async function revalidateCache(tags: string[]): Promise<boolean> {
+export async function revalidateCache(paths: string[] = ['/']): Promise<boolean> {
   try {
     const response = await fetch('/api/revalidate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tags }),
+      body: JSON.stringify({ paths }),
     })
 
     if (!response.ok) {

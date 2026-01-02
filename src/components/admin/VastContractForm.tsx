@@ -394,7 +394,7 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
       if (detailsError) throw detailsError
 
       // Revalidate cache for homepage carousel
-      await revalidateCache(['best-deals'])
+      await revalidateCache(['/'])
 
       router.push('/admin/contracten')
       router.refresh()

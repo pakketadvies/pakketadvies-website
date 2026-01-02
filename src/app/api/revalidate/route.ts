@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -19,27 +19,27 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get tags to revalidate from request body
+    // Get paths to revalidate from request body
     const body = await request.json()
-    const { tags } = body
+    const { paths = ['/'] } = body
 
-    if (!tags || !Array.isArray(tags)) {
+    if (!Array.isArray(paths)) {
       return NextResponse.json(
-        { error: 'Tags array is required' },
+        { error: 'Paths array is required' },
         { status: 400 }
       )
     }
 
-    // Revalidate each tag
-    for (const tag of tags) {
-      revalidateTag(tag)
-      console.log(`✅ Revalidated cache tag: ${tag}`)
+    // Revalidate each path
+    for (const path of paths) {
+      revalidatePath(path, 'page')
+      console.log(`✅ Revalidated cache path: ${path}`)
     }
 
     return NextResponse.json({
       success: true,
-      message: `Successfully revalidated ${tags.length} cache tag(s)`,
-      tags,
+      message: `Successfully revalidated ${paths.length} path(s)`,
+      paths,
       timestamp: new Date().toISOString(),
     })
   } catch (error: any) {
