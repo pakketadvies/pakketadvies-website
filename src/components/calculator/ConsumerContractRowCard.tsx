@@ -184,31 +184,27 @@ export function ConsumerContractRowCard({
               </div>
             </div>
 
-            {/* Price section - prominent with saving badge */}
+            {/* Price section */}
             <div>
-              <div className="flex items-baseline justify-between gap-3">
-                <div className="flex-1">
-                  <div className="text-xs text-gray-500 mb-0.5">kosten per maand</div>
-                  <div className="flex items-baseline gap-1.5">
-                    <div className="text-4xl font-bold text-brand-navy-500">€{contract.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    <div className="text-base text-gray-500">/maand</div>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-0.5">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} per jaar</div>
-                </div>
-                
-                {/* Saving badge - prominent if available */}
-                {contract.besparing && contract.besparing > 0 && (
-                  <div className="flex-shrink-0">
-                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-br from-green-50 to-green-100 text-green-700 rounded-xl px-3 py-2 text-sm font-bold border-2 border-green-300 shadow-sm">
-                      <Check className="w-4 h-4" weight="bold" />
-                      <div className="flex flex-col">
-                        <span className="leading-tight">€{contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd</span>
-                        <span className="text-xs font-semibold text-green-600 leading-tight">besparing</span>
-                      </div>
+              <div className="text-xs text-gray-500 mb-0.5">kosten per maand</div>
+              <div className="flex items-baseline gap-1.5">
+                <div className="text-4xl font-bold text-brand-navy-500">€{contract.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="text-base text-gray-500">/maand</div>
+              </div>
+              <div className="text-xs text-gray-500 mt-0.5">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} per jaar</div>
+              
+              {/* Saving badge - ONDER de prijs (nooit overflow!) */}
+              {contract.besparing && contract.besparing > 0 && (
+                <div className="mt-2">
+                  <div className="inline-flex items-center gap-1.5 bg-gradient-to-br from-green-50 to-green-100 text-green-700 rounded-xl px-3 py-2 text-sm font-bold border-2 border-green-300 shadow-sm">
+                    <Check className="w-4 h-4" weight="bold" />
+                    <div className="flex flex-col">
+                      <span className="leading-tight">€{contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd</span>
+                      <span className="text-xs font-semibold text-green-600 leading-tight">besparing</span>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* CTA Button - full width on mobile */}
@@ -265,15 +261,17 @@ export function ConsumerContractRowCard({
               </div>
             </div>
 
-            {/* Middle: Price + Saving badge */}
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+            {/* Middle: Price (verticaal met besparing eronder) */}
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
                 <div className="text-2xl font-bold text-brand-navy-500">€{contract.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 <div className="text-sm text-gray-500">/mnd</div>
+                <div className="text-xs text-gray-500">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</div>
               </div>
-              <div className="text-xs text-gray-500">€{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/jaar</div>
+              
+              {/* Saving badge - ONDER de prijs (nooit conflict met button!) */}
               {contract.besparing && contract.besparing > 0 && (
-                <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 rounded-lg px-2 py-1 text-xs font-semibold border border-green-200">
+                <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 rounded-lg px-2 py-1 text-xs font-semibold border border-green-200 w-fit">
                   <Check className="w-3 h-3" weight="bold" />
                   <span>€{contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd besparing</span>
                 </div>
