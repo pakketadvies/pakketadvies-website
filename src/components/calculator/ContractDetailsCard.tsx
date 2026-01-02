@@ -188,6 +188,13 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
     }
     return `€${amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
+  
+  // Format tariff helper (voor tarieven zoals €/kWh, €/m³)
+  // Tarieven in database zijn excl. BTW, dus voor particulier moeten we BTW toevoegen
+  const formatTariff = (tariff: number, decimals: number = 6) => {
+    const adjustedTariff = isZakelijk ? tariff : tariff * 1.21
+    return `€${adjustedTariff.toFixed(decimals)}`
+  }
 
   // Bepaal of zakelijk of particulier (voor BTW indicatie)
   const isZakelijk = verbruik?.addressType === 'zakelijk'
@@ -365,7 +372,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Elektriciteit enkeltarief:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{contract.tariefElektriciteitEnkel.toFixed(6)}/kWh
+                        {formatTariff(contract.tariefElektriciteitEnkel)}/kWh
                       </span>
                     </div>
                   )}
@@ -373,7 +380,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Elektriciteit normaal:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{contract.tariefElektriciteit.toFixed(6)}/kWh
+                        {formatTariff(contract.tariefElektriciteit)}/kWh
                       </span>
                     </div>
                   )}
@@ -381,7 +388,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Elektriciteit dal:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{contract.tariefElektriciteitDal.toFixed(6)}/kWh
+                        {formatTariff(contract.tariefElektriciteitDal)}/kWh
                       </span>
                     </div>
                   )}
@@ -391,7 +398,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Gas:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{contract.tariefGas.toFixed(6)}/m³
+                        {formatTariff(contract.tariefGas)}/m³
                       </span>
                     </div>
                   )}
@@ -401,7 +408,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Teruglevering:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{details.tarief_teruglevering_kwh.toFixed(6)}/kWh
+                        {formatTariff(details.tarief_teruglevering_kwh)}/kWh
                       </span>
                     </div>
                   )}
@@ -416,7 +423,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Opslag elektriciteit:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{(details.opslag_elektriciteit || details.opslag_elektriciteit_normaal).toFixed(6)}/kWh
+                        {formatTariff(details.opslag_elektriciteit || details.opslag_elektriciteit_normaal)}/kWh
                       </span>
                     </div>
                   )}
@@ -424,7 +431,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Opslag gas:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{details.opslag_gas.toFixed(6)}/m³
+                        {formatTariff(details.opslag_gas)}/m³
                       </span>
                     </div>
                   )}
@@ -432,7 +439,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Opslag teruglevering:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        €{details.opslag_teruglevering.toFixed(6)}/kWh
+                        {formatTariff(details.opslag_teruglevering)}/kWh
                       </span>
                     </div>
                   )}
@@ -447,7 +454,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Vastrecht stroom:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        {formatCurrency(details.vastrecht_stroom_maand, false)}/maand
+                        {formatCurrency(details.vastrecht_stroom_maand, true)}/maand
                       </span>
                     </div>
                   )}
@@ -455,7 +462,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Vastrecht gas:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        {formatCurrency(details.vastrecht_gas_maand, false)}/maand
+                        {formatCurrency(details.vastrecht_gas_maand, true)}/maand
                       </span>
                     </div>
                   )}
@@ -491,7 +498,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                               <span className="text-gray-700">
                                 Leveringskosten normaal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
+                                  ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.normaal?.tarief)})
                                 </span>
                               </span>
                               <span className="font-semibold text-brand-navy-500">
@@ -504,7 +511,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                               <span className="text-gray-700">
                                 Leveringskosten dal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
+                                  ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.dal?.tarief)})
                                 </span>
                               </span>
                               <span className="font-semibold text-brand-navy-500">
@@ -519,7 +526,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                           <span className="text-gray-700">
                             Leveringskosten enkeltarief
                             <span className="text-xs text-gray-500 ml-1">
-                              ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
+                              ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.enkel?.tarief)})
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">
@@ -579,7 +586,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                           <span className="text-gray-700">
                             Leveringskosten gas
                             <span className="text-xs text-gray-500 ml-1">
-                              ({breakdown.leverancier.gasDetails.m3.toLocaleString()} m³ × €{breakdown.leverancier.gasDetails.tarief.toFixed(6)})
+                              ({breakdown.leverancier.gasDetails.m3.toLocaleString()} m³ × {formatTariff(breakdown.leverancier.gasDetails.tarief)})
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">
