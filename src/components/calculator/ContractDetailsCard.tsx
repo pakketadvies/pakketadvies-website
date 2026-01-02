@@ -178,16 +178,6 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
     }
   }, [showDetails, breakdown, loadingBreakdown, contract, verbruik, details])
 
-  // Bepaal of zakelijk of particulier (voor BTW indicatie)
-  const isZakelijk = verbruik?.addressType === 'zakelijk'
-  
-  // DEBUG: Log om te zien of isZakelijk correct wordt bepaald
-  console.log('🔍 ContractDetailsCard DEBUG:', {
-    addressType: verbruik?.addressType,
-    isZakelijk,
-    verbruikExists: !!verbruik,
-  })
-
   // Format currency helper
   // contract.maandbedrag en contract.jaarbedrag zijn AL correct (incl. BTW voor particulier, excl. BTW voor zakelijk)
   // breakdown items zijn excl. BTW, dus daar moeten we wel BTW toevoegen voor particulier
@@ -203,9 +193,11 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   // Tarieven in database zijn excl. BTW, dus voor particulier moeten we BTW toevoegen
   const formatTariff = (tariff: number, decimals: number = 6) => {
     const adjustedTariff = isZakelijk ? tariff : tariff * 1.21
-    console.log('🔍 formatTariff DEBUG:', { tariff, isZakelijk, adjustedTariff })
     return `€${adjustedTariff.toFixed(decimals)}`
   }
+
+  // Bepaal of zakelijk of particulier (voor BTW indicatie)
+  const isZakelijk = verbruik?.addressType === 'zakelijk'
 
   return (
     <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg mb-6 overflow-hidden">
@@ -227,15 +219,6 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
 
           {/* Contract Info */}
           <div className="flex-1 min-w-0">
-            {/* DEBUG BADGE - ALTIJD ZICHTBAAR */}
-            <div className="mb-2 inline-block px-3 py-1 rounded-lg text-xs font-bold" style={{ 
-              backgroundColor: isZakelijk ? '#fef3c7' : '#dcfce7', 
-              color: isZakelijk ? '#92400e' : '#166534',
-              border: `2px solid ${isZakelijk ? '#f59e0b' : '#10b981'}`
-            }}>
-              🔍 DEBUG: {isZakelijk ? 'ZAKELIJK (excl BTW)' : 'PARTICULIER (incl BTW)'} | addressType: "{verbruik?.addressType || 'NULL'}"
-            </div>
-            
             <h3 className="font-bold text-brand-navy-500 text-sm md:text-base mb-1">
               {contract.contractNaam || `${contract.type === 'vast' ? 'Vast' : 'Dynamisch'} contract`}
             </h3>
@@ -379,10 +362,6 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
             <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
               <CurrencyEur className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
               Tarieven
-              {/* DEBUG: Visuele indicator */}
-              <span className="ml-auto text-xs px-2 py-1 rounded" style={{ backgroundColor: isZakelijk ? '#fef3c7' : '#dcfce7', color: isZakelijk ? '#92400e' : '#166534' }}>
-                DEBUG: {isZakelijk ? 'Zakelijk (excl BTW)' : 'Particulier (incl BTW)'} | addressType: {verbruik?.addressType || 'null'}
-              </span>
             </h4>
             <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-2">
               {/* Vast contract: normale tarieven */}
@@ -505,10 +484,6 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                 <ChartBar className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
                 Berekening (op basis van jouw verbruik)
-                {/* DEBUG: Visuele indicator */}
-                <span className="ml-auto text-xs px-2 py-1 rounded" style={{ backgroundColor: isZakelijk ? '#fef3c7' : '#dcfce7', color: isZakelijk ? '#92400e' : '#166534' }}>
-                  🔍 {isZakelijk ? 'ZAKELIJK (excl)' : 'PARTICULIER (incl)'} | type: {verbruik?.addressType || 'NULL'}
-                </span>
               </h4>
               <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-3">
                 {/* Elektriciteit */}

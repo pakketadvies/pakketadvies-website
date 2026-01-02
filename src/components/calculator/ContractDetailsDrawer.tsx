@@ -48,6 +48,22 @@ export function ContractDetailsDrawer({
   const isZakelijk = addressType === 'zakelijk'
   const [activeTab, setActiveTab] = useState<Tab>('prijsdetails')
 
+  // Format currency helper
+  // Breakdown items zijn excl. BTW, dus voor particulier moeten we BTW toevoegen
+  const formatCurrency = (amount: number, addBtw: boolean = true) => {
+    if (addBtw && !isZakelijk) {
+      amount = amount * 1.21
+    }
+    return amount.toFixed(2)
+  }
+  
+  // Format tariff helper (voor tarieven zoals €/kWh, €/m³)
+  // Tarieven in breakdown zijn excl. BTW, dus voor particulier moeten we BTW toevoegen
+  const formatTariff = (tariff: number, decimals: number = 6) => {
+    const adjustedTariff = isZakelijk ? tariff : tariff * 1.21
+    return adjustedTariff.toFixed(decimals)
+  }
+
   const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -202,11 +218,11 @@ export function ContractDetailsDrawer({
                                               breakdown.leverancier.elektriciteitDetails.normaal?.kwh ??
                                               0
                                             ).toLocaleString()}{' '}
-                                            kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
+                                            kWh × €{formatTariff(breakdown.leverancier.elektriciteitDetails.normaal?.tarief || 0)})
                                           </span>
                                         </span>
                                         <span className="font-medium flex-shrink-0">
-                                          €{breakdown.leverancier.elektriciteitDetails.normaal?.bedrag.toFixed(2)}
+                                          €{formatCurrency(breakdown.leverancier.elektriciteitDetails.normaal?.bedrag || 0)}
                                         </span>
                                       </div>
                                       <div className="flex justify-between items-center text-sm gap-2">
@@ -217,11 +233,11 @@ export function ContractDetailsDrawer({
                                               breakdown.leverancier.elektriciteitDetails.dal?.kwh ??
                                               0
                                             ).toLocaleString()}{' '}
-                                            kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
+                                            kWh × €{formatTariff(breakdown.leverancier.elektriciteitDetails.dal?.tarief || 0)})
                                           </span>
                                         </span>
                                         <span className="font-medium flex-shrink-0">
-                                          €{breakdown.leverancier.elektriciteitDetails.dal?.bedrag.toFixed(2)}
+                                          €{formatCurrency(breakdown.leverancier.elektriciteitDetails.dal?.bedrag || 0)}
                                         </span>
                                       </div>
                                     </>
@@ -236,11 +252,11 @@ export function ContractDetailsDrawer({
                                             breakdown.leverancier.elektriciteitDetails.enkel?.kwh ??
                                             0
                                           ).toLocaleString()}{' '}
-                                          kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
+                                          kWh × €{formatTariff(breakdown.leverancier.elektriciteitDetails.enkel?.tarief || 0)})
                                         </span>
                                       </span>
                                       <span className="font-medium flex-shrink-0">
-                                        €{breakdown.leverancier.elektriciteitDetails.enkel?.bedrag.toFixed(2)}
+                                        €{formatCurrency(breakdown.leverancier.elektriciteitDetails.enkel?.bedrag || 0)}
                                       </span>
                                     </div>
                                   )}
@@ -252,7 +268,7 @@ export function ContractDetailsDrawer({
                                         <span className="text-xs text-gray-500 ml-1">({totaalElektriciteit.toLocaleString()} kWh)</span>
                                       </span>
                                       <span className="font-medium flex-shrink-0">
-                                        €{breakdown.leverancier.elektriciteit.toFixed(2)}
+                                        €{formatCurrency(breakdown.leverancier.elektriciteit)}
                                       </span>
                                     </div>
                                   )}
@@ -260,7 +276,7 @@ export function ContractDetailsDrawer({
                                   <div className="flex justify-between items-center text-sm gap-2">
                                     <span className="text-gray-700 flex-1 min-w-0">Energiebelasting</span>
                                     <span className="font-medium flex-shrink-0">
-                                      €{breakdown.energiebelasting.elektriciteit.toFixed(2)}
+                                      €{formatCurrency(breakdown.energiebelasting.elektriciteit)}
                                     </span>
                                   </div>
                                 </div>
@@ -270,7 +286,7 @@ export function ContractDetailsDrawer({
 
                                   <div className="flex justify-between items-center text-sm gap-2">
                                     <span className="text-gray-700 flex-1 min-w-0">Vastrecht</span>
-                                    <span className="font-medium flex-shrink-0">€{breakdown.leverancier.vastrechtStroom.toFixed(2)}</span>
+                                    <span className="font-medium flex-shrink-0">€{formatCurrency(breakdown.leverancier.vastrechtStroom)}</span>
                                   </div>
 
                                   <div className="flex justify-between items-center text-sm gap-2">
@@ -278,7 +294,7 @@ export function ContractDetailsDrawer({
                                       Netbeheerkosten {aansluitwaardeElektriciteit}
                                       <span className="text-xs text-gray-500 ml-1">({breakdown.netbeheer.netbeheerder})</span>
                                     </span>
-                                    <span className="font-medium flex-shrink-0">€{breakdown.netbeheer.elektriciteit.toFixed(2)}</span>
+                                    <span className="font-medium flex-shrink-0">€{formatCurrency(breakdown.netbeheer.elektriciteit)}</span>
                                   </div>
 
                                   {isGrootverbruikElektriciteitAansluitwaarde(aansluitwaardeElektriciteit) && (
@@ -291,7 +307,7 @@ export function ContractDetailsDrawer({
 
                                   <div className="flex justify-between items-center text-sm text-green-700 gap-2">
                                     <span className="flex-1 min-w-0">Vermindering EB</span>
-                                    <span className="font-medium flex-shrink-0">-€{breakdown.energiebelasting.vermindering.toFixed(2)}</span>
+                                    <span className="font-medium flex-shrink-0">-€{formatCurrency(breakdown.energiebelasting.vermindering)}</span>
                                   </div>
                                 </div>
                               </div>
@@ -310,16 +326,16 @@ export function ContractDetailsDrawer({
                                           Leveringskosten gas
                                           <span className="text-xs text-gray-500 ml-1 block sm:inline">
                                             ({breakdown.leverancier.gasDetails.m3.toLocaleString()} m³ × €
-                                            {breakdown.leverancier.gasDetails.tarief.toFixed(6)})
+                                            {formatTariff(breakdown.leverancier.gasDetails.tarief)})
                                           </span>
                                         </span>
-                                        <span className="font-medium flex-shrink-0">€{breakdown.leverancier.gasDetails.bedrag.toFixed(2)}</span>
+                                        <span className="font-medium flex-shrink-0">€{formatCurrency(breakdown.leverancier.gasDetails.bedrag)}</span>
                                       </div>
                                     )}
 
                                     <div className="flex justify-between items-center text-sm gap-2">
                                       <span className="text-gray-700 flex-1 min-w-0">Energiebelasting</span>
-                                      <span className="font-medium flex-shrink-0">€{breakdown.energiebelasting.gas.toFixed(2)}</span>
+                                      <span className="font-medium flex-shrink-0">€{formatCurrency(breakdown.energiebelasting.gas)}</span>
                                     </div>
                                   </div>
 
@@ -328,7 +344,7 @@ export function ContractDetailsDrawer({
 
                                     <div className="flex justify-between items-center text-sm gap-2">
                                       <span className="text-gray-700 flex-1 min-w-0">Vastrecht</span>
-                                      <span className="font-medium flex-shrink-0">€{breakdown.leverancier.vastrechtGas.toFixed(2)}</span>
+                                      <span className="font-medium flex-shrink-0">€{formatCurrency(breakdown.leverancier.vastrechtGas)}</span>
                                     </div>
 
                                     <div className="flex justify-between items-center text-sm gap-2">
@@ -336,7 +352,7 @@ export function ContractDetailsDrawer({
                                         Netbeheerkosten {aansluitwaardeGas}
                                         <span className="text-xs text-gray-500 ml-1">({breakdown.netbeheer.netbeheerder})</span>
                                       </span>
-                                      <span className="font-medium flex-shrink-0">€{breakdown.netbeheer.gas.toFixed(2)}</span>
+                                      <span className="font-medium flex-shrink-0">€{formatCurrency(breakdown.netbeheer.gas)}</span>
                                     </div>
 
                                     {isGrootverbruikGasAansluitwaarde(aansluitwaardeGas) && (
