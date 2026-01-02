@@ -461,29 +461,6 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                   )}
                 </div>
               )}
-
-              {/* Dynamische contract opslagen */}
-              {contract.type === 'dynamisch' && details && (
-                <div className="pt-2 border-t border-gray-200 mt-2">
-                  <p className="text-xs font-semibold text-gray-500 mb-1">Opslagen bovenop spotprijs:</p>
-                  {details.opslag_elektriciteit && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-700">Opslag elektriciteit:</span>
-                      <span className="font-semibold text-brand-navy-500">
-                        €{details.opslag_elektriciteit.toFixed(6)}/kWh
-                      </span>
-                    </div>
-                  )}
-                  {details.opslag_gas && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-700">Opslag gas:</span>
-                      <span className="font-semibold text-brand-navy-500">
-                        €{details.opslag_gas.toFixed(6)}/m³
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
 
