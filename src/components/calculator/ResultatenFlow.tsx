@@ -833,9 +833,9 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </div>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[340px_1fr]" style={{ border: '3px solid blue' }}>
+              <div className="grid gap-6 lg:grid-cols-[340px_1fr] w-full" style={{ border: '3px solid blue' }}>
                 {/* Sidebar */}
-                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start" style={{ border: '3px solid green' }}>
+                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start min-w-0" style={{ border: '3px solid green' }}>
                   {/* Help mij kiezen sectie */}
                   <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-2xl p-4 text-white overflow-hidden relative" style={{ border: '3px solid cyan' }}>
                     <div className="relative z-10">
@@ -950,7 +950,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </aside>
 
                 {/* Results list */}
-                <section className="space-y-4" style={{ border: '3px solid orange' }}>
+                <section className="space-y-4 min-w-0" style={{ border: '3px solid orange' }}>
                   {filteredResultaten.length === 0 ? (
                     <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
                       <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
