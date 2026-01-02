@@ -359,7 +359,7 @@ export function ContractDetailsDrawer({
                                   <span className="font-bold text-brand-navy-500">
                                     {/* Use contract.maandbedrag (from results page calculation) instead of breakdown total */}
                                     {/* This ensures consistency between results page and details drawer */}
-                                    €{contract.maandbedrag?.toFixed(2) ?? (isZakelijk ? breakdown.totaal.maandExclBtw : breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw).toFixed(2)}/mnd
+                                    €{(contract.maandbedrag ?? (isZakelijk ? breakdown.totaal.maandExclBtw : breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw)).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd
                                   </span>
                                 </div>
                               </div>
