@@ -625,18 +625,10 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
         <h2 className="text-xl md:text-2xl font-bold text-brand-navy-500 mb-1.5 md:mb-2">
           Meld u nu aan bij {leverancierNaam}
         </h2>
-        <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4">
+        <p className="text-sm md:text-base text-gray-600">
           Meld u nu aan voor {contractNaam}. {leverancierNaam} verzorgt uw volledige overstap. 
           U komt geen moment zonder stroom en gas te zitten.
         </p>
-        
-        {/* Besparing per jaar badge (als van toepassing) */}
-        {korting && korting > 0 && (
-          <div className="inline-flex items-center gap-1.5 md:gap-2 bg-green-100 text-green-700 border-2 border-green-300 rounded-xl px-3 py-1.5 md:px-4 md:py-2 font-bold text-base md:text-lg">
-            <span>Besparing per jaar</span>
-            <span className="text-xl md:text-2xl">€ {korting.toLocaleString('nl-NL')},-</span>
-          </div>
-        )}
       </div>
 
       {/* Bent u momenteel klant? */}
