@@ -778,8 +778,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
           {verbruik && (
-            <div className="mt-5" style={{ border: '3px solid red' }}>
-              <div className="mb-5 mx-5 rounded-2xl bg-brand-navy-500 text-white py-4 px-5" style={{ border: '3px solid yellow' }}>
+            <div className="mt-5 px-5" style={{ border: '3px solid red' }}>
+              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white py-4 px-5" style={{ border: '3px solid yellow' }}>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <p className="text-white/80 text-sm">Resultaten</p>
@@ -833,7 +833,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </div>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[340px_1fr] w-full mx-5" style={{ border: '3px solid blue' }}>
+              <div className="grid gap-6 lg:grid-cols-[340px_1fr] w-full" style={{ border: '3px solid blue' }}>
                 {/* Sidebar */}
                 <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start min-w-0" style={{ border: '3px solid green' }}>
                   {/* Help mij kiezen sectie */}
