@@ -178,6 +178,9 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
     }
   }, [showDetails, breakdown, loadingBreakdown, contract, verbruik, details])
 
+  // Bepaal of zakelijk of particulier (voor BTW indicatie)
+  const isZakelijk = verbruik?.addressType === 'zakelijk'
+
   // Format currency helper
   // contract.maandbedrag en contract.jaarbedrag zijn AL correct (incl. BTW voor particulier, excl. BTW voor zakelijk)
   // breakdown items zijn excl. BTW, dus daar moeten we wel BTW toevoegen voor particulier
@@ -195,9 +198,6 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
     const adjustedTariff = isZakelijk ? tariff : tariff * 1.21
     return `€${adjustedTariff.toFixed(decimals)}`
   }
-
-  // Bepaal of zakelijk of particulier (voor BTW indicatie)
-  const isZakelijk = verbruik?.addressType === 'zakelijk'
 
   return (
     <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg mb-6 overflow-hidden">
