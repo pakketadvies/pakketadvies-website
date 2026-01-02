@@ -34,13 +34,6 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   const requestCounter = useRef<number>(0)
   const bagRequestCounter = useRef<number>(0)
 
-  // Update form when currentData changes
-  useEffect(() => {
-    setFormData(currentData)
-    // Reset saved elektriciteitDal ref wanneer data wordt geüpdatet
-    savedElektriciteitDal.current = null
-  }, [currentData])
-
   // Cleanup
   useEffect(() => {
     return () => {
@@ -74,7 +67,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     // Clear addressType omdat adres is gewijzigd
     const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
     setFormData(newData)
-    onChange(newData)
+    // onChange(newData) // NIET direct aanroepen - alleen bij Save button
     
     // Clear existing timeout
     if (addressTimeoutRef.current) {
