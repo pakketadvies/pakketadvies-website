@@ -576,16 +576,32 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
               const { breakdown } = await kostenResponse.json()
               // Bepaal of zakelijk of particulier op basis van addressType
               const isZakelijk = data?.addressType === 'zakelijk'
+              
+              // Bereken afgeronde bedragen
+              const maandbedrag = isZakelijk 
+                ? Math.round(breakdown.totaal.maandExclBtw * 100) / 100
+                : Math.round((breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw) * 100) / 100
+              const jaarbedrag = isZakelijk
+                ? Math.round(breakdown.totaal.jaarExclBtw * 100) / 100
+                : Math.round((breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw) * 100) / 100
+              
+              // Update breakdown met afgeronde waardes zodat details modal ook correcte prijzen toont
+              const updatedBreakdown = {
+                ...breakdown,
+                totaal: {
+                  ...breakdown.totaal,
+                  maandExclBtw: isZakelijk ? maandbedrag : breakdown.totaal.maandExclBtw,
+                  maandInclBtw: !isZakelijk ? maandbedrag : breakdown.totaal.maandInclBtw,
+                  jaarExclBtw: isZakelijk ? jaarbedrag : breakdown.totaal.jaarExclBtw,
+                  jaarInclBtw: !isZakelijk ? jaarbedrag : breakdown.totaal.jaarInclBtw,
+                }
+              }
+              
               return {
                 ...contract,
-                // Voor zakelijk: gebruik excl BTW, voor particulier: gebruik incl BTW
-                exactMaandbedrag: isZakelijk 
-                  ? Math.round(breakdown.totaal.maandExclBtw * 100) / 100
-                  : Math.round((breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw) * 100) / 100,
-                exactJaarbedrag: isZakelijk
-                  ? Math.round(breakdown.totaal.jaarExclBtw * 100) / 100
-                  : Math.round((breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw) * 100) / 100,
-                breakdown,
+                exactMaandbedrag: maandbedrag,
+                exactJaarbedrag: jaarbedrag,
+                breakdown: updatedBreakdown,
               }
             }
           } catch (err) {

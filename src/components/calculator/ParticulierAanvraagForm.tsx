@@ -156,7 +156,7 @@ interface ParticulierAanvraagFormProps {
   contract: ContractOptie | null
 }
 
-export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormProps) {
+export function ParticulierAanvraagForm({ contract: initialContract }: ParticulierAanvraagFormProps) {
   const router = useRouter()
   const { verbruik, vorigeStap, setVerbruik, setAddressType } = useCalculatorStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -167,14 +167,93 @@ export function ParticulierAanvraagForm({ contract }: ParticulierAanvraagFormPro
   const [showVerbruikModal, setShowVerbruikModal] = useState(false)
   const [isUpdatingVerbruik, setIsUpdatingVerbruik] = useState(false)
   
+  // Contract state - kan updated worden na verbruik wijziging
+  const [contract, setContract] = useState<ContractOptie | null>(initialContract)
+  
   // Handler voor verbruik update
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
-    if (!newVerbruik) return
+    if (!newVerbruik || !contract) return
     
     setIsUpdatingVerbruik(true)
     try {
-      // Update verbruik in store
-      setVerbruik(newVerbruik)
+      // 1. Update verbruik in store (zet geschat op false)
+      const updatedVerbruik = {
+        ...newVerbruik,
+        geschat: false // Gebruiker heeft verbruik handmatig aangepast
+      }
+      setVerbruik(updatedVerbruik)
+      
+      // 2. Herbereken contract prijzen met nieuw verbruik
+      const isZakelijk = updatedVerbruik.addressType === 'zakelijk'
+      
+      const response = await fetch('/api/energie/bereken-contract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          elektriciteitNormaal: newVerbruik.elektriciteitNormaal,
+          elektriciteitDal: newVerbruik.elektriciteitDal || 0,
+          gas: newVerbruik.gasJaar || 0,
+          terugleveringJaar: newVerbruik.terugleveringJaar || 0,
+          aansluitwaardeElektriciteit: newVerbruik.aansluitwaardeElektriciteit || '3x25A',
+          aansluitwaardeGas: newVerbruik.aansluitwaardeGas || 'G6',
+          postcode: newVerbruik.leveringsadressen?.[0]?.postcode || '',
+          contractType: contract.type,
+          tariefElektriciteitNormaal: contract.tariefElektriciteit,
+          tariefElektriciteitDal: contract.tariefElektriciteitDal,
+          tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
+          tariefGas: contract.tariefGas,
+          tariefTerugleveringKwh: (contract as any).details_vast?.tarief_teruglevering_kwh,
+          opslagElektriciteit: (contract as any).details_dynamisch?.opslag_elektriciteit,
+          opslagGas: (contract as any).details_dynamisch?.opslag_gas,
+          opslagTeruglevering: (contract as any).details_dynamisch?.opslag_teruglevering,
+          vastrechtStroomMaand: (contract as any).details_vast?.vastrecht_stroom_maand || (contract as any).details_dynamisch?.vastrecht_stroom_maand,
+          vastrechtGasMaand: (contract as any).details_vast?.vastrecht_gas_maand || (contract as any).details_dynamisch?.vastrecht_gas_maand,
+          heeftDubbeleMeter: !newVerbruik.heeftEnkeleMeter,
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const breakdown = data.breakdown
+        
+        // Bereken afgeronde bedragen (consistent met ResultatenFlow.tsx)
+        const maandbedrag = isZakelijk 
+          ? Math.round(breakdown.totaal.maandExclBtw * 100) / 100
+          : Math.round((breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw) * 100) / 100
+        const jaarbedrag = isZakelijk
+          ? Math.round(breakdown.totaal.jaarExclBtw * 100) / 100
+          : Math.round((breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw) * 100) / 100
+        
+        // Update breakdown met afgeronde waardes
+        const updatedBreakdown = {
+          ...breakdown,
+          totaal: {
+            ...breakdown.totaal,
+            maandExclBtw: isZakelijk ? maandbedrag : breakdown.totaal.maandExclBtw,
+            maandInclBtw: !isZakelijk ? maandbedrag : breakdown.totaal.maandInclBtw,
+            jaarExclBtw: isZakelijk ? jaarbedrag : breakdown.totaal.jaarExclBtw,
+            jaarInclBtw: !isZakelijk ? jaarbedrag : breakdown.totaal.jaarInclBtw,
+          }
+        }
+        
+        // 3. Update contract met nieuwe prijzen
+        const updatedContract: ContractOptie = {
+          ...contract,
+          maandbedrag: maandbedrag,
+          jaarbedrag: jaarbedrag,
+          breakdown: updatedBreakdown,
+        }
+        
+        // Herbereken besparing (simpele berekening: verschil met huidige contract)
+        // Voor nu: behoud bestaande besparing als we geen referentie hebben
+        if (contract.besparing) {
+          const besparingPerMaand = contract.besparing
+          updatedContract.besparing = Math.round(besparingPerMaand * 100) / 100
+        }
+        
+        setContract(updatedContract)
+      }
+      
       // Sluit modal na korte delay voor UX
       setTimeout(() => {
         setShowVerbruikModal(false)
