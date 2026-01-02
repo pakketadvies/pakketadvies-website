@@ -1,8 +1,8 @@
 // Service Worker voor PakketAdvies PWA
-// Versie: 2.0.0 - Navigations volledig bypassen, alleen statische assets cachen
+// Versie: 2.1.0 - Force cache invalidation voor nieuwe deployment
 
-const CACHE_NAME = 'pakketadvies-v4';
-const RUNTIME_CACHE = 'pakketadvies-runtime-v4';
+const CACHE_NAME = 'pakketadvies-v5';
+const RUNTIME_CACHE = 'pakketadvies-runtime-v5';
 
 // Assets die direct gecached moeten worden (alleen statische assets)
 const STATIC_ASSETS = [
@@ -84,6 +84,8 @@ self.addEventListener('fetch', (event) => {
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/_next/') ||
+    url.pathname.includes('/_next/') || // Extra check voor Next.js chunks
+    url.pathname.match(/\.[a-f0-9]{16}\.js$/) || // Next.js hashed JS files
     url.hostname !== self.location.hostname ||
     url.protocol === 'chrome-extension:'
   ) {
@@ -111,18 +113,22 @@ self.addEventListener('fetch', (event) => {
               return response;
             }
 
-            // Only cache static assets (images, fonts, CSS, JS)
+            // Only cache static assets (images, fonts, CSS) - NEVER cache JS files
             const contentType = response.headers.get('content-type') || '';
             const isStaticAsset = 
               contentType.startsWith('image/') ||
               contentType.startsWith('font/') ||
               contentType.includes('font/') ||
               contentType.startsWith('text/css') ||
+              url.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot|css)$/i);
+            
+            // NEVER cache JavaScript files to prevent hydration errors
+            const isJavaScript = 
               contentType.startsWith('application/javascript') ||
               contentType.startsWith('text/javascript') ||
-              url.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot|css|js)$/i);
+              url.pathname.match(/\.js$/i);
 
-            if (isStaticAsset) {
+            if (isStaticAsset && !isJavaScript) {
               const responseToCache = response.clone();
               caches.open(RUNTIME_CACHE)
                 .then((cache) => {
