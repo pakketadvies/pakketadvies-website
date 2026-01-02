@@ -180,6 +180,13 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
 
   // Bepaal of zakelijk of particulier (voor BTW indicatie)
   const isZakelijk = verbruik?.addressType === 'zakelijk'
+  
+  // DEBUG: Log om te zien of isZakelijk correct wordt bepaald
+  console.log('🔍 ContractDetailsCard DEBUG:', {
+    addressType: verbruik?.addressType,
+    isZakelijk,
+    verbruikExists: !!verbruik,
+  })
 
   // Format currency helper
   // contract.maandbedrag en contract.jaarbedrag zijn AL correct (incl. BTW voor particulier, excl. BTW voor zakelijk)
@@ -196,6 +203,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   // Tarieven in database zijn excl. BTW, dus voor particulier moeten we BTW toevoegen
   const formatTariff = (tariff: number, decimals: number = 6) => {
     const adjustedTariff = isZakelijk ? tariff : tariff * 1.21
+    console.log('🔍 formatTariff DEBUG:', { tariff, isZakelijk, adjustedTariff })
     return `€${adjustedTariff.toFixed(decimals)}`
   }
 
