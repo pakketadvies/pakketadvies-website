@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, CheckCircle, Plus, X, File, FilePdf, FileText, Upload } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { Leverancier, Contract, ContractDetailsVast } from '@/types/admin'
+import { revalidateCache } from '@/lib/revalidate-cache'
 
 const vastContractSchema = z.object({
   // Basis contract info
@@ -391,6 +392,9 @@ export default function VastContractForm({ contract }: VastContractFormProps) {
         .upsert(detailsData)
 
       if (detailsError) throw detailsError
+
+      // Revalidate cache for homepage carousel
+      await revalidateCache(['best-deals'])
 
       router.push('/admin/contracten')
       router.refresh()

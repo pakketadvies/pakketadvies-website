@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, CheckCircle, Plus, X, File, FilePdf, FileText, Upload } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { Leverancier, Contract, ContractDetailsMaatwerk } from '@/types/admin'
+import { revalidateCache } from '@/lib/revalidate-cache'
 
 // Identiek aan vast contract schema, maar met min_verbruik velden toegevoegd
 const maatwerkContractSchema = z.object({
@@ -404,6 +405,9 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         .upsert(detailsData)
 
       if (detailsError) throw detailsError
+
+      // Revalidate cache for homepage carousel
+      await revalidateCache(['best-deals'])
 
       router.push('/admin/contracten')
       router.refresh()

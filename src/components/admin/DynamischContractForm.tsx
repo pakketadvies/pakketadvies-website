@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, CheckCircle, Plus, X, File, FilePdf, FileText, Upload } from '@phosphor-icons/react'
 import Link from 'next/link'
 import type { Leverancier, Contract, ContractDetailsDynamisch } from '@/types/admin'
+import { revalidateCache } from '@/lib/revalidate-cache'
 
 const dynamischContractSchema = z.object({
   leverancier_id: z.string().min(1, 'Selecteer een leverancier'),
@@ -359,6 +360,9 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         .upsert(detailsData)
 
       if (detailsError) throw detailsError
+
+      // Revalidate cache for homepage carousel
+      await revalidateCache(['best-deals'])
 
       router.push('/admin/contracten')
       router.refresh()
