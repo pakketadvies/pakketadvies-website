@@ -753,9 +753,9 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="container-custom max-w-7xl">
+      <div className="container-custom max-w-7xl" style={{ border: '5px solid purple' }}>
         {/* Conditionele padding: alleen voor consumer (particulier) omdat business (zakelijk) al CalculatorLayout padding heeft */}
-        <div className={audience === 'consumer' ? 'pt-24 md:pt-28' : ''}>
+        <div className={audience === 'consumer' ? 'pt-24 md:pt-28' : ''} style={{ border: '5px solid pink' }}>
         {verbruik && (
             <>
               <div className="lg:hidden">
@@ -778,8 +778,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
           {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
           {verbruik && (
-            <div className="mt-5 px-5">
-              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white py-4 px-5">
+            <div className="mt-5 px-5" style={{ border: '3px solid red' }}>
+              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white py-4 px-5" style={{ border: '3px solid yellow' }}>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <p className="text-white/80 text-sm">Resultaten</p>
@@ -833,11 +833,11 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </div>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+              <div className="grid gap-6 lg:grid-cols-[340px_1fr]" style={{ border: '3px solid blue' }}>
                 {/* Sidebar */}
-                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start" style={{ border: '3px solid green' }}>
                   {/* Help mij kiezen sectie */}
-                  <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-2xl p-4 text-white overflow-hidden relative">
+                  <div className="bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 rounded-2xl p-4 text-white overflow-hidden relative" style={{ border: '3px solid cyan' }}>
                     <div className="relative z-10">
                       <div className="flex items-start gap-3 mb-3">
                         <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -950,7 +950,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 </aside>
 
                 {/* Results list */}
-                <section className="space-y-4">
+                <section className="space-y-4" style={{ border: '3px solid orange' }}>
                   {filteredResultaten.length === 0 ? (
                     <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
                       <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>
