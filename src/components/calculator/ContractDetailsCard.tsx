@@ -227,6 +227,15 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
 
           {/* Contract Info */}
           <div className="flex-1 min-w-0">
+            {/* DEBUG BADGE - ALTIJD ZICHTBAAR */}
+            <div className="mb-2 inline-block px-3 py-1 rounded-lg text-xs font-bold" style={{ 
+              backgroundColor: isZakelijk ? '#fef3c7' : '#dcfce7', 
+              color: isZakelijk ? '#92400e' : '#166534',
+              border: `2px solid ${isZakelijk ? '#f59e0b' : '#10b981'}`
+            }}>
+              🔍 DEBUG: {isZakelijk ? 'ZAKELIJK (excl BTW)' : 'PARTICULIER (incl BTW)'} | addressType: "{verbruik?.addressType || 'NULL'}"
+            </div>
+            
             <h3 className="font-bold text-brand-navy-500 text-sm md:text-base mb-1">
               {contract.contractNaam || `${contract.type === 'vast' ? 'Vast' : 'Dynamisch'} contract`}
             </h3>
