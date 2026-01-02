@@ -206,7 +206,12 @@ export function ContractDetailsDrawer({
                                 <h4 className="font-bold text-brand-navy-500 mb-3 text-lg">Stroom</h4>
 
                                 <div className="space-y-1.5 mb-3">
-                                  <p className="text-xs font-semibold text-gray-500 mb-1">Variabele kosten</p>
+                                  <p className="text-xs font-semibold text-gray-500 mb-1">
+                                    Variabele kosten{' '}
+                                    <span className="text-[10px] font-medium text-gray-400">
+                                      [{isZakelijk ? 'excl. BTW' : 'incl. BTW'}]
+                                    </span>
+                                  </p>
 
                                   {breakdown.leverancier.elektriciteitDetails?.type === 'dubbel' && (
                                     <>
@@ -282,7 +287,12 @@ export function ContractDetailsDrawer({
                                 </div>
 
                                 <div className="space-y-1.5 pt-2 border-t border-gray-200">
-                                  <p className="text-xs font-semibold text-gray-500 mb-1">Vaste kosten</p>
+                                  <p className="text-xs font-semibold text-gray-500 mb-1">
+                                    Vaste kosten{' '}
+                                    <span className="text-[10px] font-medium text-gray-400">
+                                      [{isZakelijk ? 'excl. BTW' : 'incl. BTW'}]
+                                    </span>
+                                  </p>
 
                                   <div className="flex justify-between items-center text-sm gap-2">
                                     <span className="text-gray-700 flex-1 min-w-0">Vastrecht</span>
@@ -318,7 +328,12 @@ export function ContractDetailsDrawer({
                                   <h4 className="font-bold text-brand-navy-500 mb-3 text-lg">Gas</h4>
 
                                   <div className="space-y-1.5 mb-3">
-                                    <p className="text-xs font-semibold text-gray-500 mb-1">Variabele kosten</p>
+                                    <p className="text-xs font-semibold text-gray-500 mb-1">
+                                      Variabele kosten{' '}
+                                      <span className="text-[10px] font-medium text-gray-400">
+                                        [{isZakelijk ? 'excl. BTW' : 'incl. BTW'}]
+                                      </span>
+                                    </p>
 
                                     {breakdown.leverancier.gasDetails && (
                                       <div className="flex justify-between items-center text-sm gap-2">
@@ -340,7 +355,12 @@ export function ContractDetailsDrawer({
                                   </div>
 
                                   <div className="space-y-1.5 pt-2 border-t border-gray-200">
-                                    <p className="text-xs font-semibold text-gray-500 mb-1">Vaste kosten</p>
+                                    <p className="text-xs font-semibold text-gray-500 mb-1">
+                                      Vaste kosten{' '}
+                                      <span className="text-[10px] font-medium text-gray-400">
+                                        [{isZakelijk ? 'excl. BTW' : 'incl. BTW'}]
+                                      </span>
+                                    </p>
 
                                     <div className="flex justify-between items-center text-sm gap-2">
                                       <span className="text-gray-700 flex-1 min-w-0">Vastrecht</span>
