@@ -245,7 +245,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               
               setAddressTypeResult(bagResultWithDetails);
               
-              // Update addressType in formData
+              // Update addressType in formData (NIET onChange aanroepen, alleen lokale state)
               if (bagResult.type !== 'error') {
                 // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
                 if (!originalBagResult && !manualAddressTypeOverride) {
@@ -253,12 +253,12 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 }
                 const updatedData = { ...newData, addressType: bagResult.type };
                 setFormData(updatedData);
-                onChange(updatedData);
+                // onChange(updatedData); // VERWIJDERD: niet direct aanroepen bij adres check
                 setAddressType(bagResult.type);
               } else {
                 const updatedData = { ...newData, addressType: null };
                 setFormData(updatedData);
-                onChange(updatedData);
+                // onChange(updatedData); // VERWIJDERD: niet direct aanroepen bij adres check
               }
             } catch (error) {
               console.error('BAG API check error:', error);
@@ -272,10 +272,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 type: 'error',
                 message: 'Kon adres type niet controleren'
               });
-              // Bij error, clear addressType
+              // Bij error, clear addressType (NIET onChange aanroepen, alleen lokale state)
               const updatedData = { ...newData, addressType: null };
               setFormData(updatedData);
-              onChange(updatedData);
+              // onChange(updatedData); // VERWIJDERD: niet direct aanroepen bij adres check
             } finally {
               // Alleen loading state updaten als dit nog steeds de laatste request is
               if (bagRequestCounter.current === currentBagRequestId) {
@@ -293,10 +293,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         
         setAddressError('Adres niet gevonden')
         setAddressTypeResult(null) // Clear BAG API result
-        // Clear addressType bij error
+        // Clear addressType bij error (NIET onChange aanroepen, alleen lokale state)
         const newData = { ...formData, addressType: null }
         setFormData(newData)
-        onChange(newData)
+        // onChange(newData) // VERWIJDERD: niet direct aanroepen bij adres check
       }
     } catch (error) {
       console.error('Address lookup error:', error)

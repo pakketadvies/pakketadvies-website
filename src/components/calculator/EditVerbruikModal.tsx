@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, Check, ArrowLeft, Leaf, SlidersHorizontal, ArrowsDownUp } from '@phosphor-icons/react'
+import { X, ArrowLeft, Leaf, SlidersHorizontal, ArrowsDownUp } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
 import type { VerbruikData } from '@/types/calculator'
 import EditVerbruikForm from './EditVerbruikForm'
@@ -285,21 +285,20 @@ export default function EditVerbruikModal({
 
           {/* Footer - Sticky */}
           <div className="border-t-2 border-gray-100 p-5 bg-white sticky bottom-0">
-            <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <div className="flex gap-3">
               <Button
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isUpdating}
-                className="flex-1 sm:flex-initial"
+                className="flex-1"
               >
-                <X weight="bold" className="w-5 h-5" />
                 Annuleren
               </Button>
               
               <Button
                 onClick={handleSave}
                 disabled={!hasChanges || isUpdating}
-                className="flex-1 sm:flex-auto"
+                className="flex-1"
               >
                 {isUpdating ? (
                   <>
@@ -307,10 +306,7 @@ export default function EditVerbruikModal({
                     Herberekenen...
                   </>
                 ) : (
-                  <>
-                    <Check weight="bold" className="w-5 h-5" />
-                    Opslaan & Herberekenen
-                  </>
+                  'Opslaan & Herberekenen'
                 )}
               </Button>
             </div>
