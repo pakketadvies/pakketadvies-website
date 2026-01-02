@@ -229,7 +229,7 @@ export function ConsumerContractRowCard({
           </div>
 
           {/* Desktop: Horizontal compact layout (Pricewise-style) */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-start gap-4">
             {/* Left: Logo + Name + Badges */}
             <div className="flex items-center gap-3 flex-shrink-0 min-w-0" style={{ width: '240px' }}>
               {contract.leverancier.logo ? (
@@ -278,8 +278,8 @@ export function ConsumerContractRowCard({
               )}
             </div>
 
-            {/* Right: CTA Button */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Right: CTA Button - gecentreerd verticaal */}
+            <div className="flex items-center gap-3 flex-shrink-0 self-center">
               <Button
                 className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
                 onClick={() => {
