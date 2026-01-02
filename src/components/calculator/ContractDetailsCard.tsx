@@ -496,6 +496,10 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               <h4 className="text-sm md:text-base font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                 <ChartBar className="w-4 h-4 md:w-5 md:h-5" weight="bold" />
                 Berekening (op basis van jouw verbruik)
+                {/* DEBUG: Visuele indicator */}
+                <span className="ml-auto text-xs px-2 py-1 rounded" style={{ backgroundColor: isZakelijk ? '#fef3c7' : '#dcfce7', color: isZakelijk ? '#92400e' : '#166534' }}>
+                  🔍 {isZakelijk ? 'ZAKELIJK (excl)' : 'PARTICULIER (incl)'} | type: {verbruik?.addressType || 'NULL'}
+                </span>
               </h4>
               <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 space-y-3">
                 {/* Elektriciteit */}
