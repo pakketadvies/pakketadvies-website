@@ -580,11 +580,11 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                 ...contract,
                 // Voor zakelijk: gebruik excl BTW, voor particulier: gebruik incl BTW
                 exactMaandbedrag: isZakelijk 
-                  ? Math.round(breakdown.totaal.maandExclBtw)
-                  : Math.round(breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw),
+                  ? Math.round(breakdown.totaal.maandExclBtw * 100) / 100
+                  : Math.round((breakdown.totaal.maandInclBtw ?? breakdown.totaal.maandExclBtw) * 100) / 100,
                 exactJaarbedrag: isZakelijk
-                  ? Math.round(breakdown.totaal.jaarExclBtw)
-                  : Math.round(breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw),
+                  ? Math.round(breakdown.totaal.jaarExclBtw * 100) / 100
+                  : Math.round((breakdown.totaal.jaarInclBtw ?? breakdown.totaal.jaarExclBtw) * 100) / 100,
                 breakdown,
               }
             }
