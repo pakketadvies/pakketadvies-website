@@ -296,12 +296,12 @@ export default function ContractCard({
             <div className="flex-1 min-w-0">
               <div className={`flex items-baseline gap-1.5 md:gap-2 ${isCompact ? 'mb-0.5' : 'mb-1'}`}>
                 <span className={`${isCompact ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl'} font-bold text-brand-navy-500`}>
-                  €{contract.maandbedrag}
+                  €{contract.maandbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <span className={`${isCompact ? 'text-xs md:text-sm' : 'text-xs md:text-base'} text-gray-500`}>/maand</span>
               </div>
               <div className={`${isCompact ? 'text-xs mb-1.5' : 'text-xs md:text-sm mb-2 md:mb-3'} text-gray-500`}>
-                €{contract.jaarbedrag.toLocaleString()} per jaar
+                €{contract.jaarbedrag.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} per jaar
               </div>
               {contract.besparing && contract.besparing > 0 && (
                 <Tooltip

@@ -256,8 +256,8 @@ const berekenContractKostenVereenvoudigd = (
     const btw = totaalExclBtw * 0.21
     totaalJaarMaatwerk = totaalExclBtw + btw
 
-    const maandbedrag = Math.round(totaalJaarMaatwerk / 12)
-    const jaarbedrag = Math.round(totaalJaarMaatwerk)
+    const maandbedrag = Math.round((totaalJaarMaatwerk / 12) * 100) / 100
+    const jaarbedrag = Math.round(totaalJaarMaatwerk * 100) / 100
 
     let besparing = 0
     if (enecoModelMaandbedrag && enecoModelMaandbedrag > 0) {
@@ -275,8 +275,8 @@ const berekenContractKostenVereenvoudigd = (
   const btw = totaalExclBtw * 0.21
   totaalJaar = totaalExclBtw + btw
 
-  const maandbedrag = Math.round(totaalJaar / 12)
-  const jaarbedrag = Math.round(totaalJaar)
+  const maandbedrag = Math.round((totaalJaar / 12) * 100) / 100
+  const jaarbedrag = Math.round(totaalJaar * 100) / 100
 
   let besparing = 0
   if (enecoModelMaandbedrag && enecoModelMaandbedrag > 0) {
@@ -326,8 +326,8 @@ const transformContractToOptie = (
     // berekenContractKostenVereenvoudigd geeft altijd incl BTW terug
     // Voor zakelijk moeten we BTW eraf halen
     if (isZakelijk) {
-      maandbedrag = Math.round(berekend.maandbedrag / 1.21)
-      jaarbedrag = Math.round(berekend.jaarbedrag / 1.21)
+      maandbedrag = Math.round((berekend.maandbedrag / 1.21) * 100) / 100
+      jaarbedrag = Math.round((berekend.jaarbedrag / 1.21) * 100) / 100
     } else {
       maandbedrag = berekend.maandbedrag
       jaarbedrag = berekend.jaarbedrag
