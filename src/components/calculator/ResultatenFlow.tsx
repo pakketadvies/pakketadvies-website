@@ -779,8 +779,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
           {/* Pricewise-style layout (sidebar + list) - EXACT same for both consumer and business */}
           {verbruik && (
             <div className="mt-5 px-5" style={{ border: '3px solid red' }}>
-              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white py-4 px-5 w-full" style={{ border: '3px solid yellow' }}>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="mb-5 rounded-2xl bg-brand-navy-500 text-white py-4 w-full" style={{ border: '3px solid yellow' }}>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-5">
                   <div>
                     <p className="text-white/80 text-sm">Resultaten</p>
                     <h1 className="text-xl md:text-2xl font-bold">
