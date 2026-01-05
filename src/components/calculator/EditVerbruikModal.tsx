@@ -146,6 +146,7 @@ export default function EditVerbruikModal({
       newAddressType: newData?.addressType,
     })
     setFormData(newData)
+    // ✅ VOORSTEL 3: hasChanges wordt true, maar we saven pas bij button click!
     setHasChanges(true)
   }
 

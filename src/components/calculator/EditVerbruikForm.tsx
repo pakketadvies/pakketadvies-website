@@ -60,7 +60,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   const handleFieldChange = (field: keyof VerbruikData, value: any) => {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
-    onChange(newData)
+    onChange(newData)  // ✅ BACK! Safe now omdat verbruik.addressType niet meer in useEffect dependency is
   }
 
   const handleAddressChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
@@ -91,7 +91,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     setFormData(newData)
     
     console.log('🟡 [FORM] Calling onChange(newData) to update parent modal')
-    onChange(newData) // ✅ RE-ENABLED: Update parent modal
+    onChange(newData) // ✅ BACK! Safe now omdat verbruik.addressType niet meer in useEffect dependency is
     
     // Clear existing timeout
     if (addressTimeoutRef.current) {
@@ -203,7 +203,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
           console.log('🟡 [FORM] After error - calling onChange(newData)')
           onChange(newData)
         } else if (data.street && data.city) {
-          console.log('✅ [FORM] Address found:', { street: data.street, city: data.city })
+            console.log('✅ [FORM] Address found:', { street: data.street, city: data.city })
           const newAdres = { 
             ...formData.leveringsadressen[0],
             straat: data.street,
@@ -215,7 +215,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
           const newData = { ...formData, leveringsadressen: [newAdres] }
           setFormData(newData)
           console.log('🟡 [FORM] After address found - calling onChange(newData)')
-          onChange(newData)
+          onChange(newData)  // ✅ BACK! Safe now
           lastLookup.current = lookupKey
 
           // NIEUW: BAG API woonfunctie check (alleen als dit nog steeds de laatste request is)
@@ -287,14 +287,14 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 const updatedData = { ...newData, addressType: bagResult.type };
                 setFormData(updatedData);
                 console.log('🟡 [FORM] After BAG success - calling onChange(updatedData)')
-                onChange(updatedData); // ✅ RE-ENABLED: Update parent met addressType
+                onChange(updatedData); // ✅ BACK! Safe now
                 setAddressType(bagResult.type);
               } else {
                 console.log('❌ [FORM] BAG API returned error type')
                 const updatedData = { ...newData, addressType: null };
                 setFormData(updatedData);
                 console.log('🟡 [FORM] After BAG error - calling onChange(updatedData)')
-                onChange(updatedData); // ✅ RE-ENABLED: Update parent
+                onChange(updatedData); // ✅ BACK! Safe now
               }
             } catch (error) {
               console.error('❌ [FORM] BAG API check error:', error);
@@ -309,11 +309,11 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 type: 'error',
                 message: 'Kon adres type niet controleren'
               });
-              // Bij error, clear addressType en sync met parent
+              // Bij error, clear addressType
               const updatedData = { ...newData, addressType: null };
               setFormData(updatedData);
               console.log('🟡 [FORM] After BAG catch error - calling onChange(updatedData)')
-              onChange(updatedData); // ✅ RE-ENABLED: Update parent
+              onChange(updatedData); // ✅ BACK! Safe now
             } finally {
               // Alleen loading state updaten als dit nog steeds de laatste request is
               if (bagRequestCounter.current === currentBagRequestId) {
@@ -331,10 +331,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         
         setAddressError('Adres niet gevonden')
         setAddressTypeResult(null) // Clear BAG API result
-        // Clear addressType bij error en sync met parent
+        // Clear addressType bij error
         const newData = { ...formData, addressType: null }
         setFormData(newData)
-        onChange(newData) // ✅ RE-ENABLED: Update parent
+        onChange(newData)  // ✅ BACK! Safe now
       }
     } catch (error) {
       console.error('Address lookup error:', error)

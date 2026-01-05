@@ -695,9 +695,10 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   }
 
   useEffect(() => {
+    console.log('🔄 [RESULTATEN] useEffect for loadResultaten triggered')
     loadResultaten()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isQuickCalc, router, verbruik?.addressType])
+  }, [isQuickCalc, router])  // ✅ REMOVED verbruik?.addressType! Dit veroorzaakte modal reopen!
 
   useEffect(() => {
     let filtered = [...resultaten]
