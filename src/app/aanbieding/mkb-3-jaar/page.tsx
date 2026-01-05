@@ -115,7 +115,7 @@ export default function MKB3JaarPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero */}
+      {/* Hero met Inline Formulier */}
       <section className="bg-brand-navy-500 text-white py-16 md:py-24 pb-20 md:pb-28 pt-32 md:pt-40 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
@@ -136,72 +136,97 @@ export default function MKB3JaarPage() {
         </div>
         
         <div className="container-custom relative z-10">
-          <div className="max-w-4xl">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
-              <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-              <span className="text-sm font-semibold text-brand-teal-200">MKB 3-jarig vast contract</span>
+          {/* 2-kolommen layout: Hero content + Formulier */}
+          <div className="grid lg:grid-cols-[1fr,480px] gap-12 items-start">
+            {/* Links: Hero Content */}
+            <div>
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
+                <Buildings weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                <span className="text-sm font-semibold text-brand-teal-200">MKB 3-jarig vast contract</span>
+              </div>
+
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                Vaste tarieven voor uw{' '}
+                <span className="text-brand-teal-500">MKB-bedrijf</span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-gray-300 mb-8">
+                3 jaar lang budgetzekerheid met scherpe zakelijke tarieven. Perfect voor je bedrijfsplanning en financiële rust.
+              </p>
+
+              {/* Trust indicators */}
+              <div className="flex flex-wrap items-center gap-6 md:gap-8">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                    <Calculator weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400">Budgetzekerheid</div>
+                    <div className="font-semibold text-white">3 jaar vast</div>
+                  </div>
+                </div>
+                
+                <div className="w-px h-8 bg-gray-600"></div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                    <ChartLineUp weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400">Zakelijke</div>
+                    <div className="font-semibold text-white">Voordelige tarieven</div>
+                  </div>
+                </div>
+
+                <div className="w-px h-8 bg-gray-600"></div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                    <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400">Volledig</div>
+                    <div className="font-semibold text-white">Gratis advies</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Vaste tarieven voor uw{' '}
-              <span className="text-brand-teal-500">MKB-bedrijf</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
-              3 jaar lang budgetzekerheid met scherpe zakelijke tarieven. Perfect voor je bedrijfsplanning en financiële rust.
-            </p>
-
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center gap-6 md:gap-8 mb-8">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                  <Calculator weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400">Budgetzekerheid</div>
-                  <div className="font-semibold text-white">3 jaar vast</div>
-                </div>
-              </div>
-              
-              <div className="w-px h-8 bg-gray-600"></div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                  <ChartLineUp weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400">Zakelijke</div>
-                  <div className="font-semibold text-white">Voordelige tarieven</div>
-                </div>
-              </div>
-
-              <div className="w-px h-8 bg-gray-600"></div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                  <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400">Volledig</div>
-                  <div className="font-semibold text-white">Gratis advies</div>
-                </div>
-              </div>
+            {/* Rechts: Formulier Card */}
+            <div className="lg:sticky lg:top-32">
+              <Card className="bg-white shadow-2xl border-0">
+                <CardContent className="p-6 md:p-8">
+                  <div className="mb-6 text-center">
+                    <h3 className="font-display text-2xl font-bold text-brand-navy-500 mb-2">
+                      Vraag offerte aan
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Binnen 24 uur reactie · Gratis en vrijblijvend
+                    </p>
+                  </div>
+                  
+                  <AanbiedingInteresseForm 
+                    aanbiedingType="mkb-3-jaar"
+                    compact={true}
+                  />
+                  
+                  {/* Trust badges */}
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <CheckCircle weight="fill" className="w-4 h-4 text-brand-teal-500" />
+                        <span>Binnen 24 uur</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle weight="fill" className="w-4 h-4 text-brand-teal-500" />
+                        <span>7.500+ klanten</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-
-            {/* CTA Button - Scroll to form */}
-            <Button
-              size="lg"
-              variant="primary"
-              className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white"
-              onClick={() => {
-                const formElement = document.getElementById('interesse-formulier')
-                formElement?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-            >
-              Toon interesse
-              <ArrowRight weight="bold" className="w-5 h-5 ml-2" />
-            </Button>
           </div>
         </div>
 
@@ -451,22 +476,6 @@ export default function MKB3JaarPage() {
         </div>
       </section>
 
-      {/* Interesse Formulier */}
-      <section id="interesse-formulier" className="py-16 md:py-24 bg-gray-50">
-        <div className="container-custom max-w-4xl">
-          <div className="mb-8 text-center">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
-              Interesse? Laat het ons weten!
-            </h2>
-            <p className="text-lg text-gray-600">
-              Vul het formulier in en we nemen binnen 24 uur contact met je op voor een vrijblijvend gesprek over je zakelijke energiecontract.
-            </p>
-          </div>
-
-          <AanbiedingInteresseForm aanbiedingType="mkb-3-jaar" />
-        </div>
-      </section>
-
       {/* Finale CTA */}
       <section className="py-16 md:py-24 bg-brand-navy-500 relative overflow-hidden">
         {/* Background Image */}
@@ -492,7 +501,7 @@ export default function MKB3JaarPage() {
               Klaar voor 3 jaar budgetzekerheid?
             </h2>
             <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Laat je bedrijfsgegevens achter en ontdek hoeveel je kunt besparen met een 3-jarig zakelijk energiecontract.
+              Scroll naar boven en vul het formulier in, of bel ons direct voor persoonlijk advies.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -501,11 +510,10 @@ export default function MKB3JaarPage() {
                 variant="primary"
                 className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white"
                 onClick={() => {
-                  const formElement = document.getElementById('interesse-formulier')
-                  formElement?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
-                Toon interesse
+                Scroll naar boven
                 <ArrowRight weight="bold" className="w-5 h-5 ml-2" />
               </Button>
               <Link href="/contact">

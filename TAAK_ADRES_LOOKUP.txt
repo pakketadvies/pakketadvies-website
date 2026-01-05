@@ -1,0 +1,150 @@
+📋 TAAK: Automatische Adres Invulling op Checkout Pagina
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 DOEL
+Implementeer automatische adres lookup op de checkout pagina waarbij klanten alleen hun postcode, huisnummer en optionele toevoeging hoeven in te vullen. Het systeem haalt vervolgens automatisch straatnaam en plaatsnaam op via de PDOK Locatieserver API.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 LOCATIE
+Pagina: Checkout/Afrekenpagina MOSE webshop (mose-webshop.vercel.app/checkout)
+
+Betrokken velden:
+• Postcode (1234 AB) 
+• Huisnummer (nieuw veld - toevoegen)
+• Toevoeging (nieuw veld - optioneel)
+• Straat en huisnummer (bestaand - automatisch invullen)
+• Plaats (bestaand - automatisch invullen)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 TECHNISCHE SPECIFICATIE
+
+API Details:
+• Provider: PDOK Locatieserver API v3.1 (gratis, geen API key)
+• Endpoint: https://api.pdok.nl/bzk/locatieserver/search/v3_1/free
+• Documentatie: https://api.pdok.nl/bzk/locatieserver/search/v3_1/ui/
+
+Query voorbeeld:
+postcode=9722EG (4 cijfers + 2 letters, uppercase)
+huisnummer=27 (verplicht)
+toevoeging=A (optioneel)
+
+Query constructie:
+let query = `postcode:${postcode} AND huisnummer:${huisnummer}`
+
+Toevoeging handling:
+• Enkele letter (A, B, C) → huisletter
+• Cijfer/combinatie (1, 2a, bis) → huisnummertoevoeging
+
+API response:
+{
+  "street": "Stavangerweg",
+  "city": "Groningen"
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 UX FLOW
+
+Veld layout:
+┌─────────────────────────────────────┐
+│ 2 Bezorging                         │
+│                                      │
+│ [Voornaam]        [Achternaam]      │
+│                                      │
+│ [Postcode*] [Huisnummer*] [Toev.]  │
+│  (1234 AB)    (27)         (A)      │
+│              [🔍 Adres ophalen]      │
+│                                      │
+│ [Straat en huisnummer] ← Auto       │
+│ [Plaats] ← Auto                     │
+│                                      │
+│ [Telefoonnummer]                    │
+│ [Land ▼]                            │
+└─────────────────────────────────────┘
+
+User flow:
+1. Gebruiker vult in: postcode 9722EG, huisnummer 27, toevoeging A
+2. Trigger: Automatisch bij blur/change OF knop "Adres ophalen"
+3. Loading: Toon spinner, disable velden
+4. Success: Vul "Stavangerweg 27A" en "Groningen" automatisch in
+5. Error: Toon foutmelding, sta handmatige invoer toe
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ VALIDATIE REGELS
+
+Postcode:
+• Format: 4 cijfers + 2 letters (1234AB of 1234 AB)
+• Automatisch uppercase + spaties verwijderen
+• Regex: /^\d{4}[A-Z]{2}$/
+
+Huisnummer:
+• Verplicht
+• Alleen cijfers
+• Min: 1, Max: 99999
+
+Toevoeging:
+• Optioneel
+• Letters, cijfers of combinaties
+• Max 10 tekens
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 EDGE CASES
+
+1. Adres wijzigen na opzoeken:
+   → Voeg "Wijzig adres" link toe
+   → Enable velden weer, clear straat/plaats
+
+2. API niet beschikbaar:
+   → Fallback: sta handmatige invoer toe
+   → Toon melding
+
+3. Formulier pre-fill (terugkerende klant):
+   → Respecteer opgeslagen data
+   → Skip API call als adres compleet is
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📱 RESPONSIVE
+
+Desktop: [Postcode] [Huisnummer] [Toevoeging] [Knop]
+Mobile: Velden onder elkaar, knop full-width
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 ACCEPTANCE CRITERIA
+
+✓ Postcode met/zonder spaties werkt
+✓ Huisnummer + toevoeging velden toegevoegd
+✓ API call correct met PDOK
+✓ Auto-fill straat en plaats bij success
+✓ Loading state zichtbaar
+✓ Error meldingen duidelijk in NL
+✓ Handmatige invoer mogelijk bij errors
+✓ Client + server-side validatie
+✓ Toevoeging correct gedetecteerd
+✓ Werkt op desktop + mobile
+✓ Fallback voor edge cases
+✓ Adres wijzigen mogelijk na opzoeken
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 REFERENTIE
+
+Zie /src/app/api/postcode/route.ts in PakketAdvies project voor volledige werkende implementatie. Kopieer deze logica 1-op-1.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 PRIORITY: High (verbetert checkout conversie)
+⏱️ GESCHATTE TIJD: 4-6 uur
+
+📝 OPMERKINGEN:
+• PDOK API is gratis en vereist geen API key
+• Response tijd < 200ms
+• Test met verschillende postcodes/toevoegingen
+• Overweeg analytics voor "auto" vs "handmatig" ratio
+
