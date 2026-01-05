@@ -7,7 +7,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 /**
  * CRON endpoint: Update dynamic prices daily (day-ahead)
  * 
- * Called by Vercel Cron Jobs at 14:00 UTC daily
+ * Called by EasyCron.com at 14:00 UTC daily
  * Fetches TOMORROW's day-ahead prices and saves them to Supabase
  * 
  * Day-ahead pricing logic:
@@ -15,7 +15,11 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
  * - This allows users to see tomorrow's prices from 14:00 onwards
  * - Prices are saved with tomorrow's date in the database
  * 
- * Security: Should be protected by Vercel Cron secret
+ * Security: Protected by EASYCRON_SECRET environment variable
+ * 
+ * Usage:
+ * curl -X GET "https://pakketadvies.nl/api/cron/update-dynamic-prices" \
+ *   -H "Authorization: Bearer <EASYCRON_SECRET>"
  */
 
 // Force dynamic rendering to prevent caching
@@ -28,98 +32,38 @@ export async function GET(request: Request) {
   console.log('⏰ Timestamp:', new Date().toISOString())
   
   try {
-    // Verify this is a cron request
-    // Vercel cron jobs automatically add an Authorization header
-    // For manual testing, use: Authorization: Bearer <CRON_SECRET>
+    // Security: Verify EasyCron secret
     const authHeader = request.headers.get('authorization')?.trim()
-    const cronSecret = process.env.CRON_SECRET?.trim()
+    const easyCronSecret = process.env.EASYCRON_SECRET?.trim()
     
-    // Log ALL headers immediately for debugging
-    const allRequestHeaders: Record<string, string | null> = {}
-    request.headers.forEach((value, key) => {
-      allRequestHeaders[key] = value
-    })
-    console.log('📋 ALL REQUEST HEADERS:', JSON.stringify(allRequestHeaders, null, 2))
-    
-    // Debug logging (remove in production if needed)
+    // Log for debugging (sanitized)
     console.log('🔍 Auth check:', {
       hasAuthHeader: !!authHeader,
-      authHeaderValue: authHeader ? `"${authHeader.substring(0, 20)}..."` : 'none',
-      hasCronSecret: !!cronSecret,
-      cronSecretValue: cronSecret ? `"${cronSecret.substring(0, 10)}..."` : 'none',
-      expectedHeader: cronSecret ? `Bearer ${cronSecret.substring(0, 10)}...` : 'none',
+      authHeaderPreview: authHeader ? `"${authHeader.substring(0, 20)}..."` : 'none',
+      hasEasyCronSecret: !!easyCronSecret,
+      easyCronSecretPreview: easyCronSecret ? `"${easyCronSecret.substring(0, 10)}..."` : 'none',
     })
     
-    // Security check:
-    // IMPORTANT: Vercel cron jobs send ONLY x-vercel-cron header (NOT Authorization header)
-    // According to Vercel docs, cron jobs send Authorization header with CRON_SECRET value
-    // For manual testing, use: curl -H "Authorization: Bearer <CRON_SECRET>" ...
-    
-    // Check all possible Vercel cron indicators
-    const vercelCronHeader = request.headers.get('x-vercel-cron')
-    const vercelSignature = request.headers.get('x-vercel-signature')
-    const vercelId = request.headers.get('x-vercel-id')
-    const userAgent = request.headers.get('user-agent') || ''
-    
-    // Vercel cron jobs can be identified by:
-    // 1. x-vercel-cron header (most reliable)
-    // 2. x-vercel-signature header
-    // 3. Authorization header matching CRON_SECRET (direct, not Bearer)
-    // 4. User agent containing 'vercel'
-    const isVercelCron = vercelCronHeader !== null || 
-                        vercelSignature !== null ||
-                        vercelId !== null ||
-                        userAgent.toLowerCase().includes('vercel')
-    
-    // Vercel cron jobs send Authorization header with CRON_SECRET value directly (not Bearer)
-    const isVercelDirectAuth = authHeader === cronSecret
-    
-    // For manual testing, we accept Bearer token format
-    const expectedBearerHeader = cronSecret ? `Bearer ${cronSecret}` : null
-    const hasBearerAuth = expectedBearerHeader && authHeader === expectedBearerHeader
-    
-    // Log all headers for debugging
-    const allHeaders = {
-      'x-vercel-cron': vercelCronHeader,
-      'x-vercel-signature': vercelSignature ? 'present' : null,
-      'x-vercel-id': vercelId,
-      'user-agent': userAgent.substring(0, 50),
-      'authorization': authHeader ? `${authHeader.substring(0, 30)}...` : 'none',
-    }
-    console.log('🔍 All request headers:', allHeaders)
-    
-    if (cronSecret) {
-      // Allow if: Vercel cron header present OR Vercel direct auth OR Bearer token (manual)
-      if (!isVercelCron && !isVercelDirectAuth && !hasBearerAuth) {
-        console.error('❌ Unauthorized cron request')
-        console.error('   Received auth header:', authHeader ? `"${authHeader}"` : 'none')
-        console.error('   Expected (direct):', cronSecret ? `"${cronSecret}"` : 'none')
-        console.error('   Expected (Bearer for manual):', expectedBearerHeader ? `"${expectedBearerHeader}"` : 'none')
-        console.error('   Is Vercel cron:', isVercelCron)
-        console.error('   Vercel headers:', allHeaders)
-        console.error('   For manual testing, use: Authorization: Bearer <CRON_SECRET>')
+    // Check authorization
+    if (easyCronSecret) {
+      const expectedBearerHeader = `Bearer ${easyCronSecret}`
+      const isAuthorized = authHeader === expectedBearerHeader
+      
+      if (!isAuthorized) {
+        console.error('❌ Unauthorized: Invalid or missing Authorization header')
         return NextResponse.json(
           { 
             success: false, 
-            error: 'Unauthorized. Use Authorization: Bearer <CRON_SECRET> header for manual testing' 
+            error: 'Unauthorized: Invalid or missing secret',
+            hint: 'Use: Authorization: Bearer <EASYCRON_SECRET>'
           },
           { status: 401 }
         )
       }
       
-      if (isVercelCron) {
-        console.log('✅ Vercel cron request detected')
-      } else if (isVercelDirectAuth) {
-        console.log('✅ Vercel direct auth matches')
-      } else if (hasBearerAuth) {
-        console.log('✅ Bearer token auth matches (manual test)')
-      }
+      console.log('✅ Authorization successful')
     } else {
-      // No CRON_SECRET set - allow all requests (not recommended for production)
-      console.warn('⚠️  No CRON_SECRET set - allowing request (should set CRON_SECRET in production)')
-      if (isVercelCron) {
-        console.log('✅ Vercel cron request detected')
-      }
+      console.warn('⚠️  EASYCRON_SECRET not set - endpoint is unprotected!')
     }
 
     console.log('🔄 Starting daily price update...')
