@@ -16,28 +16,11 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
   const savedElektriciteitDal = useRef<number | null>(null)
   
-  // Sync formData with currentData when it changes from parent
-  // MAAR ALLEEN als het VERSCHILT van huidige formData (anders oneindige loop!)
-  useEffect(() => {
-    const currentPostcode = formData?.leveringsadressen?.[0]?.postcode
-    const newPostcode = currentData?.leveringsadressen?.[0]?.postcode
-    const currentHuisnummer = formData?.leveringsadressen?.[0]?.huisnummer
-    const newHuisnummer = currentData?.leveringsadressen?.[0]?.huisnummer
-    
-    // Alleen synchen als data ECHT verschilt (voorkom oneindige loop)
-    if (currentPostcode !== newPostcode || currentHuisnummer !== newHuisnummer) {
-      console.log('🟣 [FORM] useEffect: currentData changed from parent - SYNCING', {
-        from: { postcode: currentPostcode, huisnummer: currentHuisnummer },
-        to: { postcode: newPostcode, huisnummer: newHuisnummer },
-      })
-      setFormData(currentData)
-      savedElektriciteitDal.current = null
-    } else {
-      console.log('🟣 [FORM] useEffect: currentData changed but SAME as formData - SKIPPING SYNC')
-    }
-  }, [currentData, formData])
+  // ✅ VOORSTEL 1: NO MORE SYNC! 
+  // Form krijgt currentData bij mount, daarna volledig onafhankelijk
+  // Geen useEffect die currentData synct = geen loops = geen modal reopen
   
-  // Log formData changes
+  // Log formData changes (alleen voor debugging)
   useEffect(() => {
     console.log('🟠 [FORM] formData changed:', {
       postcode: formData?.leveringsadressen?.[0]?.postcode,

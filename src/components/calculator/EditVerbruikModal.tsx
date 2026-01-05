@@ -58,7 +58,10 @@ export default function EditVerbruikModal({
     })
     
     if (isOpen) {
-      console.log('🟢 [MODAL] Modal is opening, setting formData to currentData')
+      console.log('🟢 [MODAL] Modal is opening, setting formData to FRESH currentData from parent')
+      // ✅ VOORSTEL 1: We pakken altijd de VERSE currentData bij open
+      // Dit voorkomt stale data, en omdat EditVerbruikForm geen sync useEffect meer heeft,
+      // krijgen we geen loops meer!
       setFormData(currentData)
       setHasChanges(false)
       setShowAdvancedFilters(false)
@@ -70,7 +73,7 @@ export default function EditVerbruikModal({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen])
+  }, [isOpen, currentData])  // ✅ ADD currentData back maar EditVerbruikForm heeft geen sync meer!
   
   // Log formData changes
   useEffect(() => {
