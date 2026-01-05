@@ -53,7 +53,7 @@ export function CTA() {
             <Link href="/calculator">
               <button className="group relative px-8 py-4 bg-brand-teal-500 text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-brand-teal-500/50 transition-all duration-300 hover:scale-105 hover:bg-brand-teal-600">
                 <span className="flex items-center gap-2">
-                  Start je besparingscheck
+                  Energie vergelijken
                   <ArrowRight weight="bold" className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>

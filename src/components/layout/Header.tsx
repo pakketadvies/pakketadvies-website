@@ -73,8 +73,8 @@ export function Header() {
   const homeHref = audience === 'consumer' ? '/particulier' : '/'
   const primaryCta =
     audience === 'consumer'
-      ? { href: '/particulier/energie-vergelijken', label: 'Vergelijk nu' }
-      : { href: '/calculator', label: 'Bereken besparing' }
+      ? { href: '/particulier/energie-vergelijken', label: 'Energie vergelijken' }
+      : { href: '/calculator', label: 'Energie vergelijken' }
 
   const handleSwitch = (next: Audience) => {
     // Check based on current pathname, not state (which might be stale)
