@@ -162,22 +162,22 @@ export function AanbiedingInteresseForm({ aanbiedingType, compact = false }: Aan
                 helpText="Optioneel, maar maakt contact makkelijker"
               />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Opmerking
-                </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-3 text-gray-400">
-                    <ChatCircleText className="w-5 h-5" />
-                  </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Opmerking
+            </label>
+            <div className="relative">
+              <div className="absolute left-3 top-3 text-gray-400 pointer-events-none z-10">
+                <ChatCircleText className="w-5 h-5" />
+              </div>
               <textarea
                 {...register('opmerking')}
                 rows={4}
                 className="w-full rounded-xl border-2 border-gray-300 px-4 py-3 pl-11 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:border-brand-teal-500 focus:ring-brand-teal-500 bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Heb je vragen of specifieke wensen? Laat het ons weten..."
               />
-                </div>
-              </div>
+            </div>
+          </div>
 
               <div>
                 <label className="flex items-start gap-3 cursor-pointer group">
