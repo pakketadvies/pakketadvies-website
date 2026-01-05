@@ -47,16 +47,13 @@ export default function EditVerbruikModal({
     minRating: 0,
   })
   const [localSortBy, setLocalSortBy] = useState<'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating'>(sortBy)
-  // Unique key that changes every time modal opens (for EditVerbruikForm remount)
-  const [formKey, setFormKey] = useState(0)
 
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setFormData(currentData)
       setHasChanges(false)
-      setShowAdvancedFilters(false) // Reset advanced filters section when modal opens
-      setFormKey(prev => prev + 1) // Change key to remount EditVerbruikForm
+      setShowAdvancedFilters(false)
       if (filters) {
         setLocalFilters(filters)
       }
@@ -279,7 +276,6 @@ export default function EditVerbruikModal({
               <div>
                 <h3 className="text-lg font-bold text-brand-navy-500 mb-4">Verbruik</h3>
                 <EditVerbruikForm 
-                  key={formKey}
                   currentData={formData}
                   onChange={handleFormChange}
                 />

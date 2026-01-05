@@ -16,6 +16,12 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
   const savedElektriciteitDal = useRef<number | null>(null)
   
+  // Sync formData with currentData when it changes from parent
+  useEffect(() => {
+    setFormData(currentData)
+    savedElektriciteitDal.current = null
+  }, [currentData])
+  
   // Address lookup states
   const [loadingAddress, setLoadingAddress] = useState(false)
   const [addressError, setAddressError] = useState<string>('')
@@ -67,7 +73,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     // Clear addressType omdat adres is gewijzigd
     const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
     setFormData(newData)
-    // onChange(newData) // NIET direct aanroepen - alleen bij Save button
+    onChange(newData) // ✅ RE-ENABLED: Update parent modal
     
     // Clear existing timeout
     if (addressTimeoutRef.current) {
@@ -238,7 +244,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               
               setAddressTypeResult(bagResultWithDetails);
               
-              // Update addressType in formData (NIET onChange aanroepen, alleen lokale state)
+              // Update addressType in formData en sync met parent
               if (bagResult.type !== 'error') {
                 // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
                 if (!originalBagResult && !manualAddressTypeOverride) {
@@ -246,12 +252,12 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 }
                 const updatedData = { ...newData, addressType: bagResult.type };
                 setFormData(updatedData);
-                // onChange(updatedData); // VERWIJDERD: niet direct aanroepen bij adres check
+                onChange(updatedData); // ✅ RE-ENABLED: Update parent met addressType
                 setAddressType(bagResult.type);
               } else {
                 const updatedData = { ...newData, addressType: null };
                 setFormData(updatedData);
-                // onChange(updatedData); // VERWIJDERD: niet direct aanroepen bij adres check
+                onChange(updatedData); // ✅ RE-ENABLED: Update parent
               }
             } catch (error) {
               console.error('BAG API check error:', error);
@@ -265,10 +271,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
                 type: 'error',
                 message: 'Kon adres type niet controleren'
               });
-              // Bij error, clear addressType (NIET onChange aanroepen, alleen lokale state)
+              // Bij error, clear addressType en sync met parent
               const updatedData = { ...newData, addressType: null };
               setFormData(updatedData);
-              // onChange(updatedData); // VERWIJDERD: niet direct aanroepen bij adres check
+              onChange(updatedData); // ✅ RE-ENABLED: Update parent
             } finally {
               // Alleen loading state updaten als dit nog steeds de laatste request is
               if (bagRequestCounter.current === currentBagRequestId) {
@@ -286,10 +292,10 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         
         setAddressError('Adres niet gevonden')
         setAddressTypeResult(null) // Clear BAG API result
-        // Clear addressType bij error (NIET onChange aanroepen, alleen lokale state)
+        // Clear addressType bij error en sync met parent
         const newData = { ...formData, addressType: null }
         setFormData(newData)
-        // onChange(newData) // VERWIJDERD: niet direct aanroepen bij adres check
+        onChange(newData) // ✅ RE-ENABLED: Update parent
       }
     } catch (error) {
       console.error('Address lookup error:', error)
