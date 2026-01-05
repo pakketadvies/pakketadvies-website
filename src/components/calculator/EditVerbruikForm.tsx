@@ -17,16 +17,25 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   const savedElektriciteitDal = useRef<number | null>(null)
   
   // Sync formData with currentData when it changes from parent
+  // MAAR ALLEEN als het VERSCHILT van huidige formData (anders oneindige loop!)
   useEffect(() => {
-    console.log('🟣 [FORM] useEffect: currentData changed from parent', {
-      currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
-      currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
-      currentDataToevoeging: currentData?.leveringsadressen?.[0]?.toevoeging,
-      currentDataAddressType: currentData?.addressType,
-    })
-    setFormData(currentData)
-    savedElektriciteitDal.current = null
-  }, [currentData])
+    const currentPostcode = formData?.leveringsadressen?.[0]?.postcode
+    const newPostcode = currentData?.leveringsadressen?.[0]?.postcode
+    const currentHuisnummer = formData?.leveringsadressen?.[0]?.huisnummer
+    const newHuisnummer = currentData?.leveringsadressen?.[0]?.huisnummer
+    
+    // Alleen synchen als data ECHT verschilt (voorkom oneindige loop)
+    if (currentPostcode !== newPostcode || currentHuisnummer !== newHuisnummer) {
+      console.log('🟣 [FORM] useEffect: currentData changed from parent - SYNCING', {
+        from: { postcode: currentPostcode, huisnummer: currentHuisnummer },
+        to: { postcode: newPostcode, huisnummer: newHuisnummer },
+      })
+      setFormData(currentData)
+      savedElektriciteitDal.current = null
+    } else {
+      console.log('🟣 [FORM] useEffect: currentData changed but SAME as formData - SKIPPING SYNC')
+    }
+  }, [currentData, formData])
   
   // Log formData changes
   useEffect(() => {

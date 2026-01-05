@@ -48,9 +48,9 @@ export default function EditVerbruikModal({
   })
   const [localSortBy, setLocalSortBy] = useState<'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating'>(sortBy)
 
-  // Reset form when modal opens
+  // Reset form when modal opens (ONLY on isOpen change, NOT on currentData change!)
   useEffect(() => {
-    console.log('🔵 [MODAL] useEffect triggered', { 
+    console.log('🔵 [MODAL] useEffect triggered (isOpen changed)', { 
       isOpen, 
       currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
       currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
@@ -69,7 +69,8 @@ export default function EditVerbruikModal({
         setLocalSortBy(sortBy)
       }
     }
-  }, [isOpen, currentData, filters, sortBy])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
   
   // Log formData changes
   useEffect(() => {
