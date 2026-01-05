@@ -50,7 +50,15 @@ export default function EditVerbruikModal({
 
   // Reset form when modal opens
   useEffect(() => {
+    console.log('🔵 [MODAL] useEffect triggered', { 
+      isOpen, 
+      currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
+      currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
+      currentDataToevoeging: currentData?.leveringsadressen?.[0]?.toevoeging,
+    })
+    
     if (isOpen) {
+      console.log('🟢 [MODAL] Modal is opening, setting formData to currentData')
       setFormData(currentData)
       setHasChanges(false)
       setShowAdvancedFilters(false)
@@ -62,6 +70,16 @@ export default function EditVerbruikModal({
       }
     }
   }, [isOpen, currentData, filters, sortBy])
+  
+  // Log formData changes
+  useEffect(() => {
+    console.log('🟡 [MODAL] formData changed:', {
+      postcode: formData?.leveringsadressen?.[0]?.postcode,
+      huisnummer: formData?.leveringsadressen?.[0]?.huisnummer,
+      toevoeging: formData?.leveringsadressen?.[0]?.toevoeging,
+      addressType: formData?.addressType,
+    })
+  }, [formData])
 
   // Update filters when local filters change
   useEffect(() => {
@@ -90,10 +108,21 @@ export default function EditVerbruikModal({
   }, [isOpen])
 
   const handleSave = () => {
+    console.log('💾 [MODAL] handleSave called', {
+      postcode: formData?.leveringsadressen?.[0]?.postcode,
+      huisnummer: formData?.leveringsadressen?.[0]?.huisnummer,
+      toevoeging: formData?.leveringsadressen?.[0]?.toevoeging,
+      addressType: formData?.addressType,
+    })
     onSave(formData)
   }
 
   const handleCancel = () => {
+    console.log('❌ [MODAL] handleCancel called - resetting to currentData', {
+      currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
+      currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
+      currentDataToevoeging: currentData?.leveringsadressen?.[0]?.toevoeging,
+    })
     // Reset all state first
     setFormData(currentData)
     setHasChanges(false)
@@ -106,6 +135,12 @@ export default function EditVerbruikModal({
   }
 
   const handleFormChange = (newData: VerbruikData) => {
+    console.log('🔴 [MODAL] handleFormChange called from EditVerbruikForm', {
+      newPostcode: newData?.leveringsadressen?.[0]?.postcode,
+      newHuisnummer: newData?.leveringsadressen?.[0]?.huisnummer,
+      newToevoeging: newData?.leveringsadressen?.[0]?.toevoeging,
+      newAddressType: newData?.addressType,
+    })
     setFormData(newData)
     setHasChanges(true)
   }

@@ -662,11 +662,20 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   }
 
   const handleVerbruikUpdate = async (newVerbruikData: VerbruikData) => {
+    console.log('🚀 [RESULTATEN] handleVerbruikUpdate called', {
+      newPostcode: newVerbruikData?.leveringsadressen?.[0]?.postcode,
+      newHuisnummer: newVerbruikData?.leveringsadressen?.[0]?.huisnummer,
+      newToevoeging: newVerbruikData?.leveringsadressen?.[0]?.toevoeging,
+      newAddressType: newVerbruikData?.addressType,
+    })
     setIsUpdating(true)
     window.scrollTo({ top: 0, behavior: 'instant' })
     try {
+      console.log('🟢 [RESULTATEN] Calling setVerbruik(newVerbruikData)')
       setVerbruik(newVerbruikData)
+      console.log('🟢 [RESULTATEN] Closing modal')
       setIsModalOpen(false)
+      console.log('🟢 [RESULTATEN] Calling loadResultaten(newVerbruikData)')
       await loadResultaten(newVerbruikData)
       setTimeout(() => {
         const resultsSection = document.querySelector('[data-results-section]')
@@ -677,9 +686,10 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
         }
       }, 100)
     } catch (err) {
-      console.error('Error updating verbruik:', err)
+      console.error('❌ [RESULTATEN] Error updating verbruik:', err)
       setError('Er ging iets mis bij het herberekenen. Probeer het opnieuw.')
     } finally {
+      console.log('✅ [RESULTATEN] Update complete, setIsUpdating(false)')
       setIsUpdating(false)
     }
   }

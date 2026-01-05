@@ -18,9 +18,25 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   
   // Sync formData with currentData when it changes from parent
   useEffect(() => {
+    console.log('🟣 [FORM] useEffect: currentData changed from parent', {
+      currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
+      currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
+      currentDataToevoeging: currentData?.leveringsadressen?.[0]?.toevoeging,
+      currentDataAddressType: currentData?.addressType,
+    })
     setFormData(currentData)
     savedElektriciteitDal.current = null
   }, [currentData])
+  
+  // Log formData changes
+  useEffect(() => {
+    console.log('🟠 [FORM] formData changed:', {
+      postcode: formData?.leveringsadressen?.[0]?.postcode,
+      huisnummer: formData?.leveringsadressen?.[0]?.huisnummer,
+      toevoeging: formData?.leveringsadressen?.[0]?.toevoeging,
+      addressType: formData?.addressType,
+    })
+  }, [formData])
   
   // Address lookup states
   const [loadingAddress, setLoadingAddress] = useState(false)
@@ -56,6 +72,8 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   }
 
   const handleAddressChange = (field: 'postcode' | 'huisnummer' | 'toevoeging', value: string) => {
+    console.log('🔵 [FORM] handleAddressChange called', { field, value })
+    
     const newAdres = { ...formData.leveringsadressen[0] }
     newAdres[field] = value
     
@@ -72,7 +90,15 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     setOriginalBagResult(null)
     // Clear addressType omdat adres is gewijzigd
     const newData = { ...formData, leveringsadressen: [newAdres], addressType: null }
+    
+    console.log('🟢 [FORM] Calling setFormData with newData', {
+      newPostcode: newData?.leveringsadressen?.[0]?.postcode,
+      newHuisnummer: newData?.leveringsadressen?.[0]?.huisnummer,
+      newToevoeging: newData?.leveringsadressen?.[0]?.toevoeging,
+    })
     setFormData(newData)
+    
+    console.log('🟡 [FORM] Calling onChange(newData) to update parent modal')
     onChange(newData) // ✅ RE-ENABLED: Update parent modal
     
     // Clear existing timeout
@@ -139,12 +165,18 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
   }
 
   const fetchAddress = async (postcode: string, huisnummer: string, toevoeging?: string) => {
+    console.log('🔍 [FORM] fetchAddress called', { postcode, huisnummer, toevoeging })
+    
     const lookupKey = `${postcode}-${huisnummer}-${toevoeging || ''}`
-    if (lastLookup.current === lookupKey) return
+    if (lastLookup.current === lookupKey) {
+      console.log('⏭️ [FORM] Skipping - same address already looked up')
+      return
+    }
 
     // Genereer unieke request ID voor race condition preventie
     const currentRequestId = requestCounter.current + 1
     requestCounter.current = currentRequestId
+    console.log('🔢 [FORM] Request ID:', currentRequestId)
 
     const postcodeClean = postcode.toUpperCase().replace(/\s/g, '')
     setLoadingAddress(true)
@@ -156,25 +188,30 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
         url += `&addition=${encodeURIComponent(toevoeging.trim())}`
       }
       
+      console.log('📡 [FORM] Fetching postcode API:', url)
       const response = await fetch(url)
       
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ [FORM] Postcode API response:', data)
         
         // Check of dit nog steeds de laatste request is (race condition preventie)
         if (requestCounter.current !== currentRequestId) {
-          console.log('Ignoring stale postcode API response')
+          console.log('⚠️ [FORM] Ignoring stale postcode API response - newer request exists')
           return
         }
         
         if (data.error) {
+          console.log('❌ [FORM] Postcode API returned error:', data.error)
           setAddressError(data.error)
           setAddressTypeResult(null) // Clear BAG API result
           // Clear addressType bij error
           const newData = { ...formData, addressType: null }
           setFormData(newData)
+          console.log('🟡 [FORM] After error - calling onChange(newData)')
           onChange(newData)
         } else if (data.street && data.city) {
+          console.log('✅ [FORM] Address found:', { street: data.street, city: data.city })
           const newAdres = { 
             ...formData.leveringsadressen[0],
             straat: data.street,
@@ -185,11 +222,13 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
           }
           const newData = { ...formData, leveringsadressen: [newAdres] }
           setFormData(newData)
+          console.log('🟡 [FORM] After address found - calling onChange(newData)')
           onChange(newData)
           lastLookup.current = lookupKey
 
           // NIEUW: BAG API woonfunctie check (alleen als dit nog steeds de laatste request is)
           if (requestCounter.current === currentRequestId) {
+            console.log('🔍 [FORM] Starting BAG API check for address type...')
             // Als er een manual override is, gebruik die in plaats van BAG API
             if (manualAddressTypeOverride) {
               const overrideResult: {
@@ -221,6 +260,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
             setAddressTypeResult(null);
             
             try {
+              console.log('📡 [FORM] Fetching BAG API:', { postcode, huisnummer, toevoeging })
               const bagResponse = await fetch('/api/adres-check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -228,10 +268,11 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               });
 
               const bagResult = await bagResponse.json();
+              console.log('✅ [FORM] BAG API response:', bagResult)
               
               // Check of dit nog steeds de laatste BAG request is (race condition preventie)
               if (bagRequestCounter.current !== currentBagRequestId) {
-                console.log('Ignoring stale BAG API response')
+                console.log('⚠️ [FORM] Ignoring stale BAG API response - newer request exists')
                 return
               }
               
@@ -246,24 +287,29 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               
               // Update addressType in formData en sync met parent
               if (bagResult.type !== 'error') {
+                console.log('✅ [FORM] BAG API success - addressType:', bagResult.type)
                 // Sla het originele BAG API resultaat op (alleen bij eerste check, niet bij manual override)
                 if (!originalBagResult && !manualAddressTypeOverride) {
                   setOriginalBagResult(bagResult.type)
                 }
                 const updatedData = { ...newData, addressType: bagResult.type };
                 setFormData(updatedData);
+                console.log('🟡 [FORM] After BAG success - calling onChange(updatedData)')
                 onChange(updatedData); // ✅ RE-ENABLED: Update parent met addressType
                 setAddressType(bagResult.type);
               } else {
+                console.log('❌ [FORM] BAG API returned error type')
                 const updatedData = { ...newData, addressType: null };
                 setFormData(updatedData);
+                console.log('🟡 [FORM] After BAG error - calling onChange(updatedData)')
                 onChange(updatedData); // ✅ RE-ENABLED: Update parent
               }
             } catch (error) {
-              console.error('BAG API check error:', error);
+              console.error('❌ [FORM] BAG API check error:', error);
               
               // Check of dit nog steeds de laatste BAG request is (race condition preventie)
               if (bagRequestCounter.current !== currentBagRequestId) {
+                console.log('⚠️ [FORM] Ignoring stale BAG API error - newer request exists')
                 return
               }
               
@@ -274,6 +320,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
               // Bij error, clear addressType en sync met parent
               const updatedData = { ...newData, addressType: null };
               setFormData(updatedData);
+              console.log('🟡 [FORM] After BAG catch error - calling onChange(updatedData)')
               onChange(updatedData); // ✅ RE-ENABLED: Update parent
             } finally {
               // Alleen loading state updaten als dit nog steeds de laatste request is
