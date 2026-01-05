@@ -31,16 +31,20 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
     if (typeof window !== 'undefined') {
       // Initial check - don't load if not allowed
       const allowed = isCategoryAllowed('marketing')
+      console.log('🔵 [FB PIXEL] Marketing cookies allowed?', allowed)
+      console.log('🔵 [FB PIXEL] Pixel ID:', pixelId)
       setShouldLoad(allowed)
 
       // Listen for cookie preference changes
       const handleCookieChange = () => {
         const nowAllowed = isCategoryAllowed('marketing')
+        console.log('🔵 [FB PIXEL] Cookie preferences changed. Marketing allowed?', nowAllowed)
         setShouldLoad(nowAllowed)
         if (nowAllowed && typeof window.fbq === 'function') {
           // Track page view if pixel is already loaded
           try {
             window.fbq('track', 'PageView')
+            console.log('🔵 [FB PIXEL] PageView tracked after cookie change')
           } catch (error) {
             console.error('Facebook Pixel tracking error:', error)
           }
@@ -66,6 +70,12 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
   }, [pathname, shouldLoad])
 
   if (!pixelId || !pixelId.trim() || !shouldLoad) {
+    if (!pixelId || !pixelId.trim()) {
+      console.warn('🔵 [FB PIXEL] No Pixel ID configured')
+    }
+    if (!shouldLoad) {
+      console.warn('🔵 [FB PIXEL] Not loading - marketing cookies not accepted')
+    }
     return null
   }
 
@@ -82,8 +92,12 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
       <Script
         id="facebook-pixel"
         strategy="afterInteractive"
+        onLoad={() => {
+          console.log('🔵 [FB PIXEL] Script loaded successfully')
+          console.log('🔵 [FB PIXEL] window.fbq available?', typeof window.fbq === 'function')
+        }}
         onError={(e) => {
-          console.error('Facebook Pixel script error:', e)
+          console.error('🔵 [FB PIXEL] Script error:', e)
         }}
         dangerouslySetInnerHTML={{
           __html: `
@@ -105,6 +119,7 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
             }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
             fbq('init','${safePixelId}');
             fbq('track','PageView');
+            console.log('🔵 [FB PIXEL] Initialized with ID: ${safePixelId}');
           `,
         }}
       />

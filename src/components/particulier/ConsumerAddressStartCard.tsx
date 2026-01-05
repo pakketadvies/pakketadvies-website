@@ -278,6 +278,9 @@ export function ConsumerAddressStartCard({
     if (!canStart || !addressTypeResult || addressTypeResult.type === 'error') return
 
     // Track Facebook Pixel custom event
+    console.log('🔵 [START VERGELIJKEN] Button clicked - attempting to track Facebook Pixel event')
+    console.log('🔵 [FB PIXEL CHECK] window.fbq exists?', typeof window !== 'undefined' && typeof window.fbq === 'function')
+    
     trackCustom('StartComparison', {
       content_name: 'Particulier Homepage - Start vergelijken',
       content_category: 'consumer_comparison',
@@ -285,6 +288,8 @@ export function ConsumerAddressStartCard({
       postcode: cleanPostcode(adres.postcode),
       city: adres.plaats,
     })
+    
+    console.log('🔵 [START VERGELIJKEN] trackCustom called')
 
     const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
     const directToResults = variant === 'heroCard' && isDesktop
