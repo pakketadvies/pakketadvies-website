@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { VerbruikData } from '@/types/calculator'
 import { estimateConsumerUsage } from '@/lib/particulier-verbruik-schatting'
+import { useFacebookPixel } from '@/lib/tracking/useFacebookPixel'
 
 type AddressTypeResult =
   | {
@@ -86,6 +87,7 @@ export function ConsumerAddressStartCard({
 }: ConsumerAddressStartCardProps) {
   const router = useRouter()
   const { setVerbruik } = useCalculatorStore()
+  const { trackCustom } = useFacebookPixel()
 
   // EXACT same address model as QuickCalculator / VerbruikForm
   const [adres, setAdres] = useState({
@@ -274,6 +276,15 @@ export function ConsumerAddressStartCard({
 
   const handleStart = () => {
     if (!canStart || !addressTypeResult || addressTypeResult.type === 'error') return
+
+    // Track Facebook Pixel custom event
+    trackCustom('StartComparison', {
+      content_name: 'Particulier Homepage - Start vergelijken',
+      content_category: 'consumer_comparison',
+      address_type: addressTypeResult.type,
+      postcode: cleanPostcode(adres.postcode),
+      city: adres.plaats,
+    })
 
     const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
     const directToResults = variant === 'heroCard' && isDesktop
