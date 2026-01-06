@@ -33,7 +33,8 @@ export function ConsumerCompareWizard() {
   const [householdSize, setHouseholdSize] = useState(2)
 
   // iDIN enable gating (until provider configured)
-  const idinEnabled = typeof window !== 'undefined' && (process.env.NEXT_PUBLIC_IDIN_ENABLED === 'true')
+  // TEMPORARILY DISABLED: Set to false to hide iDIN option from customers until fully working
+  const idinEnabled = false // typeof window !== 'undefined' && (process.env.NEXT_PUBLIC_IDIN_ENABLED === 'true')
   const [idinError, setIdinError] = useState<string | null>(null)
   const [idinLoading, setIdinLoading] = useState(false)
 
@@ -258,11 +259,12 @@ export function ConsumerCompareWizard() {
                   title: 'Nee, help mijn verbruik schatten',
                   desc: 'We helpen je een schatting te maken.',
                 },
-                {
+                // Temporarily hidden until iDIN is fully working
+                ...(idinEnabled ? [{
                   key: 'netbeheerder' as const,
                   title: 'Verbruik ophalen bij netbeheerder',
                   desc: 'Automatisch en veilig via iDIN.',
-                },
+                }] : []),
               ].map((opt) => {
                 const active = method === opt.key
                 return (
