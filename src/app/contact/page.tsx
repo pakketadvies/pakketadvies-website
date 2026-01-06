@@ -28,6 +28,7 @@ interface FormData {
   onderwerp: string
   bericht: string
   privacy_akkoord: boolean
+  website?: string // Honeypot field (verborgen, bots vullen dit in)
 }
 
 interface FormErrors {
@@ -67,6 +68,7 @@ export default function ContactPage() {
     onderwerp: '',
     bericht: '',
     privacy_akkoord: false,
+    website: '', // Honeypot field - altijd leeg voor legitieme gebruikers
   })
 
   const [errors, setErrors] = useState<FormErrors>({})
@@ -138,6 +140,7 @@ export default function ContactPage() {
           onderwerp: '',
           bericht: '',
           privacy_akkoord: false,
+          website: '',
         })
         // Scroll naar success message
         window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -425,6 +428,25 @@ export default function ContactPage() {
                         {errors.privacy_akkoord}
                       </p>
                     )}
+
+                    {/* Honeypot field - verborgen, bots vullen dit in */}
+                    <input
+                      type="text"
+                      name="website"
+                      value={formData.website}
+                      onChange={(e) => handleChange('website', e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      style={{
+                        position: 'absolute',
+                        left: '-9999px',
+                        width: '1px',
+                        height: '1px',
+                        opacity: 0,
+                        pointerEvents: 'none',
+                      }}
+                      aria-hidden="true"
+                    />
 
                     <Button
                       type="submit"

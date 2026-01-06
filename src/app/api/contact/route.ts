@@ -11,6 +11,7 @@ interface ContactFormData {
   onderwerp: string
   bericht: string
   privacy_akkoord: boolean
+  website?: string // Honeypot field (verborgen, bots vullen dit in)
 }
 
 export async function POST(request: Request) {
@@ -48,6 +49,16 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       )
+    }
+
+    // Honeypot check - als website veld is ingevuld, is het spam
+    if (body.website && body.website.trim() !== '') {
+      console.log('🚫 [contact] Spam detected - honeypot field filled:', body.website)
+      // Return success to bot (don't let them know they were caught)
+      return NextResponse.json({
+        success: true,
+        message: 'Je bericht is ontvangen. We nemen zo snel mogelijk contact met je op.',
+      })
     }
 
     // Use service role key voor public inserts
