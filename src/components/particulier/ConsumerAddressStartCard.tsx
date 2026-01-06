@@ -87,7 +87,7 @@ export function ConsumerAddressStartCard({
 }: ConsumerAddressStartCardProps) {
   const router = useRouter()
   const { setVerbruik } = useCalculatorStore()
-  const { trackCustom } = useFacebookPixel()
+  const { track } = useFacebookPixel()
 
   // EXACT same address model as QuickCalculator / VerbruikForm
   const [adres, setAdres] = useState({
@@ -277,19 +277,22 @@ export function ConsumerAddressStartCard({
   const handleStart = () => {
     if (!canStart || !addressTypeResult || addressTypeResult.type === 'error') return
 
-    // Track Facebook Pixel custom event
-    console.log('🔵 [START VERGELIJKEN] Button clicked - attempting to track Facebook Pixel event')
+    // Track Facebook Pixel Standard Event: Lead
+    // This will appear in Ads Manager as a conversion event for campaign optimization
+    console.log('🔵 [START VERGELIJKEN] Button clicked - tracking Lead event')
     console.log('🔵 [FB PIXEL CHECK] window.fbq exists?', typeof window !== 'undefined' && typeof window.fbq === 'function')
     
-    trackCustom('StartComparison', {
+    track('Lead', {
       content_name: 'Particulier Homepage - Start vergelijken',
       content_category: 'consumer_comparison',
       address_type: addressTypeResult.type,
       postcode: cleanPostcode(adres.postcode),
       city: adres.plaats,
+      currency: 'EUR',
+      value: 0, // Optional: estimated lead value
     })
     
-    console.log('🔵 [START VERGELIJKEN] trackCustom called')
+    console.log('🔵 [START VERGELIJKEN] Lead event tracked')
 
     const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
     const directToResults = variant === 'heroCard' && isDesktop
