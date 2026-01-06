@@ -31,7 +31,7 @@ export interface GridHubRelation {
   companyCoCNumber?: string // Verplicht voor BUSINESS
   bankAccountType: 'IBAN' | 'BIC'
   bankAccountNumber: string
-  paymentMethod: 'DIRECT_DEBIT' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'IDEAL' | 'PAYPAL'
+  paymentMethod: 'DIRECT_DEBIT' | 'SEPA_DIRECT_DEBIT' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'IDEAL' | 'PAYPAL'
   mandateDate: string // YYYY-MM-DD
   mandateReference?: string
 }
@@ -57,9 +57,10 @@ export interface GridHubRequestedConnection {
   hasP1Data?: boolean
   expectedAdvancePaymentAmountElectricity?: string
   expectedAdvancePaymentAmountGas?: string
+  agreedAdvancePaymentAmountElectricity?: string // Verplicht veld
+  agreedAdvancePaymentAmountGas?: string // Verplicht veld
   customerApprovalLEDs: boolean // Verplicht: true
   billingIDs?: string[]
-  originalCreateTimestamp?: string // ISO date-time
 }
 
 export interface GridHubCreateOrderRequestPayload {
@@ -83,6 +84,8 @@ export interface GridHubCreateOrderRequestPayload {
   signSource: string // 'DIRECT_DEBIT_MANDATE', 'EMAIL', etc.
   signIP: string // Client IP address
   signData: string // Base64 encoded signature data
+  originalCreateTimestamp: string // Verplicht, Y-m-d H:i:s format
+  agreedAdvancePaymentAmount: string // Verplicht, string met 2 decimalen
 }
 
 export interface GridHubCreateOrderRequestResponse {
@@ -115,23 +118,14 @@ export class GridHubClient {
   }
 
   /**
-   * Get Bearer token (Basic Auth -> Bearer token)
-   * GridHub gebruikt Bearer Auth volgens documentatie
+   * Get Bearer token for GridHub API
+   * GridHub uses Bearer Auth with the password directly as the token
+   * (No separate login endpoint required)
    */
   private async getAuthToken(): Promise<string> {
-    // GridHub gebruikt Bearer Auth
-    // In de praktijk: credentials worden waarschijnlijk via Basic Auth geauthenticeerd
-    // en dan krijgen we een Bearer token terug, of we gebruiken username/password direct
-    // Voor nu: gebruik Basic Auth credentials als Bearer token placeholder
-    // Dit moet worden aangepast zodra we de exacte auth flow weten
-    
-    // Option 1: Direct Bearer token (als we token krijgen)
-    // return this.config.password // Als password al een token is
-    
-    // Option 2: Basic Auth (als GridHub Basic Auth gebruikt voor auth, dan Bearer voor requests)
-    // Voor nu: gebruik Basic Auth encoding als placeholder
-    const credentials = Buffer.from(`${this.config.username}:${this.config.password}`).toString('base64')
-    return credentials
+    // GridHub uses the password directly as the Bearer token
+    // No login endpoint needed - just use the password as-is
+    return this.config.password
   }
 
   /**
@@ -275,6 +269,82 @@ export class GridHubClient {
       }
       throw new Error(`GridHub API error: ${response.status} - ${JSON.stringify(error)}`)
     }
+  }
+
+  /**
+   * Get Product/Tariff Information
+   * Attempts to fetch product and tariff details from GridHub
+   * Note: This endpoint may not exist in GridHub API - it's a placeholder
+   * If it doesn't exist, we'll need to get pricing info from Energiek.nl directly
+   */
+  async getProductTariffInfo(productId: string, tariffId: string): Promise<any> {
+    const authToken = await this.getAuthToken()
+    
+    // Try to fetch product/tariff info (this endpoint may not exist)
+    try {
+      const response = await fetch(
+        `${this.config.apiUrl}/products/${productId}/tariffs/${tariffId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+        }
+      )
+
+      if (response.ok) {
+        return await response.json()
+      }
+    } catch (error) {
+      // Endpoint doesn't exist or error - this is expected
+      console.warn('⚠️ [GridHub] Product/Tariff info endpoint not available:', error)
+    }
+
+    // Return null if endpoint doesn't exist
+    return null
+  }
+}
+
+/**
+ * Helper function to get GridHubClient for a specific leverancier
+ * Fetches API config from database and initializes client
+ */
+export async function getGridHubClientForLeverancier(leverancierId: string): Promise<GridHubClient | null> {
+  try {
+    // Dynamic import to avoid circular dependencies
+    const { createClient } = await import('@/lib/supabase/server')
+    const { decryptPassword } = await import('./encryption')
+    
+    const supabase = await createClient()
+    
+    // Fetch API config
+    const { data: apiConfig, error: configError } = await supabase
+      .from('leverancier_api_config')
+      .select('*')
+      .eq('leverancier_id', leverancierId)
+      .eq('provider', 'GRIDHUB')
+      .eq('actief', true)
+      .single()
+
+    if (configError || !apiConfig) {
+      console.warn(`No active GridHub config found for leverancier ${leverancierId}:`, configError?.message)
+      return null
+    }
+
+    // Decrypt password (decryptPassword gets key from env internally)
+    const decryptedPassword = decryptPassword(apiConfig.api_password_encrypted)
+
+    // Create and return client
+    return new GridHubClient({
+      apiUrl: apiConfig.api_url,
+      username: apiConfig.api_username,
+      password: decryptedPassword,
+      environment: apiConfig.environment as 'test' | 'production',
+    })
+  } catch (error: any) {
+    console.error(`Error creating GridHubClient for leverancier ${leverancierId}:`, error)
+    return null
   }
 }
 

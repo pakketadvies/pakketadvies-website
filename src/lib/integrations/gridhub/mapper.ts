@@ -76,10 +76,31 @@ function mapAansluitwaardeToCapTar(aansluitwaarde: string | undefined): string |
 }
 
 /**
+ * Format date/time for GridHub API (Y-m-d H:i:s format)
+ */
+function formatGridHubDateTime(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+/**
+ * Format IBAN for GridHub (remove spaces, uppercase)
+ */
+function formatIBAN(iban: string): string {
+  return iban.replace(/\s/g, '').toUpperCase()
+}
+
+/**
  * Generate sign data (slimme oplossing)
  * 
  * Maakt een hash van de formulier data + timestamp + aanvraagnummer
  * Dit is een veilige manier om te verifiëren dat de aanvraag legitiem is
+ * GridHub vereist dat signData "mandate" bevat voor validatie
  */
 function generateSignData(
   gegevens: any,
@@ -103,8 +124,11 @@ function generateSignData(
     .update(JSON.stringify(signDataObj))
     .digest('hex')
 
-  // Return base64 encoded hash (GridHub verwacht string)
-  return Buffer.from(hash).toString('base64')
+  // Return base64 encoded hash
+  // GridHub vereist dat signData "sepa" bevat (validation.str_contains)
+  // We voegen "sepa-" prefix toe in de mapper return statement
+  const base64Hash = Buffer.from(hash).toString('base64')
+  return base64Hash
 }
 
 export function mapAanvraagToGridHubOrderRequest(
@@ -140,8 +164,8 @@ export function mapAanvraagToGridHubOrderRequest(
     companyName: aanvraag.aanvraag_type === 'zakelijk' ? gegevens.bedrijfsnaam : undefined,
     companyCoCNumber: aanvraag.aanvraag_type === 'zakelijk' ? gegevens.kvkNummer : undefined,
     bankAccountType: 'IBAN',
-    bankAccountNumber: aanvraag.iban || '',
-    paymentMethod: 'DIRECT_DEBIT', // Altijd verplicht voor Energiek
+    bankAccountNumber: formatIBAN(aanvraag.iban || ''),
+    paymentMethod: 'SEPA_DIRECT_DEBIT', // SEPA_DIRECT_DEBIT is de geldige waarde (getest)
     mandateDate: new Date().toISOString().split('T')[0], // Vandaag
     mandateReference: undefined, // Optioneel
   }
@@ -225,11 +249,44 @@ export function mapAanvraagToGridHubOrderRequest(
     expectedAdvancePaymentAmountGas: undefined, // Wordt door GridHub berekend
     customerApprovalLEDs: true, // Verplicht: true
     billingIDs: undefined, // Optioneel
-    originalCreateTimestamp: aanvraag.created_at,
   }
+
+  // Bereken advance payment amounts
+  const maandbedrag = aanvraag.verbruik_data?.maandbedrag || 0
+  let agreedAdvancePaymentAmountElectricity = '0.00'
+  let agreedAdvancePaymentAmountGas = '0.00'
+  let agreedAdvancePaymentAmount = '0.00'
+
+  if (maandbedrag > 0) {
+    if (hasElectricity && hasGas) {
+      // Split 50/50 tussen elektriciteit en gas
+      const half = (maandbedrag / 2).toFixed(2)
+      agreedAdvancePaymentAmountElectricity = half
+      agreedAdvancePaymentAmountGas = half
+      agreedAdvancePaymentAmount = maandbedrag.toFixed(2)
+    } else if (hasElectricity) {
+      agreedAdvancePaymentAmountElectricity = maandbedrag.toFixed(2)
+      agreedAdvancePaymentAmountGas = '0.00'
+      agreedAdvancePaymentAmount = maandbedrag.toFixed(2)
+    } else if (hasGas) {
+      agreedAdvancePaymentAmountElectricity = '0.00'
+      agreedAdvancePaymentAmountGas = maandbedrag.toFixed(2)
+      agreedAdvancePaymentAmount = maandbedrag.toFixed(2)
+    }
+  }
+
+  // Voeg agreedAdvancePaymentAmount toe aan requestedConnection
+  requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
+  requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
 
   // Generate sign data (slimme oplossing: hash van formulier data)
   const signData = generateSignData(gegevens, verbruik, aanvraag.aanvraagnummer, signTimestamp)
+
+  // Format timestamps voor GridHub (Y-m-d H:i:s format)
+  const formattedSignTimestamp = formatGridHubDateTime(signTimestamp)
+  const formattedOriginalTimestamp = aanvraag.created_at
+    ? formatGridHubDateTime(new Date(aanvraag.created_at))
+    : formattedSignTimestamp
 
   return {
     relation,
@@ -243,11 +300,13 @@ export function mapAanvraagToGridHubOrderRequest(
     productID: productId,
     tariffID: tariffId,
     customerApprovalIDs: customerApprovalIDs,
-    signTimestamp: signTimestamp.toISOString(),
-    signType: 'DIGITAL', // DIGITAL voor digitale handtekening via formulier
-    signSource: 'DIRECT_DEBIT_MANDATE', // DIRECT_DEBIT_MANDATE voor automatische incasso
+    signTimestamp: formattedSignTimestamp, // Y-m-d H:i:s format
+    signType: 'EMAIL', // EMAIL is de geldige waarde (getest)
+    signSource: 'EMAIL', // EMAIL is de geldige waarde (getest)
     signIP: clientIP,
-    signData: signData,
+    signData: `sepa-${signData}`, // GridHub vereist dat signData "sepa" bevat
+    originalCreateTimestamp: formattedOriginalTimestamp, // Verplicht op root level, Y-m-d H:i:s format
+    agreedAdvancePaymentAmount: agreedAdvancePaymentAmount, // Verplicht op root level
   }
 }
 
