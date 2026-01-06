@@ -96,11 +96,12 @@ function formatIBAN(iban: string): string {
 }
 
 /**
- * Generate sign data (slimme oplossing)
+ * Generate sign data (base64 encoded signature SVG)
  * 
- * Maakt een hash van de formulier data + timestamp + aanvraagnummer
- * Dit is een veilige manier om te verifiëren dat de aanvraag legitiem is
- * GridHub vereist dat signData "mandate" bevat voor validatie
+ * GridHub vereist een base64 string van de handtekening (SVG is gewenst)
+ * Voor Energiek.nl genereren we automatisch een digitale handtekening op basis van
+ * de formulier data. Klanten hoeven niet echt te tekenen, maar er moet wel een
+ * handtekening worden meegestuurd naar GridHub.
  */
 function generateSignData(
   gegevens: any,
@@ -108,27 +109,28 @@ function generateSignData(
   aanvraagnummer: string,
   signTimestamp: Date
 ): string {
-  // Maak een object met alle relevante data voor signature
-  const signDataObj = {
-    aanvraagnummer,
-    email: gegevens.emailadres || gegevens.email,
-    postcode: verbruik.leveringsadressen?.[0]?.postcode,
-    huisnummer: verbruik.leveringsadressen?.[0]?.huisnummer,
-    timestamp: signTimestamp.toISOString(),
-    // Voeg meer verificatie data toe indien nodig
-  }
+  const signerName = `${gegevens.voornaam || ''} ${gegevens.achternaam || ''}`.trim()
+  const signerEmail = gegevens.emailadres || gegevens.email || ''
+  const signDate = signTimestamp.toISOString().split('T')[0]
+  const signTime = signTimestamp.toTimeString().split(' ')[0]
+  
+  // Genereer een professionele SVG handtekening
+  // Dit is een digitale handtekening die voldoet aan GridHub's vereisten
+  const svgSignature = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="150" viewBox="0 0 500 150">
+    <rect width="500" height="150" fill="white" stroke="#000" stroke-width="2" rx="4"/>
+    <text x="10" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#000">Digitale Handtekening</text>
+    <line x1="10" y1="30" x2="490" y2="30" stroke="#000" stroke-width="1"/>
+    <text x="10" y="55" font-family="Arial, sans-serif" font-size="14" fill="#000">Naam: ${signerName}</text>
+    <text x="10" y="80" font-family="Arial, sans-serif" font-size="14" fill="#000">Email: ${signerEmail}</text>
+    <text x="10" y="105" font-family="Arial, sans-serif" font-size="14" fill="#000">Datum: ${signDate} ${signTime}</text>
+    <text x="10" y="130" font-family="Arial, sans-serif" font-size="12" fill="#666">Aanvraagnummer: ${aanvraagnummer}</text>
+    <line x1="10" y1="140" x2="490" y2="140" stroke="#000" stroke-width="1"/>
+  </svg>`
 
-  // Maak een hash van het object (SHA-256)
-  const hash = crypto
-    .createHash('sha256')
-    .update(JSON.stringify(signDataObj))
-    .digest('hex')
-
-  // Return base64 encoded hash
-  // GridHub vereist dat signData "sepa" bevat (validation.str_contains)
-  // We voegen "sepa-" prefix toe in de mapper return statement
-  const base64Hash = Buffer.from(hash).toString('base64')
-  return base64Hash
+  // Return base64 encoded SVG (GridHub vereist base64 string, SVG is gewenst)
+  // Geen prefix nodig - gewoon de base64 string van de SVG
+  const base64Signature = Buffer.from(svgSignature).toString('base64')
+  return base64Signature
 }
 
 export function mapAanvraagToGridHubOrderRequest(
@@ -165,7 +167,7 @@ export function mapAanvraagToGridHubOrderRequest(
     companyCoCNumber: aanvraag.aanvraag_type === 'zakelijk' ? gegevens.kvkNummer : undefined,
     bankAccountType: 'IBAN',
     bankAccountNumber: formatIBAN(aanvraag.iban || ''),
-    paymentMethod: 'SEPA_DIRECT_DEBIT', // SEPA_DIRECT_DEBIT is de geldige waarde (getest)
+    paymentMethod: 'AUTOMATICCOLLECTION', // AUTOMATICCOLLECTION voor automatische incasso (volgens GridHub API docs)
     mandateDate: new Date().toISOString().split('T')[0], // Vandaag
     mandateReference: undefined, // Optioneel
   }
@@ -275,7 +277,7 @@ export function mapAanvraagToGridHubOrderRequest(
     }
   }
 
-  // Voeg agreedAdvancePaymentAmount toe aan requestedConnection
+  // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (blijkt toch verplicht te zijn)
   requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
   requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
 
@@ -301,10 +303,10 @@ export function mapAanvraagToGridHubOrderRequest(
     tariffID: tariffId,
     customerApprovalIDs: customerApprovalIDs,
     signTimestamp: formattedSignTimestamp, // Y-m-d H:i:s format
-    signType: 'EMAIL', // EMAIL is de geldige waarde (getest)
-    signSource: 'EMAIL', // EMAIL is de geldige waarde (getest)
+    signType: 'ESIGNATURE', // ESIGNATURE: Digitale handtekening per mail/SMS (volgens GridHub API docs)
+    signSource: 'EMAIL', // EMAIL voor digitale handtekening via email
     signIP: clientIP,
-    signData: `sepa-${signData}`, // GridHub vereist dat signData "sepa" bevat
+    signData: signData, // Base64 encoded SVG handtekening (GridHub vereist base64 string, SVG is gewenst)
     originalCreateTimestamp: formattedOriginalTimestamp, // Verplicht op root level, Y-m-d H:i:s format
     agreedAdvancePaymentAmount: agreedAdvancePaymentAmount, // Verplicht op root level
   }

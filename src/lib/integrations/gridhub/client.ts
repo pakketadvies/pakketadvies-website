@@ -31,7 +31,7 @@ export interface GridHubRelation {
   companyCoCNumber?: string // Verplicht voor BUSINESS
   bankAccountType: 'IBAN' | 'BIC'
   bankAccountNumber: string
-  paymentMethod: 'DIRECT_DEBIT' | 'SEPA_DIRECT_DEBIT' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'IDEAL' | 'PAYPAL'
+  paymentMethod: 'AUTOMATICCOLLECTION' | 'MANUAL'
   mandateDate: string // YYYY-MM-DD
   mandateReference?: string
 }
@@ -57,8 +57,8 @@ export interface GridHubRequestedConnection {
   hasP1Data?: boolean
   expectedAdvancePaymentAmountElectricity?: string
   expectedAdvancePaymentAmountGas?: string
-  agreedAdvancePaymentAmountElectricity?: string // Verplicht veld
-  agreedAdvancePaymentAmountGas?: string // Verplicht veld
+  agreedAdvancePaymentAmountElectricity?: string // Verplicht veld (blijkt toch nodig te zijn)
+  agreedAdvancePaymentAmountGas?: string // Verplicht veld (blijkt toch nodig te zijn)
   customerApprovalLEDs: boolean // Verplicht: true
   billingIDs?: string[]
 }
@@ -80,7 +80,7 @@ export interface GridHubCreateOrderRequestPayload {
   tariffID: string // "11" voor test, "37" voor productie
   customerApprovalIDs: number[] // [1,2,3]
   signTimestamp: string // ISO date-time
-  signType: string // 'EMAIL', 'SMS', 'DIGITAL', etc.
+  signType: 'DIRECT' | 'SIGNATURE' | 'ESIGNATURE' // DIRECT: Website order, SIGNATURE: Natte handtekening, ESIGNATURE: Digitale handtekening per mail/SMS
   signSource: string // 'DIRECT_DEBIT_MANDATE', 'EMAIL', etc.
   signIP: string // Client IP address
   signData: string // Base64 encoded signature data
