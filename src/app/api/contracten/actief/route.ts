@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     
     // Get all active contracts with leverancier info
+    // Filter on BOTH contract.actief AND leverancier.actief
     const { data: contracten, error } = await supabase
       .from('contracten')
       .select(`
@@ -26,9 +27,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ contracten: [] })
     }
 
+    // Filter out contracts where leverancier is inactive
+    const activeContracten = contracten.filter((contract: any) => {
+      return contract.leverancier && contract.leverancier.actief === true
+    })
+
     // Fetch details for each contract based on type
     const contractenWithDetails = await Promise.all(
-      contracten.map(async (contract: any) => {
+      activeContracten.map(async (contract: any) => {
         if (contract.type === 'vast') {
           const { data: details } = await supabase
             .from('contract_details_vast')
