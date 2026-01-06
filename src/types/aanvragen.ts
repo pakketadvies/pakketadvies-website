@@ -29,6 +29,16 @@ export interface ContractAanvraag {
   heeft_andere_correspondentie_adres: boolean
   correspondentie_adres?: any
   admin_notities?: string
+  // GridHub integration fields
+  external_api_provider?: 'GRIDHUB' | 'MANUAL' | null
+  external_order_id?: string
+  external_order_request_id?: string
+  external_status?: string
+  external_sub_status_id?: string
+  external_status_reason?: string
+  external_response?: any
+  external_errors?: any
+  external_last_sync?: string
   created_at: string
   updated_at: string
   afgehandeld_op?: string

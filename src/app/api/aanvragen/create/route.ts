@@ -374,6 +374,107 @@ export async function POST(request: Request) {
       )
     }
     
+    // ============================================
+    // GRIDHUB API INTEGRATION (if configured)
+    // ============================================
+    try {
+      // Check if leverancier has GridHub API config
+      const { data: apiConfig } = await supabase
+        .from('leverancier_api_config')
+        .select('*')
+        .eq('leverancier_id', body.leverancier_id)
+        .eq('provider', 'GRIDHUB')
+        .eq('environment', process.env.NODE_ENV === 'production' ? 'production' : 'test')
+        .eq('actief', true)
+        .single()
+
+      if (apiConfig) {
+        console.log('🔄 [GridHub] API config found, attempting to create order request...')
+        
+        try {
+          // Import GridHub client and mapper
+          const { GridHubClient } = await import('@/lib/integrations/gridhub/client')
+          const { mapAanvraagToGridHubOrderRequest } = await import('@/lib/integrations/gridhub/mapper')
+          const { decryptPassword } = await import('@/lib/integrations/gridhub/encryption')
+          
+          // Decrypt API password
+          const apiPassword = decryptPassword(apiConfig.api_password_encrypted)
+          
+          // Create GridHub client
+          const gridhubClient = new GridHubClient({
+            apiUrl: apiConfig.api_url,
+            username: apiConfig.api_username,
+            password: apiPassword,
+            environment: apiConfig.environment as 'test' | 'production',
+          })
+          
+          // Get product and tariff IDs
+          const productIds = apiConfig.product_ids as { particulier: string; zakelijk: string }
+          const tariefIds = apiConfig.tarief_ids as { test: string; production: string }
+          
+          const productId = body.aanvraag_type === 'particulier' ? productIds.particulier : productIds.zakelijk
+          const tariffId = apiConfig.environment === 'production' ? tariefIds.production : tariefIds.test
+          
+          // Map aanvraag to GridHub format
+          const gridhubPayload = mapAanvraagToGridHubOrderRequest({
+            aanvraag: data,
+            productId,
+            tariffId,
+            customerApprovalIDs: apiConfig.customer_approval_ids,
+            clientIP: clientIP,
+            signTimestamp: new Date(),
+          })
+          
+          // Call GridHub API
+          console.log('📤 [GridHub] Sending order request to GridHub...')
+          const gridhubResponse = await gridhubClient.createOrderRequest(gridhubPayload)
+          
+          console.log('✅ [GridHub] Order request created successfully:', gridhubResponse.orderRequestId)
+          
+          // Update aanvraag with GridHub response
+          await supabase
+            .from('contractaanvragen')
+            .update({
+              external_api_provider: 'GRIDHUB',
+              external_order_id: gridhubResponse.orderRequestId,
+              external_order_request_id: gridhubResponse.orderRequestId,
+              external_status: 'NEW',
+              external_response: gridhubResponse,
+              external_last_sync: new Date().toISOString(),
+              status: 'verzonden',
+            })
+            .eq('id', data.id)
+          
+          console.log('✅ [GridHub] Aanvraag updated with GridHub data')
+          
+        } catch (gridhubError: any) {
+          console.error('❌ [GridHub] Error creating order request:', gridhubError)
+          
+          // Update aanvraag with error (but status stays 'nieuw' for manual processing)
+          await supabase
+            .from('contractaanvragen')
+            .update({
+              external_api_provider: 'GRIDHUB',
+              external_errors: {
+                error: gridhubError.message,
+                timestamp: new Date().toISOString(),
+                stack: gridhubError.stack,
+              },
+              status: 'nieuw', // Blijft nieuw voor handmatige verwerking
+            })
+            .eq('id', data.id)
+          
+          // Log error but don't fail the entire request
+          // Admin can retry via dashboard
+        }
+      } else {
+        console.log('ℹ️ [GridHub] No GridHub API config found for this leverancier')
+      }
+    } catch (gridhubConfigError: any) {
+      // Non-blocking: if GridHub config check fails, continue with normal flow
+      console.error('❌ [GridHub] Error checking GridHub config (non-blocking):', gridhubConfigError)
+    }
+    
     // Send confirmation email synchronously and return logs to client
     const emailLogs: string[] = []
     const logToClient = (message: string) => {

@@ -408,38 +408,81 @@ export function ContractDetailsDrawer({
                       {activeTab === 'voorwaarden' && (
                         <div className="space-y-4">
                           <h4 className="font-bold text-brand-navy-500 text-lg">Voorwaarden</h4>
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             {(contract.voorwaarden || []).length === 0 ? (
                               <div className="text-sm text-gray-600">Geen voorwaarden beschikbaar.</div>
                             ) : (
-                              (contract.voorwaarden || []).map((v, idx) => (
-                                <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                                  <Check className="w-5 h-5 text-brand-teal-600 flex-shrink-0" weight="bold" />
-                                  <span className="min-w-0 break-words">{v}</span>
-                                </div>
-                              ))
-                            )}
-                          </div>
+                              (contract.voorwaarden || []).map((v, idx) => {
+                                // Parse voorwaarde: kan een JSON string zijn (document) of plain string (oude format)
+                                // Of het kan al een object zijn (als het al geparsed is)
+                                let voorwaardeObj: { naam?: string; url?: string; type?: string } | null = null
+                                
+                                // Check 1: Is het al een object?
+                                if (v && typeof v === 'object' && !Array.isArray(v) && v !== null) {
+                                  // Het is al een object
+                                  const vObj = v as { naam?: string; url?: string; type?: string }
+                                  if (vObj.url && (vObj.type === 'pdf' || vObj.type === 'doc')) {
+                                    voorwaardeObj = vObj as { naam: string; url: string; type: string }
+                                  }
+                                } 
+                                // Check 2: Is het een string die JSON kan zijn?
+                                else if (typeof v === 'string') {
+                                  // Check of het eruit ziet als JSON (begint met { en eindigt met })
+                                  const trimmed = v.trim()
+                                  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                                    // Probeer te parsen als JSON
+                                    try {
+                                      const parsed = JSON.parse(trimmed)
+                                      if (parsed && typeof parsed === 'object' && parsed !== null && parsed.url && (parsed.type === 'pdf' || parsed.type === 'doc')) {
+                                        // Het is een JSON string met document info
+                                        voorwaardeObj = parsed as { naam: string; url: string; type: string }
+                                      }
+                                    } catch (e) {
+                                      // Parsing gefaald, behandel als plain string
+                                      console.warn('Failed to parse voorwaarde as JSON:', e, v)
+                                    }
+                                  }
+                                }
 
-                          {/* Documents */}
-                          <div className="pt-3 border-t border-gray-200">
-                            <h5 className="font-semibold text-brand-navy-500 mb-2">Documenten</h5>
-                            <div className="space-y-2">
-                              {(contract.leverancier?.website || contract.contractNaam) && (
-                                <a
-                                  className="inline-flex items-center gap-2 text-sm font-semibold text-brand-teal-700 hover:text-brand-teal-800"
-                                  href={contract.leverancier.website || '#'}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  <FilePdf className="w-4 h-4" weight="bold" />
-                                  Naar leverancier
-                                </a>
-                              )}
-                              <div className="text-xs text-gray-500">
-                                {getFriendlyDocumentUrl('voorwaarden')} {/* keeps same helper semantics */}
-                              </div>
-                            </div>
+                                // Render als document (met link) of als plain tekst
+                                if (voorwaardeObj && voorwaardeObj.url) {
+                                  // Document met URL
+                                  const isPdf = voorwaardeObj.type === 'pdf'
+                                  const isDoc = voorwaardeObj.type === 'doc'
+                                  const documentUrl = getFriendlyDocumentUrl(voorwaardeObj.url)
+                                  return (
+                                    <div key={idx} className="flex items-start gap-2 text-sm">
+                                      {isPdf ? (
+                                        <FilePdf className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" weight="bold" />
+                                      ) : isDoc ? (
+                                        <FileText className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
+                                      ) : (
+                                        <Check className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <a
+                                          href={documentUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-2 text-brand-teal-600 hover:text-brand-teal-700 font-medium hover:underline break-words"
+                                        >
+                                          <span className="break-words">{voorwaardeObj.naam || 'Download voorwaarden'}</span>
+                                        </a>
+                                      </div>
+                                    </div>
+                                  )
+                                } else {
+                                  // Plain tekst (oude format of tekstvoorwaarde)
+                                  const tekst = typeof v === 'string' ? v : (v as any)?.naam || String(v) || 'Voorwaarde'
+                                  return (
+                                    <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                      <Check className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
+                                      <span className="min-w-0 break-words">{tekst}</span>
+                                    </div>
+                                  )
+                                }
+                              })
+                            )}
                           </div>
                         </div>
                       )}
