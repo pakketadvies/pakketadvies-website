@@ -299,7 +299,7 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   console.log('🔍 [GridHub] Capacity codes mapping:', capacityCodesMapping)
   gridHubLogger.debug('CapTar Code Debugging - Capacity codes mapping', capacityCodesMapping, {
-    ...logContext,
+    aanvraagnummer: aanvraag.aanvraagnummer,
     hasGas,
     hasElectricity,
     capacityCodeGas,
