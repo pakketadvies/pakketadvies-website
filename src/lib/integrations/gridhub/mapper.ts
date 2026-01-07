@@ -344,7 +344,7 @@ export function mapAanvraagToGridHubOrderRequest(
     if (meterType && meterType !== 'UNKNOWN') requestedConnection.meterType = meterType
     if (startDateStr) requestedConnection.startDateElectricity = startDateStr
     // NO capacityCodeElectricity - not in Energiek example!
-    if (switchType && switchType !== 'UNKNOWN') requestedConnection.switchTypeElectricity = switchType
+    requestedConnection.switchTypeElectricity = switchType
     // NO hasP1Data - not in Energiek example!
     
     // Note: isDoubleMeter is already determined above, near meterType detection
@@ -385,7 +385,7 @@ export function mapAanvraagToGridHubOrderRequest(
   if (hasGas) {
     console.log('🔍 [GridHub] hasGas is TRUE - Adding gas fields...')
     if (startDateStr) requestedConnection.startDateGas = startDateStr
-    if (switchType && switchType !== 'UNKNOWN') requestedConnection.switchTypeGas = switchType
+    requestedConnection.switchTypeGas = switchType
     if (verbruik.gasJaar) {
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
     }
