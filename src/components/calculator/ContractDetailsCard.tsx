@@ -68,9 +68,12 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
       hasDetails: !!details,
       hasDetailsVast: !!(contract as any).details_vast,
       hasDetailsDynamisch: !!(contract as any).details_dynamisch,
+      detailsObject: details,
       opslag_elektriciteit: details?.opslag_elektriciteit,
       opslag_elektriciteit_normaal: details?.opslag_elektriciteit_normaal,
       opslag_gas: details?.opslag_gas,
+      opslag_teruglevering: details?.opslag_teruglevering,
+      fullContract: contract,
     })
   }, [contract.type, details])
 
@@ -416,33 +419,37 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
               )}
 
               {/* Dynamisch contract: opslagen bovenop spotprijs */}
-              {contract.type === 'dynamisch' && (
+              {contract.type === 'dynamisch' && details && (
                 <>
                   <p className="text-xs font-semibold text-gray-500 mb-2">Opslagen bovenop spotprijs:</p>
-                  {(details?.opslag_elektriciteit || details?.opslag_elektriciteit_normaal) && (
+                  {/* Opslag elektriciteit - toon altijd als het bestaat (ook als 0) */}
+                  {(details.opslag_elektriciteit !== undefined && details.opslag_elektriciteit !== null) || 
+                   (details.opslag_elektriciteit_normaal !== undefined && details.opslag_elektriciteit_normaal !== null) ? (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Opslag elektriciteit:</span>
                       <span className="font-semibold text-brand-navy-500">
-                        {formatTariff(details.opslag_elektriciteit || details.opslag_elektriciteit_normaal)}/kWh
+                        {formatTariff(details.opslag_elektriciteit ?? details.opslag_elektriciteit_normaal ?? 0)}/kWh
                       </span>
                     </div>
-                  )}
-                  {details?.opslag_gas && (
+                  ) : null}
+                  {/* Opslag gas - toon altijd als het bestaat (ook als 0) */}
+                  {details.opslag_gas !== undefined && details.opslag_gas !== null ? (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Opslag gas:</span>
                       <span className="font-semibold text-brand-navy-500">
                         {formatTariff(details.opslag_gas)}/m³
                       </span>
                     </div>
-                  )}
-                  {details?.opslag_teruglevering && (
+                  ) : null}
+                  {/* Opslag teruglevering - toon altijd als het bestaat (ook als 0) */}
+                  {details.opslag_teruglevering !== undefined && details.opslag_teruglevering !== null ? (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-700">Opslag teruglevering:</span>
                       <span className="font-semibold text-brand-navy-500">
                         {formatTariff(details.opslag_teruglevering)}/kWh
                       </span>
                     </div>
-                  )}
+                  ) : null}
                 </>
               )}
 
