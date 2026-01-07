@@ -192,7 +192,15 @@ export function mapAanvraagToGridHubOrderRequest(
   const hasElectricity =
     !verbruik.geenElektriciteitsaansluiting &&
     (verbruik.elektriciteitNormaal > 0 || verbruik.elektriciteitDal > 0 || verbruik.elektriciteitEnkel > 0)
-  const hasGas = !verbruik.geenGasaansluiting && verbruik.gasJaar > 0
+  // WORKAROUND: Voor alleen-elektriciteit aanvragen maken we hasGas true om 500 errors te voorkomen
+  // GridHub geeft 500 error bij hasGas: false, maar accepteert hasGas: true met minimale gas data
+  const originalHasGas = !verbruik.geenGasaansluiting && verbruik.gasJaar > 0
+  let hasGas = originalHasGas
+  if (!hasGas && hasElectricity) {
+    // WORKAROUND: hasGas true maken voor alleen-elektriciteit aanvragen
+    hasGas = true
+    console.log('ℹ️ [GridHub] WORKAROUND: hasGas wordt TRUE gemaakt voor alleen-elektriciteit aanvraag (voorkomt 500 error)')
+  }
 
   // Bereken startdatum (minimaal 20 dagen, behalve inhuizing: 3 dagen)
   // Dit wordt later in de flow berekend, maar hier gebruiken we de ingangsdatum als die er is
@@ -283,6 +291,9 @@ export function mapAanvraagToGridHubOrderRequest(
     if (switchType) requestedConnection.switchTypeGas = switchType
     if (verbruik.gasJaar) {
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
+    } else if (!originalHasGas) {
+      // WORKAROUND: Voor alleen-elektriciteit aanvragen (hasGas true gemaakt) stuur minimale usageGas
+      requestedConnection.usageGas = "0"
     }
     // CRITICAL: capacityCodeGas is verplicht als hasGas true is
     // GridHub geeft 500 error zonder capacityCodeGas, en 422 error met zowel "20102" als "10211"
@@ -343,30 +354,24 @@ export function mapAanvraagToGridHubOrderRequest(
   }
 
   // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (numbers, niet strings!)
-  // GridHub verwacht beide velden altijd, ook als hasGas/hasElectricity false is
-  // TEST: Proberen met 0 (niet null) zoals de error suggereerde dat het veld verplicht is
+  // CONCLUSIE TESTEN:
+  // - hasGas: false + agreedAdvancePaymentAmountGas: 0 → 500 error (GridHub bug)
+  // - hasGas: true + minimale gas data + capacityCodeGas → 422 error (code ongeldig, maar beter dan 500)
+  // 
+  // WORKAROUND: Voor alleen-elektriciteit aanvragen maken we hasGas: true met minimale gas data
+  // Dit voorkomt de 500 error. We krijgen wel 422 voor capacityCodeGas tot we de correcte code hebben.
   if (hasElectricity) {
     requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
-  } else {
-    // GridHub verwacht dit veld ook als hasElectricity false is
-    requestedConnection.agreedAdvancePaymentAmountElectricity = 0
   }
   
-  // GridHub verwacht agreedAdvancePaymentAmountGas ALTIJD, ook als hasGas false is
-  // Eerste error (422): "Het requested connections.agreed advance payment amount gas veld is verplicht"
-  // Nu krijgen we 500 error (interne serverfout) - mogelijk is er een server-side validatie die faalt
-  // Stuur 0 mee als er geen gas is (zoals de 422 error suggereerde)
+  // hasGas is nu mogelijk true gemaakt voor alleen-elektriciteit aanvragen (workaround)
+  // In dat geval is agreedAdvancePaymentAmountGas al berekend (0 of split)
   requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
-  
-  // Log voor debugging
-  if (!hasGas && agreedAdvancePaymentAmountGas === 0) {
-    console.log('ℹ️ [GridHub] hasGas is false, maar agreedAdvancePaymentAmountGas wordt meegestuurd met waarde 0 (verplicht veld)')
-    console.warn('⚠️ [GridHub] Als je een 500 error krijgt, is dit een GridHub server-side probleem')
-    console.warn('⚠️ [GridHub] Neem contact op met Energiek/GridHub met de Service ID uit de error')
-  }
 
   // Format timestamps voor GridHub (Y-m-d H:i:s format)
-  const formattedSignTimestamp = formatGridHubDateTime(signTimestamp)
+  // Use provided signTimestamp or current date/time as fallback
+  const signTimestampToUse = signTimestamp || new Date()
+  const formattedSignTimestamp = formatGridHubDateTime(signTimestampToUse)
   const formattedOriginalTimestamp = aanvraag.created_at
     ? formatGridHubDateTime(new Date(aanvraag.created_at))
     : formattedSignTimestamp
