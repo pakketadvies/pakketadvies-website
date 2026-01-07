@@ -202,6 +202,30 @@ function BedrijfsgegevensFormContent() {
   // Ref om bij te houden of we al standaard verbruik hebben ingesteld (voorkomt meerdere keren instellen)
   const heeftStandaardVerbruikGeinsteld = useRef(false)
   
+  // ALLE HOOKS MOETEN BOVEN DE EARLY RETURNS STAAN (React Rules of Hooks)
+  // useForm moet hier worden aangeroepen, VOOR eventuele early returns
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<BedrijfsgegevensFormData>({
+    resolver: zodResolver(bedrijfsgegevensSchema),
+    defaultValues: {
+      typeBedrijf: 'kantoor',
+      isKlantBijLeverancier: false,
+      aanhef: 'dhr',
+      heeftVerblijfsfunctie: true,
+      gaatVerhuizen: false,
+      wanneerOverstappen: 'zo_snel_mogelijk',
+      voorwaarden: true,
+      privacy: true,
+      herinneringContract: false,
+      nieuwsbrief: false,
+    },
+  })
+  
   // Handler voor verbruik update
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
     if (!newVerbruik) return
@@ -386,6 +410,7 @@ function BedrijfsgegevensFormContent() {
   console.log('🔍 BedrijfsgegevensForm - isDirect:', isDirect, 'contractId:', contractId)
   console.log('🔍 BedrijfsgegevensForm - Will show verbruik card:', !!verbruik)
   
+  // Nu kunnen we early returns doen (alle hooks zijn al aangeroepen)
   // Loading state
   if (loadingContract) {
     return (
@@ -412,32 +437,6 @@ function BedrijfsgegevensFormContent() {
       </div>
     )
   }
-  
-  // ALLE HOOKS MOETEN BOVEN DE EARLY RETURNS STAAN (React Rules of Hooks)
-  // useForm moet hier worden aangeroepen, VOOR eventuele early returns
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<BedrijfsgegevensFormData>({
-    resolver: zodResolver(bedrijfsgegevensSchema),
-    defaultValues: {
-      typeBedrijf: 'kantoor',
-      isKlantBijLeverancier: false,
-      aanhef: 'dhr',
-      heeftVerblijfsfunctie: true,
-      gaatVerhuizen: false,
-      wanneerOverstappen: 'zo_snel_mogelijk',
-      voorwaarden: true,
-      privacy: true,
-      herinneringContract: false,
-      nieuwsbrief: false,
-    },
-  })
-
-  // Nu kunnen we early returns doen (alle hooks zijn al aangeroepen)
   // Als geen contract en geen contractId, toon error
   if (!contract && !contractId) {
     return (
