@@ -251,10 +251,27 @@ export class GridHubClient {
       } catch {
         error = { message: errorText || 'Unknown error' }
       }
+      
+      // Log error to database
+      gridHubLogger.error('GridHub API Request Failed', {
+        url: `${this.config.apiUrl}/orderrequests`,
+        status: response.status,
+        statusText: response.statusText,
+        error,
+        errorText,
+      }, logContext)
+      
       throw new Error(`GridHub API error: ${response.status} - ${JSON.stringify(error)}`)
     }
 
     const data = await response.json()
+    
+    // Log success
+    gridHubLogger.info('GridHub API Request Successful', {
+      orderRequestId: data.orderRequestId,
+      response: data,
+    }, logContext)
+    
     return data
   }
 

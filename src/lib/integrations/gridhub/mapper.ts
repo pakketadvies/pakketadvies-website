@@ -177,7 +177,7 @@ function generateSignData(
 export function mapAanvraagToGridHubOrderRequest(
   options: MapToGridHubOptions
 ): GridHubCreateOrderRequestPayload {
-  const { aanvraag, productId, tariffId, customerApprovalIDs, clientIP, signTimestamp } = options
+  const { aanvraag, productId, tariffId, customerApprovalIDs, clientIP, signTimestamp, aanvraagId, aanvraagnummer } = options
 
   const gegevens = aanvraag.gegevens_data
   const verbruik = aanvraag.verbruik_data
@@ -273,7 +273,8 @@ export function mapAanvraagToGridHubOrderRequest(
   console.log('🔍 [GridHub] ========== CAPTAR CODE DEBUGGING ==========')
   console.log('🔍 [GridHub] Input verbruik data:', verbruikData)
   gridHubLogger.debug('CapTar Code Debugging - Input verbruik data', verbruikData, {
-    aanvraagnummer: aanvraag.aanvraagnummer,
+    aanvraagId: aanvraagId,
+    aanvraagnummer: aanvraagnummer || aanvraag.aanvraagnummer,
   })
   
   const calculatedFlags = {
@@ -284,7 +285,8 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   console.log('🔍 [GridHub] Calculated flags:', calculatedFlags)
   gridHubLogger.debug('CapTar Code Debugging - Calculated flags', calculatedFlags, {
-    aanvraagnummer: aanvraag.aanvraagnummer,
+    aanvraagId: aanvraagId,
+    aanvraagnummer: aanvraagnummer || aanvraag.aanvraagnummer,
   })
   
   const capacityCodesMapping = {
@@ -299,7 +301,8 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   console.log('🔍 [GridHub] Capacity codes mapping:', capacityCodesMapping)
   gridHubLogger.debug('CapTar Code Debugging - Capacity codes mapping', capacityCodesMapping, {
-    aanvraagnummer: aanvraag.aanvraagnummer,
+    aanvraagId: aanvraagId,
+    aanvraagnummer: aanvraagnummer || aanvraag.aanvraagnummer,
     hasGas,
     hasElectricity,
     capacityCodeGas,
