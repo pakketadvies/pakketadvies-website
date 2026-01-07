@@ -192,15 +192,10 @@ export function mapAanvraagToGridHubOrderRequest(
   const hasElectricity =
     !verbruik.geenElektriciteitsaansluiting &&
     (verbruik.elektriciteitNormaal > 0 || verbruik.elektriciteitDal > 0 || verbruik.elektriciteitEnkel > 0)
-  // WORKAROUND: Voor alleen-elektriciteit aanvragen maken we hasGas true om 500 errors te voorkomen
-  // GridHub geeft 500 error bij hasGas: false, maar accepteert hasGas: true met minimale gas data
-  const originalHasGas = !verbruik.geenGasaansluiting && verbruik.gasJaar > 0
-  let hasGas = originalHasGas
-  if (!hasGas && hasElectricity) {
-    // WORKAROUND: hasGas true maken voor alleen-elektriciteit aanvragen
-    hasGas = true
-    console.log('ℹ️ [GridHub] WORKAROUND: hasGas wordt TRUE gemaakt voor alleen-elektriciteit aanvraag (voorkomt 500 error)')
-  }
+  // Volgens Energiek.nl: andere prijsvergelijkers sturen de CapTar code NIET mee
+  // We houden hasGas false voor alleen-elektriciteit aanvragen (zoals het hoort)
+  // En we laten capacityCodeGas weg als hasGas false is
+  const hasGas = !verbruik.geenGasaansluiting && verbruik.gasJaar > 0
 
   // Bereken startdatum (minimaal 20 dagen, behalve inhuizing: 3 dagen)
   // Dit wordt later in de flow berekend, maar hier gebruiken we de ingangsdatum als die er is
@@ -291,40 +286,14 @@ export function mapAanvraagToGridHubOrderRequest(
     if (switchType) requestedConnection.switchTypeGas = switchType
     if (verbruik.gasJaar) {
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
-    } else if (!originalHasGas) {
-      // WORKAROUND: Voor alleen-elektriciteit aanvragen (hasGas true gemaakt) stuur minimale usageGas
-      requestedConnection.usageGas = "0"
     }
-    // CRITICAL: capacityCodeGas is verplicht als hasGas true is
-    // GridHub geeft 500 error zonder capacityCodeGas, en 422 error met zowel "20102" als "10211"
-    // 
-    // CONCLUSIE TESTEN:
-    // - Test 1: "20102" (originele code) → 422 error ❌
-    // - Test 2: "10211" (elektriciteit code) → 422 error ❌
-    // - GridHub gebruikt NIET dezelfde CapTar codes voor elektriciteit en gas
-    // - GridHub verwacht een specifieke CapTar code voor gas die we nog niet hebben
-    //
-    // OPLOSSING: Contact Energiek/GridHub voor correcte CapTar code mapping voor gas
-    // We hebben de officiële mapping nodig van aansluitwaarden (G4, G6, etc.) naar CapTar codes
-    if (capacityCodeGas) {
-      requestedConnection.capacityCodeGas = capacityCodeGas
-      console.log(`✅ [GridHub] capacityCodeGas set to: ${capacityCodeGas} (from aansluitwaarde: ${verbruik.aansluitwaardeGas})`)
-      console.error(`❌ [GridHub] WARNING: GridHub heeft eerder 422 errors gegeven voor capacityCodeGas`)
-      console.error(`❌ [GridHub] Geteste codes: "20102" (origineel) en "10211" (elektriciteit) - beide geweigerd`)
-      console.error(`❌ [GridHub] CONTACT ENERGIEK/GRIDHUB voor correcte CapTar code mapping voor gas!`)
-      console.error(`❌ [GridHub] Aanvraag zal waarschijnlijk falen met 422 error tot we de correcte codes hebben`)
-    } else {
-      console.error('❌ [GridHub] CRITICAL: hasGas is true but capacityCodeGas is undefined/null!', {
-        aansluitwaardeGas: verbruik.aansluitwaardeGas,
-        hasGas,
-        capacityCodeGas,
-      })
-      // Fallback naar originele code (20102) - GridHub zal dit afwijzen maar dat is beter dan 500
-      requestedConnection.capacityCodeGas = '20102'
-      console.error('❌ [GridHub] Using fallback capacityCodeGas: 20102 (G6) - GridHub zal dit afwijzen met 422')
-      console.error('❌ [GridHub] CONTACT ENERGIEK/GRIDHUB voor correcte CapTar code mapping voor gas!')
-    }
+    // VOLGENS ENERGIEK.NL: andere prijsvergelijkers sturen capacityCodeGas NIET mee
+    // We laten capacityCodeGas daarom weg, ook als hasGas true is
+    // Dit is volgens het advies van Energiek.nl
+    console.log('ℹ️ [GridHub] capacityCodeGas wordt WEGGELATEN (volgens advies Energiek.nl)')
+    console.log('ℹ️ [GridHub] Andere prijsvergelijkers sturen deze ook niet mee')
   }
+  // Als hasGas false is, sturen we sowieso geen capacityCodeGas mee
 
   // Always set these
   requestedConnection.customerApprovalLEDs = true // Verplicht: true
@@ -355,18 +324,24 @@ export function mapAanvraagToGridHubOrderRequest(
 
   // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (numbers, niet strings!)
   // CONCLUSIE TESTEN:
-  // - hasGas: false + agreedAdvancePaymentAmountGas: 0 → 500 error (GridHub bug)
-  // - hasGas: true + minimale gas data + capacityCodeGas → 422 error (code ongeldig, maar beter dan 500)
-  // 
-  // WORKAROUND: Voor alleen-elektriciteit aanvragen maken we hasGas: true met minimale gas data
-  // Dit voorkomt de 500 error. We krijgen wel 422 voor capacityCodeGas tot we de correcte code hebben.
+  // - agreedAdvancePaymentAmountGas weglaten → 422 error (veld is verplicht)
+  // - agreedAdvancePaymentAmountGas: 0 → 500 error (met hasGas: false)
+  // - capacityCodeGas weglaten → volgens Energiek.nl doen andere prijsvergelijkers dit ook
   if (hasElectricity) {
     requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
   }
   
-  // hasGas is nu mogelijk true gemaakt voor alleen-elektriciteit aanvragen (workaround)
-  // In dat geval is agreedAdvancePaymentAmountGas al berekend (0 of split)
+  // agreedAdvancePaymentAmountGas is VERPLICHT (ook als hasGas false)
+  // We moeten het meesturen, maar krijgen 500 error met hasGas: false + 0
+  // Dit lijkt een GridHub bug te zijn
   requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
+  
+  if (!hasGas) {
+    console.log('ℹ️ [GridHub] hasGas: false, maar agreedAdvancePaymentAmountGas wordt meegestuurd (verplicht veld)')
+    console.log('ℹ️ [GridHub] capacityCodeGas wordt WEGGELATEN (volgens advies Energiek.nl)')
+    console.warn('⚠️ [GridHub] Als je een 500 error krijgt, is dit een GridHub server-side probleem')
+    console.warn('⚠️ [GridHub] Neem contact op met Energiek/GridHub met de Service ID uit de error')
+  }
 
   // Format timestamps voor GridHub (Y-m-d H:i:s format)
   // Use provided signTimestamp or current date/time as fallback
