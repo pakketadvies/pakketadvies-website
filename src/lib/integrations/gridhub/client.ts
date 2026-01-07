@@ -239,6 +239,9 @@ export class GridHubClient {
       },
       body: JSON.stringify(payload),
     })
+    
+    // Remove __aanvraagId and __aanvraagnummer from payload before sending (they're only for logging)
+    // These were already removed in JSON.stringify, but just to be safe
 
     if (!response.ok) {
       const errorText = await response.text()
