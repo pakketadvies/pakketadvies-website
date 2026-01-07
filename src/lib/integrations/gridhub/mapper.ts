@@ -29,10 +29,14 @@ interface MapToGridHubOptions {
  * Voor productie: deze mapping moet mogelijk worden uitgebreid of via API worden opgehaald
  */
 function mapAansluitwaardeToCapTar(aansluitwaarde: string | undefined): string | undefined {
-  if (!aansluitwaarde) return undefined
+  if (!aansluitwaarde) {
+    console.log('🔍 [GridHub] mapAansluitwaardeToCapTar: aansluitwaarde is undefined/null')
+    return undefined
+  }
 
   // Normaliseer aansluitwaarde (uppercase, trim)
   const normalized = aansluitwaarde.trim().toUpperCase()
+  console.log(`🔍 [GridHub] mapAansluitwaardeToCapTar: input="${aansluitwaarde}", normalized="${normalized}"`)
 
   // Mapping tabel voor elektriciteit (meest voorkomende)
   const elektriciteitMapping: Record<string, string> = {
@@ -63,18 +67,23 @@ function mapAansluitwaardeToCapTar(aansluitwaarde: string | undefined): string |
 
   // Check elektriciteit mapping
   if (elektriciteitMapping[normalized]) {
-    return elektriciteitMapping[normalized]
+    const result = elektriciteitMapping[normalized]
+    console.log(`✅ [GridHub] mapAansluitwaardeToCapTar: elektriciteit mapping gevonden: "${normalized}" -> "${result}"`)
+    return result
   }
 
   // Check gas mapping
   if (gasMapping[normalized]) {
-    return gasMapping[normalized]
+    const result = gasMapping[normalized]
+    console.log(`✅ [GridHub] mapAansluitwaardeToCapTar: gas mapping gevonden: "${normalized}" -> "${result}"`)
+    return result
   }
 
   // Als geen mapping gevonden: return aansluitwaarde als-is
   // GridHub moet dit accepteren, of we krijgen een error die we kunnen afhandelen
   // In productie: log dit voor monitoring en uitbreiding mapping
-  console.warn(`⚠️ [GridHub] Geen CapTar mapping gevonden voor aansluitwaarde: ${aansluitwaarde}`)
+  console.warn(`⚠️ [GridHub] Geen CapTar mapping gevonden voor aansluitwaarde: ${aansluitwaarde} (normalized: ${normalized})`)
+  console.warn(`⚠️ [GridHub] Beschikbare gas mappings: ${Object.keys(gasMapping).join(', ')}`)
   return normalized
 }
 
@@ -211,58 +220,85 @@ export function mapAanvraagToGridHubOrderRequest(
     ? 'MOVE'
     : 'SWITCH'
 
-  const requestedConnection: GridHubRequestedConnection = {
+  // Map capacity codes with logging
+  const capacityCodeElectricity = hasElectricity
+    ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeElektriciteit)
+    : undefined
+  const capacityCodeGas = hasGas ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeGas) : undefined
+
+  console.log('🔍 [GridHub] Capacity codes mapping:', {
+    hasGas,
+    aansluitwaardeGas: verbruik.aansluitwaardeGas,
+    capacityCodeGas,
+    hasElectricity,
+    aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit,
+    capacityCodeElectricity,
+  })
+
+  // Build requestedConnection object
+  const requestedConnection: any = {
     postalCode: leveringsadres?.postcode?.replace(/\s/g, '').toUpperCase() || '',
     houseNumber: leveringsadres?.huisnummer || '', // String, niet number!
     houseNumberAddition: leveringsadres?.toevoeging || '',
     hasElectricity,
     hasGas,
-    meterType: hasElectricity ? meterType : undefined,
-    startDateElectricity: hasElectricity ? startDateStr : undefined,
-    startDateGas: hasGas ? startDateStr : undefined,
     isResidenceFunction: true, // In voorbeeld: true
-    capacityCodeElectricity: hasElectricity
-      ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeElektriciteit)
-      : undefined,
-    capacityCodeGas: hasGas ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeGas) : undefined,
-    usageElectricityHigh:
-      hasElectricity && verbruik.elektriciteitNormaal && verbruik.heeftDubbeleMeter
-        ? Math.round(verbruik.elektriciteitNormaal).toString()
-        : undefined,
-    usageElectricityLow:
-      hasElectricity && verbruik.elektriciteitDal && verbruik.heeftDubbeleMeter
-        ? Math.round(verbruik.elektriciteitDal).toString()
-        : undefined,
-    usageElectricitySingle:
-      hasElectricity && !verbruik.heeftDubbeleMeter && verbruik.elektriciteitEnkel
-        ? Math.round(verbruik.elektriciteitEnkel).toString()
-        : hasElectricity && !verbruik.heeftDubbeleMeter && verbruik.elektriciteitNormaal
-          ? Math.round(verbruik.elektriciteitNormaal).toString()
-          : undefined,
-    usageGas: hasGas && verbruik.gasJaar ? Math.round(verbruik.gasJaar).toString() : undefined,
-    returnElectricityHigh:
-      hasElectricity &&
-      verbruik.terugleveringJaar &&
-      verbruik.heeftDubbeleMeter &&
-      verbruik.terugleveringJaar > 0
-        ? Math.round(verbruik.terugleveringJaar).toString()
-        : undefined,
-    returnElectricityLow: undefined, // Niet beschikbaar in onze data
-    returnElectricitySingle:
-      hasElectricity &&
-      verbruik.terugleveringJaar &&
-      !verbruik.heeftDubbeleMeter &&
-      verbruik.terugleveringJaar > 0
-        ? Math.round(verbruik.terugleveringJaar).toString()
-        : undefined,
-    switchTypeElectricity: hasElectricity ? switchType : undefined,
-    switchTypeGas: hasGas ? switchType : undefined,
-    hasP1Data: verbruik.meterType === 'slim',
-    expectedAdvancePaymentAmountElectricity: undefined, // Wordt door GridHub berekend
-    expectedAdvancePaymentAmountGas: undefined, // Wordt door GridHub berekend
-    customerApprovalLEDs: true, // Verplicht: true
-    billingIDs: undefined, // Optioneel
   }
+
+  // Only add optional fields if they have values
+  if (hasElectricity) {
+    if (meterType) requestedConnection.meterType = meterType
+    if (startDateStr) requestedConnection.startDateElectricity = startDateStr
+    if (capacityCodeElectricity) requestedConnection.capacityCodeElectricity = capacityCodeElectricity
+    if (switchType) requestedConnection.switchTypeElectricity = switchType
+    if (verbruik.meterType === 'slim') requestedConnection.hasP1Data = true
+    
+    if (verbruik.elektriciteitNormaal && verbruik.heeftDubbeleMeter) {
+      requestedConnection.usageElectricityHigh = Math.round(verbruik.elektriciteitNormaal).toString()
+    }
+    if (verbruik.elektriciteitDal && verbruik.heeftDubbeleMeter) {
+      requestedConnection.usageElectricityLow = Math.round(verbruik.elektriciteitDal).toString()
+    }
+    if (!verbruik.heeftDubbeleMeter) {
+      if (verbruik.elektriciteitEnkel) {
+        requestedConnection.usageElectricitySingle = Math.round(verbruik.elektriciteitEnkel).toString()
+      } else if (verbruik.elektriciteitNormaal) {
+        requestedConnection.usageElectricitySingle = Math.round(verbruik.elektriciteitNormaal).toString()
+      }
+    }
+    if (verbruik.terugleveringJaar && verbruik.terugleveringJaar > 0) {
+      if (verbruik.heeftDubbeleMeter) {
+        requestedConnection.returnElectricityHigh = Math.round(verbruik.terugleveringJaar).toString()
+      } else {
+        requestedConnection.returnElectricitySingle = Math.round(verbruik.terugleveringJaar).toString()
+      }
+    }
+  }
+
+  if (hasGas) {
+    if (startDateStr) requestedConnection.startDateGas = startDateStr
+    if (switchType) requestedConnection.switchTypeGas = switchType
+    if (verbruik.gasJaar) {
+      requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
+    }
+    // CRITICAL: capacityCodeGas is verplicht als hasGas true is
+    if (capacityCodeGas) {
+      requestedConnection.capacityCodeGas = capacityCodeGas
+    } else {
+      console.error('❌ [GridHub] CRITICAL: hasGas is true but capacityCodeGas is undefined/null!', {
+        aansluitwaardeGas: verbruik.aansluitwaardeGas,
+        hasGas,
+        capacityCodeGas,
+      })
+      // We moeten toch een waarde sturen, anders faalt de API
+      // Fallback naar G6 code
+      requestedConnection.capacityCodeGas = '20102'
+      console.warn('⚠️ [GridHub] Using fallback capacityCodeGas: 20102 (G6)')
+    }
+  }
+
+  // Always set these
+  requestedConnection.customerApprovalLEDs = true // Verplicht: true
 
   // Bereken advance payment amounts (volgens voorbeeld: numbers, niet strings!)
   const maandbedrag = aanvraag.verbruik_data?.maandbedrag || 0

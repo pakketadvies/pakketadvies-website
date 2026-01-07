@@ -425,6 +425,18 @@ export async function POST(request: Request) {
             signTimestamp: new Date(),
           })
           
+          // Log payload voor debugging (zonder gevoelige data)
+          console.log('📤 [GridHub] Payload details:', {
+            hasGas: gridhubPayload.requestedConnections.hasGas,
+            capacityCodeGas: (gridhubPayload.requestedConnections as any).capacityCodeGas,
+            hasElectricity: gridhubPayload.requestedConnections.hasElectricity,
+            capacityCodeElectricity: (gridhubPayload.requestedConnections as any).capacityCodeElectricity,
+            verbruikData: {
+              aansluitwaardeGas: data.verbruik_data?.aansluitwaardeGas,
+              aansluitwaardeElektriciteit: data.verbruik_data?.aansluitwaardeElektriciteit,
+            },
+          })
+          
           // Call GridHub API
           console.log('📤 [GridHub] Sending order request to GridHub...')
           const gridhubResponse = await gridhubClient.createOrderRequest(gridhubPayload)
