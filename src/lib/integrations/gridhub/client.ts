@@ -120,7 +120,15 @@ export class GridHubClient {
   private config: GridHubConfig
 
   constructor(config: GridHubConfig) {
-    this.config = config
+    // Trim newlines and whitespace from config values to prevent API errors
+    // Environment variables in Vercel can sometimes have trailing newlines
+    this.config = {
+      ...config,
+      apiUrl: config.apiUrl?.trim() || '',
+      username: config.username?.trim() || '',
+      password: config.password?.trim() || '',
+      environment: config.environment,
+    }
   }
 
   /**
@@ -131,7 +139,8 @@ export class GridHubClient {
   private async getAuthToken(): Promise<string> {
     // GridHub uses the password directly as the Bearer token
     // No login endpoint needed - just use the password as-is
-    return this.config.password
+    // Trim again for safety (should already be trimmed in constructor)
+    return this.config.password.trim()
   }
 
   /**

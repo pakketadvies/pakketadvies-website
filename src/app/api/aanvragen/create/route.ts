@@ -401,6 +401,7 @@ export async function POST(request: Request) {
           const apiPassword = decryptPassword(apiConfig.api_password_encrypted)
           
           // Create GridHub client
+          // Note: GridHubClient constructor will trim newlines from config values
           const gridhubClient = new GridHubClient({
             apiUrl: apiConfig.api_url,
             username: apiConfig.api_username,
