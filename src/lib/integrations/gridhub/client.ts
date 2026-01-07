@@ -266,13 +266,21 @@ export class GridHubClient {
 
     const data = await response.json()
     
+    // Extract the order request ID from the nested response structure
+    // GridHub returns: { data: { id: 416, ... } }
+    const orderRequestId = data.data?.id
+    
     // Log success
     gridHubLogger.info('GridHub API Request Successful', {
-      orderRequestId: data.orderRequestId,
+      orderRequestId: orderRequestId,
       response: data,
     }, logContext)
     
-    return data
+    // Return the full response with extracted ID for convenience
+    return {
+      ...data,
+      orderRequestId: orderRequestId,
+    }
   }
 
   /**
