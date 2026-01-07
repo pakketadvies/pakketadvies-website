@@ -413,6 +413,31 @@ function BedrijfsgegevensFormContent() {
     )
   }
   
+  // ALLE HOOKS MOETEN BOVEN DE EARLY RETURNS STAAN (React Rules of Hooks)
+  // useForm moet hier worden aangeroepen, VOOR eventuele early returns
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<BedrijfsgegevensFormData>({
+    resolver: zodResolver(bedrijfsgegevensSchema),
+    defaultValues: {
+      typeBedrijf: 'kantoor',
+      isKlantBijLeverancier: false,
+      aanhef: 'dhr',
+      heeftVerblijfsfunctie: true,
+      gaatVerhuizen: false,
+      wanneerOverstappen: 'zo_snel_mogelijk',
+      voorwaarden: true,
+      privacy: true,
+      herinneringContract: false,
+      nieuwsbrief: false,
+    },
+  })
+
+  // Nu kunnen we early returns doen (alle hooks zijn al aangeroepen)
   // Als geen contract en geen contractId, toon error
   if (!contract && !contractId) {
     return (
@@ -441,29 +466,6 @@ function BedrijfsgegevensFormContent() {
   }
   
   // Anders: zakelijk formulier (bestaande logica)
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<BedrijfsgegevensFormData>({
-    resolver: zodResolver(bedrijfsgegevensSchema),
-    defaultValues: {
-      typeBedrijf: 'kantoor',
-      isKlantBijLeverancier: false,
-      aanhef: 'dhr',
-      heeftVerblijfsfunctie: true,
-      gaatVerhuizen: false,
-      wanneerOverstappen: 'zo_snel_mogelijk',
-      voorwaarden: true,
-      privacy: true,
-      herinneringContract: false,
-      nieuwsbrief: false,
-    },
-  })
-
   const typeBedrijf = watch('typeBedrijf')
 
   // Copy leveradres to correspondentie when checkbox is checked
