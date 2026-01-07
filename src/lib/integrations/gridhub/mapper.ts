@@ -283,7 +283,9 @@ export function mapAanvraagToGridHubOrderRequest(
     hasElectricityCalculation: `!${verbruik.geenElektriciteitsaansluiting} && (${verbruik.elektriciteitNormaal} || ${verbruik.elektriciteitDal} || ${verbruik.elektriciteitEnkel})`,
   }
   console.log('🔍 [GridHub] Calculated flags:', calculatedFlags)
-  gridHubLogger.debug('CapTar Code Debugging - Calculated flags', calculatedFlags, logContext)
+  gridHubLogger.debug('CapTar Code Debugging - Calculated flags', calculatedFlags, {
+    aanvraagnummer: aanvraag.aanvraagnummer,
+  })
   
   const capacityCodesMapping = {
     hasGas,
