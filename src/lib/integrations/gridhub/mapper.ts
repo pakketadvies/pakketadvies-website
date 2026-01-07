@@ -105,9 +105,32 @@ function formatGridHubDateTime(date: Date): string {
 
 /**
  * Format IBAN for GridHub (remove spaces, uppercase)
+ * GridHub verwacht een geldig IBAN formaat: 2 letters + 2 cijfers + max 30 alfanumerieke tekens
  */
 function formatIBAN(iban: string): string {
-  return iban.replace(/\s/g, '').toUpperCase()
+  if (!iban) return ''
+  
+  // Remove all spaces and convert to uppercase
+  const cleaned = iban.replace(/\s/g, '').toUpperCase()
+  
+  // Log voor debugging
+  console.log('🔍 [GridHub] IBAN formatting:', {
+    original: iban,
+    cleaned,
+    length: cleaned.length,
+    isValidFormat: /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/.test(cleaned),
+  })
+  
+  // Validate IBAN format (basic check)
+  // IBAN format: 2 letters (country code) + 2 digits (check digits) + up to 30 alphanumeric characters
+  if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/.test(cleaned)) {
+    console.warn('⚠️ [GridHub] IBAN format may be invalid:', {
+      iban: cleaned,
+      expectedFormat: '2 letters + 2 digits + 1-30 alphanumeric characters',
+    })
+  }
+  
+  return cleaned
 }
 
 /**
