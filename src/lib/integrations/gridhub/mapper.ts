@@ -281,19 +281,24 @@ export function mapAanvraagToGridHubOrderRequest(
     if (verbruik.gasJaar) {
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
     }
-    // CRITICAL: capacityCodeGas is verplicht als hasGas true is
+    // NOTE: GridHub geeft 422 error voor capacityCodeGas "20102"
+    // Mogelijk is de code verkeerd of moet het veld worden weggelaten
+    // Voor nu: alleen toevoegen als we een geldige code hebben, anders weglaten
+    // TODO: Contact Energiek/GridHub voor correcte CapTar codes voor gas
     if (capacityCodeGas) {
-      requestedConnection.capacityCodeGas = capacityCodeGas
-    } else {
-      console.error('❌ [GridHub] CRITICAL: hasGas is true but capacityCodeGas is undefined/null!', {
+      // Probeer eerst zonder capacityCodeGas - GridHub geeft 422 voor "20102"
+      // Laat het veld weg tot we de correcte code hebben
+      console.warn('⚠️ [GridHub] capacityCodeGas wordt weggelaten - GridHub accepteert "20102" niet', {
         aansluitwaardeGas: verbruik.aansluitwaardeGas,
-        hasGas,
         capacityCodeGas,
+        note: 'Contact Energiek/GridHub voor correcte CapTar code voor gas',
       })
-      // We moeten toch een waarde sturen, anders faalt de API
-      // Fallback naar G6 code
-      requestedConnection.capacityCodeGas = '20102'
-      console.warn('⚠️ [GridHub] Using fallback capacityCodeGas: 20102 (G6)')
+      // TEMPORARY: Weglaten tot we de correcte code hebben
+      // requestedConnection.capacityCodeGas = capacityCodeGas
+    } else {
+      console.warn('⚠️ [GridHub] hasGas is true but capacityCodeGas is undefined/null - veld wordt weggelaten', {
+        aansluitwaardeGas: verbruik.aansluitwaardeGas,
+      })
     }
   }
 
