@@ -344,7 +344,7 @@ export function mapAanvraagToGridHubOrderRequest(
 
   // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (numbers, niet strings!)
   // GridHub verwacht beide velden altijd, ook als hasGas/hasElectricity false is
-  // In dat geval sturen we 0 mee
+  // TEST: Proberen met 0 (niet null) zoals de error suggereerde dat het veld verplicht is
   if (hasElectricity) {
     requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
   } else {
@@ -353,8 +353,17 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   
   // GridHub verwacht agreedAdvancePaymentAmountGas ALTIJD, ook als hasGas false is
-  // Stuur 0 mee als er geen gas is
+  // Eerste error (422): "Het requested connections.agreed advance payment amount gas veld is verplicht"
+  // Nu krijgen we 500 error (interne serverfout) - mogelijk is er een server-side validatie die faalt
+  // Stuur 0 mee als er geen gas is (zoals de 422 error suggereerde)
   requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
+  
+  // Log voor debugging
+  if (!hasGas && agreedAdvancePaymentAmountGas === 0) {
+    console.log('ℹ️ [GridHub] hasGas is false, maar agreedAdvancePaymentAmountGas wordt meegestuurd met waarde 0 (verplicht veld)')
+    console.warn('⚠️ [GridHub] Als je een 500 error krijgt, is dit een GridHub server-side probleem')
+    console.warn('⚠️ [GridHub] Neem contact op met Energiek/GridHub met de Service ID uit de error')
+  }
 
   // Format timestamps voor GridHub (Y-m-d H:i:s format)
   const formattedSignTimestamp = formatGridHubDateTime(signTimestamp)
