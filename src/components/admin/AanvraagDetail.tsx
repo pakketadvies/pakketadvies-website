@@ -19,7 +19,12 @@ import {
   Note,
   PencilSimple,
   FloppyDisk,
-  X
+  X,
+  Bug,
+  Copy,
+  Check,
+  ArrowClockwise,
+  Funnel
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/Button'
 import type { ContractAanvraag, AanvraagStatus } from '@/types/aanvragen'
