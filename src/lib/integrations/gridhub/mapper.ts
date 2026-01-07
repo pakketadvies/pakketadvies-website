@@ -343,13 +343,18 @@ export function mapAanvraagToGridHubOrderRequest(
   }
 
   // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (numbers, niet strings!)
-  // Als hasGas false is, vraag Energiek.nl of we 0 moeten sturen of het field moeten weglaten
+  // GridHub verwacht beide velden altijd, ook als hasGas/hasElectricity false is
+  // In dat geval sturen we 0 mee
   if (hasElectricity) {
     requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
+  } else {
+    // GridHub verwacht dit veld ook als hasElectricity false is
+    requestedConnection.agreedAdvancePaymentAmountElectricity = 0
   }
-  if (hasGas) {
-    requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
-  }
+  
+  // GridHub verwacht agreedAdvancePaymentAmountGas ALTIJD, ook als hasGas false is
+  // Stuur 0 mee als er geen gas is
+  requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
 
   // Format timestamps voor GridHub (Y-m-d H:i:s format)
   const formattedSignTimestamp = formatGridHubDateTime(signTimestamp)
