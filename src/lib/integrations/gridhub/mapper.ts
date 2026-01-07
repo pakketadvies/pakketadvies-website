@@ -281,24 +281,24 @@ export function mapAanvraagToGridHubOrderRequest(
     if (verbruik.gasJaar) {
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
     }
-    // NOTE: GridHub geeft 422 error voor capacityCodeGas "20102"
-    // Mogelijk is de code verkeerd of moet het veld worden weggelaten
-    // Voor nu: alleen toevoegen als we een geldige code hebben, anders weglaten
+    // CRITICAL: capacityCodeGas is waarschijnlijk verplicht als hasGas true is
+    // GridHub geeft 500 error zonder capacityCodeGas, en 422 error met "20102"
+    // Dit suggereert dat het veld verplicht is, maar de code "20102" ongeldig is
     // TODO: Contact Energiek/GridHub voor correcte CapTar codes voor gas
     if (capacityCodeGas) {
-      // Probeer eerst zonder capacityCodeGas - GridHub geeft 422 voor "20102"
-      // Laat het veld weg tot we de correcte code hebben
-      console.warn('⚠️ [GridHub] capacityCodeGas wordt weggelaten - GridHub accepteert "20102" niet', {
-        aansluitwaardeGas: verbruik.aansluitwaardeGas,
-        capacityCodeGas,
-        note: 'Contact Energiek/GridHub voor correcte CapTar code voor gas',
-      })
-      // TEMPORARY: Weglaten tot we de correcte code hebben
-      // requestedConnection.capacityCodeGas = capacityCodeGas
+      // Stuur de code mee - GridHub verwacht waarschijnlijk een waarde
+      // Als de code ongeldig is, krijgen we een 422 error (niet 500)
+      requestedConnection.capacityCodeGas = capacityCodeGas
+      console.log(`✅ [GridHub] capacityCodeGas set to: ${capacityCodeGas} (from aansluitwaarde: ${verbruik.aansluitwaardeGas})`)
     } else {
-      console.warn('⚠️ [GridHub] hasGas is true but capacityCodeGas is undefined/null - veld wordt weggelaten', {
+      console.error('❌ [GridHub] CRITICAL: hasGas is true but capacityCodeGas is undefined/null!', {
         aansluitwaardeGas: verbruik.aansluitwaardeGas,
+        hasGas,
+        capacityCodeGas,
       })
+      // Fallback: probeer met G6 code (20102) - GridHub geeft mogelijk 422 maar dat is beter dan 500
+      requestedConnection.capacityCodeGas = '20102'
+      console.warn('⚠️ [GridHub] Using fallback capacityCodeGas: 20102 (G6) - GridHub kan dit afwijzen met 422')
     }
   }
 
