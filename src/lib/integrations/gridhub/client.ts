@@ -18,11 +18,11 @@ export interface GridHubRelation {
   middleName?: string
   lastName: string
   gender: 'MALE' | 'FEMALE'
-  birthDate: string // YYYY-MM-DD
+  birthDate?: string // YYYY-MM-DD (optioneel in voorbeeld)
   phoneNumber: string
-  emailAddress: string
+  email: string // In voorbeeld: "email" niet "emailAddress"
   street: string
-  houseNumber: number
+  houseNumber: string // In voorbeeld: string ("400") niet number
   houseNumberAddition?: string
   postalCode: string
   city: string
@@ -31,6 +31,7 @@ export interface GridHubRelation {
   companyCoCNumber?: string // Verplicht voor BUSINESS
   bankAccountType: 'IBAN' | 'BIC'
   bankAccountNumber: string
+  debtorName?: string // In voorbeeld aanwezig
   paymentMethod: 'AUTOMATICCOLLECTION' | 'MANUAL'
   mandateDate: string // YYYY-MM-DD
   mandateReference?: string
@@ -38,11 +39,11 @@ export interface GridHubRelation {
 
 export interface GridHubRequestedConnection {
   postalCode: string
-  houseNumber: number
+  houseNumber: string // In voorbeeld: string ("144") niet number
   houseNumberAddition?: string
   hasElectricity: boolean
   hasGas: boolean
-  meterType?: 'SMART' | 'CONVENTIONAL' | 'UNKNOWN'
+  meterType?: 'DOUBLE' | 'SINGLE' | 'SMART' | 'CONVENTIONAL' | 'UNKNOWN' // In voorbeeld: "DOUBLE"
   capacityCodeElectricity?: string // CapTar code (bijv. "10211")
   capacityCodeGas?: string
   usageElectricityHigh?: string // kWh per jaar
@@ -52,14 +53,17 @@ export interface GridHubRequestedConnection {
   returnElectricityHigh?: string
   returnElectricityLow?: string
   returnElectricitySingle?: string
+  startDateElectricity?: string // YYYY-MM-DD (in voorbeeld aanwezig)
+  startDateGas?: string // YYYY-MM-DD (in voorbeeld aanwezig)
   switchTypeElectricity?: 'SWITCH' | 'NEW' | 'MOVE' | 'UNKNOWN'
   switchTypeGas?: 'SWITCH' | 'NEW' | 'MOVE' | 'UNKNOWN'
+  isResidenceFunction?: boolean // In voorbeeld: true
   hasP1Data?: boolean
   expectedAdvancePaymentAmountElectricity?: string
   expectedAdvancePaymentAmountGas?: string
-  agreedAdvancePaymentAmountElectricity?: string // Verplicht veld (blijkt toch nodig te zijn)
-  agreedAdvancePaymentAmountGas?: string // Verplicht veld (blijkt toch nodig te zijn)
-  customerApprovalLEDs: boolean // Verplicht: true
+  agreedAdvancePaymentAmountElectricity?: number // In voorbeeld: number (40.09) niet string!
+  agreedAdvancePaymentAmountGas?: number // In voorbeeld: number (117.61) niet string!
+  customerApprovalLEDs?: boolean // In voorbeeld niet aanwezig, maar was verplicht
   billingIDs?: string[]
 }
 
@@ -75,17 +79,19 @@ export interface GridHubCreateOrderRequestPayload {
     name?: string
     externalReference?: string
   }
-  requestedConnections: GridHubRequestedConnection[]
-  productID: string // "1" voor particulier, "5" voor zakelijk
-  tariffID: string // "11" voor test, "37" voor productie
-  customerApprovalIDs: number[] // [1,2,3]
-  signTimestamp: string // ISO date-time
-  signType: 'DIRECT' | 'SIGNATURE' | 'ESIGNATURE' // DIRECT: Website order, SIGNATURE: Natte handtekening, ESIGNATURE: Digitale handtekening per mail/SMS
-  signSource: string // 'DIRECT_DEBIT_MANDATE', 'EMAIL', etc.
-  signIP: string // Client IP address
-  signData: string // Base64 encoded signature data
+  requestedConnections: GridHubRequestedConnection | GridHubRequestedConnection[] // In voorbeeld: object, niet array!
+  productID: string // "2" in voorbeeld (niet "1")
+  tariffID: string // "34" in voorbeeld (niet "37")
+  customerApprovalIDs: number[] // [1,2] in voorbeeld (niet [1,2,3])
+  signTimestamp: string // Y-m-d H:i:s format (niet ISO)
+  signType: 'DIRECT' | 'SIGNATURE' | 'ESIGNATURE' // In voorbeeld: "DIRECT" (niet "ESIGNATURE")
+  signSource?: string // In voorbeeld: "DIRECT" (optioneel?)
+  signIP?: string // In voorbeeld niet aanwezig (optioneel?)
+  signData?: string // In voorbeeld niet aanwezig (optioneel voor DIRECT?)
+  externalReference?: string // In voorbeeld op root level
   originalCreateTimestamp: string // Verplicht, Y-m-d H:i:s format
-  agreedAdvancePaymentAmount: string // Verplicht, string met 2 decimalen
+  flowQuestion?: any[] // In voorbeeld: lege array
+  agreedAdvancePaymentAmount: number // In voorbeeld: number (157.70) niet string!
 }
 
 export interface GridHubCreateOrderRequestResponse {

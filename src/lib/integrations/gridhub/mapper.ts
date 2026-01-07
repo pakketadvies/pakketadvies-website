@@ -142,7 +142,7 @@ export function mapAanvraagToGridHubOrderRequest(
   const verbruik = aanvraag.verbruik_data
   const leveringsadres = verbruik.leveringsadressen?.[0]
 
-  // Map relation
+  // Map relation (volgens voorbeeld JSON van Energiek.nl)
   const relation: GridHubRelation = {
     type: aanvraag.aanvraag_type === 'particulier' ? 'CONSUMER' : 'BUSINESS',
     firstName: gegevens.voornaam || gegevens.firstName || '',
@@ -154,12 +154,12 @@ export function mapAanvraagToGridHubOrderRequest(
         : gegevens.geslacht === 'vrouw'
           ? 'FEMALE'
           : 'MALE', // Default naar MALE als niet gespecificeerd
-    birthDate: gegevens.geboortedatum || gegevens.birthDate || '', // YYYY-MM-DD
+    birthDate: gegevens.geboortedatum || gegevens.birthDate, // YYYY-MM-DD (optioneel)
     phoneNumber: gegevens.telefoonnummer || gegevens.telefoon || '',
-    emailAddress: gegevens.emailadres || gegevens.email || '',
+    email: gegevens.emailadres || gegevens.email || '', // "email" niet "emailAddress"
     street: leveringsadres?.straat || '',
-    houseNumber: parseInt(leveringsadres?.huisnummer || '0', 10),
-    houseNumberAddition: leveringsadres?.toevoeging,
+    houseNumber: leveringsadres?.huisnummer || '', // String, niet number!
+    houseNumberAddition: leveringsadres?.toevoeging || '',
     postalCode: leveringsadres?.postcode?.replace(/\s/g, '').toUpperCase() || '',
     city: leveringsadres?.plaats || '',
     country: 'NL',
@@ -167,8 +167,9 @@ export function mapAanvraagToGridHubOrderRequest(
     companyCoCNumber: aanvraag.aanvraag_type === 'zakelijk' ? gegevens.kvkNummer : undefined,
     bankAccountType: 'IBAN',
     bankAccountNumber: formatIBAN(aanvraag.iban || ''),
-    paymentMethod: 'AUTOMATICCOLLECTION', // AUTOMATICCOLLECTION voor automatische incasso (volgens GridHub API docs)
-    mandateDate: new Date().toISOString().split('T')[0], // Vandaag
+    debtorName: `${gegevens.voornaam?.[0] || ''}. ${gegevens.achternaam || ''}`.trim() || undefined, // In voorbeeld: "J. Doe"
+    paymentMethod: 'AUTOMATICCOLLECTION',
+    mandateDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
     mandateReference: undefined, // Optioneel
   }
 
@@ -190,12 +191,16 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   const startDateStr = startDate.toISOString().split('T')[0]
 
-  // Map meter type
-  let meterType: 'SMART' | 'CONVENTIONAL' | 'UNKNOWN' = 'UNKNOWN'
+  // Map meter type (volgens voorbeeld: "DOUBLE" voor dubbele meter)
+  let meterType: 'DOUBLE' | 'SINGLE' | 'SMART' | 'CONVENTIONAL' | 'UNKNOWN' = 'UNKNOWN'
   if (verbruik.meterType === 'slim') {
     meterType = 'SMART'
-  } else if (verbruik.meterType === 'enkelvoudig' || verbruik.meterType === 'dubbel') {
-    meterType = 'CONVENTIONAL'
+  } else if (verbruik.heeftDubbeleMeter) {
+    meterType = 'DOUBLE' // In voorbeeld: "DOUBLE"
+  } else if (verbruik.meterType === 'enkelvoudig') {
+    meterType = 'SINGLE'
+  } else if (verbruik.meterType === 'dubbel') {
+    meterType = 'DOUBLE'
   }
 
   // Map switch type
@@ -205,11 +210,14 @@ export function mapAanvraagToGridHubOrderRequest(
 
   const requestedConnection: GridHubRequestedConnection = {
     postalCode: leveringsadres?.postcode?.replace(/\s/g, '').toUpperCase() || '',
-    houseNumber: parseInt(leveringsadres?.huisnummer || '0', 10),
-    houseNumberAddition: leveringsadres?.toevoeging,
+    houseNumber: leveringsadres?.huisnummer || '', // String, niet number!
+    houseNumberAddition: leveringsadres?.toevoeging || '',
     hasElectricity,
     hasGas,
     meterType: hasElectricity ? meterType : undefined,
+    startDateElectricity: hasElectricity ? startDateStr : undefined,
+    startDateGas: hasGas ? startDateStr : undefined,
+    isResidenceFunction: true, // In voorbeeld: true
     capacityCodeElectricity: hasElectricity
       ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeElektriciteit)
       : undefined,
@@ -253,36 +261,38 @@ export function mapAanvraagToGridHubOrderRequest(
     billingIDs: undefined, // Optioneel
   }
 
-  // Bereken advance payment amounts
+  // Bereken advance payment amounts (volgens voorbeeld: numbers, niet strings!)
   const maandbedrag = aanvraag.verbruik_data?.maandbedrag || 0
-  let agreedAdvancePaymentAmountElectricity = '0.00'
-  let agreedAdvancePaymentAmountGas = '0.00'
-  let agreedAdvancePaymentAmount = '0.00'
+  let agreedAdvancePaymentAmountElectricity = 0
+  let agreedAdvancePaymentAmountGas = 0
+  let agreedAdvancePaymentAmount = 0
 
   if (maandbedrag > 0) {
     if (hasElectricity && hasGas) {
       // Split 50/50 tussen elektriciteit en gas
-      const half = (maandbedrag / 2).toFixed(2)
-      agreedAdvancePaymentAmountElectricity = half
-      agreedAdvancePaymentAmountGas = half
-      agreedAdvancePaymentAmount = maandbedrag.toFixed(2)
+      const half = maandbedrag / 2
+      agreedAdvancePaymentAmountElectricity = Math.round(half * 100) / 100 // 2 decimalen
+      agreedAdvancePaymentAmountGas = Math.round(half * 100) / 100
+      agreedAdvancePaymentAmount = Math.round(maandbedrag * 100) / 100
     } else if (hasElectricity) {
-      agreedAdvancePaymentAmountElectricity = maandbedrag.toFixed(2)
-      agreedAdvancePaymentAmountGas = '0.00'
-      agreedAdvancePaymentAmount = maandbedrag.toFixed(2)
+      agreedAdvancePaymentAmountElectricity = Math.round(maandbedrag * 100) / 100
+      agreedAdvancePaymentAmountGas = 0
+      agreedAdvancePaymentAmount = Math.round(maandbedrag * 100) / 100
     } else if (hasGas) {
-      agreedAdvancePaymentAmountElectricity = '0.00'
-      agreedAdvancePaymentAmountGas = maandbedrag.toFixed(2)
-      agreedAdvancePaymentAmount = maandbedrag.toFixed(2)
+      agreedAdvancePaymentAmountElectricity = 0
+      agreedAdvancePaymentAmountGas = Math.round(maandbedrag * 100) / 100
+      agreedAdvancePaymentAmount = Math.round(maandbedrag * 100) / 100
     }
   }
 
-  // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (blijkt toch verplicht te zijn)
-  requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
-  requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
-
-  // Generate sign data (slimme oplossing: hash van formulier data)
-  const signData = generateSignData(gegevens, verbruik, aanvraag.aanvraagnummer, signTimestamp)
+  // Voeg agreedAdvancePaymentAmount toe aan requestedConnection (numbers, niet strings!)
+  // Als hasGas false is, vraag Energiek.nl of we 0 moeten sturen of het field moeten weglaten
+  if (hasElectricity) {
+    requestedConnection.agreedAdvancePaymentAmountElectricity = agreedAdvancePaymentAmountElectricity
+  }
+  if (hasGas) {
+    requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
+  }
 
   // Format timestamps voor GridHub (Y-m-d H:i:s format)
   const formattedSignTimestamp = formatGridHubDateTime(signTimestamp)
@@ -290,25 +300,21 @@ export function mapAanvraagToGridHubOrderRequest(
     ? formatGridHubDateTime(new Date(aanvraag.created_at))
     : formattedSignTimestamp
 
+  // Volgens voorbeeld: requestedConnections is een object, niet een array!
+  // signData en signIP zijn niet aanwezig in voorbeeld (mogelijk niet nodig voor DIRECT)
   return {
     relation,
-    externalUser: {
-      firstName: gegevens.voornaam,
-      lastName: gegevens.achternaam,
-      externalReference: aanvraag.aanvraagnummer, // Ons aanvraagnummer als external reference
-    },
-    externalOrganization: undefined, // Optioneel
-    requestedConnections: [requestedConnection],
     productID: productId,
     tariffID: tariffId,
-    customerApprovalIDs: customerApprovalIDs,
     signTimestamp: formattedSignTimestamp, // Y-m-d H:i:s format
-    signType: 'ESIGNATURE', // ESIGNATURE: Digitale handtekening per mail/SMS (volgens GridHub API docs)
-    signSource: 'EMAIL', // EMAIL voor digitale handtekening via email
-    signIP: clientIP,
-    signData: signData, // Base64 encoded SVG handtekening (GridHub vereist base64 string, SVG is gewenst)
+    signType: 'DIRECT', // In voorbeeld: "DIRECT" (niet "ESIGNATURE")
+    signSource: 'DIRECT', // In voorbeeld: "DIRECT" (niet "EMAIL")
+    externalReference: aanvraag.aanvraagnummer, // In voorbeeld op root level
+    requestedConnections: requestedConnection, // Object, niet array!
+    customerApprovalIDs: customerApprovalIDs,
     originalCreateTimestamp: formattedOriginalTimestamp, // Verplicht op root level, Y-m-d H:i:s format
-    agreedAdvancePaymentAmount: agreedAdvancePaymentAmount, // Verplicht op root level
+    flowQuestion: [], // In voorbeeld: lege array
+    agreedAdvancePaymentAmount: agreedAdvancePaymentAmount, // Number, niet string!
   }
 }
 
