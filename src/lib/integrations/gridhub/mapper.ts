@@ -50,6 +50,9 @@ function mapAansluitwaardeToCapTar(aansluitwaarde: string | undefined): string |
   const gasMapping: Record<string, string> = {
     'G4': '20101', // Standaard kleinverbruik
     'G6': '20102',
+    'G6_LAAG': '20102', // G6 varianten gebruiken dezelfde CapTar code als G6
+    'G6_MIDDEN': '20102',
+    'G6_HOOG': '20102',
     'G10': '20103',
     'G16': '20104',
     'G25': '20105',
