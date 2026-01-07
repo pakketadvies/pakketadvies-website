@@ -18,6 +18,8 @@ interface MapToGridHubOptions {
   customerApprovalIDs: number[]
   clientIP: string
   signTimestamp: Date
+  aanvraagId?: string // Optional: for linking logs to aanvraag
+  aanvraagnummer?: string // Optional: for linking logs to aanvraag
 }
 
 /**
@@ -281,9 +283,7 @@ export function mapAanvraagToGridHubOrderRequest(
     hasElectricityCalculation: `!${verbruik.geenElektriciteitsaansluiting} && (${verbruik.elektriciteitNormaal} || ${verbruik.elektriciteitDal} || ${verbruik.elektriciteitEnkel})`,
   }
   console.log('🔍 [GridHub] Calculated flags:', calculatedFlags)
-  gridHubLogger.debug('CapTar Code Debugging - Calculated flags', calculatedFlags, {
-    aanvraagnummer: aanvraag.aanvraagnummer,
-  })
+  gridHubLogger.debug('CapTar Code Debugging - Calculated flags', calculatedFlags, logContext)
   
   const capacityCodesMapping = {
     hasGas,
@@ -297,7 +297,7 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   console.log('🔍 [GridHub] Capacity codes mapping:', capacityCodesMapping)
   gridHubLogger.debug('CapTar Code Debugging - Capacity codes mapping', capacityCodesMapping, {
-    aanvraagnummer: aanvraag.aanvraagnummer,
+    ...logContext,
     hasGas,
     hasElectricity,
     capacityCodeGas,
@@ -410,7 +410,7 @@ export function mapAanvraagToGridHubOrderRequest(
   // agreedAdvancePaymentAmountGas is VERPLICHT (ook als hasGas false)
   // We moeten het meesturen, maar krijgen 500 error met hasGas: false + 0
   // Dit lijkt een GridHub bug te zijn
-  requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
+    requestedConnection.agreedAdvancePaymentAmountGas = agreedAdvancePaymentAmountGas
   
   if (!hasGas) {
     console.log('ℹ️ [GridHub] hasGas: false, maar agreedAdvancePaymentAmountGas wordt meegestuurd (verplicht veld)')

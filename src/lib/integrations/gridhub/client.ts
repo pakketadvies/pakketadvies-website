@@ -205,6 +205,20 @@ export class GridHubClient {
     }
     
     // Log naar database (non-blocking)
+    // Extract aanvraagId from externalReference (format: PA-2026-000018)
+    // We'll need to look it up, but for now use externalReference as context
+    const logContext: any = {
+      externalReference: payload.externalReference,
+    }
+    
+    // Try to extract aanvraagId from context if available in payload
+    if ((payload as any).__aanvraagId) {
+      logContext.aanvraagId = (payload as any).__aanvraagId
+    }
+    if ((payload as any).__aanvraagnummer) {
+      logContext.aanvraagnummer = (payload as any).__aanvraagnummer
+    }
+    
     gridHubLogger.info('GridHub API Request', {
       url: `${this.config.apiUrl}/orderrequests`,
       method: 'POST',
@@ -212,9 +226,7 @@ export class GridHubClient {
       payload: payloadForLogging,
       requestedConnections: payload.requestedConnections,
       connectionDetails,
-    }, {
-      externalReference: payload.externalReference,
-    })
+    }, logContext)
     
     console.log('📤 [GridHub] ==========================================')
     

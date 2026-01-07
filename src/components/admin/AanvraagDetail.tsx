@@ -175,72 +175,77 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
         </div>
       </div>
 
-      {/* GridHub Status (if applicable) */}
+      {/* GridHub Status & Logs (if applicable) */}
       {(aanvraag as any).external_api_provider === 'GRIDHUB' && (
-        <div className="bg-blue-50 rounded-xl border-2 border-blue-200 p-4 md:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-blue-900">GridHub Status</h2>
-            <button
-              onClick={async () => {
-                setSaving(true)
-                try {
-                  const response = await fetch(`/api/admin/aanvragen/${aanvraag.id}/sync-gridhub`, {
-                    method: 'POST',
-                  })
-                  if (!response.ok) throw new Error('Sync failed')
-                  router.refresh()
-                  alert('Status gesynchroniseerd!')
-                } catch (error) {
-                  alert('Fout bij synchroniseren. Probeer het opnieuw.')
-                } finally {
-                  setSaving(false)
-                }
-              }}
-              disabled={saving}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-            >
-              🔄 Sync Nu
-            </button>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <span className="text-sm text-blue-700">Order ID:</span>
-              <p className="font-mono text-sm text-blue-900 mt-1">
-                {(aanvraag as any).external_order_id || 'N/A'}
-              </p>
+        <>
+          <div className="bg-blue-50 rounded-xl border-2 border-blue-200 p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-blue-900">GridHub Status</h2>
+              <button
+                onClick={async () => {
+                  setSaving(true)
+                  try {
+                    const response = await fetch(`/api/admin/aanvragen/${aanvraag.id}/sync-gridhub`, {
+                      method: 'POST',
+                    })
+                    if (!response.ok) throw new Error('Sync failed')
+                    router.refresh()
+                    alert('Status gesynchroniseerd!')
+                  } catch (error) {
+                    alert('Fout bij synchroniseren. Probeer het opnieuw.')
+                  } finally {
+                    setSaving(false)
+                  }
+                }}
+                disabled={saving}
+                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                🔄 Sync Nu
+              </button>
             </div>
-            <div>
-              <span className="text-sm text-blue-700">Status:</span>
-              <p className="font-semibold text-blue-900 mt-1">
-                {(aanvraag as any).external_status || 'N/A'}
-              </p>
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm text-blue-700">Order ID:</span>
+                <p className="font-mono text-sm text-blue-900 mt-1">
+                  {(aanvraag as any).external_order_id || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm text-blue-700">Status:</span>
+                <p className="font-semibold text-blue-900 mt-1">
+                  {(aanvraag as any).external_status || 'N/A'}
+                </p>
+              </div>
+              {(aanvraag as any).external_status_reason && (
+                <div>
+                  <span className="text-sm text-blue-700">Status Reden:</span>
+                  <p className="text-sm text-blue-800 mt-1">
+                    {(aanvraag as any).external_status_reason}
+                  </p>
+                </div>
+              )}
+              {(aanvraag as any).external_last_sync && (
+                <div>
+                  <span className="text-sm text-blue-700">Laatste Sync:</span>
+                  <p className="text-sm text-blue-800 mt-1">
+                    {formatDate((aanvraag as any).external_last_sync)}
+                  </p>
+                </div>
+              )}
+              {(aanvraag as any).external_errors && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <span className="text-sm font-semibold text-red-700">API Error:</span>
+                  <p className="text-sm text-red-600 mt-1">
+                    {JSON.stringify((aanvraag as any).external_errors, null, 2)}
+                  </p>
+                </div>
+              )}
             </div>
-            {(aanvraag as any).external_status_reason && (
-              <div>
-                <span className="text-sm text-blue-700">Status Reden:</span>
-                <p className="text-sm text-blue-800 mt-1">
-                  {(aanvraag as any).external_status_reason}
-                </p>
-              </div>
-            )}
-            {(aanvraag as any).external_last_sync && (
-              <div>
-                <span className="text-sm text-blue-700">Laatste Sync:</span>
-                <p className="text-sm text-blue-800 mt-1">
-                  {formatDate((aanvraag as any).external_last_sync)}
-                </p>
-              </div>
-            )}
-            {(aanvraag as any).external_errors && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <span className="text-sm font-semibold text-red-700">API Error:</span>
-                <p className="text-sm text-red-600 mt-1">
-                  {JSON.stringify((aanvraag as any).external_errors, null, 2)}
-                </p>
-              </div>
-            )}
           </div>
-        </div>
+
+          {/* GridHub Logs */}
+          <GridHubLogsSection aanvraagId={aanvraag.id} />
+        </>
       )}
 
       {/* Status Management */}

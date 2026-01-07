@@ -27,12 +27,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Fetch latest GridHub logs (last 50)
-    const { data: logs, error } = await supabase
+    // Check if filtering by aanvraag_id
+    const { searchParams } = new URL(request.url)
+    const aanvraagId = searchParams.get('aanvraag_id')
+
+    let query = supabase
       .from('gridhub_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50)
+
+    if (aanvraagId) {
+      query = query.eq('aanvraag_id', aanvraagId)
+    } else {
+      query = query.limit(50)
+    }
+
+    const { data: logs, error } = await query
 
     if (error) {
       console.error('Error fetching GridHub logs:', error)
@@ -54,6 +64,9 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
+    // Extract aanvraag_id from context if available
+    const aanvraagId = context?.aanvraagId || null
+
     // Insert log (no auth required for logging, but we'll validate the data)
     const { data: log, error } = await supabase
       .from('gridhub_logs')
@@ -62,6 +75,7 @@ export async function POST(request: NextRequest) {
         message: message || '',
         data: data || {},
         context: context || {},
+        aanvraag_id: aanvraagId,
         created_at: new Date().toISOString(),
       })
       .select()

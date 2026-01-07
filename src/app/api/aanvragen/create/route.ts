@@ -417,6 +417,7 @@ export async function POST(request: Request) {
           const tariffId = apiConfig.environment === 'production' ? tariefIds.production : tariefIds.test
           
           // Map aanvraag to GridHub format
+          // Pass aanvraagId to mapper so all logs are linked to this aanvraag
           const gridhubPayload = mapAanvraagToGridHubOrderRequest({
             aanvraag: data,
             productId,
@@ -424,7 +425,13 @@ export async function POST(request: Request) {
             customerApprovalIDs: apiConfig.customer_approval_ids,
             clientIP: clientIP,
             signTimestamp: new Date(),
+            aanvraagId: data.id, // Pass aanvraagId for logging
+            aanvraagnummer: aanvraagnummer, // Pass aanvraagnummer for logging
           })
+          
+          // Add aanvraagId to payload for client logging (will be removed before sending)
+          ;(gridhubPayload as any).__aanvraagId = data.id
+          ;(gridhubPayload as any).__aanvraagnummer = aanvraagnummer
           
           // Log payload voor debugging (zonder gevoelige data)
           const requestedConnections = gridhubPayload.requestedConnections as any
@@ -441,9 +448,31 @@ export async function POST(request: Request) {
           
           // Call GridHub API
           console.log('📤 [GridHub] Sending order request to GridHub...')
+          
+          // Log ALL GridHub activity for this aanvraag
+          const { gridHubLogger } = await import('@/lib/integrations/gridhub/logger')
+          await gridHubLogger.info('Starting GridHub API call', {
+            aanvraagId: data.id,
+            aanvraagnummer,
+            productId,
+            tariffId,
+          }, {
+            aanvraagId: data.id,
+            aanvraagnummer,
+          })
+          
           const gridhubResponse = await gridhubClient.createOrderRequest(gridhubPayload)
           
           console.log('✅ [GridHub] Order request created successfully:', gridhubResponse.orderRequestId)
+          
+          // Log success
+          await gridHubLogger.info('GridHub API call successful', {
+            orderRequestId: gridhubResponse.orderRequestId,
+            response: gridhubResponse,
+          }, {
+            aanvraagId: data.id,
+            aanvraagnummer,
+          })
           
           // Update aanvraag with GridHub response
           await supabase
