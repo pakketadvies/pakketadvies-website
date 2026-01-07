@@ -143,6 +143,17 @@ export class GridHubClient {
   ): Promise<GridHubCreateOrderRequestResponse> {
     const authToken = await this.getAuthToken()
     
+    // Log full payload for debugging (without sensitive data)
+    const payloadForLogging = {
+      ...payload,
+      relation: {
+        ...payload.relation,
+        bankAccountNumber: payload.relation.bankAccountNumber ? '***REDACTED***' : undefined,
+      },
+    }
+    console.log('📤 [GridHub] Full payload being sent:', JSON.stringify(payloadForLogging, null, 2))
+    console.log('🔍 [GridHub] requestedConnections details:', JSON.stringify(payload.requestedConnections, null, 2))
+    
     const response = await fetch(`${this.config.apiUrl}/orderrequests`, {
       method: 'POST',
       headers: {
