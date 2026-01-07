@@ -223,6 +223,7 @@ async function main() {
       tariffId,
       customerApprovalIDs: apiConfig.customer_approval_ids as number[],
       clientIP: '127.0.0.1',
+      signTimestamp: new Date(),
     })
 
     log('✅ Payload mapped to GridHub format')
