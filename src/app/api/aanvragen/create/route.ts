@@ -426,11 +426,12 @@ export async function POST(request: Request) {
           })
           
           // Log payload voor debugging (zonder gevoelige data)
+          const requestedConnections = gridhubPayload.requestedConnections as any
           console.log('📤 [GridHub] Payload details:', {
-            hasGas: gridhubPayload.requestedConnections.hasGas,
-            capacityCodeGas: (gridhubPayload.requestedConnections as any).capacityCodeGas,
-            hasElectricity: gridhubPayload.requestedConnections.hasElectricity,
-            capacityCodeElectricity: (gridhubPayload.requestedConnections as any).capacityCodeElectricity,
+            hasGas: requestedConnections.hasGas,
+            capacityCodeGas: requestedConnections.capacityCodeGas,
+            hasElectricity: requestedConnections.hasElectricity,
+            capacityCodeElectricity: requestedConnections.capacityCodeElectricity,
             verbruikData: {
               aansluitwaardeGas: data.verbruik_data?.aansluitwaardeGas,
               aansluitwaardeElektriciteit: data.verbruik_data?.aansluitwaardeElektriciteit,
