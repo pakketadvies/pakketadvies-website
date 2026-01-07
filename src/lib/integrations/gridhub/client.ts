@@ -5,6 +5,8 @@
  * Documentation: https://gridhub.stoplight.io/docs/gridhub-external
  */
 
+import { gridHubLogger } from './logger'
+
 export interface GridHubConfig {
   apiUrl: string // https://energiek.gridhub.cloud/api/external/v1
   username: string
@@ -161,6 +163,7 @@ export class GridHubClient {
       },
     }
     
+    // Uitgebreide payload logging voor debugging
     console.log('📤 [GridHub] ========== API REQUEST DETAILS ==========')
     console.log('📤 [GridHub] Request URL:', `${this.config.apiUrl}/orderrequests`)
     console.log('📤 [GridHub] Request method: POST')
@@ -173,19 +176,23 @@ export class GridHubClient {
     
     // Specifieke logging voor CapTar codes
     const requestedConnections = payload.requestedConnections as any
+    let connectionDetails: any
+    
     if (Array.isArray(requestedConnections)) {
+      connectionDetails = requestedConnections.map((conn, index) => ({
+        index,
+        hasElectricity: conn.hasElectricity,
+        hasGas: conn.hasGas,
+        capacityCodeElectricity: conn.capacityCodeElectricity || 'NOT SET',
+        capacityCodeGas: conn.capacityCodeGas || 'NOT SET',
+        agreedAdvancePaymentAmountElectricity: conn.agreedAdvancePaymentAmountElectricity,
+        agreedAdvancePaymentAmountGas: conn.agreedAdvancePaymentAmountGas,
+      }))
       requestedConnections.forEach((conn, index) => {
-        console.log(`🔍 [GridHub] requestedConnections[${index}]:`, {
-          hasElectricity: conn.hasElectricity,
-          hasGas: conn.hasGas,
-          capacityCodeElectricity: conn.capacityCodeElectricity || 'NOT SET',
-          capacityCodeGas: conn.capacityCodeGas || 'NOT SET',
-          agreedAdvancePaymentAmountElectricity: conn.agreedAdvancePaymentAmountElectricity,
-          agreedAdvancePaymentAmountGas: conn.agreedAdvancePaymentAmountGas,
-        })
+        console.log(`🔍 [GridHub] requestedConnections[${index}]:`, connectionDetails[index])
       })
     } else {
-      console.log('🔍 [GridHub] requestedConnections (single object):', {
+      connectionDetails = {
         hasElectricity: requestedConnections.hasElectricity,
         hasGas: requestedConnections.hasGas,
         capacityCodeElectricity: requestedConnections.capacityCodeElectricity || 'NOT SET',
@@ -193,8 +200,22 @@ export class GridHubClient {
         agreedAdvancePaymentAmountElectricity: requestedConnections.agreedAdvancePaymentAmountElectricity,
         agreedAdvancePaymentAmountGas: requestedConnections.agreedAdvancePaymentAmountGas,
         allKeys: Object.keys(requestedConnections).sort(),
-      })
+      }
+      console.log('🔍 [GridHub] requestedConnections (single object):', connectionDetails)
     }
+    
+    // Log naar database (non-blocking)
+    gridHubLogger.info('GridHub API Request', {
+      url: `${this.config.apiUrl}/orderrequests`,
+      method: 'POST',
+      environment: this.config.environment,
+      payload: payloadForLogging,
+      requestedConnections: payload.requestedConnections,
+      connectionDetails,
+    }, {
+      externalReference: payload.externalReference,
+    })
+    
     console.log('📤 [GridHub] ==========================================')
     
     const response = await fetch(`${this.config.apiUrl}/orderrequests`, {

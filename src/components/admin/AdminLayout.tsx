@@ -87,6 +87,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       active: pathname.startsWith('/admin/test-e2e'),
     },
     {
+      name: 'GridHub Debug',
+      href: '/admin/gridhub-debug',
+      icon: Bug,
+      active: pathname.startsWith('/admin/gridhub-debug'),
+    },
+    {
       name: 'Newsletter',
       href: '/admin/newsletter-preview',
       icon: Envelope,

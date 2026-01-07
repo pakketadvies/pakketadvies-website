@@ -256,8 +256,7 @@ export function mapAanvraagToGridHubOrderRequest(
   const capacityCodeGas = hasGas ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeGas) : undefined
 
   // Uitgebreide logging voor CapTar codes debugging
-  console.log('🔍 [GridHub] ========== CAPTAR CODE DEBUGGING ==========')
-  console.log('🔍 [GridHub] Input verbruik data:', {
+  const verbruikData = {
     geenGasaansluiting: verbruik.geenGasaansluiting,
     gasJaar: verbruik.gasJaar,
     aansluitwaardeGas: verbruik.aansluitwaardeGas,
@@ -265,14 +264,27 @@ export function mapAanvraagToGridHubOrderRequest(
     elektriciteitNormaal: verbruik.elektriciteitNormaal,
     elektriciteitDal: verbruik.elektriciteitDal,
     elektriciteitEnkel: verbruik.elektriciteitEnkel,
+  }
+  
+  // Log naar console EN database (non-blocking)
+  console.log('🔍 [GridHub] ========== CAPTAR CODE DEBUGGING ==========')
+  console.log('🔍 [GridHub] Input verbruik data:', verbruikData)
+  gridHubLogger.debug('CapTar Code Debugging - Input verbruik data', verbruikData, {
+    aanvraagnummer: aanvraag.aanvraagnummer,
   })
-  console.log('🔍 [GridHub] Calculated flags:', {
+  
+  const calculatedFlags = {
     hasGas,
     hasElectricity,
     hasGasCalculation: `!${verbruik.geenGasaansluiting} && ${verbruik.gasJaar} > 0 = ${!verbruik.geenGasaansluiting && verbruik.gasJaar > 0}`,
     hasElectricityCalculation: `!${verbruik.geenElektriciteitsaansluiting} && (${verbruik.elektriciteitNormaal} || ${verbruik.elektriciteitDal} || ${verbruik.elektriciteitEnkel})`,
+  }
+  console.log('🔍 [GridHub] Calculated flags:', calculatedFlags)
+  gridHubLogger.debug('CapTar Code Debugging - Calculated flags', calculatedFlags, {
+    aanvraagnummer: aanvraag.aanvraagnummer,
   })
-  console.log('🔍 [GridHub] Capacity codes mapping:', {
+  
+  const capacityCodesMapping = {
     hasGas,
     aansluitwaardeGas: verbruik.aansluitwaardeGas,
     capacityCodeGas,
@@ -281,6 +293,14 @@ export function mapAanvraagToGridHubOrderRequest(
     aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit,
     capacityCodeElectricity,
     capacityCodeElectricitySource: hasElectricity ? `mapAansluitwaardeToCapTar("${verbruik.aansluitwaardeElektriciteit}")` : 'undefined (hasElectricity=false)',
+  }
+  console.log('🔍 [GridHub] Capacity codes mapping:', capacityCodesMapping)
+  gridHubLogger.debug('CapTar Code Debugging - Capacity codes mapping', capacityCodesMapping, {
+    aanvraagnummer: aanvraag.aanvraagnummer,
+    hasGas,
+    hasElectricity,
+    capacityCodeGas,
+    capacityCodeElectricity,
   })
   console.log('🔍 [GridHub] ===========================================')
 
