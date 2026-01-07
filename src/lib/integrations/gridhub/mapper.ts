@@ -282,18 +282,30 @@ export function mapAanvraagToGridHubOrderRequest(
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
     }
     // CRITICAL: capacityCodeGas is verplicht als hasGas true is
-    if (capacityCodeGas) {
-      requestedConnection.capacityCodeGas = capacityCodeGas
-    } else {
+    // GridHub verwacht een geldige CapTar code
+    if (!capacityCodeGas) {
       console.error('❌ [GridHub] CRITICAL: hasGas is true but capacityCodeGas is undefined/null!', {
         aansluitwaardeGas: verbruik.aansluitwaardeGas,
         hasGas,
         capacityCodeGas,
+        verbruikData: JSON.stringify(verbruik, null, 2),
       })
-      // We moeten toch een waarde sturen, anders faalt de API
-      // Fallback naar G6 code
-      requestedConnection.capacityCodeGas = '20102'
-      console.warn('⚠️ [GridHub] Using fallback capacityCodeGas: 20102 (G6)')
+      // Probeer fallback: als aansluitwaardeGas bestaat maar niet gemapped kan worden,
+      // probeer dan de basis G6 code
+      if (verbruik.aansluitwaardeGas) {
+        const fallbackCode = '20102' // G6 standaard
+        requestedConnection.capacityCodeGas = fallbackCode
+        console.warn(`⚠️ [GridHub] Using fallback capacityCodeGas: ${fallbackCode} (G6) for aansluitwaarde: ${verbruik.aansluitwaardeGas}`)
+      } else {
+        // Als er helemaal geen aansluitwaardeGas is, kunnen we niets doen
+        // Dit zou niet moeten gebeuren als hasGas true is
+        console.error('❌ [GridHub] FATAL: hasGas is true but aansluitwaardeGas is missing from verbruik_data!')
+        // We moeten toch iets sturen, anders faalt de API
+        requestedConnection.capacityCodeGas = '20102'
+      }
+    } else {
+      requestedConnection.capacityCodeGas = capacityCodeGas
+      console.log(`✅ [GridHub] capacityCodeGas set to: ${capacityCodeGas} (from aansluitwaarde: ${verbruik.aansluitwaardeGas})`)
     }
   }
 
