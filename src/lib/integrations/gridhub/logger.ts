@@ -46,25 +46,52 @@ export async function logGridHub(
       console.log(logPrefix, message, data || '')
   }
 
-  // Try to save to database (non-blocking, don't fail if it doesn't work)
+  // Save to database (server-side only, non-blocking)
   try {
-    // Use fetch to save log (works in both server and client contexts)
-    await fetch('/api/admin/gridhub-logs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        level,
-        message,
-        data: data || {},
-        context: context || {},
-      }),
-    }).catch(() => {
-      // Silently fail - logging should never break the app
-    })
+    // Only run on server-side (Next.js API routes)
+    if (typeof window === 'undefined') {
+      // Dynamically import Supabase to avoid issues
+      const { createClient } = await import('@supabase/supabase-js')
+      
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.warn('[GridHub Logger] Supabase credentials not available, skipping database log')
+        return
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      )
+
+      // Extract aanvraag_id from context
+      const aanvraagId = context?.aanvraagId || null
+
+      // Insert log directly into database
+      await supabase
+        .from('gridhub_logs')
+        .insert({
+          level: level || 'info',
+          message: message || '',
+          data: data || {},
+          context: context || {},
+          aanvraag_id: aanvraagId,
+          created_at: new Date().toISOString(),
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error('[GridHub Logger] Failed to save log to database:', error)
+          }
+        })
+    }
   } catch (error) {
     // Silently fail - logging should never break the app
+    console.error('[GridHub Logger] Error saving to database:', error)
   }
 }
 
