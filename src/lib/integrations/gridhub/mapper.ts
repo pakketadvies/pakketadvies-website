@@ -51,17 +51,19 @@ function mapAansluitwaardeToCapTar(aansluitwaarde: string | undefined): string |
   }
 
   // Mapping tabel voor gas (meest voorkomende)
+  // TEST: Gebruik tijdelijk 10211 voor alle gas aansluitingen om te testen of GridHub dit accepteert
+  // Dit is dezelfde code als voor elektriciteit 3x25A - mogelijk gebruikt GridHub dezelfde codes?
   const gasMapping: Record<string, string> = {
-    'G4': '20101', // Standaard kleinverbruik
-    'G6': '20102',
-    'G6_LAAG': '20102', // G6 varianten gebruiken dezelfde CapTar code als G6
-    'G6_MIDDEN': '20102',
-    'G6_HOOG': '20102',
-    'G10': '20103',
-    'G16': '20104',
-    'G25': '20105',
-    'G40': '20106',
-    'G65': '20107',
+    'G4': '10211', // TEST: Was '20101', nu '10211' om te testen
+    'G6': '10211', // TEST: Was '20102', nu '10211' om te testen
+    'G6_LAAG': '10211', // TEST: Was '20102', nu '10211' om te testen
+    'G6_MIDDEN': '10211', // TEST: Was '20102', nu '10211' om te testen
+    'G6_HOOG': '10211', // TEST: Was '20102', nu '10211' om te testen
+    'G10': '10211', // TEST: Was '20103', nu '10211' om te testen
+    'G16': '10211', // TEST: Was '20104', nu '10211' om te testen
+    'G25': '10211', // TEST: Was '20105', nu '10211' om te testen
+    'G40': '10211', // TEST: Was '20106', nu '10211' om te testen
+    'G65': '10211', // TEST: Was '20107', nu '10211' om te testen
     // Voeg meer mappings toe indien nodig
   }
 
@@ -283,35 +285,28 @@ export function mapAanvraagToGridHubOrderRequest(
     }
     // CRITICAL: capacityCodeGas is verplicht als hasGas true is
     // GridHub geeft 500 error zonder capacityCodeGas, en 422 error met "20102"
-    // Dit suggereert dat het veld verplicht is, maar de code "20102" ongeldig is
     // 
-    // PROBLEEM: We gebruiken momenteel "20102" voor G6 gas, maar GridHub wijst dit af
-    // OPLOSSING: Contact Energiek/GridHub voor correcte CapTar code mapping voor gas
+    // TEST: We testen nu met "10211" (dezelfde code als elektriciteit 3x25A)
+    // Mogelijk gebruikt GridHub dezelfde CapTar codes voor elektriciteit en gas?
     // 
-    // CapTar codes zijn 5-cijferige codes die de aansluitcapaciteit beschrijven
-    // Voor elektriciteit gebruiken we: 10211 (3x25A), 10212 (3x35A), etc.
-    // Voor gas proberen we: 20101 (G4), 20102 (G6), 20103 (G10), etc.
-    // Maar GridHub accepteert "20102" niet - mogelijk is de mapping incorrect
-    //
-    // ACM Tarievencode elektriciteit beschrijft wel aansluitcapaciteiten maar geen CapTar codes
-    // CapTar codes lijken een aparte standaard te zijn die door GridHub wordt gebruikt
+    // Als deze test slaagt, weten we dat GridHub "10211" accepteert voor gas
+    // Als deze test faalt, moeten we contact opnemen met Energiek/GridHub voor correcte mapping
     if (capacityCodeGas) {
-      // Stuur de code mee - GridHub verwacht waarschijnlijk een waarde
-      // Als de code ongeldig is, krijgen we een 422 error (niet 500)
+      // TEST: Stuur "10211" mee voor alle gas aansluitingen
       requestedConnection.capacityCodeGas = capacityCodeGas
-      console.log(`✅ [GridHub] capacityCodeGas set to: ${capacityCodeGas} (from aansluitwaarde: ${verbruik.aansluitwaardeGas})`)
-      console.warn(`⚠️ [GridHub] WARNING: GridHub heeft eerder 422 error gegeven voor capacityCodeGas "20102"`)
-      console.warn(`⚠️ [GridHub] Als deze aanvraag faalt met 422, contacteer Energiek/GridHub voor correcte CapTar code mapping`)
+      console.log(`🧪 [GridHub] TEST: capacityCodeGas set to: ${capacityCodeGas} (from aansluitwaarde: ${verbruik.aansluitwaardeGas})`)
+      console.log(`🧪 [GridHub] TEST: We testen met CapTar code "10211" voor gas (normaal voor elektriciteit 3x25A)`)
+      console.log(`🧪 [GridHub] TEST: Als dit werkt, gebruikt GridHub mogelijk dezelfde codes voor beide`)
+      console.log(`🧪 [GridHub] TEST: Als dit faalt, moeten we contact opnemen met Energiek/GridHub`)
     } else {
       console.error('❌ [GridHub] CRITICAL: hasGas is true but capacityCodeGas is undefined/null!', {
         aansluitwaardeGas: verbruik.aansluitwaardeGas,
         hasGas,
         capacityCodeGas,
       })
-      // Fallback: probeer met G6 code (20102) - GridHub geeft mogelijk 422 maar dat is beter dan 500
-      requestedConnection.capacityCodeGas = '20102'
-      console.warn('⚠️ [GridHub] Using fallback capacityCodeGas: 20102 (G6) - GridHub kan dit afwijzen met 422')
-      console.warn('⚠️ [GridHub] CONTACT ENERGIEK/GRIDHUB voor correcte CapTar code mapping voor gas!')
+      // TEST: Fallback naar 10211 in plaats van 20102
+      requestedConnection.capacityCodeGas = '10211'
+      console.warn('🧪 [GridHub] TEST: Using fallback capacityCodeGas: 10211 (TEST - was 20102)')
     }
   }
 
