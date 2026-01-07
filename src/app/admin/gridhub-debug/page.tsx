@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Copy, Check, Trash, RefreshCw, Filter, X } from '@phosphor-icons/react'
+import { Copy, Check, Trash, ArrowClockwise, Funnel, X } from '@phosphor-icons/react'
 
 interface GridHubLog {
   id: string
@@ -165,14 +165,14 @@ export default function GridHubDebugPage() {
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  <RefreshCw size={20} weight={autoRefresh ? 'fill' : 'regular'} />
+                  <ArrowClockwise size={20} weight={autoRefresh ? 'fill' : 'regular'} />
                   Auto-refresh {autoRefresh ? 'ON' : 'OFF'}
                 </button>
                 <button
                   onClick={fetchLogs}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-brand-teal-500 text-white rounded-lg hover:bg-brand-teal-600 transition-colors"
                 >
-                  <RefreshCw size={20} />
+                  <ArrowClockwise size={20} />
                   Refresh
                 </button>
                 <button
@@ -197,7 +197,7 @@ export default function GridHubDebugPage() {
             {/* Filters */}
             <div className="mb-4 flex gap-4 items-center">
               <div className="flex items-center gap-2">
-                <Filter size={20} className="text-gray-500" />
+                <Funnel size={20} className="text-gray-500" />
                 <select
                   value={filterLevel}
                   onChange={(e) => setFilterLevel(e.target.value)}
