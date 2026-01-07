@@ -435,6 +435,15 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
       </div>
 
       {/* GridHub Status & Logs (if applicable) */}
+      {(() => {
+        console.log('🔍 [AanvraagDetail] Checking GridHub provider:', {
+          external_api_provider: (aanvraag as any).external_api_provider,
+          external_order_id: (aanvraag as any).external_order_id,
+          external_status: (aanvraag as any).external_status,
+          hasGridHub: (aanvraag as any).external_api_provider === 'GRIDHUB',
+        })
+        return null
+      })()}
       {(aanvraag as any).external_api_provider === 'GRIDHUB' && (
         <>
           <div className="bg-blue-50 rounded-xl border-2 border-blue-200 p-4 md:p-6">
