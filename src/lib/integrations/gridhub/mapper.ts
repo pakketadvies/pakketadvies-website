@@ -336,16 +336,21 @@ export function mapAanvraagToGridHubOrderRequest(
   console.log('🔍 [GridHub] Initial requestedConnection:', JSON.stringify(requestedConnection, null, 2))
 
   // Only add optional fields if they have values
+  // IMPORTANT: Based on working Energiek.nl example, we should NOT send:
+  // - capacityCodeElectricity/Gas (not in example!)
+  // - hasP1Data (not in example!)
+  // - customerApprovalLEDs (not in example!)
   if (hasElectricity) {
-    if (meterType) requestedConnection.meterType = meterType
+    if (meterType && meterType !== 'UNKNOWN') requestedConnection.meterType = meterType
     if (startDateStr) requestedConnection.startDateElectricity = startDateStr
-    if (capacityCodeElectricity) requestedConnection.capacityCodeElectricity = capacityCodeElectricity
-    if (switchType) requestedConnection.switchTypeElectricity = switchType
-    if (verbruik.meterType === 'slim') requestedConnection.hasP1Data = true
+    // NO capacityCodeElectricity - not in Energiek example!
+    if (switchType && switchType !== 'UNKNOWN') requestedConnection.switchTypeElectricity = switchType
+    // NO hasP1Data - not in Energiek example!
     
     // Note: isDoubleMeter is already determined above, near meterType detection
     console.log('🔍 [GridHub] Using electricity values for meter type:', {
       isDoubleMeter,
+      meterType,
       elektriciteitNormaal: verbruik.elektriciteitNormaal,
       elektriciteitDal: verbruik.elektriciteitDal,
       elektriciteitEnkel: verbruik.elektriciteitEnkel,
@@ -380,28 +385,21 @@ export function mapAanvraagToGridHubOrderRequest(
   if (hasGas) {
     console.log('🔍 [GridHub] hasGas is TRUE - Adding gas fields...')
     if (startDateStr) requestedConnection.startDateGas = startDateStr
-    if (switchType) requestedConnection.switchTypeGas = switchType
+    if (switchType && switchType !== 'UNKNOWN') requestedConnection.switchTypeGas = switchType
     if (verbruik.gasJaar) {
       requestedConnection.usageGas = Math.round(verbruik.gasJaar).toString()
     }
-    // VOLGENS ENERGIEK.NL: andere prijsvergelijkers sturen capacityCodeGas NIET mee
-    // We laten capacityCodeGas daarom weg, ook als hasGas true is
-    // Dit is volgens het advies van Energiek.nl
-    console.log('ℹ️ [GridHub] capacityCodeGas wordt WEGGELATEN (volgens advies Energiek.nl)')
-    console.log('ℹ️ [GridHub] Andere prijsvergelijkers sturen deze ook niet mee')
+    // NO capacityCodeGas - not in Energiek example!
     console.log('🔍 [GridHub] Gas fields added:', {
       startDateGas: requestedConnection.startDateGas,
       switchTypeGas: requestedConnection.switchTypeGas,
       usageGas: requestedConnection.usageGas,
-      capacityCodeGas: 'WEGGELATEN',
     })
   } else {
     console.log('🔍 [GridHub] hasGas is FALSE - No gas fields added')
-    console.log('🔍 [GridHub] capacityCodeGas wordt sowieso niet meegestuurd (hasGas=false)')
   }
 
-  // Always set these
-  requestedConnection.customerApprovalLEDs = true // Verplicht: true
+  // NO customerApprovalLEDs - not in Energiek example!
 
   // Bereken advance payment amounts (volgens voorbeeld: numbers, niet strings!)
   const maandbedrag = aanvraag.verbruik_data?.maandbedrag || 0
