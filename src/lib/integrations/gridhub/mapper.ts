@@ -331,21 +331,38 @@ export function mapAanvraagToGridHubOrderRequest(
     if (switchType) requestedConnection.switchTypeElectricity = switchType
     if (verbruik.meterType === 'slim') requestedConnection.hasP1Data = true
     
-    if (verbruik.elektriciteitNormaal && verbruik.heeftDubbeleMeter) {
+    // Detect if user has a double meter by checking if BOTH normaal AND dal are filled
+    const hasDoubleValues = verbruik.elektriciteitNormaal > 0 && verbruik.elektriciteitDal > 0
+    const isDoubleMeter = verbruik.heeftDubbeleMeter || hasDoubleValues
+    
+    console.log('🔍 [GridHub] Meter type detection:', {
+      heeftDubbeleMeter: verbruik.heeftDubbeleMeter,
+      hasDoubleValues,
+      isDoubleMeter,
+      elektriciteitNormaal: verbruik.elektriciteitNormaal,
+      elektriciteitDal: verbruik.elektriciteitDal,
+      elektriciteitEnkel: verbruik.elektriciteitEnkel,
+    })
+    
+    if (verbruik.elektriciteitNormaal && isDoubleMeter) {
       requestedConnection.usageElectricityHigh = Math.round(verbruik.elektriciteitNormaal).toString()
+      console.log('✅ [GridHub] Added usageElectricityHigh:', requestedConnection.usageElectricityHigh)
     }
-    if (verbruik.elektriciteitDal && verbruik.heeftDubbeleMeter) {
+    if (verbruik.elektriciteitDal && isDoubleMeter) {
       requestedConnection.usageElectricityLow = Math.round(verbruik.elektriciteitDal).toString()
+      console.log('✅ [GridHub] Added usageElectricityLow:', requestedConnection.usageElectricityLow)
     }
-    if (!verbruik.heeftDubbeleMeter) {
+    if (!isDoubleMeter) {
       if (verbruik.elektriciteitEnkel) {
         requestedConnection.usageElectricitySingle = Math.round(verbruik.elektriciteitEnkel).toString()
+        console.log('✅ [GridHub] Added usageElectricitySingle (from enkel):', requestedConnection.usageElectricitySingle)
       } else if (verbruik.elektriciteitNormaal) {
         requestedConnection.usageElectricitySingle = Math.round(verbruik.elektriciteitNormaal).toString()
+        console.log('✅ [GridHub] Added usageElectricitySingle (from normaal):', requestedConnection.usageElectricitySingle)
       }
     }
     if (verbruik.terugleveringJaar && verbruik.terugleveringJaar > 0) {
-      if (verbruik.heeftDubbeleMeter) {
+      if (isDoubleMeter) {
         requestedConnection.returnElectricityHigh = Math.round(verbruik.terugleveringJaar).toString()
       } else {
         requestedConnection.returnElectricitySingle = Math.round(verbruik.terugleveringJaar).toString()
