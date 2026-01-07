@@ -8,6 +8,7 @@ import type {
   GridHubRelation,
   GridHubRequestedConnection,
 } from './client'
+import { gridHubLogger } from './logger'
 import crypto from 'crypto'
 
 interface MapToGridHubOptions {
