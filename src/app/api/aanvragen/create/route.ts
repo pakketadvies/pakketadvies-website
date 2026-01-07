@@ -379,14 +379,38 @@ export async function POST(request: Request) {
     // ============================================
     try {
       // Check if leverancier has GridHub API config
-      const { data: apiConfig } = await supabase
+      // First try to find production config, then fall back to test
+      let apiConfig = null
+      
+      // Try production first
+      const { data: prodConfig } = await supabase
         .from('leverancier_api_config')
         .select('*')
         .eq('leverancier_id', body.leverancier_id)
         .eq('provider', 'GRIDHUB')
-        .eq('environment', process.env.NODE_ENV === 'production' ? 'production' : 'test')
+        .eq('environment', 'production')
         .eq('actief', true)
         .single()
+      
+      if (prodConfig) {
+        apiConfig = prodConfig
+        console.log('🔄 [GridHub] Found PRODUCTION config')
+      } else {
+        // Try test config as fallback
+        const { data: testConfig } = await supabase
+          .from('leverancier_api_config')
+          .select('*')
+          .eq('leverancier_id', body.leverancier_id)
+          .eq('provider', 'GRIDHUB')
+          .eq('environment', 'test')
+          .eq('actief', true)
+          .single()
+        
+        if (testConfig) {
+          apiConfig = testConfig
+          console.log('🔄 [GridHub] Found TEST config')
+        }
+      }
 
       if (apiConfig) {
         console.log('🔄 [GridHub] API config found, attempting to create order request...')
