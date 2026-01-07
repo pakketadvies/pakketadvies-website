@@ -235,17 +235,29 @@ export function mapAanvraagToGridHubOrderRequest(
   }
   const startDateStr = startDate.toISOString().split('T')[0]
 
+  // Detect if user has a double meter BEFORE mapping meterType
+  // We'll use this for both meterType and usage fields
+  const hasDoubleValues = (verbruik.elektriciteitNormaal || 0) > 0 && (verbruik.elektriciteitDal || 0) > 0
+  const isDoubleMeter = verbruik.heeftDubbeleMeter || hasDoubleValues || verbruik.meterType === 'dubbel'
+
   // Map meter type (volgens voorbeeld: "DOUBLE" voor dubbele meter)
+  // Priority: DOUBLE if meter is double (even if smart), then SMART, then others
   let meterType: 'DOUBLE' | 'SINGLE' | 'SMART' | 'CONVENTIONAL' | 'UNKNOWN' = 'UNKNOWN'
-  if (verbruik.meterType === 'slim') {
+  if (isDoubleMeter) {
+    meterType = 'DOUBLE' // In voorbeeld: "DOUBLE" - takes priority over SMART!
+  } else if (verbruik.meterType === 'slim') {
     meterType = 'SMART'
-  } else if (verbruik.heeftDubbeleMeter) {
-    meterType = 'DOUBLE' // In voorbeeld: "DOUBLE"
   } else if (verbruik.meterType === 'enkelvoudig') {
     meterType = 'SINGLE'
-  } else if (verbruik.meterType === 'dubbel') {
-    meterType = 'DOUBLE'
   }
+  
+  console.log('🔍 [GridHub] MeterType determination:', {
+    verbruikMeterType: verbruik.meterType,
+    heeftDubbeleMeter: verbruik.heeftDubbeleMeter,
+    hasDoubleValues,
+    isDoubleMeter,
+    finalMeterType: meterType,
+  })
 
   // Map switch type
   const switchType: 'SWITCH' | 'NEW' | 'MOVE' | 'UNKNOWN' = aanvraag.gaat_verhuizen
@@ -331,13 +343,8 @@ export function mapAanvraagToGridHubOrderRequest(
     if (switchType) requestedConnection.switchTypeElectricity = switchType
     if (verbruik.meterType === 'slim') requestedConnection.hasP1Data = true
     
-    // Detect if user has a double meter by checking if BOTH normaal AND dal are filled
-    const hasDoubleValues = verbruik.elektriciteitNormaal > 0 && verbruik.elektriciteitDal > 0
-    const isDoubleMeter = verbruik.heeftDubbeleMeter || hasDoubleValues
-    
-    console.log('🔍 [GridHub] Meter type detection:', {
-      heeftDubbeleMeter: verbruik.heeftDubbeleMeter,
-      hasDoubleValues,
+    // Note: isDoubleMeter is already determined above, near meterType detection
+    console.log('🔍 [GridHub] Using electricity values for meter type:', {
       isDoubleMeter,
       elektriciteitNormaal: verbruik.elektriciteitNormaal,
       elektriciteitDal: verbruik.elektriciteitDal,
