@@ -152,7 +152,7 @@ export class GridHubClient {
   ): Promise<GridHubCreateOrderRequestResponse> {
     const authToken = await this.getAuthToken()
     
-    // Log full payload for debugging (without sensitive data)
+    // Uitgebreide payload logging voor debugging
     const payloadForLogging = {
       ...payload,
       relation: {
@@ -160,8 +160,42 @@ export class GridHubClient {
         bankAccountNumber: payload.relation.bankAccountNumber ? '***REDACTED***' : undefined,
       },
     }
+    
+    console.log('📤 [GridHub] ========== API REQUEST DETAILS ==========')
+    console.log('📤 [GridHub] Request URL:', `${this.config.apiUrl}/orderrequests`)
+    console.log('📤 [GridHub] Request method: POST')
+    console.log('📤 [GridHub] Environment:', this.config.environment)
+    console.log('📤 [GridHub] Username:', this.config.username)
+    console.log('📤 [GridHub] Password length:', this.config.password.length)
+    console.log('📤 [GridHub] Password has newline:', this.config.password.includes('\n'))
     console.log('📤 [GridHub] Full payload being sent:', JSON.stringify(payloadForLogging, null, 2))
     console.log('🔍 [GridHub] requestedConnections details:', JSON.stringify(payload.requestedConnections, null, 2))
+    
+    // Specifieke logging voor CapTar codes
+    const requestedConnections = payload.requestedConnections as any
+    if (Array.isArray(requestedConnections)) {
+      requestedConnections.forEach((conn, index) => {
+        console.log(`🔍 [GridHub] requestedConnections[${index}]:`, {
+          hasElectricity: conn.hasElectricity,
+          hasGas: conn.hasGas,
+          capacityCodeElectricity: conn.capacityCodeElectricity || 'NOT SET',
+          capacityCodeGas: conn.capacityCodeGas || 'NOT SET',
+          agreedAdvancePaymentAmountElectricity: conn.agreedAdvancePaymentAmountElectricity,
+          agreedAdvancePaymentAmountGas: conn.agreedAdvancePaymentAmountGas,
+        })
+      })
+    } else {
+      console.log('🔍 [GridHub] requestedConnections (single object):', {
+        hasElectricity: requestedConnections.hasElectricity,
+        hasGas: requestedConnections.hasGas,
+        capacityCodeElectricity: requestedConnections.capacityCodeElectricity || 'NOT SET',
+        capacityCodeGas: requestedConnections.capacityCodeGas || 'NOT SET',
+        agreedAdvancePaymentAmountElectricity: requestedConnections.agreedAdvancePaymentAmountElectricity,
+        agreedAdvancePaymentAmountGas: requestedConnections.agreedAdvancePaymentAmountGas,
+        allKeys: Object.keys(requestedConnections).sort(),
+      })
+    }
+    console.log('📤 [GridHub] ==========================================')
     
     const response = await fetch(`${this.config.apiUrl}/orderrequests`, {
       method: 'POST',

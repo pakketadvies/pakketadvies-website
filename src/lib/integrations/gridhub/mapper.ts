@@ -232,14 +232,34 @@ export function mapAanvraagToGridHubOrderRequest(
     : undefined
   const capacityCodeGas = hasGas ? mapAansluitwaardeToCapTar(verbruik.aansluitwaardeGas) : undefined
 
+  // Uitgebreide logging voor CapTar codes debugging
+  console.log('🔍 [GridHub] ========== CAPTAR CODE DEBUGGING ==========')
+  console.log('🔍 [GridHub] Input verbruik data:', {
+    geenGasaansluiting: verbruik.geenGasaansluiting,
+    gasJaar: verbruik.gasJaar,
+    aansluitwaardeGas: verbruik.aansluitwaardeGas,
+    aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit,
+    elektriciteitNormaal: verbruik.elektriciteitNormaal,
+    elektriciteitDal: verbruik.elektriciteitDal,
+    elektriciteitEnkel: verbruik.elektriciteitEnkel,
+  })
+  console.log('🔍 [GridHub] Calculated flags:', {
+    hasGas,
+    hasElectricity,
+    hasGasCalculation: `!${verbruik.geenGasaansluiting} && ${verbruik.gasJaar} > 0 = ${!verbruik.geenGasaansluiting && verbruik.gasJaar > 0}`,
+    hasElectricityCalculation: `!${verbruik.geenElektriciteitsaansluiting} && (${verbruik.elektriciteitNormaal} || ${verbruik.elektriciteitDal} || ${verbruik.elektriciteitEnkel})`,
+  })
   console.log('🔍 [GridHub] Capacity codes mapping:', {
     hasGas,
     aansluitwaardeGas: verbruik.aansluitwaardeGas,
     capacityCodeGas,
+    capacityCodeGasSource: hasGas ? `mapAansluitwaardeToCapTar("${verbruik.aansluitwaardeGas}")` : 'undefined (hasGas=false)',
     hasElectricity,
     aansluitwaardeElektriciteit: verbruik.aansluitwaardeElektriciteit,
     capacityCodeElectricity,
+    capacityCodeElectricitySource: hasElectricity ? `mapAansluitwaardeToCapTar("${verbruik.aansluitwaardeElektriciteit}")` : 'undefined (hasElectricity=false)',
   })
+  console.log('🔍 [GridHub] ===========================================')
 
   // Build requestedConnection object
   const requestedConnection: any = {
@@ -250,6 +270,9 @@ export function mapAanvraagToGridHubOrderRequest(
     hasGas,
     isResidenceFunction: true, // In voorbeeld: true
   }
+  
+  console.log('🔍 [GridHub] ========== REQUESTED CONNECTION BUILD ==========')
+  console.log('🔍 [GridHub] Initial requestedConnection:', JSON.stringify(requestedConnection, null, 2))
 
   // Only add optional fields if they have values
   if (hasElectricity) {
@@ -282,6 +305,7 @@ export function mapAanvraagToGridHubOrderRequest(
   }
 
   if (hasGas) {
+    console.log('🔍 [GridHub] hasGas is TRUE - Adding gas fields...')
     if (startDateStr) requestedConnection.startDateGas = startDateStr
     if (switchType) requestedConnection.switchTypeGas = switchType
     if (verbruik.gasJaar) {
@@ -292,8 +316,16 @@ export function mapAanvraagToGridHubOrderRequest(
     // Dit is volgens het advies van Energiek.nl
     console.log('ℹ️ [GridHub] capacityCodeGas wordt WEGGELATEN (volgens advies Energiek.nl)')
     console.log('ℹ️ [GridHub] Andere prijsvergelijkers sturen deze ook niet mee')
+    console.log('🔍 [GridHub] Gas fields added:', {
+      startDateGas: requestedConnection.startDateGas,
+      switchTypeGas: requestedConnection.switchTypeGas,
+      usageGas: requestedConnection.usageGas,
+      capacityCodeGas: 'WEGGELATEN',
+    })
+  } else {
+    console.log('🔍 [GridHub] hasGas is FALSE - No gas fields added')
+    console.log('🔍 [GridHub] capacityCodeGas wordt sowieso niet meegestuurd (hasGas=false)')
   }
-  // Als hasGas false is, sturen we sowieso geen capacityCodeGas mee
 
   // Always set these
   requestedConnection.customerApprovalLEDs = true // Verplicht: true
@@ -350,6 +382,20 @@ export function mapAanvraagToGridHubOrderRequest(
   const formattedOriginalTimestamp = aanvraag.created_at
     ? formatGridHubDateTime(new Date(aanvraag.created_at))
     : formattedSignTimestamp
+
+  // FINAL DEBUGGING: Log complete requestedConnection before sending
+  console.log('🔍 [GridHub] ========== FINAL REQUESTED CONNECTION ==========')
+  console.log('🔍 [GridHub] Complete requestedConnection object:', JSON.stringify(requestedConnection, null, 2))
+  console.log('🔍 [GridHub] Key fields check:', {
+    hasElectricity: requestedConnection.hasElectricity,
+    hasGas: requestedConnection.hasGas,
+    capacityCodeElectricity: requestedConnection.capacityCodeElectricity || 'NOT SET',
+    capacityCodeGas: requestedConnection.capacityCodeGas || 'NOT SET (wegelaten)',
+    agreedAdvancePaymentAmountElectricity: requestedConnection.agreedAdvancePaymentAmountElectricity,
+    agreedAdvancePaymentAmountGas: requestedConnection.agreedAdvancePaymentAmountGas,
+    allKeys: Object.keys(requestedConnection).sort(),
+  })
+  console.log('🔍 [GridHub] ===============================================')
 
   // Volgens voorbeeld: requestedConnections is een object, niet een array!
   // signData en signIP zijn niet aanwezig in voorbeeld (mogelijk niet nodig voor DIRECT)
