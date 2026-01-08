@@ -129,7 +129,7 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
   const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
   const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
-  const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
+  const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('slim')
   // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
   const savedElektriciteitDal = useRef<number | null>(null)
   
@@ -183,7 +183,7 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
       heeftEnkeleMeter: false,
       heeftZonnepanelen: false,
       geenGasaansluiting: false,
-      meterType: 'weet_niet' as const,
+      meterType: 'slim' as const,
       addressType: null, // NIEUW: default value voor address type
     },
   })

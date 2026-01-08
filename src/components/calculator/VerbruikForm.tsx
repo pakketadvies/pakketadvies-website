@@ -121,7 +121,7 @@ export function VerbruikForm() {
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
   const [geenGasaansluiting, setGeenGasaansluiting] = useState(false)
   const [heeftZonnepanelen, setHeeftZonnepanelen] = useState(false)
-  const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('weet_niet')
+  const [meterType, setMeterType] = useState<'slim' | 'oud' | 'weet_niet'>('slim')
   // Ref om oorspronkelijke elektriciteitDal waarde te bewaren
   const savedElektriciteitDal = useRef<number | null>(null)
   const [leveringsadressen, setLeveringsadressen] = useState([
@@ -172,7 +172,7 @@ export function VerbruikForm() {
       heeftEnkeleMeter: false,
       geenGasaansluiting: false,
       heeftZonnepanelen: false,
-      meterType: 'weet_niet' as 'slim' | 'oud' | 'weet_niet',
+      meterType: 'slim' as 'slim' | 'oud' | 'weet_niet',
       elektriciteitDal: null,
       gasJaar: null,
       terugleveringJaar: null,
