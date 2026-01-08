@@ -74,6 +74,24 @@ export interface KostenBreakdown {
     vastrecht: number
     subtotaal: number
   }
+  // Dynamische prijsinformatie (alleen bij dynamische contracten)
+  dynamischePrijzen?: {
+    spotprijzen: {
+      elektriciteitDag: number
+      elektriciteitNacht: number
+      gas: number
+    }
+    opslagen: {
+      elektriciteit: number
+      gas: number
+      teruglevering: number
+    }
+    totaalTarieven: {
+      elektriciteitDag: number
+      elektriciteitNacht: number
+      gas: number
+    }
+  }
   energiebelasting: {
     elektriciteit: number
     gas: number

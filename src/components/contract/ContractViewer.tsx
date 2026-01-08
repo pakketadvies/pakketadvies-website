@@ -621,6 +621,86 @@ export default function ContractViewer({
                               <span>{formatCurrency(breakdown.leverancier.subtotaal)}</span>
                             </div>
                           </div>
+
+                          {/* Dynamische prijsinformatie (spotprijs + opslag) */}
+                          {breakdown.dynamischePrijzen && (
+                            <details className="mt-4 text-xs text-gray-600 bg-blue-50 rounded-lg p-3 border border-blue-200">
+                              <summary className="cursor-pointer hover:text-brand-teal-600 font-semibold text-brand-navy-600 mb-1">
+                                📊 Dynamische prijsopbouw (spotprijs + opslag)
+                              </summary>
+                              <div className="mt-3 space-y-3">
+                                {/* Elektriciteit */}
+                                {(breakdown.leverancier.elektriciteitDetails?.normaal || breakdown.leverancier.elektriciteitDetails?.dal) && (
+                                  <div className="space-y-2">
+                                    <div className="font-medium text-gray-700">Elektriciteit:</div>
+                                    {breakdown.leverancier.elektriciteitDetails?.normaal && (
+                                      <div className="space-y-1 pl-3">
+                                        <div className="text-xs font-medium text-gray-600">Normaal/Dag:</div>
+                                        <div className="pl-2 space-y-0.5">
+                                          <div className="flex justify-between">
+                                            <span>• Spotprijs (30d gem.):</span>
+                                            <span className="font-mono">€{breakdown.dynamischePrijzen.spotprijzen.elektriciteitDag.toFixed(5)}/kWh</span>
+                                          </div>
+                                          <div className="flex justify-between">
+                                            <span>• Opslag leverancier:</span>
+                                            <span className="font-mono">€{breakdown.dynamischePrijzen.opslagen.elektriciteit.toFixed(5)}/kWh</span>
+                                          </div>
+                                          <div className="flex justify-between pt-1 border-t border-blue-300 font-semibold text-gray-800">
+                                            <span>= Totaal tarief:</span>
+                                            <span className="font-mono">€{breakdown.dynamischePrijzen.totaalTarieven.elektriciteitDag.toFixed(5)}/kWh</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                    {breakdown.leverancier.elektriciteitDetails?.dal && (
+                                      <div className="space-y-1 pl-3 pt-2 border-t border-blue-200">
+                                        <div className="text-xs font-medium text-gray-600">Dal/Nacht:</div>
+                                        <div className="pl-2 space-y-0.5">
+                                          <div className="flex justify-between">
+                                            <span>• Spotprijs (30d gem.):</span>
+                                            <span className="font-mono">€{breakdown.dynamischePrijzen.spotprijzen.elektriciteitNacht.toFixed(5)}/kWh</span>
+                                          </div>
+                                          <div className="flex justify-between">
+                                            <span>• Opslag leverancier:</span>
+                                            <span className="font-mono">€{breakdown.dynamischePrijzen.opslagen.elektriciteit.toFixed(5)}/kWh</span>
+                                          </div>
+                                          <div className="flex justify-between pt-1 border-t border-blue-300 font-semibold text-gray-800">
+                                            <span>= Totaal tarief:</span>
+                                            <span className="font-mono">€{breakdown.dynamischePrijzen.totaalTarieven.elektriciteitNacht.toFixed(5)}/kWh</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {/* Gas */}
+                                {breakdown.leverancier.gasDetails && (
+                                  <div className="space-y-1 pt-2 border-t border-blue-200">
+                                    <div className="font-medium text-gray-700">Gas:</div>
+                                    <div className="pl-3 space-y-0.5">
+                                      <div className="flex justify-between">
+                                        <span>• Spotprijs (30d gem.):</span>
+                                        <span className="font-mono">€{breakdown.dynamischePrijzen.spotprijzen.gas.toFixed(5)}/m³</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>• Opslag leverancier:</span>
+                                        <span className="font-mono">€{breakdown.dynamischePrijzen.opslagen.gas.toFixed(5)}/m³</span>
+                                      </div>
+                                      <div className="flex justify-between pt-1 border-t border-blue-300 font-semibold text-gray-800">
+                                        <span>= Totaal tarief:</span>
+                                        <span className="font-mono">€{breakdown.dynamischePrijzen.totaalTarieven.gas.toFixed(5)}/m³</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className="mt-2 pt-2 border-t border-blue-200 text-xs text-gray-600 italic">
+                                  💡 Spotprijzen zijn 30-dagen gemiddelden en variëren dagelijks
+                                </div>
+                              </div>
+                            </details>
+                          )}
                         </div>
 
                         {/* Energiebelasting */}

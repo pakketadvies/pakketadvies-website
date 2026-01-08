@@ -256,6 +256,9 @@ export async function POST(request: Request) {
     let gasBreakdown: any | null = null
     let terugleveringBreakdown: any | null = null
     
+    // Voor dynamisch contract: bewaar prijsinformatie
+    let dynamicPricesData: any = null
+    
     // Bruto verbruik (voor saldering display)
     const brutoTotaalElektriciteit = elektriciteitNormaal + (elektriciteitDal || 0)
     
@@ -266,7 +269,7 @@ export async function POST(request: Request) {
       console.log('💱 DYNAMISCH CONTRACT - Berekenen met marktprijzen...')
       
       try {
-        const dynamicPricesData = await getCurrentDynamicPrices()
+        dynamicPricesData = await getCurrentDynamicPrices()
         
         // Converteren naar het formaat dat de helper functie verwacht
         const dynamicPrices = {
@@ -607,6 +610,24 @@ export async function POST(request: Request) {
           vastrecht: kostenVastrecht,
           subtotaal: subtotaalLeverancier,
         },
+        // Dynamisch contract prijsinformatie (spotprijzen + opslagen)
+        dynamischePrijzen: isDynamisch ? {
+          spotprijzen: {
+            elektriciteitDag: dynamicPricesData?.electricityDay || 0,
+            elektriciteitNacht: dynamicPricesData?.electricityNight || 0,
+            gas: dynamicPricesData?.gas || 0,
+          },
+          opslagen: {
+            elektriciteit: opslagElektriciteit || 0,
+            gas: opslagGas || 0,
+            teruglevering: opslagTeruglevering || 0,
+          },
+          totaalTarieven: {
+            elektriciteitDag: (dynamicPricesData?.electricityDay || 0) + (opslagElektriciteit || 0),
+            elektriciteitNacht: (dynamicPricesData?.electricityNight || 0) + (opslagElektriciteit || 0),
+            gas: (dynamicPricesData?.gas || 0) + (opslagGas || 0),
+          }
+        } : undefined,
         energiebelasting: {
           elektriciteit: ebElektriciteit,
           gas: ebGas,
