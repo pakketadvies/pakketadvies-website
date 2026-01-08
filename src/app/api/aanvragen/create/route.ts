@@ -499,7 +499,7 @@ export async function POST(request: Request) {
           })
           
           // Update aanvraag with GridHub response
-          await supabase
+          const { error: updateError } = await supabase
             .from('contractaanvragen')
             .update({
               external_api_provider: 'GRIDHUB',
@@ -512,7 +512,22 @@ export async function POST(request: Request) {
             })
             .eq('id', data.id)
           
-          console.log('✅ [GridHub] Aanvraag updated with GridHub data')
+          if (updateError) {
+            console.error('❌ [GridHub] Error updating aanvraag with GridHub data:', updateError)
+          } else {
+            console.log('✅ [GridHub] Aanvraag updated with GridHub data')
+            
+            // Fetch updated data to return to client
+            const { data: updatedData } = await supabase
+              .from('contractaanvragen')
+              .select('*')
+              .eq('id', data.id)
+              .single()
+            
+            if (updatedData) {
+              data = updatedData // Update data object with fresh GridHub fields
+            }
+          }
           
         } catch (gridhubError: any) {
           console.error('❌ [GridHub] Error creating order request:', gridhubError)
