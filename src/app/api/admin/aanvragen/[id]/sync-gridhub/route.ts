@@ -213,7 +213,7 @@ export async function POST(
     
     // Log error
     try {
-      const supabase = await createClient()
+      const supabase = createServiceRoleClient()
       const { data: aanvraag } = await supabase
         .from('contractaanvragen')
         .select('aanvraagnummer')
