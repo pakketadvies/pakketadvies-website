@@ -40,6 +40,13 @@ interface ContractCardProps {
 }
 
 export interface KostenBreakdown {
+  saldering?: {
+    heeftZonnepanelen: boolean
+    verbruikBruto: number // Totaal verbruik voor saldering
+    teruglevering: number // Totaal teruglevering
+    verbruikNetto: number // Na saldering
+    overschotKwh: number // Overschot (als teruglevering > verbruik)
+  }
   leverancier: {
     elektriciteit: number
     elektriciteitDetails?: {

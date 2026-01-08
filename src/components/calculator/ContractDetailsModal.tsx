@@ -114,6 +114,76 @@ export function ContractDetailsModal({
 
             {breakdown && !loading && (
               <div className="space-y-4">
+                {/* SALDERING BLOK - Bovenaan als er zonnepanelen zijn */}
+                {breakdown.saldering && breakdown.saldering.heeftZonnepanelen && breakdown.saldering.teruglevering > 0 && (
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-5 shadow-sm">
+                    <h4 className="font-bold text-brand-navy-600 mb-4 flex items-center gap-2 text-lg">
+                      <Sun weight="duotone" className="w-6 h-6 text-yellow-500" />
+                      Saldering (Zonnepanelen)
+                    </h4>
+
+                    <div className="space-y-2.5 mb-4">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-700 font-medium">Verbruik (bruto):</span>
+                        <span className="font-semibold text-gray-900">
+                          {breakdown.saldering.verbruikBruto.toLocaleString()} kWh
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-700 font-medium">Opwekking (teruglevering):</span>
+                        <span className="font-semibold text-green-700">
+                          {breakdown.saldering.teruglevering.toLocaleString()} kWh
+                        </span>
+                      </div>
+
+                      <div className="border-t-2 border-yellow-400 my-2"></div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-900 font-bold flex items-center gap-1">
+                          Netto verbruik:
+                          {breakdown.saldering.verbruikNetto === 0 && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-normal">
+                              volledig gesaldeerd
+                            </span>
+                          )}
+                        </span>
+                        <span className="font-bold text-brand-navy-600 text-lg">
+                          {breakdown.saldering.verbruikNetto.toLocaleString()} kWh
+                        </span>
+                      </div>
+
+                      {breakdown.saldering.overschotKwh > 0 && (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-700 font-medium flex items-center gap-1">
+                            Overschot teruglevering:
+                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-normal">
+                              extra opbrengst
+                            </span>
+                          </span>
+                          <span className="font-semibold text-blue-700">
+                            {breakdown.saldering.overschotKwh.toLocaleString()} kWh
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info box */}
+                    <div className="bg-white/70 backdrop-blur-sm border border-yellow-300 rounded-lg p-3 text-xs text-gray-700 leading-relaxed">
+                      <strong className="text-brand-navy-600">ℹ️ Salderingsregeling:</strong> Je verbruik wordt eerst verrekend met je teruglevering. 
+                      {breakdown.saldering.verbruikNetto === 0 && (
+                        <> Je hebt dit jaar <strong>geen netto verbruik</strong>, dus je betaalt <strong>geen energiebelasting</strong> op elektriciteit!</>
+                      )}
+                      {breakdown.saldering.verbruikNetto > 0 && (
+                        <> Je betaalt alleen energiebelasting over het <strong>netto verbruik</strong> ({breakdown.saldering.verbruikNetto.toLocaleString()} kWh).</>
+                      )}
+                      {breakdown.saldering.overschotKwh > 0 && (
+                        <> Je overschot ({breakdown.saldering.overschotKwh.toLocaleString()} kWh) levert je <strong>geld op</strong>!</>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* STROOM SECTIE */}
                 <div>
                   <h4 className="font-bold text-brand-navy-500 mb-3 text-lg">Stroom</h4>

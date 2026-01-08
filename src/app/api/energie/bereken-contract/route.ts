@@ -256,6 +256,9 @@ export async function POST(request: Request) {
     let gasBreakdown: any | null = null
     let terugleveringBreakdown: any | null = null
     
+    // Bruto verbruik (voor saldering display)
+    const brutoTotaalElektriciteit = elektriciteitNormaal + (elektriciteitDal || 0)
+    
     if (isDynamisch) {
       // ============================================
       // DYNAMISCH CONTRACT BEREKENING
@@ -582,6 +585,13 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       breakdown: {
+        saldering: terugleveringKwh > 0 ? {
+          heeftZonnepanelen: true,
+          verbruikBruto: brutoTotaalElektriciteit, // Verbruik voor saldering
+          teruglevering: terugleveringKwh,
+          verbruikNetto: nettoKwh,
+          overschotKwh: overschotKwh || 0,
+        } : undefined,
         leverancier: {
           elektriciteit: kostenElektriciteit,
           elektriciteitDetails: elektriciteitBreakdown,
