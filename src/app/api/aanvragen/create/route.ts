@@ -660,6 +660,27 @@ export async function POST(request: Request) {
       }, null, 2))
     }
 
+    // Fetch the latest aanvraag data before returning to ensure GridHub fields are included
+    console.log('🔄 [create] Fetching final aanvraag data before response...')
+    const { data: finalData, error: finalFetchError } = await supabase
+      .from('contractaanvragen')
+      .select('*')
+      .eq('id', data.id)
+      .single()
+    
+    if (finalFetchError) {
+      console.error('❌ [create] Error fetching final data:', finalFetchError)
+      // Use original data as fallback
+    } else if (finalData) {
+      console.log('✅ [create] Final data fetched, GridHub fields:', {
+        external_api_provider: finalData.external_api_provider,
+        external_order_id: finalData.external_order_id,
+        external_status: finalData.external_status,
+      })
+      // Use the fresh data which includes GridHub fields
+      Object.assign(data, finalData)
+    }
+
     return NextResponse.json<CreateAanvraagResponse>({
       success: true,
       aanvraag: data,
