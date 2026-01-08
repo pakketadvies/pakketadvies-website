@@ -11,6 +11,9 @@ import { GridHubClient } from '@/lib/integrations/gridhub/client'
 import { decryptPassword } from '@/lib/integrations/gridhub/encryption'
 import { gridHubLogger } from '@/lib/integrations/gridhub/logger'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
