@@ -391,7 +391,7 @@ export default function EditVerbruikPanel({
               <p className="text-sm text-gray-600 leading-snug break-words">
                 {totaalElektriciteit.toLocaleString()} kWh stroom
                 {formData.heeftZonnepanelen && formData.terugleveringJaar
-                  ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering`
+                  ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh opwekking`
                   : ''}
                 {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
                 {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
@@ -424,7 +424,7 @@ export default function EditVerbruikPanel({
               <p className="text-sm text-gray-600">
                 {totaalElektriciteit.toLocaleString()} kWh stroom
                 {formData.heeftZonnepanelen && formData.terugleveringJaar
-                  ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh teruglevering`
+                  ? ` • ${formData.terugleveringJaar.toLocaleString()} kWh opwekking`
                   : ''}
                 {formData.gasJaar ? ` • ${formData.gasJaar.toLocaleString()} m³ gas` : ''}
                 {formData.leveringsadressen?.[0]?.postcode && ` • ${formData.leveringsadressen[0].postcode}`}
@@ -684,7 +684,7 @@ export default function EditVerbruikPanel({
                 {formData.heeftZonnepanelen && (
                   <div className="animate-slide-down">
                     <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
-                      Teruglevering per jaar
+                      Opwekking per jaar
                     </label>
                     <div className="relative">
                       <input

@@ -989,7 +989,7 @@ export function VerbruikForm() {
         {heeftZonnepanelen && (
           <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
             <Input
-              label="Teruglevering per jaar"
+              label="Opwekking per jaar"
                   type="number"
                   {...register('terugleveringJaar', { valueAsNumber: true })}
                   placeholder="Bijv. 3000"

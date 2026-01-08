@@ -720,7 +720,7 @@ export default function AanvraagDetail({ aanvraag }: AanvraagDetailProps) {
               )}
               {verbruik?.terugleveringJaar && (
                 <div>
-                  <span className="text-sm text-gray-600">Teruglevering:</span>
+                  <span className="text-sm text-gray-600">Opwekking:</span>
                   <p className="font-medium">{verbruik.terugleveringJaar.toLocaleString('nl-NL')} kWh/jaar</p>
                 </div>
               )}

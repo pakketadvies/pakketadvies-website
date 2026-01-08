@@ -606,7 +606,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
             {formData.heeftZonnepanelen && (
               <div className="animate-slide-down">
                 <label className="block text-xs font-semibold text-brand-navy-500 mb-1.5">
-                  Teruglevering per jaar
+                  Opwekking per jaar
                 </label>
                 <div className="relative">
                   <input

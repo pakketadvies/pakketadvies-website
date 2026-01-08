@@ -997,7 +997,7 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
                       <div className="flex items-center gap-2">
                         <Sun weight="duotone" className="w-4 h-4 text-yellow-500 flex-shrink-0" />
                         <div className="flex-1">
-                          <span className="text-sm font-semibold text-brand-navy-500">Teruglevering:</span>
+                          <span className="text-sm font-semibold text-brand-navy-500">Opwekking:</span>
                           <span className="text-sm text-gray-700 ml-2">
                             {verbruik.terugleveringJaar.toLocaleString('nl-NL')} kWh/jaar
                           </span>

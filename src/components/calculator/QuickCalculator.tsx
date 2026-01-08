@@ -995,7 +995,7 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
         {heeftZonnepanelen && (
           <div className="md:bg-brand-teal-50 md:border-2 md:border-brand-teal-200 md:rounded-xl md:p-3 animate-slide-down">
             <label className="block text-sm md:text-xs font-semibold text-brand-navy-500 mb-2 md:mb-1.5">
-              Teruglevering per jaar <span className="text-red-500">*</span>
+              Opwekking per jaar <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input

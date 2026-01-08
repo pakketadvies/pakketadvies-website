@@ -395,7 +395,7 @@ export function ConsumerCompareWizard() {
 
                   {hasSolar && (
                     <div className="md:col-span-2">
-                      <label className="text-sm font-semibold text-gray-700">Teruglevering (kWh/jaar)</label>
+                      <label className="text-sm font-semibold text-gray-700">Opwekking (kWh/jaar)</label>
                       <input
                         type="number"
                         className="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
@@ -517,7 +517,7 @@ export function ConsumerCompareWizard() {
                           +
                         </button>
                         <div className="flex-1 text-sm text-gray-600">
-                          = <span className="font-semibold text-brand-navy-600">{(typeof numberOfSolarPanels === 'number' ? numberOfSolarPanels : 1) * 385} kWh</span> teruglevering per jaar
+                          = <span className="font-semibold text-brand-navy-600">{(typeof numberOfSolarPanels === 'number' ? numberOfSolarPanels : 1) * 385} kWh</span> opwekking per jaar
                         </div>
                       </div>
                     </div>
