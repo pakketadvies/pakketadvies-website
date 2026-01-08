@@ -42,42 +42,57 @@ export async function POST(
 
     const aanvraagnummer = (aanvraag as any).aanvraagnummer
     const externalOrderId = (aanvraag as any).external_order_id
+    const leverancierId = (aanvraag as any).leverancier_id
 
     console.log('🔄 [GridHub Sync] Starting sync for:', aanvraagnummer)
+    console.log('🔍 [GridHub Sync] Leverancier ID:', leverancierId)
 
     // Get GridHub config (check environment variable to decide test or production)
     let apiConfig = null
     const environmentToUse = process.env.GRIDHUB_ENVIRONMENT || 'production'
 
     if (environmentToUse === 'test') {
-      const { data: testConfig } = await supabase
+      console.log('🔍 [GridHub Sync] Looking for TEST config...')
+      const { data: testConfig, error: testError } = await supabase
         .from('leverancier_api_config')
         .select('*')
-        .eq('leverancier_id', (aanvraag as any).leverancier_id)
+        .eq('leverancier_id', leverancierId)
         .eq('provider', 'GRIDHUB')
         .eq('environment', 'test')
         .eq('actief', true)
         .single()
       
+      if (testError) {
+        console.log('⚠️  [GridHub Sync] TEST config error:', testError)
+      }
       apiConfig = testConfig
     }
 
     if (!apiConfig) {
-      const { data: prodConfig } = await supabase
+      console.log('🔍 [GridHub Sync] Looking for PRODUCTION config...')
+      const { data: prodConfig, error: prodError } = await supabase
         .from('leverancier_api_config')
         .select('*')
-        .eq('leverancier_id', (aanvraag as any).leverancier_id)
+        .eq('leverancier_id', leverancierId)
         .eq('provider', 'GRIDHUB')
         .eq('environment', 'production')
         .eq('actief', true)
         .single()
       
+      if (prodError) {
+        console.log('⚠️  [GridHub Sync] PRODUCTION config error:', prodError)
+      }
       apiConfig = prodConfig
     }
 
     if (!apiConfig) {
+      console.error('❌ [GridHub Sync] No GridHub config found for leverancier:', leverancierId)
+      console.error('❌ [GridHub Sync] Environment:', environmentToUse)
       return NextResponse.json(
-        { error: 'GridHub config niet gevonden' },
+        { 
+          error: 'GridHub config niet gevonden',
+          details: `Geen GridHub configuratie gevonden voor leverancier ${leverancierId}`,
+        },
         { status: 404 }
       )
     }
