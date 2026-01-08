@@ -378,37 +378,47 @@ export async function POST(request: Request) {
     // GRIDHUB API INTEGRATION (if configured)
     // ============================================
     try {
+      // Check environment variable to determine which environment to use
+      // Set GRIDHUB_ENVIRONMENT=test in Vercel to use staging/test
+      // Set GRIDHUB_ENVIRONMENT=production (or leave unset) to use production
+      const preferredEnvironment = process.env.GRIDHUB_ENVIRONMENT || 'production'
+      console.log(`🔄 [GridHub] Looking for ${preferredEnvironment.toUpperCase()} config...`)
+      
       // Check if leverancier has GridHub API config
-      // First try to find production config, then fall back to test
       let apiConfig = null
       
-      // Try production first
-      const { data: prodConfig } = await supabase
+      // Try preferred environment first
+      const { data: preferredConfig } = await supabase
         .from('leverancier_api_config')
         .select('*')
         .eq('leverancier_id', body.leverancier_id)
         .eq('provider', 'GRIDHUB')
-        .eq('environment', 'production')
+        .eq('environment', preferredEnvironment)
         .eq('actief', true)
         .single()
       
-      if (prodConfig) {
-        apiConfig = prodConfig
-        console.log('🔄 [GridHub] Found PRODUCTION config')
+      if (preferredConfig) {
+        apiConfig = preferredConfig
+        console.log(`✅ [GridHub] Found ${preferredEnvironment.toUpperCase()} config`)
       } else {
-        // Try test config as fallback
-        const { data: testConfig } = await supabase
+        console.log(`⚠️ [GridHub] No ${preferredEnvironment.toUpperCase()} config found`)
+        
+        // Fallback: try the other environment
+        const fallbackEnvironment = preferredEnvironment === 'production' ? 'test' : 'production'
+        console.log(`🔄 [GridHub] Trying ${fallbackEnvironment.toUpperCase()} as fallback...`)
+        
+        const { data: fallbackConfig } = await supabase
           .from('leverancier_api_config')
           .select('*')
           .eq('leverancier_id', body.leverancier_id)
           .eq('provider', 'GRIDHUB')
-          .eq('environment', 'test')
+          .eq('environment', fallbackEnvironment)
           .eq('actief', true)
           .single()
         
-        if (testConfig) {
-          apiConfig = testConfig
-          console.log('🔄 [GridHub] Found TEST config')
+        if (fallbackConfig) {
+          apiConfig = fallbackConfig
+          console.log(`✅ [GridHub] Using ${fallbackEnvironment.toUpperCase()} config as fallback`)
         }
       }
 
