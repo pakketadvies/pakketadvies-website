@@ -125,17 +125,17 @@ export async function POST(
     }
 
     console.log('✅ [GridHub Sync] Found matching order:', {
-      orderID: matchingEntry.orderID,
+      orderID: matchingEntry.order?.id,
       status: matchingEntry.status,
       statusReason: matchingEntry.statusReason,
     })
 
     // Log the sync
     await gridHubLogger.info('GridHub Sync: Status update found', {
-      orderID: matchingEntry.orderID,
+      orderID: matchingEntry.order?.id,
       status: matchingEntry.status,
       statusReason: matchingEntry.statusReason,
-      subStatusID: matchingEntry.subStatusID,
+      subStatusID: matchingEntry.order?.subStatusID,
       timestamp: matchingEntry.timestamp,
     }, {
       aanvraagId: id,
@@ -144,10 +144,10 @@ export async function POST(
 
     // Update aanvraag
     const updateData: any = {
-      external_order_id: matchingEntry.orderID?.toString() || externalOrderId, // Use orderID from feed
+      external_order_id: matchingEntry.order?.id?.toString() || externalOrderId, // Use order.id from feed
       external_status: matchingEntry.status,
       external_status_reason: matchingEntry.statusReason || null,
-      external_sub_status_id: matchingEntry.subStatusID?.toString() || null,
+      external_sub_status_id: matchingEntry.order?.subStatusID?.toString() || null,
       external_last_sync: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -186,7 +186,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       status: matchingEntry.status,
-      orderID: matchingEntry.orderID,
+      orderID: matchingEntry.order?.id,
       statusReason: matchingEntry.statusReason,
       message: 'Status gesynchroniseerd',
     })
