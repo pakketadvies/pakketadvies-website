@@ -525,7 +525,8 @@ export async function POST(request: Request) {
               .single()
             
             if (updatedData) {
-              data = updatedData // Update data object with fresh GridHub fields
+              // Merge updated GridHub fields into original data object
+              Object.assign(data, updatedData)
             }
           }
           
