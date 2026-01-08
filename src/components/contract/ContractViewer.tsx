@@ -22,7 +22,8 @@ import {
   ChartLine,
   Clock,
   ShieldCheck,
-  FileText
+  FileText,
+  Sun
 } from '@phosphor-icons/react'
 import Link from 'next/link'
 import Image from 'next/image'
