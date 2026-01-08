@@ -284,52 +284,25 @@ export class GridHubClient {
   }
 
   /**
-   * Get Order Request Status Feed
-   * GET /api/external/v1/orderrequests/statusfeed?timestampFrom={date-time}
-   */
-  async getOrderRequestStatusFeed(
-    timestampFrom: Date
-  ): Promise<GridHubStatusFeedResponse> {
-    const authToken = await this.getAuthToken()
-    const timestampFromISO = timestampFrom.toISOString()
-    
-    const response = await fetch(
-      `${this.config.apiUrl}/orderrequests/statusfeed?timestampFrom=${encodeURIComponent(timestampFromISO)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-      }
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      let error: any
-      try {
-        error = JSON.parse(errorText)
-      } catch {
-        error = { message: errorText || 'Unknown error' }
-      }
-      throw new Error(`GridHub API error: ${response.status} - ${JSON.stringify(error)}`)
-    }
-
-    return await response.json()
-  }
-
-  /**
    * Get Order Status Feed (voor orders die CREATED zijn)
    * GET /api/external/v1/orders/statusfeed?timestampFrom={date-time}
+   * 
+   * NOTE: timestampFrom must be in Y-m-d H:i:s format (NOT ISO format!)
+   * NOTE: This returns ORDERS (not order requests). Use this to get status updates.
    */
   async getOrderStatusFeed(
     timestampFrom: Date
   ): Promise<GridHubStatusFeedResponse> {
     const authToken = await this.getAuthToken()
-    const timestampFromISO = timestampFrom.toISOString()
+    
+    // GridHub wants Y-m-d H:i:s format, not ISO!
+    // Example: "2025-12-09 10:46:03"
+    const timestampFromFormatted = timestampFrom.toISOString()
+      .replace('T', ' ')
+      .replace(/\.\d{3}Z$/, '') // Remove milliseconds and Z
     
     const response = await fetch(
-      `${this.config.apiUrl}/orders/statusfeed?timestampFrom=${encodeURIComponent(timestampFromISO)}`,
+      `${this.config.apiUrl}/orders/statusfeed?timestampFrom=${encodeURIComponent(timestampFromFormatted)}`,
       {
         method: 'GET',
         headers: {
