@@ -518,7 +518,7 @@ export async function POST(request: Request) {
               external_status: 'NEW',
               external_response: gridhubResponse,
               external_last_sync: new Date().toISOString(),
-              status: 'verzonden',
+              status: 'in_behandeling', // Changed from 'verzonden' to valid status
             })
             .eq('id', data.id)
           
