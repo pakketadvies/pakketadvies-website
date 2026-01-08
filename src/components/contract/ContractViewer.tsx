@@ -531,7 +531,7 @@ export default function ContractViewer({
                     {breakdown && !loading && (
                       <div className="mt-4 space-y-4">
                         {/* SALDERING BLOK - Bovenaan als er zonnepanelen zijn */}
-                        {breakdown.saldering && breakdown.saldering.heeftZonnepanelen && breakdown.saldering.teruglevering > 0 && (
+                        {breakdown.saldering && breakdown.saldering.heeftZonnepanelen && breakdown.saldering.opwekking > 0 && (
                           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-5 shadow-sm print:border print:border-gray-300">
                             <h4 className="font-bold text-brand-navy-600 mb-4 flex items-center gap-2 text-lg">
                               <Sun weight="duotone" className="w-6 h-6 text-yellow-500" />
@@ -547,10 +547,39 @@ export default function ContractViewer({
                               </div>
                               
                               <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-700 font-medium">Opwekking:</span>
+                                <span className="text-gray-700 font-medium">Opwekking zonnepanelen:</span>
                                 <span className="font-semibold text-green-700">
-                                  {breakdown.saldering.teruglevering.toLocaleString()} kWh
+                                  {breakdown.saldering.opwekking.toLocaleString()} kWh
                                 </span>
+                              </div>
+
+                              <div className="border-t-2 border-yellow-400 my-2"></div>
+                              
+                              {/* 30/70 Verdeling */}
+                              <div className="bg-white/50 rounded-lg p-3 space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-gray-700 font-medium flex items-center gap-1 flex-wrap">
+                                    Eigen verbruik (30%):
+                                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-normal print:border print:border-purple-300">
+                                      direct gebruikt
+                                    </span>
+                                  </span>
+                                  <span className="font-semibold text-purple-700">
+                                    {breakdown.saldering.eigenVerbruik.toLocaleString()} kWh
+                                  </span>
+                                </div>
+                                
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-gray-700 font-medium flex items-center gap-1 flex-wrap">
+                                    Teruglevering (70%):
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-normal print:border print:border-blue-300">
+                                      naar het net
+                                    </span>
+                                  </span>
+                                  <span className="font-semibold text-blue-700">
+                                    {breakdown.saldering.teruglevering.toLocaleString()} kWh
+                                  </span>
+                                </div>
                               </div>
 
                               <div className="border-t-2 border-yellow-400 my-2"></div>
@@ -568,34 +597,11 @@ export default function ContractViewer({
                                   {breakdown.saldering.verbruikNetto.toLocaleString()} kWh
                                 </span>
                               </div>
-
-                              {breakdown.saldering.overschotKwh > 0 && (
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="text-gray-700 font-medium flex items-center gap-1 flex-wrap">
-                                    Teruglevering:
-                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-normal print:border print:border-blue-300">
-                                      naar het net
-                                    </span>
-                                  </span>
-                                  <span className="font-semibold text-blue-700">
-                                    {breakdown.saldering.overschotKwh.toLocaleString()} kWh
-                                  </span>
-                                </div>
-                              )}
                             </div>
 
                             {/* Info box */}
                             <div className="bg-white/70 backdrop-blur-sm border border-yellow-300 rounded-lg p-3 text-xs text-gray-700 leading-relaxed print:bg-gray-50">
-                              <strong className="text-brand-navy-600">ℹ️ Salderingsregeling:</strong> Je verbruik wordt eerst verrekend met je opwekking. 
-                              {breakdown.saldering.verbruikNetto === 0 && (
-                                <> Je hebt dit jaar <strong>geen netto verbruik</strong>, dus je betaalt <strong>geen energiebelasting</strong> op elektriciteit!</>
-                              )}
-                              {breakdown.saldering.verbruikNetto > 0 && (
-                                <> Je betaalt alleen energiebelasting over het <strong>netto verbruik</strong> ({breakdown.saldering.verbruikNetto.toLocaleString()} kWh).</>
-                              )}
-                              {breakdown.saldering.overschotKwh > 0 && (
-                                <> Je overschot ({breakdown.saldering.overschotKwh.toLocaleString()} kWh) wordt <strong>teruggeleverd aan het net</strong> en levert je geld op!</>
-                              )}
+                              <strong className="text-brand-navy-600">ℹ️ Realistische berekening:</strong> Van je opgewekte stroom gebruik je ongeveer 30% direct zelf (eigen verbruik). De overige 70% gaat terug naar het net (teruglevering). Je betaalt alleen energiebelasting over het <strong>netto verbruik</strong> ({breakdown.saldering.verbruikNetto.toLocaleString()} kWh).
                             </div>
                           </div>
                         )}

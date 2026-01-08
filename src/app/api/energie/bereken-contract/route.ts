@@ -255,6 +255,8 @@ export async function POST(request: Request) {
     let elektriciteitBreakdown: any = {}
     let gasBreakdown: any | null = null
     let terugleveringBreakdown: any | null = null
+    let eigenVerbruikKwh = 0 // NIEUW: 30% van opwekking
+    let terugleveringNaarNetKwh = 0 // NIEUW: 70% van opwekking
     
     // Voor dynamisch contract: bewaar prijsinformatie
     let dynamicPricesData: any = null
@@ -306,6 +308,8 @@ export async function POST(request: Request) {
         nettoKwh = result.nettoKwh
         overschotKwh = result.overschotKwh
         opbrengstOverschot = result.opbrengstOverschot
+        eigenVerbruikKwh = result.eigenVerbruikKwh
+        terugleveringNaarNetKwh = result.terugleveringKwh
         elektriciteitBreakdown = result.elektriciteitBreakdown
         gasBreakdown = result.gasBreakdown
         terugleveringBreakdown = result.terugleveringBreakdown
@@ -327,45 +331,33 @@ export async function POST(request: Request) {
     } else if (isVastOfMaatwerk) {
     
       // ============================================
-      // VAST OF MAATWERK CONTRACT BEREKENING
+      // VAST OF MAATWERK CONTRACT BEREKENING met 30/70 SALDERING
       // ============================================
       console.log(`📋 ${contractType === 'maatwerk' ? 'MAATWERK' : 'VAST'} CONTRACT - Berekenen met vaste tarieven...`)
       
-      // SALDERINGSREGELING voor vaste contracten
+      // NIEUW: 30/70 SALDERING (30% eigen verbruik, 70% teruglevering)
+      eigenVerbruikKwh = terugleveringKwh * 0.30
+      terugleveringNaarNetKwh = terugleveringKwh * 0.70
+      
       let nettoElektriciteitNormaal = elektriciteitNormaal
       let nettoElektriciteitDal = elektriciteitDal || 0
       
       if (terugleveringKwh > 0) {
         if (!heeftDubbeleMeter) {
-          // ENKELE METER: Teruglevering volledig aftrekken van totaal verbruik
-          const totaalVerbruik = elektriciteitNormaal
-          nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringKwh)
+          // ENKELE METER: Trek eigenverbruik (30%) af van totaal verbruik
+          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - eigenVerbruikKwh)
           nettoKwh = nettoElektriciteitNormaal
         } else {
-          // DUBBELE METER: Teruglevering 50/50 verdelen tussen normaal en dal
-          const terugleveringNormaal = terugleveringKwh / 2
-          const terugleveringDal = terugleveringKwh / 2
+          // DUBBELE METER: Verdeel eigenverbruik proportioneel over dag/nacht
+          const totaalVerbruik = elektriciteitNormaal + (elektriciteitDal || 0)
+          const ratioNormaal = totaalVerbruik > 0 ? elektriciteitNormaal / totaalVerbruik : 0.5
+          const ratioDal = totaalVerbruik > 0 ? (elektriciteitDal || 0) / totaalVerbruik : 0.5
           
-          // Trek teruglevering af van beide tarieven
-          let normaal_na_aftrek = elektriciteitNormaal - terugleveringNormaal
-          let dal_na_aftrek = (elektriciteitDal || 0) - terugleveringDal
+          const eigenVerbruikNormaal = eigenVerbruikKwh * ratioNormaal
+          const eigenVerbruikDal = eigenVerbruikKwh * ratioDal
           
-          // Als een van beide negatief wordt, gebruik overschot om andere verder te verminderen
-          if (normaal_na_aftrek < 0) {
-            // Overschot bij normaal, haal af van dal
-            const overschot_normaal = -normaal_na_aftrek
-            dal_na_aftrek = Math.max(0, dal_na_aftrek - overschot_normaal)
-            normaal_na_aftrek = 0
-          } else if (dal_na_aftrek < 0) {
-            // Overschot bij dal, haal af van normaal
-            const overschot_dal = -dal_na_aftrek
-            normaal_na_aftrek = Math.max(0, normaal_na_aftrek - overschot_dal)
-            dal_na_aftrek = 0
-          }
-          
-          // Zet beide op minimum 0 (extra veiligheid)
-          nettoElektriciteitNormaal = Math.max(0, normaal_na_aftrek)
-          nettoElektriciteitDal = Math.max(0, dal_na_aftrek)
+          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - eigenVerbruikNormaal)
+          nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - eigenVerbruikDal)
           nettoKwh = nettoElektriciteitNormaal + nettoElektriciteitDal
         }
       } else {
@@ -590,8 +582,10 @@ export async function POST(request: Request) {
       breakdown: {
         saldering: terugleveringKwh > 0 ? {
           heeftZonnepanelen: true,
-          verbruikBruto: brutoTotaalElektriciteit, // Verbruik voor saldering
-          teruglevering: terugleveringKwh,
+          verbruikBruto: brutoTotaalElektriciteit,
+          opwekking: terugleveringKwh,
+          eigenVerbruik: eigenVerbruikKwh,  // NIEUW: 30% van opwekking
+          teruglevering: terugleveringNaarNetKwh,  // NIEUW: 70% van opwekking
           verbruikNetto: nettoKwh,
           overschotKwh: overschotKwh || 0,
         } : undefined,

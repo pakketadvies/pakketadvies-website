@@ -174,6 +174,8 @@ export async function calculateContractCosts(
     let overschotKwh = 0
     let opbrengstOverschot = 0
     let kostenTeruglevering = 0
+    let eigenVerbruikKwh = 0
+    let terugleveringNaarNetKwh = 0
 
     if (isDynamisch) {
       const dynamicPricesData = await getCurrentDynamicPrices()
@@ -202,34 +204,34 @@ export async function calculateContractCosts(
       nettoKwh = result.nettoKwh
       overschotKwh = result.overschotKwh
       opbrengstOverschot = result.opbrengstOverschot
+      eigenVerbruikKwh = result.eigenVerbruikKwh
+      terugleveringNaarNetKwh = result.terugleveringKwh
     } else if (isVastOfMaatwerk) {
-      // Saldering
+      // ============================================
+      // VAST CONTRACT: 30/70 SALDERING (geen terugleververgoeding)
+      // ============================================
+      eigenVerbruikKwh = terugleveringKwh * 0.30  // 30% direct gebruikt
+      terugleveringNaarNetKwh = terugleveringKwh * 0.70  // 70% terug aan net (geen vergoeding)
+      
       let nettoElektriciteitNormaal = elektriciteitNormaal
       let nettoElektriciteitDal = elektriciteitDal || 0
 
       if (terugleveringKwh > 0) {
         if (!heeftDubbeleMeter) {
-          const totaalVerbruik = elektriciteitNormaal
-          nettoElektriciteitNormaal = Math.max(0, totaalVerbruik - terugleveringKwh)
+          // Enkeltarief: trek eigenverbruik af
+          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - eigenVerbruikKwh)
           nettoKwh = nettoElektriciteitNormaal
         } else {
-          const terugleveringNormaal = terugleveringKwh / 2
-          const terugleveringDal = terugleveringKwh / 2
-          let normaal_na_aftrek = elektriciteitNormaal - terugleveringNormaal
-          let dal_na_aftrek = (elektriciteitDal || 0) - terugleveringDal
-
-          if (normaal_na_aftrek < 0) {
-            const overschot_normaal = -normaal_na_aftrek
-            dal_na_aftrek = Math.max(0, dal_na_aftrek - overschot_normaal)
-            normaal_na_aftrek = 0
-          } else if (dal_na_aftrek < 0) {
-            const overschot_dal = -dal_na_aftrek
-            normaal_na_aftrek = Math.max(0, normaal_na_aftrek - overschot_dal)
-            dal_na_aftrek = 0
-          }
-
-          nettoElektriciteitNormaal = Math.max(0, normaal_na_aftrek)
-          nettoElektriciteitDal = Math.max(0, dal_na_aftrek)
+          // Dubbeltarief: verdeel eigenverbruik proportioneel over dag/nacht
+          const totaalVerbruik = elektriciteitNormaal + (elektriciteitDal || 0)
+          const ratioNormaal = totaalVerbruik > 0 ? elektriciteitNormaal / totaalVerbruik : 0.5
+          const ratioDal = totaalVerbruik > 0 ? (elektriciteitDal || 0) / totaalVerbruik : 0.5
+          
+          const eigenVerbruikNormaal = eigenVerbruikKwh * ratioNormaal
+          const eigenVerbruikDal = eigenVerbruikKwh * ratioDal
+          
+          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - eigenVerbruikNormaal)
+          nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - eigenVerbruikDal)
           nettoKwh = nettoElektriciteitNormaal + nettoElektriciteitDal
         }
       } else {
@@ -313,6 +315,15 @@ export async function calculateContractCosts(
     return {
       success: true,
       breakdown: {
+        saldering: terugleveringKwh > 0 ? {
+          heeftZonnepanelen: true,
+          verbruikBruto: elektriciteitNormaal + (elektriciteitDal || 0),
+          opwekking: terugleveringKwh,
+          eigenVerbruik: eigenVerbruikKwh,  // NIEUW: 30% van opwekking
+          teruglevering: terugleveringNaarNetKwh,  // NIEUW: 70% van opwekking
+          verbruikNetto: nettoKwh,
+          overschotKwh: overschotKwh || 0,
+        } : undefined,
         leverancier: {
           elektriciteit: kostenElektriciteit,
           gas: kostenGas,

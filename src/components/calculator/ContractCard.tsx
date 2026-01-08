@@ -43,7 +43,9 @@ export interface KostenBreakdown {
   saldering?: {
     heeftZonnepanelen: boolean
     verbruikBruto: number // Totaal verbruik voor saldering
-    teruglevering: number // Totaal teruglevering
+    opwekking: number // Totale opwekking zonnepanelen
+    eigenVerbruik: number // 30% direct gebruikt
+    teruglevering: number // 70% terug aan net
     verbruikNetto: number // Na saldering
     overschotKwh: number // Overschot (als teruglevering > verbruik)
   }
