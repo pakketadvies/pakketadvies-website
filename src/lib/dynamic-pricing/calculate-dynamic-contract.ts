@@ -89,8 +89,12 @@ export function calculateDynamicContract(
   const P_nacht = S_nacht + opslagElektriciteit
   const P_enkel = S_enkel + opslagElektriciteit
   
-  // TERUGLEVERING: Altijd €0,02/kWh voor dynamische contracten
-  const P_teruglever = S_enkel + 0.02
+  // TERUGLEVERING: Spotprijs MINUS opslag_teruglevering (is eigenlijk een afslag)
+  // Als opslag_teruglevering = 0.03 → Tarief = Spotprijs - €0,03
+  const P_teruglever = S_enkel - (opslagTeruglevering || 0)
+  
+  // OVERSCHOT: Vaste vergoeding van €0,02/kWh (voor alle leveranciers)
+  const P_overschot = 0.02
   
   const P_gas_totaal = P_gas + (opslagGas || 0)
 
@@ -114,16 +118,28 @@ export function calculateDynamicContract(
     // Trek eigenverbruik (30%) af van verbruik
     const E_na_eigenverbruik = Math.max(0, E_enkel - eigenVerbruikKwh)
     
-    // Bereken netto verbruik en kosten
-    nettoKwh = E_na_eigenverbruik
-    kostenElektriciteit = nettoKwh * P_enkel
+    // Saldering: verbruik - teruglevering (70%)
+    const nettoNaSaldering = E_na_eigenverbruik - terugleveringKwh
     
-    // Teruglevering (70%) levert altijd geld op
-    const opbrengstTeruglevering = terugleveringKwh * P_teruglever
-    kostenElektriciteit = kostenElektriciteit - opbrengstTeruglevering
-    
-    // Als kosten negatief zijn, is er overschot
-    overschotKwh = kostenElektriciteit < 0 ? terugleveringKwh : 0
+    if (nettoNaSaldering > 0) {
+      // GEEN OVERSCHOT: Je moet nog kWh inkopen
+      nettoKwh = nettoNaSaldering
+      overschotKwh = 0
+      
+      // Kosten verbruik - opbrengst teruglevering
+      const kostenVerbruik = E_na_eigenverbruik * P_enkel
+      const opbrengstTeruglevering = terugleveringKwh * P_teruglever
+      kostenElektriciteit = kostenVerbruik - opbrengstTeruglevering
+    } else {
+      // WEL OVERSCHOT: Je levert meer terug dan je verbruikt
+      nettoKwh = 0
+      overschotKwh = Math.abs(nettoNaSaldering)
+      
+      // Opbrengst teruglevering + extra vergoeding voor overschot
+      const opbrengstTeruglevering = terugleveringKwh * P_teruglever
+      const opbrengstOverschot = overschotKwh * P_overschot
+      kostenElektriciteit = -(opbrengstTeruglevering + opbrengstOverschot)
+    }
 
     elektriciteitBreakdown = {
       type: 'enkel',
@@ -132,7 +148,7 @@ export function calculateDynamicContract(
         nettoKwh,
         overschotKwh,
         tarief: P_enkel,
-        bedrag: kostenElektriciteit > 0 ? kostenElektriciteit : 0,
+        bedrag: kostenElektriciteit,
       },
     }
   }   else {
@@ -150,35 +166,48 @@ export function calculateDynamicContract(
     const E_normaal_na_eigen = Math.max(0, elektriciteitNormaal - eigenVerbruikNormaal)
     const E_dal_na_eigen = Math.max(0, (elektriciteitDal || 0) - eigenVerbruikDal)
     
-    nettoKwh = E_normaal_na_eigen + E_dal_na_eigen
+    const verbruikNaEigen = E_normaal_na_eigen + E_dal_na_eigen
     
-    // Bereken kosten
-    const kostenNormaal = E_normaal_na_eigen * P_dag
-    const kostenDal = E_dal_na_eigen * P_nacht
-    kostenElektriciteit = kostenNormaal + kostenDal
+    // Saldering: verbruik - teruglevering (70%)
+    const nettoNaSaldering = verbruikNaEigen - terugleveringKwh
     
-    // Teruglevering (70%) levert altijd geld op
-    const opbrengstTeruglevering = terugleveringKwh * P_teruglever
-    kostenElektriciteit = kostenElektriciteit - opbrengstTeruglevering
-    
-    // Als kosten negatief zijn, is er overschot
-    overschotKwh = kostenElektriciteit < 0 ? terugleveringKwh : 0
+    if (nettoNaSaldering > 0) {
+      // GEEN OVERSCHOT: Je moet nog kWh inkopen
+      nettoKwh = nettoNaSaldering
+      overschotKwh = 0
+      
+      // Kosten verbruik - opbrengst teruglevering
+      const kostenNormaal = E_normaal_na_eigen * P_dag
+      const kostenDal = E_dal_na_eigen * P_nacht
+      const kostenVerbruik = kostenNormaal + kostenDal
+      const opbrengstTeruglevering = terugleveringKwh * P_teruglever
+      kostenElektriciteit = kostenVerbruik - opbrengstTeruglevering
+    } else {
+      // WEL OVERSCHOT: Je levert meer terug dan je verbruikt
+      nettoKwh = 0
+      overschotKwh = Math.abs(nettoNaSaldering)
+      
+      // Opbrengst teruglevering + extra vergoeding voor overschot
+      const opbrengstTeruglevering = terugleveringKwh * P_teruglever
+      const opbrengstOverschot = overschotKwh * P_overschot
+      kostenElektriciteit = -(opbrengstTeruglevering + opbrengstOverschot)
+    }
 
     elektriciteitBreakdown = {
       type: 'dubbel',
       normaal: {
         kwh: elektriciteitNormaal,
-        nettoKwh: E_normaal_na_eigen,
+        nettoKwh: nettoNaSaldering > 0 ? E_normaal_na_eigen : 0,
         teruglevering: terugleveringKwh * ratioNormaal,
         tarief: P_dag,
-        bedrag: kostenNormaal,
+        bedrag: nettoNaSaldering > 0 ? E_normaal_na_eigen * P_dag : 0,
       },
       dal: {
         kwh: elektriciteitDal || 0,
-        nettoKwh: E_dal_na_eigen,
+        nettoKwh: nettoNaSaldering > 0 ? E_dal_na_eigen : 0,
         teruglevering: terugleveringKwh * ratioDal,
         tarief: P_nacht,
-        bedrag: kostenDal,
+        bedrag: nettoNaSaldering > 0 ? E_dal_na_eigen * P_nacht : 0,
       },
     }
   }
@@ -199,11 +228,15 @@ export function calculateDynamicContract(
   // ============================================
   // 5. TERUGLEVERING BREAKDOWN (voor UI)
   // ============================================
-  const opbrengstOverschot = terugleveringKwh * P_teruglever
+  const opbrengstTeruglevering = terugleveringKwh * P_teruglever
+  const opbrengstOverschot = overschotKwh * P_overschot
   const terugleveringBreakdown = {
     kwh: terugleveringKwh,
     tarief: P_teruglever,
-    opbrengst: opbrengstOverschot,
+    opbrengst: opbrengstTeruglevering,
+    overschotKwh: overschotKwh,
+    overschotTarief: P_overschot,
+    opbrengstOverschot: opbrengstOverschot,
   }
 
   return {

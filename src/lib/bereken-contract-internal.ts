@@ -208,19 +208,31 @@ export async function calculateContractCosts(
       terugleveringNaarNetKwh = result.terugleveringKwh
     } else if (isVastOfMaatwerk) {
       // ============================================
-      // VAST CONTRACT: 30/70 SALDERING (geen terugleververgoeding)
+      // VAST CONTRACT: 30/70 SALDERING (geen terugleververgoeding voor overschot)
       // ============================================
       eigenVerbruikKwh = terugleveringKwh * 0.30  // 30% direct gebruikt
-      terugleveringNaarNetKwh = terugleveringKwh * 0.70  // 70% terug aan net (geen vergoeding)
+      terugleveringNaarNetKwh = terugleveringKwh * 0.70  // 70% terug aan net
       
       let nettoElektriciteitNormaal = elektriciteitNormaal
       let nettoElektriciteitDal = elektriciteitDal || 0
 
       if (terugleveringKwh > 0) {
         if (!heeftDubbeleMeter) {
-          // Enkeltarief: trek eigenverbruik af
-          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - eigenVerbruikKwh)
-          nettoKwh = nettoElektriciteitNormaal
+          // Enkeltarief: trek eigenverbruik af, dan saldering met teruglevering
+          const verbruikNaEigen = Math.max(0, elektriciteitNormaal - eigenVerbruikKwh)
+          const nettoNaSaldering = verbruikNaEigen - terugleveringNaarNetKwh
+          
+          if (nettoNaSaldering > 0) {
+            // Nog verbruik over
+            nettoElektriciteitNormaal = nettoNaSaldering
+            nettoKwh = nettoElektriciteitNormaal
+            overschotKwh = 0
+          } else {
+            // Overschot, maar geen vergoeding voor vaste contracten
+            nettoElektriciteitNormaal = 0
+            nettoKwh = 0
+            overschotKwh = Math.abs(nettoNaSaldering)
+          }
         } else {
           // Dubbeltarief: verdeel eigenverbruik proportioneel over dag/nacht
           const totaalVerbruik = elektriciteitNormaal + (elektriciteitDal || 0)
@@ -230,9 +242,25 @@ export async function calculateContractCosts(
           const eigenVerbruikNormaal = eigenVerbruikKwh * ratioNormaal
           const eigenVerbruikDal = eigenVerbruikKwh * ratioDal
           
-          nettoElektriciteitNormaal = Math.max(0, elektriciteitNormaal - eigenVerbruikNormaal)
-          nettoElektriciteitDal = Math.max(0, (elektriciteitDal || 0) - eigenVerbruikDal)
-          nettoKwh = nettoElektriciteitNormaal + nettoElektriciteitDal
+          const verbruikNormaalNaEigen = Math.max(0, elektriciteitNormaal - eigenVerbruikNormaal)
+          const verbruikDalNaEigen = Math.max(0, (elektriciteitDal || 0) - eigenVerbruikDal)
+          const verbruikNaEigen = verbruikNormaalNaEigen + verbruikDalNaEigen
+          
+          const nettoNaSaldering = verbruikNaEigen - terugleveringNaarNetKwh
+          
+          if (nettoNaSaldering > 0) {
+            // Nog verbruik over
+            nettoKwh = nettoNaSaldering
+            nettoElektriciteitNormaal = verbruikNormaalNaEigen
+            nettoElektriciteitDal = verbruikDalNaEigen
+            overschotKwh = 0
+          } else {
+            // Overschot, maar geen vergoeding voor vaste contracten
+            nettoKwh = 0
+            nettoElektriciteitNormaal = 0
+            nettoElektriciteitDal = 0
+            overschotKwh = Math.abs(nettoNaSaldering)
+          }
         }
       } else {
         nettoKwh = elektriciteitNormaal + (elektriciteitDal || 0)
@@ -247,8 +275,10 @@ export async function calculateContractCosts(
       }
 
       kostenGas = totaalGas * (tariefGas || 0)
-      kostenTeruglevering = terugleveringKwh > 0 && tariefTerugleveringKwh 
-        ? terugleveringKwh * tariefTerugleveringKwh 
+      
+      // Teruglevering: alleen voor wat er naar net gaat, geen vergoeding voor overschot
+      kostenTeruglevering = terugleveringNaarNetKwh > 0 && tariefTerugleveringKwh 
+        ? terugleveringNaarNetKwh * tariefTerugleveringKwh 
         : 0
     }
 
