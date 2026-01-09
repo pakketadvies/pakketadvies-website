@@ -183,6 +183,23 @@ export function ContractDetailsModal({
                       </div>
                     </div>
 
+                    {/* NIEUW: Overschot vergoeding (alleen bij dynamisch) */}
+                    {contract.type === 'dynamisch' && breakdown.saldering.overschotKwh > 0 && breakdown.leverancier.opbrengstOverschot && breakdown.leverancier.opbrengstOverschot > 0 && (
+                      <div className="mt-3 -mx-3 px-3">
+                        <div className="flex justify-between items-center text-sm border-t-2 border-green-400 bg-green-50 px-3 py-3 rounded-lg">
+                          <span className="font-semibold text-green-800 flex items-center gap-1 flex-wrap">
+                            💰 Overschot vergoeding:
+                            <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-normal print:border print:border-green-400">
+                              {breakdown.saldering.overschotKwh.toLocaleString()} kWh × €0,02/kWh
+                            </span>
+                          </span>
+                          <span className="font-bold text-green-700 text-lg flex-shrink-0">
+                            + €{breakdown.leverancier.opbrengstOverschot.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Info box */}
                     <div className="bg-white/70 backdrop-blur-sm border border-yellow-300 rounded-lg p-3 text-xs text-gray-700 leading-relaxed print:bg-gray-50">
                       <strong className="text-brand-navy-600">ℹ️ Realistische berekening:</strong> Van je opgewekte stroom gebruik je ongeveer 30% direct zelf (eigen verbruik). De overige 70% gaat terug naar het net (teruglevering). Je betaalt alleen energiebelasting over het <strong>netto verbruik</strong> ({breakdown.saldering.verbruikNetto.toLocaleString()} kWh).
@@ -525,7 +542,7 @@ export function ContractDetailsModal({
                 )}
 
                 {/* Teruglevering (zonnepanelen) - VASTE CONTRACTEN */}
-                {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && breakdown.leverancier.terugleveringDetails.bedrag > 0 && (
+                {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && (breakdown.leverancier.terugleveringDetails.bedrag || breakdown.leverancier.terugleveringDetails.opbrengst) && (
                   <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg p-4">
                     <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                       <Sun weight="duotone" className="w-5 h-5 text-brand-teal-600" />
@@ -544,7 +561,7 @@ export function ContractDetailsModal({
                           </span>
                         </span>
                         <span className="font-medium text-brand-teal-700 flex-shrink-0">
-                          €{breakdown.leverancier.terugleveringDetails.bedrag.toFixed(2)}
+                          €{(breakdown.leverancier.terugleveringDetails.bedrag || breakdown.leverancier.terugleveringDetails.opbrengst || 0).toFixed(2)}
                         </span>
                       </div>
                     </div>

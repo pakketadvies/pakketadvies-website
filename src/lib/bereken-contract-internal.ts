@@ -225,7 +225,7 @@ export async function calculateContractCosts(
           if (nettoNaSaldering > 0) {
             // Nog verbruik over
             nettoElektriciteitNormaal = nettoNaSaldering
-            nettoKwh = nettoElektriciteitNormaal
+          nettoKwh = nettoElektriciteitNormaal
             overschotKwh = 0
           } else {
             // Overschot, maar geen vergoeding voor vaste contracten

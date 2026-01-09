@@ -67,7 +67,11 @@ export interface KostenBreakdown {
     terugleveringDetails?: { // NIEUW
       kwh: number
       tarief: number
-      bedrag: number
+      bedrag?: number  // Voor vaste contracten
+      opbrengst?: number  // Voor dynamische contracten
+      overschotKwh?: number  // Overschot kWh (dynamisch)
+      overschotTarief?: number  // €0,02/kWh
+      opbrengstOverschot?: number  // Opbrengst van overschot
     } | null
     overschotKwh?: number // NIEUW: overschot teruglevering (alleen dynamisch)
     opbrengstOverschot?: number // NIEUW: opbrengst van overschot (alleen dynamisch)
@@ -720,7 +724,7 @@ export default function ContractCard({
                     )}
                     
                     {/* Teruglevering (zonnepanelen) - VASTE CONTRACTEN */}
-                    {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && breakdown.leverancier.terugleveringDetails.bedrag > 0 && (
+                    {contract.type === 'vast' && breakdown.leverancier.terugleveringDetails && breakdown.leverancier.terugleveringDetails.kwh > 0 && (breakdown.leverancier.terugleveringDetails.bedrag || breakdown.leverancier.terugleveringDetails.opbrengst) && (
                       <div className="bg-brand-teal-50 border-2 border-brand-teal-200 rounded-lg p-4">
                         <h4 className="font-bold text-brand-navy-500 mb-3 flex items-center gap-2">
                           <Sun weight="duotone" className="w-5 h-5 text-brand-teal-600" />
@@ -739,7 +743,7 @@ export default function ContractCard({
                               </span>
                             </span>
                             <span className="font-medium text-brand-teal-700">
-                              €{breakdown.leverancier.terugleveringDetails.bedrag.toFixed(2)}
+                              €{(breakdown.leverancier.terugleveringDetails.bedrag || breakdown.leverancier.terugleveringDetails.opbrengst || 0).toFixed(2)}
                             </span>
                           </div>
                         </div>

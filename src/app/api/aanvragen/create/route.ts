@@ -525,7 +525,7 @@ export async function POST(request: Request) {
           if (updateError) {
             console.error('❌ [GridHub] Error updating aanvraag with GridHub data:', updateError)
           } else {
-            console.log('✅ [GridHub] Aanvraag updated with GridHub data')
+          console.log('✅ [GridHub] Aanvraag updated with GridHub data')
             
             // Fetch updated data to return to client
             const { data: updatedData } = await supabase

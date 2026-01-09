@@ -71,14 +71,14 @@ export async function POST(
     if (!apiConfig) {
       console.log('🔍 [GridHub Sync] Looking for PRODUCTION config...')
       const { data: prodConfig, error: prodError } = await supabase
-        .from('leverancier_api_config')
-        .select('*')
+      .from('leverancier_api_config')
+      .select('*')
         .eq('leverancier_id', leverancierId)
-        .eq('provider', 'GRIDHUB')
+      .eq('provider', 'GRIDHUB')
         .eq('environment', 'production')
-        .eq('actief', true)
-        .single()
-      
+      .eq('actief', true)
+      .single()
+
       if (prodError) {
         console.log('⚠️  [GridHub Sync] PRODUCTION config error:', prodError)
       }

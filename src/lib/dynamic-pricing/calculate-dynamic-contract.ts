@@ -120,7 +120,7 @@ export function calculateDynamicContract(
     
     // Saldering: verbruik - teruglevering (70%)
     const nettoNaSaldering = E_na_eigenverbruik - terugleveringKwh
-    
+
     if (nettoNaSaldering > 0) {
       // GEEN OVERSCHOT: Je moet nog kWh inkopen
       nettoKwh = nettoNaSaldering
@@ -154,7 +154,7 @@ export function calculateDynamicContract(
   }   else {
     // === DUBBEL TARIEF met 30/70 SALDERING ===
     const E_tot = elektriciteitNormaal + (elektriciteitDal || 0)
-    
+
     // Trek eigenverbruik (30%) af van totaal verbruik
     // Verdeel proportioneel over dag en nacht
     const ratioNormaal = E_tot > 0 ? elektriciteitNormaal / E_tot : 0.5
@@ -175,7 +175,7 @@ export function calculateDynamicContract(
       // GEEN OVERSCHOT: Je moet nog kWh inkopen
       nettoKwh = nettoNaSaldering
       overschotKwh = 0
-      
+
       // Kosten verbruik - opbrengst teruglevering
       const kostenNormaal = E_normaal_na_eigen * P_dag
       const kostenDal = E_dal_na_eigen * P_nacht
@@ -193,22 +193,22 @@ export function calculateDynamicContract(
       kostenElektriciteit = -(opbrengstTeruglevering + opbrengstOverschot)
     }
 
-    elektriciteitBreakdown = {
-      type: 'dubbel',
-      normaal: {
-        kwh: elektriciteitNormaal,
+      elektriciteitBreakdown = {
+        type: 'dubbel',
+        normaal: {
+          kwh: elektriciteitNormaal,
         nettoKwh: nettoNaSaldering > 0 ? E_normaal_na_eigen : 0,
         teruglevering: terugleveringKwh * ratioNormaal,
-        tarief: P_dag,
+          tarief: P_dag,
         bedrag: nettoNaSaldering > 0 ? E_normaal_na_eigen * P_dag : 0,
-      },
-      dal: {
-        kwh: elektriciteitDal || 0,
+        },
+        dal: {
+          kwh: elektriciteitDal || 0,
         nettoKwh: nettoNaSaldering > 0 ? E_dal_na_eigen : 0,
         teruglevering: terugleveringKwh * ratioDal,
-        tarief: P_nacht,
+          tarief: P_nacht,
         bedrag: nettoNaSaldering > 0 ? E_dal_na_eigen * P_nacht : 0,
-      },
+        },
     }
   }
 
@@ -232,12 +232,12 @@ export function calculateDynamicContract(
   const opbrengstOverschot = overschotKwh * P_overschot
   const terugleveringBreakdown = {
     kwh: terugleveringKwh,
-    tarief: P_teruglever,
+          tarief: P_teruglever,
     opbrengst: opbrengstTeruglevering,
     overschotKwh: overschotKwh,
     overschotTarief: P_overschot,
     opbrengstOverschot: opbrengstOverschot,
-  }
+        }
 
   return {
     kostenElektriciteit,

@@ -78,8 +78,8 @@ export async function logGridHub(
         .insert({
           level: level || 'info',
           message: message || '',
-          data: data || {},
-          context: context || {},
+        data: data || {},
+        context: context || {},
           aanvraag_id: aanvraagId,
           created_at: new Date().toISOString(),
         })
