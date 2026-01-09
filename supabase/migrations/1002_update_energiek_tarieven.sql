@@ -2,12 +2,22 @@
 -- Date: 2026-01-09
 -- Description: Fix Energiek.nl opslagen en vastrechten naar OFFICIËLE tarieven
 --
--- BRON: OFFICIËLE Energiek.nl tarieven (excl. BTW, geldig voor consument EN zakelijk)
+-- BRON: Energiek.nl berekening screenshot (2000/3000/1000 voorbeeld)
 -- 
+-- ANALYSE UIT SCREENSHOT:
+-- Levering: 166 kWh × (€0,09364 + €0,0180) = €18,54/m
+-- Teruglevering: 250 kWh × (€0,0490 - €0,0180) = €7,75/m credit
+-- Netto teruglevering tarief: €0,0310/kWh
+-- 
+-- BEREKENING VOOR DATABASE:
+-- Spotprijs (onze EPEX): €0,09364
+-- Gewenst teruglevering tarief: €0,0310
+-- Dus: opslag_teruglevering = €0,09364 - €0,0310 = €0,06054
+--
 -- ELEKTRICITEIT:
--- - Inkoopvergoeding: €0,01490 per kWh
--- - Afslagtarief bij teruglevering: €0,01490 per kWh
--- - Vaste leveringskosten: €59,40 per jaar = €4,95 per maand
+-- - Inkoopvergoeding (opslag): €0,0180 per kWh
+-- - Teruglevering afslag: €0,06054 per kWh (om van €0,09364 naar €0,0310 te komen)
+-- - Vaste leveringskosten: €71,87 per jaar = €5,99 per maand (uit screenshot)
 --
 -- GAS:
 -- - Inkoopvergoeding: €0,04959 per m³
@@ -18,10 +28,10 @@
 -- =====================================================
 UPDATE contract_details_dynamisch
 SET
-  opslag_elektriciteit = 0.01490,      -- €0,01490/kWh opslag elektriciteit (inkoopvergoeding)
-  opslag_gas = 0.04959,                -- €0,04959/m³ opslag gas (inkoopvergoeding)
-  opslag_teruglevering = 0.01490,      -- €0,01490/kWh AFSLAG teruglevering (wordt afgetrokken!)
-  vastrecht_stroom_maand = 4.95,       -- €4,95/maand vastrecht stroom (€59,40/jaar)
+  opslag_elektriciteit = 0.0180,       -- €0,0180/kWh opslag elektriciteit (uit screenshot)
+  opslag_gas = 0.04959,                -- €0,04959/m³ opslag gas
+  opslag_teruglevering = 0.06054,      -- €0,06054/kWh AFSLAG om van €0,09364 naar €0,0310 te komen
+  vastrecht_stroom_maand = 5.99,       -- €5,99/maand vastrecht stroom (€71,87/jaar uit screenshot)
   vastrecht_gas_maand = 4.95,          -- €4,95/maand vastrecht gas (€59,40/jaar)
   updated_at = NOW()
 WHERE contract_id IN (
@@ -56,6 +66,6 @@ ORDER BY c.target_audience;
 -- Verwachte output:
 -- naam                              | type      | target_audience | opslag_elektriciteit | opslag_gas | opslag_teruglevering | vastrecht_stroom_maand | vastrecht_gas_maand
 -- ----------------------------------|-----------|-----------------|----------------------|------------|----------------------|------------------------|--------------------
--- Dynamisch Energiecontract         | dynamisch | particulier     | 0.01490              | 0.04959    | 0.01490              | 4.95                   | 4.95
--- Dynamisch Zakelijk Energiecontract| dynamisch | zakelijk        | 0.01490              | 0.04959    | 0.01490              | 4.95                   | 4.95
+-- Dynamisch Energiecontract         | dynamisch | particulier     | 0.0180               | 0.04959    | 0.06054              | 5.99                   | 4.95
+-- Dynamisch Zakelijk Energiecontract| dynamisch | zakelijk        | 0.0180               | 0.04959    | 0.06054              | 5.99                   | 4.95
 
