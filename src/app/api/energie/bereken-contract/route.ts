@@ -584,8 +584,12 @@ export async function POST(request: Request) {
           heeftZonnepanelen: true,
           verbruikBruto: brutoTotaalElektriciteit,
           opwekking: terugleveringKwh,
-          eigenVerbruik: eigenVerbruikKwh,  // NIEUW: 30% van opwekking
-          teruglevering: terugleveringNaarNetKwh,  // NIEUW: 70% van opwekking
+          // Voor dynamische contracten: geen eigenVerbruik/teruglevering split
+          // Voor vaste contracten: wel 30/70 split
+          ...(isDynamisch ? {} : {
+            eigenVerbruik: eigenVerbruikKwh,
+            teruglevering: terugleveringNaarNetKwh,
+          }),
           verbruikNetto: nettoKwh,
           overschotKwh: overschotKwh || 0,
         } : undefined,
