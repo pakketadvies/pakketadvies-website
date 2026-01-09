@@ -604,15 +604,18 @@ export default function ContractViewer({
                               <div className="mt-3">
                                 <div className="flex justify-between items-center text-sm border-t-2 border-green-400 bg-green-50 px-3 py-3 rounded-lg">
                                   <span className="font-semibold text-green-800 flex items-center gap-1 flex-wrap">
-                                    💰 Overschot vergoeding:
+                                    💰 Overschot vergoeding*:
                                     <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-normal print:border print:border-green-400">
-                                      {breakdown.saldering.overschotKwh.toLocaleString()} kWh × €0,02/kWh
+                                      {breakdown.saldering.overschotKwh.toLocaleString()} kWh × ca. €0,02/kWh
                                     </span>
                                   </span>
                                   <span className="font-bold text-green-700 text-lg flex-shrink-0">
-                                    + €{breakdown.leverancier.opbrengstOverschot.toFixed(2)}
+                                    + ca. €{breakdown.leverancier.opbrengstOverschot.toFixed(2)}
                                   </span>
                                 </div>
+                                <p className="text-xs text-green-800 mt-1 italic">
+                                  * Schatting o.b.v. gemiddelde marktvergoeding afgelopen jaren
+                                </p>
                               </div>
                             )}
 
