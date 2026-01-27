@@ -72,15 +72,15 @@ const tariefDetails = [
   },
   {
     item: 'Gastarieven',
-    detail: '€0,83',
+    detail: '€0,50',
   },
   {
-    item: 'Soortprijs',
-    detail: 'KvK (ook eenmanszaak)',
+    item: 'Doelgroep',
+    detail: 'KvK (ook woonhuis)',
   },
   {
     item: 'Looptijd',
-    detail: 'tm 31-01-2031',
+    detail: 't/m 01-01-2031',
   },
 ]
 
@@ -122,7 +122,7 @@ const faqItems = [
   },
   {
     vraag: 'Is dit aanbod voor iedereen?',
-    antwoord: 'Nee, dit persoonlijk aanbod is alleen voor KvK-klanten (ook eenmanszaken). Dit is de uitsluitende voorwaarde om van dit aanbod gebruik te kunnen maken. Tijdens het gesprek wordt gecontroleerd dat je een geldig KvK-nummer hebt. Particulieren kunnen helaas niet van dit aanbod profiteren.',
+    antwoord: 'Nee, dit persoonlijk aanbod is alleen voor KvK-klanten (ook eenmanszaken). Dit is de uitsluitende voorwaarde om van dit aanbod gebruik te kunnen maken. Goed om te weten: dit specifieke Clean Energy contract mag óók op woonhuizen worden aangesloten (mits u een KvK-nummer heeft).',
   },
   {
     vraag: 'Wat als ik nu nog een contract heb lopen?',
@@ -134,7 +134,7 @@ const faqItems = [
   },
   {
     vraag: 'Wat gebeurt er na de 5 jaar?',
-    antwoord: 'Na afloop van het 5-jarige contract (tm 31-01-2031) kun je opnieuw kiezen voor een nieuw contract bij Clean Energy of een andere leverancier. De ETS-2 impact is voor deze periode volledig afgedekt.',
+    antwoord: 'Na afloop van het 5-jarige contract (t/m 01-01-2031) kun je opnieuw kiezen voor een nieuw contract bij Clean Energy of een andere leverancier. De ETS-2 impact is voor deze periode volledig afgedekt.',
   },
 ]
 
@@ -188,8 +188,9 @@ export default function CleanEnergyETS2Page() {
               </h1>
               
               <p className="text-lg md:text-xl text-gray-300 mb-6">
-                Let op: dit aanbod is uitsluitend beschikbaar voor zakelijke klanten met een KvK-nummer. 
-                Profiteer nu van onze eenmalige zekerheid voordat het te laat is!
+                Let op: dit aanbod is uitsluitend bedoeld voor klanten met een KvK-nummer — maar het 
+                contract kan wél worden aangesloten op woonhuizen. Looptijd tot en met 01-01-2031 
+                (dus vanaf vandaag effectief circa 5 jaar zekerheid).
               </p>
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 mb-8">
@@ -218,7 +219,7 @@ export default function CleanEnergyETS2Page() {
                   </div>
                   <div>
                     <div className="text-sm text-gray-400">5 jaar vast</div>
-                    <div className="font-semibold text-white">tm 31-01-2031</div>
+                    <div className="font-semibold text-white">t/m 01-01-2031</div>
                   </div>
                 </div>
                 
@@ -307,7 +308,7 @@ export default function CleanEnergyETS2Page() {
               Clean Energy — 5 jaar vast gas (ETS-2 beschermd)
             </h2>
             <p className="text-lg text-gray-600">
-              Alleen voor KvK-klanten (incl. eenmanszaak)
+              Alleen voor KvK-klanten (wel mogelijk op woonhuis)
             </p>
           </div>
 
