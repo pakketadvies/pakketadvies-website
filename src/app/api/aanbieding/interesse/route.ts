@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { generateAanbiedingInteresseEmail } from '@/lib/email-templates'
 
 interface AanbiedingInteresseData {
-  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch'
+  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
   naam: string
   email: string
   telefoon?: string
@@ -92,6 +92,7 @@ export async function POST(request: Request) {
           'mkb-3-jaar': '3-jarig vast aanbod voor het MKB',
           'grootzakelijk': 'Groot Zakelijk Aanbod',
           'dynamisch': 'Dynamische energietarieven',
+          'clean-energy-ets2': 'Clean Energy 5-jarig vast gas (ETS-2 beschermd)',
         }
 
         const aanbiedingNaam = aanbiedingNamen[body.aanbiedingType] || body.aanbiedingType

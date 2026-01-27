@@ -22,7 +22,7 @@ const interesseSchema = z.object({
 type InteresseFormData = z.infer<typeof interesseSchema>
 
 interface AanbiedingInteresseFormProps {
-  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch'
+  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
   compact?: boolean  // Voor inline gebruik in hero
 }
 

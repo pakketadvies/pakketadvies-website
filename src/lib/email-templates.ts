@@ -317,7 +317,7 @@ export interface ContactBevestigingData {
 }
 
 export interface AanbiedingInteresseData {
-  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch'
+  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
   naam: string
   email: string
   telefoon?: string
@@ -639,6 +639,7 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
     'mkb-3-jaar': '3-jarig vast aanbod voor het MKB',
     'grootzakelijk': 'Groot Zakelijk Aanbod',
     'dynamisch': 'Dynamische energietarieven',
+    'clean-energy-ets2': 'Clean Energy 5-jarig vast gas (ETS-2 beschermd)',
   }
   
   const aanbiedingNaam = aanbiedingNamen[aanbiedingType] || aanbiedingType
@@ -649,6 +650,7 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
     'mkb-3-jaar': `${baseUrl}/aanbieding/mkb-3-jaar`,
     'grootzakelijk': `${baseUrl}/aanbieding/grootzakelijk`,
     'dynamisch': `${baseUrl}/aanbieding/dynamisch`,
+    'clean-energy-ets2': `${baseUrl}/aanbieding/clean-energy-ets2`,
   }
   
   const aanbiedingUrl = aanbiedingUrls[aanbiedingType] || baseUrl
