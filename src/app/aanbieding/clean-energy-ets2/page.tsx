@@ -126,7 +126,7 @@ const faqItems = [
   },
   {
     vraag: 'Wat als ik nu nog een contract heb lopen?',
-    antwoord: 'Tijdens het gesprek bespreken we de voorwaarden en specifieke vragen rondt bestaande looptijden. We leggen ook uit hoe we je overstap het beste kunnen timen om te profiteren van dit aanbod.',
+    antwoord: 'Tijdens het gesprek bespreken we de voorwaarden en specifieke vragen rondt bestaande looptijden. We leggen ook uit hoe we je overstap het beste kunnen timen om te profiteren van dit aanbod. De ingangsdatum van het nieuwe contract kan tot 12 maanden in de toekomst worden gepland, zodat je perfect kunt aansluiten wanneer je huidige contract afloopt.',
   },
   {
     vraag: 'Hoe lang is dit aanbod geldig?',
