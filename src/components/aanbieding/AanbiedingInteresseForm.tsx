@@ -12,7 +12,7 @@ import { User, Envelope, Phone, ChatCircleText, CheckCircle, XCircle } from '@ph
 const interesseSchema = z.object({
   naam: z.string().min(2, 'Vul je naam in'),
   email: z.string().email('Vul een geldig e-mailadres in'),
-  telefoon: z.string().optional(),
+  telefoon: z.string().min(10, 'Vul een geldig telefoonnummer in'),
   opmerking: z.string().optional(),
   privacy_akkoord: z.boolean().refine((val) => val === true, {
     message: 'Je moet akkoord gaan met de privacyvoorwaarden',
@@ -153,13 +153,13 @@ export function AanbiedingInteresseForm({ aanbiedingType, compact = false }: Aan
               />
 
               <Input
-                label="Telefoonnummer"
+                label="Telefoonnummer *"
                 type="tel"
                 placeholder="0612345678"
                 icon={<Phone className="w-5 h-5" />}
                 {...register('telefoon')}
                 error={errors.telefoon?.message}
-                helpText="Optioneel, maar maakt contact makkelijker"
+                required
               />
 
           <div>
@@ -263,12 +263,13 @@ export function AanbiedingInteresseForm({ aanbiedingType, compact = false }: Aan
             />
 
             <Input
-              label="Telefoonnummer"
+              label="Telefoonnummer *"
               type="tel"
               placeholder="0612345678"
               icon={<Phone className="w-5 h-5" />}
               {...register('telefoon')}
               error={errors.telefoon?.message}
+              required
             />
 
             <div>

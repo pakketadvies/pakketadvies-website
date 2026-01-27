@@ -320,7 +320,7 @@ export interface AanbiedingInteresseData {
   aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
   naam: string
   email: string
-  telefoon?: string
+  telefoon: string
   opmerking?: string
   baseUrl: string
 }

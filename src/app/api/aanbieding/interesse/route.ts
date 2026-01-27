@@ -6,7 +6,7 @@ interface AanbiedingInteresseData {
   aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
   naam: string
   email: string
-  telefoon?: string
+  telefoon: string
   opmerking?: string
   privacy_akkoord: boolean
 }
@@ -16,11 +16,11 @@ export async function POST(request: Request) {
     const body: AanbiedingInteresseData = await request.json()
     
     // Validatie
-    if (!body.naam || !body.email || !body.aanbiedingType) {
+    if (!body.naam || !body.email || !body.telefoon || !body.aanbiedingType) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Naam, email en aanbieding type zijn verplicht' 
+          error: 'Naam, email, telefoonnummer en aanbieding type zijn verplicht' 
         },
         { status: 400 }
       )
