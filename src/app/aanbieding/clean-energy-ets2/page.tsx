@@ -100,7 +100,7 @@ const procesStappen = [
   {
     nummer: '3',
     titel: 'Contract opstellen',
-    beschrijving: 'We stellen een contract op maat op en leggen alles helder uit, zodat je precies weet waar je aan toe bent.',
+    beschrijving: 'We stellen een contract op maat op en leggen alles helder uit, zodat je precies weet waar je aan toe bent. De ingangsdatum kan tot 12 maanden vooruit gepland worden.',
     icon: ChartLineUp,
   },
   {
@@ -330,11 +330,16 @@ export default function CleanEnergyETS2Page() {
 
           <Card className="bg-brand-teal-50 border-2 border-brand-teal-500">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-600 leading-relaxed mb-3">
                 <strong>Termijnbedrag berekenen contract:</strong> Het termijnbedrag is gebaseerd op je 
                 voorgeschat verbruik. De netbeheerderskosten en overheidsheffingen zijn een 
                 verwaarding over de levertijd en weergeven in je contract. We berekenen dit 
                 voor je tijdens het gesprek.
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                <strong>Flexibele ingangsdatum:</strong> Heb je nog een lopend contract? De ingangsdatum 
+                kan tot 12 maanden in de toekomst worden gepland, zodat je dit gunstige tarief nu al 
+                kunt vastleggen.
               </p>
             </CardContent>
           </Card>
