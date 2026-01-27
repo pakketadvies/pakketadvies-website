@@ -204,10 +204,14 @@ export default function CleanEnergyETS2Page() {
                   uitfasering (vanaf 2028 tot en met 2035/2036), is dit de allerlaatste kans om 
                   te vangen op het vastleggen van de gasprijs voor 5 jaar.
                 </p>
-                <p className="text-gray-200">
+                <p className="text-gray-200 mb-4">
                   Belangrijk om te beseffen is dat dit de laatste kans is om je in te dekken tegen 
                   de ETS-2 impact. Clean Energy is de enige leverancier die het uitfaseringstraject 
                   volledig in je contract verwerkt en daarmee het ETS-2 risico compleet voor je wegneemt!
+                </p>
+                <p className="text-brand-teal-300 font-semibold">
+                  💡 Heb je nog een lopend contract? De ingangsdatum kan tot 12 maanden in de toekomst 
+                  worden gepland — leg dit tarief nu al vast!
                 </p>
               </div>
 
