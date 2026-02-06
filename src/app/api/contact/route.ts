@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { generateContactFormulierEmail, generateContactBevestigingEmail } from '@/lib/email-templates'
+import { appendLeadToSheet } from '@/lib/google-sheets'
 
 interface ContactFormData {
   naam: string
@@ -201,6 +202,29 @@ export async function POST(request: Request) {
     } catch (emailError: any) {
       console.error('❌ [contact] Unexpected error sending email:', emailError)
       // Don't fail the request if email fails, just log it
+    }
+
+    // ============================================
+    // GOOGLE SHEETS INTEGRATION (Advertentieleads)
+    // ============================================
+    try {
+      console.log('📊 [contact] Attempting to write to Google Sheets...')
+      await appendLeadToSheet({
+        datumLeadBinnen: new Date().toISOString(),
+        huidigeLeveranciers: '', // Niet beschikbaar in contactformulier
+        postcode: '', // Niet beschikbaar in contactformulier
+        huisnummer: '', // Niet beschikbaar in contactformulier
+        stroom: '', // Niet beschikbaar in contactformulier
+        gas: '', // Niet beschikbaar in contactformulier
+        naam: body.naam,
+        telefoonnummer: body.telefoon || '',
+        emailadres: body.email,
+        opmerkingen: `${body.onderwerp}\n\n${body.bericht}${body.bedrijfsnaam ? `\n\nBedrijf: ${body.bedrijfsnaam}` : ''}`,
+      })
+      console.log('✅ [contact] Successfully wrote to Google Sheets')
+    } catch (sheetsError: any) {
+      console.error('❌ [contact] Error writing to Google Sheets (non-blocking):', sheetsError)
+      // Non-blocking: formulier blijft werken ook als Google Sheets faalt
     }
 
     return NextResponse.json({

@@ -5,6 +5,7 @@ import { calculateContractCosts } from '@/lib/bereken-contract-internal'
 import { checkRateLimit, getClientIP } from '@/lib/security/rate-limiter'
 import { validateEmail } from '@/lib/security/email-validation'
 import { performSpamCheck } from '@/lib/security/spam-detection'
+import { appendLeadToSheet } from '@/lib/google-sheets'
 
 /**
  * POST /api/aanvragen/create
@@ -689,6 +690,52 @@ export async function POST(request: Request) {
       })
       // Use the fresh data which includes GridHub fields
       Object.assign(data, finalData)
+    }
+
+    // ============================================
+    // GOOGLE SHEETS INTEGRATION (Advertentieleads)
+    // ============================================
+    try {
+      console.log('📊 [create] Attempting to write to Google Sheets...')
+      
+      // Extract data from gegevens_data and verbruik_data
+      const gegevens = body.gegevens_data || {}
+      const verbruik = body.verbruik_data || {}
+      const leveringsadres = verbruik.leveringsadressen?.[0] || {}
+      
+      // Bepaal naam (prioriteit: bedrijfsnaam > voornaam+achternaam > naam)
+      let naam = ''
+      if (gegevens.bedrijfsnaam) {
+        naam = gegevens.bedrijfsnaam
+      } else if (gegevens.voornaam && gegevens.achternaam) {
+        naam = `${gegevens.voornaam} ${gegevens.achternaam}`
+      } else if (gegevens.naam) {
+        naam = gegevens.naam
+      }
+      
+      // Bepaal huidige leveranciers
+      const huidigeLeveranciers = verbruik.huidigeLeverancierStroom || verbruik.huidigeLeverancierGas || ''
+      
+      // Bepaal of stroom/gas gewenst is
+      const heeftStroom = verbruik.elektriciteitNormaal > 0 || verbruik.elektriciteitDal > 0 ? 'ja' : 'nee'
+      const heeftGas = verbruik.gasJaar > 0 ? 'ja' : 'nee'
+      
+      await appendLeadToSheet({
+        datumLeadBinnen: new Date().toISOString(),
+        huidigeLeveranciers: huidigeLeveranciers,
+        postcode: leveringsadres.postcode || '',
+        huisnummer: leveringsadres.huisnummer ? String(leveringsadres.huisnummer) : '',
+        stroom: heeftStroom,
+        gas: heeftGas,
+        naam: naam,
+        telefoonnummer: gegevens.telefoon || gegevens.telefoonnummer || '',
+        emailadres: gegevens.email || gegevens.emailadres || '',
+        opmerkingen: `Contractaanvraag: ${body.contract_naam}\nAanvraagnummer: ${aanvraagnummer}\nLeverancier: ${body.leverancier_naam}\nType: ${body.aanvraag_type}`,
+      })
+      console.log('✅ [create] Successfully wrote to Google Sheets')
+    } catch (sheetsError: any) {
+      console.error('❌ [create] Error writing to Google Sheets (non-blocking):', sheetsError)
+      // Non-blocking: formulier blijft werken ook als Google Sheets faalt
     }
 
     return NextResponse.json<CreateAanvraagResponse>({

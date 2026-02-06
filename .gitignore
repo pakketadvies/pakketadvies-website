@@ -32,5 +32,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Google Sheets credentials (NEVER COMMIT!)
+google-sheets-env-vars.txt
+*-service-account-*.json
+pakketadvies-sheets-*.json
+
 # API Keys
 POSTCODE_API_KEY=

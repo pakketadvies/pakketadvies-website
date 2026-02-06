@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Story - Essent Overstap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f3f4f6;
+      padding: 20px;
+    }
+
+    .instagram-story {
+      width: 1080px;
+      height: 1920px;
+      background: linear-gradient(180deg, #0F4C75 0%, #1A5F8A 40%, #0F4C75 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 100px 80px;
+    }
+
+    /* Animated background circles */
+    .bg-circle-1 {
+      position: absolute;
+      top: -200px;
+      left: -200px;
+      width: 800px;
+      height: 800px;
+      background: rgba(20, 184, 166, 0.1);
+      border-radius: 50%;
+      filter: blur(120px);
+    }
+
+    .bg-circle-2 {
+      position: absolute;
+      top: 50%;
+      right: -250px;
+      width: 700px;
+      height: 700px;
+      background: rgba(20, 184, 166, 0.12);
+      border-radius: 50%;
+      filter: blur(100px);
+    }
+
+    .bg-circle-3 {
+      position: absolute;
+      bottom: -300px;
+      left: -200px;
+      width: 900px;
+      height: 900px;
+      background: rgba(20, 184, 166, 0.15);
+      border-radius: 50%;
+      filter: blur(140px);
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .logo {
+      background: white;
+      padding: 25px 50px;
+      border-radius: 25px;
+      display: inline-block;
+      align-self: center;
+      margin-bottom: 80px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo h1 {
+      font-size: 52px;
+      font-weight: 900;
+      color: #0F4C75;
+      letter-spacing: -1.5px;
+      text-align: center;
+    }
+
+    .logo p {
+      font-size: 18px;
+      color: #64748B;
+      margin-top: 8px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .urgent-badge {
+      background: #EF4444;
+      color: white;
+      padding: 22px 45px;
+      border-radius: 60px;
+      font-size: 28px;
+      font-weight: 800;
+      display: inline-block;
+      align-self: center;
+      margin-bottom: 60px;
+      box-shadow: 0 15px 40px rgba(239, 68, 68, 0.5);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: 90px;
+      font-weight: 900;
+      color: white;
+      line-height: 1;
+      margin-bottom: 40px;
+      text-align: center;
+      text-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+      letter-spacing: -2px;
+    }
+
+    .highlight {
+      color: #14B8A6;
+      display: block;
+      margin-top: 20px;
+      font-size: 95px;
+    }
+
+    .subtitle {
+      font-size: 42px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 700;
+      margin-bottom: 80px;
+      line-height: 1.3;
+      text-align: center;
+    }
+
+    .benefits {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(30px);
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      border-radius: 35px;
+      padding: 50px 60px;
+      margin-bottom: 60px;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 35px;
+      font-size: 32px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .benefit-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .check {
+      font-size: 48px;
+      margin-right: 25px;
+      flex-shrink: 0;
+    }
+
+    .cta-box {
+      background: rgba(20, 184, 166, 0.2);
+      border: 3px solid #14B8A6;
+      border-radius: 30px;
+      padding: 50px 55px;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .cta-text {
+      font-size: 32px;
+      color: white;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .website {
+      font-size: 40px;
+      color: #14B8A6;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+    }
+
+    .arrow {
+      font-size: 50px;
+      margin-top: 20px;
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .deadline-box {
+      background: rgba(239, 68, 68, 0.25);
+      border: 3px solid #EF4444;
+      color: #FEE2E2;
+      padding: 35px;
+      border-radius: 25px;
+      font-size: 32px;
+      font-weight: 800;
+      margin-top: 40px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .emoji {
+      font-size: 40px;
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="instagram-story">
+    <div class="bg-circle-1"></div>
+    <div class="bg-circle-2"></div>
+    <div class="bg-circle-3"></div>
+    
+    <div class="content">
+      <div class="logo">
+        <h1>PAKKETADVIES</h1>
+        <p>Onafhankelijk energie vergelijken</p>
+      </div>
+
+      <div class="urgent-badge">
+        ⚠️ T/M 11 MAART
+      </div>
+
+      <h2>
+        Essent klant?
+        <span class="highlight">Boetevrij<br>overstappen!</span>
+      </h2>
+
+      <p class="subtitle">
+        Ga niet zomaar akkoord<br>
+        met nieuwe voorwaarden
+      </p>
+
+      <div class="benefits">
+        <div class="benefit-item">
+          <span class="check">✓</span>
+          <span>Boetevrij tot 11 maart</span>
+        </div>
+        <div class="benefit-item">
+          <span class="check">✓</span>
+          <span>Hoge tarieven? Nu overstappen!</span>
+        </div>
+        <div class="benefit-item">
+          <span class="check">✓</span>
+          <span>Gratis advies & vergelijking</span>
+        </div>
+      </div>
+
+      <div class="cta-box">
+        <p class="cta-text">Bekijk je mogelijkheden:</p>
+        <p class="website">pakketadvies.nl/<br>essent-overstap</p>
+        <div class="arrow">👆</div>
+      </div>
+
+      <div class="deadline-box">
+        <span class="emoji">⏰</span>
+        Laatste kans!<br>
+        Deadline: 11 maart 2026
+      </div>
+    </div>
+  </div>
+</body>
+</html>

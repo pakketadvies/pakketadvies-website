@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { generateAanbiedingInteresseEmail } from '@/lib/email-templates'
+import { appendLeadToSheet } from '@/lib/google-sheets'
 
 interface AanbiedingInteresseData {
   aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
@@ -117,6 +118,41 @@ export async function POST(request: Request) {
     } catch (emailError: any) {
       console.error('❌ [aanbieding-interesse] Unexpected error sending email:', emailError)
       // Don't fail the request if email fails, just log it
+    }
+
+    // ============================================
+    // GOOGLE SHEETS INTEGRATION (Advertentieleads)
+    // ============================================
+    try {
+      console.log('📊 [aanbieding-interesse] Attempting to write to Google Sheets...')
+      
+      // Map aanbieding type to display name for opmerkingen
+      const aanbiedingNamen: Record<string, string> = {
+        'particulier-3-jaar': 'Particulier 3-jarig aanbod',
+        'mkb-3-jaar': '3-jarig vast aanbod voor het MKB',
+        'grootzakelijk': 'Groot Zakelijk Aanbod',
+        'dynamisch': 'Dynamische energietarieven',
+        'clean-energy-ets2': 'Clean Energy 5-jarig vast gas (ETS-2 beschermd)',
+      }
+
+      const aanbiedingNaam = aanbiedingNamen[body.aanbiedingType] || body.aanbiedingType
+      
+      await appendLeadToSheet({
+        datumLeadBinnen: new Date().toISOString(),
+        huidigeLeveranciers: '', // Niet beschikbaar in aanbieding interesse formulier
+        postcode: '', // Niet beschikbaar in aanbieding interesse formulier
+        huisnummer: '', // Niet beschikbaar in aanbieding interesse formulier
+        stroom: '', // Niet beschikbaar in aanbieding interesse formulier
+        gas: '', // Niet beschikbaar in aanbieding interesse formulier
+        naam: body.naam,
+        telefoonnummer: body.telefoon,
+        emailadres: body.email,
+        opmerkingen: `Interesse in: ${aanbiedingNaam}${body.opmerking ? `\n\nOpmerking: ${body.opmerking}` : ''}`,
+      })
+      console.log('✅ [aanbieding-interesse] Successfully wrote to Google Sheets')
+    } catch (sheetsError: any) {
+      console.error('❌ [aanbieding-interesse] Error writing to Google Sheets (non-blocking):', sheetsError)
+      // Non-blocking: formulier blijft werken ook als Google Sheets faalt
     }
 
     return NextResponse.json({

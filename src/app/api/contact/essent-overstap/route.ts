@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { appendLeadToSheet } from '@/lib/google-sheets'
 
 interface EssentOverstapData {
   naam: string
@@ -227,6 +228,29 @@ export async function POST(request: Request) {
     } catch (emailError: any) {
       console.error('❌ [essent-overstap] Unexpected error sending email:', emailError)
       // Don't fail the request if email fails, just log it
+    }
+
+    // ============================================
+    // GOOGLE SHEETS INTEGRATION (Advertentieleads)
+    // ============================================
+    try {
+      console.log('📊 [essent-overstap] Attempting to write to Google Sheets...')
+      await appendLeadToSheet({
+        datumLeadBinnen: new Date().toISOString(),
+        huidigeLeveranciers: 'Essent',
+        postcode: '', // Niet beschikbaar in essent overstap formulier
+        huisnummer: '', // Niet beschikbaar in essent overstap formulier
+        stroom: '', // Niet beschikbaar in essent overstap formulier
+        gas: '', // Niet beschikbaar in essent overstap formulier
+        naam: body.naam,
+        telefoonnummer: body.telefoon,
+        emailadres: body.email,
+        opmerkingen: `Essent Overstap (boetevrij t/m 11 maart)${body.opmerking ? `\n\nOpmerking: ${body.opmerking}` : ''}`,
+      })
+      console.log('✅ [essent-overstap] Successfully wrote to Google Sheets')
+    } catch (sheetsError: any) {
+      console.error('❌ [essent-overstap] Error writing to Google Sheets (non-blocking):', sheetsError)
+      // Non-blocking: formulier blijft werken ook als Google Sheets faalt
     }
 
     return NextResponse.json({

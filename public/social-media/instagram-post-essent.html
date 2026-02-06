@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Post - Essent Overstap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f3f4f6;
+      padding: 20px;
+    }
+
+    .instagram-post {
+      width: 1080px;
+      height: 1080px;
+      background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 50%, #0F4C75 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 80px;
+    }
+
+    /* Animated background circles */
+    .bg-circle-1 {
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 500px;
+      height: 500px;
+      background: rgba(20, 184, 166, 0.1);
+      border-radius: 50%;
+      filter: blur(80px);
+    }
+
+    .bg-circle-2 {
+      position: absolute;
+      bottom: -150px;
+      right: -150px;
+      width: 600px;
+      height: 600px;
+      background: rgba(20, 184, 166, 0.15);
+      border-radius: 50%;
+      filter: blur(100px);
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      width: 100%;
+    }
+
+    .logo {
+      background: white;
+      padding: 20px 40px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 50px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo h1 {
+      font-size: 42px;
+      font-weight: 800;
+      color: #0F4C75;
+      letter-spacing: -1px;
+    }
+
+    .logo p {
+      font-size: 16px;
+      color: #64748B;
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
+    .urgent-badge {
+      background: #EF4444;
+      color: white;
+      padding: 15px 35px;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      font-size: 72px;
+      font-weight: 800;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 30px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .highlight {
+      color: #14B8A6;
+      display: block;
+    }
+
+    .subtitle {
+      font-size: 36px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 600;
+      margin-bottom: 50px;
+      line-height: 1.3;
+    }
+
+    .cta-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 25px;
+      padding: 40px 50px;
+      margin-top: 40px;
+    }
+
+    .cta-text {
+      font-size: 28px;
+      color: white;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .website {
+      font-size: 32px;
+      color: #14B8A6;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .deadline {
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #EF4444;
+      color: #FEE2E2;
+      padding: 25px;
+      border-radius: 20px;
+      font-size: 24px;
+      font-weight: 700;
+      margin-top: 40px;
+    }
+
+    .emoji {
+      font-size: 32px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="instagram-post">
+    <div class="bg-circle-1"></div>
+    <div class="bg-circle-2"></div>
+    
+    <div class="content">
+      <div class="logo">
+        <h1>PAKKETADVIES</h1>
+        <p>Onafhankelijk energie vergelijken</p>
+      </div>
+
+      <div class="urgent-badge">
+        ⚠️ T/M 11 MAART 2026
+      </div>
+
+      <h2>
+        Essent klant?
+        <span class="highlight">Nu boetevrij<br>overstappen!</span>
+      </h2>
+
+      <p class="subtitle">
+        Ga niet zomaar akkoord met<br>
+        de nieuwe voorwaarden
+      </p>
+
+      <div class="cta-box">
+        <p class="cta-text">Bekijk je mogelijkheden op</p>
+        <p class="website">pakketadvies.nl/essent-overstap</p>
+      </div>
+
+      <div class="deadline">
+        <span class="emoji">⏰</span>
+        Deadline: 11 maart — Boetevrij overstappen!
+      </div>
+    </div>
+  </div>
+</body>
+</html>
