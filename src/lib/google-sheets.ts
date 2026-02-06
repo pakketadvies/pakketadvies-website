@@ -32,22 +32,43 @@ interface LeadData {
  * Get Google Sheets configuration from environment variables
  */
 function getConfig(): GoogleSheetsConfig {
+  console.log('🔍 [Google Sheets] Checking environment variables...')
+  
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID
   const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
   const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY
 
+  console.log('🔍 [Google Sheets] Environment check:', {
+    hasSpreadsheetId: !!spreadsheetId,
+    spreadsheetId: spreadsheetId?.substring(0, 10) + '...',
+    hasServiceAccountEmail: !!serviceAccountEmail,
+    serviceAccountEmail,
+    hasPrivateKey: !!privateKeyBase64,
+    privateKeyLength: privateKeyBase64?.length,
+  })
+
   if (!spreadsheetId || !serviceAccountEmail || !privateKeyBase64) {
-    throw new Error('Google Sheets configuratie ontbreekt. Zorg dat GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL en GOOGLE_PRIVATE_KEY zijn ingesteld.')
+    const missing = []
+    if (!spreadsheetId) missing.push('GOOGLE_SHEETS_SPREADSHEET_ID')
+    if (!serviceAccountEmail) missing.push('GOOGLE_SERVICE_ACCOUNT_EMAIL')
+    if (!privateKeyBase64) missing.push('GOOGLE_PRIVATE_KEY')
+    
+    console.error('❌ [Google Sheets] Missing environment variables:', missing)
+    throw new Error(`Google Sheets configuratie ontbreekt: ${missing.join(', ')}`)
   }
 
   // Decode base64 private key
   let privateKey: string
   try {
+    console.log('🔐 [Google Sheets] Decoding private key from base64...')
     privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf-8')
+    console.log('✅ [Google Sheets] Private key decoded successfully, length:', privateKey.length)
   } catch (error) {
+    console.error('❌ [Google Sheets] Failed to decode private key:', error)
     throw new Error('GOOGLE_PRIVATE_KEY is niet correct base64 encoded')
   }
 
+  console.log('✅ [Google Sheets] Configuration loaded successfully')
   return {
     spreadsheetId,
     serviceAccountEmail,
@@ -59,20 +80,35 @@ function getConfig(): GoogleSheetsConfig {
  * Create authenticated Google Sheets client
  */
 async function getAuthenticatedClient() {
+  console.log('🔐 [Google Sheets] Creating authenticated client...')
   const config = getConfig()
 
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: config.serviceAccountEmail,
-      private_key: config.privateKey,
-    },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  })
+  try {
+    console.log('🔐 [Google Sheets] Initializing GoogleAuth with service account...')
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: config.serviceAccountEmail,
+        private_key: config.privateKey,
+      },
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
 
-  const authClient = await auth.getClient()
-  const sheets = google.sheets({ version: 'v4', auth: auth as any })
+    console.log('🔐 [Google Sheets] Getting auth client...')
+    const authClient = await auth.getClient()
+    console.log('✅ [Google Sheets] Auth client created successfully')
+    
+    console.log('🔐 [Google Sheets] Creating Sheets API client...')
+    const sheets = google.sheets({ version: 'v4', auth: auth as any })
+    console.log('✅ [Google Sheets] Sheets API client created successfully')
 
-  return { sheets, spreadsheetId: config.spreadsheetId }
+    return { sheets, spreadsheetId: config.spreadsheetId }
+  } catch (error: any) {
+    console.error('❌ [Google Sheets] Failed to create authenticated client:', {
+      message: error?.message,
+      stack: error?.stack,
+    })
+    throw error
+  }
 }
 
 /**
@@ -82,10 +118,22 @@ async function getAuthenticatedClient() {
  * @returns Promise that resolves when data is written
  */
 export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
+  console.log('📊 [Google Sheets] ========================================')
+  console.log('📊 [Google Sheets] START: Appending lead to spreadsheet')
+  console.log('📊 [Google Sheets] ========================================')
+  
   try {
-    console.log('📊 [Google Sheets] Starting to append lead to sheet...')
+    console.log('📊 [Google Sheets] Lead data received:', {
+      naam: leadData.naam,
+      email: leadData.emailadres,
+      telefoon: leadData.telefoonnummer,
+      hasPostcode: !!leadData.postcode,
+      hasHuisnummer: !!leadData.huisnummer,
+    })
     
+    console.log('📊 [Google Sheets] Getting authenticated client...')
     const { sheets, spreadsheetId } = await getAuthenticatedClient()
+    console.log('✅ [Google Sheets] Authenticated client ready')
 
     // Kolommen in de spreadsheet:
     // A: Datum lead binnen
@@ -112,8 +160,13 @@ export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
       leadData.opmerkingen || '',
     ]
 
-    console.log('📊 [Google Sheets] Appending row to Advertentieleads sheet...')
+    console.log('📊 [Google Sheets] Row data prepared:', {
+      columns: row.length,
+      spreadsheetId,
+      range: 'Advertentieleads!A:J',
+    })
     
+    console.log('📊 [Google Sheets] Calling Sheets API append...')
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
       range: 'Advertentieleads!A:J', // Target sheet en kolommen
@@ -123,13 +176,37 @@ export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
       },
     })
 
-    console.log('✅ [Google Sheets] Lead successfully appended to sheet:', response.data.updates?.updatedRange)
+    console.log('✅ [Google Sheets] ========================================')
+    console.log('✅ [Google Sheets] SUCCESS: Lead appended to sheet!')
+    console.log('✅ [Google Sheets] Updated range:', response.data.updates?.updatedRange)
+    console.log('✅ [Google Sheets] Updated rows:', response.data.updates?.updatedRows)
+    console.log('✅ [Google Sheets] Updated columns:', response.data.updates?.updatedColumns)
+    console.log('✅ [Google Sheets] Updated cells:', response.data.updates?.updatedCells)
+    console.log('✅ [Google Sheets] ========================================')
   } catch (error: any) {
-    console.error('❌ [Google Sheets] Error appending lead to sheet:', {
+    console.error('❌ [Google Sheets] ========================================')
+    console.error('❌ [Google Sheets] ERROR: Failed to append lead')
+    console.error('❌ [Google Sheets] ========================================')
+    console.error('❌ [Google Sheets] Error details:', {
       message: error?.message,
-      stack: error?.stack,
-      response: error?.response?.data,
+      code: error?.code,
+      status: error?.status,
+      statusText: error?.statusText,
     })
+    
+    if (error?.response) {
+      console.error('❌ [Google Sheets] API Response error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      })
+    }
+    
+    if (error?.stack) {
+      console.error('❌ [Google Sheets] Stack trace:', error.stack)
+    }
+    
+    console.error('❌ [Google Sheets] ========================================')
     
     // Re-throw error zodat de API route het kan loggen
     // Maar dit is non-blocking: formulier blijft werken ook als Google Sheets faalt

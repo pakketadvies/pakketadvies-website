@@ -233,8 +233,19 @@ export async function POST(request: Request) {
     // ============================================
     // GOOGLE SHEETS INTEGRATION (Advertentieleads)
     // ============================================
+    console.log('📊 [essent-overstap] ========================================')
+    console.log('📊 [essent-overstap] Starting Google Sheets integration')
+    console.log('📊 [essent-overstap] ========================================')
+    
     try {
       console.log('📊 [essent-overstap] Attempting to write to Google Sheets...')
+      console.log('📊 [essent-overstap] Data to write:', {
+        naam: body.naam,
+        email: body.email,
+        telefoon: body.telefoon,
+        hasOpmerking: !!body.opmerking,
+      })
+      
       await appendLeadToSheet({
         datumLeadBinnen: new Date().toISOString(),
         huidigeLeveranciers: 'Essent',
@@ -247,9 +258,16 @@ export async function POST(request: Request) {
         emailadres: body.email,
         opmerkingen: `Essent Overstap (boetevrij t/m 11 maart)${body.opmerking ? `\n\nOpmerking: ${body.opmerking}` : ''}`,
       })
+      
       console.log('✅ [essent-overstap] Successfully wrote to Google Sheets')
+      console.log('✅ [essent-overstap] ========================================')
     } catch (sheetsError: any) {
-      console.error('❌ [essent-overstap] Error writing to Google Sheets (non-blocking):', sheetsError)
+      console.error('❌ [essent-overstap] ========================================')
+      console.error('❌ [essent-overstap] Error writing to Google Sheets (non-blocking):', {
+        message: sheetsError?.message,
+        stack: sheetsError?.stack,
+      })
+      console.error('❌ [essent-overstap] ========================================')
       // Non-blocking: formulier blijft werken ook als Google Sheets faalt
     }
 
