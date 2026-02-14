@@ -25,6 +25,18 @@ interface ContractDetailsModalProps {
 
 type Tab = 'prijsdetails' | 'voorwaarden' | 'over'
 
+type ElektriciteitDetailRegel = {
+  kwh: number
+  tarief: number
+  bedrag: number
+  nettoKwh?: number
+}
+
+function getElektriciteitKwh(detail?: ElektriciteitDetailRegel): number {
+  if (!detail) return 0
+  return detail.nettoKwh ?? detail.kwh
+}
+
 export function ContractDetailsModal({
   isOpen,
   onClose,
@@ -181,7 +193,7 @@ export function ContractDetailsModal({
                           <span className="text-gray-700 flex-1 min-w-0 break-words">
                             Leveringskosten normaal
                             <span className="text-xs text-gray-500 ml-1 block sm:inline">
-                              ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
+                              ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.normaal).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
                             </span>
                           </span>
                           <span className="font-medium flex-shrink-0">
@@ -192,7 +204,7 @@ export function ContractDetailsModal({
                           <span className="text-gray-700 flex-1 min-w-0 break-words">
                             Leveringskosten dal
                             <span className="text-xs text-gray-500 ml-1 block sm:inline">
-                              ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
+                              ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.dal).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
                             </span>
                           </span>
                           <span className="font-medium flex-shrink-0">
@@ -207,7 +219,7 @@ export function ContractDetailsModal({
                         <span className="text-gray-700 flex-1 min-w-0 break-words">
                           Leveringskosten enkeltarief
                           <span className="text-xs text-gray-500 ml-1 block sm:inline">
-                            ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
+                            ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.enkel).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
                           </span>
                         </span>
                         <span className="font-medium flex-shrink-0">

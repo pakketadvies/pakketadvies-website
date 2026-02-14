@@ -43,6 +43,24 @@ export function CookieBanner() {
     }
   }, [])
 
+  useEffect(() => {
+    const handleOpenSettings = () => {
+      const existing = getCookiePreferences()
+      if (existing) {
+        setPreferences(existing)
+        setAnalytical(existing.analytical)
+        setMarketing(existing.marketing)
+      }
+      setShow(true)
+      setShowSettings(true)
+    }
+
+    window.addEventListener('openCookieSettings', handleOpenSettings)
+    return () => {
+      window.removeEventListener('openCookieSettings', handleOpenSettings)
+    }
+  }, [])
+
   const handleAcceptAll = () => {
     acceptAllCookies()
     setShow(false)
@@ -71,7 +89,7 @@ export function CookieBanner() {
   if (!show) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+    <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="bg-brand-navy-500 text-white shadow-2xl border-t-4 border-brand-teal-500">
         <div className="container-custom py-4 md:py-6">
           {/* Main Banner */}
@@ -100,7 +118,7 @@ export function CookieBanner() {
             <div className="flex flex-col sm:flex-row gap-3 md:flex-shrink-0">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="px-4 py-2.5 rounded-xl border-2 border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all text-sm font-semibold flex items-center justify-center gap-2"
+                className="px-4 py-3 min-h-[44px] rounded-xl border-2 border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all text-sm font-semibold flex items-center justify-center gap-2"
               >
                 <span>Instellingen</span>
                 {showSettings ? (
@@ -111,13 +129,13 @@ export function CookieBanner() {
               </button>
               <button
                 onClick={handleAcceptNecessary}
-                className="px-4 py-2.5 rounded-xl border-2 border-white/30 hover:border-white/50 bg-transparent hover:bg-white/5 transition-all text-sm font-semibold"
+                className="px-4 py-3 min-h-[44px] rounded-xl border-2 border-white/30 hover:border-white/50 bg-transparent hover:bg-white/5 transition-all text-sm font-semibold"
               >
                 Alleen noodzakelijk
               </button>
               <button
                 onClick={handleAcceptAll}
-                className="px-4 py-2.5 md:px-6 rounded-xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base"
+                className="px-4 py-3 min-h-[44px] md:px-6 rounded-xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base"
               >
                 Alles accepteren
               </button>
@@ -180,9 +198,10 @@ export function CookieBanner() {
                     <div className="flex items-center">
                       <button
                         onClick={() => setAnalytical(!analytical)}
-                        className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                        className={`relative w-12 h-6 min-w-[44px] min-h-[44px] rounded-full transition-all duration-300 ${
                           analytical ? 'bg-brand-teal-500' : 'bg-gray-600'
                         }`}
+                        aria-label="Analytische cookies aan of uit"
                       >
                         <div
                           className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -216,7 +235,8 @@ export function CookieBanner() {
                       <button
                         onClick={() => setMarketing(!marketing)}
                         disabled
-                        className="relative w-12 h-6 rounded-full bg-gray-700 opacity-50 cursor-not-allowed"
+                        className="relative w-12 h-6 min-w-[44px] min-h-[44px] rounded-full bg-gray-700 opacity-50 cursor-not-allowed"
+                        aria-label="Marketing cookies niet beschikbaar"
                       >
                         <div className="absolute top-1 left-1 w-4 h-4 bg-gray-500 rounded-full" />
                       </button>
@@ -229,13 +249,13 @@ export function CookieBanner() {
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="px-4 py-2.5 rounded-xl border-2 border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all text-sm font-semibold"
+                  className="px-4 py-3 min-h-[44px] rounded-xl border-2 border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all text-sm font-semibold"
                 >
                   Annuleren
                 </button>
                 <button
                   onClick={handleSavePreferences}
-                  className="px-6 py-2.5 rounded-xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base flex items-center justify-center gap-2"
+                  className="px-6 py-3 min-h-[44px] rounded-xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base flex items-center justify-center gap-2"
                 >
                   <CheckCircle weight="bold" className="w-5 h-5" />
                   Voorkeuren opslaan

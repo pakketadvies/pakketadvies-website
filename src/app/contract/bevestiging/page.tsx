@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import { CheckCircle, Envelope, Phone, Lightning, CalendarCheck, Confetti, Buildings, MapPin } from '@phosphor-icons/react'
 import confetti from 'canvas-confetti'
+import { trackGAEvent } from '@/lib/tracking/ga-events'
 
 function BevestigingContent() {
   const { bedrijfsgegevens, verbruik } = useCalculatorStore()
@@ -21,6 +22,21 @@ function BevestigingContent() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!aanvraagnummer) return
+
+    const eventKey = `ga-aanvraag-complete-${aanvraagnummer}`
+    if (sessionStorage.getItem(eventKey)) return
+
+    trackGAEvent('purchase', {
+      transaction_id: aanvraagnummer,
+      currency: 'EUR',
+      value: 0,
+    })
+    sessionStorage.setItem(eventKey, '1')
+  }, [aanvraagnummer])
 
   useEffect(() => {
     if (showConfetti && typeof window !== 'undefined') {

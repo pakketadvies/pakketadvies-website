@@ -3,6 +3,7 @@ import { fetchDayAheadPrices } from '@/lib/dynamic-pricing/api-client'
 import { saveDynamicPrices } from '@/lib/dynamic-pricing/database'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
+import { apiError, getErrorMessage } from '@/lib/api/response'
 
 /**
  * CRON endpoint: Update dynamic prices daily (day-ahead)
@@ -26,6 +27,17 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+type PriceResult = {
+  success: boolean
+  date?: string
+  electricity?: number
+  gas?: number
+  source?: string
+  skipped?: boolean
+  reason?: string
+  error?: string
+}
+
 export async function GET(request: Request) {
   // Log immediately to ensure we see something in logs
   console.log('🚀 CRON JOB STARTED - update-dynamic-prices')
@@ -45,26 +57,25 @@ export async function GET(request: Request) {
     })
     
     // Check authorization
-    if (easyCronSecret) {
-      const expectedBearerHeader = `Bearer ${easyCronSecret}`
-      const isAuthorized = authHeader === expectedBearerHeader
-      
-      if (!isAuthorized) {
-        console.error('❌ Unauthorized: Invalid or missing Authorization header')
-        return NextResponse.json(
-          { 
-            success: false, 
-            error: 'Unauthorized: Invalid or missing secret',
-            hint: 'Use: Authorization: Bearer <EASYCRON_SECRET>'
-          },
-          { status: 401 }
-        )
-      }
-      
-      console.log('✅ Authorization successful')
-    } else {
-      console.warn('⚠️  EASYCRON_SECRET not set - endpoint is unprotected!')
+    if (!easyCronSecret) {
+      console.error('❌ EASYCRON_SECRET ontbreekt - endpoint disabled')
+      return apiError('Server misconfigured: EASYCRON_SECRET ontbreekt', 503)
     }
+
+    const expectedBearerHeader = `Bearer ${easyCronSecret}`
+    const isAuthorized = authHeader === expectedBearerHeader
+    
+    if (!isAuthorized) {
+      console.error('❌ Unauthorized: Invalid or missing Authorization header')
+      return apiError(
+        'Unauthorized: Invalid or missing secret',
+        401,
+        undefined,
+        { hint: 'Use: Authorization: Bearer <EASYCRON_SECRET>' }
+      )
+    }
+    
+    console.log('✅ Authorization successful')
 
     console.log('🔄 Starting daily price update...')
     
@@ -84,7 +95,10 @@ export async function GET(request: Request) {
     console.log(`📅 Today's date (UTC): ${todayStr}`)
     console.log(`📅 Tomorrow's date (UTC): ${tomorrowStr}`)
     
-    const results: any = {
+    const results: {
+      today: PriceResult | null
+      tomorrow: PriceResult | null
+    } = {
       today: null,
       tomorrow: null,
     }
@@ -127,11 +141,12 @@ export async function GET(request: Request) {
       console.log(`   Electricity: €${tomorrowPrices.electricity.average.toFixed(5)}/kWh`)
       console.log(`   Gas: €${tomorrowPrices.gas.average.toFixed(5)}/m³`)
       console.log(`   Source: ${tomorrowPrices.source}`)
-    } catch (error: any) {
-      console.error(`❌ Failed to fetch/save tomorrow's prices:`, error.message)
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error, 'Failed to fetch/save tomorrow prices')
+      console.error(`❌ Failed to fetch/save tomorrow's prices:`, errorMessage)
       results.tomorrow = {
         success: false,
-        error: error.message,
+        error: errorMessage,
       }
     }
     
@@ -176,11 +191,12 @@ export async function GET(request: Request) {
         console.log(`   Electricity: €${todayPrices.electricity.average.toFixed(5)}/kWh`)
         console.log(`   Gas: €${todayPrices.gas.average.toFixed(5)}/m³`)
         console.log(`   Source: ${todayPrices.source}`)
-      } catch (error: any) {
-        console.error(`❌ Failed to fetch/save today's prices:`, error.message)
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, 'Failed to fetch/save today prices')
+        console.error(`❌ Failed to fetch/save today's prices:`, errorMessage)
         results.today = {
           success: false,
-          error: error.message,
+          error: errorMessage,
         }
       }
     }
@@ -196,15 +212,14 @@ export async function GET(request: Request) {
       success: allSuccess,
       results,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error in cron job:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error.message || 'Failed to update prices',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
-      { status: 500 }
-    )
+    const errorMessage = getErrorMessage(error, 'Failed to update prices')
+    const errorStack =
+      process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
+    return apiError('Failed to update prices', 500, undefined, {
+      details: errorMessage,
+      stack: errorStack,
+    })
   }
 }

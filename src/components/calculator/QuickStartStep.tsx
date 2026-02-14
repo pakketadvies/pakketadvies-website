@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { MapPin, CheckCircle, Warning } from '@phosphor-icons/react'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
+import { CTA_COPY } from '@/lib/copy'
 
 const quickStartSchema = z.object({
   postcode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/i, 'Vul een geldige postcode in (bijv. 1234AB)'),
@@ -96,9 +97,9 @@ export function QuickStartStep() {
         if (addressType) {
           setAddressType(addressType)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching address data:', err)
-        setError(err.message || 'Kon adresgegevens niet ophalen')
+        setError(err instanceof Error ? err.message : 'Kon adresgegevens niet ophalen')
       } finally {
         setLoading(false)
       }
@@ -158,9 +159,9 @@ export function QuickStartStep() {
       // Navigeer naar stap 2 (contract wordt al via URL parameter doorgegeven)
       const contractId = searchParams?.get('contract')
       router.push(`/calculator?stap=2${contractId ? `&contract=${contractId}` : ''}`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error setting up quick start:', err)
-      setError(err.message || 'Er ging iets mis. Probeer het opnieuw.')
+      setError(err instanceof Error ? err.message : 'Er ging iets mis. Probeer het opnieuw.')
       setLoading(false)
     }
   }
@@ -275,7 +276,7 @@ export function QuickStartStep() {
             </>
           ) : (
             <>
-              Doorgaan naar aanvraag
+              {CTA_COPY.continueToDetails}
               <CheckCircle className="w-5 h-5 ml-2" weight="bold" />
             </>
           )}

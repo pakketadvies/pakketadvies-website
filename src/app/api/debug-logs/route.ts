@@ -7,6 +7,13 @@ import { createClient } from '@supabase/supabase-js'
  */
 export async function POST(request: NextRequest) {
   try {
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json(
+        { success: false, error: 'Debug logging is disabled in production' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { level, message, data, url, userAgent, timestamp } = body
 

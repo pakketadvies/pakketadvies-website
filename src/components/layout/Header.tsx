@@ -134,7 +134,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl hover:bg-gray-100 transition-colors"
               aria-label="Open menu"
             >
               {isMobileMenuOpen ? (

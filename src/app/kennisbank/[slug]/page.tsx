@@ -1,8 +1,13 @@
 import { notFound } from 'next/navigation'
-import { getArticleBySlug } from '@/data/articles'
+import { allArticles, getArticleBySlug } from '@/data/articles'
 import { generateArticleMetadata, generateStructuredData, generateBreadcrumbStructuredData } from '@/lib/seo'
 import Link from 'next/link'
-import Image from 'next/image'
+
+export function generateStaticParams() {
+  return allArticles.map((article) => ({
+    slug: article.slug,
+  }))
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

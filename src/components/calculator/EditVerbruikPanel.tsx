@@ -77,7 +77,7 @@ export default function EditVerbruikPanel({
     }
   }, [])
 
-  const handleFieldChange = (field: keyof VerbruikData, value: any) => {
+  const handleFieldChange = (field: keyof VerbruikData, value: VerbruikData[keyof VerbruikData]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setHasChanges(true)
   }

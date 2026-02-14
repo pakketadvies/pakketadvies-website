@@ -17,6 +17,10 @@ export function Footer() {
   }, [pathname])
 
   const isConsumer = audience === 'consumer'
+  const openCookieSettings = () => {
+    if (typeof window === 'undefined') return
+    window.dispatchEvent(new Event('openCookieSettings'))
+  }
 
   return (
     <footer className="bg-brand-navy-500 text-white">
@@ -176,6 +180,13 @@ export function Footer() {
               <Link href="/algemene-voorwaarden" className="text-gray-400 hover:text-brand-teal-500 transition-colors">
                 Algemene voorwaarden
               </Link>
+              <button
+                type="button"
+                onClick={openCookieSettings}
+                className="text-gray-400 hover:text-brand-teal-500 transition-colors"
+              >
+                Cookie-instellingen
+              </button>
               <Link href="/cookies" className="text-gray-400 hover:text-brand-teal-500 transition-colors">
                 Cookies
               </Link>

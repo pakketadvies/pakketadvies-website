@@ -1,12 +1,23 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
 import { PWARegistration } from "@/components/layout/PWARegistration";
 import { FacebookPixel } from "@/components/tracking/FacebookPixel";
+import { GoogleAnalytics } from "@/components/tracking/GoogleAnalytics";
 
-const inter = Inter({ subsets: ["latin"] });
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +27,6 @@ export const metadata: Metadata = {
   description: "We regelen het beste energiecontract voor uw bedrijf. Simpel, transparant en altijd met uw voordeel voorop. Vergelijk energiecontracten en bespaar tot 30% op uw energiekosten.",
   keywords: "zakelijke energie, energiecontract vergelijken, energieadvies bedrijf, grootverbruik energie, kleinverbruik energie, energieprijzen zakelijk, energie besparen bedrijf",
   manifest: "/manifest.json",
-  themeColor: "#00AF9B",
   metadataBase: new URL('https://pakketadvies.nl'),
   openGraph: {
     type: 'website',
@@ -69,19 +79,25 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#00AF9B",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
   return (
-    <html lang="nl" className="overscroll-none">
-      <body className={inter.className}>
+    <html lang="nl" className={`overscroll-none ${plusJakartaSans.variable} ${spaceGrotesk.variable}`}>
+      <body>
         <PWARegistration />
         <LayoutWrapper>{children}</LayoutWrapper>
         <InstallPrompt />
+        {gaMeasurementId && <GoogleAnalytics measurementId={gaMeasurementId} />}
         {facebookPixelId && <FacebookPixel pixelId={facebookPixelId} />}
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import Image from 'next/image'
 import { Check, Star, Leaf, CaretDown, CaretUp, Sun, Info, FilePdf, FileText } from '@phosphor-icons/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -124,6 +125,28 @@ export interface KostenBreakdown {
   }
 }
 
+type ContractDetails = {
+  tarief_teruglevering_kwh?: number
+  opslag_elektriciteit?: number
+  opslag_elektriciteit_normaal?: number
+  opslag_gas?: number
+  opslag_teruglevering?: number
+  vastrecht_stroom_maand?: number
+  vastrecht_gas_maand?: number
+}
+
+type ElektriciteitDetailRegel = {
+  kwh: number
+  tarief: number
+  bedrag: number
+  nettoKwh?: number
+}
+
+function getElektriciteitKwh(detail?: ElektriciteitDetailRegel): number {
+  if (!detail) return 0
+  return detail.nettoKwh ?? detail.kwh
+}
+
 export default function ContractCard({ 
   contract, 
   variant = 'default',
@@ -157,8 +180,8 @@ export default function ContractCard({
 
   // Haal contract details op
   const details = contract.type === 'vast' 
-    ? (contract as any).details_vast 
-    : (contract as any).details_dynamisch
+    ? ((contract.details_vast as ContractDetails | undefined) ?? {})
+    : ((contract.details_dynamisch as ContractDetails | undefined) ?? {})
 
   // BEREKEN KOSTEN VIA API alleen voor prijsdetails breakdown
   useEffect(() => {
@@ -219,9 +242,9 @@ export default function ContractCard({
 
       const data = await response.json()
       setBreakdown(data.breakdown)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error calculating costs:', err)
-      setError(err.message || 'Kon kosten niet berekenen')
+      setError(err instanceof Error ? err.message : 'Kon kosten niet berekenen')
     } finally {
       setLoading(false)
     }
@@ -255,9 +278,11 @@ export default function ContractCard({
                 isCompact ? 'w-10 h-10 p-1.5' : 'w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 p-1.5 md:p-2'
               }`}
             >
-              <img 
-                src={contract.leverancier.logo} 
+              <Image
+                src={contract.leverancier.logo}
                 alt={`${contract.leverancier.naam} logo`}
+                width={80}
+                height={80}
                 className="w-full h-full object-contain"
               />
             </div>
@@ -484,7 +509,7 @@ export default function ContractCard({
                               <span className="text-gray-700">
                                 Leveringskosten normaal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
+                                  ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.normaal).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.normaal?.tarief.toFixed(6)})
                                 </span>
                               </span>
                               <span className="font-medium">
@@ -495,7 +520,7 @@ export default function ContractCard({
                               <span className="text-gray-700">
                                 Leveringskosten dal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
+                                  ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.dal).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.dal?.tarief.toFixed(6)})
                                 </span>
                               </span>
                               <span className="font-medium">
@@ -510,7 +535,7 @@ export default function ContractCard({
                             <span className="text-gray-700">
                               Leveringskosten enkeltarief
                               <span className="text-xs text-gray-500 ml-1">
-                                ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
+                                ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.enkel).toLocaleString()} kWh × €{breakdown.leverancier.elektriciteitDetails.enkel?.tarief.toFixed(6)})
                               </span>
                             </span>
                             <span className="font-medium">
@@ -962,8 +987,7 @@ export default function ContractCard({
                 contract_id: contract.id,
                 contract_type: contract.type,
               }
-              
-              console.log('[ContractCard] Tracking InitiateCheckout event:', eventData)
+
               track('InitiateCheckout', eventData)
               
               // Kleine delay om Pixel event de tijd te geven om te worden getracked

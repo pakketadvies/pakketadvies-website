@@ -33,18 +33,10 @@ interface HomepageBestDealsProps {
 }
 
 export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData }: HomepageBestDealsProps) {
-  console.log('🔵 [HomepageBestDeals] Rendered')
-  console.log('🔵 [HomepageBestDeals] initialData:', initialData)
-  console.log('🔵 [HomepageBestDeals] initialData?.contracten:', initialData?.contracten)
-  console.log('🔵 [HomepageBestDeals] initialData?.contracten?.length:', initialData?.contracten?.length)
-  console.log('🔵 [HomepageBestDeals] initialData?.averagePrice:', initialData?.averagePrice)
-  
   const [contracts, setContracts] = useState<BestDeal[]>(initialData?.contracten || [])
   const [averagePrice, setAveragePrice] = useState(initialData?.averagePrice || propAveragePrice || 0)
   const [loading, setLoading] = useState(!initialData) // Only show loading if no initial data
   const [filter, setFilter] = useState<'alle' | 'vast' | 'dynamisch'>('alle')
-  
-  console.log('🔵 [HomepageBestDeals] State - contracts.length:', contracts.length, 'loading:', loading, 'averagePrice:', averagePrice)
 
   useEffect(() => {
     // Only fetch if filter changed from 'alle' (initial load has server data)

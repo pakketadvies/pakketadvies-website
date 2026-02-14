@@ -170,7 +170,7 @@ export default function EditVerbruikModal({
             <div className="flex items-center gap-3">
               <button
                 onClick={handleCancel}
-                className="sm:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 active:scale-95 transition-all"
+                className="sm:hidden w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100 active:scale-95 transition-all"
                 aria-label="Terug"
               >
                 <ArrowLeft weight="bold" className="w-5 h-5 text-brand-navy-500" />
@@ -202,7 +202,7 @@ export default function EditVerbruikModal({
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setLocalFilters({ ...localFilters, type: 'alle' })}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-all ${
                           localFilters.type === 'alle'
                             ? 'bg-brand-teal-500 text-white shadow-md'
                             : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
@@ -212,7 +212,7 @@ export default function EditVerbruikModal({
                       </button>
                       <button
                         onClick={() => setLocalFilters({ ...localFilters, type: 'vast' })}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-all ${
                           localFilters.type === 'vast'
                             ? 'bg-brand-teal-500 text-white shadow-md'
                             : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
@@ -222,7 +222,7 @@ export default function EditVerbruikModal({
                       </button>
                       <button
                         onClick={() => setLocalFilters({ ...localFilters, type: 'dynamisch' })}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-all ${
                           localFilters.type === 'dynamisch'
                             ? 'bg-brand-teal-500 text-white shadow-md'
                             : 'bg-brand-navy-50 text-brand-navy-600 hover:bg-brand-navy-100'
@@ -232,7 +232,7 @@ export default function EditVerbruikModal({
                       </button>
                       <button
                         onClick={() => setLocalFilters({ ...localFilters, groeneEnergie: !localFilters.groeneEnergie })}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                        className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
                           localFilters.groeneEnergie
                             ? 'bg-green-500 text-white shadow-md'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -251,7 +251,7 @@ export default function EditVerbruikModal({
                       <ArrowsDownUp weight="bold" className="w-5 h-5 text-gray-500" />
                       <select
                         value={localSortBy}
-                        onChange={(e) => setLocalSortBy(e.target.value as any)}
+                        onChange={(e) => setLocalSortBy(e.target.value as 'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating')}
                         className="flex-1 px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
                       >
                         <option value="besparing">Hoogste besparing</option>
@@ -265,7 +265,7 @@ export default function EditVerbruikModal({
                   {/* Advanced filters toggle */}
                   <button
                     onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                    className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
                   >
                     <SlidersHorizontal weight="bold" className="w-4 h-4" />
                     Meer filters
@@ -302,7 +302,7 @@ export default function EditVerbruikModal({
                           setLocalFilters({ type: 'alle', groeneEnergie: false, maxPrijs: 99999, minRating: 0 })
                           setShowAdvancedFilters(false)
                         }}
-                        className="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        className="w-full px-4 py-2.5 min-h-[44px] text-sm font-medium text-gray-600 hover:text-brand-navy-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
                         <X weight="bold" className="w-4 h-4" />
                         Reset filters
@@ -324,7 +324,7 @@ export default function EditVerbruikModal({
           </div>
 
           {/* Footer - Sticky */}
-          <div className="border-t-2 border-gray-100 p-5 bg-white sticky bottom-0">
+          <div className="border-t-2 border-gray-100 p-5 bg-white sticky bottom-0" style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>
             <div className="flex gap-3">
               <Button
                 variant="outline"

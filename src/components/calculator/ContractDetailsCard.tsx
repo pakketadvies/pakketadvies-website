@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { CaretDown, Star, CheckCircle, CurrencyEur, ChartBar, Leaf, Info } from '@phosphor-icons/react'
 import type { ContractOptie } from '@/types/calculator'
+import type { KostenBreakdown } from './ContractCard'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import { debugLogger } from '@/lib/debug-logger'
 
@@ -11,9 +12,31 @@ interface ContractDetailsCardProps {
   contract: ContractOptie | null
 }
 
+type ContractDetails = {
+  tarief_teruglevering_kwh?: number
+  opslag_elektriciteit?: number
+  opslag_elektriciteit_normaal?: number
+  opslag_gas?: number
+  opslag_teruglevering?: number
+  vastrecht_stroom_maand?: number
+  vastrecht_gas_maand?: number
+}
+
+type ElektriciteitDetailRegel = {
+  kwh: number
+  tarief: number
+  bedrag: number
+  nettoKwh?: number
+}
+
+function getElektriciteitKwh(detail?: ElektriciteitDetailRegel): number {
+  if (!detail) return 0
+  return detail.nettoKwh ?? detail.kwh
+}
+
 export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
   const [showDetails, setShowDetails] = useState(false)
-  const [breakdown, setBreakdown] = useState<any>(null)
+  const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(null)
   const [loadingBreakdown, setLoadingBreakdown] = useState(false)
   const { verbruik } = useCalculatorStore()
 
@@ -26,7 +49,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
       maandbedrag: contract?.maandbedrag,
       jaarbedrag: contract?.jaarbedrag,
       besparing: contract?.besparing,
-      hasBreakdown: !!(contract as any)?.breakdown,
+      hasBreakdown: !!contract?.breakdown,
     })
   }, [])
 
@@ -58,16 +81,16 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
 
   // Haal contract details op voor tarieven
   const details = contract.type === 'vast' 
-    ? (contract as any).details_vast 
-    : (contract as any).details_dynamisch
+    ? ((contract.details_vast as ContractDetails | undefined) ?? {})
+    : ((contract.details_dynamisch as ContractDetails | undefined) ?? {})
 
   // 📱 DEBUG: Log details om te zien wat erin zit
   useEffect(() => {
     debugLogger.info('ContractDetailsCard - Contract details', {
       contractType: contract.type,
       hasDetails: !!details,
-      hasDetailsVast: !!(contract as any).details_vast,
-      hasDetailsDynamisch: !!(contract as any).details_dynamisch,
+      hasDetailsVast: !!contract.details_vast,
+      hasDetailsDynamisch: !!contract.details_dynamisch,
       detailsObject: details,
       opslag_elektriciteit: details?.opslag_elektriciteit,
       opslag_elektriciteit_normaal: details?.opslag_elektriciteit_normaal,
@@ -85,15 +108,15 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
       debugLogger.info('ContractDetailsCard - Breakdown check', {
         showDetails,
         hasBreakdown: !!breakdown,
-        hasContractBreakdown: !!(contract as any).breakdown,
+        hasContractBreakdown: !!contract.breakdown,
         loadingBreakdown,
         hasVerbruik: !!verbruik,
       })
 
       // Als het contract al een breakdown heeft, gebruik die direct
-      if ((contract as any).breakdown) {
+      if (contract.breakdown) {
         debugLogger.info('ContractDetailsCard - Using existing breakdown from contract')
-        setBreakdown((contract as any).breakdown)
+        setBreakdown(contract.breakdown as KostenBreakdown)
         return
       }
       
@@ -162,10 +185,10 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                 errorText,
               })
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             debugLogger.error('ContractDetailsCard - Fetch error', {
-              error: error.message,
-              stack: error.stack,
+              error: error instanceof Error ? error.message : 'Unknown error',
+              stack: error instanceof Error ? error.stack : undefined,
             })
             console.error('Error fetching breakdown:', error)
           } finally {
@@ -505,7 +528,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                               <span className="text-gray-700">
                                 Leveringskosten normaal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.normaal?.kwh ?? 0).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.normaal?.tarief)})
+                                  ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.normaal).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.normaal?.tarief)})
                                 </span>
                               </span>
                               <span className="font-semibold text-brand-navy-500">
@@ -518,7 +541,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                               <span className="text-gray-700">
                                 Leveringskosten dal
                                 <span className="text-xs text-gray-500 ml-1">
-                                  ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.dal?.kwh ?? 0).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.dal?.tarief)})
+                                  ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.dal).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.dal?.tarief)})
                                 </span>
                               </span>
                               <span className="font-semibold text-brand-navy-500">
@@ -533,7 +556,7 @@ export function ContractDetailsCard({ contract }: ContractDetailsCardProps) {
                           <span className="text-gray-700">
                             Leveringskosten enkeltarief
                             <span className="text-xs text-gray-500 ml-1">
-                              ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ?? breakdown.leverancier.elektriciteitDetails.enkel?.kwh ?? 0).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.enkel?.tarief)})
+                              ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.enkel).toLocaleString()} kWh × {formatTariff(breakdown.leverancier.elektriciteitDetails.enkel?.tarief)})
                             </span>
                           </span>
                           <span className="font-semibold text-brand-navy-500">

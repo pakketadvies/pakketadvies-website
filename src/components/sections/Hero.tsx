@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { QuickCalculator } from '@/components/calculator/QuickCalculator'
 import { HomepageBestDeals } from '@/components/sections/HomepageBestDeals'
 import { WaveDivider } from '@/components/ui/WaveDivider'
+import { TRUST_COPY } from '@/lib/copy'
 
 interface HeroProps {
   initialBestDeals?: {
@@ -14,11 +15,6 @@ interface HeroProps {
 }
 
 export function Hero({ initialBestDeals }: HeroProps = {} as HeroProps) {
-  console.log('🔵 [Hero] Rendered')
-  console.log('🔵 [Hero] initialBestDeals:', initialBestDeals)
-  console.log('🔵 [Hero] initialBestDeals?.contracten:', initialBestDeals?.contracten)
-  console.log('🔵 [Hero] initialBestDeals?.contracten?.length:', initialBestDeals?.contracten?.length || 0)
-  console.log('🔵 [Hero] initialBestDeals?.averagePrice:', initialBestDeals?.averagePrice)
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-navy-500 pt-20 md:pt-24">
       {/* Background Image with Overlay */}
@@ -52,14 +48,14 @@ export function Hero({ initialBestDeals }: HeroProps = {} as HeroProps) {
                     <svg className="w-5 h-5 text-brand-teal-500" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                     </svg>
-                    <span className="text-sm">2.500+ reviews</span>
+                    <span className="text-sm">{TRUST_COPY.reviewsCount}</span>
                   </div>
             <div className="w-px h-6 bg-gray-600"></div>
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-teal-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
               </svg>
-              <span className="text-sm">100% transparant</span>
+              <span className="text-sm">{TRUST_COPY.freeAndNoObligation}</span>
             </div>
           </div>
 

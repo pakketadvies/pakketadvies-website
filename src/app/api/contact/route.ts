@@ -1,63 +1,37 @@
-import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { z } from 'zod'
 import { generateContactFormulierEmail, generateContactBevestigingEmail } from '@/lib/email-templates'
 import { appendLeadToSheet } from '@/lib/google-sheets'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { parseJsonBody } from '@/lib/api/validation'
 
-interface ContactFormData {
-  naam: string
-  bedrijfsnaam: string
-  email: string
-  telefoon?: string
-  onderwerp: string
-  bericht: string
-  privacy_akkoord: boolean
-  website?: string // Honeypot field (verborgen, bots vullen dit in)
-}
+const contactFormSchema = z.object({
+  naam: z.string().trim().min(1, 'Naam is verplicht'),
+  bedrijfsnaam: z.string().trim().default(''),
+  email: z.string().trim().email('Ongeldig emailadres'),
+  telefoon: z.string().trim().optional(),
+  onderwerp: z.string().trim().min(1, 'Onderwerp is verplicht'),
+  bericht: z.string().trim().min(10, 'Bericht moet minimaal 10 tekens bevatten'),
+  privacy_akkoord: z
+    .boolean()
+    .refine((value) => value === true, 'Je moet akkoord gaan met de privacyvoorwaarden'),
+  website: z.string().optional(), // Honeypot field (verborgen, bots vullen dit in)
+})
 
 export async function POST(request: Request) {
   try {
-    const body: ContactFormData = await request.json()
-    
-    // Validatie
-    if (!body.naam || !body.email || !body.onderwerp || !body.bericht) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Alle verplichte velden moeten ingevuld zijn' 
-        },
-        { status: 400 }
-      )
+    const parsedBody = await parseJsonBody(request, contactFormSchema)
+    if (!parsedBody.success) {
+      return apiError(parsedBody.error, 400)
     }
-
-    if (!body.privacy_akkoord) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Je moet akkoord gaan met de privacyvoorwaarden' 
-        },
-        { status: 400 }
-      )
-    }
-
-    // Email validatie
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(body.email)) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Ongeldig emailadres' 
-        },
-        { status: 400 }
-      )
-    }
+    const body = parsedBody.data
 
     // Honeypot check - als website veld is ingevuld, is het spam
     if (body.website && body.website.trim() !== '') {
       console.log('🚫 [contact] Spam detected - honeypot field filled:', body.website)
       // Return success to bot (don't let them know they were caught)
-      return NextResponse.json({
-        success: true,
+      return apiSuccess({
         message: 'Je bericht is ontvangen. We nemen zo snel mogelijk contact met je op.',
       })
     }
@@ -65,10 +39,7 @@ export async function POST(request: Request) {
     // Use service role key voor public inserts
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
-      return NextResponse.json(
-        { success: false, error: 'Server configuration error' },
-        { status: 500 }
-      )
+      return apiError('Server configuration error', 500)
     }
 
     const supabase = createClient(
@@ -194,12 +165,12 @@ export async function POST(request: Request) {
           } else {
             console.log('✅ [contact] Confirmation email sent successfully, ID:', bevestigingResult?.id)
           }
-        } catch (bevestigingError: any) {
+        } catch (bevestigingError: unknown) {
           console.error('❌ [contact] Unexpected error sending confirmation email:', bevestigingError)
           // Don't fail the request if email fails, just log it
         }
       }
-    } catch (emailError: any) {
+    } catch (emailError: unknown) {
       console.error('❌ [contact] Unexpected error sending email:', emailError)
       // Don't fail the request if email fails, just log it
     }
@@ -222,24 +193,17 @@ export async function POST(request: Request) {
         opmerkingen: `${body.onderwerp}\n\n${body.bericht}${body.bedrijfsnaam ? `\n\nBedrijf: ${body.bedrijfsnaam}` : ''}`,
       })
       console.log('✅ [contact] Successfully wrote to Google Sheets')
-    } catch (sheetsError: any) {
+    } catch (sheetsError: unknown) {
       console.error('❌ [contact] Error writing to Google Sheets (non-blocking):', sheetsError)
       // Non-blocking: formulier blijft werken ook als Google Sheets faalt
     }
 
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       message: 'Je bericht is ontvangen. We nemen zo snel mogelijk contact met je op.',
       id: data?.id,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error processing contact form:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Er is een fout opgetreden. Probeer het later opnieuw.' 
-      },
-      { status: 500 }
-    )
+    return apiError('Er is een fout opgetreden. Probeer het later opnieuw.', 500)
   }
 }

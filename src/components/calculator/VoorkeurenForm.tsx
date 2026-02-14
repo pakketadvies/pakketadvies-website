@@ -30,7 +30,7 @@ const createVoorkeurenSchema = (type?: string) => {
 
 type VoorkeurenFormData = {
   type: 'vast' | 'dynamisch' | 'maatwerk'
-  looptijd?: 1 | 2 | 3 | 5
+  looptijd?: 1 | 2 | 3 | 4 | 5
   groeneEnergie: boolean
   opmerkingen?: string
 }
@@ -271,11 +271,12 @@ export function VoorkeurenForm() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {looptijden.map((jaar) => {
               const isSelected = looptijd === jaar
+              const looptijdJaar = jaar as 1 | 2 | 3 | 4 | 5
               
               return (
                 <label
                   key={jaar}
-                  onClick={() => setValue('looptijd', jaar as any)}
+                  onClick={() => setValue('looptijd', looptijdJaar)}
                   className={`
                     relative flex flex-col items-center justify-center p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300
                     ${isSelected 
@@ -288,7 +289,7 @@ export function VoorkeurenForm() {
                     type="radio"
                     value={jaar}
                     checked={isSelected}
-                    onChange={() => setValue('looptijd', jaar as any)}
+                    onChange={() => setValue('looptijd', looptijdJaar)}
                     className="sr-only"
                   />
                   <div className={`text-xl md:text-2xl font-bold mb-0.5 md:mb-1 ${isSelected ? 'text-brand-teal-600' : 'text-gray-900'}`}>

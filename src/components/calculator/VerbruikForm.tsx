@@ -28,6 +28,8 @@ import {
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
+import { trackGAEvent } from '@/lib/tracking/ga-events'
+import { CTA_COPY, TRUST_COPY } from '@/lib/copy'
 
 const verbruikSchema = z.object({
   // Elektriciteit
@@ -112,6 +114,13 @@ const verbruikSchema = z.object({
 })
 
 type VerbruikFormData = z.infer<typeof verbruikSchema>
+type AddressInputField = 'postcode' | 'huisnummer' | 'toevoeging'
+type AddressErrorField = AddressInputField | 'straat' | 'plaats'
+type AddressErrorPath = `leveringsadressen.${number}.${AddressErrorField}`
+
+function getAddressPath(index: number, field: AddressErrorField): AddressErrorPath {
+  return `leveringsadressen.${index}.${field}` as AddressErrorPath
+}
 
 export function VerbruikForm() {
   const router = useRouter()
@@ -165,8 +174,8 @@ export function VerbruikForm() {
     setError,
     clearErrors,
     watch,
-  } = useForm<any>({
-    resolver: zodResolver(verbruikSchema) as any,
+  } = useForm({
+    resolver: zodResolver(verbruikSchema),
     defaultValues: {
       elektriciteitNormaal: 0,
       heeftEnkeleMeter: false,
@@ -262,7 +271,7 @@ export function VerbruikForm() {
         
         if (data.error) {
           // API geeft error terug (maar met 200 status)
-          setError(`leveringsadressen.${index}.toevoeging` as any, {
+          setError(getAddressPath(index, 'toevoeging'), {
             message: data.error
           })
           // Clear BAG API result omdat adres niet geldig is
@@ -304,11 +313,11 @@ export function VerbruikForm() {
         
         // Check of het specifiek de toevoeging is die niet bestaat
         if (toevoeging && errorData.error && errorData.error.includes('Toevoeging')) {
-          setError(`leveringsadressen.${index}.toevoeging` as any, {
+          setError(getAddressPath(index, 'toevoeging'), {
             message: errorData.error
           })
         } else {
-          setError(`leveringsadressen.${index}.postcode` as any, {
+          setError(getAddressPath(index, 'postcode'), {
             message: errorData.error || 'Adres niet gevonden. Controleer postcode en huisnummer.'
           })
         }
@@ -408,7 +417,7 @@ export function VerbruikForm() {
 
     // Update form state (alleen voor primair adres, index 0)
     if (index === 0) {
-      setValue('addressType', newType as any)
+      setValue('addressType', newType)
       setAddressType(newType)
     }
   }
@@ -434,7 +443,7 @@ export function VerbruikForm() {
       }
       setAddressTypeResult(prev => ({ ...prev, [index]: overrideResult }))
       if (index === 0) {
-        setValue('addressType', overrideType as any)
+        setValue('addressType', overrideType)
         setAddressType(overrideType)
       }
       return
@@ -505,7 +514,7 @@ export function VerbruikForm() {
     }
   }, [setValue, manualAddressTypeOverride, addressTypeResult, setAddressType]);
 
-  const handleLeveringsadresChange = (index: number, field: string, value: string) => {
+  const handleLeveringsadresChange = (index: number, field: AddressInputField, value: string) => {
     // Update state
     setLeveringsadressen(prev => {
       const updated = [...prev]
@@ -536,7 +545,7 @@ export function VerbruikForm() {
       return updated
     })
     
-    setValue(`leveringsadressen.${index}.${field}` as any, value)
+    setValue(getAddressPath(index, field), value)
 
     // Clear oude timer
     if (debounceTimers.current[index]) {
@@ -609,15 +618,15 @@ export function VerbruikForm() {
 
     // Verdeel elektriciteit over normaal/dal (60/40 split voor dubbele meter)
     if (!heeftEnkeleMeter) {
-      setValue('elektriciteitNormaal' as any, Math.round(geschatElektriciteit * 0.6))
-      setValue('elektriciteitDal' as any, Math.round(geschatElektriciteit * 0.4))
+      setValue('elektriciteitNormaal', Math.round(geschatElektriciteit * 0.6))
+      setValue('elektriciteitDal', Math.round(geschatElektriciteit * 0.4))
     } else {
-      setValue('elektriciteitNormaal' as any, geschatElektriciteit)
+      setValue('elektriciteitNormaal', geschatElektriciteit)
       setValue('elektriciteitDal', null)
     }
 
     if (!geenGasaansluiting) {
-      setValue('gasJaar' as any, geschatGas)
+      setValue('gasJaar', geschatGas)
     }
 
     setShowHelpSchatten(false)
@@ -663,9 +672,13 @@ export function VerbruikForm() {
 
       for (const fieldName of errorFields) {
         // Check of er een error is voor dit veld
-        const hasError = fieldName.includes('.') 
-          ? (errors.leveringsadressen as any)?.[0]?.[fieldName.split('.')[2] as string]
-          : (errors as any)[fieldName]
+        let hasError = false
+        if (fieldName === 'elektriciteitNormaal') hasError = !!errors.elektriciteitNormaal
+        if (fieldName === 'elektriciteitDal') hasError = !!errors.elektriciteitDal
+        if (fieldName === 'gasJaar') hasError = !!errors.gasJaar
+        if (fieldName === 'terugleveringJaar') hasError = !!errors.terugleveringJaar
+        if (fieldName === 'leveringsadressen.0.postcode') hasError = !!errors.leveringsadressen?.[0]?.postcode
+        if (fieldName === 'leveringsadressen.0.huisnummer') hasError = !!errors.leveringsadressen?.[0]?.huisnummer
         
         if (hasError) {
           const element = document.querySelector(`input[name="${fieldName}"]`) as HTMLElement
@@ -685,6 +698,13 @@ export function VerbruikForm() {
   }, [errors])
 
   const onSubmit = (data: VerbruikFormData) => {
+    trackGAEvent('calculator_start', {
+      has_gas: !geenGasaansluiting,
+      has_solar: heeftZonnepanelen,
+      has_single_meter: heeftEnkeleMeter,
+      meter_type: data.meterType,
+    })
+
     setVerbruik({
       elektriciteitNormaal: data.elektriciteitNormaal,
       elektriciteitDal: heeftEnkeleMeter ? null : data.elektriciteitDal,
@@ -743,7 +763,7 @@ export function VerbruikForm() {
                   value={adres.postcode}
                   onChange={(e) => handleLeveringsadresChange(index, 'postcode', e.target.value)}
                   placeholder="1234 AB"
-                  error={(errors.leveringsadressen as any)?.[index]?.postcode?.message}
+                  error={typeof errors.leveringsadressen?.[index]?.postcode?.message === 'string' ? errors.leveringsadressen[index]?.postcode?.message : undefined}
                   required
                 />
               </div>
@@ -754,7 +774,7 @@ export function VerbruikForm() {
                   value={adres.huisnummer}
                   onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
                   placeholder="12"
-                  error={(errors.leveringsadressen as any)?.[index]?.huisnummer?.message}
+                  error={typeof errors.leveringsadressen?.[index]?.huisnummer?.message === 'string' ? errors.leveringsadressen[index]?.huisnummer?.message : undefined}
                   required
                 />
               </div>
@@ -765,7 +785,7 @@ export function VerbruikForm() {
                   value={adres.toevoeging || ''}
                   onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
                   placeholder="A"
-                  error={(errors.leveringsadressen as any)?.[index]?.toevoeging?.message}
+                  error={typeof errors.leveringsadressen?.[index]?.toevoeging?.message === 'string' ? errors.leveringsadressen[index]?.toevoeging?.message : undefined}
                 />
               </div>
             </div>
@@ -929,7 +949,7 @@ export function VerbruikForm() {
                 if (checked) {
                   // Bewaar de huidige waarde voordat we het op null zetten
                   const currentDal = watch('elektriciteitDal')
-                  if (currentDal !== null && currentDal !== undefined) {
+                  if (typeof currentDal === 'number' && !isNaN(currentDal)) {
                     savedElektriciteitDal.current = currentDal
                   }
                   setValue('elektriciteitDal', null)
@@ -1088,11 +1108,11 @@ export function VerbruikForm() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-          {[
+          {([
             { value: 'slim', label: 'Slimme meter', icon: DeviceMobile, desc: 'Digitale uitlezing' },
             { value: 'oud', label: 'Oude meter', icon: Gauge, desc: 'Draaiende schijf' },
             { value: 'weet_niet', label: 'Weet ik niet', icon: CheckCircle, desc: 'Standaard' },
-          ].map((option) => {
+          ] as const).map((option) => {
             const Icon = option.icon
             const isSelected = meterType === option.value
             
@@ -1101,8 +1121,8 @@ export function VerbruikForm() {
                 key={option.value}
                 type="button"
                 onClick={() => {
-                  setMeterType(option.value as any)
-                  setValue('meterType', option.value as any)
+                  setMeterType(option.value)
+                  setValue('meterType', option.value)
                 }}
                 className={`p-3 md:p-4 rounded-xl border-2 transition-all text-left ${
                   isSelected
@@ -1227,10 +1247,10 @@ export function VerbruikForm() {
       <div className="pt-4 md:pt-6">
         <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
           <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-          Bekijk mijn aanbiedingen
+          {CTA_COPY.viewOffers}
         </Button>
         <p className="text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
-          100% vrijblijvend • Direct resultaat • Geen verplichtingen
+          {TRUST_COPY.freeAndNoObligation} • {TRUST_COPY.quickResult} • {TRUST_COPY.noObligation}
         </p>
       </div>
 

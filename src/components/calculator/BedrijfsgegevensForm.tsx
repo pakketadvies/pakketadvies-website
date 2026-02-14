@@ -21,6 +21,7 @@ import { convertToISODate } from '@/lib/date-utils'
 import type { ContractOptie } from '@/types/calculator'
 import EditVerbruikModal from './EditVerbruikModal'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
+import { trackGAEvent } from '@/lib/tracking/ga-events'
 
 const bedrijfsgegevensSchema = z.object({
   // Klant check
@@ -173,6 +174,7 @@ function BedrijfsgegevensFormContent() {
   // ALLE HOOKS MOETEN BOVEN DE EARLY RETURN STAAN (React Rules of Hooks)
   // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   
   // KvK number lookup states
   const [kvkNummer, setKvkNummer] = useState('')
@@ -334,9 +336,9 @@ function BedrijfsgegevensFormContent() {
           setContract(transformedContract)
           setSelectedContract(transformedContract) // Zet ook in store voor volgende keer
           setLoadingContract(false)
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('❌ [BedrijfsgegevensForm] Error loading contract:', error)
-          setContractError(error.message || 'Fout bij laden contract')
+          setContractError(error instanceof Error ? error.message : 'Fout bij laden contract')
           setLoadingContract(false)
         }
     }
@@ -409,6 +411,15 @@ function BedrijfsgegevensFormContent() {
   } : 'null')
   console.log('🔍 BedrijfsgegevensForm - isDirect:', isDirect, 'contractId:', contractId)
   console.log('🔍 BedrijfsgegevensForm - Will show verbruik card:', !!verbruik)
+
+  useEffect(() => {
+    if (!contract) return
+    trackGAEvent('aanvraag_start', {
+      audience: 'zakelijk',
+      contract_type: contract.type,
+      supplier: contract.leverancier?.naam,
+    })
+  }, [contract])
   
   // Nu kunnen we early returns doen (alle hooks zijn al aangeroepen)
   // Loading state
@@ -726,6 +737,7 @@ function BedrijfsgegevensFormContent() {
 
   const onSubmit = async (data: BedrijfsgegevensFormData) => {
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
       if (!contract) {
         console.error('❌ [BedrijfsgegevensForm] No contract available on submit')
@@ -736,7 +748,7 @@ function BedrijfsgegevensFormContent() {
       
       if (!verbruik) {
         console.error('❌ [BedrijfsgegevensForm] No verbruik data available on submit')
-        alert('Geen verbruik data beschikbaar. Ga terug naar stap 1.')
+        setSubmitError('Geen verbruiksgegevens gevonden. Ga terug naar stap 1 en probeer opnieuw.')
         setIsSubmitting(false)
         return
       }
@@ -855,10 +867,19 @@ function BedrijfsgegevensFormContent() {
       }
 
       // Redirect to bevestigingspagina
+      trackGAEvent('aanvraag_complete', {
+        audience: 'zakelijk',
+        contract_type: contract.type,
+        supplier: contract.leverancier?.naam,
+      })
       router.push('/contract/bevestiging')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting form:', error)
-      alert(error.message || 'Er is een fout opgetreden bij het verzenden van uw aanvraag. Probeer het opnieuw.')
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Er is een fout opgetreden bij het verzenden van uw aanvraag. Probeer het opnieuw.'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -906,6 +927,12 @@ function BedrijfsgegevensFormContent() {
       <ContractDetailsCard contract={contract} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+        {submitError && (
+          <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-medium text-red-700">{submitError}</p>
+          </div>
+        )}
+
         {/* Honeypot field - verborgen, bots vullen dit in */}
         <input
           type="text"

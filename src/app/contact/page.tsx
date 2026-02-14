@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LocalBusinessSchema } from '@/components/seo/StructuredData'
+import { validatePhoneNumber } from '@/lib/phone-validation'
 import { 
   Phone, 
   Envelope, 
@@ -35,6 +36,7 @@ interface FormErrors {
   naam?: string
   bedrijfsnaam?: string
   email?: string
+  telefoon?: string
   onderwerp?: string
   bericht?: string
   privacy_akkoord?: string
@@ -74,6 +76,7 @@ export default function ContactPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [globalFormError, setGlobalFormError] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
 
   const validateForm = (): boolean => {
@@ -89,6 +92,13 @@ export default function ContactPage() {
       newErrors.email = 'E-mail is verplicht'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Ongeldig e-mailadres'
+    }
+
+    if (formData.telefoon.trim()) {
+      const phone = validatePhoneNumber(formData.telefoon)
+      if (!phone.valid) {
+        newErrors.telefoon = phone.error || 'Vul een geldig telefoonnummer in'
+      }
     }
 
     if (!formData.onderwerp) {
@@ -118,6 +128,7 @@ export default function ContactPage() {
 
     setIsSubmitting(true)
     setErrors({})
+    setGlobalFormError(null)
 
     try {
       const response = await fetch('/api/contact', {
@@ -132,6 +143,7 @@ export default function ContactPage() {
 
       if (data.success) {
         setIsSuccess(true)
+        setGlobalFormError(null)
         setFormData({
           naam: '',
           bedrijfsnaam: '',
@@ -145,11 +157,11 @@ export default function ContactPage() {
         // Scroll naar success message
         window.scrollTo({ top: 0, behavior: 'smooth' })
       } else {
-        setErrors({ bericht: data.error || 'Er is een fout opgetreden' })
+        setGlobalFormError(data.error || 'Er is een fout opgetreden bij het verzenden van je bericht.')
       }
     } catch (error) {
       console.error('Error submitting form:', error)
-      setErrors({ bericht: 'Er is een fout opgetreden. Probeer het later opnieuw.' })
+      setGlobalFormError('Er is een fout opgetreden. Probeer het later opnieuw.')
     } finally {
       setIsSubmitting(false)
     }
@@ -157,6 +169,7 @@ export default function ContactPage() {
 
   const handleChange = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (globalFormError) setGlobalFormError(null)
     // Clear error when user starts typing
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }))
@@ -310,6 +323,12 @@ export default function ContactPage() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {globalFormError && (
+                      <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+                        <p className="text-sm font-medium text-red-700">{globalFormError}</p>
+                      </div>
+                    )}
+
                     <div className="grid md:grid-cols-2 gap-6">
                       <Input
                         label="Naam *"
@@ -344,6 +363,7 @@ export default function ContactPage() {
                         placeholder="06 12345678"
                         value={formData.telefoon}
                         onChange={(e) => handleChange('telefoon', e.target.value)}
+                        error={errors.telefoon}
                       />
                     </div>
 

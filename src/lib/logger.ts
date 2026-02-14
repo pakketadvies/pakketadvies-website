@@ -9,7 +9,7 @@ export const logger = {
   /**
    * Log info messages (only in development)
    */
-  log: (...args: any[]) => {
+  log: (...args: unknown[]) => {
     if (isDevelopment) {
       console.log(...args)
     }
@@ -18,7 +18,7 @@ export const logger = {
   /**
    * Log errors (always logged, even in production)
    */
-  error: (...args: any[]) => {
+  error: (...args: unknown[]) => {
     console.error(...args)
     // TODO: In production, send to error tracking service (e.g. Sentry)
   },
@@ -26,7 +26,7 @@ export const logger = {
   /**
    * Log warnings (only in development)
    */
-  warn: (...args: any[]) => {
+  warn: (...args: unknown[]) => {
     if (isDevelopment) {
       console.warn(...args)
     }
@@ -35,7 +35,7 @@ export const logger = {
   /**
    * Log debug messages (only in development)
    */
-  debug: (...args: any[]) => {
+  debug: (...args: unknown[]) => {
     if (isDevelopment) {
       console.debug(...args)
     }
@@ -44,7 +44,7 @@ export const logger = {
   /**
    * Log info with prefix (only in development)
    */
-  info: (prefix: string, ...args: any[]) => {
+  info: (prefix: string, ...args: unknown[]) => {
     if (isDevelopment) {
       console.log(`[${prefix}]`, ...args)
     }

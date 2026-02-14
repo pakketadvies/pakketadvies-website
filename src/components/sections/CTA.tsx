@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Lightning, ArrowRight, CheckCircle } from '@phosphor-icons/react'
+import { CTA_COPY, TRUST_COPY } from '@/lib/copy'
 
 export function CTA() {
   return (
@@ -53,7 +54,7 @@ export function CTA() {
             <Link href="/calculator">
               <button className="group relative px-8 py-4 bg-brand-teal-500 text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-brand-teal-500/50 transition-all duration-300 hover:scale-105 hover:bg-brand-teal-600">
                 <span className="flex items-center gap-2">
-                  Energie vergelijken
+                  {CTA_COPY.compareEnergy}
                   <ArrowRight weight="bold" className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
@@ -70,7 +71,7 @@ export function CTA() {
           <div className="flex flex-wrap justify-center gap-8 pt-12 text-sm text-gray-300">
             <div className="flex items-center gap-2">
               <CheckCircle weight="bold" className="w-5 h-5 text-brand-teal-500" />
-              <span>Gratis en vrijblijvend</span>
+              <span>{TRUST_COPY.freeAndNoObligation}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle weight="bold" className="w-5 h-5 text-brand-teal-500" />

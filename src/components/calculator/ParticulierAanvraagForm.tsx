@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCalculatorStore } from '@/store/calculatorStore'
@@ -37,6 +37,16 @@ import { DatePicker } from '@/components/ui/DatePicker'
 import { validatePhoneNumber } from '@/lib/phone-validation'
 import { convertToISODate } from '@/lib/date-utils'
 import EditVerbruikModal from './EditVerbruikModal'
+import { trackGAEvent } from '@/lib/tracking/ga-events'
+
+type ContractDetails = {
+  tarief_teruglevering_kwh?: number
+  opslag_elektriciteit?: number
+  opslag_gas?: number
+  opslag_teruglevering?: number
+  vastrecht_stroom_maand?: number
+  vastrecht_gas_maand?: number
+}
 
 const particulierAanvraagSchema = z.object({
   // Klant check
@@ -160,6 +170,7 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
   const router = useRouter()
   const { verbruik, vorigeStap, setVerbruik, setAddressType } = useCalculatorStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [showAdresWijzigen, setShowAdresWijzigen] = useState(false)
   const [showIbanCalculator, setShowIbanCalculator] = useState(false)
   
@@ -169,6 +180,17 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
   
   // Contract state - kan updated worden na verbruik wijziging
   const [contract, setContract] = useState<ContractOptie | null>(initialContract)
+  const detailsVast = (contract?.details_vast as ContractDetails | undefined) ?? {}
+  const detailsDynamisch = (contract?.details_dynamisch as ContractDetails | undefined) ?? {}
+
+  useEffect(() => {
+    if (!contract) return
+    trackGAEvent('aanvraag_start', {
+      audience: 'particulier',
+      contract_type: contract.type,
+      supplier: contract.leverancier?.naam,
+    })
+  }, [contract])
   
   // Handler voor verbruik update
   const handleVerbruikUpdate = async (newVerbruik: typeof verbruik) => {
@@ -202,12 +224,12 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
           tariefElektriciteitDal: contract.tariefElektriciteitDal,
           tariefElektriciteitEnkel: contract.tariefElektriciteitEnkel,
           tariefGas: contract.tariefGas,
-          tariefTerugleveringKwh: (contract as any).details_vast?.tarief_teruglevering_kwh,
-          opslagElektriciteit: (contract as any).details_dynamisch?.opslag_elektriciteit,
-          opslagGas: (contract as any).details_dynamisch?.opslag_gas,
-          opslagTeruglevering: (contract as any).details_dynamisch?.opslag_teruglevering,
-          vastrechtStroomMaand: (contract as any).details_vast?.vastrecht_stroom_maand || (contract as any).details_dynamisch?.vastrecht_stroom_maand,
-          vastrechtGasMaand: (contract as any).details_vast?.vastrecht_gas_maand || (contract as any).details_dynamisch?.vastrecht_gas_maand,
+          tariefTerugleveringKwh: detailsVast.tarief_teruglevering_kwh,
+          opslagElektriciteit: detailsDynamisch.opslag_elektriciteit,
+          opslagGas: detailsDynamisch.opslag_gas,
+          opslagTeruglevering: detailsDynamisch.opslag_teruglevering,
+          vastrechtStroomMaand: detailsVast.vastrecht_stroom_maand || detailsDynamisch.vastrecht_stroom_maand,
+          vastrechtGasMaand: detailsVast.vastrecht_gas_maand || detailsDynamisch.vastrecht_gas_maand,
           heeftDubbeleMeter: !newVerbruik.heeftEnkeleMeter,
         }),
       })
@@ -534,9 +556,10 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
 
   const onSubmit = async (data: ParticulierAanvraagFormData) => {
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
       if (!contract || !verbruik) {
-        alert('Er is een fout opgetreden. Probeer het opnieuw.')
+        setSubmitError('Er ontbreekt contract- of verbruiksdata. Probeer het opnieuw.')
         return
       }
 
@@ -638,10 +661,19 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
       }
 
       // Redirect to bevestigingspagina
+      trackGAEvent('aanvraag_complete', {
+        audience: 'particulier',
+        contract_type: contract.type,
+        supplier: contract.leverancier?.naam,
+      })
       router.push('/contract/bevestiging')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting form:', error)
-      alert(error.message || 'Er is een fout opgetreden bij het verzenden van uw aanvraag. Probeer het opnieuw.')
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Er is een fout opgetreden bij het verzenden van uw aanvraag. Probeer het opnieuw.'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -682,6 +714,12 @@ export function ParticulierAanvraagForm({ contract: initialContract }: Particuli
       <ContractDetailsCard contract={contract} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+        {submitError && (
+          <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-medium text-red-700">{submitError}</p>
+          </div>
+        )}
+
         {/* Honeypot field - verborgen, bots vullen dit in */}
         <input
           type="text"

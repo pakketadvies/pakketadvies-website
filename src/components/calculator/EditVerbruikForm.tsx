@@ -57,7 +57,7 @@ export default function EditVerbruikForm({ currentData, onChange }: EditVerbruik
     }
   }, [])
 
-  const handleFieldChange = (field: keyof VerbruikData, value: any) => {
+  const handleFieldChange = (field: keyof VerbruikData, value: VerbruikData[keyof VerbruikData]) => {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
     onChange(newData)  // ✅ BACK! Safe now omdat verbruik.addressType niet meer in useEffect dependency is

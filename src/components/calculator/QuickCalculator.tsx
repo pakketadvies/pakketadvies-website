@@ -25,6 +25,7 @@ import {
 } from '@phosphor-icons/react'
 import type { VerbruikData } from '@/types/calculator'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
+import { CTA_COPY, TRUST_COPY } from '@/lib/copy'
 
 const verbruikSchema = z.object({
   elektriciteitNormaal: z.preprocess(
@@ -654,17 +655,11 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
 
       for (const fieldName of errorFields) {
         // Check of er een error is voor dit veld
-        let hasError: any = false
-        
-        if (fieldName.includes('.')) {
-          // Nested field (leveringsadressen.0.postcode, etc.)
-          const errorObj = (errors as any).leveringsadressen?.[0]
-          const nestedField = fieldName.split('.')[2]
-          hasError = errorObj?.[nestedField]
-        } else {
-          // Top-level field
-          hasError = errors[fieldName as keyof typeof errors]
-        }
+        let hasError = false
+        if (fieldName === 'elektriciteitNormaal') hasError = !!errors.elektriciteitNormaal
+        if (fieldName === 'elektriciteitDal') hasError = !!errors.elektriciteitDal
+        if (fieldName === 'gasJaar') hasError = !!errors.gasJaar
+        if (fieldName === 'terugleveringJaar') hasError = !!errors.terugleveringJaar
         
         if (hasError) {
           const element = document.querySelector(`input[name="${fieldName}"]`) as HTMLElement
@@ -723,7 +718,7 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
         </div>
         <div>
           <h3 className="text-xl md:text-lg lg:text-xl font-bold text-brand-navy-500">Bereken je besparing</h3>
-          <p className="text-sm md:text-xs text-gray-600">Gratis en vrijblijvend</p>
+          <p className="text-sm md:text-xs text-gray-600">{TRUST_COPY.freeAndNoObligation}</p>
         </div>
       </div>
 
@@ -1081,11 +1076,11 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
             Type meter
           </label>
           <div className="grid grid-cols-3 gap-2 md:gap-2">
-            {[
+            {([
               { value: 'slim', label: 'Slim', icon: DeviceMobile },
               { value: 'oud', label: 'Oud', icon: Gauge },
               { value: 'weet_niet', label: 'Weet niet', icon: CheckCircle },
-            ].map((option) => {
+            ] as const).map((option) => {
               const Icon = option.icon
               const isSelected = meterType === option.value
               
@@ -1094,8 +1089,8 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
                   key={option.value}
                   type="button"
                   onClick={() => {
-                    setMeterType(option.value as any)
-                    setValue('meterType', option.value as any)
+                    setMeterType(option.value)
+                    setValue('meterType', option.value)
                   }}
                   className={`p-3.5 md:p-2.5 rounded-xl border-2 transition-all active:scale-[0.97] ${
                     isSelected
@@ -1192,11 +1187,11 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
         >
           <span className="flex items-center justify-center gap-2.5 md:gap-2">
             <MagnifyingGlass weight="bold" className="w-6 h-6 md:w-5 md:h-5" />
-            <span>Bekijk mijn aanbiedingen</span>
+            <span>{CTA_COPY.viewOffers}</span>
           </span>
         </button>
         <p className="text-center text-sm md:text-xs text-gray-500 -mt-1">
-          100% vrijblijvend • Direct resultaat
+          {TRUST_COPY.freeAndNoObligation} • {TRUST_COPY.quickResult}
         </p>
       </form>
 
@@ -1205,15 +1200,15 @@ export function QuickCalculator({ resultsPath = '/calculator/resultaten' }: Quic
         <div className="grid grid-cols-3 gap-3 text-xs">
           <div className="flex flex-col items-center gap-1.5 md:gap-1.5 text-gray-600">
             <CheckCircle weight="fill" className="w-5 h-5 md:w-4 md:h-4 text-brand-teal-500" />
-            <span className="text-center leading-tight text-xs md:text-xs font-medium">100% gratis</span>
+            <span className="text-center leading-tight text-xs md:text-xs font-medium">{TRUST_COPY.freeAndNoObligation}</span>
           </div>
           <div className="flex flex-col items-center gap-1.5 md:gap-1.5 text-gray-600">
             <CheckCircle weight="fill" className="w-5 h-5 md:w-4 md:h-4 text-brand-teal-500" />
-            <span className="text-center leading-tight text-xs md:text-xs font-medium">Geen verplichtingen</span>
+            <span className="text-center leading-tight text-xs md:text-xs font-medium">{TRUST_COPY.noObligation}</span>
           </div>
           <div className="flex flex-col items-center gap-1.5 md:gap-1.5 text-gray-600">
             <CheckCircle weight="fill" className="w-5 h-5 md:w-4 md:h-4 text-brand-teal-500" />
-            <span className="text-center leading-tight text-xs md:text-xs font-medium">Privacy veilig</span>
+            <span className="text-center leading-tight text-xs md:text-xs font-medium">{TRUST_COPY.privacySafe}</span>
           </div>
         </div>
       </div>

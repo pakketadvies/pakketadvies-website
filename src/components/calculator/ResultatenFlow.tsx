@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense, useCallback } from 'react'
+import { useEffect, useState, Suspense, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import ContractCard from '@/components/calculator/ContractCard'
@@ -19,8 +19,57 @@ import {
   isGrootverbruikElektriciteitAansluitwaarde,
   isGrootverbruikGasAansluitwaarde,
 } from '@/lib/verbruik-type'
+import { trackGAEvent } from '@/lib/tracking/ga-events'
 
 type AudienceMode = 'business' | 'consumer'
+
+type DetailData = {
+  tarief_elektriciteit_enkel?: number
+  tarief_elektriciteit_normaal?: number
+  tarief_elektriciteit_dal?: number
+  tarief_gas?: number
+  tarief_teruglevering_kwh?: number
+  vastrecht_stroom_maand?: number
+  vastrecht_gas_maand?: number
+  vaste_kosten_maand?: number
+  opslag_elektriciteit_normaal?: number
+  opslag_elektriciteit?: number
+  opslag_gas?: number
+  opslag_teruglevering?: number
+  groene_energie?: boolean
+  rating?: number
+  aantal_reviews?: number
+  voorwaarden?: string[]
+  opzegtermijn?: number
+  bijzonderheden?: string[]
+  verbruik_type?: 'kleinverbruik' | 'grootverbruik' | 'beide'
+  min_verbruik_elektriciteit?: number | null
+  min_verbruik_gas?: number | null
+  looptijd?: number
+}
+
+type RawContract = {
+  id: string
+  type: 'vast' | 'dynamisch' | 'maatwerk'
+  naam?: string
+  leverancier?: {
+    id?: string
+    naam?: string
+    logo_url?: string
+    website?: string
+    over_leverancier?: string
+  }
+  details_vast?: DetailData
+  details_dynamisch?: DetailData
+  details_maatwerk?: DetailData
+  exactMaandbedrag?: number
+  exactJaarbedrag?: number
+  aanbevolen?: boolean
+  populair?: boolean
+  breakdown?: unknown
+  zichtbaar_bij_teruglevering?: boolean | null
+  target_audience?: 'particulier' | 'zakelijk' | 'both' | null
+}
 
 function getStartPath(audience: AudienceMode) {
   return audience === 'consumer' ? '/particulier/energie-vergelijken' : '/calculator'
@@ -32,7 +81,7 @@ function getStartPath(audience: AudienceMode) {
 // For the FULL calculation with all costs, the energie-berekening.ts would be used
 // But that requires netbeheerder lookup which is async and heavy for list pages
 const berekenContractKostenVereenvoudigd = (
-  contract: any,
+  contract: RawContract,
   verbruikElektriciteitNormaal: number,
   verbruikElektriciteitDal: number,
   verbruikGas: number,
@@ -143,7 +192,7 @@ const berekenContractKostenVereenvoudigd = (
 
     const totaalElektriciteit = nettoElektriciteitNormaal + nettoElektriciteitDal
     totaalJaar =
-      totaalElektriciteit * (marktPrijsElektriciteit + opslag_elektriciteit_normaal) +
+      totaalElektriciteit * (marktPrijsElektriciteit + (opslag_elektriciteit_normaal || 0)) +
       verbruikGas * (marktPrijsGas + (opslag_gas || 0)) +
       (vaste_kosten_maand || 0) * 12
 
@@ -264,7 +313,7 @@ const berekenContractKostenVereenvoudigd = (
       besparing = Math.max(0, enecoModelMaandbedrag - maandbedrag)
     } else {
       const totaalElektriciteitVoorBesparing = verbruikElektriciteitNormaal + verbruikElektriciteitDal
-      const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteitVoorBesparing * 0.35 + verbruikGas * 1.5 + 700) / 12) as any)
+      const gemiddeldeMaandbedrag = Math.round((totaalElektriciteitVoorBesparing * 0.35 + verbruikGas * 1.5 + 700) / 12)
       besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
     }
 
@@ -283,7 +332,7 @@ const berekenContractKostenVereenvoudigd = (
     besparing = Math.max(0, enecoModelMaandbedrag - maandbedrag)
   } else {
     const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
-    const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35 + verbruikGas * 1.5 + 700) / 12) as any)
+    const gemiddeldeMaandbedrag = Math.round((totaalElektriciteit * 0.35 + verbruikGas * 1.5 + 700) / 12)
     besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
   }
 
@@ -292,7 +341,7 @@ const berekenContractKostenVereenvoudigd = (
 
 // Transform API contract to ContractOptie
 const transformContractToOptie = (
-  contract: any,
+  contract: RawContract,
   verbruikElektriciteitNormaal: number,
   verbruikElektriciteitDal: number,
   verbruikGas: number,
@@ -352,7 +401,7 @@ const transformContractToOptie = (
     besparing = Math.max(0, enecoModelMaandbedrag - maandbedrag)
   } else {
     const totaalElektriciteit = verbruikElektriciteitNormaal + verbruikElektriciteitDal
-    const gemiddeldeMaandbedrag = Math.round(((totaalElektriciteit * 0.35 + verbruikGas * 1.5 + 700) / 12) as any)
+    const gemiddeldeMaandbedrag = Math.round((totaalElektriciteit * 0.35 + verbruikGas * 1.5 + 700) / 12)
     besparing = Math.max(0, gemiddeldeMaandbedrag - maandbedrag)
   }
 
@@ -404,6 +453,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isKeuzehulpOpen, setIsKeuzehulpOpen] = useState(false)
+  const hasTrackedResultsView = useRef(false)
 
   // Explicit close handler for modal
   const handleCloseModal = useCallback(() => {
@@ -477,12 +527,12 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
       const response = await fetch('/api/contracten/actief')
       if (!response.ok) throw new Error('Failed to fetch contracts')
-      const { contracten } = await response.json()
+      const { contracten } = (await response.json()) as { contracten: RawContract[] }
 
       const postcode = data.leveringsadressen?.[0]?.postcode || '0000AA'
 
       const contractenMetKosten = await Promise.all(
-        contracten.map(async (contract: any) => {
+        contracten.map(async (contract: RawContract) => {
           try {
             const details = contract.details_vast || contract.details_dynamisch || contract.details_maatwerk || {}
 
@@ -612,11 +662,11 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
       )
 
       // Filter null values (maatwerk not eligible)
-      let validContracten = contractenMetKosten.filter((c: any) => c !== null)
+      let validContracten = contractenMetKosten.filter((c): c is NonNullable<typeof c> => c !== null)
 
       // teruglevering filter
       const heeftTeruglevering = (data?.terugleveringJaar || 0) > 0
-      validContracten = validContracten.filter((c: any) => {
+      validContracten = validContracten.filter((c) => {
         if (c.zichtbaar_bij_teruglevering === null || c.zichtbaar_bij_teruglevering === undefined) return true
         if (c.zichtbaar_bij_teruglevering === true) return heeftTeruglevering
         return !heeftTeruglevering
@@ -625,7 +675,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
       // addressType -> target_audience filter
       const effectiveAddressType = data?.addressType || verbruik?.addressType
       if (effectiveAddressType) {
-        validContracten = validContracten.filter((c: any) => {
+        validContracten = validContracten.filter((c) => {
           const targetAudience = c.target_audience
           if (!targetAudience) return true
           if (targetAudience === 'both') return true
@@ -634,7 +684,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
       }
 
       const transformed = validContracten
-        .map((c: any) =>
+        .map((c) =>
           transformContractToOptie(
             c,
             elektriciteitNormaal,
@@ -648,7 +698,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
             data?.addressType || verbruik?.addressType // NIEUW: doorgeven addressType voor BTW bepaling
           )
         )
-        .filter((c: any) => c !== null) as ContractOptie[]
+        .filter((c): c is ContractOptie => c !== null)
 
       setResultaten(transformed)
       setFilteredResultaten(transformed)
@@ -733,6 +783,16 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
     setFilteredResultaten(filtered)
   }, [resultaten, filters, sortBy, verbruik?.addressType])
+
+  useEffect(() => {
+    if (!loading && filteredResultaten.length > 0 && !hasTrackedResultsView.current) {
+      trackGAEvent('resultaten_view', {
+        result_count: filteredResultaten.length,
+        audience,
+      })
+      hasTrackedResultsView.current = true
+    }
+  }, [loading, filteredResultaten.length, audience])
 
   const handleStartOpnieuw = () => {
     reset()
@@ -919,7 +979,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                         <label className="block text-xs font-semibold text-gray-600 mb-2">Sorteren op</label>
                         <select
                           value={sortBy}
-                          onChange={(e) => setSortBy(e.target.value as any)}
+                          onChange={(e) => setSortBy(e.target.value as 'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating')}
                           className="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-brand-navy-600 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent transition-all"
                         >
                           <option value="besparing">Hoogste besparing</option>

@@ -26,6 +26,27 @@ interface ContractDetailsDrawerProps {
   addressType?: 'particulier' | 'zakelijk' | null // NIEUW: voor BTW bepaling
 }
 
+type ElektriciteitDetailRegel = {
+  kwh: number
+  tarief: number
+  bedrag: number
+  nettoKwh?: number
+}
+
+function getElektriciteitKwh(detail?: ElektriciteitDetailRegel): number {
+  if (!detail) return 0
+  return detail.nettoKwh ?? detail.kwh
+}
+
+function getVoorwaardeTekst(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (value && typeof value === 'object' && 'naam' in value) {
+    const naam = (value as { naam?: unknown }).naam
+    if (typeof naam === 'string' && naam.length > 0) return naam
+  }
+  return String(value ?? 'Voorwaarde') || 'Voorwaarde'
+}
+
 /**
  * Slide-over details panel.
  * - Desktop: right-side drawer
@@ -271,10 +292,7 @@ export function ContractDetailsDrawer({
                                         <span className="text-gray-700 flex-1 min-w-0 break-words">
                                           Leveringskosten normaal
                                           <span className="text-xs text-gray-500 ml-1 block sm:inline">
-                                            ({((breakdown.leverancier.elektriciteitDetails.normaal as any)?.nettoKwh ??
-                                              breakdown.leverancier.elektriciteitDetails.normaal?.kwh ??
-                                              0
-                                            ).toLocaleString()}{' '}
+                                            ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.normaal).toLocaleString()}{' '}
                                             kWh × €{formatTariff(breakdown.leverancier.elektriciteitDetails.normaal?.tarief || 0)})
                                           </span>
                                         </span>
@@ -286,10 +304,7 @@ export function ContractDetailsDrawer({
                                         <span className="text-gray-700 flex-1 min-w-0 break-words">
                                           Leveringskosten dal
                                           <span className="text-xs text-gray-500 ml-1 block sm:inline">
-                                            ({((breakdown.leverancier.elektriciteitDetails.dal as any)?.nettoKwh ??
-                                              breakdown.leverancier.elektriciteitDetails.dal?.kwh ??
-                                              0
-                                            ).toLocaleString()}{' '}
+                                            ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.dal).toLocaleString()}{' '}
                                             kWh × €{formatTariff(breakdown.leverancier.elektriciteitDetails.dal?.tarief || 0)})
                                           </span>
                                         </span>
@@ -305,10 +320,7 @@ export function ContractDetailsDrawer({
                                       <span className="text-gray-700 flex-1 min-w-0 break-words">
                                         Leveringskosten enkeltarief
                                         <span className="text-xs text-gray-500 ml-1 block sm:inline">
-                                          ({((breakdown.leverancier.elektriciteitDetails.enkel as any)?.nettoKwh ??
-                                            breakdown.leverancier.elektriciteitDetails.enkel?.kwh ??
-                                            0
-                                          ).toLocaleString()}{' '}
+                                          ({getElektriciteitKwh(breakdown.leverancier.elektriciteitDetails.enkel).toLocaleString()}{' '}
                                           kWh × €{formatTariff(breakdown.leverancier.elektriciteitDetails.enkel?.tarief || 0)})
                                         </span>
                                       </span>
@@ -603,7 +615,7 @@ export function ContractDetailsDrawer({
                                   )
                                 } else {
                                   // Plain tekst (oude format of tekstvoorwaarde)
-                                  const tekst = typeof v === 'string' ? v : (v as any)?.naam || String(v) || 'Voorwaarde'
+                                  const tekst = getVoorwaardeTekst(v)
                                   return (
                                     <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
                                       <Check className="w-5 h-5 text-brand-teal-600 flex-shrink-0 mt-0.5" weight="bold" />
@@ -656,7 +668,7 @@ export function ContractDetailsDrawer({
     </div>
   )
 
-  // Render via portal to escape any stacking contexts (e.g. parent transforms),
+  // Render via portal to escape stacking contexts (e.g. parent transforms),
   // ensuring the drawer always sits above the fixed header.
   if (typeof document !== 'undefined') {
     return createPortal(content, document.body)

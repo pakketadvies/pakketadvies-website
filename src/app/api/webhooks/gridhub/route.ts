@@ -5,9 +5,11 @@
  * POST /api/webhooks/gridhub
  */
 
-import { NextResponse } from 'next/server'
+import { createHmac, timingSafeEqual } from 'node:crypto'
+import { z } from 'zod'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { sendBevestigingEmail } from '@/lib/send-email-internal'
+import { apiError, apiSuccess, getErrorMessage } from '@/lib/api/response'
 
 interface GridHubWebhookPayload {
   id: number
@@ -21,6 +23,48 @@ interface GridHubWebhookPayload {
     statusReason?: string
     subStatusID?: string
   }
+}
+
+const gridHubOrderSchema = z.object({
+  id: z.number(),
+  status: z.string(),
+  statusReason: z.string().optional(),
+  subStatusID: z.string().optional(),
+})
+
+const gridHubWebhookPayloadSchema = z.object({
+  id: z.number(),
+  externalReference: z.string().min(1),
+  timestamp: z.string(),
+  status: z.enum(['NEW', 'NEEDSATTENTION', 'CANCELLED', 'CREATED']),
+  statusReason: z.string().optional(),
+  order: gridHubOrderSchema.optional(),
+})
+
+function signaturesMatch(rawBody: string, signatureHeader: string, secret: string): boolean {
+  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
+  const candidates = signatureHeader
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part.replace(/^sha256=/i, ''))
+
+  for (const candidate of candidates) {
+    try {
+      const expectedBuffer = Buffer.from(expected, 'hex')
+      const candidateBuffer = Buffer.from(candidate, 'hex')
+      if (
+        expectedBuffer.length === candidateBuffer.length &&
+        timingSafeEqual(expectedBuffer, candidateBuffer)
+      ) {
+        return true
+      }
+    } catch {
+      // Ignore malformed signatures and continue checking other candidates.
+    }
+  }
+
+  return false
 }
 
 /**
@@ -53,7 +97,7 @@ async function sendStatusUpdateEmail(
       await sendBevestigingEmail(aanvraagId, aanvraagnummer)
     }
     // TODO: Add other status-specific emails (NEEDSATTENTION, CANCELLED, etc.)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [GridHub Webhook] Error sending status update email:', error)
     // Non-blocking: don't fail webhook if email fails
   }
@@ -61,16 +105,35 @@ async function sendStatusUpdateEmail(
 
 export async function POST(request: Request) {
   try {
-    // TODO: Add webhook signature verification for security
-    // const signature = request.headers.get('x-gridhub-signature')
-    // if (!verifyWebhookSignature(signature, body)) {
-    //   return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-    // }
+    const rawBody = await request.text()
+    const webhookSecret = process.env.GRIDHUB_WEBHOOK_SECRET?.trim()
+    const signature =
+      request.headers.get('x-gridhub-signature') ||
+      request.headers.get('x-signature')
 
-    const body = await request.json()
+    if (!webhookSecret) {
+      console.error('❌ [GridHub Webhook] GRIDHUB_WEBHOOK_SECRET ontbreekt')
+      return apiError('Webhook endpoint not configured', 503)
+    }
+
+    if (!signature || !signaturesMatch(rawBody, signature, webhookSecret)) {
+      console.error('❌ [GridHub Webhook] Invalid or missing signature')
+      return apiError('Invalid signature', 401)
+    }
+
+    const body: unknown = JSON.parse(rawBody)
     
     // GridHub can send single entry or array
-    const entries: GridHubWebhookPayload[] = Array.isArray(body) ? body : [body]
+    const rawEntries = Array.isArray(body) ? body : [body]
+    const entries: GridHubWebhookPayload[] = []
+    for (const rawEntry of rawEntries) {
+      const parsed = gridHubWebhookPayloadSchema.safeParse(rawEntry)
+      if (!parsed.success) {
+        console.error('❌ [GridHub Webhook] Invalid payload entry:', parsed.error.issues[0]?.message)
+        return apiError('Invalid webhook payload', 400)
+      }
+      entries.push(parsed.data)
+    }
     
     console.log(`📥 [GridHub Webhook] Received ${entries.length} status update(s)`)
     
@@ -106,7 +169,15 @@ export async function POST(request: Request) {
         }
         
         // Update aanvraag status
-        const updateData: any = {
+        const updateData: {
+          external_status: string
+          external_status_reason: string | null
+          external_last_sync: string
+          status: string
+          updated_at: string
+          external_order_id?: string
+          external_sub_status_id?: string | null
+        } = {
           external_status: entry.status,
           external_status_reason: entry.statusReason || null,
           external_last_sync: new Date().toISOString(),
@@ -152,30 +223,26 @@ export async function POST(request: Request) {
             entry.statusReason
           )
         }
-      } catch (entryError: any) {
+      } catch (entryError: unknown) {
         console.error('❌ [GridHub Webhook] Error processing entry:', entryError)
         errors++
       }
     }
     
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       updated,
       errors,
       timestamp: new Date().toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [GridHub Webhook] Fatal error:', error)
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    )
+    return apiError(getErrorMessage(error), 500)
   }
 }
 
 // Also support GET for webhook verification (if GridHub requires it)
 export async function GET(request: Request) {
-  return NextResponse.json({
+  return apiSuccess({
     message: 'GridHub webhook endpoint is active',
     timestamp: new Date().toISOString(),
   })

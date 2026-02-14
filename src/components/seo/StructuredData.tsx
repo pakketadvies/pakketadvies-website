@@ -5,13 +5,17 @@ interface OrganizationSchemaProps {
   url?: string
   logo?: string
   description?: string
+  telephone?: string
+  sameAs?: string[]
 }
 
 export function OrganizationSchema({ 
   name = 'PakketAdvies',
   url = 'https://pakketadvies.nl',
   logo = 'https://pakketadvies.nl/images/logo.png',
-  description = 'Het beste energiecontract voor uw bedrijf. Simpel, transparant en altijd met uw voordeel voorop.'
+  description = 'Het beste energiecontract voor uw bedrijf. Simpel, transparant en altijd met uw voordeel voorop.',
+  telephone = '+31850477065',
+  sameAs = [],
 }: OrganizationSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
@@ -25,14 +29,12 @@ export function OrganizationSchema({
     description,
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+31-XXX-XXX-XXXX',
+      telephone,
       contactType: 'customer service',
       areaServed: 'NL',
       availableLanguage: 'Dutch',
     },
-    sameAs: [
-      // Voeg hier social media links toe als beschikbaar
-    ],
+    ...(sameAs.length > 0 ? { sameAs } : {}),
   }
 
   return (
@@ -148,6 +150,7 @@ interface LocalBusinessSchemaProps {
   openingHours?: string
   priceRange?: string
   logo?: string
+  sameAs?: string[]
 }
 
 export function LocalBusinessSchema({
@@ -165,6 +168,7 @@ export function LocalBusinessSchema({
   openingHours = 'Mo-Fr 09:00-17:00',
   priceRange = '€€',
   logo = 'https://pakketadvies.nl/images/logo.png',
+  sameAs = [],
 }: LocalBusinessSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
@@ -196,6 +200,7 @@ export function LocalBusinessSchema({
       '@type': 'Country',
       name: 'NL',
     },
+    ...(sameAs.length > 0 ? { sameAs } : {}),
   }
 
   return (

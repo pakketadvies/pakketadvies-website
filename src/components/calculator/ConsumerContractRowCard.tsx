@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { CaretRight, Check, Star, Info } from '@phosphor-icons/react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -9,6 +10,16 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import type { ContractOptie } from '@/types/calculator'
 import type { KostenBreakdown } from './ContractCard'
 import { ContractDetailsDrawer } from './ContractDetailsDrawer'
+
+type ContractDetails = {
+  tarief_teruglevering_kwh?: number
+  opslag_elektriciteit?: number
+  opslag_elektriciteit_normaal?: number
+  opslag_gas?: number
+  opslag_teruglevering?: number
+  vastrecht_stroom_maand?: number
+  vastrecht_gas_maand?: number
+}
 
 type Props = {
   contract: ContractOptie
@@ -48,8 +59,8 @@ export function ConsumerContractRowCard({
 
   // Haal contract details op (exact zoals in ContractCard)
   const details = contract.type === 'vast' 
-    ? (contract as any).details_vast 
-    : (contract as any).details_dynamisch
+    ? ((contract.details_vast as ContractDetails | undefined) ?? {})
+    : ((contract.details_dynamisch as ContractDetails | undefined) ?? {})
 
   // Lazy-load breakdown only when opening details.
   useEffect(() => {
@@ -99,8 +110,10 @@ export function ConsumerContractRowCard({
         if (!res.ok) throw new Error('Kon prijsdetails niet ophalen')
         const json = await res.json()
         if (!cancelled) setBreakdown(json.breakdown || null)
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Kon prijsdetails niet ophalen')
+      } catch (e: unknown) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : 'Kon prijsdetails niet ophalen')
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -154,7 +167,13 @@ export function ConsumerContractRowCard({
             <div className="flex items-start gap-3">
               {contract.leverancier.logo ? (
                 <div className="w-16 h-16 bg-white rounded-xl border border-gray-100 p-2.5 flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <img src={contract.leverancier.logo} alt={`${contract.leverancier.naam} logo`} className="w-full h-full object-contain" />
+                  <Image
+                    src={contract.leverancier.logo}
+                    alt={`${contract.leverancier.naam} logo`}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               ) : null}
 
@@ -234,7 +253,13 @@ export function ConsumerContractRowCard({
             <div className="flex items-center gap-3 flex-shrink-0 min-w-0" style={{ width: '240px' }}>
               {contract.leverancier.logo ? (
                 <div className="w-12 h-12 bg-white rounded-lg border border-gray-100 p-1.5 flex items-center justify-center flex-shrink-0">
-                  <img src={contract.leverancier.logo} alt={`${contract.leverancier.naam} logo`} className="w-full h-full object-contain" />
+                  <Image
+                    src={contract.leverancier.logo}
+                    alt={`${contract.leverancier.naam} logo`}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               ) : null}
               <div className="min-w-0 flex-1">
