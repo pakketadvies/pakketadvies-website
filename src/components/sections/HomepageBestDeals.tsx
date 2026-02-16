@@ -6,6 +6,34 @@ import Link from 'next/link'
 import { Lightning, Star, Leaf, ArrowRight, Lock, TrendDown } from '@phosphor-icons/react'
 import type { Contract } from '@/types/admin'
 
+const FALLBACK_MONTHS_NL = [
+  'januari',
+  'februari',
+  'maart',
+  'april',
+  'mei',
+  'juni',
+  'juli',
+  'augustus',
+  'september',
+  'oktober',
+  'november',
+  'december',
+] as const
+
+function getCurrentMonthNameNl(date: Date = new Date()): string {
+  // Keep this stable between server/client renders by formatting in a fixed timezone.
+  // This avoids hydration mismatches around month boundaries.
+  try {
+    return new Intl.DateTimeFormat('nl-NL', {
+      month: 'long',
+      timeZone: 'Europe/Amsterdam',
+    }).format(date)
+  } catch {
+    return FALLBACK_MONTHS_NL[date.getMonth()] ?? ''
+  }
+}
+
 interface BestDeal {
   id: string
   naam: string
@@ -37,6 +65,8 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
   const [averagePrice, setAveragePrice] = useState(initialData?.averagePrice || propAveragePrice || 0)
   const [loading, setLoading] = useState(!initialData) // Only show loading if no initial data
   const [filter, setFilter] = useState<'alle' | 'vast' | 'dynamisch'>('alle')
+
+  const currentMonthName = getCurrentMonthNameNl()
 
   useEffect(() => {
     // Only fetch if filter changed from 'alle' (initial load has server data)
@@ -163,7 +193,7 @@ export function HomepageBestDeals({ averagePrice: propAveragePrice, initialData 
             <TrendDown className="w-4 h-4 text-brand-teal-400 flex-shrink-0" weight="bold" />
             <div>
               <p className="text-white font-medium text-xs">
-                Overstappen in december?
+                Overstappen in {currentMonthName}?
               </p>
               <p className="text-gray-300 text-xs">
                 81% kiest voor een dynamisch contract
