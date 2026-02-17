@@ -64,15 +64,15 @@ const tariefDetails = [
   },
   {
     item: 'Elektra normaal',
-    detail: '€0,128',
+    detail: '€ 0,120 per kWh',
   },
   {
     item: 'Elektra dal',
-    detail: '€0,123',
+    detail: '€ 0,116 per kWh',
   },
   {
-    item: 'Gastarieven',
-    detail: '€0,50',
+    item: 'Gastarief',
+    detail: '€ 0,494 per m3',
   },
   {
     item: 'Doelgroep',
