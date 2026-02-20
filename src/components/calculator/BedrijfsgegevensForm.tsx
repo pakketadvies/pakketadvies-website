@@ -420,6 +420,27 @@ function BedrijfsgegevensFormContent() {
       supplier: contract.leverancier?.naam,
     })
   }, [contract])
+
+  // Keep hooks above all conditional returns to preserve hook order.
+  useEffect(() => {
+    if (zelfdeAlsLeveradres && verbruik && verbruik.leveringsadressen.length > 0) {
+      const leveradres = verbruik.leveringsadressen[0]
+      setValue('correspondentieStraat', leveradres.straat || '')
+      setValue('correspondentieHuisnummer', leveradres.huisnummer)
+      setValue('correspondentiePostcode', leveradres.postcode)
+      setValue('correspondentiePlaats', leveradres.plaats || '')
+    }
+  }, [zelfdeAlsLeveradres, verbruik, setValue])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   
   // Nu kunnen we early returns doen (alle hooks zijn al aangeroepen)
   // Loading state
@@ -477,28 +498,6 @@ function BedrijfsgegevensFormContent() {
   
   // Anders: zakelijk formulier (bestaande logica)
   const typeBedrijf = watch('typeBedrijf')
-
-  // Copy leveradres to correspondentie when checkbox is checked
-  useEffect(() => {
-    if (zelfdeAlsLeveradres && verbruik && verbruik.leveringsadressen.length > 0) {
-      const leveradres = verbruik.leveringsadressen[0]
-      setValue('correspondentieStraat', leveradres.straat || '')
-      setValue('correspondentieHuisnummer', leveradres.huisnummer)
-      setValue('correspondentiePostcode', leveradres.postcode)
-      setValue('correspondentiePlaats', leveradres.plaats || '')
-    }
-  }, [zelfdeAlsLeveradres, verbruik, setValue])
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   // Search companies by name (debounced)
   const searchCompanies = async (query: string) => {
