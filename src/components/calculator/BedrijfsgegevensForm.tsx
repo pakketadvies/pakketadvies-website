@@ -160,8 +160,6 @@ function BedrijfsgegevensFormContent() {
   const urlJaarbedrag = searchParams?.get('jaarbedrag') ? parseFloat(searchParams.get('jaarbedrag')!) : null
   const urlBesparing = searchParams?.get('besparing') ? parseFloat(searchParams.get('besparing')!) : null
   
-  console.log('📱 [BedrijfsgegevensForm] URL params:', { contractId, urlMaandbedrag, urlJaarbedrag, urlBesparing })
-  
   // Alleen gebruik selectedContract als het overeenkomt met contractId uit URL
   const initialContract = contractId && selectedContract && selectedContract.id === contractId
     ? selectedContract
@@ -277,8 +275,6 @@ function BedrijfsgegevensFormContent() {
         setContractError(null)
         
         try {
-          console.log('📡 [BedrijfsgegevensForm] Fetching contract from API:', contractId)
-          
           // Fetch contract from API
           const response = await fetch(`/api/contracten/${contractId}`)
           
@@ -293,8 +289,6 @@ function BedrijfsgegevensFormContent() {
           if (!rawContract) {
             throw new Error('Contract data ontbreekt in API response')
           }
-          
-          console.log('✅ [BedrijfsgegevensForm] Contract fetched:', rawContract.id, rawContract.naam)
           
           // Transform raw contract to ContractOptie format
           const transformedContract: ContractOptie = {
@@ -326,13 +320,6 @@ function BedrijfsgegevensFormContent() {
             populair: rawContract.populair || false,
           }
           
-          console.log('✅ [BedrijfsgegevensForm] Contract transformed:', transformedContract.id, transformedContract.targetAudience)
-          console.log('💰 [BedrijfsgegevensForm] Contract prices:', { 
-            maandbedrag: transformedContract.maandbedrag, 
-            jaarbedrag: transformedContract.jaarbedrag, 
-            besparing: transformedContract.besparing 
-          })
-          
           setContract(transformedContract)
           setSelectedContract(transformedContract) // Zet ook in store voor volgende keer
           setLoadingContract(false)
@@ -359,13 +346,6 @@ function BedrijfsgegevensFormContent() {
     const heeftGeenVerbruik = !verbruik || !verbruik.elektriciteitNormaal || verbruik.elektriciteitNormaal === 0
     
     if (isDirect && contractId && heeftGeenVerbruik && !heeftStandaardVerbruikGeinsteld.current) {
-      console.log('🔵 [BedrijfsgegevensForm] Setting default verbruik for direct contract selection', {
-        isDirect,
-        contractId,
-        hasVerbruik: !!verbruik,
-        hasElektriciteitNormaal: !!verbruik?.elektriciteitNormaal
-      })
-      
       // Markeer dat we standaard verbruik gaan instellen
       heeftStandaardVerbruikGeinsteld.current = true
       
@@ -395,23 +375,10 @@ function BedrijfsgegevensFormContent() {
         leveringsadressen: verbruik?.leveringsadressen || [], // Behoud bestaande adressen als die er zijn
       }
       
-      console.log('✅ [BedrijfsgegevensForm] Setting verbruik:', nieuwVerbruik)
       setVerbruik(nieuwVerbruik)
     }
   }, [isDirect, contractId, verbruik, setVerbruik]) // Nu wel verbruik in dependencies, maar ref voorkomt infinite loop
   
-  // Debug logging
-  console.log('🔍 BedrijfsgegevensForm - Contract:', contract?.id, 'targetAudience:', contract?.targetAudience)
-  console.log('🔍 BedrijfsgegevensForm - Verbruik:', verbruik ? { 
-    addressType: verbruik.addressType,
-    elektriciteitNormaal: verbruik.elektriciteitNormaal,
-    gasJaar: verbruik.gasJaar,
-    hasLeveringsadressen: verbruik.leveringsadressen?.length || 0,
-    geschat: verbruik.geschat
-  } : 'null')
-  console.log('🔍 BedrijfsgegevensForm - isDirect:', isDirect, 'contractId:', contractId)
-  console.log('🔍 BedrijfsgegevensForm - Will show verbruik card:', !!verbruik)
-
   useEffect(() => {
     if (!contract) return
     trackGAEvent('aanvraag_start', {
@@ -489,8 +456,6 @@ function BedrijfsgegevensFormContent() {
   // Bepaal contract type
   const contractType = bepaalContractType(contract, verbruik)
   
-  console.log('🔍 BedrijfsgegevensForm - Bepaald contract type:', contractType)
-  
   // Als particulier, render particulier formulier
   if (contractType === 'particulier') {
     return <ParticulierAanvraagForm contract={contract} />
@@ -501,36 +466,25 @@ function BedrijfsgegevensFormContent() {
 
   // Search companies by name (debounced)
   const searchCompanies = async (query: string) => {
-    console.log('🔍 [searchCompanies] START - Query:', query)
-    
     if (query.length < 2) {
-      console.log('❌ [searchCompanies] Query te kort (<2), stop')
       setSearchResults([])
       setShowDropdown(false)
       return
     }
 
-    console.log('⏳ [searchCompanies] Calling API...')
     setSearchLoading(true)
     
     try {
       const url = `/api/kvk/search?query=${encodeURIComponent(query)}`
-      console.log('📡 [searchCompanies] URL:', url)
       
       const response = await fetch(url)
-      console.log('📥 [searchCompanies] Response status:', response.status)
       
       const data = await response.json()
-      console.log('📦 [searchCompanies] Response data:', data)
 
       if (response.ok && data.results) {
-        console.log('✅ [searchCompanies] Success! Results count:', data.results.length)
-        console.log('📋 [searchCompanies] Results:', data.results)
         setSearchResults(data.results)
         setShowDropdown(data.results.length > 0)
-        console.log('🎯 [searchCompanies] Dropdown should be visible:', data.results.length > 0)
       } else {
-        console.log('❌ [searchCompanies] No results or error')
         setSearchResults([])
         setShowDropdown(false)
       }
@@ -539,14 +493,11 @@ function BedrijfsgegevensFormContent() {
       setSearchResults([])
     } finally {
       setSearchLoading(false)
-      console.log('🏁 [searchCompanies] END')
     }
   }
 
   // Handle bedrijfsnaam input change with debounce and KvK number detection
   const handleBedrijfsnaamChange = (value: string) => {
-    console.log('⌨️ [handleBedrijfsnaamChange] Input value:', value)
-    
     setBedrijfsnaamInput(value)
     setValue('bedrijfsnaam', value)
     setSelectedIndex(-1)
@@ -555,20 +506,16 @@ function BedrijfsgegevensFormContent() {
 
     // Clear previous timeout
     if (searchTimeoutRef.current) {
-      console.log('⏰ [handleBedrijfsnaamChange] Clearing previous timeout')
       clearTimeout(searchTimeoutRef.current)
     }
 
     // Als input leeg of te kort, reset alles
     if (value.length < 2) {
-      console.log('❌ [handleBedrijfsnaamChange] Value te kort, reset')
       setSearchResults([])
       setShowDropdown(false)
       setKvkNummer('')
       return
     }
-
-    console.log('⏲️ [handleBedrijfsnaamChange] Setting timeout (300ms) for search')
     
     // SIMPEL: Altijd search API aanroepen voor dropdown (werkt voor ALLES)
     // Dit toont dropdown voor:
@@ -578,7 +525,6 @@ function BedrijfsgegevensFormContent() {
     setKvkNummer('') // Reset KvK nummer
     
     searchTimeoutRef.current = setTimeout(() => {
-      console.log('🚀 [handleBedrijfsnaamChange] Timeout fired! Calling searchCompanies...')
       searchCompanies(value)
     }, 300)
   }
@@ -752,8 +698,6 @@ function BedrijfsgegevensFormContent() {
         return
       }
       
-      console.log('✅ [BedrijfsgegevensForm] Submitting with contract:', contract.id, contract.contractNaam)
-
       // Prepare gegevens_data (zakelijk)
       const gegevensData = {
         bedrijfsnaam: data.bedrijfsnaam,
@@ -821,29 +765,12 @@ function BedrijfsgegevensFormContent() {
 
       const result = await response.json()
 
-      // Log all email logs to browser console
-      if (result.emailLogs && result.emailLogs.length > 0) {
-        console.group('📧 Email Sending Logs')
-        result.emailLogs.forEach((log: string) => {
-          if (log.includes('❌')) {
-            console.error(log)
-          } else if (log.includes('⚠️')) {
-            console.warn(log)
-          } else {
-            console.log(log)
-          }
-        })
-        console.groupEnd()
-        
-        if (result.emailError) {
-          console.error('❌ Email Error Details:', result.emailError)
-        }
-        
-        if (result.emailSuccess) {
-          console.log('✅ Email sent successfully!')
-        } else {
-          console.error('❌ Email sending failed!')
-        }
+      if (result.emailError) {
+        console.error('❌ Email Error Details:', result.emailError)
+      }
+
+      if (result.emailSuccess === false) {
+        console.error('❌ Email sending failed!')
       }
 
       if (!result.success) {
