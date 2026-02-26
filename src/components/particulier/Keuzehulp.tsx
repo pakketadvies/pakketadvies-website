@@ -68,7 +68,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
   // Lock body scroll while mounted
   useEffect(() => {
     if (!mounted) return
-    return lockBodyScroll()
+    return lockBodyScroll('Keuzehulp')
   }, [mounted])
 
   // ESC closes

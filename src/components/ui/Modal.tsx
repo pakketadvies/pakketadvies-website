@@ -40,7 +40,7 @@ export function Modal({
   // Prevent background scroll while modal is open
   useEffect(() => {
     if (!isOpen) return
-    return lockBodyScroll()
+    return lockBodyScroll('Modal')
   }, [isOpen])
 
   if (!isOpen) return null

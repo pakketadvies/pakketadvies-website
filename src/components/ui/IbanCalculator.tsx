@@ -102,7 +102,7 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (!isOpen) return
-    return lockBodyScroll()
+    return lockBodyScroll('IbanCalculator')
   }, [isOpen])
 
   // Close on Escape key

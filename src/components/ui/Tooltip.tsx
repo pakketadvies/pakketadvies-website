@@ -47,7 +47,7 @@ export default function Tooltip({ content, children, className, position = 'bott
   // Prevent body scroll when mobile tooltip is open (without scrolling to top)
   useEffect(() => {
     if (!isMobileOpen || typeof window === 'undefined') return
-    return lockBodyScroll()
+    return lockBodyScroll('TooltipMobile')
   }, [isMobileOpen])
 
   // Close on escape key

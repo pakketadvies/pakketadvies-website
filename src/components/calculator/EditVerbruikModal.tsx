@@ -103,7 +103,7 @@ export default function EditVerbruikModal({
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (!isOpen) return
-    return lockBodyScroll()
+    return lockBodyScroll('EditVerbruikModal')
   }, [isOpen])
 
   const handleSave = () => {

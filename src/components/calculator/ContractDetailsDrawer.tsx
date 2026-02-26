@@ -108,7 +108,7 @@ export function ContractDetailsDrawer({
   // Lock body scroll while mounted
   useEffect(() => {
     if (!mounted) return
-    return lockBodyScroll()
+    return lockBodyScroll('ContractDetailsDrawer')
   }, [mounted])
 
   // ESC closes

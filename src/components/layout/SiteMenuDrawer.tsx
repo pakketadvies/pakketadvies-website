@@ -49,7 +49,7 @@ export function SiteMenuDrawer({
   // Lock body scroll when open (important for mobile)
   useEffect(() => {
     if (!mounted) return
-    return lockBodyScroll()
+    return lockBodyScroll('SiteMenuDrawer')
   }, [mounted])
 
   // ESC to close + focus on open
