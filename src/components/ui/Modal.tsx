@@ -4,6 +4,7 @@ import { useEffect, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 interface ModalProps {
   isOpen: boolean
@@ -36,27 +37,10 @@ export function Modal({
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Prevent body scroll when modal is open (and preserve scroll position)
+  // Prevent background scroll while modal is open
   useEffect(() => {
-    if (isOpen && typeof window !== 'undefined') {
-      // Save current scroll position
-      const scrollY = window.scrollY
-      
-      // Prevent scrolling on body
-      document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
-      
-      return () => {
-        // Restore scroll position
-        document.body.style.overflow = ''
-        document.body.style.position = ''
-        document.body.style.top = ''
-        document.body.style.width = ''
-        window.scrollTo(0, scrollY)
-      }
-    }
+    if (!isOpen) return
+    return lockBodyScroll()
   }, [isOpen])
 
   if (!isOpen) return null

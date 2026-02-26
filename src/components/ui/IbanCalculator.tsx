@@ -6,6 +6,7 @@ import { Button } from './Button'
 import { Input } from './Input'
 import { CreditCard, CheckCircle, XCircle, Copy, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { calculateIBAN, validateIBAN, formatIBAN, getBankNameFromIBAN, getCommonBankCodes } from '@/lib/iban-calculator'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 interface IbanCalculatorProps {
   isOpen: boolean
@@ -100,14 +101,8 @@ export function IbanCalculator({ isOpen, onClose, onSelect }: IbanCalculatorProp
 
   // Prevent body scroll when modal is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
+    if (!isOpen) return
+    return lockBodyScroll()
   }, [isOpen])
 
   // Close on Escape key

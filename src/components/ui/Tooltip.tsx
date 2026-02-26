@@ -4,6 +4,7 @@ import { ReactNode, useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 interface TooltipProps {
   content: ReactNode
@@ -45,21 +46,8 @@ export default function Tooltip({ content, children, className, position = 'bott
 
   // Prevent body scroll when mobile tooltip is open (without scrolling to top)
   useEffect(() => {
-    if (isMobileOpen && typeof window !== 'undefined') {
-      // Simply prevent scroll - same approach as EditVerbruikModal
-      // This should maintain scroll position naturally without jumping
-      const originalBodyOverflow = document.body.style.overflow
-      
-      // Just prevent overflow - no position fixed, no scroll manipulation
-      // This maintains the visual scroll position
-      document.body.style.overflow = 'hidden'
-
-      return () => {
-        // Restore original value
-        document.body.style.overflow = originalBodyOverflow
-        // No need to restore scroll position - it should stay naturally
-      }
-    }
+    if (!isMobileOpen || typeof window === 'undefined') return
+    return lockBodyScroll()
   }, [isMobileOpen])
 
   // Close on escape key

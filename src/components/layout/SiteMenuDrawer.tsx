@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { X } from '@phosphor-icons/react'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 type Audience = 'business' | 'consumer'
 
@@ -48,11 +49,7 @@ export function SiteMenuDrawer({
   // Lock body scroll when open (important for mobile)
   useEffect(() => {
     if (!mounted) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
+    return lockBodyScroll()
   }, [mounted])
 
   // ESC to close + focus on open

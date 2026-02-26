@@ -5,6 +5,7 @@ import { X, ArrowLeft, Leaf, SlidersHorizontal, ArrowsDownUp } from '@phosphor-i
 import { Button } from '@/components/ui/Button'
 import type { VerbruikData } from '@/types/calculator'
 import EditVerbruikForm from './EditVerbruikForm'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 interface Filters {
   type: 'alle' | 'vast' | 'dynamisch'
@@ -101,14 +102,8 @@ export default function EditVerbruikModal({
 
   // Prevent body scroll when modal is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
+    if (!isOpen) return
+    return lockBodyScroll()
   }, [isOpen])
 
   const handleSave = () => {

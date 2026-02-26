@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, CaretRight, Info, Check } from '@phosphor-icons/react'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 type TariefType = 'vast' | 'variabel' | 'dynamisch' | null
 type Looptijd = 1 | 2 | 3 | 5 | null
@@ -67,11 +68,7 @@ export function Keuzehulp({ isOpen, onClose, onApplyFilters, currentFilters }: K
   // Lock body scroll while mounted
   useEffect(() => {
     if (!mounted) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
+    return lockBodyScroll()
   }, [mounted])
 
   // ESC closes

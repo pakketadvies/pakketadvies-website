@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { CookieBanner } from './CookieBanner'
+import { clearBodyScrollLocks } from '@/lib/scroll-lock'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -51,7 +52,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   
   // Scroll naar top bij route change (zonder animatie)
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    // Defensive reset: if an overlay unmounted unexpectedly, ensure scroll is not stuck.
+    clearBodyScrollLocks()
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }, [pathname])
   
   // Check if we're on an admin route

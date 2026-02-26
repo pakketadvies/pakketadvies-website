@@ -8,6 +8,7 @@ import type { ContractOptie } from '@/types/calculator'
 import { getFriendlyDocumentUrl } from '@/lib/document-url'
 import { Check, FilePdf, Sun } from '@phosphor-icons/react'
 import { isGrootverbruikElektriciteitAansluitwaarde, isGrootverbruikGasAansluitwaarde } from '@/lib/verbruik-type'
+import { lockBodyScroll } from '@/lib/scroll-lock'
 
 type Tab = 'prijsdetails' | 'voorwaarden' | 'over'
 
@@ -107,11 +108,7 @@ export function ContractDetailsDrawer({
   // Lock body scroll while mounted
   useEffect(() => {
     if (!mounted) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
+    return lockBodyScroll()
   }, [mounted])
 
   // ESC closes
