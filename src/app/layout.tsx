@@ -92,7 +92,7 @@ export default function RootLayout({
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
   return (
-    <html lang="nl" className={`overscroll-none ${plusJakartaSans.variable} ${spaceGrotesk.variable}`}>
+    <html lang="nl" className={`${plusJakartaSans.variable} ${spaceGrotesk.variable}`}>
       <body>
         <PWARegistration />
         <LayoutWrapper>{children}</LayoutWrapper>
