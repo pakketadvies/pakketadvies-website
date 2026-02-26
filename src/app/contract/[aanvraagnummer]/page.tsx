@@ -1,7 +1,24 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ContractViewer from '@/components/contract/ContractViewer'
+
+export const metadata: Metadata = {
+  title: 'Contractviewer | PakketAdvies',
+  description: 'Beveiligde contractviewer voor bestaande aanvragen.',
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    nosnippet: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+}
 
 interface PageProps {
   params: Promise<{ aanvraagnummer: string }>

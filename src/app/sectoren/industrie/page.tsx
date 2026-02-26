@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Factory, Check, ArrowRight, Lightning, TrendUp, Clock, Gauge, Handshake, Lightbulb, Wrench, Fire, SolarPanel, Phone } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Zakelijke energie voor industrie',
+  description: 'Energieadvies voor industrie en productiebedrijven. Krijg grip op grootverbruik, piekbelasting en contractvoorwaarden.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/sectoren/industrie',
+  },
+  openGraph: {
+    title: 'Zakelijke energie voor industrie | PakketAdvies',
+    description: 'Energieoplossingen voor industriële grootverbruikers met focus op piekmanagement en kostenbeheersing.',
+    url: 'https://pakketadvies.nl/sectoren/industrie',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zakelijke energie voor industrie | PakketAdvies',
+    description: 'Energieoplossingen voor industriële grootverbruikers met focus op piekmanagement en kostenbeheersing.',
+  },
+}
 
 export default function IndustriePage() {
   return (

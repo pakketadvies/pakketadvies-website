@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Storefront, Check, ArrowRight, Lightning, Buildings, ChartLine, ShieldCheck, Handshake, Lightbulb, ChartLineUp, CalendarCheck, Users, Package } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Zakelijke energie voor retail',
+  description: 'Energieadvies voor winkels en winkelketens. Optimaliseer energiekosten per vestiging met slimme contractkeuzes en centrale inkoop.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/sectoren/retail',
+  },
+  openGraph: {
+    title: 'Zakelijke energie voor retail | PakketAdvies',
+    description: 'Energieoplossingen voor retail met focus op vestigingsbeheer, kostencontrole en inkoopvoordeel.',
+    url: 'https://pakketadvies.nl/sectoren/retail',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zakelijke energie voor retail | PakketAdvies',
+    description: 'Energieoplossingen voor retail met focus op vestigingsbeheer, kostencontrole en inkoopvoordeel.',
+  },
+}
 
 export default function RetailPage() {
   return (

@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Lightning, Check, ArrowRight, TrendUp, Clock, ChartLine, Coins, Calendar, Factory, ForkKnife, Lightbulb, ChartLineUp, LockOpen } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Dynamisch energiecontract voor bedrijven',
+  description: 'Kies een dynamisch energiecontract en profiteer van uurprijzen, flexibiliteit en kansen om slim op energiekosten te besparen.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/producten/dynamisch-contract',
+  },
+  openGraph: {
+    title: 'Dynamisch energiecontract voor bedrijven | PakketAdvies',
+    description: 'Profiteer van marktprijzen met een dynamisch energiecontract voor zakelijke klanten.',
+    url: 'https://pakketadvies.nl/producten/dynamisch-contract',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dynamisch energiecontract voor bedrijven | PakketAdvies',
+    description: 'Profiteer van marktprijzen met een dynamisch energiecontract voor zakelijke klanten.',
+  },
+}
 
 export default function DynamischContractPage() {
   return (

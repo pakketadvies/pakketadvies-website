@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Storefront, Check, ArrowRight, Lightning, Clock, TrendDown, Users, Handshake, Lightbulb } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Zakelijke energie voor horeca',
+  description: 'Energieadvies voor horeca: restaurants, hotels en cafés. Vergelijk contracten die aansluiten op piekverbruik en seizoenspatronen.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/sectoren/horeca',
+  },
+  openGraph: {
+    title: 'Zakelijke energie voor horeca | PakketAdvies',
+    description: 'Energieoplossingen voor horeca met focus op piekverbruik, flexibiliteit en kostenbeheersing.',
+    url: 'https://pakketadvies.nl/sectoren/horeca',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zakelijke energie voor horeca | PakketAdvies',
+    description: 'Energieoplossingen voor horeca met focus op piekverbruik, flexibiliteit en kostenbeheersing.',
+  },
+}
 
 export default function HorecaPage() {
   return (

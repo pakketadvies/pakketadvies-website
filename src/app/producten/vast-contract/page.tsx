@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Lock, Check, ArrowRight, Calendar, Shield, TrendDown, Lightning, ChartLine } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Vast energiecontract voor bedrijven',
+  description: 'Ontdek de voordelen van een vast energiecontract: prijszekerheid, budgetcontrole en bescherming tegen prijsschommelingen.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/producten/vast-contract',
+  },
+  openGraph: {
+    title: 'Vast energiecontract voor bedrijven | PakketAdvies',
+    description: 'Prijszekerheid en voorspelbare energiekosten met een vast contract voor zakelijke klanten.',
+    url: 'https://pakketadvies.nl/producten/vast-contract',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vast energiecontract voor bedrijven | PakketAdvies',
+    description: 'Prijszekerheid en voorspelbare energiekosten met een vast contract voor zakelijke klanten.',
+  },
+}
 
 export default function VastContractPage() {
   return (

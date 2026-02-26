@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Briefcase, Check, ArrowRight, Lightning, Leaf, Shield, TrendUp, Handshake, Lightbulb, ChartLine, FileText, Sun } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Zakelijke energie voor kantoren',
+  description: 'Energieadvies voor kantoren en zakelijke dienstverlening met focus op voorspelbare kosten, duurzaamheid en contractoptimalisatie.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/sectoren/kantoren',
+  },
+  openGraph: {
+    title: 'Zakelijke energie voor kantoren | PakketAdvies',
+    description: 'Energieoplossingen voor kantoren met focus op budgetzekerheid, verduurzaming en lagere energiekosten.',
+    url: 'https://pakketadvies.nl/sectoren/kantoren',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zakelijke energie voor kantoren | PakketAdvies',
+    description: 'Energieoplossingen voor kantoren met focus op budgetzekerheid, verduurzaming en lagere energiekosten.',
+  },
+}
 
 export default function KantorenPage() {
   return (

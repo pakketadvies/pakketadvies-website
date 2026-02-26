@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Diamond, Check, ArrowRight, Users, Handshake, ChartLine, Lightning, ShieldCheck, HeadsetIcon as Headset, Plant, Hospital, Desktop, Lightbulb, Storefront, Buildings, Factory } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Maatwerk energiecontract voor grootverbruik',
+  description: 'Vraag een maatwerk energiecontract aan voor grootzakelijk verbruik met scherpe tarieven, persoonlijke inkoopstrategie en gespecialiseerde begeleiding.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/producten/maatwerk-contract',
+  },
+  openGraph: {
+    title: 'Maatwerk energiecontract voor grootverbruik | PakketAdvies',
+    description: 'Maatwerk contracten voor grootzakelijke energiebehoeften met persoonlijke begeleiding en tariefonderhandeling.',
+    url: 'https://pakketadvies.nl/producten/maatwerk-contract',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Maatwerk energiecontract voor grootverbruik | PakketAdvies',
+    description: 'Maatwerk contracten voor grootzakelijke energiebehoeften met persoonlijke begeleiding en tariefonderhandeling.',
+  },
+}
 
 export default function MaatwerkContractPage() {
   return (

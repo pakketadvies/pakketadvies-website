@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Buildings, Check, ArrowRight, Lightning, ChartLine, FileText, TrendUp, Handshake, Lightbulb, Users, Package, ChartLineUp, House } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Zakelijke energie voor vastgoed',
+  description: 'Energieadvies voor vastgoedbeleggers en beheerders. Optimaliseer portfolio-inkoop, rapportage en doorbelasting met passende energiecontracten.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/sectoren/vastgoed',
+  },
+  openGraph: {
+    title: 'Zakelijke energie voor vastgoed | PakketAdvies',
+    description: 'Energieoplossingen voor vastgoedportefeuilles met focus op inkoop, beheer en kostenoptimalisatie.',
+    url: 'https://pakketadvies.nl/sectoren/vastgoed',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zakelijke energie voor vastgoed | PakketAdvies',
+    description: 'Energieoplossingen voor vastgoedportefeuilles met focus op inkoop, beheer en kostenoptimalisatie.',
+  },
+}
 
 export default function VastgoedPage() {
   return (

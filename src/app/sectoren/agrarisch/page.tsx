@@ -1,6 +1,26 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plant, Check, ArrowRight, Lightning, Sun, Fire, TrendUp, Handshake, Lightbulb, Wrench, CurrencyDollar, Leaf, Gear } from '@phosphor-icons/react/dist/ssr'
+
+export const metadata: Metadata = {
+  title: 'Zakelijke energie voor agrarisch',
+  description: 'Energieadvies voor glastuinbouw en agrarische bedrijven met hoog verbruik, WKK-integratie en slimme contractstrategieën.',
+  alternates: {
+    canonical: 'https://pakketadvies.nl/sectoren/agrarisch',
+  },
+  openGraph: {
+    title: 'Zakelijke energie voor agrarisch | PakketAdvies',
+    description: 'Energieoplossingen voor agrarische bedrijven met focus op grootverbruik, verduurzaming en kostenbeheersing.',
+    url: 'https://pakketadvies.nl/sectoren/agrarisch',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zakelijke energie voor agrarisch | PakketAdvies',
+    description: 'Energieoplossingen voor agrarische bedrijven met focus op grootverbruik, verduurzaming en kostenbeheersing.',
+  },
+}
 
 export default function AgrarischPage() {
   return (
