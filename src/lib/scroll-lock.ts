@@ -7,31 +7,6 @@ function isClient(): boolean {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
 }
 
-function updateDebugState() {
-  if (!isClient()) return
-  const state = {
-    activeLocks,
-    bodyOverflow: document.body.style.overflow || '(empty)',
-    htmlOverflow: document.documentElement.style.overflow || '(empty)',
-    sources: Array.from(sourceCounts.entries()).map(([source, count]) => ({ source, count })),
-  }
-  window.__PA_SCROLL_DEBUG = state
-  return state
-}
-
-function logDebug(event: string, source: string) {
-  if (!isClient()) return
-  const state = updateDebugState()
-  console.log(`[ScrollLock][${event}]`, {
-    source,
-    activeLocks: state?.activeLocks ?? 0,
-    bodyOverflow: state?.bodyOverflow,
-    htmlOverflow: state?.htmlOverflow,
-    sources: state?.sources ?? [],
-    path: window.location.pathname,
-  })
-}
-
 export function lockBodyScroll(source = 'unknown'): () => void {
   if (!isClient()) {
     return () => {}
@@ -46,7 +21,6 @@ export function lockBodyScroll(source = 'unknown'): () => void {
 
   activeLocks += 1
   sourceCounts.set(source, (sourceCounts.get(source) ?? 0) + 1)
-  logDebug('lock', source)
   let released = false
 
   return () => {
@@ -66,7 +40,6 @@ export function lockBodyScroll(source = 'unknown'): () => void {
       previousBodyOverflow = null
       previousHtmlOverflow = null
     }
-    logDebug('unlock', source)
   }
 }
 
@@ -78,23 +51,4 @@ export function clearBodyScrollLocks(): void {
   document.documentElement.style.overflow = ''
   previousBodyOverflow = null
   previousHtmlOverflow = null
-  logDebug('clear', 'LayoutWrapper')
-}
-
-export function getScrollLockDebugState() {
-  return {
-    activeLocks,
-    sources: Array.from(sourceCounts.entries()).map(([source, count]) => ({ source, count })),
-  }
-}
-
-declare global {
-  interface Window {
-    __PA_SCROLL_DEBUG?: {
-      activeLocks: number
-      bodyOverflow: string
-      htmlOverflow: string
-      sources: Array<{ source: string; count: number }>
-    }
-  }
 }
