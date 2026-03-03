@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import { isCategoryAllowed } from '@/lib/cookies'
 
 declare global {
   interface Window {
@@ -10,7 +11,36 @@ declare global {
       data?: Record<string, any>
     ) => void
     _fbq?: typeof window.fbq
+    __PA_FB_PIXEL_ID?: string
   }
+}
+
+function countFacebookTransportEntries(): number {
+  if (typeof window === 'undefined' || typeof performance === 'undefined') return 0
+  const entries = performance.getEntriesByType('resource')
+  return entries.filter((entry) => {
+    const name = entry.name || ''
+    return name.includes('facebook.com/tr') || name.includes('connect.facebook.net')
+  }).length
+}
+
+function logTransportCheck(eventName: string, beforeCount: number, mode: 'track' | 'trackCustom') {
+  if (typeof window === 'undefined') return
+  window.setTimeout(() => {
+    const afterCount = countFacebookTransportEntries()
+    const marketingAllowed = isCategoryAllowed('marketing')
+    console.log('[Facebook Pixel] 🔎 Transport check', {
+      mode,
+      eventName,
+      pixelId: window.__PA_FB_PIXEL_ID ?? '(unknown)',
+      marketingAllowed,
+      beforeCount,
+      afterCount,
+      networkEntryIncreased: afterCount > beforeCount,
+      fbqAvailable: typeof window.fbq === 'function',
+      path: window.location.pathname,
+    })
+  }, 1200)
 }
 
 /**
@@ -56,8 +86,10 @@ export function useFacebookPixel() {
     // Try to track immediately if Pixel is loaded
     if (typeof window.fbq === 'function') {
       try {
+        const beforeCount = countFacebookTransportEntries()
         window.fbq('track', eventName, data)
         console.log('[Facebook Pixel] ✅ Event tracked:', eventName, data)
+        logTransportCheck(eventName, beforeCount, 'track')
         return
       } catch (error) {
         console.error('[Facebook Pixel] ❌ Error tracking event:', error, eventName, data)
@@ -70,8 +102,10 @@ export function useFacebookPixel() {
     waitForPixel(2000).then((pixelLoaded) => {
       if (pixelLoaded && typeof window.fbq === 'function') {
         try {
+          const beforeCount = countFacebookTransportEntries()
           window.fbq('track', eventName, data)
           console.log('[Facebook Pixel] ✅ Event tracked (delayed):', eventName, data)
+          logTransportCheck(eventName, beforeCount, 'track')
         } catch (error) {
           console.error('[Facebook Pixel] ❌ Error tracking event (delayed):', error, eventName, data)
         }
@@ -90,8 +124,10 @@ export function useFacebookPixel() {
 
     if (typeof window.fbq === 'function') {
       try {
+        const beforeCount = countFacebookTransportEntries()
         window.fbq('trackCustom', eventName, data)
         console.log('[Facebook Pixel] ✅ Custom event tracked:', eventName, data)
+        logTransportCheck(eventName, beforeCount, 'trackCustom')
         return
       } catch (error) {
         console.error('[Facebook Pixel] ❌ Error tracking custom event:', error, eventName, data)
@@ -102,8 +138,10 @@ export function useFacebookPixel() {
     waitForPixel(2000).then((pixelLoaded) => {
       if (pixelLoaded && typeof window.fbq === 'function') {
         try {
+          const beforeCount = countFacebookTransportEntries()
           window.fbq('trackCustom', eventName, data)
           console.log('[Facebook Pixel] ✅ Custom event tracked (delayed):', eventName, data)
+          logTransportCheck(eventName, beforeCount, 'trackCustom')
         } catch (error) {
           console.error('[Facebook Pixel] ❌ Error tracking custom event (delayed):', error, eventName, data)
         }

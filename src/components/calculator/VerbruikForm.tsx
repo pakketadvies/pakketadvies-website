@@ -128,7 +128,7 @@ function getAddressPath(index: number, field: AddressErrorField): AddressErrorPa
 export function VerbruikForm() {
   const router = useRouter()
   const { setVerbruik, setAddressType } = useCalculatorStore()
-  const { track } = useFacebookPixel()
+  const { track, trackCustom } = useFacebookPixel()
   
   // State
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
@@ -712,6 +712,11 @@ export function VerbruikForm() {
     track('InitiateCheckout', {
       content_name: 'Calculator Step 1',
       content_category: 'calculator',
+      button_text: CTA_COPY.viewOffers,
+      path: '/calculator',
+    })
+    trackCustom('StartComparison', {
+      source: 'business_calculator_submit',
       button_text: CTA_COPY.viewOffers,
       path: '/calculator',
     })

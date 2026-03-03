@@ -13,6 +13,7 @@ declare global {
       data?: Record<string, any>
     ) => void
     _fbq?: typeof window.fbq
+    __PA_FB_PIXEL_ID?: string
   }
 }
 
@@ -103,6 +104,7 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
               s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)
             }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+            window.__PA_FB_PIXEL_ID='${safePixelId}';
             fbq('init','${safePixelId}');
             fbq('track','PageView');
           `,
