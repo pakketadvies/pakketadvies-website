@@ -1068,47 +1068,53 @@ export function VerbruikForm() {
           </div>
         </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          {!geenGasaansluiting && (
-            <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4">
-                <Input
-                  label="Gasverbruik per jaar"
-                  inputSize="sm"
-                  type="number"
-                  {...register('gasJaar', { 
-                    valueAsNumber: true,
-                    onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
-                  })}
-                  placeholder="Bijv. 1200"
-                  error={errors.gasJaar?.message as string | undefined}
-                  required
-                />
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
+            {!geenGasaansluiting ? (
+              <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4">
+                  <Input
+                    label="Gasverbruik per jaar"
+                    inputSize="sm"
+                    type="number"
+                    {...register('gasJaar', { 
+                      valueAsNumber: true,
+                      onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
+                    })}
+                    placeholder="Bijv. 1200"
+                    error={errors.gasJaar?.message as string | undefined}
+                    required
+                  />
+              </div>
+            ) : (
+              <div className="border-2 border-gray-200 rounded-xl p-3 md:p-4 bg-gray-50 h-full flex items-center">
+                <p className="text-xs text-gray-600">
+                  Geen gasverbruik nodig.
+                </p>
+              </div>
+            )}
 
-          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-2.5 md:p-3 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
-            <input
-              type="checkbox"
-              checked={geenGasaansluiting}
-              onChange={(e) => {
-                setGeenGasaansluiting(e.target.checked)
-                setValue('geenGasaansluiting', e.target.checked)
-                if (e.target.checked) {
-                  setValue('gasJaar', null)
-                }
-              }}
-              className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
-            />
-            <div>
-              <span className="text-xs md:text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
-                Wij hebben geen gasaansluiting
-              </span>
-              <p className="text-xs text-gray-600 mt-0.5">
-                Bijvoorbeeld bij volledig elektrisch verwarmen
-              </p>
-            </div>
-          </label>
-        </div>
+            <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-2.5 md:p-3 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200 h-full">
+              <input
+                type="checkbox"
+                checked={geenGasaansluiting}
+                onChange={(e) => {
+                  setGeenGasaansluiting(e.target.checked)
+                  setValue('geenGasaansluiting', e.target.checked)
+                  if (e.target.checked) {
+                    setValue('gasJaar', null)
+                  }
+                }}
+                className="w-4 h-4 md:w-5 md:h-5 mt-0.5 rounded-md border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-offset-2 flex-shrink-0"
+              />
+              <div>
+                <span className="text-xs md:text-sm font-medium text-brand-navy-500 group-hover:text-brand-teal-600 transition-colors">
+                  Wij hebben geen gasaansluiting
+                </span>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Bijv. volledig elektrisch verwarmen
+                </p>
+              </div>
+            </label>
+          </div>
         </div>
       </section>
 
