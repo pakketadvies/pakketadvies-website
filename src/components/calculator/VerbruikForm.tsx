@@ -779,7 +779,7 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-4">
                 <Input
                   label="Huisnr."
                   inputSize="sm"
@@ -791,7 +791,7 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <div className="col-span-4">
+              <div className="col-span-3">
                 <Input
                   label="Toev."
                   inputSize="sm"
