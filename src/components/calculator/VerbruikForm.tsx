@@ -22,6 +22,8 @@ import {
   MagnifyingGlass,
   Gauge,
   Plugs,
+  CaretDown,
+  CaretUp,
   ArrowsClockwise,
   Warning
 } from '@phosphor-icons/react'
@@ -146,6 +148,7 @@ export function VerbruikForm() {
   const [aansluitwaardeElektriciteit, setAansluitwaardeElektriciteit] = useState('')
   const [aansluitwaardeGas, setAansluitwaardeGas] = useState('')
   const [showAansluitwaardeInfo, setShowAansluitwaardeInfo] = useState(false)
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
   // Ref om laatste lookup te tracken (voorkomt dubbele calls)
   const lastLookup = useRef<{ [key: number]: string }>({})
   // Debounce timers
@@ -733,7 +736,7 @@ export function VerbruikForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-4 md:space-y-6">
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-4 md:space-y-4">
       {/* Leveringsadres */}
       <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
         <div className="space-y-3 md:space-y-4">
@@ -1102,153 +1105,169 @@ export function VerbruikForm() {
         </div>
       </div>
 
-      {/* Meter type */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-3 md:space-y-4">
-          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
-              <Gauge weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-          </div>
+      {/* Geavanceerde instellingen */}
+      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-5">
+        <button
+          type="button"
+          onClick={() => setShowAdvancedSettings((prev) => !prev)}
+          className="w-full flex items-center justify-between gap-3 rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-left hover:border-gray-300 transition-colors"
+        >
           <div>
-              <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Type meter</h3>
-              <p className="text-xs md:text-sm text-gray-600">Helpt ons de beste contracten te vinden</p>
+            <h3 className="text-base md:text-lg font-bold text-brand-navy-500">Geavanceerde instellingen (optioneel)</h3>
+            <p className="text-xs md:text-sm text-gray-600">Type meter en aansluitwaarden voor nauwkeuriger advies</p>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-          {([
-            { value: 'slim', label: 'Slimme meter', icon: DeviceMobile, desc: 'Digitale uitlezing' },
-            { value: 'oud', label: 'Oude meter', icon: Gauge, desc: 'Draaiende schijf' },
-            { value: 'weet_niet', label: 'Weet ik niet', icon: CheckCircle, desc: 'Standaard' },
-          ] as const).map((option) => {
-            const Icon = option.icon
-            const isSelected = meterType === option.value
-            
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => {
-                  setMeterType(option.value)
-                  setValue('meterType', option.value)
-                }}
-                className={`p-3 md:p-4 rounded-xl border-2 transition-all text-left ${
-                  isSelected
-                    ? 'border-brand-teal-500 bg-brand-teal-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <Icon weight="duotone" className={`w-6 h-6 md:w-8 md:h-8 mb-1.5 md:mb-2 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`} />
-                <div className={`text-xs md:text-sm font-semibold mb-0.5 md:mb-1 ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
-                  {option.label}
-                </div>
-                <div className="text-xs text-gray-500">{option.desc}</div>
-              </button>
-            )
-          })}
-        </div>
-        </div>
-      </div>
-
-      {/* Aansluitwaarden (Automatisch geschat, aanpasbaar) */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-3 md:space-y-4">
-          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-purple-500 rounded-xl flex items-center justify-center">
-              <Plugs weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
-          </div>
-          <div>
-              <h3 className="text-lg md:text-xl font-bold text-brand-navy-500">Aansluitwaarden</h3>
-              <p className="text-xs md:text-sm text-gray-600">Automatisch geschat op basis van je verbruik</p>
-          </div>
-        </div>
-
-          <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            {/* Elektriciteit Aansluitwaarde */}
-            <div>
-              <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                Elektriciteit <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={aansluitwaardeElektriciteit}
-                onChange={(e) => {
-                  setAansluitwaardeElektriciteit(e.target.value)
-                  setValue('aansluitwaardeElektriciteit', e.target.value)
-                }}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-              >
-                <option value="">Selecteer aansluitwaarde</option>
-                <option value="3x25A">3x25A</option>
-                <option value="3x35A">3x35A</option>
-                <option value="3x50A">3x50A</option>
-                <option value="3x63A">3x63A</option>
-                <option value="3x80A">3x80A</option>
-                <option value=">3x80A">Grootverbruik</option>
-              </select>
-            </div>
-
-            {/* Gas Aansluitwaarde */}
-            {!geenGasaansluiting && (
-              <div>
-                <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
-                  Gas <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={aansluitwaardeGas}
-                  onChange={(e) => {
-                    setAansluitwaardeGas(e.target.value)
-                    setValue('aansluitwaardeGas', e.target.value)
-                  }}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
-                >
-                  <option value="">Selecteer aansluitwaarde</option>
-                  <option value="G6">G6</option>
-                  <option value="G10">G10</option>
-                  <option value="G16">G16</option>
-                  <option value="G25">G25</option>
-                  <option value=">G25">Grootverbruik</option>
-                </select>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-start gap-2 p-2.5 md:p-3 bg-brand-purple-100 border border-brand-purple-300 rounded-lg">
-            <Info weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-brand-purple-700 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-brand-purple-900 leading-relaxed">
-              <strong>Automatisch geschat:</strong> We hebben de aansluitwaarden automatisch geschat op basis van je verbruik. 
-              Dit is meestal correct, maar je kunt het handmatig aanpassen als je zeker bent van een andere waarde. 
-              De aansluitwaarde staat op je meterkast en beïnvloedt de netbeheerkosten.
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowAansluitwaardeInfo(!showAansluitwaardeInfo)}
-            className="text-sm text-brand-purple-600 hover:text-brand-purple-700 font-medium underline inline-flex items-center gap-1"
-          >
-            <Info weight="duotone" className="w-4 h-4" />
-            Waar vind ik mijn aansluitwaarde?
-          </button>
-
-          {showAansluitwaardeInfo && (
-            <div className="bg-white border-2 border-brand-purple-300 rounded-lg p-4 space-y-2 animate-slide-down">
-              <h4 className="font-semibold text-brand-navy-500 text-sm">Elektriciteit aansluitwaarde vinden:</h4>
-              <ul className="text-xs text-gray-700 space-y-1 ml-4 list-disc">
-                <li>Kijk op de hoofdzekering in je meterkast (bijv. "3x25A")</li>
-                <li>Staat op je aansluitovereenkomst van de netbeheerder</li>
-                <li>Neem contact op met je netbeheerder (Liander, Stedin, Enexis, etc.)</li>
-              </ul>
-              <h4 className="font-semibold text-brand-navy-500 text-sm mt-4">Gas aansluitwaarde vinden:</h4>
-              <ul className="text-xs text-gray-700 space-y-1 ml-4 list-disc">
-                <li>Kijk op de gasmeter (bijv. "G6" of "G4")</li>
-                <li>Staat op je aansluitovereenkomst</li>
-                <li>De meeste huishoudens hebben G4 of G6</li>
-              </ul>
-            </div>
+          {showAdvancedSettings ? (
+            <CaretUp weight="bold" className="w-5 h-5 text-brand-navy-500 shrink-0" />
+          ) : (
+            <CaretDown weight="bold" className="w-5 h-5 text-brand-navy-500 shrink-0" />
           )}
-        </div>
-        </div>
+        </button>
+
+        {showAdvancedSettings && (
+          <div className="mt-4 space-y-4 animate-slide-down">
+            {/* Meter type */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-brand-teal-500 rounded-lg flex items-center justify-center">
+                  <Gauge weight="duotone" className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-brand-navy-500">Type meter</h4>
+                  <p className="text-xs text-gray-600">Helpt ons de beste contracten te vinden</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {([
+                  { value: 'slim', label: 'Slimme meter', icon: DeviceMobile, desc: 'Digitale uitlezing' },
+                  { value: 'oud', label: 'Oude meter', icon: Gauge, desc: 'Draaiende schijf' },
+                  { value: 'weet_niet', label: 'Weet ik niet', icon: CheckCircle, desc: 'Standaard' },
+                ] as const).map((option) => {
+                  const Icon = option.icon
+                  const isSelected = meterType === option.value
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setMeterType(option.value)
+                        setValue('meterType', option.value)
+                      }}
+                      className={`p-3 rounded-xl border-2 transition-all text-left ${
+                        isSelected
+                          ? 'border-brand-teal-500 bg-brand-teal-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Icon weight="duotone" className={`w-5 h-5 mb-1 ${isSelected ? 'text-brand-teal-600' : 'text-gray-400'}`} />
+                      <div className={`text-xs font-semibold mb-0.5 ${isSelected ? 'text-brand-teal-700' : 'text-gray-700'}`}>
+                        {option.label}
+                      </div>
+                      <div className="text-xs text-gray-500">{option.desc}</div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Aansluitwaarden */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-brand-purple-500 rounded-lg flex items-center justify-center">
+                  <Plugs weight="duotone" className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-brand-navy-500">Aansluitwaarden</h4>
+                  <p className="text-xs text-gray-600">Automatisch geschat op basis van je verbruik</p>
+                </div>
+              </div>
+
+              <div className="bg-brand-purple-50/50 border-2 border-brand-purple-200 rounded-xl p-3 md:p-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                      Elektriciteit <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={aansluitwaardeElektriciteit}
+                      onChange={(e) => {
+                        setAansluitwaardeElektriciteit(e.target.value)
+                        setValue('aansluitwaardeElektriciteit', e.target.value)
+                      }}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                    >
+                      <option value="">Selecteer aansluitwaarde</option>
+                      <option value="3x25A">3x25A</option>
+                      <option value="3x35A">3x35A</option>
+                      <option value="3x50A">3x50A</option>
+                      <option value="3x63A">3x63A</option>
+                      <option value="3x80A">3x80A</option>
+                      <option value=">3x80A">Grootverbruik</option>
+                    </select>
+                  </div>
+
+                  {!geenGasaansluiting && (
+                    <div>
+                      <label className="block text-sm font-semibold text-brand-navy-500 mb-2">
+                        Gas <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={aansluitwaardeGas}
+                        onChange={(e) => {
+                          setAansluitwaardeGas(e.target.value)
+                          setValue('aansluitwaardeGas', e.target.value)
+                        }}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
+                      >
+                        <option value="">Selecteer aansluitwaarde</option>
+                        <option value="G6">G6</option>
+                        <option value="G10">G10</option>
+                        <option value="G16">G16</option>
+                        <option value="G25">G25</option>
+                        <option value=">G25">Grootverbruik</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-start gap-2 p-2.5 bg-brand-purple-100 border border-brand-purple-300 rounded-lg">
+                  <Info weight="duotone" className="w-4 h-4 text-brand-purple-700 flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-brand-purple-900 leading-relaxed">
+                    <strong>Automatisch geschat:</strong> We vullen dit alvast in op basis van je verbruik.
+                    Je kunt het aanpassen als je de exacte aansluitwaarde weet.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAansluitwaardeInfo(!showAansluitwaardeInfo)}
+                  className="text-sm text-brand-purple-600 hover:text-brand-purple-700 font-medium underline inline-flex items-center gap-1"
+                >
+                  <Info weight="duotone" className="w-4 h-4" />
+                  Waar vind ik mijn aansluitwaarde?
+                </button>
+
+                {showAansluitwaardeInfo && (
+                  <div className="bg-white border-2 border-brand-purple-300 rounded-lg p-4 space-y-2 animate-slide-down">
+                    <h4 className="font-semibold text-brand-navy-500 text-sm">Elektriciteit aansluitwaarde vinden:</h4>
+                    <ul className="text-xs text-gray-700 space-y-1 ml-4 list-disc">
+                      <li>Kijk op de hoofdzekering in je meterkast (bijv. "3x25A")</li>
+                      <li>Staat op je aansluitovereenkomst van de netbeheerder</li>
+                      <li>Neem contact op met je netbeheerder (Liander, Stedin, Enexis, etc.)</li>
+                    </ul>
+                    <h4 className="font-semibold text-brand-navy-500 text-sm mt-4">Gas aansluitwaarde vinden:</h4>
+                    <ul className="text-xs text-gray-700 space-y-1 ml-4 list-disc">
+                      <li>Kijk op de gasmeter (bijv. "G6" of "G4")</li>
+                      <li>Staat op je aansluitovereenkomst</li>
+                      <li>De meeste huishoudens hebben G4 of G6</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Submit */}
