@@ -789,6 +789,8 @@ export function VerbruikForm() {
                   label="Huisnr."
                   inputSize="sm"
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={adres.huisnummer}
                   onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
                   placeholder="12"
@@ -932,6 +934,7 @@ export function VerbruikForm() {
               label={heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'}
               inputSize="sm"
                   type="number"
+                  inputMode="numeric"
                   {...register('elektriciteitNormaal', { 
                     valueAsNumber: true,
                     onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitNormaal: Number(e.target.value) || 0 }))
@@ -947,6 +950,7 @@ export function VerbruikForm() {
                   label="Dal tarief (nacht/weekend)"
                   inputSize="sm"
                     type="number"
+                    inputMode="numeric"
                     {...register('elektriciteitDal', { 
                       valueAsNumber: true,
                       onChange: (e) => setVerbruikWatched(prev => ({ ...prev, elektriciteitDal: Number(e.target.value) || 0 }))
@@ -1080,6 +1084,7 @@ export function VerbruikForm() {
                     label="Gasverbruik per jaar"
                     inputSize="sm"
                     type="number"
+                    inputMode="numeric"
                     {...register('gasJaar', { 
                       valueAsNumber: true,
                       onChange: (e) => setVerbruikWatched(prev => ({ ...prev, gasJaar: Number(e.target.value) || 0 }))
