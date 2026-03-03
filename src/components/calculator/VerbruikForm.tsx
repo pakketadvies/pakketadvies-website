@@ -29,6 +29,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { schatAansluitwaarden } from '@/lib/aansluitwaarde-schatting'
 import { trackGAEvent } from '@/lib/tracking/ga-events'
+import { useFacebookPixel } from '@/lib/tracking/useFacebookPixel'
 import { CTA_COPY, TRUST_COPY } from '@/lib/copy'
 
 const verbruikSchema = z.object({
@@ -125,6 +126,7 @@ function getAddressPath(index: number, field: AddressErrorField): AddressErrorPa
 export function VerbruikForm() {
   const router = useRouter()
   const { setVerbruik, setAddressType } = useCalculatorStore()
+  const { track } = useFacebookPixel()
   
   // State
   const [heeftEnkeleMeter, setHeeftEnkeleMeter] = useState(false)
@@ -704,6 +706,12 @@ export function VerbruikForm() {
       has_single_meter: heeftEnkeleMeter,
       meter_type: data.meterType,
     })
+    track('InitiateCheckout', {
+      content_name: 'Calculator Step 1',
+      content_category: 'calculator',
+      button_text: CTA_COPY.viewOffers,
+      path: '/calculator',
+    })
 
     setVerbruik({
       elektriciteitNormaal: data.elektriciteitNormaal,
@@ -1246,8 +1254,10 @@ export function VerbruikForm() {
       {/* Submit */}
       <div className="pt-4 md:pt-6">
         <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
-          <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-          {CTA_COPY.viewOffers}
+          <span className="inline-flex items-center justify-center gap-2">
+            <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+            <span>{CTA_COPY.viewOffers}</span>
+          </span>
         </Button>
         <p className="text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
           {TRUST_COPY.freeAndNoObligation} • {TRUST_COPY.quickResult} • {TRUST_COPY.noObligation}

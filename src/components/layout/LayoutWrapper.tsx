@@ -29,6 +29,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   // Check if we're on an admin route
   const isAdminRoute = pathname?.startsWith('/admin')
+  const hideFooter = pathname === '/calculator'
   
   if (isAdminRoute) {
     // Admin routes: no header/footer, just children
@@ -40,7 +41,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <>
       <Header />
       <main>{children}</main>
-      <Footer />
+      {!hideFooter && <Footer />}
       <CookieBanner />
     </>
   )
