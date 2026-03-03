@@ -8,7 +8,6 @@ interface ProgressBarProps {
 
 export function ProgressBar({ currentStep, totalSteps, stepLabels }: ProgressBarProps) {
   const percentage = (currentStep / totalSteps) * 100
-  const currentLabel = stepLabels?.[currentStep - 1]
 
   return (
     <div className="space-y-3">
@@ -18,23 +17,6 @@ export function ProgressBar({ currentStep, totalSteps, stepLabels }: ProgressBar
           className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-teal-500 to-brand-teal-600 rounded-full transition-all duration-500 ease-out shadow-lg"
           style={{ width: `${percentage}%` }}
         />
-      </div>
-
-      {/* Steps indicator */}
-      <div className="flex justify-between items-center">
-        <div className="min-w-0">
-          <span className="text-sm font-medium text-gray-600">
-            Stap {currentStep} van {totalSteps}
-          </span>
-          {currentLabel && (
-            <p className="text-xs text-brand-navy-500 font-semibold mt-0.5 truncate">
-              {currentLabel}
-            </p>
-          )}
-        </div>
-        <span className="text-sm font-bold text-brand-teal-600">
-          {Math.round(percentage)}% compleet
-        </span>
       </div>
 
       {stepLabels && stepLabels.length >= totalSteps && (
