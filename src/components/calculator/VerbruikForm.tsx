@@ -182,7 +182,7 @@ export function VerbruikForm() {
   } = useForm({
     resolver: zodResolver(verbruikSchema),
     defaultValues: {
-      elektriciteitNormaal: 0,
+      elektriciteitNormaal: undefined,
       heeftEnkeleMeter: false,
       geenGasaansluiting: false,
       heeftZonnepanelen: false,
