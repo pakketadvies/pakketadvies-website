@@ -32,34 +32,56 @@ function CalculatorContent() {
 
   return (
     <div className="container-custom">
-      <div className="max-w-3xl lg:max-w-5xl mx-auto">
-        <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-6 md:p-8 lg:p-10">
-          <div className="mb-6 md:mb-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-8 bg-white rounded-2xl md:rounded-3xl border border-gray-200 shadow-2xl p-4 md:p-6 lg:p-8">
+            <div className="mb-5 md:mb-6">
             <ProgressBar currentStep={progressStep} totalSteps={TOTAL_STEPS} stepLabels={stepLabels} />
+            </div>
+            {showQuickStart ? (
+              <QuickStartStep />
+            ) : (
+              <>
+                {stap === 1 && <VerbruikForm />}
+                {stap === 2 && <BedrijfsgegevensForm />}
+              </>
+            )}
           </div>
-          {showQuickStart ? (
-            <QuickStartStep />
-          ) : (
-            <>
-              {stap === 1 && <VerbruikForm />}
-              {stap === 2 && <BedrijfsgegevensForm />}
-            </>
-          )}
-        </div>
 
-        <div className="mt-6 md:mt-8 text-center pb-8 md:pb-12">
-          <p className="text-sm md:text-base text-gray-600">
-            Vragen? Bel ons op{' '}
-            <a href="tel:+31850477065" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
-              085 047 7065
-            </a>{' '}
-            of{' '}
-            <a href="mailto:info@pakketadvies.nl" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
-              mail ons
-            </a>
-            .
-          </p>
-          <p className="text-xs text-gray-500 mt-2">{TRUST_COPY.secureDataLine}</p>
+          <aside className="lg:col-span-4 lg:sticky lg:top-28 bg-white rounded-2xl border border-gray-200 shadow-lg p-4 md:p-5">
+            <h3 className="text-base md:text-lg font-bold text-brand-navy-500">Snel en vrijblijvend vergelijken</h3>
+            <p className="text-sm text-gray-600 mt-1">Vul je gegevens in en bekijk direct je aanbiedingen.</p>
+
+            <ul className="mt-4 space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-teal-500 shrink-0" />
+                <span>Alleen de noodzakelijke gegevens in stap 1</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-teal-500 shrink-0" />
+                <span>Geavanceerde instellingen zijn optioneel</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-teal-500 shrink-0" />
+                <span>Gratis en zonder verplichtingen</span>
+              </li>
+            </ul>
+
+            <div className="mt-5 border-t border-gray-200 pt-4">
+              <p className="text-sm text-gray-600">
+                Vragen? Bel ons op{' '}
+                <a href="tel:+31850477065" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
+                  085 047 7065
+                </a>{' '}
+                of{' '}
+                <a href="mailto:info@pakketadvies.nl" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
+                  mail ons
+                </a>
+                .
+              </p>
+              <p className="text-xs text-gray-500 mt-2">{TRUST_COPY.secureDataLine}</p>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

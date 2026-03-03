@@ -736,11 +736,11 @@ export function VerbruikForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-4 md:space-y-4">
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-3 md:space-y-4 pb-24 md:pb-0">
       {/* Leveringsadres */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
         <div className="space-y-3 md:space-y-4">
-          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <MapPin weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
@@ -751,7 +751,7 @@ export function VerbruikForm() {
         </div>
 
         {leveringsadressen.map((adres, index) => (
-          <div key={index} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3 md:p-6 space-y-3 md:space-y-4">
+          <div key={index} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3 md:p-4 space-y-2 md:space-y-3">
             {leveringsadressen.length > 1 && (
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-gray-700">Adres {index + 1}</span>
@@ -766,8 +766,8 @@ export function VerbruikForm() {
             )}
 
             {/* Desktop: compactere grid */}
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-3 md:gap-4">
-              <div className="md:col-span-3">
+            <div className="grid grid-cols-12 gap-2 md:gap-3">
+              <div className="col-span-6">
                 <Input
                   label="Postcode"
                   type="text"
@@ -778,9 +778,9 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="col-span-4">
                 <Input
-                  label="Huisnummer"
+                  label="Huisnr."
                   type="text"
                   value={adres.huisnummer}
                   onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
@@ -789,7 +789,7 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <div className="md:col-span-1">
+              <div className="col-span-2">
                 <Input
                   label="Toev."
                   type="text"
@@ -885,7 +885,7 @@ export function VerbruikForm() {
           <button
             type="button"
             onClick={toevoegenLeveringsadres}
-            className="w-full md:w-auto flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-3 border-2 border-dashed border-brand-teal-300 text-brand-teal-600 hover:border-brand-teal-500 hover:bg-brand-teal-50 rounded-xl text-sm md:text-base font-semibold transition-all"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2.5 border-2 border-dashed border-brand-teal-300 text-brand-teal-600 hover:border-brand-teal-500 hover:bg-brand-teal-50 rounded-xl text-sm font-semibold transition-all"
           >
             <Plus weight="bold" className="w-5 h-5" />
             Extra leveringsadres toevoegen
@@ -895,8 +895,8 @@ export function VerbruikForm() {
       </div>
 
       {/* Elektriciteitsverbruik */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
-        <div className="space-y-4 md:space-y-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
+        <div className="space-y-3 md:space-y-4">
           <div className="flex items-center justify-between gap-2 md:gap-3">
             <div className="flex items-center gap-2 md:gap-3">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
@@ -917,7 +917,7 @@ export function VerbruikForm() {
           </button>
         </div>
 
-          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
+          <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4 space-y-3">
           {/* Desktop: grid voor normaal + dal naast elkaar */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <Input
@@ -949,7 +949,7 @@ export function VerbruikForm() {
             )}
           </div>
 
-          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-white/50 transition-colors">
+          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-2.5 md:p-3 rounded-xl hover:bg-white/50 transition-colors">
             <input
               type="checkbox"
               checked={heeftEnkeleMeter}
@@ -996,9 +996,9 @@ export function VerbruikForm() {
       </div>
 
       {/* Zonnepanelen */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
         <div className="space-y-3 md:space-y-4">
-          <label className="flex items-center gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
+          <label className="flex items-center gap-2 md:gap-3 cursor-pointer group p-2.5 md:p-3 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
           <input
             type="checkbox"
             checked={heeftZonnepanelen}
@@ -1018,7 +1018,7 @@ export function VerbruikForm() {
         </label>
 
         {heeftZonnepanelen && (
-          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
+          <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4 space-y-3">
             <Input
               label="Opwekking per jaar"
                   type="number"
@@ -1050,9 +1050,9 @@ export function VerbruikForm() {
       </div>
 
       {/* Gasverbruik */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
         <div className="space-y-3 md:space-y-4">
-          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
               <Flame weight="duotone" className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
@@ -1064,7 +1064,7 @@ export function VerbruikForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {!geenGasaansluiting && (
-            <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-4 md:p-6">
+            <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4">
                 <Input
                   label="Gasverbruik per jaar"
                   type="number"
@@ -1079,7 +1079,7 @@ export function VerbruikForm() {
             </div>
           )}
 
-          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
+          <label className="flex items-start gap-2 md:gap-3 cursor-pointer group p-2.5 md:p-3 rounded-xl hover:bg-gray-50 transition-colors border-2 border-gray-200">
             <input
               type="checkbox"
               checked={geenGasaansluiting}
@@ -1106,7 +1106,7 @@ export function VerbruikForm() {
       </div>
 
       {/* Geavanceerde instellingen */}
-      <div className="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm md:p-5">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
         <button
           type="button"
           onClick={() => setShowAdvancedSettings((prev) => !prev)}
@@ -1271,7 +1271,7 @@ export function VerbruikForm() {
       </div>
 
       {/* Submit */}
-      <div className="pt-4 md:pt-6">
+      <div className="sticky bottom-3 z-20 rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-sm p-3 shadow-lg md:static md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none">
         <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
           <span className="inline-flex items-center justify-center gap-2">
             <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
