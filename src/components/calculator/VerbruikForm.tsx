@@ -736,7 +736,7 @@ export function VerbruikForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-3 md:space-y-4 pb-24 md:pb-0">
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-3 md:space-y-4 pb-6 md:pb-0">
       {/* Leveringsadres */}
       <section className="pb-4 md:pb-5 border-b border-gray-200">
         <div className="space-y-3 md:space-y-4">
