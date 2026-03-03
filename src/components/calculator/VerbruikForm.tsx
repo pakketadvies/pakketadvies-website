@@ -767,7 +767,7 @@ export function VerbruikForm() {
 
             {/* Desktop: compactere grid */}
             <div className="grid grid-cols-12 gap-2 md:gap-3">
-              <div className="col-span-6">
+              <div className="col-span-5">
                 <Input
                   label="Postcode"
                   inputSize="sm"
@@ -779,7 +779,7 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <div className="col-span-4">
+              <div className="col-span-3">
                 <Input
                   label="Huisnr."
                   inputSize="sm"
@@ -791,7 +791,7 @@ export function VerbruikForm() {
                   required
                 />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-4">
                 <Input
                   label="Toev."
                   inputSize="sm"
@@ -1278,14 +1278,14 @@ export function VerbruikForm() {
       </section>
 
       {/* Submit */}
-      <div className="sticky bottom-3 z-20 rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-sm p-3 shadow-lg md:static md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none">
+      <div className="sticky bottom-3 z-20 md:static md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none">
         <Button type="submit" size="lg" className="w-full bg-brand-teal-500 hover:bg-brand-teal-600">
           <span className="inline-flex items-center justify-center gap-2">
             <MagnifyingGlass weight="bold" className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
             <span>{CTA_COPY.viewOffers}</span>
           </span>
         </Button>
-        <p className="text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
+        <p className="text-center text-xs md:text-sm text-gray-500 mt-2 md:mt-4">
           {TRUST_COPY.freeAndNoObligation} • {TRUST_COPY.quickResult} • {TRUST_COPY.noObligation}
         </p>
       </div>
