@@ -770,6 +770,7 @@ export function VerbruikForm() {
               <div className="col-span-6">
                 <Input
                   label="Postcode"
+                  inputSize="sm"
                   type="text"
                   value={adres.postcode}
                   onChange={(e) => handleLeveringsadresChange(index, 'postcode', e.target.value)}
@@ -781,6 +782,7 @@ export function VerbruikForm() {
               <div className="col-span-4">
                 <Input
                   label="Huisnr."
+                  inputSize="sm"
                   type="text"
                   value={adres.huisnummer}
                   onChange={(e) => handleLeveringsadresChange(index, 'huisnummer', e.target.value)}
@@ -792,6 +794,7 @@ export function VerbruikForm() {
               <div className="col-span-2">
                 <Input
                   label="Toev."
+                  inputSize="sm"
                   type="text"
                   value={adres.toevoeging || ''}
                   onChange={(e) => handleLeveringsadresChange(index, 'toevoeging', e.target.value)}
@@ -919,9 +922,10 @@ export function VerbruikForm() {
 
           <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4 space-y-3">
           {/* Desktop: grid voor normaal + dal naast elkaar */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
             <Input
               label={heeftEnkeleMeter ? 'Totaal verbruik per jaar' : 'Normaal tarief (overdag)'}
+              inputSize="sm"
                   type="number"
                   {...register('elektriciteitNormaal', { 
                     valueAsNumber: true,
@@ -936,6 +940,7 @@ export function VerbruikForm() {
               <div className="animate-slide-down">
                 <Input
                   label="Dal tarief (nacht/weekend)"
+                  inputSize="sm"
                     type="number"
                     {...register('elektriciteitDal', { 
                       valueAsNumber: true,
@@ -1021,6 +1026,7 @@ export function VerbruikForm() {
           <div className="animate-slide-down bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4 space-y-3">
             <Input
               label="Opwekking per jaar"
+              inputSize="sm"
                   type="number"
                   {...register('terugleveringJaar', { valueAsNumber: true })}
                   placeholder="Bijv. 3000"
@@ -1067,6 +1073,7 @@ export function VerbruikForm() {
             <div className="bg-brand-teal-50/50 border-2 border-brand-teal-200 rounded-xl p-3 md:p-4">
                 <Input
                   label="Gasverbruik per jaar"
+                  inputSize="sm"
                   type="number"
                   {...register('gasJaar', { 
                     valueAsNumber: true,

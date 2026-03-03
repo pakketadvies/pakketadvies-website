@@ -48,7 +48,7 @@ function CalculatorContent() {
             )}
           </div>
 
-          <aside className="lg:col-span-4 lg:sticky lg:top-28 bg-white rounded-2xl border border-gray-200 shadow-lg p-4 md:p-5">
+          <aside className="hidden lg:block lg:col-span-4 lg:sticky lg:top-28 bg-white rounded-2xl border border-gray-200 shadow-lg p-4 md:p-5">
             <h3 className="text-base md:text-lg font-bold text-brand-navy-500">Snel en vrijblijvend vergelijken</h3>
             <p className="text-sm text-gray-600 mt-1">Vul je gegevens in en bekijk direct je aanbiedingen.</p>
 
@@ -82,6 +82,21 @@ function CalculatorContent() {
               <p className="text-xs text-gray-500 mt-2">{TRUST_COPY.secureDataLine}</p>
             </div>
           </aside>
+        </div>
+
+        <div className="lg:hidden mt-4 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <p className="text-sm text-gray-600">
+            Vragen? Bel ons op{' '}
+            <a href="tel:+31850477065" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
+              085 047 7065
+            </a>{' '}
+            of{' '}
+            <a href="mailto:info@pakketadvies.nl" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
+              mail ons
+            </a>
+            .
+          </p>
+          <p className="text-xs text-gray-500 mt-2">{TRUST_COPY.secureDataLine}</p>
         </div>
       </div>
     </div>
