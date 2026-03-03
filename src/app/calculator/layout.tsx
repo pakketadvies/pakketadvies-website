@@ -15,7 +15,7 @@ export default function CalculatorLayout({
     <div className="min-h-screen flex flex-col bg-white">
       {/* Calculator Content */}
       {/* Padding-top voor fixed header (header is ~80-100px hoog) */}
-      <main className="flex-grow bg-gray-50 pt-24 md:pt-28">
+      <main className="flex-grow bg-gray-50 pt-24 md:pt-28 pb-10 md:pb-16">
         {children}
       </main>
     </div>

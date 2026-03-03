@@ -47,7 +47,7 @@ function CalculatorContent() {
           )}
         </div>
 
-        <div className="mt-6 md:mt-8 text-center">
+        <div className="mt-6 md:mt-8 text-center pb-8 md:pb-12">
           <p className="text-sm md:text-base text-gray-600">
             Vragen? Bel ons op{' '}
             <a href="tel:+31850477065" className="font-semibold text-brand-teal-600 hover:text-brand-teal-700 transition-colors">
