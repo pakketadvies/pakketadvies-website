@@ -738,7 +738,7 @@ export function VerbruikForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="space-y-3 md:space-y-4 pb-24 md:pb-0">
       {/* Leveringsadres */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
+      <section className="pb-4 md:pb-5 border-b border-gray-200">
         <div className="space-y-3 md:space-y-4">
           <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
@@ -895,10 +895,10 @@ export function VerbruikForm() {
           </button>
         )}
         </div>
-      </div>
+      </section>
 
       {/* Elektriciteitsverbruik */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
+      <section className="pt-1 pb-4 md:pb-5 border-b border-gray-200">
         <div className="space-y-3 md:space-y-4">
           <div className="flex items-center justify-between gap-2 md:gap-3">
             <div className="flex items-center gap-2 md:gap-3">
@@ -998,10 +998,10 @@ export function VerbruikForm() {
           </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Zonnepanelen */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
+      <section className="pt-1 pb-4 md:pb-5 border-b border-gray-200">
         <div className="space-y-3 md:space-y-4">
           <label className="flex items-center gap-2 md:gap-3 cursor-pointer group p-2.5 md:p-3 bg-brand-teal-50 border-2 border-brand-teal-200 rounded-xl hover:border-brand-teal-300 transition-all">
           <input
@@ -1053,10 +1053,10 @@ export function VerbruikForm() {
           </div>
         )}
         </div>
-      </div>
+      </section>
 
       {/* Gasverbruik */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
+      <section className="pt-1 pb-4 md:pb-5 border-b border-gray-200">
         <div className="space-y-3 md:space-y-4">
           <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-teal-500 rounded-xl flex items-center justify-center">
@@ -1110,10 +1110,10 @@ export function VerbruikForm() {
           </label>
         </div>
         </div>
-      </div>
+      </section>
 
       {/* Geavanceerde instellingen */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-5">
+      <section className="pt-1">
         <button
           type="button"
           onClick={() => setShowAdvancedSettings((prev) => !prev)}
@@ -1275,7 +1275,7 @@ export function VerbruikForm() {
             </div>
           </div>
         )}
-      </div>
+      </section>
 
       {/* Submit */}
       <div className="sticky bottom-3 z-20 rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-sm p-3 shadow-lg md:static md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none">
