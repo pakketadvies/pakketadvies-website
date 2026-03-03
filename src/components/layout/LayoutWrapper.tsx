@@ -29,7 +29,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   // Check if we're on an admin route
   const isAdminRoute = pathname?.startsWith('/admin')
-  const hideFooter = pathname === '/calculator'
+  const hideFooter = pathname?.startsWith('/calculator')
   
   if (isAdminRoute) {
     // Admin routes: no header/footer, just children
