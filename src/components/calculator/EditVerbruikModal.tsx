@@ -48,43 +48,33 @@ export default function EditVerbruikModal({
     minRating: 0,
   })
   const [localSortBy, setLocalSortBy] = useState<'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating'>(sortBy)
+  const [initialFormData, setInitialFormData] = useState<VerbruikData>(currentData)
+  const [initialFilters, setInitialFilters] = useState<Filters>(filters || {
+    type: 'alle',
+    groeneEnergie: false,
+    maxPrijs: 99999,
+    minRating: 0,
+  })
+  const [initialSortBy, setInitialSortBy] = useState<'prijs-laag' | 'prijs-hoog' | 'besparing' | 'rating'>(sortBy)
 
   // Reset form when modal opens (ONLY on isOpen change, NOT on currentData change!)
   useEffect(() => {
-    console.log('🔵 [MODAL] useEffect triggered (isOpen changed)', { 
-      isOpen, 
-      currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
-      currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
-      currentDataToevoeging: currentData?.leveringsadressen?.[0]?.toevoeging,
-    })
-    
     if (isOpen) {
-      console.log('🟢 [MODAL] Modal is opening, setting formData to FRESH currentData from parent')
-      // ✅ VOORSTEL 1: We pakken altijd de VERSE currentData bij open
-      // Dit voorkomt stale data, en omdat EditVerbruikForm geen sync useEffect meer heeft,
-      // krijgen we geen loops meer!
       setFormData(currentData)
-      setHasChanges(false)
+      setInitialFormData(currentData)
       setShowAdvancedFilters(false)
-      if (filters) {
-        setLocalFilters(filters)
+      const nextFilters = filters || {
+        type: 'alle',
+        groeneEnergie: false,
+        maxPrijs: 99999,
+        minRating: 0,
       }
-      if (sortBy) {
-        setLocalSortBy(sortBy)
-      }
+      setLocalFilters(nextFilters)
+      setInitialFilters(nextFilters)
+      setLocalSortBy(sortBy)
+      setInitialSortBy(sortBy)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, currentData])  // ✅ ADD currentData back maar EditVerbruikForm heeft geen sync meer!
-  
-  // Log formData changes
-  useEffect(() => {
-    console.log('🟡 [MODAL] formData changed:', {
-      postcode: formData?.leveringsadressen?.[0]?.postcode,
-      huisnummer: formData?.leveringsadressen?.[0]?.huisnummer,
-      toevoeging: formData?.leveringsadressen?.[0]?.toevoeging,
-      addressType: formData?.addressType,
-    })
-  }, [formData])
+  }, [isOpen, currentData, filters, sortBy])
 
   // Update filters when local filters change
   useEffect(() => {
@@ -100,6 +90,18 @@ export default function EditVerbruikModal({
     }
   }, [localSortBy, isOpen, onSortByChange])
 
+  useEffect(() => {
+    if (!isOpen) {
+      setHasChanges(false)
+      return
+    }
+
+    const formChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData)
+    const filtersChanged = JSON.stringify(localFilters) !== JSON.stringify(initialFilters)
+    const sortChanged = localSortBy !== initialSortBy
+    setHasChanges(formChanged || filtersChanged || sortChanged)
+  }, [isOpen, formData, initialFormData, localFilters, initialFilters, localSortBy, initialSortBy])
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (!isOpen) return
@@ -107,42 +109,23 @@ export default function EditVerbruikModal({
   }, [isOpen])
 
   const handleSave = () => {
-    console.log('💾 [MODAL] handleSave called', {
-      postcode: formData?.leveringsadressen?.[0]?.postcode,
-      huisnummer: formData?.leveringsadressen?.[0]?.huisnummer,
-      toevoeging: formData?.leveringsadressen?.[0]?.toevoeging,
-      addressType: formData?.addressType,
-    })
     onSave(formData)
   }
 
   const handleCancel = () => {
-    console.log('❌ [MODAL] handleCancel called - resetting to currentData', {
-      currentDataPostcode: currentData?.leveringsadressen?.[0]?.postcode,
-      currentDataHuisnummer: currentData?.leveringsadressen?.[0]?.huisnummer,
-      currentDataToevoeging: currentData?.leveringsadressen?.[0]?.toevoeging,
-    })
-    // Reset all state first
     setFormData(currentData)
+    setLocalFilters(initialFilters)
+    setLocalSortBy(initialSortBy)
     setHasChanges(false)
-    setShowAdvancedFilters(false) // Reset advanced filters section
-    
-    // Close the modal - ensure onClose is called
+    setShowAdvancedFilters(false)
+
     if (onClose) {
       onClose()
     }
   }
 
   const handleFormChange = (newData: VerbruikData) => {
-    console.log('🔴 [MODAL] handleFormChange called from EditVerbruikForm', {
-      newPostcode: newData?.leveringsadressen?.[0]?.postcode,
-      newHuisnummer: newData?.leveringsadressen?.[0]?.huisnummer,
-      newToevoeging: newData?.leveringsadressen?.[0]?.toevoeging,
-      newAddressType: newData?.addressType,
-    })
     setFormData(newData)
-    // ✅ VOORSTEL 3: hasChanges wordt true, maar we saven pas bij button click!
-    setHasChanges(true)
   }
 
   if (!isOpen) return null
