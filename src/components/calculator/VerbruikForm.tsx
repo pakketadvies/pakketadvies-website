@@ -147,6 +147,8 @@ export function VerbruikForm() {
   // Aansluitwaarden (automatisch geschat, door klant aanpasbaar)
   const [aansluitwaardeElektriciteit, setAansluitwaardeElektriciteit] = useState('')
   const [aansluitwaardeGas, setAansluitwaardeGas] = useState('')
+  const [manualAansluitwaardeElektriciteit, setManualAansluitwaardeElektriciteit] = useState(false)
+  const [manualAansluitwaardeGas, setManualAansluitwaardeGas] = useState(false)
   const [showAansluitwaardeInfo, setShowAansluitwaardeInfo] = useState(false)
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
   // Ref om laatste lookup te tracken (voorkomt dubbele calls)
@@ -220,19 +222,19 @@ export function VerbruikForm() {
     if (totaalElektriciteit > 0) {
       aansluitwaardeTimer.current = setTimeout(() => {
         const schatting = schatAansluitwaarden(totaalElektriciteit, gasJaar > 0 ? gasJaar : null)
-        
-        // Alleen automatisch invullen als nog leeg (niet overschrijven van handmatige aanpassing)
-        if (!aansluitwaardeElektriciteit) {
+
+        // Altijd automatisch bijwerken op basis van verbruik, behalve na handmatige wijziging.
+        if (!manualAansluitwaardeElektriciteit) {
           setAansluitwaardeElektriciteit(schatting.elektriciteit)
           setValue('aansluitwaardeElektriciteit', schatting.elektriciteit)
         }
-        if (!aansluitwaardeGas && !geenGasaansluiting) {
+        if (!manualAansluitwaardeGas && !geenGasaansluiting) {
           setAansluitwaardeGas(schatting.gas)
           setValue('aansluitwaardeGas', schatting.gas)
         }
       }, 1000) // 1 seconde debounce
     }
-  }, [verbruikWatched, geenGasaansluiting, aansluitwaardeElektriciteit, aansluitwaardeGas, setValue])
+  }, [verbruikWatched, geenGasaansluiting, manualAansluitwaardeElektriciteit, manualAansluitwaardeGas, setValue])
 
   // Valideer of postcode compleet is
   const isValidPostcode = (postcode: string): boolean => {
@@ -1232,6 +1234,7 @@ export function VerbruikForm() {
                       onChange={(e) => {
                         setAansluitwaardeElektriciteit(e.target.value)
                         setValue('aansluitwaardeElektriciteit', e.target.value)
+                        setManualAansluitwaardeElektriciteit(Boolean(e.target.value))
                       }}
                       className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                     >
@@ -1255,6 +1258,7 @@ export function VerbruikForm() {
                         onChange={(e) => {
                           setAansluitwaardeGas(e.target.value)
                           setValue('aansluitwaardeGas', e.target.value)
+                          setManualAansluitwaardeGas(Boolean(e.target.value))
                         }}
                         className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-brand-purple-500 focus:ring-2 focus:ring-brand-purple-500/20 transition-all text-brand-navy-500 font-medium bg-white"
                       >
