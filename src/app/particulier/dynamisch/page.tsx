@@ -63,7 +63,7 @@ export default function DynamischPage() {
               Dynamisch + zonnepanelen
             </Link>
             <Link
-              href="/particulier/energie-vergelijken"
+              href="/calculator"
               className="inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold"
             >
               Vergelijk dynamisch

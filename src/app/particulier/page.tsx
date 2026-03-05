@@ -227,7 +227,7 @@ export default function ParticulierHomePage() {
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link
-              href="/particulier/energie-vergelijken"
+              href="/calculator"
               className="inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-teal-500/25 hover:bg-brand-teal-600 transition-all"
             >
               Start met vergelijken
@@ -382,7 +382,7 @@ export default function ParticulierHomePage() {
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Link
-                href="/particulier/energie-vergelijken"
+                href="/calculator"
                 className="inline-flex justify-center items-center px-6 py-3 bg-white text-brand-navy-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
               >
                 Vergelijk nu

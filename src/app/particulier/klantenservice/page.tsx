@@ -74,7 +74,7 @@ export default function KlantenservicePage() {
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <h2 className="font-display text-xl font-bold text-brand-navy-600">Snel naar</h2>
             <div className="mt-4 space-y-2">
-              <Link className="block text-brand-teal-600 font-semibold hover:underline" href="/particulier/energie-vergelijken">
+              <Link className="block text-brand-teal-600 font-semibold hover:underline" href="/calculator">
                 Energie vergelijken →
               </Link>
               <Link className="block text-brand-teal-600 font-semibold hover:underline" href="/particulier/zonnepanelen">

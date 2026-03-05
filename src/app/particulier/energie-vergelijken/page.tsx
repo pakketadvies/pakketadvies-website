@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { WaveDivider } from '@/components/ui/WaveDivider'
-import { ConsumerCompareWizard } from '@/components/particulier/ConsumerCompareWizard'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Energie vergelijken | PakketAdvies',
@@ -45,17 +44,7 @@ export const metadata: Metadata = {
 }
 
 export default function EnergieVergelijkenPage() {
-  return (
-    <div className="bg-white">
-      {/* Header / Hero */}
-      <section className="relative pt-28 pb-16 md:pt-32 md:pb-20 bg-gradient-to-br from-brand-navy-500 via-brand-navy-600 to-brand-teal-600 overflow-hidden">
-        <div className="container-custom relative z-10">
-          <ConsumerCompareWizard />
-        </div>
-        <WaveDivider variant="heroLow" />
-      </section>
-    </div>
-  )
+  redirect('/calculator')
 }
 
 

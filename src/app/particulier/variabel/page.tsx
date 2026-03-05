@@ -56,7 +56,7 @@ export default function VariabelPage() {
           </p>
           <div className="mt-7 flex flex-col sm:flex-row gap-3">
             <Link
-              href="/particulier/energie-vergelijken"
+              href="/calculator"
               className="inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold"
             >
               Vergelijk variabele contracten

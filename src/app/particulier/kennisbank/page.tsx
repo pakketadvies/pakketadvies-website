@@ -48,7 +48,7 @@ const items = [
   { href: '/particulier/zonnepanelen', title: 'Zonnepanelen: teruglevering en voorwaarden', tag: 'Zonnepanelen' },
   { href: '/particulier/verhuizen', title: 'Verhuizen: energie regelen zonder gedoe', tag: 'Verhuizen' },
   { href: '/particulier/faq', title: 'Veelgestelde vragen', tag: 'FAQ' },
-  { href: '/particulier/energie-vergelijken', title: 'Energie vergelijken: waar let je op?', tag: 'Vergelijken' },
+  { href: '/calculator', title: 'Energie vergelijken: waar let je op?', tag: 'Vergelijken' },
   { href: '/particulier/klantenservice', title: 'Hulp & klantenservice', tag: 'Service' },
 ]
 
@@ -68,7 +68,7 @@ export default function ParticulierKennisbankPage() {
             </p>
           </div>
           <Link
-            href="/particulier/energie-vergelijken"
+            href="/calculator"
             className="hidden md:inline-flex justify-center items-center px-6 py-3 bg-brand-teal-500 text-white rounded-xl font-semibold"
           >
             Vergelijk nu
