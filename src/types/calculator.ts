@@ -98,6 +98,12 @@ export interface ContractOptie {
   besparing?: number
   aanbevolen?: boolean
   aanbevolenSegment?: 'particulier_kleinverbruik' | 'particulier_grootverbruik' | 'zakelijk_kleinverbruik' | 'zakelijk_grootverbruik' | null
+  aanbevolenWaaromTitel?: string | null
+  aanbevolenWaaromIntro?: string | null
+  aanbevolenWaaromPunt1?: string | null
+  aanbevolenWaaromPunt2?: string | null
+  aanbevolenWaaromPunt3?: string | null
+  aanbevolenWaaromDisclaimer?: string | null
   isSegmentAanbevolen?: boolean
   populair?: boolean
   breakdown?: any // Kosten breakdown voor prijsdetails (optioneel)

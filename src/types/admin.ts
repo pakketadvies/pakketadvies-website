@@ -21,6 +21,12 @@ export interface Contract {
   actief: boolean
   aanbevolen: boolean
   aanbevolen_segment: 'particulier_kleinverbruik' | 'particulier_grootverbruik' | 'zakelijk_kleinverbruik' | 'zakelijk_grootverbruik' | null
+  aanbevolen_waarom_titel: string | null
+  aanbevolen_waarom_intro: string | null
+  aanbevolen_waarom_punt_1: string | null
+  aanbevolen_waarom_punt_2: string | null
+  aanbevolen_waarom_punt_3: string | null
+  aanbevolen_waarom_disclaimer: string | null
   populair: boolean
   volgorde: number
   zichtbaar_bij_teruglevering: boolean | null // NULL = altijd tonen, TRUE = alleen bij teruglevering, FALSE = alleen zonder teruglevering

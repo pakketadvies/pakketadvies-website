@@ -36,6 +36,12 @@ export async function POST(
       actief: false, // Set inactive by default for safety
       aanbevolen: false, // Reset flags
       aanbevolen_segment: null,
+      aanbevolen_waarom_titel: null,
+      aanbevolen_waarom_intro: null,
+      aanbevolen_waarom_punt_1: null,
+      aanbevolen_waarom_punt_2: null,
+      aanbevolen_waarom_punt_3: null,
+      aanbevolen_waarom_disclaimer: null,
       populair: false,
       volgorde: contract.volgorde,
       zichtbaar_bij_teruglevering: contract.zichtbaar_bij_teruglevering,

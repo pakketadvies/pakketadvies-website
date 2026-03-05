@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { CaretRight, Check, Star, Info } from '@phosphor-icons/react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import { useCalculatorStore } from '@/store/calculatorStore'
 import type { ContractOptie } from '@/types/calculator'
 import type { KostenBreakdown } from './ContractCard'
@@ -53,6 +54,7 @@ export function ConsumerContractRowCard({
   const { setSelectedContract, verbruik } = useCalculatorStore()
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isWhyOpen, setIsWhyOpen] = useState(false)
   const [breakdown, setBreakdown] = useState<KostenBreakdown | null>(contract.breakdown || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -149,6 +151,22 @@ export function ConsumerContractRowCard({
         ? `Vast • ${contract.looptijd} jaar`
         : 'Vast'
   const isSegmentAanbevolen = Boolean(contract.isSegmentAanbevolen)
+  const whyTitle = contract.aanbevolenWaaromTitel || 'Waarom deze keuze?'
+  const whyIntro = contract.aanbevolenWaaromIntro
+  const whyPoints = [
+    contract.aanbevolenWaaromPunt1,
+    contract.aanbevolenWaaromPunt2,
+    contract.aanbevolenWaaromPunt3,
+  ].filter((point): point is string => Boolean(point && point.trim()))
+  const whyDisclaimer = contract.aanbevolenWaaromDisclaimer
+  const fallbackPoints = [
+    `Geselecteerd voor jouw profiel (${verbruik?.addressType === 'zakelijk' ? 'zakelijk' : 'particulier'}).`,
+    contract.besparing && contract.besparing > 0
+      ? `Sterke besparing: ongeveer €${contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} per maand.`
+      : 'Concurrerende maandprijs voor jouw verbruiksniveau.',
+    `Betrouwbare beoordeling (${contract.rating} op basis van ${contract.aantalReviews} reviews).`,
+  ]
+  const visibleWhyPoints = whyPoints.length > 0 ? whyPoints : fallbackPoints
 
   return (
     <>
@@ -236,6 +254,16 @@ export function ConsumerContractRowCard({
                   </div>
                 </div>
               )}
+              {isSegmentAanbevolen && (
+                <button
+                  type="button"
+                  onClick={() => setIsWhyOpen(true)}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-brand-teal-700 bg-brand-teal-50 border border-brand-teal-200 hover:bg-brand-teal-100 transition-colors"
+                >
+                  <Info className="w-3.5 h-3.5" weight="fill" />
+                  Waarom deze keuze?
+                </button>
+              )}
             </div>
 
             {/* CTA Button - full width on mobile */}
@@ -313,6 +341,16 @@ export function ConsumerContractRowCard({
                   <span>€{contract.besparing.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mnd besparing</span>
                 </div>
               )}
+              {isSegmentAanbevolen && (
+                <button
+                  type="button"
+                  onClick={() => setIsWhyOpen(true)}
+                  className="inline-flex w-fit items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-brand-teal-700 bg-brand-teal-50 border border-brand-teal-200 hover:bg-brand-teal-100 transition-colors"
+                >
+                  <Info className="w-3.5 h-3.5" weight="fill" />
+                  Waarom deze keuze?
+                </button>
+              )}
             </div>
 
             {/* Right: CTA Button - gecentreerd verticaal */}
@@ -365,6 +403,41 @@ export function ConsumerContractRowCard({
         aansluitwaardeGas={aansluitwaardeGas}
         addressType={verbruik?.addressType}
       />
+      <Modal
+        isOpen={isWhyOpen}
+        onClose={() => setIsWhyOpen(false)}
+        title={whyTitle}
+        size="md"
+      >
+        <div className="space-y-4">
+          {whyIntro && (
+            <p className="text-sm md:text-base text-gray-700 leading-relaxed">
+              {whyIntro}
+            </p>
+          )}
+          {visibleWhyPoints.length > 0 && (
+            <ul className="space-y-2">
+              {visibleWhyPoints.map((point, index) => (
+                <li key={`${contract.id}-why-${index}`} className="flex items-start gap-2 text-sm md:text-base text-gray-700">
+                  <Check className="w-4 h-4 text-brand-teal-600 mt-0.5 flex-shrink-0" weight="bold" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {whyDisclaimer && (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs md:text-sm text-gray-600 leading-relaxed">
+              {whyDisclaimer}
+            </div>
+          )}
+          <Button
+            className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+            onClick={() => setIsWhyOpen(false)}
+          >
+            Duidelijk, bedankt
+          </Button>
+        </div>
+      </Modal>
     </>
   )
 }

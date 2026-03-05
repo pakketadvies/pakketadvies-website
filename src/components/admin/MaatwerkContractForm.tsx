@@ -26,6 +26,12 @@ const maatwerkContractSchema = z.object({
     'zakelijk_kleinverbruik',
     'zakelijk_grootverbruik',
   ]),
+  aanbevolen_waarom_titel: z.string().max(120, 'Maximaal 120 tekens').optional(),
+  aanbevolen_waarom_intro: z.string().max(280, 'Maximaal 280 tekens').optional(),
+  aanbevolen_waarom_punt_1: z.string().max(140, 'Maximaal 140 tekens').optional(),
+  aanbevolen_waarom_punt_2: z.string().max(140, 'Maximaal 140 tekens').optional(),
+  aanbevolen_waarom_punt_3: z.string().max(140, 'Maximaal 140 tekens').optional(),
+  aanbevolen_waarom_disclaimer: z.string().max(200, 'Maximaal 200 tekens').optional(),
   populair: z.boolean(),
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
@@ -112,6 +118,12 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
       actief: contract?.actief ?? true,
       aanbevolen: contract?.aanbevolen ?? false,
       aanbevolen_segment: (contract?.aanbevolen_segment as 'particulier_kleinverbruik' | 'particulier_grootverbruik' | 'zakelijk_kleinverbruik' | 'zakelijk_grootverbruik') || 'none',
+      aanbevolen_waarom_titel: contract?.aanbevolen_waarom_titel || '',
+      aanbevolen_waarom_intro: contract?.aanbevolen_waarom_intro || '',
+      aanbevolen_waarom_punt_1: contract?.aanbevolen_waarom_punt_1 || '',
+      aanbevolen_waarom_punt_2: contract?.aanbevolen_waarom_punt_2 || '',
+      aanbevolen_waarom_punt_3: contract?.aanbevolen_waarom_punt_3 || '',
+      aanbevolen_waarom_disclaimer: contract?.aanbevolen_waarom_disclaimer || '',
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
@@ -353,6 +365,12 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
         actief: data.actief,
         aanbevolen: data.aanbevolen,
         aanbevolen_segment: data.aanbevolen && data.aanbevolen_segment !== 'none' ? data.aanbevolen_segment : null,
+        aanbevolen_waarom_titel: data.aanbevolen ? (data.aanbevolen_waarom_titel?.trim() || null) : null,
+        aanbevolen_waarom_intro: data.aanbevolen ? (data.aanbevolen_waarom_intro?.trim() || null) : null,
+        aanbevolen_waarom_punt_1: data.aanbevolen ? (data.aanbevolen_waarom_punt_1?.trim() || null) : null,
+        aanbevolen_waarom_punt_2: data.aanbevolen ? (data.aanbevolen_waarom_punt_2?.trim() || null) : null,
+        aanbevolen_waarom_punt_3: data.aanbevolen ? (data.aanbevolen_waarom_punt_3?.trim() || null) : null,
+        aanbevolen_waarom_disclaimer: data.aanbevolen ? (data.aanbevolen_waarom_disclaimer?.trim() || null) : null,
         populair: data.populair,
         volgorde: data.volgorde,
         zichtbaar_bij_teruglevering: data.zichtbaar_bij_teruglevering,
@@ -1094,6 +1112,37 @@ export default function MaatwerkContractForm({ contract }: MaatwerkContractFormP
               <p className="text-xs text-gray-500">
                 Dit contract wordt bovenaan gepind voor dit klantsegment.
               </p>
+            </div>
+            <div className="ml-8 mt-3 space-y-3">
+              <label className="block text-xs font-semibold text-brand-navy-500">
+                Uitleg "Waarom aanbevolen?" (zichtbaar voor klant)
+              </label>
+              <input
+                {...register('aanbevolen_waarom_titel')}
+                type="text"
+                placeholder="Bijv. Beste match voor jouw verbruiksprofiel"
+                disabled={!watch('aanbevolen') || loading}
+                className="w-full max-w-2xl px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500"
+              />
+              <textarea
+                {...register('aanbevolen_waarom_intro')}
+                rows={2}
+                placeholder="Korte introductie waarom dit contract goed past."
+                disabled={!watch('aanbevolen') || loading}
+                className="w-full max-w-2xl px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all resize-none disabled:bg-gray-100 disabled:text-gray-500"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 max-w-4xl">
+                <input {...register('aanbevolen_waarom_punt_1')} type="text" placeholder="Punt 1 (bijv. beste prijs-zekerheid)" disabled={!watch('aanbevolen') || loading} className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500" />
+                <input {...register('aanbevolen_waarom_punt_2')} type="text" placeholder="Punt 2 (bijv. sterke maandbesparing)" disabled={!watch('aanbevolen') || loading} className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500" />
+                <input {...register('aanbevolen_waarom_punt_3')} type="text" placeholder="Punt 3 (bijv. goede voorwaarden)" disabled={!watch('aanbevolen') || loading} className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+              <input
+                {...register('aanbevolen_waarom_disclaimer')}
+                type="text"
+                placeholder="Optioneel: nuance/disclaimer"
+                disabled={!watch('aanbevolen') || loading}
+                className="w-full max-w-2xl px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500"
+              />
             </div>
 
             <div className="flex items-center gap-3">

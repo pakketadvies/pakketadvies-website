@@ -75,6 +75,12 @@ type RawContract = {
   zichtbaar_bij_teruglevering?: boolean | null
   target_audience?: 'particulier' | 'zakelijk' | 'both' | null
   aanbevolen_segment?: AanbevolenSegment | null
+  aanbevolen_waarom_titel?: string | null
+  aanbevolen_waarom_intro?: string | null
+  aanbevolen_waarom_punt_1?: string | null
+  aanbevolen_waarom_punt_2?: string | null
+  aanbevolen_waarom_punt_3?: string | null
+  aanbevolen_waarom_disclaimer?: string | null
 }
 
 function bepaalAanbevolenSegment(verbruikData?: VerbruikData | null): AanbevolenSegment | null {
@@ -448,6 +454,12 @@ const transformContractToOptie = (
     besparing,
     aanbevolen: contract.aanbevolen || false,
     aanbevolenSegment: contract.aanbevolen_segment || null,
+    aanbevolenWaaromTitel: contract.aanbevolen_waarom_titel || null,
+    aanbevolenWaaromIntro: contract.aanbevolen_waarom_intro || null,
+    aanbevolenWaaromPunt1: contract.aanbevolen_waarom_punt_1 || null,
+    aanbevolenWaaromPunt2: contract.aanbevolen_waarom_punt_2 || null,
+    aanbevolenWaaromPunt3: contract.aanbevolen_waarom_punt_3 || null,
+    aanbevolenWaaromDisclaimer: contract.aanbevolen_waarom_disclaimer || null,
     populair: contract.populair || false,
     breakdown: contract.breakdown || undefined,
     // NIEUW: voeg details_vast en details_dynamisch toe zodat ContractDetailsCard deze kan gebruiken
