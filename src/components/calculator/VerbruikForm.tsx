@@ -703,6 +703,19 @@ export function VerbruikForm() {
   }, [errors])
 
   const onSubmit = (data: VerbruikFormData) => {
+    const addressTypeForTracking: 'business' | 'consumer' | 'unknown' =
+      data.addressType === 'zakelijk'
+        ? 'business'
+        : data.addressType === 'particulier'
+        ? 'consumer'
+        : 'unknown'
+    const comparisonEventName =
+      addressTypeForTracking === 'business'
+        ? 'StartComparison_Business'
+        : addressTypeForTracking === 'consumer'
+        ? 'StartComparison_Consumer'
+        : 'StartComparison_Unknown'
+
     trackGAEvent('calculator_start', {
       has_gas: !geenGasaansluiting,
       has_solar: heeftZonnepanelen,
@@ -713,10 +726,12 @@ export function VerbruikForm() {
       content_name: 'Calculator Step 1',
       content_category: 'calculator',
       button_text: CTA_COPY.viewOffers,
+      address_type: addressTypeForTracking,
       path: '/calculator',
     })
-    trackCustom('StartComparison', {
+    trackCustom(comparisonEventName, {
       source: 'business_calculator_submit',
+      address_type: addressTypeForTracking,
       button_text: CTA_COPY.viewOffers,
       path: '/calculator',
     })
