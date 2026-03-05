@@ -168,6 +168,19 @@ export function ConsumerContractRowCard({
   ]
   const visibleWhyPoints = whyPoints.length > 0 ? whyPoints : fallbackPoints
 
+  const handleSelectContract = () => {
+    setSelectedContract(contract)
+    // Voeg berekende waardes toe aan URL voor mobiele compatibility
+    const params = new URLSearchParams({
+      stap: '2',
+      contract: contract.id,
+      maandbedrag: contract.maandbedrag.toString(),
+      jaarbedrag: contract.jaarbedrag.toString(),
+      besparing: (contract.besparing || 0).toString(),
+    })
+    router.push(`/calculator?${params.toString()}`)
+  }
+
   return (
     <>
       <Card className={`relative border shadow-sm hover:shadow-lg transition-all duration-200 ${
@@ -269,18 +282,7 @@ export function ConsumerContractRowCard({
             {/* CTA Button - full width on mobile */}
             <Button
               className="w-full bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-brand-teal-500/25 hover:shadow-xl hover:shadow-brand-teal-500/30 transition-all duration-200"
-              onClick={() => {
-                setSelectedContract(contract)
-                // Voeg berekende waardes toe aan URL voor mobiele compatibility
-                const params = new URLSearchParams({
-                  stap: '2',
-                  contract: contract.id,
-                  maandbedrag: contract.maandbedrag.toString(),
-                  jaarbedrag: contract.jaarbedrag.toString(),
-                  besparing: (contract.besparing || 0).toString(),
-                })
-                router.push(`/calculator?${params.toString()}`)
-              }}
+              onClick={handleSelectContract}
             >
               Aanmelden
             </Button>
@@ -357,18 +359,7 @@ export function ConsumerContractRowCard({
             <div className="flex items-center gap-3 flex-shrink-0 self-center">
               <Button
                 className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-semibold px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
-                onClick={() => {
-                  setSelectedContract(contract)
-                  // Voeg berekende waardes toe aan URL voor mobiele compatibility
-                  const params = new URLSearchParams({
-                    stap: '2',
-                    contract: contract.id,
-                    maandbedrag: contract.maandbedrag.toString(),
-                    jaarbedrag: contract.jaarbedrag.toString(),
-                    besparing: (contract.besparing || 0).toString(),
-                  })
-                  router.push(`/calculator?${params.toString()}`)
-                }}
+                onClick={handleSelectContract}
               >
                 Aanmelden
               </Button>
@@ -430,12 +421,21 @@ export function ConsumerContractRowCard({
               {whyDisclaimer}
             </div>
           )}
-          <Button
-            className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
-            onClick={() => setIsWhyOpen(false)}
-          >
-            Duidelijk, bedankt
-          </Button>
+          <div className="space-y-2">
+            <Button
+              className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"
+              onClick={handleSelectContract}
+            >
+              Ja, ik wil dit contract
+            </Button>
+            <button
+              type="button"
+              className="w-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => setIsWhyOpen(false)}
+            >
+              Toch terug naar overzicht
+            </button>
+          </div>
         </div>
       </Modal>
     </>
