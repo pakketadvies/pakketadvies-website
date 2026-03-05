@@ -28,12 +28,12 @@ const voordelen = [
   {
     icon: ShieldCheck,
     titel: '5-jarig vast contract',
-    beschrijving: 'Zekerheid en stabiliteit met een vast gastarieven voor de komende 5 jaar, beschermd tegen marktschommelingen.',
+    beschrijving: 'Zekerheid en stabiliteit met een vast gastarief voor de komende 5 jaar, beschermd tegen marktschommelingen.',
   },
   {
     icon: CheckCircle,
     titel: 'ETS-2 risico afgedekt',
-    beschrijving: 'Het enige 5-jarige vaste gastarieven dat het ETS-2 risico écht afdekt zonder verrassingen of bijbetalingen.',
+    beschrijving: 'Het enige 5-jarige vaste gastarief dat het ETS-2-risico echt afdekt zonder verrassingen of bijbetalingen.',
   },
   {
     icon: TrendUp,
@@ -183,8 +183,8 @@ export default function CleanEnergyETS2Page() {
               </div>
 
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                Het enige 5-jarige vaste gastarieven dat het{' '}
-                <span className="text-brand-teal-500">ETS-2 risico écht afdekt</span>
+                Het enige 5-jarige vaste gastarief dat het{' '}
+                <span className="text-brand-teal-500">ETS-2-risico echt afdekt</span>
               </h1>
               
               <p className="text-lg md:text-xl text-gray-300 mb-6">
