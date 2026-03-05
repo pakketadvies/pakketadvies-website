@@ -36,6 +36,16 @@ export default function ContractenList({ contracten }: ContractenListProps) {
     }
   }
 
+  const getSegmentLabel = (segment?: string | null) => {
+    switch (segment) {
+      case 'particulier_kleinverbruik': return 'Particulier - kleinverbruik'
+      case 'particulier_grootverbruik': return 'Particulier - grootverbruik'
+      case 'zakelijk_kleinverbruik': return 'Zakelijk - kleinverbruik'
+      case 'zakelijk_grootverbruik': return 'Zakelijk - grootverbruik'
+      default: return null
+    }
+  }
+
   return (
     <>
       {/* Filter Tabs - Werkende filters! */}
@@ -149,6 +159,11 @@ export default function ContractenList({ contracten }: ContractenListProps) {
                               Aanbevolen
                             </span>
                           )}
+                          {contract.aanbevolen && contract.aanbevolen_segment && getSegmentLabel(contract.aanbevolen_segment) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-navy-50 text-brand-navy-700 text-xs font-medium rounded-full">
+                              {getSegmentLabel(contract.aanbevolen_segment)}
+                            </span>
+                          )}
                           {contract.populair && (
                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-teal-50 text-brand-teal-700 text-xs font-medium rounded-full">
                               Populair
@@ -218,6 +233,11 @@ export default function ContractenList({ contracten }: ContractenListProps) {
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-teal-50 text-brand-teal-700 text-xs font-medium rounded-full">
                         <Star size={12} weight="fill" />
                         Aanbevolen
+                      </span>
+                    )}
+                    {contract.aanbevolen && contract.aanbevolen_segment && getSegmentLabel(contract.aanbevolen_segment) && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-navy-50 text-brand-navy-700 text-xs font-medium rounded-full">
+                        {getSegmentLabel(contract.aanbevolen_segment)}
                       </span>
                     )}
                     {contract.populair && (

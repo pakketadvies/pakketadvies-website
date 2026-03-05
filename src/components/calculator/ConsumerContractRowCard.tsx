@@ -148,10 +148,22 @@ export function ConsumerContractRowCard({
       : contract.looptijd
         ? `Vast • ${contract.looptijd} jaar`
         : 'Vast'
+  const isSegmentAanbevolen = Boolean(contract.isSegmentAanbevolen)
 
   return (
     <>
-      <Card className="relative border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200">
+      <Card className={`relative border shadow-sm hover:shadow-lg transition-all duration-200 ${
+        isSegmentAanbevolen
+          ? 'border-brand-teal-300 ring-2 ring-brand-teal-200 bg-gradient-to-r from-brand-teal-50/50 to-white'
+          : 'border-gray-200'
+      }`}>
+        {isSegmentAanbevolen && (
+          <div className="absolute -top-2 right-3 z-10">
+            <span className="inline-flex items-center rounded-full bg-brand-teal-600 text-white px-3 py-1 text-[11px] md:text-xs font-bold shadow-md">
+              Aanbevolen voor jouw profiel
+            </span>
+          </div>
+        )}
         {position !== undefined && (
           <div className="absolute -top-2.5 -left-2.5 z-10">
             <div className="w-8 h-8 bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 text-white rounded-full flex items-center justify-center shadow-lg font-bold text-sm border-2 border-white">

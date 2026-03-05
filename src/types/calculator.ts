@@ -97,6 +97,8 @@ export interface ContractOptie {
   bijzonderheden: string[]
   besparing?: number
   aanbevolen?: boolean
+  aanbevolenSegment?: 'particulier_kleinverbruik' | 'particulier_grootverbruik' | 'zakelijk_kleinverbruik' | 'zakelijk_grootverbruik' | null
+  isSegmentAanbevolen?: boolean
   populair?: boolean
   breakdown?: any // Kosten breakdown voor prijsdetails (optioneel)
   targetAudience?: 'particulier' | 'zakelijk' | 'both' // NIEUW: voor particulier/zakelijk filtering

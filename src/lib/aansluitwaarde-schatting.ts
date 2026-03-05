@@ -17,32 +17,32 @@ export interface AansluitwaardeSchatting {
  * Schat de elektrische aansluitwaarde op basis van jaarverbruik
  * 
  * Formule: Aansluitwaarde gebaseerd op piekvermogen en jaarverbruik
- * - Tot 5.000 kWh: 3x25A (kleinverbruik particulier)
- * - 5.001 - 15.000 kWh: 3x35A (klein zakelijk)
- * - 15.001 - 30.000 kWh: 3x50A (middelgroot zakelijk)
- * - 30.001 - 50.000 kWh: 3x63A (groot zakelijk)
- * - Boven 50.000 kWh: 3x80A (zeer groot zakelijk)
+ * - Tot 10.000 kWh: 3x25A (kleinverbruik particulier)
+ * - 10.001 - 30.000 kWh: 3x35A (klein zakelijk)
+ * - 30.001 - 55.000 kWh: 3x50A (middelgroot zakelijk)
+ * - 55.001 - 80.000 kWh: 3x63A (groot zakelijk)
+ * - Boven 80.000 kWh: 3x80A (zeer groot zakelijk)
  */
 export function schatElektriciteitAansluitwaarde(jaarverbruikKwh: number): {
   waarde: string
   toelichting: string
 } {
-  if (jaarverbruikKwh <= 5000) {
+  if (jaarverbruikKwh <= 10000) {
     return {
       waarde: '3x25A',
       toelichting: 'Kleinverbruik (huishoudelijk of zeer klein zakelijk)',
     }
-  } else if (jaarverbruikKwh <= 15000) {
+  } else if (jaarverbruikKwh <= 30000) {
     return {
       waarde: '3x35A',
       toelichting: 'Klein zakelijk (bijv. kantoor, kleine winkel)',
     }
-  } else if (jaarverbruikKwh <= 30000) {
+  } else if (jaarverbruikKwh <= 55000) {
     return {
       waarde: '3x50A',
       toelichting: 'Middelgroot zakelijk (bijv. horeca, productie)',
     }
-  } else if (jaarverbruikKwh <= 50000) {
+  } else if (jaarverbruikKwh <= 80000) {
     return {
       waarde: '3x63A',
       toelichting: 'Groot zakelijk (bijv. grote productie, winkelketen)',
@@ -59,21 +59,21 @@ export function schatElektriciteitAansluitwaarde(jaarverbruikKwh: number): {
  * Schat de gas aansluitwaarde op basis van jaarverbruik
  * 
  * Formule: Aansluitwaarde gebaseerd op m³ per jaar
- * - Tot 2.500 m³: G6 (kleinverbruik particulier)
- * - 2.501 - 10.000 m³: G10 (klein zakelijk)
- * - 10.001 - 25.000 m³: G16 (middelgroot zakelijk)
+ * - Tot 10.000 m³: G6 (kleinverbruik particulier)
+ * - 10.001 - 17.500 m³: G10 (klein zakelijk)
+ * - 17.501 - 25.000 m³: G16 (middelgroot zakelijk)
  * - Boven 25.000 m³: G25 (groot zakelijk)
  */
 export function schatGasAansluitwaarde(jaarverbruikM3: number): {
   waarde: string
   toelichting: string
 } {
-  if (jaarverbruikM3 <= 2500) {
+  if (jaarverbruikM3 <= 10000) {
     return {
       waarde: 'G6',
       toelichting: 'Kleinverbruik (huishoudelijk of zeer klein zakelijk)',
     }
-  } else if (jaarverbruikM3 <= 10000) {
+  } else if (jaarverbruikM3 <= 17500) {
     return {
       waarde: 'G10',
       toelichting: 'Klein zakelijk (bijv. kantoor met cv)',
@@ -130,7 +130,7 @@ export function schatAansluitwaarden(
   const elektriciteit = schatElektriciteitAansluitwaarde(elektriciteitJaar)
   const gas = gasJaar !== null && gasJaar > 0
     ? schatGasAansluitwaarde(gasJaar)
-    : { waarde: 'G6', toelichting: 'Standaard (kleinverbruik)' }
+    : { waarde: 'G6', toelichting: 'Fallback bij ontbrekend gasverbruik' }
 
   return {
     elektriciteit: elektriciteit.waarde,

@@ -22,6 +22,11 @@ import {
 import { trackGAEvent } from '@/lib/tracking/ga-events'
 
 type AudienceMode = 'business' | 'consumer'
+type AanbevolenSegment =
+  | 'particulier_kleinverbruik'
+  | 'particulier_grootverbruik'
+  | 'zakelijk_kleinverbruik'
+  | 'zakelijk_grootverbruik'
 
 type DetailData = {
   tarief_elektriciteit_enkel?: number
@@ -69,6 +74,16 @@ type RawContract = {
   breakdown?: unknown
   zichtbaar_bij_teruglevering?: boolean | null
   target_audience?: 'particulier' | 'zakelijk' | 'both' | null
+  aanbevolen_segment?: AanbevolenSegment | null
+}
+
+function bepaalAanbevolenSegment(verbruikData?: VerbruikData | null): AanbevolenSegment | null {
+  if (!verbruikData?.addressType) return null
+  const isGroot = isGrootverbruik(verbruikData.aansluitwaardeElektriciteit, verbruikData.aansluitwaardeGas)
+  if (verbruikData.addressType === 'particulier') {
+    return isGroot ? 'particulier_grootverbruik' : 'particulier_kleinverbruik'
+  }
+  return isGroot ? 'zakelijk_grootverbruik' : 'zakelijk_kleinverbruik'
 }
 
 function getStartPath(audience: AudienceMode) {
@@ -432,6 +447,7 @@ const transformContractToOptie = (
     bijzonderheden: details.bijzonderheden || [],
     besparing,
     aanbevolen: contract.aanbevolen || false,
+    aanbevolenSegment: contract.aanbevolen_segment || null,
     populair: contract.populair || false,
     breakdown: contract.breakdown || undefined,
     // NIEUW: voeg details_vast en details_dynamisch toe zodat ContractDetailsCard deze kan gebruiken
@@ -699,10 +715,20 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
           )
         )
         .filter((c): c is ContractOptie => c !== null)
+        .map((c) => ({
+          ...c,
+          isSegmentAanbevolen: false,
+        }))
 
-      setResultaten(transformed)
-      setFilteredResultaten(transformed)
-      setResultatenInStore(transformed)
+      const currentSegment = bepaalAanbevolenSegment(data)
+      const transformedMetSegment = transformed.map((c) => ({
+        ...c,
+        isSegmentAanbevolen: Boolean(c.aanbevolen && currentSegment && c.aanbevolenSegment === currentSegment),
+      }))
+
+      setResultaten(transformedMetSegment)
+      setFilteredResultaten(transformedMetSegment)
+      setResultatenInStore(transformedMetSegment)
       setLoading(false)
     } catch (err) {
       console.error('Error loading resultaten:', err)
@@ -766,22 +792,27 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
     filtered = filtered.filter((r) => r.maandbedrag <= filters.maxPrijs)
     filtered = filtered.filter((r) => r.rating >= filters.minRating)
 
-    switch (sortBy) {
-      case 'prijs-laag':
-        filtered.sort((a, b) => a.maandbedrag - b.maandbedrag)
-        break
-      case 'prijs-hoog':
-        filtered.sort((a, b) => b.maandbedrag - a.maandbedrag)
-        break
-      case 'besparing':
-        filtered.sort((a, b) => (b.besparing || 0) - (a.besparing || 0))
-        break
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
+    const compareContracts = (a: ContractOptie, b: ContractOptie) => {
+      switch (sortBy) {
+        case 'prijs-laag':
+          return a.maandbedrag - b.maandbedrag
+        case 'prijs-hoog':
+          return b.maandbedrag - a.maandbedrag
+        case 'besparing':
+          return (b.besparing || 0) - (a.besparing || 0)
+        case 'rating':
+          return b.rating - a.rating
+        default:
+          return 0
+      }
     }
 
-    setFilteredResultaten(filtered)
+    filtered.sort(compareContracts)
+
+    // Segment-aanbevolen contracten altijd bovenaan tonen, maar intern wel op huidige sortering houden.
+    const segmentAanbevolen = filtered.filter((r) => r.isSegmentAanbevolen)
+    const overige = filtered.filter((r) => !r.isSegmentAanbevolen)
+    setFilteredResultaten([...segmentAanbevolen, ...overige])
   }, [resultaten, filters, sortBy, verbruik?.addressType])
 
   useEffect(() => {
@@ -799,6 +830,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
     localStorage.removeItem('quickcalc-data')
     router.push(startPath)
   }
+
+  const aanbevolenVoorProfiel = filteredResultaten.find((r) => r.isSegmentAanbevolen)
 
   if (loading) {
     return (
@@ -1038,6 +1071,16 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
                 {/* Results list */}
                 <section className="space-y-4 min-w-0">
+                  {aanbevolenVoorProfiel && (
+                    <div className="rounded-2xl border border-brand-teal-200 bg-gradient-to-r from-brand-teal-50/80 to-white px-4 py-3 md:px-5 md:py-4">
+                      <p className="text-sm md:text-base font-semibold text-brand-navy-600">
+                        Aanbevolen voor jouw profiel: <span className="text-brand-teal-700">{aanbevolenVoorProfiel.leverancier.naam}</span>
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-600 mt-1">
+                        Deze match is geselecteerd voor jouw type adres en verbruik, en staat daarom bovenaan.
+                      </p>
+                    </div>
+                  )}
                   {filteredResultaten.length === 0 ? (
                     <div className="bg-white rounded-2xl p-10 text-center border border-gray-200">
                       <p className="text-gray-600 mb-4">Geen contracten gevonden met deze filters</p>

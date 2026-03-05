@@ -35,6 +35,7 @@ export async function POST(
       beschrijving: contract.beschrijving,
       actief: false, // Set inactive by default for safety
       aanbevolen: false, // Reset flags
+      aanbevolen_segment: null,
       populair: false,
       volgorde: contract.volgorde,
       zichtbaar_bij_teruglevering: contract.zichtbaar_bij_teruglevering,

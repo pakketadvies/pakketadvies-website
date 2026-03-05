@@ -17,6 +17,13 @@ const dynamischContractSchema = z.object({
   beschrijving: z.string().optional(),
   actief: z.boolean(),
   aanbevolen: z.boolean(),
+  aanbevolen_segment: z.enum([
+    'none',
+    'particulier_kleinverbruik',
+    'particulier_grootverbruik',
+    'zakelijk_kleinverbruik',
+    'zakelijk_grootverbruik',
+  ]),
   populair: z.boolean(),
   volgorde: z.number().int().min(0),
   zichtbaar_bij_teruglevering: z.boolean().nullable(), // NULL = altijd, TRUE = alleen bij teruglevering, FALSE = alleen zonder
@@ -78,6 +85,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<DynamischContractFormData>({
     resolver: zodResolver(dynamischContractSchema),
@@ -87,6 +95,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
       beschrijving: contract?.beschrijving || '',
       actief: contract?.actief ?? true,
       aanbevolen: contract?.aanbevolen ?? false,
+      aanbevolen_segment: (contract?.aanbevolen_segment as 'particulier_kleinverbruik' | 'particulier_grootverbruik' | 'zakelijk_kleinverbruik' | 'zakelijk_grootverbruik') || 'none',
       populair: contract?.populair ?? false,
       volgorde: contract?.volgorde || 0,
       zichtbaar_bij_teruglevering: contract?.zichtbaar_bij_teruglevering ?? null,
@@ -309,6 +318,7 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
         beschrijving: data.beschrijving || null,
         actief: data.actief,
         aanbevolen: data.aanbevolen,
+        aanbevolen_segment: data.aanbevolen && data.aanbevolen_segment !== 'none' ? data.aanbevolen_segment : null,
         populair: data.populair,
         volgorde: data.volgorde,
         zichtbaar_bij_teruglevering: data.zichtbaar_bij_teruglevering,
@@ -689,6 +699,25 @@ export default function DynamischContractForm({ contract }: DynamischContractFor
             <div className="flex items-center gap-3">
               <input {...register('aanbevolen')} type="checkbox" id="aanbevolen_dyn" className="w-5 h-5 rounded border-2 border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500 focus:ring-2" disabled={loading} />
               <label htmlFor="aanbevolen_dyn" className="text-sm font-medium text-brand-navy-500 cursor-pointer">Markeer als aanbevolen contract</label>
+            </div>
+            <div className="ml-8 space-y-2">
+              <label className="block text-xs font-semibold text-brand-navy-500">
+                Aanbevolen segment
+              </label>
+              <select
+                {...register('aanbevolen_segment')}
+                disabled={!watch('aanbevolen') || loading}
+                className="w-full max-w-md px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-brand-teal-500 focus:ring-2 focus:ring-brand-teal-500/20 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500"
+              >
+                <option value="none">Geen segment (niet pinnen)</option>
+                <option value="particulier_kleinverbruik">Particulier - kleinverbruik</option>
+                <option value="particulier_grootverbruik">Particulier - grootverbruik</option>
+                <option value="zakelijk_kleinverbruik">Zakelijk - kleinverbruik</option>
+                <option value="zakelijk_grootverbruik">Zakelijk - grootverbruik</option>
+              </select>
+              <p className="text-xs text-gray-500">
+                Dit contract wordt bovenaan gepind voor dit klantsegment.
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
