@@ -14,13 +14,15 @@ interface TimedLeadCapturePopupProps {
   pathname: string
 }
 
-const POPUP_DELAY_MS = 20000
+const DEFAULT_POPUP_DELAY_MS = 20000
+const HOMEPAGE_POPUP_DELAY_MS = 12000
 
 export function TimedLeadCapturePopup({ pathname }: TimedLeadCapturePopupProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const flow = useMemo(() => inferLeadFlow(pathname), [pathname])
   const shouldSkipRoute = pathname.startsWith('/admin') || pathname.startsWith('/contract-viewer')
+  const popupDelayMs = pathname === '/' ? HOMEPAGE_POPUP_DELAY_MS : DEFAULT_POPUP_DELAY_MS
 
   useEffect(() => {
     if (shouldSkipRoute || hasRecentLeadCapture(30) || wasPopupRecentlyDismissed(24)) {
@@ -29,10 +31,10 @@ export function TimedLeadCapturePopup({ pathname }: TimedLeadCapturePopupProps) 
 
     const timer = window.setTimeout(() => {
       setIsOpen(true)
-    }, POPUP_DELAY_MS)
+    }, popupDelayMs)
 
     return () => window.clearTimeout(timer)
-  }, [pathname, shouldSkipRoute])
+  }, [pathname, shouldSkipRoute, popupDelayMs])
 
   const closePopup = () => {
     setIsOpen(false)

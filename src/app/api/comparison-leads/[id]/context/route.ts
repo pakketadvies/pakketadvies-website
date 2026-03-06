@@ -30,10 +30,10 @@ function scoreExtraContext(extraContext: z.infer<typeof extraContextSchema>) {
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     if (!id) {
       return NextResponse.json({ success: false, error: 'Lead id ontbreekt.' }, { status: 400 })
     }

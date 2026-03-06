@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Storefront, Buildings, Factory, Plant, Hospital, Briefcase, ArrowRight } from '@phosphor-icons/react'
+import { trackGAEvent } from '@/lib/tracking/ga-events'
 
 export function Sectors() {
   const sectors = [
@@ -33,6 +34,15 @@ export function Sectors() {
       href: '/sectoren/vastgoed'
     },
     {
+      id: 'vve',
+      icon: Buildings,
+      title: 'VvE',
+      description: 'Verenigingen van eigenaren',
+      highlights: ['Collectieve voorzieningen en algemene ruimtes', 'Stabiele kosten voor bewoners'],
+      color: 'from-brand-purple-400 to-brand-purple-500',
+      href: '/sectoren/vve'
+    },
+    {
       id: 'industrie',
       icon: Factory,
       title: 'Industrie',
@@ -40,6 +50,15 @@ export function Sectors() {
       highlights: ['Grootverbruik', 'Volume voordeel'],
       color: 'from-brand-navy-500 to-brand-navy-600',
       href: '/sectoren/industrie'
+    },
+    {
+      id: 'zorg',
+      icon: Hospital,
+      title: 'Zorg',
+      description: 'Praktijken en zorglocaties',
+      highlights: ['Leveringszekerheid voor cruciale processen', 'Grip op verbruik en budget'],
+      color: 'from-brand-teal-500 to-brand-navy-500',
+      href: '/sectoren/zorg'
     },
     {
       id: 'agrarisch',
@@ -85,11 +104,17 @@ export function Sectors() {
               <Link
                 key={sector.id}
                 href={sector.href}
+                onClick={() =>
+                  trackGAEvent('business_segment_card_click', {
+                    segment: sector.id,
+                    page: 'homepage_sectors',
+                  })
+                }
                 className="group block bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300"
               >
                 <div className={`h-3 bg-gradient-to-r ${sector.color}`} />
                 
-                <div className="p-4 md:p-6">
+                <div className="p-4 md:p-6 min-h-[280px] md:min-h-[320px] flex flex-col">
                   {/* Icon */}
                   <div className={`w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br ${sector.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <Icon weight="duotone" className="w-6 h-6 md:w-7 md:h-7 text-white" />
@@ -106,13 +131,13 @@ export function Sectors() {
                     {sector.highlights.map((highlight, i) => (
                       <li key={i} className="flex items-center gap-2 text-xs md:text-sm text-gray-700">
                         <div className="w-1.5 h-1.5 bg-brand-teal-500 rounded-full flex-shrink-0" />
-                        <span>{highlight}</span>
+                        <span className="leading-tight">{highlight}</span>
                       </li>
                     ))}
                   </ul>
 
                   {/* Arrow */}
-                  <div className="flex items-center gap-2 text-brand-teal-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                  <div className="mt-auto flex items-center gap-2 text-brand-teal-600 font-semibold text-sm group-hover:gap-3 transition-all">
                     <span>Meer informatie</span>
                     <ArrowRight weight="bold" className="w-4 h-4" />
                   </div>

@@ -42,15 +42,19 @@ async function getLeadStats() {
       inline: 0,
       why: 0,
       converted: 0,
+      enriched: 0,
+      highPriority: 0,
     }
   }
 
-  const [total, popup, inline, why, converted] = await Promise.all([
+  const [total, popup, inline, why, converted, enriched, highPriority] = await Promise.all([
     supabase.from('comparison_leads').select('*', { count: 'exact', head: true }),
     supabase.from('comparison_leads').select('*', { count: 'exact', head: true }).eq('source', 'timed_popup'),
     supabase.from('comparison_leads').select('*', { count: 'exact', head: true }).eq('source', 'results_inline'),
     supabase.from('comparison_leads').select('*', { count: 'exact', head: true }).eq('source', 'why_modal'),
     supabase.from('comparison_leads').select('*', { count: 'exact', head: true }).eq('status', 'converted'),
+    supabase.from('comparison_leads').select('*', { count: 'exact', head: true }).gt('profile_completion', 0),
+    supabase.from('comparison_leads').select('*', { count: 'exact', head: true }).eq('followup_priority', 'high'),
   ])
 
   return {
@@ -59,6 +63,8 @@ async function getLeadStats() {
     inline: inline.count || 0,
     why: why.count || 0,
     converted: converted.count || 0,
+    enriched: enriched.count || 0,
+    highPriority: highPriority.count || 0,
   }
 }
 
@@ -75,7 +81,7 @@ export default async function VergelijkerLeadsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-7 gap-4">
           <div className="bg-white rounded-xl border-2 border-gray-200 p-4">
             <p className="text-sm text-gray-600 mb-1">Totaal</p>
             <p className="text-2xl font-bold text-brand-navy-500">{stats.total}</p>
@@ -95,6 +101,14 @@ export default async function VergelijkerLeadsPage() {
           <div className="bg-white rounded-xl border-2 border-green-200 p-4">
             <p className="text-sm text-gray-600 mb-1">Geconverteerd</p>
             <p className="text-2xl font-bold text-green-700">{stats.converted}</p>
+          </div>
+          <div className="bg-white rounded-xl border-2 border-blue-200 p-4">
+            <p className="text-sm text-gray-600 mb-1">Verrijkt</p>
+            <p className="text-2xl font-bold text-blue-700">{stats.enriched}</p>
+          </div>
+          <div className="bg-white rounded-xl border-2 border-red-200 p-4">
+            <p className="text-sm text-gray-600 mb-1">Hoog prioriteit</p>
+            <p className="text-2xl font-bold text-red-700">{stats.highPriority}</p>
           </div>
         </div>
 

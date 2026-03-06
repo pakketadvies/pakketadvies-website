@@ -38,6 +38,17 @@ export default function SectorenPage() {
       href: '/sectoren/vastgoed'
     },
     {
+      id: 'vve',
+      icon: Buildings,
+      title: 'VvE',
+      description: 'Verenigingen van eigenaren',
+      challenges: ['Collectieve ruimtes', 'Budget voor bewoners', 'Meerdere voorzieningen'],
+      solutions: ['Collectief energiebeheer', 'Stabiele maandlasten', 'Duidelijke rapportage'],
+      color: 'from-brand-purple-400 to-brand-purple-500',
+      typicalUsage: '25.000 - 180.000 kWh/jaar',
+      href: '/sectoren/vve'
+    },
+    {
       id: 'industrie',
       icon: Factory,
       title: 'Industrie',
@@ -47,6 +58,17 @@ export default function SectorenPage() {
       color: 'from-brand-navy-500 to-brand-navy-600',
       typicalUsage: '200.000+ kWh/jaar',
       href: '/sectoren/industrie'
+    },
+    {
+      id: 'zorg',
+      icon: Hospital,
+      title: 'Zorg',
+      description: 'Praktijken, klinieken en zorglocaties',
+      challenges: ['Continuiteit cruciaal', 'Strak kostenbeheer', 'Lange openingstijden'],
+      solutions: ['Leveringszekerheid', 'Voorspelbare tarieven', 'Verbruiksinzicht per locatie'],
+      color: 'from-brand-teal-500 to-brand-navy-500',
+      typicalUsage: '40.000 - 250.000 kWh/jaar',
+      href: '/sectoren/zorg'
     },
     {
       id: 'agrarisch',
