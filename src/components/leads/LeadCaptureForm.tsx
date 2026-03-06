@@ -134,7 +134,7 @@ export function LeadCaptureForm({
           Wil je een nog scherper voorstel? (optioneel)
         </p>
         <p className="text-sm text-gray-700">
-          Met 3 extra gegevens maken we je aanbod nauwkeuriger. Kost ongeveer 20 seconden.
+          Met een paar extra gegevens maken we je aanbod nauwkeuriger. Kost ongeveer 20 seconden.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
