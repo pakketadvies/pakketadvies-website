@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type {
   ComparisonLead,
   ComparisonLeadPriority,
@@ -70,15 +71,18 @@ const gasRangeLabels: Record<string, string> = {
 }
 
 export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsListProps) {
+  const router = useRouter()
+  const [leads, setLeads] = useState(initialLeads)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | ComparisonLeadStatus>('all')
   const [sourceFilter, setSourceFilter] = useState<'all' | ComparisonLead['source']>('all')
   const [priorityFilter, setPriorityFilter] = useState<'all' | ComparisonLeadPriority>('all')
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return initialLeads.filter((lead) => {
+    return leads.filter((lead) => {
       if (statusFilter !== 'all' && lead.status !== statusFilter) return false
       if (sourceFilter !== 'all' && lead.source !== sourceFilter) return false
       if (priorityFilter !== 'all' && lead.followup_priority !== priorityFilter) return false
@@ -91,12 +95,41 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
         (lead.extra_context?.note || '').toLowerCase().includes(q)
       )
     })
-  }, [initialLeads, query, statusFilter, sourceFilter, priorityFilter])
+  }, [leads, query, statusFilter, sourceFilter, priorityFilter])
 
   const selectedLead = useMemo(
     () => filtered.find((lead) => lead.id === selectedLeadId) || null,
     [filtered, selectedLeadId]
   )
+
+  const handleDeleteLead = async (leadId: string, email: string) => {
+    const confirmDelete = window.confirm(
+      `Weet je zeker dat je lead ${email} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`
+    )
+    if (!confirmDelete) return
+
+    try {
+      setDeletingLeadId(leadId)
+      const response = await fetch(`/api/admin/comparison-leads/${leadId}`, {
+        method: 'DELETE',
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(result.error || 'Verwijderen van lead mislukt')
+      }
+
+      setLeads((current) => current.filter((lead) => lead.id !== leadId))
+      if (selectedLeadId === leadId) {
+        setSelectedLeadId(null)
+      }
+      router.refresh()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Onbekende fout'
+      window.alert(`Lead kon niet verwijderd worden: ${message}`)
+    } finally {
+      setDeletingLeadId(null)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -218,8 +251,9 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
                     <td className="px-4 py-3">
                       <button
                         type="button"
+                        disabled={deletingLeadId === lead.id}
                         onClick={() => setSelectedLeadId(isSelected ? null : lead.id)}
-                        className="text-xs font-semibold text-brand-teal-700 hover:text-brand-teal-800 underline underline-offset-2"
+                        className="text-xs font-semibold text-brand-teal-700 hover:text-brand-teal-800 underline underline-offset-2 disabled:opacity-50"
                       >
                         {isSelected ? 'Verberg' : 'Bekijk'}
                       </button>
@@ -272,6 +306,17 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
                   {selectedLead.extra_context?.note || 'Geen extra notitie ingevuld.'}
                 </p>
               </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => handleDeleteLead(selectedLead.id, selectedLead.email)}
+                disabled={deletingLeadId === selectedLead.id}
+                className="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
+              >
+                {deletingLeadId === selectedLead.id ? 'Verwijderen...' : 'Lead verwijderen'}
+              </button>
             </div>
           </div>
         )}
