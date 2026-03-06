@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Modal } from '@/components/ui/Modal'
 import type {
   ComparisonLead,
   ComparisonLeadPriority,
@@ -11,6 +12,39 @@ import type {
 interface ComparisonLeadsListProps {
   initialLeads: ComparisonLead[]
 }
+
+const exportColumns = [
+  { key: 'created_at', label: 'Datum aangemaakt' },
+  { key: 'email', label: 'E-mailadres' },
+  { key: 'phone', label: 'Telefoonnummer' },
+  { key: 'flow', label: 'Flow' },
+  { key: 'source', label: 'Bron' },
+  { key: 'status', label: 'Status' },
+  { key: 'followup_priority', label: 'Prioriteit' },
+  { key: 'profile_completion', label: 'Compleetheid (%)' },
+  { key: 'page_path', label: 'Pagina pad' },
+  { key: 'referrer', label: 'Referrer' },
+  { key: 'utm_source', label: 'UTM source' },
+  { key: 'utm_medium', label: 'UTM medium' },
+  { key: 'utm_campaign', label: 'UTM campagne' },
+  { key: 'utm_content', label: 'UTM content' },
+  { key: 'utm_term', label: 'UTM term' },
+  { key: 'fbclid', label: 'fbclid' },
+  { key: 'gclid', label: 'gclid' },
+  { key: 'session_id', label: 'Sessie ID' },
+  { key: 'consent_contact', label: 'Contact consent' },
+  { key: 'consent_text', label: 'Consent tekst' },
+  { key: 'location_type', label: 'Locatietype' },
+  { key: 'electricity_usage_range', label: 'Stroom range' },
+  { key: 'gas_usage_range', label: 'Gas range' },
+  { key: 'switch_moment', label: 'Overstapmoment' },
+  { key: 'note', label: 'Notitie' },
+  { key: 'converted_aanvraag_id', label: 'Geconverteerde aanvraag ID' },
+  { key: 'notes_internal', label: 'Interne notities' },
+  { key: 'updated_at', label: 'Laatst bijgewerkt' },
+] as const
+
+type LeadExportColumn = (typeof exportColumns)[number]['key']
 
 const statusLabels: Record<ComparisonLeadStatus, string> = {
   new: 'Nieuw',
@@ -80,6 +114,11 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
   const [exportingFormat, setExportingFormat] = useState<'csv' | 'excel' | null>(null)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [pendingExportFormat, setPendingExportFormat] = useState<'csv' | 'excel' | null>(null)
+  const [selectedExportColumns, setSelectedExportColumns] = useState<LeadExportColumn[]>(
+    exportColumns.map((column) => column.key)
+  )
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -132,10 +171,31 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
     }
   }
 
-  const handleExport = async (format: 'csv' | 'excel') => {
+  const openExportModal = (format: 'csv' | 'excel') => {
+    setPendingExportFormat(format)
+    setIsExportModalOpen(true)
+  }
+
+  const toggleExportColumn = (column: LeadExportColumn) => {
+    setSelectedExportColumns((current) =>
+      current.includes(column) ? current.filter((item) => item !== column) : [...current, column]
+    )
+  }
+
+  const handleExport = async () => {
+    if (!pendingExportFormat) return
+    if (selectedExportColumns.length === 0) {
+      window.alert('Selecteer minimaal 1 kolom voor export.')
+      return
+    }
+
     try {
-      setExportingFormat(format)
-      const response = await fetch(`/api/admin/comparison-leads/export?format=${format}`, {
+      setExportingFormat(pendingExportFormat)
+      const params = new URLSearchParams({
+        format: pendingExportFormat,
+        columns: selectedExportColumns.join(','),
+      })
+      const response = await fetch(`/api/admin/comparison-leads/export?${params.toString()}`, {
         method: 'GET',
       })
 
@@ -147,7 +207,8 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
       const blob = await response.blob()
       const disposition = response.headers.get('content-disposition') || ''
       const filenameMatch = disposition.match(/filename="(.+)"/i)
-      const filename = filenameMatch?.[1] || `vergelijker-leads.${format === 'excel' ? 'xls' : 'csv'}`
+      const filename =
+        filenameMatch?.[1] || `vergelijker-leads.${pendingExportFormat === 'excel' ? 'xls' : 'csv'}`
 
       const url = window.URL.createObjectURL(blob)
       const anchor = document.createElement('a')
@@ -157,6 +218,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
       anchor.click()
       anchor.remove()
       window.URL.revokeObjectURL(url)
+      setIsExportModalOpen(false)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Onbekende fout'
       window.alert(`Lead export mislukt: ${message}`)
@@ -171,7 +233,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
         <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => handleExport('csv')}
+            onClick={() => openExportModal('csv')}
             disabled={exportingFormat !== null}
             className="inline-flex items-center rounded-lg border border-brand-teal-200 bg-brand-teal-50 px-3 py-2 text-xs font-semibold text-brand-teal-700 hover:bg-brand-teal-100 disabled:opacity-50"
           >
@@ -179,7 +241,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
           </button>
           <button
             type="button"
-            onClick={() => handleExport('excel')}
+            onClick={() => openExportModal('excel')}
             disabled={exportingFormat !== null}
             className="inline-flex items-center rounded-lg border border-brand-navy-200 bg-brand-navy-50 px-3 py-2 text-xs font-semibold text-brand-navy-700 hover:bg-brand-navy-100 disabled:opacity-50"
           >
@@ -380,6 +442,73 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        title={`Kies kolommen voor ${pendingExportFormat === 'excel' ? 'Excel' : 'CSV'} export`}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Selecteer welke kolommen je wilt meenemen in de export. Minimaal 1 kolom is verplicht.
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedExportColumns(exportColumns.map((column) => column.key))}
+              className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Alles selecteren
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedExportColumns([])}
+              className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Alles uitzetten
+            </button>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 max-h-[45vh] overflow-y-auto pr-1">
+            {exportColumns.map((column) => (
+              <label
+                key={column.key}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedExportColumns.includes(column.key)}
+                  onChange={() => toggleExportColumn(column.key)}
+                  className="h-4 w-4 rounded border-gray-300 text-brand-teal-600 focus:ring-brand-teal-500"
+                />
+                <span>{column.label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsExportModalOpen(false)}
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Annuleren
+            </button>
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={exportingFormat !== null || selectedExportColumns.length === 0}
+              className="rounded-lg bg-brand-teal-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-600 disabled:opacity-50"
+            >
+              {exportingFormat
+                ? `${pendingExportFormat === 'excel' ? 'Excel' : 'CSV'} exporteren...`
+                : `Exporteer ${pendingExportFormat === 'excel' ? 'Excel' : 'CSV'}`}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

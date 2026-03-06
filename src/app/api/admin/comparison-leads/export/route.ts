@@ -2,6 +2,41 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import type { ComparisonLead } from '@/types/comparison-leads'
 
+const EXPORT_COLUMN_KEYS = [
+  'id',
+  'created_at',
+  'email',
+  'phone',
+  'flow',
+  'source',
+  'status',
+  'followup_priority',
+  'profile_completion',
+  'page_path',
+  'referrer',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+  'fbclid',
+  'gclid',
+  'session_id',
+  'consent_contact',
+  'consent_text',
+  'location_type',
+  'electricity_usage_range',
+  'gas_usage_range',
+  'switch_moment',
+  'note',
+  'converted_aanvraag_id',
+  'notes_internal',
+  'updated_at',
+] as const
+
+type LeadExportColumn = (typeof EXPORT_COLUMN_KEYS)[number]
+type FlattenedLeadRow = Record<LeadExportColumn, string | number>
+
 async function requireAdmin() {
   const supabase = await createClient()
   const {
@@ -32,7 +67,7 @@ function csvEscape(value: unknown) {
   return `"${str}"`
 }
 
-function flattenLeadForExport(lead: ComparisonLead) {
+function flattenLeadForExport(lead: ComparisonLead): FlattenedLeadRow {
   return {
     id: lead.id,
     created_at: lead.created_at,
@@ -66,17 +101,31 @@ function flattenLeadForExport(lead: ComparisonLead) {
   }
 }
 
-function buildCsv(leads: ComparisonLead[]) {
+function parseRequestedColumns(rawColumns: string | null): LeadExportColumn[] {
+  if (!rawColumns) return [...EXPORT_COLUMN_KEYS]
+
+  const requested = rawColumns
+    .split(',')
+    .map((column) => column.trim())
+    .filter(Boolean)
+
+  const requestedSet = new Set(requested)
+  const validColumns = EXPORT_COLUMN_KEYS.filter((column) => requestedSet.has(column))
+
+  return validColumns.length > 0 ? validColumns : [...EXPORT_COLUMN_KEYS]
+}
+
+function buildCsv(leads: ComparisonLead[], columns: LeadExportColumn[]) {
   const rows = leads.map(flattenLeadForExport)
-  const headers = Object.keys(rows[0] || flattenLeadForExport({} as ComparisonLead))
+  const headers = columns
   const headerLine = headers.map(csvEscape).join(',')
   const lines = rows.map((row) => headers.map((header) => csvEscape(row[header as keyof typeof row])).join(','))
   return [headerLine, ...lines].join('\n')
 }
 
-function buildExcelHtml(leads: ComparisonLead[]) {
+function buildExcelHtml(leads: ComparisonLead[], columns: LeadExportColumn[]) {
   const rows = leads.map(flattenLeadForExport)
-  const headers = Object.keys(rows[0] || flattenLeadForExport({} as ComparisonLead))
+  const headers = columns
   const headerCells = headers.map((header) => `<th>${header}</th>`).join('')
   const bodyRows = rows
     .map((row) => {
@@ -146,11 +195,12 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url)
     const format = url.searchParams.get('format') === 'excel' ? 'excel' : 'csv'
+    const columns = parseRequestedColumns(url.searchParams.get('columns'))
     const leads = await fetchAllComparisonLeads()
 
     const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
     if (format === 'excel') {
-      const html = buildExcelHtml(leads)
+      const html = buildExcelHtml(leads, columns)
       return new NextResponse(html, {
         status: 200,
         headers: {
@@ -161,7 +211,7 @@ export async function GET(request: Request) {
       })
     }
 
-    const csv = buildCsv(leads)
+    const csv = buildCsv(leads, columns)
     return new NextResponse(`\uFEFF${csv}`, {
       status: 200,
       headers: {
