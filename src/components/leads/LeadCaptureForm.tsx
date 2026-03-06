@@ -291,7 +291,7 @@ export function LeadCaptureForm({
         <Input
           type="email"
           label="E-mailadres"
-          placeholder="naam@bedrijf.nl"
+          placeholder="naam@voorbeeld.nl"
           autoComplete="email"
           required
           value={email}

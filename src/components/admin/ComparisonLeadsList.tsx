@@ -79,6 +79,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
   const [priorityFilter, setPriorityFilter] = useState<'all' | ComparisonLeadPriority>('all')
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
+  const [exportingFormat, setExportingFormat] = useState<'csv' | 'excel' | null>(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -131,9 +132,61 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
     }
   }
 
+  const handleExport = async (format: 'csv' | 'excel') => {
+    try {
+      setExportingFormat(format)
+      const response = await fetch(`/api/admin/comparison-leads/export?format=${format}`, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}))
+        throw new Error(result.error || 'Exporteren mislukt')
+      }
+
+      const blob = await response.blob()
+      const disposition = response.headers.get('content-disposition') || ''
+      const filenameMatch = disposition.match(/filename="(.+)"/i)
+      const filename = filenameMatch?.[1] || `vergelijker-leads.${format === 'excel' ? 'xls' : 'csv'}`
+
+      const url = window.URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = filename
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Onbekende fout'
+      window.alert(`Lead export mislukt: ${message}`)
+    } finally {
+      setExportingFormat(null)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl border-2 border-gray-200 p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => handleExport('csv')}
+            disabled={exportingFormat !== null}
+            className="inline-flex items-center rounded-lg border border-brand-teal-200 bg-brand-teal-50 px-3 py-2 text-xs font-semibold text-brand-teal-700 hover:bg-brand-teal-100 disabled:opacity-50"
+          >
+            {exportingFormat === 'csv' ? 'CSV exporteren...' : 'Exporteer CSV'}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleExport('excel')}
+            disabled={exportingFormat !== null}
+            className="inline-flex items-center rounded-lg border border-brand-navy-200 bg-brand-navy-50 px-3 py-2 text-xs font-semibold text-brand-navy-700 hover:bg-brand-navy-100 disabled:opacity-50"
+          >
+            {exportingFormat === 'excel' ? 'Excel exporteren...' : 'Exporteer Excel'}
+          </button>
+        </div>
+
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           <input
             type="text"
