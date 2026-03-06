@@ -1,4 +1,8 @@
-import type { ComparisonLeadFlow, ComparisonLeadSource } from '@/types/comparison-leads'
+import type {
+  ComparisonLeadExtraContext,
+  ComparisonLeadFlow,
+  ComparisonLeadSource,
+} from '@/types/comparison-leads'
 
 export const LEAD_CAPTURE_DONE_KEY = 'pa_lead_capture_done_at'
 export const LEAD_CAPTURE_SESSION_ID_KEY = 'pa_lead_capture_session_id'
@@ -120,5 +124,27 @@ export async function captureComparisonLead(input: {
   }
 
   markLeadCaptured()
+  return data
+}
+
+export async function updateComparisonLeadContext(input: {
+  leadId: string
+  extraContext: ComparisonLeadExtraContext
+}) {
+  const response = await fetch(`/api/comparison-leads/${input.leadId}/context`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      extraContext: input.extraContext,
+    }),
+  })
+
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Aanvullende informatie opslaan mislukt')
+  }
+
   return data
 }

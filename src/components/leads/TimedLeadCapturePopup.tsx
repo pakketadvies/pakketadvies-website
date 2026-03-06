@@ -44,10 +44,10 @@ export function TimedLeadCapturePopup({ pathname }: TimedLeadCapturePopupProps) 
       <LeadCaptureForm
         source="timed_popup"
         flow={flow}
-        title="Nog even slim vergelijken?"
-        subtitle="Laat je e-mailadres achter en ontvang een passend energievoorstel zonder verplichtingen."
-        buttonText="Ontvang mijn aanbod"
-        onSuccess={() => setIsOpen(false)}
+        title="Voorkom te hoge energiekosten"
+        subtitle="We sturen je een persoonlijk voorstel met actuele tarieven en duidelijke keuzes."
+        buttonText="Ja, stuur mijn aanbod"
+        onComplete={() => setIsOpen(false)}
       />
     </Modal>
   )

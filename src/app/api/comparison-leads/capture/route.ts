@@ -28,6 +28,19 @@ const cleanOptionalText = (value?: string | null) => {
   return trimmed.length > 0 ? trimmed : null
 }
 
+function scoreInitialLead(phone: string | null) {
+  if (phone) {
+    return {
+      profileCompletion: 20,
+      followupPriority: 'medium' as const,
+    }
+  }
+  return {
+    profileCompletion: 0,
+    followupPriority: 'low' as const,
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const clientIP = getClientIP(request)
@@ -95,11 +108,14 @@ export async function POST(request: Request) {
       })
     }
 
+    const normalizedPhone = cleanOptionalText(payload.phone)
+    const initialScore = scoreInitialLead(normalizedPhone)
+
     const { data, error } = await supabase
       .from('comparison_leads')
       .insert({
         email: normalizedEmail,
-        phone: cleanOptionalText(payload.phone),
+        phone: normalizedPhone,
         flow: payload.flow,
         source: payload.source,
         page_path: cleanOptionalText(payload.pagePath),
@@ -114,6 +130,8 @@ export async function POST(request: Request) {
         session_id: cleanOptionalText(payload.sessionId),
         consent_contact: true,
         consent_text: cleanOptionalText(payload.consentText),
+        profile_completion: initialScore.profileCompletion,
+        followup_priority: initialScore.followupPriority,
       })
       .select('id')
       .single()
@@ -125,6 +143,19 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    // Fire-and-forget welkomstmail in bestaande PakketAdvies stijl
+    ;(async () => {
+      try {
+        const { sendLeadWelkomEmail } = await import('@/lib/send-email-internal')
+        await sendLeadWelkomEmail({
+          leadId: data.id,
+          email: normalizedEmail,
+        })
+      } catch (mailError: unknown) {
+        console.error('Lead welkomstmail mislukt (non-blocking):', mailError)
+      }
+    })()
 
     return NextResponse.json({
       success: true,

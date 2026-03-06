@@ -1,6 +1,12 @@
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
-import { generateBevestigingEmail, type EmailBevestigingData, generateInterneNotificatieEmail, type EmailInterneNotificatieData } from '@/lib/email-templates'
+import {
+  generateBevestigingEmail,
+  type EmailBevestigingData,
+  generateInterneNotificatieEmail,
+  type EmailInterneNotificatieData,
+  generateLeadWelkomEmail,
+} from '@/lib/email-templates'
 
 /**
  * Internal function to send confirmation email
@@ -719,6 +725,83 @@ export async function sendInterneNotificatieEmail(aanvraagId: string, aanvraagnu
   } catch (error: any) {
     console.error('❌ [sendInterneNotificatieEmail] Unexpected error:', error)
     throw error
+  }
+}
+
+/**
+ * Sends a simple branded welcome/info email after lead capture.
+ */
+export async function sendLeadWelkomEmail(input: {
+  leadId: string
+  email: string
+  naam?: string | null
+}) {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Email service niet geconfigureerd')
+  }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Server configuration error')
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+
+  const leadEmail = input.email.trim().toLowerCase()
+  const rawName = input.naam?.trim()
+  const derivedName = rawName && rawName.length > 0 ? rawName : leadEmail.split('@')[0]
+  const klantNaam = derivedName.length > 1 ? derivedName : 'daar'
+
+  const html = generateLeadWelkomEmail({
+    klantNaam,
+    email: leadEmail,
+    baseUrl,
+  })
+
+  const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+
+  const result = await resend.emails.send({
+    from: fromEmail,
+    to: leadEmail,
+    subject: 'Welkom bij PakketAdvies',
+    html,
+  })
+
+  if (result.error) {
+    await supabase.from('email_logs').insert({
+      aanvraag_id: null,
+      email_type: 'followup',
+      recipient_email: leadEmail,
+      subject: 'Welkom bij PakketAdvies',
+      status: 'failed',
+      error_message: result.error.message || 'Onbekende fout',
+    })
+    throw new Error(result.error.message || 'Verzenden van welkomstmail mislukt')
+  }
+
+  await supabase.from('email_logs').insert({
+    aanvraag_id: null,
+    email_type: 'followup',
+    recipient_email: leadEmail,
+    subject: 'Welkom bij PakketAdvies',
+    status: 'sent',
+    resend_id: result.data?.id || null,
+  })
+
+  return {
+    success: true,
+    emailId: result.data?.id || null,
   }
 }
 

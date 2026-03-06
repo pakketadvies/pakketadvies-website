@@ -1111,7 +1111,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                         subtitle="Laat je gegevens achter en we sturen een passend aanbod. Telefoonnummer is optioneel."
                         buttonText="Stuur mijn overzicht"
                         compact
-                        onSuccess={() => setShowInlineLeadCapture(false)}
+                        onComplete={() => setShowInlineLeadCapture(false)}
                       />
                     </div>
                   )}

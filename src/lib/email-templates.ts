@@ -621,6 +621,94 @@ export function generateContactBevestigingEmail(data: ContactBevestigingData): s
   `.trim()
 }
 
+export interface LeadWelkomEmailData {
+  klantNaam: string
+  email: string
+  baseUrl: string
+}
+
+/**
+ * Generate a simple welcome/info email after lead capture.
+ * Uses same brand styling as other customer emails.
+ */
+export function generateLeadWelkomEmail(data: LeadWelkomEmailData): string {
+  const { klantNaam, email, baseUrl } = data
+  const safeKlantNaam = escapeHtml(klantNaam)
+  const safeEmail = escapeHtml(email)
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welkom bij PakketAdvies</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: #F0FDFA; padding: 30px 20px; text-align: center; border-top: 4px solid #14B8A6;">
+              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 10px 0; font-weight: bold;">Welkom bij PakketAdvies</h1>
+              <p style="color: #64748B; font-size: 16px; margin: 0;">Bedankt, we hebben je gegevens goed ontvangen.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: white; padding: 30px 20px;">
+              <p style="color: #0F4C75; font-size: 16px; margin: 0 0 16px 0;">
+                Beste ${safeKlantNaam},
+              </p>
+              <p style="color: #64748B; font-size: 16px; margin: 0 0 14px 0; line-height: 1.6;">
+                Bedankt voor je interesse. Het kan zijn dat een specialist of adviseur van ons contact met je opneemt om je situatie kort te bespreken.
+              </p>
+              <p style="color: #64748B; font-size: 16px; margin: 0 0 14px 0; line-height: 1.6;">
+                Daarnaast houden we je per e-mail op de hoogte van relevante ontwikkelingen rondom je aanvraag.
+              </p>
+              <p style="color: #64748B; font-size: 16px; margin: 0; line-height: 1.6;">
+                Staat er iets niet goed of wil je iets aanvullen? Reageer dan gerust op deze e-mail.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: #F8FAFC; padding: 24px 20px; border-top: 1px solid #E2E8F0;">
+              <p style="color: #64748B; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Geregistreerd e-mailadres</p>
+              <p style="color: #0F4C75; font-size: 14px; margin: 0; font-weight: 600;">${safeEmail}</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: #0F4C75; padding: 30px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 20px auto;">
+              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
+                Met vriendelijke groet,<br>
+                <strong style="color: white;">Het PakketAdvies team</strong>
+              </p>
+              <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
+                <a href="${baseUrl}/privacy" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Privacybeleid</a> |
+                <a href="${baseUrl}/contact" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Contact</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim()
+}
+
 /**
  * Generate HTML email for aanbieding interesse notification (to PakketAdvies team)
  */

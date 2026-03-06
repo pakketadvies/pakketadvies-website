@@ -431,7 +431,7 @@ export function ConsumerContractRowCard({
               subtitle="Handig als je later wilt vergelijken of intern wilt delen."
               buttonText="Ontvang dit advies"
               compact
-              onSuccess={() => setIsWhyOpen(false)}
+              onComplete={() => setIsWhyOpen(false)}
             />
           </div>
           <div className="space-y-2">
