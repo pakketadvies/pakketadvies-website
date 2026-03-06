@@ -13,6 +13,7 @@ import { X, ChatCircle, Phone, PencilSimple } from '@phosphor-icons/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Keuzehulp } from '@/components/particulier/Keuzehulp'
+import { LeadCaptureForm } from '@/components/leads/LeadCaptureForm'
 import type { ContractOptie, VerbruikData } from '@/types/calculator'
 import {
   isGrootverbruik,
@@ -20,6 +21,7 @@ import {
   isGrootverbruikGasAansluitwaarde,
 } from '@/lib/verbruik-type'
 import { trackGAEvent } from '@/lib/tracking/ga-events'
+import { hasRecentLeadCapture } from '@/lib/lead-capture'
 
 type AudienceMode = 'business' | 'consumer'
 type AanbevolenSegment =
@@ -475,6 +477,7 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
   const { verbruik, setVerbruik, reset, setResultaten: setResultatenInStore } = useCalculatorStore()
 
   const [resultaten, setResultaten] = useState<ContractOptie[]>([])
+  const [showInlineLeadCapture, setShowInlineLeadCapture] = useState(false)
   const [filteredResultaten, setFilteredResultaten] = useState<ContractOptie[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -837,6 +840,12 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
     }
   }, [loading, filteredResultaten.length, audience])
 
+  useEffect(() => {
+    if (!loading && filteredResultaten.length > 0) {
+      setShowInlineLeadCapture(!hasRecentLeadCapture(30))
+    }
+  }, [loading, filteredResultaten.length])
+
   const handleStartOpnieuw = () => {
     reset()
     localStorage.removeItem('quickcalc-data')
@@ -1091,6 +1100,19 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
                       <p className="text-xs md:text-sm text-gray-600 mt-1">
                         Deze match is geselecteerd voor jouw type adres en verbruik, en staat daarom bovenaan.
                       </p>
+                    </div>
+                  )}
+                  {showInlineLeadCapture && (
+                    <div className="rounded-2xl border border-brand-teal-200 bg-gradient-to-r from-brand-teal-50/80 to-white p-4 md:p-5">
+                      <LeadCaptureForm
+                        source="results_inline"
+                        flow={audience}
+                        title="Wil je dit overzicht per e-mail ontvangen?"
+                        subtitle="Laat je gegevens achter en we sturen een passend aanbod. Telefoonnummer is optioneel."
+                        buttonText="Stuur mijn overzicht"
+                        compact
+                        onSuccess={() => setShowInlineLeadCapture(false)}
+                      />
                     </div>
                   )}
                   {filteredResultaten.length === 0 ? (

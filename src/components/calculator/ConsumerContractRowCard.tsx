@@ -11,6 +11,7 @@ import { useCalculatorStore } from '@/store/calculatorStore'
 import type { ContractOptie } from '@/types/calculator'
 import type { KostenBreakdown } from './ContractCard'
 import { ContractDetailsDrawer } from './ContractDetailsDrawer'
+import { LeadCaptureForm } from '@/components/leads/LeadCaptureForm'
 
 type ContractDetails = {
   tarief_teruglevering_kwh?: number
@@ -167,6 +168,7 @@ export function ConsumerContractRowCard({
     `Betrouwbare beoordeling (${contract.rating} op basis van ${contract.aantalReviews} reviews).`,
   ]
   const visibleWhyPoints = whyPoints.length > 0 ? whyPoints : fallbackPoints
+  const leadFlow = verbruik?.addressType === 'zakelijk' ? 'business' : 'consumer'
 
   const handleSelectContract = () => {
     setSelectedContract(contract)
@@ -421,6 +423,17 @@ export function ConsumerContractRowCard({
               {whyDisclaimer}
             </div>
           )}
+          <div className="rounded-xl border border-brand-teal-200 bg-brand-teal-50/60 p-3">
+            <LeadCaptureForm
+              source="why_modal"
+              flow={leadFlow}
+              title="Stuur dit advies naar mij"
+              subtitle="Handig als je later wilt vergelijken of intern wilt delen."
+              buttonText="Ontvang dit advies"
+              compact
+              onSuccess={() => setIsWhyOpen(false)}
+            />
+          </div>
           <div className="space-y-2">
             <Button
               className="w-full bg-brand-teal-500 hover:bg-brand-teal-600"

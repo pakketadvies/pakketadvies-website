@@ -6,6 +6,7 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 import { CookieBanner } from './CookieBanner'
 import { clearBodyScrollLocks } from '@/lib/scroll-lock'
+import { TimedLeadCapturePopup } from '@/components/leads/TimedLeadCapturePopup'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -43,6 +44,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       {!hideFooter && <Footer />}
       <CookieBanner />
+      <TimedLeadCapturePopup pathname={pathname || ''} />
     </>
   )
 }

@@ -98,6 +98,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Envelope,
       active: pathname.startsWith('/admin/newsletter-preview'),
     },
+    {
+      name: 'Vergelijker leads',
+      href: '/admin/vergelijker-leads',
+      icon: Envelope,
+      active: pathname.startsWith('/admin/vergelijker-leads'),
+    },
   ]
 
   return (

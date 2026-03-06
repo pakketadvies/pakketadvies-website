@@ -361,6 +361,20 @@ export async function POST(request: Request) {
           }
         })()
 
+        // Mark eventuele lead capture records als geconverteerd
+        const aanvraagEmailRetry = (body.gegevens_data?.email || body.gegevens_data?.emailadres || '').toLowerCase().trim()
+        if (aanvraagEmailRetry) {
+          await supabase
+            .from('comparison_leads')
+            .update({
+              status: 'converted',
+              converted_aanvraag_id: retryData.id,
+            })
+            .eq('email', aanvraagEmailRetry)
+            .neq('status', 'converted')
+            .gte('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+        }
+
         return NextResponse.json<CreateAanvraagResponse>({
           success: true,
           aanvraag: retryData,
@@ -373,6 +387,20 @@ export async function POST(request: Request) {
         { success: false, error: 'Fout bij opslaan aanvraag: ' + error.message },
         { status: 500 }
       )
+    }
+
+    // Mark eventuele lead capture records als geconverteerd
+    const aanvraagEmail = (body.gegevens_data?.email || body.gegevens_data?.emailadres || '').toLowerCase().trim()
+    if (aanvraagEmail) {
+      await supabase
+        .from('comparison_leads')
+        .update({
+          status: 'converted',
+          converted_aanvraag_id: data.id,
+        })
+        .eq('email', aanvraagEmail)
+        .neq('status', 'converted')
+        .gte('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
     }
     
     // ============================================
