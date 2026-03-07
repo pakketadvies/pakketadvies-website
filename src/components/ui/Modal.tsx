@@ -59,7 +59,7 @@ export function Modal({
       onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-modal-backdrop-in" />
 
       {/* Modal - Bottom sheet on mobile, centered on desktop */}
       <div
@@ -67,7 +67,7 @@ export function Modal({
           'relative bg-white rounded-t-2xl md:rounded-2xl lg:rounded-3xl shadow-2xl w-full md:w-auto',
           sizeClasses[size],
           'max-h-[90vh] md:max-h-[90vh] overflow-y-auto overflow-x-hidden',
-          'animate-slide-up md:animate-scale-in'
+          'animate-bottom-sheet-in md:animate-desktop-modal-in'
         )}
         onClick={(e) => e.stopPropagation()}
       >

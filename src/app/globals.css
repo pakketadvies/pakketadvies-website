@@ -189,6 +189,49 @@ select {
   animation: slide-up 0.3s ease-out;
 }
 
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-modal-backdrop-in {
+  animation: modal-backdrop-in 0.25s ease-out;
+}
+
+@keyframes bottom-sheet-in {
+  from {
+    opacity: 0.75;
+    transform: translateY(120%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-bottom-sheet-in {
+  animation: bottom-sheet-in 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes desktop-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-desktop-modal-in {
+  animation: desktop-modal-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @keyframes slide-down {
   from {
     opacity: 0;
