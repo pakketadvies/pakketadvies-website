@@ -21,7 +21,7 @@ import {
   isGrootverbruikGasAansluitwaarde,
 } from '@/lib/verbruik-type'
 import { trackGAEvent } from '@/lib/tracking/ga-events'
-import { hasRecentLeadCapture } from '@/lib/lead-capture'
+import { hasRecentLeadCaptureHours, wasLeadCapturedInSession } from '@/lib/lead-capture'
 
 type AudienceMode = 'business' | 'consumer'
 type AanbevolenSegment =
@@ -842,7 +842,8 @@ function ResultatenContent({ audience }: { audience: AudienceMode }) {
 
   useEffect(() => {
     if (!loading && filteredResultaten.length > 0) {
-      setShowInlineLeadCapture(!hasRecentLeadCapture(30))
+      const shouldHideInlineCapture = wasLeadCapturedInSession() || hasRecentLeadCaptureHours(24)
+      setShowInlineLeadCapture(!shouldHideInlineCapture)
     }
   }, [loading, filteredResultaten.length])
 

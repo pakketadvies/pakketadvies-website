@@ -1,12 +1,14 @@
 import type {
   ComparisonLeadExtraContext,
   ComparisonLeadFlow,
+  LeadAdviceEmailPayload,
   ComparisonLeadSource,
 } from '@/types/comparison-leads'
 
 export const LEAD_CAPTURE_DONE_KEY = 'pa_lead_capture_done_at'
 export const LEAD_CAPTURE_SESSION_ID_KEY = 'pa_lead_capture_session_id'
 export const LEAD_CAPTURE_POPUP_DISMISSED_KEY = 'pa_lead_capture_popup_dismissed_at'
+export const LEAD_CAPTURE_DONE_SESSION_KEY = 'pa_lead_capture_done_session'
 
 export function inferLeadFlow(pathname: string): ComparisonLeadFlow {
   if (!pathname) return 'unknown'
@@ -35,9 +37,24 @@ export function hasRecentLeadCapture(days = 30): boolean {
   return Date.now() - timestamp < days * 24 * 60 * 60 * 1000
 }
 
+export function hasRecentLeadCaptureHours(hours = 24): boolean {
+  if (typeof window === 'undefined') return false
+  const raw = window.localStorage.getItem(LEAD_CAPTURE_DONE_KEY)
+  if (!raw) return false
+  const timestamp = Number(raw)
+  if (!Number.isFinite(timestamp)) return false
+  return Date.now() - timestamp < hours * 60 * 60 * 1000
+}
+
+export function wasLeadCapturedInSession(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.sessionStorage.getItem(LEAD_CAPTURE_DONE_SESSION_KEY) === '1'
+}
+
 export function markLeadCaptured() {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(LEAD_CAPTURE_DONE_KEY, String(Date.now()))
+  window.sessionStorage.setItem(LEAD_CAPTURE_DONE_SESSION_KEY, '1')
 }
 
 export function dismissLeadPopup() {
@@ -90,6 +107,7 @@ export async function captureComparisonLead(input: {
   source: ComparisonLeadSource
   flow: ComparisonLeadFlow
   consentText?: string
+  adviceEmail?: LeadAdviceEmailPayload
 }) {
   const tracking = getTrackingParams()
   const sessionId = getOrCreateLeadSessionId()
@@ -115,6 +133,12 @@ export async function captureComparisonLead(input: {
       gclid: tracking.gclid,
       sessionId,
       consentText: input.consentText || null,
+      adviceEmail: input.adviceEmail
+        ? {
+            ...input.adviceEmail,
+            pagePath: input.adviceEmail.pagePath || tracking.pagePath,
+          }
+        : null,
     }),
   })
 

@@ -16,9 +16,11 @@ interface TimedLeadCapturePopupProps {
 
 const DEFAULT_POPUP_DELAY_MS = 20000
 const HOMEPAGE_POPUP_DELAY_MS = 12000
+const POPUP_CLOSE_DELAY_MS = 3000
 
 export function TimedLeadCapturePopup({ pathname }: TimedLeadCapturePopupProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [canClose, setCanClose] = useState(false)
 
   const flow = useMemo(() => inferLeadFlow(pathname), [pathname])
   const shouldSkipRoute = pathname.startsWith('/admin') || pathname.startsWith('/contract-viewer')
@@ -29,20 +31,31 @@ export function TimedLeadCapturePopup({ pathname }: TimedLeadCapturePopupProps) 
       return
     }
 
+    let closeLockTimer: number | undefined
     const timer = window.setTimeout(() => {
       setIsOpen(true)
+      setCanClose(false)
+      closeLockTimer = window.setTimeout(() => {
+        setCanClose(true)
+      }, POPUP_CLOSE_DELAY_MS)
     }, popupDelayMs)
 
-    return () => window.clearTimeout(timer)
+    return () => {
+      window.clearTimeout(timer)
+      if (closeLockTimer) {
+        window.clearTimeout(closeLockTimer)
+      }
+    }
   }, [pathname, shouldSkipRoute, popupDelayMs])
 
   const closePopup = () => {
+    if (!canClose) return
     setIsOpen(false)
     dismissLeadPopup()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={closePopup} size="md" showCloseButton>
+    <Modal isOpen={isOpen} onClose={closePopup} size="md" showCloseButton closeDisabled={!canClose}>
       <LeadCaptureForm
         source="timed_popup"
         flow={flow}

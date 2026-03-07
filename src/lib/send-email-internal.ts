@@ -6,7 +6,9 @@ import {
   generateInterneNotificatieEmail,
   type EmailInterneNotificatieData,
   generateLeadWelkomEmail,
+  generateLeadWaaromAdviesEmail,
 } from '@/lib/email-templates'
+import type { LeadAdviceEmailPayload } from '@/types/comparison-leads'
 
 /**
  * Internal function to send confirmation email
@@ -795,6 +797,95 @@ export async function sendLeadWelkomEmail(input: {
     email_type: 'followup',
     recipient_email: leadEmail,
     subject: 'Welkom bij PakketAdvies',
+    status: 'sent',
+    resend_id: result.data?.id || null,
+  })
+
+  return {
+    success: true,
+    emailId: result.data?.id || null,
+  }
+}
+
+/**
+ * Sends the promised "Waarom deze keuze?" advice email with contract context.
+ */
+export async function sendLeadWaaromAdviesEmail(input: {
+  leadId: string
+  email: string
+  advice: LeadAdviceEmailPayload
+  naam?: string | null
+}) {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Email service niet geconfigureerd')
+  }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Server configuration error')
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+
+  const leadEmail = input.email.trim().toLowerCase()
+  const rawName = input.naam?.trim()
+  const derivedName = rawName && rawName.length > 0 ? rawName : leadEmail.split('@')[0]
+  const klantNaam = derivedName.length > 1 ? derivedName : 'daar'
+
+  const html = generateLeadWaaromAdviesEmail({
+    klantNaam,
+    email: leadEmail,
+    baseUrl,
+    contractName: input.advice.contractName,
+    supplierName: input.advice.supplierName,
+    contractType: input.advice.contractType,
+    monthlyPrice: input.advice.monthlyPrice ?? null,
+    yearlyPrice: input.advice.yearlyPrice ?? null,
+    whyTitle: input.advice.whyTitle ?? null,
+    whyIntro: input.advice.whyIntro ?? null,
+    whyPoints: input.advice.whyPoints || [],
+    whyDisclaimer: input.advice.whyDisclaimer ?? null,
+    pagePath: input.advice.pagePath ?? null,
+  })
+
+  const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+
+  const subject = `Jouw advies: ${input.advice.supplierName} - ${input.advice.contractType}`
+  const result = await resend.emails.send({
+    from: fromEmail,
+    to: leadEmail,
+    subject,
+    html,
+  })
+
+  if (result.error) {
+    await supabase.from('email_logs').insert({
+      aanvraag_id: null,
+      email_type: 'followup',
+      recipient_email: leadEmail,
+      subject,
+      status: 'failed',
+      error_message: result.error.message || 'Onbekende fout',
+    })
+    throw new Error(result.error.message || 'Verzenden van adviesmail mislukt')
+  }
+
+  await supabase.from('email_logs').insert({
+    aanvraag_id: null,
+    email_type: 'followup',
+    recipient_email: leadEmail,
+    subject,
     status: 'sent',
     resend_id: result.data?.id || null,
   })

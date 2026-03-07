@@ -709,6 +709,166 @@ export function generateLeadWelkomEmail(data: LeadWelkomEmailData): string {
   `.trim()
 }
 
+export interface LeadWaaromAdviesEmailData {
+  klantNaam: string
+  email: string
+  baseUrl: string
+  contractName: string
+  supplierName: string
+  contractType: string
+  monthlyPrice?: number | null
+  yearlyPrice?: number | null
+  whyTitle?: string | null
+  whyIntro?: string | null
+  whyPoints?: string[]
+  whyDisclaimer?: string | null
+  pagePath?: string | null
+}
+
+export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): string {
+  const {
+    klantNaam,
+    email,
+    baseUrl,
+    contractName,
+    supplierName,
+    contractType,
+    monthlyPrice,
+    yearlyPrice,
+    whyTitle,
+    whyIntro,
+    whyPoints = [],
+    whyDisclaimer,
+    pagePath,
+  } = data
+
+  const safeKlantNaam = escapeHtml(klantNaam)
+  const safeEmail = escapeHtml(email)
+  const safeContractName = escapeHtml(contractName)
+  const safeSupplierName = escapeHtml(supplierName)
+  const safeContractType = escapeHtml(contractType)
+  const safeWhyTitle = escapeHtml(whyTitle || 'Waarom dit advies goed past')
+  const safeWhyIntro = escapeHtml(whyIntro || '')
+  const safeWhyDisclaimer = escapeHtml(whyDisclaimer || '')
+  const safePagePath = escapeHtml(pagePath || '/calculator/resultaten')
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  const formatCurrency = (amount?: number | null) => {
+    if (typeof amount !== 'number' || Number.isNaN(amount)) return null
+    return new Intl.NumberFormat('nl-NL', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  }
+
+  const monthlyText = formatCurrency(monthlyPrice)
+  const yearlyText = formatCurrency(yearlyPrice)
+
+  const advicePoints = (whyPoints || []).filter((point) => point && point.trim().length > 0).slice(0, 5)
+  const pointsHtml = advicePoints
+    .map(
+      (point) =>
+        `<tr><td style="padding: 0 0 10px 0; color: #334155; font-size: 15px; line-height: 1.55;">✅ ${escapeHtml(point)}</td></tr>`
+    )
+    .join('')
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jouw advies van PakketAdvies</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; line-height: 1.6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #0F4C75 0%, #1A5F8A 100%); padding: 40px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto;">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: #F0FDFA; padding: 30px 20px; text-align: center; border-top: 4px solid #14B8A6;">
+              <h1 style="color: #0F4C75; font-size: 28px; margin: 0 0 8px 0; font-weight: bold;">Jouw advies staat klaar</h1>
+              <p style="color: #64748B; font-size: 16px; margin: 0;">Hier is precies het advies dat je net hebt opgevraagd.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding: 28px 22px; background: white;">
+              <p style="color: #0F4C75; font-size: 16px; margin: 0 0 14px 0;">Beste ${safeKlantNaam},</p>
+              <p style="color: #64748B; font-size: 15px; margin: 0 0 16px 0;">
+                Op basis van je selectie adviseren we:
+              </p>
+              <div style="border: 1px solid #A7F3D0; border-radius: 10px; padding: 16px; background: #F0FDFA;">
+                <p style="margin: 0; color: #0F4C75; font-size: 22px; font-weight: 700;">${safeSupplierName}</p>
+                <p style="margin: 4px 0 0 0; color: #334155; font-size: 15px;">${safeContractName} - ${safeContractType}</p>
+                ${monthlyText ? `<p style="margin: 14px 0 0 0; color: #0F4C75; font-size: 18px; font-weight: 700;">${monthlyText} / maand</p>` : ''}
+                ${yearlyText ? `<p style="margin: 2px 0 0 0; color: #64748B; font-size: 14px;">${yearlyText} per jaar</p>` : ''}
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding: 0 22px 8px 22px;">
+              <h2 style="margin: 0 0 8px 0; color: #0F4C75; font-size: 20px; font-weight: 700;">${safeWhyTitle}</h2>
+              ${safeWhyIntro ? `<p style="margin: 0 0 12px 0; color: #475569; font-size: 15px; line-height: 1.6;">${safeWhyIntro}</p>` : ''}
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${pointsHtml}
+              </table>
+              ${safeWhyDisclaimer ? `
+                <div style="margin-top: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px;">
+                  <p style="margin: 0; color: #64748B; font-size: 13px; line-height: 1.55;">${safeWhyDisclaimer}</p>
+                </div>
+              ` : ''}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="text-align: center; padding: 26px 20px 30px 20px; background: white;">
+              <a href="${baseUrl}/calculator/resultaten" style="background: #14B8A6; color: #FFFFFF; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
+                Bekijk dit advies opnieuw
+              </a>
+              <p style="color: #94A3B8; font-size: 12px; margin: 12px 0 0 0;">Opgevraagd vanaf: ${safePagePath}</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: #F8FAFC; padding: 20px 22px; border-top: 1px solid #E2E8F0;">
+              <p style="margin: 0; color: #64748B; font-size: 13px;">
+                We hebben dit advies gestuurd naar: <strong style="color: #0F4C75;">${safeEmail}</strong>
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background: #0F4C75; padding: 30px 20px; text-align: center;">
+              <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto 20px auto;">
+              <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 10px 0;">
+                Met vriendelijke groet,<br>
+                <strong style="color: white;">Het PakketAdvies team</strong>
+              </p>
+              <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 10px 0 0 0;">
+                <a href="${baseUrl}/privacy" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Privacybeleid</a> |
+                <a href="${baseUrl}/contact" style="color: rgba(255,255,255,0.8); text-decoration: underline;">Contact</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim()
+}
+
 /**
  * Generate HTML email for aanbieding interesse notification (to PakketAdvies team)
  */

@@ -8,6 +8,7 @@ import { captureComparisonLead, updateComparisonLeadContext } from '@/lib/lead-c
 import type {
   ComparisonLeadExtraContext,
   ComparisonLeadFlow,
+  LeadAdviceEmailPayload,
   ComparisonLeadSource,
 } from '@/types/comparison-leads'
 
@@ -19,6 +20,7 @@ interface LeadCaptureFormProps {
   buttonText?: string
   compact?: boolean
   onComplete?: () => void
+  adviceEmailPayload?: LeadAdviceEmailPayload
 }
 
 export function LeadCaptureForm({
@@ -29,6 +31,7 @@ export function LeadCaptureForm({
   buttonText = 'Stuur mijn aanbod',
   compact = false,
   onComplete,
+  adviceEmailPayload,
 }: LeadCaptureFormProps) {
   const [stage, setStage] = useState<'capture' | 'offer_enrichment' | 'enrich' | 'done'>('capture')
   const [leadId, setLeadId] = useState<string | null>(null)
@@ -67,6 +70,7 @@ export function LeadCaptureForm({
         source,
         flow,
         consentText,
+        adviceEmail: adviceEmailPayload,
       })
       setLeadId(response.id || null)
       setStage('offer_enrichment')

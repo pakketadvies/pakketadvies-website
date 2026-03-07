@@ -13,6 +13,7 @@ interface ModalProps {
   children: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl'
   showCloseButton?: boolean
+  closeDisabled?: boolean
 }
 
 export function Modal({
@@ -22,20 +23,21 @@ export function Modal({
   children,
   size = 'md',
   showCloseButton = true,
+  closeDisabled = false,
 }: ModalProps) {
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !closeDisabled) {
         onClose()
       }
     }
 
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, closeDisabled])
 
   // Prevent background scroll while modal is open
   useEffect(() => {
@@ -56,7 +58,9 @@ export function Modal({
   const modalContent = typeof window !== 'undefined' ? createPortal(
     <div
       className="fixed inset-0 z-[99999] flex items-end md:items-center justify-center p-0 md:p-4"
-      onClick={onClose}
+      onClick={() => {
+        if (!closeDisabled) onClose()
+      }}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-modal-backdrop-in" />
@@ -81,8 +85,11 @@ export function Modal({
             )}
             {showCloseButton && (
               <button
-                onClick={onClose}
-                className="ml-auto p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => {
+                  if (!closeDisabled) onClose()
+                }}
+                disabled={closeDisabled}
+                className="ml-auto p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Sluiten"
               >
                 <X weight="bold" className="w-5 h-5 text-gray-600" />

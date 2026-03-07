@@ -431,6 +431,17 @@ export function ConsumerContractRowCard({
               subtitle="Handig als je later wilt vergelijken of intern wilt delen."
               buttonText="Ontvang dit advies"
               compact
+              adviceEmailPayload={{
+                contractName: contract.contractNaam || `${contract.leverancier.naam} ${contractTypeLabel}`,
+                supplierName: contract.leverancier.naam,
+                contractType: contractTypeLabel,
+                monthlyPrice: contract.maandbedrag,
+                yearlyPrice: contract.jaarbedrag,
+                whyTitle: whyTitle || null,
+                whyIntro: whyIntro || null,
+                whyPoints: visibleWhyPoints,
+                whyDisclaimer: whyDisclaimer || null,
+              }}
               onComplete={() => setIsWhyOpen(false)}
             />
           </div>

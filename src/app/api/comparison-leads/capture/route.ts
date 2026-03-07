@@ -3,6 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { checkRateLimit, getClientIP } from '@/lib/security/rate-limiter'
 import { validateEmail } from '@/lib/security/email-validation'
+import type { LeadAdviceEmailPayload } from '@/types/comparison-leads'
+
+const leadAdviceEmailSchema = z.object({
+  contractName: z.string().min(2).max(160),
+  supplierName: z.string().min(2).max(160),
+  contractType: z.string().min(2).max(80),
+  monthlyPrice: z.number().nonnegative().max(100000).optional().nullable(),
+  yearlyPrice: z.number().nonnegative().max(1000000).optional().nullable(),
+  whyTitle: z.string().max(200).optional().nullable(),
+  whyIntro: z.string().max(1000).optional().nullable(),
+  whyPoints: z.array(z.string().max(240)).max(5).optional().nullable(),
+  whyDisclaimer: z.string().max(1000).optional().nullable(),
+  pagePath: z.string().max(500).optional().nullable(),
+})
 
 const captureLeadSchema = z.object({
   email: z.string().min(5).max(320),
@@ -20,12 +34,36 @@ const captureLeadSchema = z.object({
   gclid: z.string().max(200).optional().nullable(),
   sessionId: z.string().max(120).optional().nullable(),
   consentText: z.string().max(500).optional().nullable(),
+  adviceEmail: leadAdviceEmailSchema.optional().nullable(),
 })
 
 const cleanOptionalText = (value?: string | null) => {
   if (!value) return null
   const trimmed = value.trim()
   return trimmed.length > 0 ? trimmed : null
+}
+
+function normalizeAdviceEmailPayload(
+  advice?: z.infer<typeof leadAdviceEmailSchema> | null
+): LeadAdviceEmailPayload | null {
+  if (!advice) return null
+
+  return {
+    contractName: advice.contractName.trim(),
+    supplierName: advice.supplierName.trim(),
+    contractType: advice.contractType.trim(),
+    monthlyPrice: advice.monthlyPrice ?? null,
+    yearlyPrice: advice.yearlyPrice ?? null,
+    whyTitle: cleanOptionalText(advice.whyTitle),
+    whyIntro: cleanOptionalText(advice.whyIntro),
+    whyPoints:
+      advice.whyPoints
+        ?.map((point) => point.trim())
+        .filter((point) => point.length > 0)
+        .slice(0, 5) || [],
+    whyDisclaimer: cleanOptionalText(advice.whyDisclaimer),
+    pagePath: cleanOptionalText(advice.pagePath),
+  }
 }
 
 function scoreInitialLead(phone: string | null) {
@@ -38,6 +76,32 @@ function scoreInitialLead(phone: string | null) {
   return {
     profileCompletion: 0,
     followupPriority: 'low' as const,
+  }
+}
+
+async function sendLeadEmails(input: {
+  leadId: string
+  email: string
+  source: 'timed_popup' | 'results_inline' | 'why_modal' | 'exit_intent' | 'manual'
+  adviceEmail?: LeadAdviceEmailPayload | null
+  sendWelcome?: boolean
+}) {
+  const { sendLeadWelkomEmail, sendLeadWaaromAdviesEmail } = await import('@/lib/send-email-internal')
+
+  if (input.source === 'why_modal' && input.adviceEmail) {
+    await sendLeadWaaromAdviesEmail({
+      leadId: input.leadId,
+      email: input.email,
+      advice: input.adviceEmail,
+    })
+    return
+  }
+
+  if (input.sendWelcome !== false) {
+    await sendLeadWelkomEmail({
+      leadId: input.leadId,
+      email: input.email,
+    })
   }
 }
 
@@ -62,6 +126,7 @@ export async function POST(request: Request) {
     }
 
     const payload = parsed.data
+    const adviceEmailPayload = normalizeAdviceEmailPayload(payload.adviceEmail)
     const normalizedEmail = payload.email.trim().toLowerCase()
     const emailValidation = validateEmail(normalizedEmail)
     if (!emailValidation.valid) {
@@ -101,6 +166,24 @@ export async function POST(request: Request) {
       .maybeSingle()
 
     if (existingLead?.id) {
+      if (payload.source === 'why_modal' && adviceEmailPayload) {
+        try {
+          await sendLeadEmails({
+            leadId: existingLead.id,
+            email: normalizedEmail,
+            source: payload.source,
+            adviceEmail: adviceEmailPayload,
+            sendWelcome: false,
+          })
+        } catch (mailError: unknown) {
+          console.error('Lead e-mail verzending mislukt (deduplicated lead):', mailError)
+          return NextResponse.json(
+            { success: false, error: 'Opslaan gelukt, maar verzenden van adviesmail is mislukt. Probeer opnieuw.' },
+            { status: 502 }
+          )
+        }
+      }
+
       return NextResponse.json({
         success: true,
         id: existingLead.id,
@@ -144,25 +227,27 @@ export async function POST(request: Request) {
       )
     }
 
-    // Fire-and-forget welkomstmail in bestaande PakketAdvies stijl
-    ;(async () => {
-      try {
-        const { sendLeadWelkomEmail } = await import('@/lib/send-email-internal')
-        await sendLeadWelkomEmail({
-          leadId: data.id,
-          email: normalizedEmail,
-        })
-      } catch (mailError: unknown) {
-        console.error('Lead welkomstmail mislukt (non-blocking):', mailError)
-      }
-    })()
+    try {
+      await sendLeadEmails({
+        leadId: data.id,
+        email: normalizedEmail,
+        source: payload.source,
+        adviceEmail: adviceEmailPayload,
+      })
+    } catch (mailError: unknown) {
+      console.error('Lead e-mail verzending mislukt:', mailError)
+      return NextResponse.json(
+        { success: false, error: 'Lead opgeslagen, maar e-mail verzenden is mislukt. Probeer opnieuw.' },
+        { status: 502 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
       id: data.id,
       deduplicated: false,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Unexpected error in lead capture:', error)
     return NextResponse.json(
       { success: false, error: 'Onverwachte fout bij lead capture.' },
