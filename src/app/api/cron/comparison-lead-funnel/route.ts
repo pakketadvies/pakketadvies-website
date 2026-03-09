@@ -3,6 +3,26 @@ import { createClient } from '@supabase/supabase-js'
 import { sendLeadFunnelCompleteProfileEmail, sendLeadFunnelProposalEmail } from '@/lib/send-email-internal'
 import { resolveLeadFunnelRecommendation } from '@/lib/lead-funnel'
 
+function getSupplierFromRelation(leverancier: unknown) {
+  if (Array.isArray(leverancier)) {
+    const first = leverancier[0] as { naam?: string; logo_url?: string | null } | undefined
+    return {
+      name: first?.naam || 'Onbekende leverancier',
+      logoUrl: first?.logo_url || null,
+    }
+  }
+
+  if (leverancier && typeof leverancier === 'object') {
+    const single = leverancier as { naam?: string; logo_url?: string | null }
+    return {
+      name: single.naam || 'Onbekende leverancier',
+      logoUrl: single.logo_url || null,
+    }
+  }
+
+  return { name: 'Onbekende leverancier', logoUrl: null }
+}
+
 export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get('authorization')
@@ -87,12 +107,13 @@ export async function GET(request: Request) {
               .maybeSingle()
 
             if (contractData) {
+              const supplier = getSupplierFromRelation(contractData.leverancier)
               recommendation = {
                 id: contractData.id,
                 name: contractData.naam || 'Onbekend contract',
                 type: contractData.type || 'vast',
-                supplierName: contractData.leverancier?.naam || 'Onbekende leverancier',
-                supplierLogoUrl: contractData.leverancier?.logo_url || null,
+                supplierName: supplier.name,
+                supplierLogoUrl: supplier.logoUrl,
               }
             }
           }

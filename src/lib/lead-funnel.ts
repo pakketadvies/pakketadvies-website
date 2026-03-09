@@ -63,12 +63,16 @@ async function fetchContract(
 
   if (error || !data) return null
 
+  const supplier = Array.isArray(data.leverancier)
+    ? data.leverancier[0]
+    : data.leverancier
+
   return {
     id: data.id,
     name: data.naam || 'Onbekend contract',
     type: data.type || 'vast',
-    supplierName: data.leverancier?.naam || 'Onbekende leverancier',
-    supplierLogoUrl: data.leverancier?.logo_url || null,
+    supplierName: supplier?.naam || 'Onbekende leverancier',
+    supplierLogoUrl: supplier?.logo_url || null,
   }
 }
 
