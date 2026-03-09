@@ -52,6 +52,15 @@ export interface ComparisonLead {
   extra_context: ComparisonLeadExtraContext | null
   profile_completion: number
   followup_priority: ComparisonLeadPriority
+  funnel_access_token?: string | null
+  funnel_status?: 'pending_profile' | 'profile_completed' | 'proposal_sent' | 'converted' | 'unsubscribed'
+  funnel_step?: number
+  funnel_last_email_sent_at?: string | null
+  funnel_next_email_at?: string | null
+  funnel_profile_completed_at?: string | null
+  funnel_recommended_contract_id?: string | null
+  funnel_fallback_contract_id?: string | null
+  funnel_metadata?: Record<string, unknown> | null
   status: ComparisonLeadStatus
   converted_aanvraag_id: string | null
   notes: string | null

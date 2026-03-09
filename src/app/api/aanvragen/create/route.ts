@@ -369,6 +369,8 @@ export async function POST(request: Request) {
             .update({
               status: 'converted',
               converted_aanvraag_id: retryData.id,
+              funnel_status: 'converted',
+              funnel_next_email_at: null,
             })
             .eq('email', aanvraagEmailRetry)
             .neq('status', 'converted')
@@ -397,6 +399,8 @@ export async function POST(request: Request) {
         .update({
           status: 'converted',
           converted_aanvraag_id: data.id,
+          funnel_status: 'converted',
+          funnel_next_email_at: null,
         })
         .eq('email', aanvraagEmail)
         .neq('status', 'converted')

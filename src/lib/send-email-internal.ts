@@ -7,8 +7,11 @@ import {
   type EmailInterneNotificatieData,
   generateLeadWelkomEmail,
   generateLeadWaaromAdviesEmail,
+  generateLeadFunnelCompleteProfileEmail,
+  generateLeadFunnelProposalEmail,
 } from '@/lib/email-templates'
 import type { LeadAdviceEmailPayload } from '@/types/comparison-leads'
+import type { LeadFunnelContract } from '@/lib/lead-funnel'
 
 /**
  * Internal function to send confirmation email
@@ -894,5 +897,154 @@ export async function sendLeadWaaromAdviesEmail(input: {
     success: true,
     emailId: result.data?.id || null,
   }
+}
+
+async function logLeadEmail(
+  supabase: ReturnType<typeof createClient>,
+  input: {
+    recipientEmail: string
+    subject: string
+    status: 'sent' | 'failed'
+    resendId?: string | null
+    errorMessage?: string | null
+  }
+) {
+  await supabase.from('email_logs').insert({
+    aanvraag_id: null,
+    email_type: 'followup',
+    recipient_email: input.recipientEmail,
+    subject: input.subject,
+    status: input.status,
+    resend_id: input.resendId || null,
+    error_message: input.errorMessage || null,
+  })
+}
+
+export async function sendLeadFunnelCompleteProfileEmail(input: {
+  leadId: string
+  email: string
+  accessToken: string
+  step?: number
+}) {
+  if (!process.env.RESEND_API_KEY) throw new Error('Email service niet geconfigureerd')
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Server configuration error')
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
+  const completeProfileUrl = `${baseUrl}/aanbod-completeren/${encodeURIComponent(input.accessToken)}`
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: { autoRefreshToken: false, persistSession: false },
+    }
+  )
+
+  const leadEmail = input.email.trim().toLowerCase()
+  const klantNaam = leadEmail.split('@')[0] || 'daar'
+  const subject = input.step && input.step > 0 ? 'Je voorstel is nog niet afgerond' : 'Maak je energievoorstel compleet'
+  const html = generateLeadFunnelCompleteProfileEmail({
+    klantNaam,
+    email: leadEmail,
+    baseUrl,
+    completeProfileUrl,
+  })
+
+  const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+
+  const result = await resend.emails.send({
+    from: fromEmail,
+    to: leadEmail,
+    subject,
+    html,
+  })
+
+  if (result.error) {
+    await logLeadEmail(supabase, {
+      recipientEmail: leadEmail,
+      subject,
+      status: 'failed',
+      errorMessage: result.error.message || 'Onbekende fout',
+    })
+    throw new Error(result.error.message || 'Verzenden van funnel-mail mislukt')
+  }
+
+  await logLeadEmail(supabase, {
+    recipientEmail: leadEmail,
+    subject,
+    status: 'sent',
+    resendId: result.data?.id || null,
+  })
+
+  return { success: true, emailId: result.data?.id || null }
+}
+
+export async function sendLeadFunnelProposalEmail(input: {
+  leadId: string
+  email: string
+  accessToken: string
+  contract: LeadFunnelContract
+  fallback?: LeadFunnelContract | null
+  step?: number
+}) {
+  if (!process.env.RESEND_API_KEY) throw new Error('Email service niet geconfigureerd')
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Server configuration error')
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pakketadvies.nl'
+  const completeProfileUrl = `${baseUrl}/aanbod-completeren/${encodeURIComponent(input.accessToken)}`
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: { autoRefreshToken: false, persistSession: false },
+    }
+  )
+
+  const leadEmail = input.email.trim().toLowerCase()
+  const klantNaam = leadEmail.split('@')[0] || 'daar'
+  const subject = input.step && input.step > 1 ? 'Je aanbevolen contract staat nog klaar' : 'Jouw aanbevolen energiecontract'
+  const html = generateLeadFunnelProposalEmail({
+    klantNaam,
+    email: leadEmail,
+    baseUrl,
+    completeProfileUrl,
+    contractName: input.contract.name,
+    supplierName: input.contract.supplierName,
+    contractType: input.contract.type,
+    fallbackContractName: input.fallback?.name || null,
+  })
+
+  const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+
+  const result = await resend.emails.send({
+    from: fromEmail,
+    to: leadEmail,
+    subject,
+    html,
+  })
+
+  if (result.error) {
+    await logLeadEmail(supabase, {
+      recipientEmail: leadEmail,
+      subject,
+      status: 'failed',
+      errorMessage: result.error.message || 'Onbekende fout',
+    })
+    throw new Error(result.error.message || 'Verzenden van voorstelmail mislukt')
+  }
+
+  await logLeadEmail(supabase, {
+    recipientEmail: leadEmail,
+    subject,
+    status: 'sent',
+    resendId: result.data?.id || null,
+  })
+
+  return { success: true, emailId: result.data?.id || null }
 }
 

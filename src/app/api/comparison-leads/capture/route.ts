@@ -82,17 +82,30 @@ function scoreInitialLead(phone: string | null) {
 async function sendLeadEmails(input: {
   leadId: string
   email: string
+  accessToken: string | null
   source: 'timed_popup' | 'results_inline' | 'why_modal' | 'exit_intent' | 'manual'
   adviceEmail?: LeadAdviceEmailPayload | null
   sendWelcome?: boolean
 }) {
-  const { sendLeadWelkomEmail, sendLeadWaaromAdviesEmail } = await import('@/lib/send-email-internal')
+  const { sendLeadWelkomEmail, sendLeadWaaromAdviesEmail, sendLeadFunnelCompleteProfileEmail } = await import(
+    '@/lib/send-email-internal'
+  )
 
   if (input.source === 'why_modal' && input.adviceEmail) {
     await sendLeadWaaromAdviesEmail({
       leadId: input.leadId,
       email: input.email,
       advice: input.adviceEmail,
+    })
+    return
+  }
+
+  if (input.accessToken) {
+    await sendLeadFunnelCompleteProfileEmail({
+      leadId: input.leadId,
+      email: input.email,
+      accessToken: input.accessToken,
+      step: 0,
     })
     return
   }
@@ -157,7 +170,7 @@ export async function POST(request: Request) {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     const { data: existingLead } = await supabase
       .from('comparison_leads')
-      .select('id')
+      .select('id, funnel_access_token')
       .eq('email', normalizedEmail)
       .eq('source', payload.source)
       .gte('created_at', twentyFourHoursAgo)
@@ -171,6 +184,7 @@ export async function POST(request: Request) {
           await sendLeadEmails({
             leadId: existingLead.id,
             email: normalizedEmail,
+            accessToken: existingLead.funnel_access_token || null,
             source: payload.source,
             adviceEmail: adviceEmailPayload,
             sendWelcome: false,
@@ -193,6 +207,8 @@ export async function POST(request: Request) {
 
     const normalizedPhone = cleanOptionalText(payload.phone)
     const initialScore = scoreInitialLead(normalizedPhone)
+    const funnelAccessToken = crypto.randomUUID()
+    const funnelNextEmailAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
     const { data, error } = await supabase
       .from('comparison_leads')
@@ -215,6 +231,10 @@ export async function POST(request: Request) {
         consent_text: cleanOptionalText(payload.consentText),
         profile_completion: initialScore.profileCompletion,
         followup_priority: initialScore.followupPriority,
+        funnel_access_token: funnelAccessToken,
+        funnel_status: 'pending_profile',
+        funnel_step: 0,
+        funnel_next_email_at: funnelNextEmailAt,
       })
       .select('id')
       .single()
@@ -231,6 +251,7 @@ export async function POST(request: Request) {
       await sendLeadEmails({
         leadId: data.id,
         email: normalizedEmail,
+        accessToken: funnelAccessToken,
         source: payload.source,
         adviceEmail: adviceEmailPayload,
       })

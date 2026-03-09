@@ -869,6 +869,124 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
   `.trim()
 }
 
+export interface LeadFunnelCompleteProfileEmailData {
+  klantNaam: string
+  email: string
+  baseUrl: string
+  completeProfileUrl: string
+}
+
+export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteProfileEmailData): string {
+  const { klantNaam, email, baseUrl, completeProfileUrl } = data
+  const safeKlantNaam = escapeHtml(klantNaam)
+  const safeEmail = escapeHtml(email)
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maak je voorstel compleet</title>
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#F8FAFC;line-height:1.6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;padding:20px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1);">
+        <tr><td style="background:linear-gradient(135deg,#0F4C75 0%,#1A5F8A 100%);padding:36px 20px;text-align:center;">
+          <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:260px;width:100%;height:auto;display:block;margin:0 auto;">
+        </td></tr>
+        <tr><td style="padding:30px 24px;background:#F0FDFA;border-top:4px solid #14B8A6;text-align:center;">
+          <h1 style="margin:0;color:#0F4C75;font-size:28px;">Je voorstel staat bijna klaar</h1>
+          <p style="margin:10px 0 0 0;color:#64748B;font-size:16px;">Nog 60 seconden voor je persoonlijke contractadvies.</p>
+        </td></tr>
+        <tr><td style="padding:28px 24px;">
+          <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${safeKlantNaam},</p>
+          <p style="margin:0 0 14px 0;color:#475569;">Je hebt al een aanvraag gestart met <strong>${safeEmail}</strong>. Vul kort je situatie aan en je ziet direct het beste contractvoorstel op onze website.</p>
+          <div style="text-align:center;margin:22px 0;">
+            <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Maak mijn voorstel compleet</a>
+          </div>
+          <p style="margin:0;color:#64748B;font-size:13px;">Geen account nodig. Je kunt direct daarna met 1 klik aanvragen.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+  `.trim()
+}
+
+export interface LeadFunnelProposalEmailData {
+  klantNaam: string
+  email: string
+  baseUrl: string
+  completeProfileUrl: string
+  contractName: string
+  supplierName: string
+  contractType: string
+  fallbackContractName?: string | null
+}
+
+export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailData): string {
+  const {
+    klantNaam,
+    email,
+    baseUrl,
+    completeProfileUrl,
+    contractName,
+    supplierName,
+    contractType,
+    fallbackContractName,
+  } = data
+
+  const safeKlantNaam = escapeHtml(klantNaam)
+  const safeEmail = escapeHtml(email)
+  const safeContractName = escapeHtml(contractName)
+  const safeSupplierName = escapeHtml(supplierName)
+  const safeContractType = escapeHtml(contractType)
+  const safeFallback = fallbackContractName ? escapeHtml(fallbackContractName) : null
+  const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jouw aanbevolen contract</title>
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#F8FAFC;line-height:1.6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;padding:20px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1);">
+        <tr><td style="background:linear-gradient(135deg,#0F4C75 0%,#1A5F8A 100%);padding:36px 20px;text-align:center;">
+          <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:260px;width:100%;height:auto;display:block;margin:0 auto;">
+        </td></tr>
+        <tr><td style="padding:30px 24px;background:#F0FDFA;border-top:4px solid #14B8A6;text-align:center;">
+          <h1 style="margin:0;color:#0F4C75;font-size:28px;">Jouw aanbevolen contract</h1>
+          <p style="margin:10px 0 0 0;color:#64748B;font-size:16px;">Automatisch geselecteerd op basis van je profiel.</p>
+        </td></tr>
+        <tr><td style="padding:28px 24px;">
+          <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${safeKlantNaam},</p>
+          <div style="border:1px solid #A7F3D0;background:#F0FDFA;border-radius:10px;padding:16px;margin:0 0 14px 0;">
+            <p style="margin:0;color:#0F4C75;font-size:22px;font-weight:700;">${safeSupplierName}</p>
+            <p style="margin:4px 0 0 0;color:#334155;font-size:15px;">${safeContractName} - ${safeContractType}</p>
+          </div>
+          ${safeFallback ? `<p style="margin:0 0 12px 0;color:#475569;">Alternatief voor jouw profiel: <strong>${safeFallback}</strong></p>` : ''}
+          <div style="text-align:center;margin:22px 0;">
+            <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Bekijk en vraag direct aan</a>
+          </div>
+          <p style="margin:0;color:#64748B;font-size:13px;">Deze mail is gestuurd naar ${safeEmail}. Wil je later verder? Gebruik dezelfde link.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+  `.trim()
+}
+
 /**
  * Generate HTML email for aanbieding interesse notification (to PakketAdvies team)
  */

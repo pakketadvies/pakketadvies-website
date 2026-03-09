@@ -104,6 +104,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Envelope,
       active: pathname.startsWith('/admin/vergelijker-leads'),
     },
+    {
+      name: 'Vergelijker funnel',
+      href: '/admin/vergelijker-funnel',
+      icon: Envelope,
+      active: pathname.startsWith('/admin/vergelijker-funnel'),
+    },
   ]
 
   return (

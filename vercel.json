@@ -9,6 +9,10 @@
     {
       "path": "/api/cron/send-review-emails",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/comparison-lead-funnel",
+      "schedule": "15 * * * *"
     }
   ]
 }
