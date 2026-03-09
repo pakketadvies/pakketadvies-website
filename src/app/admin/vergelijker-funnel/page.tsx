@@ -3,6 +3,20 @@ import { LeadFunnelRulesManager } from '@/components/admin/LeadFunnelRulesManage
 import type { ContractOption, FunnelRule } from '@/components/admin/LeadFunnelRulesManager'
 import { createClient } from '@/lib/supabase/server'
 
+function getLeverancierNaam(leverancier: unknown): string {
+  if (Array.isArray(leverancier)) {
+    const first = leverancier[0] as { naam?: string } | undefined
+    return first?.naam || 'Onbekende leverancier'
+  }
+
+  if (leverancier && typeof leverancier === 'object') {
+    const single = leverancier as { naam?: string }
+    return single.naam || 'Onbekende leverancier'
+  }
+
+  return 'Onbekende leverancier'
+}
+
 async function getRuleData() {
   const supabase = await createClient()
   const {
@@ -31,7 +45,7 @@ async function getRuleData() {
     contractsResult.data?.map((contract) => ({
       id: contract.id,
       naam: contract.naam || 'Onbekend contract',
-      leverancierNaam: contract.leverancier?.naam || 'Onbekende leverancier',
+      leverancierNaam: getLeverancierNaam(contract.leverancier),
     })) || []
 
   return { rules, contracts }
