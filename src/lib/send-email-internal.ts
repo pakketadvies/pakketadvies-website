@@ -899,27 +899,6 @@ export async function sendLeadWaaromAdviesEmail(input: {
   }
 }
 
-async function logLeadEmail(
-  supabase: ReturnType<typeof createClient>,
-  input: {
-    recipientEmail: string
-    subject: string
-    status: 'sent' | 'failed'
-    resendId?: string | null
-    errorMessage?: string | null
-  }
-) {
-  await supabase.from('email_logs').insert({
-    aanvraag_id: null,
-    email_type: 'followup',
-    recipient_email: input.recipientEmail,
-    subject: input.subject,
-    status: input.status,
-    resend_id: input.resendId || null,
-    error_message: input.errorMessage || null,
-  })
-}
-
 export async function sendLeadFunnelCompleteProfileEmail(input: {
   leadId: string
   email: string
@@ -962,20 +941,24 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
   })
 
   if (result.error) {
-    await logLeadEmail(supabase, {
-      recipientEmail: leadEmail,
+    await supabase.from('email_logs').insert({
+      aanvraag_id: null,
+      email_type: 'followup',
+      recipient_email: leadEmail,
       subject,
       status: 'failed',
-      errorMessage: result.error.message || 'Onbekende fout',
+      error_message: result.error.message || 'Onbekende fout',
     })
     throw new Error(result.error.message || 'Verzenden van funnel-mail mislukt')
   }
 
-  await logLeadEmail(supabase, {
-    recipientEmail: leadEmail,
+  await supabase.from('email_logs').insert({
+    aanvraag_id: null,
+    email_type: 'followup',
+    recipient_email: leadEmail,
     subject,
     status: 'sent',
-    resendId: result.data?.id || null,
+    resend_id: result.data?.id || null,
   })
 
   return { success: true, emailId: result.data?.id || null }
@@ -1029,20 +1012,24 @@ export async function sendLeadFunnelProposalEmail(input: {
   })
 
   if (result.error) {
-    await logLeadEmail(supabase, {
-      recipientEmail: leadEmail,
+    await supabase.from('email_logs').insert({
+      aanvraag_id: null,
+      email_type: 'followup',
+      recipient_email: leadEmail,
       subject,
       status: 'failed',
-      errorMessage: result.error.message || 'Onbekende fout',
+      error_message: result.error.message || 'Onbekende fout',
     })
     throw new Error(result.error.message || 'Verzenden van voorstelmail mislukt')
   }
 
-  await logLeadEmail(supabase, {
-    recipientEmail: leadEmail,
+  await supabase.from('email_logs').insert({
+    aanvraag_id: null,
+    email_type: 'followup',
+    recipient_email: leadEmail,
     subject,
     status: 'sent',
-    resendId: result.data?.id || null,
+    resend_id: result.data?.id || null,
   })
 
   return { success: true, emailId: result.data?.id || null }
