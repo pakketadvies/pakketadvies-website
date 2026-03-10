@@ -641,6 +641,7 @@ export interface LeadWelkomEmailData {
 export function generateLeadWelkomEmail(data: LeadWelkomEmailData): string {
   const { klantNaam, email, baseUrl } = data
   const safeKlantNaam = escapeHtml(klantNaam)
+  const salutationName = safeKlantNaam.trim().length > 0 ? safeKlantNaam : 'klant'
   const safeEmail = escapeHtml(email)
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
 
@@ -673,7 +674,7 @@ export function generateLeadWelkomEmail(data: LeadWelkomEmailData): string {
           <tr>
             <td style="background: white; padding: 30px 20px;">
               <p style="color: #0F4C75; font-size: 16px; margin: 0 0 16px 0;">
-                Beste ${safeKlantNaam},
+                Beste ${salutationName},
               </p>
               <p style="color: #64748B; font-size: 16px; margin: 0 0 14px 0; line-height: 1.6;">
                 Bedankt voor je interesse. Het kan zijn dat een specialist of adviseur van ons contact met je opneemt om je situatie kort te bespreken.
@@ -754,6 +755,7 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
   } = data
 
   const safeKlantNaam = escapeHtml(klantNaam)
+  const salutationName = safeKlantNaam.trim().length > 0 ? safeKlantNaam : 'klant'
   const safeEmail = escapeHtml(email)
   const safeContractName = escapeHtml(contractName)
   const safeSupplierName = escapeHtml(supplierName)
@@ -817,7 +819,7 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
 
           <tr>
             <td style="padding: 28px 22px; background: white;">
-              <p style="color: #0F4C75; font-size: 16px; margin: 0 0 14px 0;">Beste ${safeKlantNaam},</p>
+              <p style="color: #0F4C75; font-size: 16px; margin: 0 0 14px 0;">Beste ${salutationName},</p>
               <p style="color: #64748B; font-size: 15px; margin: 0 0 16px 0;">
                 Op basis van je selectie adviseren we:
               </p>
@@ -914,6 +916,7 @@ export interface LeadFunnelCompleteProfileEmailData {
 export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteProfileEmailData): string {
   const { klantNaam, email, baseUrl, completeProfileUrl, recommendedContract, fallbackContract } = data
   const safeKlantNaam = escapeHtml(klantNaam)
+  const salutationName = safeKlantNaam.trim().length > 0 ? safeKlantNaam : 'klant'
   const safeEmail = escapeHtml(email)
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
   const recommendedLogo = toAbsoluteUrl(recommendedContract?.supplierLogoUrl || null, baseUrl)
@@ -938,7 +941,7 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
           <p style="margin:10px 0 0 0;color:#64748B;font-size:16px;">Nog 60 seconden voor je persoonlijke contractadvies.</p>
         </td></tr>
         <tr><td style="padding:28px 24px;">
-          <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${safeKlantNaam},</p>
+          <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${salutationName},</p>
           <p style="margin:0 0 14px 0;color:#475569;">Je hebt al een aanvraag gestart met <strong>${safeEmail}</strong>. Vul kort je situatie aan en je ziet direct het beste contractvoorstel op onze website.</p>
           ${
             recommendedContract
@@ -998,6 +1001,7 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
   } = data
 
   const safeKlantNaam = escapeHtml(klantNaam)
+  const salutationName = safeKlantNaam.trim().length > 0 ? safeKlantNaam : 'klant'
   const safeEmail = escapeHtml(email)
   const safeContractName = escapeHtml(contractName)
   const safeSupplierName = escapeHtml(supplierName)
@@ -1029,7 +1033,7 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
           <p style="margin:10px 0 0 0;color:#64748B;font-size:16px;">Automatisch geselecteerd op basis van je profiel.</p>
         </td></tr>
         <tr><td style="padding:28px 24px;">
-          <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${safeKlantNaam},</p>
+          <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${salutationName},</p>
           <p style="margin:0 0 12px 0;color:#475569;">Dit contract sluit het beste aan op jouw profiel en verbruik.</p>
           <div style="border:1px solid #A7F3D0;background:#F0FDFA;border-radius:10px;padding:16px;margin:0 0 14px 0;">
             ${supplierLogo ? `<img src="${supplierLogo}" alt="${safeSupplierName}" style="height:34px;width:auto;max-width:160px;margin-bottom:10px;" />` : ''}

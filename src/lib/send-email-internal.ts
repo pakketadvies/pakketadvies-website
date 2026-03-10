@@ -17,7 +17,7 @@ function deriveLeadName(email: string): string {
   const localPart = email.trim().toLowerCase().split('@')[0] || ''
   const preferred = localPart.split(/[._-]+/)[0] || localPart
   const cleaned = preferred.replace(/[^a-zA-Z]/g, '')
-  if (cleaned.length < 2) return 'daar'
+  if (cleaned.length < 2) return 'klant'
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
 }
 
@@ -772,7 +772,7 @@ export async function sendLeadWelkomEmail(input: {
   const leadEmail = input.email.trim().toLowerCase()
   const rawName = input.naam?.trim()
   const derivedName = rawName && rawName.length > 0 ? rawName : leadEmail.split('@')[0]
-  const klantNaam = derivedName.length > 1 ? derivedName : 'daar'
+  const klantNaam = derivedName.length > 1 ? derivedName : 'klant'
 
   const html = generateLeadWelkomEmail({
     klantNaam,
@@ -850,7 +850,7 @@ export async function sendLeadWaaromAdviesEmail(input: {
   const leadEmail = input.email.trim().toLowerCase()
   const rawName = input.naam?.trim()
   const derivedName = rawName && rawName.length > 0 ? rawName : leadEmail.split('@')[0]
-  const klantNaam = derivedName.length > 1 ? derivedName : 'daar'
+  const klantNaam = derivedName.length > 1 ? derivedName : 'klant'
 
   const html = generateLeadWaaromAdviesEmail({
     klantNaam,

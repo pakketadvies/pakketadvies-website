@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { resolveLeadFunnelRecommendation } from '@/lib/lead-funnel'
 
 const extraContextSchema = z.object({
   locationType: z.enum(['woning', 'zakelijk_pand', 'zakelijk_aan_huis', 'onbekend']).optional(),
@@ -66,15 +67,51 @@ export async function PATCH(
       }
     )
 
+    const { data: existingLead, error: existingLeadError } = await supabase
+      .from('comparison_leads')
+      .select('id, email, flow, funnel_access_token')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (existingLeadError || !existingLead) {
+      console.error('Error loading comparison lead for context update:', existingLeadError)
+      return NextResponse.json(
+        { success: false, error: 'Lead niet gevonden.' },
+        { status: 404 }
+      )
+    }
+
+    const recommendation = await resolveLeadFunnelRecommendation(supabase, {
+      flow: existingLead.flow,
+      extra_context: parsed.data.extraContext,
+    })
+
+    const funnelUpdate =
+      recommendation.primary
+        ? {
+            funnel_status: 'proposal_sent' as const,
+            funnel_profile_completed_at: new Date().toISOString(),
+            funnel_recommended_contract_id: recommendation.primary.id,
+            funnel_fallback_contract_id: recommendation.fallback?.id || null,
+            funnel_step: 1,
+            funnel_next_email_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            funnel_metadata: {
+              last_profile_submit_at: new Date().toISOString(),
+              recommendation_rule_id: recommendation.rule?.id || null,
+            },
+          }
+        : {}
+
     const { data, error } = await supabase
       .from('comparison_leads')
       .update({
         extra_context: parsed.data.extraContext,
         profile_completion: completion,
         followup_priority: priority,
+        ...funnelUpdate,
       })
       .eq('id', id)
-      .select('id, profile_completion, followup_priority')
+      .select('id, profile_completion, followup_priority, funnel_status')
       .single()
 
     if (error || !data?.id) {
@@ -85,11 +122,29 @@ export async function PATCH(
       )
     }
 
+    if (recommendation.primary && existingLead.funnel_access_token) {
+      try {
+        const { sendLeadFunnelProposalEmail } = await import('@/lib/send-email-internal')
+        await sendLeadFunnelProposalEmail({
+          leadId: existingLead.id,
+          email: existingLead.email,
+          accessToken: existingLead.funnel_access_token,
+          contract: recommendation.primary,
+          fallback: recommendation.fallback,
+          step: 1,
+        })
+      } catch (mailError: unknown) {
+        console.error('Funnel voorstelmail versturen mislukt na context update:', mailError)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       id: data.id,
       profileCompletion: data.profile_completion,
       followupPriority: data.followup_priority,
+      funnelStatus: data.funnel_status,
+      recommendation,
     })
   } catch (error: unknown) {
     console.error('Unexpected error updating lead context:', error)
