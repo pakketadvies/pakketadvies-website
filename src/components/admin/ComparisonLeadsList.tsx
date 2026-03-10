@@ -13,6 +13,8 @@ interface ComparisonLeadsListProps {
   initialLeads: ComparisonLead[]
 }
 
+type LeadFunnelStatus = NonNullable<ComparisonLead['funnel_status']>
+
 const exportColumns = [
   { key: 'created_at', label: 'Datum aangemaakt' },
   { key: 'email', label: 'E-mailadres' },
@@ -104,6 +106,14 @@ const gasRangeLabels: Record<string, string> = {
   unknown: 'Niet opgegeven',
 }
 
+const funnelStatusLabels: Record<LeadFunnelStatus, string> = {
+  pending_profile: 'Wacht op profiel',
+  profile_completed: 'Profiel compleet',
+  proposal_sent: 'Voorstel verstuurd',
+  converted: 'Geconverteerd',
+  unsubscribed: 'Uitgeschreven',
+}
+
 export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsListProps) {
   const router = useRouter()
   const [leads, setLeads] = useState(initialLeads)
@@ -111,6 +121,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
   const [statusFilter, setStatusFilter] = useState<'all' | ComparisonLeadStatus>('all')
   const [sourceFilter, setSourceFilter] = useState<'all' | ComparisonLead['source']>('all')
   const [priorityFilter, setPriorityFilter] = useState<'all' | ComparisonLeadPriority>('all')
+  const [funnelFilter, setFunnelFilter] = useState<'all' | LeadFunnelStatus>('all')
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
   const [exportingFormat, setExportingFormat] = useState<'csv' | 'excel' | null>(null)
@@ -126,6 +137,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
       if (statusFilter !== 'all' && lead.status !== statusFilter) return false
       if (sourceFilter !== 'all' && lead.source !== sourceFilter) return false
       if (priorityFilter !== 'all' && lead.followup_priority !== priorityFilter) return false
+      if (funnelFilter !== 'all' && lead.funnel_status !== funnelFilter) return false
       if (!q) return true
       return (
         lead.email.toLowerCase().includes(q) ||
@@ -135,7 +147,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
         (lead.extra_context?.note || '').toLowerCase().includes(q)
       )
     })
-  }, [leads, query, statusFilter, sourceFilter, priorityFilter])
+  }, [leads, query, statusFilter, sourceFilter, priorityFilter, funnelFilter])
 
   const selectedLead = useMemo(
     () => filtered.find((lead) => lead.id === selectedLeadId) || null,
@@ -227,6 +239,42 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
     }
   }
 
+  const formatDateTime = (value?: string | null) => {
+    if (!value) return '-'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return '-'
+    return date.toLocaleString('nl-NL')
+  }
+
+  const getFunnelStatusLabel = (status?: ComparisonLead['funnel_status']) => {
+    if (!status) return 'Nog niet gestart'
+    return funnelStatusLabels[status]
+  }
+
+  const getFunnelStatusClassName = (status?: ComparisonLead['funnel_status']) => {
+    if (!status) return 'bg-gray-100 text-gray-700'
+    switch (status) {
+      case 'pending_profile':
+        return 'bg-amber-50 text-amber-700'
+      case 'profile_completed':
+        return 'bg-blue-50 text-blue-700'
+      case 'proposal_sent':
+        return 'bg-brand-teal-50 text-brand-teal-700'
+      case 'converted':
+        return 'bg-green-50 text-green-700'
+      case 'unsubscribed':
+        return 'bg-red-50 text-red-700'
+      default:
+        return 'bg-gray-100 text-gray-700'
+    }
+  }
+
+  const getFunnelProgress = (lead: ComparisonLead) => {
+    const step = Math.max(0, Math.min(4, lead.funnel_step || 0))
+    if (lead.funnel_status === 'converted') return 100
+    return Math.round((step / 4) * 100)
+  }
+
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl border-2 border-gray-200 p-4">
@@ -293,12 +341,24 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
               </option>
             ))}
           </select>
+          <select
+            value={funnelFilter}
+            onChange={(event) => setFunnelFilter(event.target.value as 'all' | LeadFunnelStatus)}
+            className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500"
+          >
+            <option value="all">Alle funnelstatussen</option>
+            {Object.entries(funnelStatusLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
       <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1240px]">
+          <table className="w-full min-w-[1400px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr className="text-left">
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Datum</th>
@@ -310,6 +370,7 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Compleetheid</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Prioriteit</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Funnel</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Details</th>
               </tr>
             </thead>
@@ -363,6 +424,24 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
                         {statusLabels[lead.status]}
                       </span>
                     </td>
+                    <td className="px-4 py-3 min-w-[200px]">
+                      <div className="space-y-1.5">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getFunnelStatusClassName(
+                            lead.funnel_status
+                          )}`}
+                        >
+                          {getFunnelStatusLabel(lead.funnel_status)}
+                        </span>
+                        <div className="h-1.5 w-full rounded-full bg-gray-100">
+                          <div
+                            className="h-1.5 rounded-full bg-brand-teal-500"
+                            style={{ width: `${getFunnelProgress(lead)}%` }}
+                          />
+                        </div>
+                        <p className="text-[11px] text-gray-500">Stap {lead.funnel_step || 0} / 4</p>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
@@ -395,7 +474,30 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 text-sm">
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Funnel status</p>
+                <span
+                  className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getFunnelStatusClassName(
+                    selectedLead.funnel_status
+                  )}`}
+                >
+                  {getFunnelStatusLabel(selectedLead.funnel_status)}
+                </span>
+                <div className="mt-3 h-2 w-full rounded-full bg-gray-100">
+                  <div
+                    className="h-2 rounded-full bg-brand-teal-500"
+                    style={{ width: `${getFunnelProgress(selectedLead)}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-600">Stap {selectedLead.funnel_step || 0} / 4</p>
+                <p className="mt-2 text-xs text-gray-600">Laatste e-mail: {formatDateTime(selectedLead.funnel_last_email_sent_at)}</p>
+                <p className="text-xs text-gray-600">Volgende e-mail: {formatDateTime(selectedLead.funnel_next_email_at)}</p>
+                <p className="text-xs text-gray-600">
+                  Profiel compleet op: {formatDateTime(selectedLead.funnel_profile_completed_at)}
+                </p>
+              </div>
+
               <div className="rounded-lg border border-gray-200 bg-white p-3">
                 <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Profielcontext</p>
                 <p className="text-gray-700">Locatie: {locationLabels[selectedLead.extra_context?.locationType || 'onbekend']}</p>
@@ -419,6 +521,16 @@ export default function ComparisonLeadsList({ initialLeads }: ComparisonLeadsLis
                 <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Notitie</p>
                 <p className="text-gray-700 whitespace-pre-wrap">
                   {selectedLead.extra_context?.note || 'Geen extra notitie ingevuld.'}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Aanbevolen contracten</p>
+                <p className="text-gray-700 break-all">
+                  Primair contract ID: {selectedLead.funnel_recommended_contract_id || '-'}
+                </p>
+                <p className="text-gray-700 break-all">
+                  Fallback contract ID: {selectedLead.funnel_fallback_contract_id || '-'}
                 </p>
               </div>
             </div>
