@@ -15,6 +15,7 @@ function UnsubscribeContent() {
       try {
         const token = searchParams?.get('token')
         const email = searchParams?.get('email')
+        const source = searchParams?.get('source')
 
         if (!token && !email) {
           setStatus('error')
@@ -28,7 +29,7 @@ function UnsubscribeContent() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ token, email }),
+          body: JSON.stringify({ token, email, source }),
         })
 
         const data = await response.json()

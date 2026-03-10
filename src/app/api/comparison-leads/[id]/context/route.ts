@@ -89,12 +89,12 @@ export async function PATCH(
     const funnelUpdate =
       recommendation.primary
         ? {
-            funnel_status: 'proposal_sent' as const,
+            funnel_status: 'profile_completed' as const,
             funnel_profile_completed_at: new Date().toISOString(),
             funnel_recommended_contract_id: recommendation.primary.id,
             funnel_fallback_contract_id: recommendation.fallback?.id || null,
-            funnel_step: 1,
-            funnel_next_email_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            funnel_step: 0,
+            funnel_next_email_at: null,
             funnel_metadata: {
               last_profile_submit_at: new Date().toISOString(),
               recommendation_rule_id: recommendation.rule?.id || null,
@@ -132,7 +132,18 @@ export async function PATCH(
           contract: recommendation.primary,
           fallback: recommendation.fallback,
           step: 1,
+          customSubject: recommendation.rule?.email_subject || null,
         })
+
+        await supabase
+          .from('comparison_leads')
+          .update({
+            funnel_status: 'proposal_sent',
+            funnel_step: 1,
+            funnel_last_email_sent_at: new Date().toISOString(),
+            funnel_next_email_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          })
+          .eq('id', existingLead.id)
       } catch (mailError: unknown) {
         console.error('Funnel voorstelmail versturen mislukt na context update:', mailError)
       }

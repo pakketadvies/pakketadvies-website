@@ -23,7 +23,10 @@ export function TimedLeadCapturePopup({ pathname }: TimedLeadCapturePopupProps) 
   const [canClose, setCanClose] = useState(false)
 
   const flow = useMemo(() => inferLeadFlow(pathname), [pathname])
-  const shouldSkipRoute = pathname.startsWith('/admin') || pathname.startsWith('/contract-viewer')
+  const shouldSkipRoute =
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/contract-viewer') ||
+    pathname.startsWith('/bekijk-contract')
   const popupDelayMs = pathname === '/' ? HOMEPAGE_POPUP_DELAY_MS : DEFAULT_POPUP_DELAY_MS
 
   useEffect(() => {

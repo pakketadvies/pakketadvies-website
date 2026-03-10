@@ -733,6 +733,7 @@ export interface LeadWaaromAdviesEmailData {
   whyPoints?: string[]
   whyDisclaimer?: string | null
   pagePath?: string | null
+  unsubscribeUrl?: string | null
 }
 
 export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): string {
@@ -752,6 +753,7 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
     whyPoints = [],
     whyDisclaimer,
     pagePath,
+    unsubscribeUrl,
   } = data
 
   const safeKlantNaam = escapeHtml(klantNaam)
@@ -764,6 +766,7 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
   const safeWhyIntro = escapeHtml(whyIntro || '')
   const safeWhyDisclaimer = escapeHtml(whyDisclaimer || '')
   const safePagePath = escapeHtml(pagePath || '/calculator/resultaten')
+  const safeUnsubscribeUrl = unsubscribeUrl || `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`
   const supplierLogo = toAbsoluteUrl(supplierLogoUrl || null, baseUrl)
   const applyUrl = contractId
     ? `${baseUrl}/calculator?stap=2&contract=${encodeURIComponent(contractId)}&direct=true`
@@ -867,6 +870,10 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
               <p style="margin: 0; color: #64748B; font-size: 13px;">
                 We hebben dit advies gestuurd naar: <strong style="color: #0F4C75;">${safeEmail}</strong>
               </p>
+              <p style="margin: 8px 0 0 0; color: #94A3B8; font-size: 12px;">
+                Geen vervolg-e-mails meer ontvangen over dit voorstel?
+                <a href="${safeUnsubscribeUrl}" style="color: #0F4C75; text-decoration: underline;">Schrijf je hier uit</a>.
+              </p>
             </td>
           </tr>
 
@@ -911,13 +918,15 @@ export interface LeadFunnelCompleteProfileEmailData {
     supplierName: string
     supplierLogoUrl?: string | null
   } | null
+  unsubscribeUrl?: string | null
 }
 
 export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteProfileEmailData): string {
-  const { klantNaam, email, baseUrl, completeProfileUrl, recommendedContract, fallbackContract } = data
+  const { klantNaam, email, baseUrl, completeProfileUrl, recommendedContract, fallbackContract, unsubscribeUrl } = data
   const safeKlantNaam = escapeHtml(klantNaam)
   const salutationName = safeKlantNaam.trim().length > 0 ? safeKlantNaam : 'klant'
   const safeEmail = escapeHtml(email)
+  const safeUnsubscribeUrl = unsubscribeUrl || `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
   const recommendedLogo = toAbsoluteUrl(recommendedContract?.supplierLogoUrl || null, baseUrl)
 
@@ -960,6 +969,10 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
             <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Maak mijn voorstel compleet</a>
           </div>
           <p style="margin:0;color:#64748B;font-size:13px;">Geen account nodig. Je kunt daarna direct online afsluiten als het voorstel past.</p>
+          <p style="margin:10px 0 0 0;color:#94A3B8;font-size:12px;">
+            Wil je geen vervolg-e-mails meer over dit voorstel?
+            <a href="${safeUnsubscribeUrl}" style="color:#0F4C75;text-decoration:underline;">Schrijf je hier uit</a>.
+          </p>
         </td></tr>
       </table>
     </td></tr>
@@ -982,6 +995,7 @@ export interface LeadFunnelProposalEmailData {
   fallbackSupplierName?: string | null
   fallbackSupplierLogoUrl?: string | null
   fallbackContractName?: string | null
+  unsubscribeUrl?: string | null
 }
 
 export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailData): string {
@@ -998,11 +1012,13 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
     fallbackSupplierName,
     fallbackSupplierLogoUrl,
     fallbackContractName,
+    unsubscribeUrl,
   } = data
 
   const safeKlantNaam = escapeHtml(klantNaam)
   const salutationName = safeKlantNaam.trim().length > 0 ? safeKlantNaam : 'klant'
   const safeEmail = escapeHtml(email)
+  const safeUnsubscribeUrl = unsubscribeUrl || `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`
   const safeContractName = escapeHtml(contractName)
   const safeSupplierName = escapeHtml(supplierName)
   const safeContractType = escapeHtml(contractType)
@@ -1054,6 +1070,10 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
           </div>
           <p style="margin:0 0 8px 0;color:#64748B;font-size:13px;">Deze mail is gestuurd naar ${safeEmail}.</p>
           <p style="margin:0;color:#64748B;font-size:13px;">Klopt je situatie niet helemaal? <a href="${completeProfileUrl}" style="color:#0F4C75;text-decoration:underline;">Werk je gegevens bij</a> en ontvang een nieuw advies.</p>
+          <p style="margin:10px 0 0 0;color:#94A3B8;font-size:12px;">
+            Geen vervolg-e-mails meer ontvangen?
+            <a href="${safeUnsubscribeUrl}" style="color:#0F4C75;text-decoration:underline;">Schrijf je hier uit</a>.
+          </p>
         </td></tr>
       </table>
     </td></tr>

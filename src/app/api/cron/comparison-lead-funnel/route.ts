@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       .select(
         'id, email, flow, extra_context, funnel_access_token, funnel_status, funnel_step, funnel_next_email_at, funnel_recommended_contract_id, funnel_fallback_contract_id, status'
       )
-      .in('funnel_status', ['pending_profile', 'proposal_sent'])
+      .in('funnel_status', ['pending_profile', 'profile_completed', 'proposal_sent'])
       .neq('status', 'converted')
       .not('funnel_access_token', 'is', null)
       .not('funnel_next_email_at', 'is', null)
@@ -97,7 +97,12 @@ export async function GET(request: Request) {
           continue
         }
 
-        if (lead.funnel_status === 'proposal_sent') {
+        if (lead.funnel_status === 'profile_completed' || lead.funnel_status === 'proposal_sent') {
+          const resolved = await resolveLeadFunnelRecommendation(supabase, {
+            flow: lead.flow,
+            extra_context: lead.extra_context,
+          })
+
           let recommendation = null
           if (lead.funnel_recommended_contract_id) {
             const { data: contractData } = await supabase
@@ -119,10 +124,6 @@ export async function GET(request: Request) {
           }
 
           if (!recommendation) {
-            const resolved = await resolveLeadFunnelRecommendation(supabase, {
-              flow: lead.flow,
-              extra_context: lead.extra_context,
-            })
             recommendation = resolved.primary
           }
 
@@ -132,7 +133,9 @@ export async function GET(request: Request) {
               email: lead.email,
               accessToken: lead.funnel_access_token,
               contract: recommendation,
+              fallback: resolved.fallback,
               step: Math.max(2, lead.funnel_step || 2),
+              customSubject: resolved.rule?.email_subject || null,
             })
 
             const nextStep = (lead.funnel_step || 1) + 1
@@ -141,6 +144,7 @@ export async function GET(request: Request) {
             await supabase
               .from('comparison_leads')
               .update({
+                funnel_status: 'proposal_sent',
                 funnel_step: nextStep,
                 funnel_last_email_sent_at: new Date().toISOString(),
                 funnel_next_email_at: nextEmailAt,

@@ -98,7 +98,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
       extra_context: payload.extraContext,
     })
 
-    const nextEmailAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     const { error: updateError } = await supabase
       .from('comparison_leads')
       .update({
@@ -106,12 +105,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
         extra_context: payload.extraContext,
         profile_completion: completion,
         followup_priority: completion >= 70 ? 'high' : completion >= 35 ? 'medium' : 'low',
-        funnel_status: 'proposal_sent',
+        funnel_status: 'profile_completed',
         funnel_profile_completed_at: new Date().toISOString(),
         funnel_recommended_contract_id: recommendation.primary?.id || null,
         funnel_fallback_contract_id: recommendation.fallback?.id || null,
-        funnel_step: 1,
-        funnel_next_email_at: nextEmailAt,
+        funnel_step: 0,
+        funnel_next_email_at: null,
         funnel_metadata: {
           last_profile_submit_at: new Date().toISOString(),
           recommendation_rule_id: recommendation.rule?.id || null,
@@ -133,7 +132,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
           contract: recommendation.primary,
           fallback: recommendation.fallback,
           step: 1,
+          customSubject: recommendation.rule?.email_subject || null,
         })
+
+        await supabase
+          .from('comparison_leads')
+          .update({
+            funnel_status: 'proposal_sent',
+            funnel_step: 1,
+            funnel_last_email_sent_at: new Date().toISOString(),
+            funnel_next_email_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          })
+          .eq('id', lead.id)
       } catch (emailError: unknown) {
         console.error('Funnel proposal e-mail versturen mislukt:', emailError)
       }

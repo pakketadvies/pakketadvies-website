@@ -21,6 +21,13 @@ function deriveLeadName(email: string): string {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
 }
 
+function getFunnelUnsubscribeUrl(input: { baseUrl: string; accessToken?: string | null; email: string }): string {
+  if (input.accessToken && input.accessToken.length > 10) {
+    return `${input.baseUrl}/unsubscribe?token=${encodeURIComponent(input.accessToken)}&source=funnel`
+  }
+  return `${input.baseUrl}/unsubscribe?email=${encodeURIComponent(input.email)}`
+}
+
 /**
  * Internal function to send confirmation email
  * Can be called directly from other API routes without HTTP fetch
@@ -852,6 +859,18 @@ export async function sendLeadWaaromAdviesEmail(input: {
   const derivedName = rawName && rawName.length > 0 ? rawName : leadEmail.split('@')[0]
   const klantNaam = derivedName.length > 1 ? derivedName : 'klant'
 
+  const { data: leadData } = await supabase
+    .from('comparison_leads')
+    .select('funnel_access_token')
+    .eq('id', input.leadId)
+    .maybeSingle()
+
+  const unsubscribeUrl = getFunnelUnsubscribeUrl({
+    baseUrl,
+    accessToken: leadData?.funnel_access_token || null,
+    email: leadEmail,
+  })
+
   const html = generateLeadWaaromAdviesEmail({
     klantNaam,
     email: leadEmail,
@@ -868,6 +887,7 @@ export async function sendLeadWaaromAdviesEmail(input: {
     whyPoints: input.advice.whyPoints || [],
     whyDisclaimer: input.advice.whyDisclaimer ?? null,
     pagePath: input.advice.pagePath ?? null,
+    unsubscribeUrl,
   })
 
   const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
@@ -914,6 +934,7 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
   email: string
   accessToken: string
   step?: number
+  customSubject?: string | null
 }) {
   if (!process.env.RESEND_API_KEY) throw new Error('Email service niet geconfigureerd')
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Server configuration error')
@@ -931,15 +952,12 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
 
   const leadEmail = input.email.trim().toLowerCase()
   const klantNaam = deriveLeadName(leadEmail)
-  const subject =
-    input.step && input.step > 0
-      ? 'Maak je voorstel af en ontvang je advies op maat'
-      : 'Voorkom te hoge energiekosten: maak je voorstel compleet'
 
   let recommendation: {
     primary: LeadFunnelContract | null
     fallback: LeadFunnelContract | null
-  } = { primary: null, fallback: null }
+    subject: string | null
+  } = { primary: null, fallback: null, subject: null }
 
   try {
     const { data: leadContext } = await supabase
@@ -956,11 +974,25 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
       recommendation = {
         primary: resolved.primary,
         fallback: resolved.fallback,
+        subject: resolved.rule?.email_subject || null,
       }
     }
   } catch (resolveError: unknown) {
     console.warn('Kon contractpreview voor profielmail niet bepalen:', resolveError)
   }
+
+  const subject =
+    input.customSubject?.trim() ||
+    recommendation.subject?.trim() ||
+    (input.step && input.step > 0
+      ? 'Maak je voorstel af en ontvang je advies op maat'
+      : 'Voorkom te hoge energiekosten: maak je voorstel compleet')
+
+  const unsubscribeUrl = getFunnelUnsubscribeUrl({
+    baseUrl,
+    accessToken: input.accessToken,
+    email: leadEmail,
+  })
 
   const html = generateLeadFunnelCompleteProfileEmail({
     klantNaam,
@@ -969,6 +1001,7 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
     completeProfileUrl,
     recommendedContract: recommendation.primary,
     fallbackContract: recommendation.fallback,
+    unsubscribeUrl,
   })
 
   const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
@@ -1013,6 +1046,7 @@ export async function sendLeadFunnelProposalEmail(input: {
   contract: LeadFunnelContract
   fallback?: LeadFunnelContract | null
   step?: number
+  customSubject?: string | null
 }) {
   if (!process.env.RESEND_API_KEY) throw new Error('Email service niet geconfigureerd')
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Server configuration error')
@@ -1031,9 +1065,16 @@ export async function sendLeadFunnelProposalEmail(input: {
   const leadEmail = input.email.trim().toLowerCase()
   const klantNaam = deriveLeadName(leadEmail)
   const subject =
-    input.step && input.step > 1
+    input.customSubject?.trim() ||
+    (input.step && input.step > 1
       ? `${input.contract.supplierName} ${input.contract.name} staat nog voor je klaar`
-      : `Dit contract past het best bij jouw situatie: ${input.contract.supplierName}`
+      : `Dit contract past het best bij jouw situatie: ${input.contract.supplierName}`)
+
+  const unsubscribeUrl = getFunnelUnsubscribeUrl({
+    baseUrl,
+    accessToken: input.accessToken,
+    email: leadEmail,
+  })
   const html = generateLeadFunnelProposalEmail({
     klantNaam,
     email: leadEmail,
@@ -1047,6 +1088,7 @@ export async function sendLeadFunnelProposalEmail(input: {
     fallbackSupplierName: input.fallback?.supplierName || null,
     fallbackSupplierLogoUrl: input.fallback?.supplierLogoUrl || null,
     fallbackContractName: input.fallback?.name || null,
+    unsubscribeUrl,
   })
 
   const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
