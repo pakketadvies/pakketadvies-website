@@ -91,6 +91,7 @@ export default function AanbodCompleterenPage() {
     if (!error) return null
     return error.replace(/funnel/gi, 'voorstel')
   }, [error])
+  const pageTopPadding = 'calc(env(safe-area-inset-top) + var(--site-header-offset, 96px) + 16px)'
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -131,7 +132,7 @@ export default function AanbodCompleterenPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-10">
+      <main className="min-h-screen bg-gray-50 pb-10" style={{ paddingTop: pageTopPadding }}>
         <div className="container-custom max-w-2xl">
           <div className="rounded-2xl bg-white border border-gray-200 p-8 text-center">
             <p className="text-gray-600">Je persoonlijke voorstel wordt klaargezet...</p>
@@ -143,7 +144,7 @@ export default function AanbodCompleterenPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-10">
+      <main className="min-h-screen bg-gray-50 pb-10" style={{ paddingTop: pageTopPadding }}>
         <div className="container-custom max-w-2xl">
           <div className="rounded-2xl bg-white border border-red-200 p-8 text-center">
             <h1 className="text-xl font-bold text-brand-navy-500 mb-2">Dit aanbod kon niet geladen worden</h1>
@@ -155,7 +156,7 @@ export default function AanbodCompleterenPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-20 pb-10">
+    <main className="min-h-screen bg-gray-50 pb-10" style={{ paddingTop: pageTopPadding }}>
       <div className="container-custom max-w-3xl space-y-5">
         <div className="rounded-2xl bg-brand-navy-500 text-white p-6">
           <p className="text-sm text-white/80">Persoonlijk aanbod</p>

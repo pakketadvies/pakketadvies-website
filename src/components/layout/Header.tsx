@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
@@ -32,6 +32,7 @@ function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 3
 export function Header() {
   const pathname = usePathname()
   const router = useRouter()
+  const headerRef = useRef<HTMLElement | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [audience, setAudience] = useState<Audience>('business')
@@ -50,6 +51,30 @@ export function Header() {
     const nextAudience: Audience = pathname?.startsWith('/particulier') ? 'consumer' : 'business'
     setAudience(nextAudience)
   }, [pathname])
+
+  useEffect(() => {
+    const updateHeaderOffset = () => {
+      const headerHeight = headerRef.current?.getBoundingClientRect().height
+      if (!headerHeight || Number.isNaN(headerHeight)) return
+      document.documentElement.style.setProperty('--site-header-offset', `${Math.ceil(headerHeight)}px`)
+    }
+
+    updateHeaderOffset()
+
+    const observer = new ResizeObserver(() => {
+      updateHeaderOffset()
+    })
+
+    if (headerRef.current) {
+      observer.observe(headerRef.current)
+    }
+
+    window.addEventListener('resize', updateHeaderOffset)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeaderOffset)
+    }
+  }, [])
 
   const businessNavLinks = [
     { href: '/diensten', label: 'Diensten' },
@@ -95,7 +120,7 @@ export function Header() {
   }
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <header ref={headerRef} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled ? 'py-3' : 'py-5'
     }`}>
       <div className="container-custom">
