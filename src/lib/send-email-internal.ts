@@ -11,7 +11,15 @@ import {
   generateLeadFunnelProposalEmail,
 } from '@/lib/email-templates'
 import type { LeadAdviceEmailPayload } from '@/types/comparison-leads'
-import type { LeadFunnelContract } from '@/lib/lead-funnel'
+import { resolveLeadFunnelRecommendation, type LeadFunnelContract } from '@/lib/lead-funnel'
+
+function deriveLeadName(email: string): string {
+  const localPart = email.trim().toLowerCase().split('@')[0] || ''
+  const preferred = localPart.split(/[._-]+/)[0] || localPart
+  const cleaned = preferred.replace(/[^a-zA-Z]/g, '')
+  if (cleaned.length < 2) return 'daar'
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
+}
 
 /**
  * Internal function to send confirmation email
@@ -848,8 +856,10 @@ export async function sendLeadWaaromAdviesEmail(input: {
     klantNaam,
     email: leadEmail,
     baseUrl,
+    contractId: input.advice.contractId ?? null,
     contractName: input.advice.contractName,
     supplierName: input.advice.supplierName,
+    supplierLogoUrl: input.advice.supplierLogoUrl ?? null,
     contractType: input.advice.contractType,
     monthlyPrice: input.advice.monthlyPrice ?? null,
     yearlyPrice: input.advice.yearlyPrice ?? null,
@@ -920,13 +930,45 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
   )
 
   const leadEmail = input.email.trim().toLowerCase()
-  const klantNaam = leadEmail.split('@')[0] || 'daar'
-  const subject = input.step && input.step > 0 ? 'Je voorstel is nog niet afgerond' : 'Maak je energievoorstel compleet'
+  const klantNaam = deriveLeadName(leadEmail)
+  const subject =
+    input.step && input.step > 0
+      ? 'Rond je advies af en bekijk direct je beste contract'
+      : 'Je persoonlijke contractadvies staat klaar (nog 1 stap)'
+
+  let recommendation: {
+    primary: LeadFunnelContract | null
+    fallback: LeadFunnelContract | null
+  } = { primary: null, fallback: null }
+
+  try {
+    const { data: leadContext } = await supabase
+      .from('comparison_leads')
+      .select('flow, extra_context')
+      .eq('id', input.leadId)
+      .maybeSingle()
+
+    if (leadContext) {
+      const resolved = await resolveLeadFunnelRecommendation(supabase, {
+        flow: leadContext.flow,
+        extra_context: leadContext.extra_context,
+      })
+      recommendation = {
+        primary: resolved.primary,
+        fallback: resolved.fallback,
+      }
+    }
+  } catch (resolveError: unknown) {
+    console.warn('Kon contractpreview voor profielmail niet bepalen:', resolveError)
+  }
+
   const html = generateLeadFunnelCompleteProfileEmail({
     klantNaam,
     email: leadEmail,
     baseUrl,
     completeProfileUrl,
+    recommendedContract: recommendation.primary,
+    fallbackContract: recommendation.fallback,
   })
 
   const fromEmail = (process.env.RESEND_FROM_EMAIL || 'PakketAdvies <onboarding@resend.dev>')
@@ -987,16 +1029,23 @@ export async function sendLeadFunnelProposalEmail(input: {
   )
 
   const leadEmail = input.email.trim().toLowerCase()
-  const klantNaam = leadEmail.split('@')[0] || 'daar'
-  const subject = input.step && input.step > 1 ? 'Je aanbevolen contract staat nog klaar' : 'Jouw aanbevolen energiecontract'
+  const klantNaam = deriveLeadName(leadEmail)
+  const subject =
+    input.step && input.step > 1
+      ? `${input.contract.supplierName} ${input.contract.name} staat nog voor je klaar`
+      : `Dit contract past het best bij jouw situatie: ${input.contract.supplierName}`
   const html = generateLeadFunnelProposalEmail({
     klantNaam,
     email: leadEmail,
     baseUrl,
     completeProfileUrl,
+    contractId: input.contract.id,
     contractName: input.contract.name,
     supplierName: input.contract.supplierName,
+    supplierLogoUrl: input.contract.supplierLogoUrl || null,
     contractType: input.contract.type,
+    fallbackSupplierName: input.fallback?.supplierName || null,
+    fallbackSupplierLogoUrl: input.fallback?.supplierLogoUrl || null,
     fallbackContractName: input.fallback?.name || null,
   })
 

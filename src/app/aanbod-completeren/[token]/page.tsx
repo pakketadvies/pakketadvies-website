@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 
 type FlowType = 'business' | 'consumer' | 'unknown'
@@ -160,9 +161,37 @@ export default function AanbodCompleterenPage() {
           <p className="text-sm text-white/80">Persoonlijk aanbod</p>
           <h1 className="text-2xl font-bold mt-1">Maak je energievoorstel compleet</h1>
           <p className="text-sm text-white/85 mt-2">
-            We hebben je e-mail ontvangen ({lead?.email}). Vul deze korte stappen in en je ziet direct het aanbevolen contract.
+            We hebben je e-mail ontvangen ({lead?.email}). Vul deze korte stappen in en je ziet direct je best passende contract met directe aanvraagknop.
           </p>
         </div>
+
+        {!completed && recommended && (
+          <div className="rounded-2xl border border-brand-teal-200 bg-brand-teal-50/40 p-5">
+            <p className="text-xs uppercase tracking-wide text-brand-teal-700 font-semibold">Huidige beste match</p>
+            <div className="mt-3 flex items-center gap-3">
+              {recommended.supplierLogoUrl ? (
+                <div className="h-11 w-24 rounded-lg border border-brand-teal-100 bg-white p-2 flex items-center justify-center">
+                  <Image
+                    src={recommended.supplierLogoUrl}
+                    alt={`${recommended.supplierName} logo`}
+                    width={96}
+                    height={44}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              ) : null}
+              <div>
+                <p className="text-base font-bold text-brand-navy-500">{recommended.supplierName}</p>
+                <p className="text-sm text-gray-700">
+                  {recommended.name} - {recommended.type}
+                </p>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-gray-600">
+              Controleer hieronder je situatie voor een definitief advies.
+            </p>
+          </div>
+        )}
 
         {!completed && (
           <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 space-y-4">
@@ -261,9 +290,32 @@ export default function AanbodCompleterenPage() {
             <h2 className="text-xl font-bold text-brand-navy-500">Jouw aanbevolen contract</h2>
             {recommended ? (
               <div className="rounded-xl border border-brand-teal-200 bg-brand-teal-50/40 p-4">
-                <p className="text-sm text-gray-600">Aanbevolen leverancier</p>
-                <p className="text-lg font-bold text-brand-navy-500">{recommended.supplierName}</p>
-                <p className="text-sm text-gray-700">{recommended.name} - {recommended.type}</p>
+                <p className="text-xs uppercase tracking-wide text-brand-teal-700 font-semibold mb-2">Beste keuze voor jouw situatie</p>
+                <div className="flex items-center gap-3">
+                  {recommended.supplierLogoUrl ? (
+                    <div className="h-12 w-28 rounded-lg border border-brand-teal-100 bg-white p-2 flex items-center justify-center">
+                      <Image
+                        src={recommended.supplierLogoUrl}
+                        alt={`${recommended.supplierName} logo`}
+                        width={112}
+                        height={48}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-sm text-gray-600">Aanbevolen leverancier</p>
+                    <p className="text-lg font-bold text-brand-navy-500">{recommended.supplierName}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 mt-3">
+                  {recommended.name} - {recommended.type}
+                </p>
+                <ul className="mt-3 space-y-1.5 text-sm text-gray-700">
+                  <li>• Geselecteerd op basis van je verbruik en overstapmoment</li>
+                  <li>• Direct online aan te vragen zonder extra account</li>
+                  <li>• Je ziet in de volgende stap exact alle kosten en voorwaarden</li>
+                </ul>
                 <div className="mt-4">
                   <Link href={contractApplyLink}>
                     <Button className="w-full md:w-auto">Vraag dit contract direct aan</Button>

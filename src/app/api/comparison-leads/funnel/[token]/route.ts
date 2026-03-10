@@ -63,7 +63,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     })
   } catch (error: unknown) {
     console.error('Unexpected error loading lead funnel token:', error)
-    return NextResponse.json({ success: false, error: 'Onverwachte fout bij laden funnel.' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Onverwachte fout bij laden voorstel.' }, { status: 500 })
   }
 }
 

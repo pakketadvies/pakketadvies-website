@@ -6,8 +6,10 @@ import { validateEmail } from '@/lib/security/email-validation'
 import type { LeadAdviceEmailPayload } from '@/types/comparison-leads'
 
 const leadAdviceEmailSchema = z.object({
+  contractId: z.string().uuid().optional().nullable(),
   contractName: z.string().min(2).max(160),
   supplierName: z.string().min(2).max(160),
+  supplierLogoUrl: z.string().max(1000).optional().nullable(),
   contractType: z.string().min(2).max(80),
   monthlyPrice: z.number().nonnegative().max(100000).optional().nullable(),
   yearlyPrice: z.number().nonnegative().max(1000000).optional().nullable(),
@@ -49,8 +51,10 @@ function normalizeAdviceEmailPayload(
   if (!advice) return null
 
   return {
+    contractId: advice.contractId ?? null,
     contractName: advice.contractName.trim(),
     supplierName: advice.supplierName.trim(),
+    supplierLogoUrl: cleanOptionalText(advice.supplierLogoUrl),
     contractType: advice.contractType.trim(),
     monthlyPrice: advice.monthlyPrice ?? null,
     yearlyPrice: advice.yearlyPrice ?? null,

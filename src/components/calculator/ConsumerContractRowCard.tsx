@@ -432,8 +432,10 @@ export function ConsumerContractRowCard({
               buttonText="Ontvang dit advies"
               compact
               adviceEmailPayload={{
+                contractId: contract.id,
                 contractName: contract.contractNaam || `${contract.leverancier.naam} ${contractTypeLabel}`,
                 supplierName: contract.leverancier.naam,
+                supplierLogoUrl: contract.leverancier.logo || null,
                 contractType: contractTypeLabel,
                 monthlyPrice: contract.maandbedrag,
                 yearlyPrice: contract.jaarbedrag,

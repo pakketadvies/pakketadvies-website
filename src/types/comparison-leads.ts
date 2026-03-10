@@ -19,8 +19,10 @@ export interface ComparisonLeadExtraContext {
 }
 
 export interface LeadAdviceEmailPayload {
+  contractId?: string | null
   contractName: string
   supplierName: string
+  supplierLogoUrl?: string | null
   contractType: string
   monthlyPrice?: number | null
   yearlyPrice?: number | null

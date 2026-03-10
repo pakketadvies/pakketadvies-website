@@ -338,6 +338,13 @@ function escapeHtml(text: string | null | undefined): string {
     .replace(/'/g, '&#039;')
 }
 
+function toAbsoluteUrl(url: string | null | undefined, baseUrl: string): string | null {
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  if (url.startsWith('/')) return `${baseUrl}${url}`
+  return null
+}
+
 /**
  * Generate HTML email for contact form notification (to PakketAdvies team)
  */
@@ -713,8 +720,10 @@ export interface LeadWaaromAdviesEmailData {
   klantNaam: string
   email: string
   baseUrl: string
+  contractId?: string | null
   contractName: string
   supplierName: string
+  supplierLogoUrl?: string | null
   contractType: string
   monthlyPrice?: number | null
   yearlyPrice?: number | null
@@ -730,8 +739,10 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
     klantNaam,
     email,
     baseUrl,
+    contractId,
     contractName,
     supplierName,
+    supplierLogoUrl,
     contractType,
     monthlyPrice,
     yearlyPrice,
@@ -751,6 +762,10 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
   const safeWhyIntro = escapeHtml(whyIntro || '')
   const safeWhyDisclaimer = escapeHtml(whyDisclaimer || '')
   const safePagePath = escapeHtml(pagePath || '/calculator/resultaten')
+  const supplierLogo = toAbsoluteUrl(supplierLogoUrl || null, baseUrl)
+  const applyUrl = contractId
+    ? `${baseUrl}/calculator?stap=2&contract=${encodeURIComponent(contractId)}&direct=true`
+    : `${baseUrl}/calculator/resultaten`
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
 
   const formatCurrency = (amount?: number | null) => {
@@ -807,6 +822,7 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
                 Op basis van je selectie adviseren we:
               </p>
               <div style="border: 1px solid #A7F3D0; border-radius: 10px; padding: 16px; background: #F0FDFA;">
+                ${supplierLogo ? `<img src="${supplierLogo}" alt="${safeSupplierName}" style="height: 34px; width: auto; max-width: 160px; margin-bottom: 10px;" />` : ''}
                 <p style="margin: 0; color: #0F4C75; font-size: 22px; font-weight: 700;">${safeSupplierName}</p>
                 <p style="margin: 4px 0 0 0; color: #334155; font-size: 15px;">${safeContractName} - ${safeContractType}</p>
                 ${monthlyText ? `<p style="margin: 14px 0 0 0; color: #0F4C75; font-size: 18px; font-weight: 700;">${monthlyText} / maand</p>` : ''}
@@ -832,9 +848,14 @@ export function generateLeadWaaromAdviesEmail(data: LeadWaaromAdviesEmailData): 
 
           <tr>
             <td style="text-align: center; padding: 26px 20px 30px 20px; background: white;">
-              <a href="${baseUrl}/calculator/resultaten" style="background: #14B8A6; color: #FFFFFF; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
-                Bekijk dit advies opnieuw
+              <a href="${applyUrl}" style="background: #14B8A6; color: #FFFFFF; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
+                Ja, ik wil dit contract bekijken
               </a>
+              <p style="margin: 12px 0 0 0;">
+                <a href="${baseUrl}/calculator/resultaten" style="color: #0F4C75; text-decoration: underline; font-size: 13px;">
+                  Liever eerst terug naar het overzicht
+                </a>
+              </p>
               <p style="color: #94A3B8; font-size: 12px; margin: 12px 0 0 0;">Opgevraagd vanaf: ${safePagePath}</p>
             </td>
           </tr>
@@ -874,13 +895,28 @@ export interface LeadFunnelCompleteProfileEmailData {
   email: string
   baseUrl: string
   completeProfileUrl: string
+  recommendedContract?: {
+    id: string
+    name: string
+    type: string
+    supplierName: string
+    supplierLogoUrl?: string | null
+  } | null
+  fallbackContract?: {
+    id: string
+    name: string
+    type: string
+    supplierName: string
+    supplierLogoUrl?: string | null
+  } | null
 }
 
 export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteProfileEmailData): string {
-  const { klantNaam, email, baseUrl, completeProfileUrl } = data
+  const { klantNaam, email, baseUrl, completeProfileUrl, recommendedContract, fallbackContract } = data
   const safeKlantNaam = escapeHtml(klantNaam)
   const safeEmail = escapeHtml(email)
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
+  const recommendedLogo = toAbsoluteUrl(recommendedContract?.supplierLogoUrl || null, baseUrl)
 
   return `
 <!DOCTYPE html>
@@ -904,6 +940,19 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
         <tr><td style="padding:28px 24px;">
           <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${safeKlantNaam},</p>
           <p style="margin:0 0 14px 0;color:#475569;">Je hebt al een aanvraag gestart met <strong>${safeEmail}</strong>. Vul kort je situatie aan en je ziet direct het beste contractvoorstel op onze website.</p>
+          ${
+            recommendedContract
+              ? `
+              <div style="border:1px solid #A7F3D0;background:#F0FDFA;border-radius:10px;padding:14px;margin:0 0 14px 0;">
+                <p style="margin:0 0 6px 0;color:#0F4C75;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Waarschijnlijke beste match</p>
+                ${recommendedLogo ? `<img src="${recommendedLogo}" alt="${escapeHtml(recommendedContract.supplierName)}" style="height:30px;width:auto;max-width:150px;margin-bottom:8px;">` : ''}
+                <p style="margin:0;color:#0F4C75;font-size:18px;font-weight:700;">${escapeHtml(recommendedContract.supplierName)}</p>
+                <p style="margin:3px 0 0 0;color:#334155;font-size:14px;">${escapeHtml(recommendedContract.name)} - ${escapeHtml(recommendedContract.type)}</p>
+                ${fallbackContract ? `<p style="margin:8px 0 0 0;color:#64748B;font-size:13px;">Alternatief: ${escapeHtml(fallbackContract.supplierName)} - ${escapeHtml(fallbackContract.name)}</p>` : ''}
+              </div>
+            `
+              : ''
+          }
           <div style="text-align:center;margin:22px 0;">
             <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Maak mijn voorstel compleet</a>
           </div>
@@ -922,9 +971,13 @@ export interface LeadFunnelProposalEmailData {
   email: string
   baseUrl: string
   completeProfileUrl: string
+  contractId: string
   contractName: string
   supplierName: string
+  supplierLogoUrl?: string | null
   contractType: string
+  fallbackSupplierName?: string | null
+  fallbackSupplierLogoUrl?: string | null
   fallbackContractName?: string | null
 }
 
@@ -934,9 +987,13 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
     email,
     baseUrl,
     completeProfileUrl,
+    contractId,
     contractName,
     supplierName,
+    supplierLogoUrl,
     contractType,
+    fallbackSupplierName,
+    fallbackSupplierLogoUrl,
     fallbackContractName,
   } = data
 
@@ -945,7 +1002,11 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
   const safeContractName = escapeHtml(contractName)
   const safeSupplierName = escapeHtml(supplierName)
   const safeContractType = escapeHtml(contractType)
+  const safeFallbackSupplier = fallbackSupplierName ? escapeHtml(fallbackSupplierName) : null
   const safeFallback = fallbackContractName ? escapeHtml(fallbackContractName) : null
+  const supplierLogo = toAbsoluteUrl(supplierLogoUrl || null, baseUrl)
+  const fallbackLogo = toAbsoluteUrl(fallbackSupplierLogoUrl || null, baseUrl)
+  const applyUrl = `${baseUrl}/calculator?stap=2&contract=${encodeURIComponent(contractId)}&direct=true`
   const pakketAdviesLogoUrl = `${baseUrl}/images/logo-wit.png`
 
   return `
@@ -969,15 +1030,26 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
         </td></tr>
         <tr><td style="padding:28px 24px;">
           <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${safeKlantNaam},</p>
+          <p style="margin:0 0 12px 0;color:#475569;">Dit contract sluit het beste aan op jouw profiel en verbruik.</p>
           <div style="border:1px solid #A7F3D0;background:#F0FDFA;border-radius:10px;padding:16px;margin:0 0 14px 0;">
+            ${supplierLogo ? `<img src="${supplierLogo}" alt="${safeSupplierName}" style="height:34px;width:auto;max-width:160px;margin-bottom:10px;" />` : ''}
             <p style="margin:0;color:#0F4C75;font-size:22px;font-weight:700;">${safeSupplierName}</p>
             <p style="margin:4px 0 0 0;color:#334155;font-size:15px;">${safeContractName} - ${safeContractType}</p>
           </div>
-          ${safeFallback ? `<p style="margin:0 0 12px 0;color:#475569;">Alternatief voor jouw profiel: <strong>${safeFallback}</strong></p>` : ''}
+          ${
+            safeFallback
+              ? `<div style="border:1px solid #E2E8F0;background:#F8FAFC;border-radius:10px;padding:12px;margin:0 0 12px 0;">
+                  <p style="margin:0;color:#64748B;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Alternatief</p>
+                  ${fallbackLogo ? `<img src="${fallbackLogo}" alt="${safeFallbackSupplier || safeFallback}" style="height:24px;width:auto;max-width:130px;margin:8px 0 6px 0;" />` : ''}
+                  <p style="margin:0;color:#334155;font-size:14px;">${safeFallbackSupplier ? `${safeFallbackSupplier} - ` : ''}<strong>${safeFallback}</strong></p>
+                </div>`
+              : ''
+          }
           <div style="text-align:center;margin:22px 0;">
-            <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Bekijk en vraag direct aan</a>
+            <a href="${applyUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Ja, ik wil dit contract aanvragen</a>
           </div>
-          <p style="margin:0;color:#64748B;font-size:13px;">Deze mail is gestuurd naar ${safeEmail}. Wil je later verder? Gebruik dezelfde link.</p>
+          <p style="margin:0 0 8px 0;color:#64748B;font-size:13px;">Deze mail is gestuurd naar ${safeEmail}.</p>
+          <p style="margin:0;color:#64748B;font-size:13px;">Klopt je situatie niet helemaal? <a href="${completeProfileUrl}" style="color:#0F4C75;text-decoration:underline;">Werk je gegevens bij</a> en ontvang een nieuw advies.</p>
         </td></tr>
       </table>
     </td></tr>
