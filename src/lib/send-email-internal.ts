@@ -933,8 +933,8 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
   const klantNaam = deriveLeadName(leadEmail)
   const subject =
     input.step && input.step > 0
-      ? 'Rond je advies af en bekijk direct je beste contract'
-      : 'Je persoonlijke contractadvies staat klaar (nog 1 stap)'
+      ? 'Maak je voorstel af en ontvang je advies op maat'
+      : 'Voorkom te hoge energiekosten: maak je voorstel compleet'
 
   let recommendation: {
     primary: LeadFunnelContract | null

@@ -937,12 +937,12 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
           <img src="${pakketAdviesLogoUrl}" alt="PakketAdvies" style="max-width:260px;width:100%;height:auto;display:block;margin:0 auto;">
         </td></tr>
         <tr><td style="padding:30px 24px;background:#F0FDFA;border-top:4px solid #14B8A6;text-align:center;">
-          <h1 style="margin:0;color:#0F4C75;font-size:28px;">Je voorstel staat bijna klaar</h1>
-          <p style="margin:10px 0 0 0;color:#64748B;font-size:16px;">Nog 60 seconden voor je persoonlijke contractadvies.</p>
+          <h1 style="margin:0;color:#0F4C75;font-size:28px;">Voorkom te hoge energiekosten</h1>
+          <p style="margin:10px 0 0 0;color:#64748B;font-size:16px;">We zetten je persoonlijke voorstel klaar met actuele tarieven en duidelijke keuzes.</p>
         </td></tr>
         <tr><td style="padding:28px 24px;">
           <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${salutationName},</p>
-          <p style="margin:0 0 14px 0;color:#475569;">Je hebt al een aanvraag gestart met <strong>${safeEmail}</strong>. Vul kort je situatie aan en je ziet direct het beste contractvoorstel op onze website.</p>
+          <p style="margin:0 0 14px 0;color:#475569;">Bedankt, we hebben je e-mailadres <strong>${safeEmail}</strong> ontvangen. Vul kort je situatie aan, dan ontvang je direct een advies op maat met de best passende contractkeuze.</p>
           ${
             recommendedContract
               ? `
@@ -959,7 +959,7 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
           <div style="text-align:center;margin:22px 0;">
             <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Maak mijn voorstel compleet</a>
           </div>
-          <p style="margin:0;color:#64748B;font-size:13px;">Geen account nodig. Je kunt direct daarna met 1 klik aanvragen.</p>
+          <p style="margin:0;color:#64748B;font-size:13px;">Geen account nodig. Je kunt daarna direct online afsluiten als het voorstel past.</p>
         </td></tr>
       </table>
     </td></tr>
