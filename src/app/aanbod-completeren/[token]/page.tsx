@@ -57,7 +57,7 @@ export default function AanbodCompleterenPage() {
         const response = await fetch(`/api/comparison-leads/funnel/${token}`)
         const data = await response.json().catch(() => ({}))
         if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Kon funnel niet laden.')
+          throw new Error(data.error || 'Kon je voorstel niet laden.')
         }
 
         const leadData = data.lead as LeadData
@@ -85,6 +85,11 @@ export default function AanbodCompleterenPage() {
     if (!recommended) return '/calculator'
     return `/calculator?stap=2&contract=${recommended.id}&direct=true`
   }, [recommended])
+
+  const friendlyError = useMemo(() => {
+    if (!error) return null
+    return error.replace(/funnel/gi, 'voorstel')
+  }, [error])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -128,7 +133,7 @@ export default function AanbodCompleterenPage() {
       <main className="min-h-screen bg-gray-50 pt-20 pb-10">
         <div className="container-custom max-w-2xl">
           <div className="rounded-2xl bg-white border border-gray-200 p-8 text-center">
-            <p className="text-gray-600">Je persoonlijke funnel laden...</p>
+            <p className="text-gray-600">Je persoonlijke voorstel wordt klaargezet...</p>
           </div>
         </div>
       </main>
@@ -141,7 +146,7 @@ export default function AanbodCompleterenPage() {
         <div className="container-custom max-w-2xl">
           <div className="rounded-2xl bg-white border border-red-200 p-8 text-center">
             <h1 className="text-xl font-bold text-brand-navy-500 mb-2">Dit aanbod kon niet geladen worden</h1>
-            <p className="text-gray-600">{error}</p>
+            <p className="text-gray-600">{friendlyError}</p>
           </div>
         </div>
       </main>
