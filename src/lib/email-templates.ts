@@ -951,7 +951,15 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
         </td></tr>
         <tr><td style="padding:28px 24px;">
           <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${salutationName},</p>
-          <p style="margin:0 0 14px 0;color:#475569;">Bedankt, we hebben je e-mailadres <strong>${safeEmail}</strong> ontvangen. Vul kort je situatie aan, dan ontvang je direct een advies op maat met de best passende contractkeuze.</p>
+          <p style="margin:0 0 14px 0;color:#475569;">Bedankt voor je aanvraag. Met een paar extra gegevens kunnen we je direct het meest passende contract tonen, inclusief actuele tarieven en heldere keuzes.</p>
+          <div style="border:1px solid #E2E8F0;background:#F8FAFC;border-radius:10px;padding:14px;margin:0 0 14px 0;">
+            <p style="margin:0 0 8px 0;color:#0F4C75;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Waarom dit slim is</p>
+            <p style="margin:0;color:#334155;font-size:14px;line-height:1.6;">
+              ✅ Je voorkomt dat je te veel betaalt door verouderde tarieven<br>
+              ✅ Je krijgt een voorstel dat aansluit op jouw verbruik en situatie<br>
+              ✅ Je kunt daarna direct online afsluiten als het voorstel klopt
+            </p>
+          </div>
           ${
             recommendedContract
               ? `
@@ -965,10 +973,16 @@ export function generateLeadFunnelCompleteProfileEmail(data: LeadFunnelCompleteP
             `
               : ''
           }
-          <div style="text-align:center;margin:22px 0;">
-            <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Maak mijn voorstel compleet</a>
+          <div style="border:1px solid #FCD34D;background:#FFFBEB;border-radius:10px;padding:12px;margin:0 0 14px 0;">
+            <p style="margin:0;color:#92400E;font-size:13px;line-height:1.55;">
+              <strong>Belangrijk:</strong> energietarieven kunnen wijzigen. Hoe sneller je je voorstel afrondt,
+              hoe eerder je zekerheid hebt over je beste optie.
+            </p>
           </div>
-          <p style="margin:0;color:#64748B;font-size:13px;">Geen account nodig. Je kunt daarna direct online afsluiten als het voorstel past.</p>
+          <div style="text-align:center;margin:22px 0;">
+            <a href="${completeProfileUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Ja, toon mijn voorstel op maat</a>
+          </div>
+          <p style="margin:0;color:#64748B;font-size:13px;">Kost ongeveer 60 seconden. Geen account nodig.</p>
           <p style="margin:10px 0 0 0;color:#94A3B8;font-size:12px;">
             Wil je geen vervolg-e-mails meer over dit voorstel?
             <a href="${safeUnsubscribeUrl}" style="color:#0F4C75;text-decoration:underline;">Schrijf je hier uit</a>.
@@ -1050,11 +1064,19 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
         </td></tr>
         <tr><td style="padding:28px 24px;">
           <p style="margin:0 0 12px 0;color:#0F4C75;">Beste ${salutationName},</p>
-          <p style="margin:0 0 12px 0;color:#475569;">Dit contract sluit het beste aan op jouw profiel en verbruik.</p>
+          <p style="margin:0 0 12px 0;color:#475569;">Op basis van je profiel en verbruik is dit op dit moment de beste contractkeuze voor jou.</p>
           <div style="border:1px solid #A7F3D0;background:#F0FDFA;border-radius:10px;padding:16px;margin:0 0 14px 0;">
             ${supplierLogo ? `<img src="${supplierLogo}" alt="${safeSupplierName}" style="height:34px;width:auto;max-width:160px;margin-bottom:10px;" />` : ''}
             <p style="margin:0;color:#0F4C75;font-size:22px;font-weight:700;">${safeSupplierName}</p>
             <p style="margin:4px 0 0 0;color:#334155;font-size:15px;">${safeContractName} - ${safeContractType}</p>
+          </div>
+          <div style="border:1px solid #E2E8F0;background:#F8FAFC;border-radius:10px;padding:14px;margin:0 0 12px 0;">
+            <p style="margin:0 0 8px 0;color:#0F4C75;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Waarom dit contract nu sterk is</p>
+            <p style="margin:0;color:#334155;font-size:14px;line-height:1.6;">
+              ✅ Geselecteerd op basis van jouw opgegeven situatie<br>
+              ✅ Heldere voorwaarden en direct online aan te vragen<br>
+              ✅ Snel zekerheid over je energiekosten
+            </p>
           </div>
           ${
             safeFallback
@@ -1065,11 +1087,17 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
                 </div>`
               : ''
           }
+          <div style="border:1px solid #FCD34D;background:#FFFBEB;border-radius:10px;padding:12px;margin:0 0 12px 0;">
+            <p style="margin:0;color:#92400E;font-size:13px;line-height:1.55;">
+              <strong>Tip:</strong> als je dit voorstel wilt, rond het dan direct af.
+              Tarieven kunnen wijzigen en beschikbaarheid kan verschuiven.
+            </p>
+          </div>
           <div style="text-align:center;margin:22px 0;">
             <a href="${applyUrl}" style="background:#14B8A6;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">Ja, ik wil dit contract aanvragen</a>
           </div>
           <p style="margin:0 0 8px 0;color:#64748B;font-size:13px;">Deze mail is gestuurd naar ${safeEmail}.</p>
-          <p style="margin:0;color:#64748B;font-size:13px;">Klopt je situatie niet helemaal? <a href="${completeProfileUrl}" style="color:#0F4C75;text-decoration:underline;">Werk je gegevens bij</a> en ontvang een nieuw advies.</p>
+          <p style="margin:0;color:#64748B;font-size:13px;">Twijfel je nog? <a href="${completeProfileUrl}" style="color:#0F4C75;text-decoration:underline;">Werk je gegevens bij</a> en ontvang direct een alternatief advies.</p>
           <p style="margin:10px 0 0 0;color:#94A3B8;font-size:12px;">
             Geen vervolg-e-mails meer ontvangen?
             <a href="${safeUnsubscribeUrl}" style="color:#0F4C75;text-decoration:underline;">Schrijf je hier uit</a>.

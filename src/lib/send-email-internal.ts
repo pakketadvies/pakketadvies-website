@@ -985,8 +985,8 @@ export async function sendLeadFunnelCompleteProfileEmail(input: {
     input.customSubject?.trim() ||
     recommendation.subject?.trim() ||
     (input.step && input.step > 0
-      ? 'Maak je voorstel af en ontvang je advies op maat'
-      : 'Voorkom te hoge energiekosten: maak je voorstel compleet')
+      ? 'Laatste stap: ontvang nu je persoonlijke energievoorstel'
+      : 'Voorkom te hoge energiekosten: claim je persoonlijke voorstel')
 
   const unsubscribeUrl = getFunnelUnsubscribeUrl({
     baseUrl,
@@ -1067,8 +1067,8 @@ export async function sendLeadFunnelProposalEmail(input: {
   const subject =
     input.customSubject?.trim() ||
     (input.step && input.step > 1
-      ? `${input.contract.supplierName} ${input.contract.name} staat nog voor je klaar`
-      : `Dit contract past het best bij jouw situatie: ${input.contract.supplierName}`)
+      ? `Je beste contractkeuze staat nog klaar: ${input.contract.supplierName}`
+      : `Jouw beste energiecontract is geselecteerd: ${input.contract.supplierName}`)
 
   const unsubscribeUrl = getFunnelUnsubscribeUrl({
     baseUrl,
