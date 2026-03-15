@@ -14,6 +14,13 @@ type RecentFunnelEmailLog = {
   resend_id: string | null
 }
 
+type EmailOpenState = 'opened' | 'not_opened' | 'unknown'
+
+type RecentFunnelEmailLogWithOpenState = RecentFunnelEmailLog & {
+  openState: EmailOpenState
+  lastEvent: string | null
+}
+
 const funnelMailCatalog = [
   {
     key: 'welcome',
@@ -44,6 +51,85 @@ const funnelMailCatalog = [
     source: 'sendLeadFunnelProposalEmail()',
   },
 ] as const
+
+function getOpenStateFromLastEvent(lastEvent: string | null): EmailOpenState {
+  if (!lastEvent) return 'unknown'
+  const normalized = lastEvent.toLowerCase()
+  if (normalized === 'opened' || normalized === 'clicked') return 'opened'
+  if (
+    normalized === 'sent' ||
+    normalized === 'delivered' ||
+    normalized === 'delivery_delayed' ||
+    normalized === 'queued'
+  ) {
+    return 'not_opened'
+  }
+  return 'unknown'
+}
+
+async function enrichEmailLogsWithOpenState(
+  emailLogs: RecentFunnelEmailLog[]
+): Promise<RecentFunnelEmailLogWithOpenState[]> {
+  const resendApiKey = process.env.RESEND_API_KEY
+  if (!resendApiKey) {
+    return emailLogs.map((log) => ({
+      ...log,
+      openState: 'unknown',
+      lastEvent: null,
+    }))
+  }
+
+  const candidates = emailLogs
+    .filter((log) => log.status === 'sent' && Boolean(log.resend_id))
+    .slice(0, 40)
+
+  const eventEntries = await Promise.all(
+    candidates.map(async (log) => {
+      try {
+        const response = await fetch(`https://api.resend.com/emails/${encodeURIComponent(log.resend_id || '')}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+          },
+          cache: 'no-store',
+        })
+
+        if (!response.ok) {
+          return [log.id, { openState: 'unknown' as EmailOpenState, lastEvent: null }] as const
+        }
+
+        const payload = (await response.json().catch(() => null)) as { last_event?: string } | null
+        const lastEvent = payload?.last_event || null
+        return [
+          log.id,
+          {
+            openState: getOpenStateFromLastEvent(lastEvent),
+            lastEvent,
+          },
+        ] as const
+      } catch {
+        return [log.id, { openState: 'unknown' as EmailOpenState, lastEvent: null }] as const
+      }
+    })
+  )
+
+  const eventMap = new Map(eventEntries)
+  return emailLogs.map((log) => {
+    const tracked = eventMap.get(log.id)
+    if (!tracked) {
+      return {
+        ...log,
+        openState: log.status === 'sent' ? 'unknown' : 'not_opened',
+        lastEvent: null,
+      }
+    }
+    return {
+      ...log,
+      openState: tracked.openState,
+      lastEvent: tracked.lastEvent,
+    }
+  })
+}
 
 function getLeverancierNaam(leverancier: unknown): string {
   if (Array.isArray(leverancier)) {
@@ -97,8 +183,9 @@ async function getRuleData() {
     })) || []
 
   const recentFollowupEmails = (emailLogsResult.data || []) as RecentFunnelEmailLog[]
+  const recentFollowupEmailsWithOpenState = await enrichEmailLogsWithOpenState(recentFollowupEmails)
 
-  return { rules, contracts, recentFollowupEmails }
+  return { rules, contracts, recentFollowupEmails: recentFollowupEmailsWithOpenState }
 }
 
 export default async function VergelijkerFunnelPage() {
@@ -157,6 +244,7 @@ export default async function VergelijkerFunnelPage() {
                     <th className="py-2 pr-3">Ontvanger</th>
                     <th className="py-2 pr-3">Onderwerp</th>
                     <th className="py-2 pr-3">Status</th>
+                    <th className="py-2 pr-3">Geopend?</th>
                     <th className="py-2 pr-3">Resend ID</th>
                     <th className="py-2">Foutmelding</th>
                   </tr>
@@ -179,6 +267,23 @@ export default async function VergelijkerFunnelPage() {
                           }`}
                         >
                           {mail.status === 'sent' ? 'Verzonden' : 'Mislukt'}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            mail.openState === 'opened'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : mail.openState === 'not_opened'
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {mail.openState === 'opened'
+                            ? 'Ja'
+                            : mail.openState === 'not_opened'
+                              ? 'Nog niet'
+                              : 'Onbekend'}
                         </span>
                       </td>
                       <td className="py-2 pr-3 text-xs text-gray-600">{mail.resend_id || '—'}</td>
