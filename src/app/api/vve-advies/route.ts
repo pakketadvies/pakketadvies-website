@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     await appendLeadToSheet({
       datumLeadBinnen: new Date().toISOString(),
       huidigeLeveranciers: 'VvE adviesaanvraag',
-      postcode: '',
+      postcode: body.locatieVve,
       huisnummer: '',
       stroom: '',
       gas: '',
