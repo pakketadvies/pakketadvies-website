@@ -71,22 +71,22 @@ export default function VvePage() {
               </ul>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/calculator?addressType=zakelijk&segment=vve">
+                <Link href="#vve-contact-form">
                   <button className="px-8 py-4 bg-white text-brand-purple-700 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                     <Lightning weight="duotone" className="w-6 h-6" />
-                    Bereken VvE-besparing
+                    Vraag vrijblijvend advies aan
                   </button>
                 </Link>
-                <Link href="/contact">
+                <Link href="#vve-contact-form">
                   <button className="px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl font-semibold text-lg border border-white/20 transition-all flex items-center justify-center gap-2">
-                    Plan adviesgesprek
+                    Vul direct het formulier in
                     <ArrowRight weight="bold" className="w-5 h-5" />
                   </button>
                 </Link>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl border border-white/30">
+            <div id="vve-contact-form" className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl border border-white/30 scroll-mt-40">
               <h2 className="font-display text-2xl font-bold text-brand-navy-500 mb-2">Vraag direct VvE-advies aan</h2>
               <p className="text-gray-600 mb-6">Laat je gegevens achter. We nemen snel contact op en denken vrijblijvend met je mee.</p>
               <VveContactForm />
@@ -223,15 +223,15 @@ export default function VvePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/calculator?addressType=zakelijk&segment=vve">
+            <Link href="#vve-contact-form">
               <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                 <Lightning weight="duotone" className="w-6 h-6" />
-                Start vergelijking
+                Vul het formulier in
               </button>
             </Link>
-            <Link href="/contact">
+            <Link href="#vve-contact-form">
               <button className="px-8 py-4 bg-brand-purple-800 hover:bg-brand-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
-                Neem contact op
+                Vraag vrijblijvend advies aan
                 <ArrowRight weight="bold" className="w-5 h-5" />
               </button>
             </Link>
