@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import Image from 'next/image'
 import {
   Buildings,
@@ -15,6 +14,7 @@ import {
   Handshake,
 } from '@phosphor-icons/react/dist/ssr'
 import { VveContactForm } from '@/components/sectoren/VveContactForm'
+import { ScrollToVveFormButton } from '@/components/sectoren/ScrollToVveFormButton'
 
 export const metadata: Metadata = {
   title: 'Zakelijke energie voor VvE',
@@ -70,19 +70,15 @@ export default function VvePage() {
                 ))}
               </ul>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="#vve-contact-form">
-                  <button className="px-8 py-4 bg-white text-brand-purple-700 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-                    <Lightning weight="duotone" className="w-6 h-6" />
-                    Vraag vrijblijvend advies aan
-                  </button>
-                </Link>
-                <Link href="#vve-contact-form">
-                  <button className="px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl font-semibold text-lg border border-white/20 transition-all flex items-center justify-center gap-2">
-                    Vul direct het formulier in
-                    <ArrowRight weight="bold" className="w-5 h-5" />
-                  </button>
-                </Link>
+              <div className="flex flex-col sm:flex-row gap-4 md:hidden">
+                <ScrollToVveFormButton className="px-8 py-4 bg-white text-brand-purple-700 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                  <Lightning weight="duotone" className="w-6 h-6" />
+                  Vraag vrijblijvend advies aan
+                </ScrollToVveFormButton>
+                <ScrollToVveFormButton className="px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl font-semibold text-lg border border-white/20 transition-all flex items-center justify-center gap-2">
+                  Vul direct het formulier in
+                  <ArrowRight weight="bold" className="w-5 h-5" />
+                </ScrollToVveFormButton>
               </div>
             </div>
 
@@ -222,19 +218,15 @@ export default function VvePage() {
             Vraag gratis advies aan en ontdek welke mogelijkheden het beste passen bij jullie bewoners, gebouwen en budget.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="#vve-contact-form">
-              <button className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-                <Lightning weight="duotone" className="w-6 h-6" />
-                Vul het formulier in
-              </button>
-            </Link>
-            <Link href="#vve-contact-form">
-              <button className="px-8 py-4 bg-brand-purple-800 hover:bg-brand-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
-                Vraag vrijblijvend advies aan
-                <ArrowRight weight="bold" className="w-5 h-5" />
-              </button>
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center md:hidden">
+            <ScrollToVveFormButton className="px-8 py-4 bg-white text-brand-purple-600 rounded-xl font-semibold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+              <Lightning weight="duotone" className="w-6 h-6" />
+              Vul het formulier in
+            </ScrollToVveFormButton>
+            <ScrollToVveFormButton className="px-8 py-4 bg-brand-purple-800 hover:bg-brand-purple-900 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
+              Vraag vrijblijvend advies aan
+              <ArrowRight weight="bold" className="w-5 h-5" />
+            </ScrollToVveFormButton>
           </div>
         </div>
       </section>
