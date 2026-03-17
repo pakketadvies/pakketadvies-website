@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { checkRateLimit, getClientIP } from '@/lib/security/rate-limiter'
 import { validateEmail } from '@/lib/security/email-validation'
+import { appendLeadToSheet } from '@/lib/google-sheets'
 import type { LeadAdviceEmailPayload } from '@/types/comparison-leads'
 
 const leadAdviceEmailSchema = z.object({
@@ -249,6 +250,26 @@ export async function POST(request: Request) {
         { success: false, error: 'Opslaan van lead is mislukt.' },
         { status: 500 }
       )
+    }
+
+    // Schrijf vergelijker leads ook naar Advertentieleads, maar alleen wanneer een telefoonnummer is ingevuld.
+    if (normalizedPhone) {
+      try {
+        await appendLeadToSheet({
+          datumLeadBinnen: new Date().toISOString(),
+          huidigeLeveranciers: `Vergelijker lead (${payload.source})`,
+          postcode: '',
+          huisnummer: '',
+          stroom: '',
+          gas: '',
+          naam: '',
+          telefoonnummer: normalizedPhone,
+          emailadres: normalizedEmail,
+          opmerkingen: `Flow: ${payload.flow}${payload.pagePath ? ` | Pagina: ${payload.pagePath}` : ''}`,
+        })
+      } catch (sheetsError: unknown) {
+        console.error('❌ [comparison-leads] Error writing to Google Sheets (non-blocking):', sheetsError)
+      }
     }
 
     try {
