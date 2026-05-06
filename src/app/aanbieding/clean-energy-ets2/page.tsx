@@ -1,6 +1,3 @@
-'use client'
-
-import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AanbiedingInteresseForm } from '@/components/aanbieding/AanbiedingInteresseForm'
@@ -9,78 +6,58 @@ import { Button } from '@/components/ui/Button'
 import {
   Lightning,
   ShieldCheck,
-  Clock,
   CheckCircle,
   Users,
   ChartLineUp,
-  CaretDown,
-  CaretUp,
-  ArrowRight,
   Phone,
   Lightbulb,
   TrendUp,
   CalendarCheck,
   Handshake,
   Fire,
-} from '@phosphor-icons/react'
+} from '@phosphor-icons/react/dist/ssr'
+import { getAanbiedingTarieven } from '@/lib/aanbieding-tarieven'
+import { CleanEnergyFAQ } from './CleanEnergyFAQ'
+import { ScrollToTopButton } from './ScrollToTopButton'
+
+export const revalidate = 60
 
 const voordelen = [
   {
     icon: ShieldCheck,
     titel: '5-jarig vast contract',
-    beschrijving: 'Zekerheid en stabiliteit met een vast gastarief voor de komende 5 jaar, beschermd tegen marktschommelingen.',
+    beschrijving:
+      'Zekerheid en stabiliteit met een vast gastarief voor de komende 5 jaar, beschermd tegen marktschommelingen.',
   },
   {
     icon: CheckCircle,
     titel: 'ETS-2 risico afgedekt',
-    beschrijving: 'Het enige 5-jarige vaste gastarief dat het ETS-2-risico echt afdekt zonder verrassingen of bijbetalingen.',
+    beschrijving:
+      'Het enige 5-jarige vaste gastarief dat het ETS-2-risico echt afdekt zonder verrassingen of bijbetalingen.',
   },
   {
     icon: TrendUp,
     titel: 'Scherpe tarieven',
-    beschrijving: 'Profiteer van uitzonderlijk aantrekkelijke tarieven door strategische inkoop en volumevoordelen.',
+    beschrijving:
+      'Profiteer van uitzonderlijk aantrekkelijke tarieven door strategische inkoop en volumevoordelen.',
   },
   {
     icon: Lightning,
     titel: 'KvK-nummer verplicht',
-    beschrijving: 'Dit aanbod is alleen beschikbaar voor zakelijke klanten met een geldig KvK-nummer.',
+    beschrijving:
+      'Dit aanbod is alleen beschikbaar voor zakelijke klanten met een geldig KvK-nummer.',
   },
   {
     icon: CalendarCheck,
     titel: 'Beperkte periode',
-    beschrijving: 'Speciaal voorjaarsaanbod voor KvK-klanten. Wacht niet te lang, dit aanbod is tijdelijk.',
+    beschrijving:
+      'Speciaal voorjaarsaanbod voor KvK-klanten. Wacht niet te lang, dit aanbod is tijdelijk.',
   },
   {
     icon: Handshake,
     titel: 'Persoonlijk advies',
-    beschrijving: 'Wij helpen je met het maken van de juiste keuze en regelen de volledige overstap voor je.',
-  },
-]
-
-const tariefDetails = [
-  {
-    item: 'Unieke kans',
-    detail: 'ETS-2 risico vastgelegd',
-  },
-  {
-    item: 'Elektra normaal',
-    detail: '€ 0,120 per kWh',
-  },
-  {
-    item: 'Elektra dal',
-    detail: '€ 0,116 per kWh',
-  },
-  {
-    item: 'Gastarief',
-    detail: '€ 0,494 per m3',
-  },
-  {
-    item: 'Doelgroep',
-    detail: 'KvK (ook woonhuis)',
-  },
-  {
-    item: 'Looptijd',
-    detail: 't/m 01-01-2031',
+    beschrijving:
+      'Wij helpen je met het maken van de juiste keuze en regelen de volledige overstap voor je.',
   },
 ]
 
@@ -88,25 +65,29 @@ const procesStappen = [
   {
     nummer: '1',
     titel: 'Vul je interesse in',
-    beschrijving: 'Laat je bedrijfsgegevens achter via het formulier. Dit duurt nog geen 2 minuten.',
+    beschrijving:
+      'Laat je bedrijfsgegevens achter via het formulier. Dit duurt nog geen 2 minuten.',
     icon: Lightning,
   },
   {
     nummer: '2',
     titel: 'Persoonlijk gesprek',
-    beschrijving: 'Een specialist neemt contact op om je situatie te bespreken en het aanbod toe te lichten.',
+    beschrijving:
+      'Een specialist neemt contact op om je situatie te bespreken en het aanbod toe te lichten.',
     icon: Phone,
   },
   {
     nummer: '3',
     titel: 'Contract opstellen',
-    beschrijving: 'We stellen een contract op maat op en leggen alles helder uit, zodat je precies weet waar je aan toe bent. De ingangsdatum kan tot 12 maanden vooruit gepland worden.',
+    beschrijving:
+      'We stellen een contract op maat op en leggen alles helder uit, zodat je precies weet waar je aan toe bent. De ingangsdatum kan tot 12 maanden vooruit gepland worden.',
     icon: ChartLineUp,
   },
   {
     nummer: '4',
     titel: 'Wij regelen alles',
-    beschrijving: 'Van aanmelding tot activatie: wij regelen je hele overstap. Jij profiteert van zekerheid en scherpe tarieven.',
+    beschrijving:
+      'Van aanmelding tot activatie: wij regelen je hele overstap. Jij profiteert van zekerheid en scherpe tarieven.',
     icon: CheckCircle,
   },
 ]
@@ -114,32 +95,42 @@ const procesStappen = [
 const faqItems = [
   {
     vraag: 'Wat is de ETS-2 bijmengverplichting?',
-    antwoord: 'De ETS-2 (Emission Trading System fase 2) is een Europese CO2-heffing die per januari 2028 de energieprijzen, vooral gas, gaat beïnvloeden. De verwachte impact op de gasprijs blijft tot 2035/2036 doorlopen (8 à 9 jaar uitfasering). Dit contract dekt het ETS-2 risico volledig af voor de komende 5 jaar. Clean Energy is de enige energieleverancier die het uitfaseringstraject betrouwbaar vastlegt en daarmee prijszekerheid biedt.',
+    antwoord:
+      'De ETS-2 (Emission Trading System fase 2) is een Europese CO2-heffing die per januari 2028 de energieprijzen, vooral gas, gaat beïnvloeden. De verwachte impact op de gasprijs blijft tot 2035/2036 doorlopen (8 à 9 jaar uitfasering). Dit contract dekt het ETS-2 risico volledig af voor de komende 5 jaar. Clean Energy is de enige energieleverancier die het uitfaseringstraject betrouwbaar vastlegt en daarmee prijszekerheid biedt.',
   },
   {
     vraag: 'Waarom is dit nu zo voordelig?',
-    antwoord: 'Gelet op de inzetting van de ETS-2 bijmengverplichting per januari 2028 en de verwachte impact daarvan op de gasprijs, inclusief 8 à 9 jaar uitfasering (vanaf 2028 tot en met 2035/2036), is dit de allerlaatste kans om te vangen op het vastleggen van de gasprijs voor 5 jaar. Met deze unieke mogelijkheid voorkom je onverwachte impact en toekomstige bijbetalingen. Clean Energy is de enige leverancier die deze zekerheid biedt.',
+    antwoord:
+      'Gelet op de inzetting van de ETS-2 bijmengverplichting per januari 2028 en de verwachte impact daarvan op de gasprijs, inclusief 8 à 9 jaar uitfasering (vanaf 2028 tot en met 2035/2036), is dit de allerlaatste kans om te vangen op het vastleggen van de gasprijs voor 5 jaar. Met deze unieke mogelijkheid voorkom je onverwachte impact en toekomstige bijbetalingen. Clean Energy is de enige leverancier die deze zekerheid biedt.',
   },
   {
     vraag: 'Is dit aanbod voor iedereen?',
-    antwoord: 'Nee, dit persoonlijk aanbod is alleen voor KvK-klanten (ook eenmanszaken). Dit is de uitsluitende voorwaarde om van dit aanbod gebruik te kunnen maken. Goed om te weten: dit specifieke Clean Energy contract mag óók op woonhuizen worden aangesloten (mits u een KvK-nummer heeft).',
+    antwoord:
+      'Nee, dit persoonlijk aanbod is alleen voor KvK-klanten (ook eenmanszaken). Dit is de uitsluitende voorwaarde om van dit aanbod gebruik te kunnen maken. Goed om te weten: dit specifieke Clean Energy contract mag óók op woonhuizen worden aangesloten (mits u een KvK-nummer heeft).',
   },
   {
     vraag: 'Wat als ik nu nog een contract heb lopen?',
-    antwoord: 'Tijdens het gesprek bespreken we de voorwaarden en specifieke vragen rondt bestaande looptijden. We leggen ook uit hoe we je overstap het beste kunnen timen om te profiteren van dit aanbod. De ingangsdatum van het nieuwe contract kan tot 12 maanden in de toekomst worden gepland, zodat je perfect kunt aansluiten wanneer je huidige contract afloopt.',
+    antwoord:
+      'Tijdens het gesprek bespreken we de voorwaarden en specifieke vragen rondt bestaande looptijden. We leggen ook uit hoe we je overstap het beste kunnen timen om te profiteren van dit aanbod. De ingangsdatum van het nieuwe contract kan tot 12 maanden in de toekomst worden gepland, zodat je perfect kunt aansluiten wanneer je huidige contract afloopt.',
   },
   {
     vraag: 'Hoe lang is dit aanbod geldig?',
-    antwoord: 'Dit is een speciaal voorjaarsaanbod voor KvK-klanten en is beperkt geldig. Wacht niet te lang met je aanmelding, want dit aanbod kan op elk moment eindigen.',
+    antwoord:
+      'Dit is een speciaal voorjaarsaanbod voor KvK-klanten en is beperkt geldig. Wacht niet te lang met je aanmelding, want dit aanbod kan op elk moment eindigen.',
   },
   {
     vraag: 'Wat gebeurt er na de 5 jaar?',
-    antwoord: 'Na afloop van het 5-jarige contract (t/m 01-01-2031) kun je opnieuw kiezen voor een nieuw contract bij Clean Energy of een andere leverancier. De ETS-2 impact is voor deze periode volledig afgedekt.',
+    antwoord:
+      'Na afloop van het 5-jarige contract (t/m 01-01-2031) kun je opnieuw kiezen voor een nieuw contract bij Clean Energy of een andere leverancier. De ETS-2 impact is voor deze periode volledig afgedekt.',
   },
 ]
 
-export default function CleanEnergyETS2Page() {
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+const heroBadgeIcons = [ShieldCheck, CheckCircle, Users]
+
+export default async function CleanEnergyETS2Page() {
+  const tarieven = await getAanbiedingTarieven('clean-energy-ets2')
+  const heroBadges = tarieven.hero_badges.slice(0, 3)
+  const tariefkaartItems = tarieven.tariefkaart_items
 
   return (
     <div className="min-h-screen bg-white">
@@ -160,9 +151,12 @@ export default function CleanEnergyETS2Page() {
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
-          <div className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+          <div
+            className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow"
+            style={{ animationDelay: '1s' }}
+          />
         </div>
-        
+
         <div className="container-custom relative z-10">
           {/* 2-kolommen layout: Hero content + Formulier */}
           <div className="grid lg:grid-cols-[1fr,480px] gap-12 items-start">
@@ -171,7 +165,9 @@ export default function CleanEnergyETS2Page() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal-500/20 border border-brand-teal-400/30 mb-6">
                 <Fire weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                <span className="text-sm font-semibold text-brand-teal-200">PERSOONLIJK AANBOD VOOR KVK-KLANTEN</span>
+                <span className="text-sm font-semibold text-brand-teal-200">
+                  PERSOONLIJK AANBOD VOOR KVK-KLANTEN
+                </span>
               </div>
 
               {/* Clean Energy Logo */}
@@ -186,10 +182,10 @@ export default function CleanEnergyETS2Page() {
                 Het enige 5-jarige vaste gastarief dat het{' '}
                 <span className="text-brand-teal-500">ETS-2-risico echt afdekt</span>
               </h1>
-              
+
               <p className="text-lg md:text-xl text-gray-300 mb-6">
-                Let op: dit aanbod is uitsluitend bedoeld voor klanten met een KvK-nummer — maar het 
-                contract kan wél worden aangesloten op woonhuizen. Looptijd tot en met 01-01-2031 
+                Let op: dit aanbod is uitsluitend bedoeld voor klanten met een KvK-nummer — maar het
+                contract kan wél worden aangesloten op woonhuizen. Looptijd tot en met 01-01-2031
                 (dus vanaf vandaag effectief circa 5 jaar zekerheid).
               </p>
 
@@ -199,58 +195,45 @@ export default function CleanEnergyETS2Page() {
                   Waarom dit nu afsluiten?
                 </h3>
                 <p className="text-gray-200 mb-4">
-                  Gelet op de inzetting van de ETS-2 bijmengverplichting per januari 2028 
-                  en de verwachte impact daarvan op de gasprijs, inclusief 8 à 9 jaar 
-                  uitfasering (vanaf 2028 tot en met 2035/2036), is dit de allerlaatste kans om 
+                  Gelet op de inzetting van de ETS-2 bijmengverplichting per januari 2028
+                  en de verwachte impact daarvan op de gasprijs, inclusief 8 à 9 jaar
+                  uitfasering (vanaf 2028 tot en met 2035/2036), is dit de allerlaatste kans om
                   te vangen op het vastleggen van de gasprijs voor 5 jaar.
                 </p>
                 <p className="text-gray-200 mb-4">
-                  Belangrijk om te beseffen is dat dit de laatste kans is om je in te dekken tegen 
-                  de ETS-2 impact. Clean Energy is de enige leverancier die het uitfaseringstraject 
-                  volledig in je contract verwerkt en daarmee het ETS-2 risico compleet voor je wegneemt!
+                  Belangrijk om te beseffen is dat dit de laatste kans is om je in te dekken tegen
+                  de ETS-2 impact. Clean Energy is de enige leverancier die het uitfaseringstraject
+                  volledig in je contract verwerkt en daarmee het ETS-2 risico compleet voor je
+                  wegneemt!
                 </p>
                 <p className="text-brand-teal-300 font-semibold">
-                  💡 Heb je nog een lopend contract? De ingangsdatum kan tot 12 maanden in de toekomst 
-                  worden gepland — leg dit tarief nu al vast!
+                  💡 Heb je nog een lopend contract? De ingangsdatum kan tot 12 maanden in de
+                  toekomst worden gepland — leg dit tarief nu al vast!
                 </p>
               </div>
 
-              {/* Trust indicators */}
-              <div className="flex flex-wrap items-center gap-6 md:gap-8">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                    <ShieldCheck weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-400">5 jaar vast</div>
-                    <div className="font-semibold text-white">t/m 01-01-2031</div>
-                  </div>
+              {/* Trust indicators (dynamisch vanuit admin) */}
+              {heroBadges.length > 0 && (
+                <div className="flex flex-wrap items-center gap-6 md:gap-8">
+                  {heroBadges.map((badge, index) => {
+                    const Icon = heroBadgeIcons[index] ?? ShieldCheck
+                    return (
+                      <div key={`${badge.label}-${index}`} className="flex items-center gap-6 md:gap-8">
+                        {index > 0 && <div className="w-px h-8 bg-gray-600 -ml-3 md:-ml-5" />}
+                        <div className="flex items-center gap-2">
+                          <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
+                            <Icon weight="duotone" className="w-5 h-5 text-brand-teal-300" />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-400">{badge.label}</div>
+                            <div className="font-semibold text-white">{badge.waarde}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-                
-                <div className="w-px h-8 bg-gray-600"></div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                    <CheckCircle weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-400">ETS-2 risico</div>
-                    <div className="font-semibold text-white">Volledig afgedekt</div>
-                  </div>
-                </div>
-
-                <div className="w-px h-8 bg-gray-600"></div>
-                
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-brand-teal-500/10 rounded-xl flex items-center justify-center">
-                    <Users weight="duotone" className="w-5 h-5 text-brand-teal-300" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-400">Alleen voor</div>
-                    <div className="font-semibold text-white">KvK-klanten</div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Rechts: Formulier Card */}
@@ -265,12 +248,9 @@ export default function CleanEnergyETS2Page() {
                       Binnen 24 uur reactie · Gratis en vrijblijvend
                     </p>
                   </div>
-                  
-                  <AanbiedingInteresseForm 
-                    aanbiedingType="clean-energy-ets2"
-                    compact={true}
-                  />
-                  
+
+                  <AanbiedingInteresseForm aanbiedingType="clean-energy-ets2" compact={true} />
+
                   {/* Trust badges */}
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
@@ -292,19 +272,19 @@ export default function CleanEnergyETS2Page() {
 
         {/* Bottom wave transition */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden">
-          <svg 
-            viewBox="0 0 1440 120" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg" 
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
             className="w-full h-20 md:h-24 lg:h-auto"
             preserveAspectRatio="none"
           >
-            <path d="M0,95 Q360,65 720,95 T1440,95 L1440,120 L0,120 Z" fill="white"/>
+            <path d="M0,95 Q360,65 720,95 T1440,95 L1440,120 L0,120 Z" fill="white" />
           </svg>
         </div>
       </section>
 
-      {/* Tarieven Overzicht */}
+      {/* Tarieven Overzicht (dynamisch vanuit admin) */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="container-custom max-w-4xl">
           <div className="text-center mb-12">
@@ -319,13 +299,13 @@ export default function CleanEnergyETS2Page() {
           <Card className="border-2 border-brand-teal-500 mb-8">
             <CardContent className="pt-8">
               <div className="space-y-4">
-                {tariefDetails.map((item, index) => (
-                  <div 
-                    key={index} 
-                    className="flex justify-between items-center py-3 border-b border-gray-200 last:border-0"
+                {tariefkaartItems.map((item, index) => (
+                  <div
+                    key={`${item.label}-${index}`}
+                    className="flex justify-between items-center py-3 border-b border-gray-200 last:border-0 gap-4"
                   >
-                    <span className="font-semibold text-brand-navy-500">{item.item}</span>
-                    <span className="text-gray-700 font-medium">{item.detail}</span>
+                    <span className="font-semibold text-brand-navy-500">{item.label}</span>
+                    <span className="text-gray-700 font-medium text-right">{item.waarde}</span>
                   </div>
                 ))}
               </div>
@@ -335,15 +315,15 @@ export default function CleanEnergyETS2Page() {
           <Card className="bg-brand-teal-50 border-2 border-brand-teal-500">
             <CardContent className="pt-6">
               <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                <strong>Termijnbedrag berekenen contract:</strong> Het termijnbedrag is gebaseerd op je 
-                voorgeschat verbruik. De netbeheerderskosten en overheidsheffingen zijn een 
-                verwaarding over de levertijd en weergeven in je contract. We berekenen dit 
-                voor je tijdens het gesprek.
+                <strong>Termijnbedrag berekenen contract:</strong> Het termijnbedrag is gebaseerd op
+                je voorgeschat verbruik. De netbeheerderskosten en overheidsheffingen zijn een
+                verwaarding over de levertijd en weergeven in je contract. We berekenen dit voor je
+                tijdens het gesprek.
               </p>
               <p className="text-sm text-gray-600 leading-relaxed">
-                <strong>Flexibele ingangsdatum:</strong> Heb je nog een lopend contract? De ingangsdatum 
-                kan tot 12 maanden in de toekomst worden gepland, zodat je dit gunstige tarief nu al 
-                kunt vastleggen.
+                <strong>Flexibele ingangsdatum:</strong> Heb je nog een lopend contract? De
+                ingangsdatum kan tot 12 maanden in de toekomst worden gepland, zodat je dit gunstige
+                tarief nu al kunt vastleggen.
               </p>
             </CardContent>
           </Card>
@@ -374,9 +354,7 @@ export default function CleanEnergyETS2Page() {
                     <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-3">
                       {voordeel.titel}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {voordeel.beschrijving}
-                    </p>
+                    <p className="text-gray-600 leading-relaxed">{voordeel.beschrijving}</p>
                   </CardContent>
                 </Card>
               )
@@ -404,9 +382,12 @@ export default function CleanEnergyETS2Page() {
                 <div key={index} className="relative">
                   {/* Connector line (desktop only) */}
                   {index < procesStappen.length - 1 && (
-                    <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-brand-teal-400 to-brand-teal-500/50 z-0" style={{ width: 'calc(100% - 3rem)', left: 'calc(50% + 1.5rem)' }} />
+                    <div
+                      className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-brand-teal-400 to-brand-teal-500/50 z-0"
+                      style={{ width: 'calc(100% - 3rem)', left: 'calc(50% + 1.5rem)' }}
+                    />
                   )}
-                  
+
                   <div className="relative z-10 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-navy-500 text-white font-bold text-xl mb-4 shadow-lg">
                       {stap.nummer}
@@ -417,9 +398,7 @@ export default function CleanEnergyETS2Page() {
                     <h3 className="font-display text-xl font-bold text-brand-navy-500 mb-2">
                       {stap.titel}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {stap.beschrijving}
-                    </p>
+                    <p className="text-gray-600 text-sm leading-relaxed">{stap.beschrijving}</p>
                   </div>
                 </div>
               )
@@ -467,41 +446,10 @@ export default function CleanEnergyETS2Page() {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-brand-navy-500 mb-4">
               Veelgestelde vragen
             </h2>
-            <p className="text-lg text-gray-600">
-              Alles wat je wilt weten over dit unieke aanbod
-            </p>
+            <p className="text-lg text-gray-600">Alles wat je wilt weten over dit unieke aanbod</p>
           </div>
 
-          <div className="space-y-4">
-            {faqItems.map((item, index) => (
-              <Card key={index} className="hover-lift">
-                <CardContent className="p-0">
-                  <button
-                    onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                    className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left"
-                  >
-                    <h3 className="font-display text-lg font-bold text-brand-navy-500 pr-4">
-                      {item.vraag}
-                    </h3>
-                    <div className="flex-shrink-0">
-                      {openFaqIndex === index ? (
-                        <CaretUp weight="bold" className="w-6 h-6 text-brand-teal-500" />
-                      ) : (
-                        <CaretDown weight="bold" className="w-6 h-6 text-gray-400" />
-                      )}
-                    </div>
-                  </button>
-                  {openFaqIndex === index && (
-                    <div className="px-6 pb-6 border-t border-gray-200">
-                      <p className="text-gray-600 leading-relaxed pt-4">
-                        {item.antwoord}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <CleanEnergyFAQ items={faqItems} />
         </div>
       </section>
 
@@ -521,7 +469,10 @@ export default function CleanEnergyETS2Page() {
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
-          <div className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+          <div
+            className="absolute bottom-20 right-20 w-80 h-80 bg-brand-teal-500/10 rounded-full blur-3xl animate-pulse-slow"
+            style={{ animationDelay: '1s' }}
+          />
         </div>
 
         <div className="container-custom relative z-10">
@@ -530,24 +481,18 @@ export default function CleanEnergyETS2Page() {
               Heeft u vragen of wilt u even overleggen?
             </h2>
             <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Neem gerust contact met ons op. We leggen je graag uitgebreid uit waarom dit een 
+              Neem gerust contact met ons op. We leggen je graag uitgebreid uit waarom dit een
               unieke kans is om jezelf te beschermen tegen toekomstige prijsstijgingen.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Button
-                size="lg"
-                variant="primary"
-                className="bg-brand-teal-500 hover:bg-brand-teal-600 text-white"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
-              >
-                Scroll naar boven
-                <ArrowRight weight="bold" className="w-5 h-5 ml-2" />
-              </Button>
+              <ScrollToTopButton />
               <Link href="mailto:info@pakketadvies.nl">
-                <Button size="lg" variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+                >
                   E-mail: info@pakketadvies.nl
                 </Button>
               </Link>
@@ -555,7 +500,11 @@ export default function CleanEnergyETS2Page() {
 
             <div className="mb-6">
               <Link href="tel:0850477065">
-                <Button size="lg" variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+                >
                   <Phone weight="bold" className="w-5 h-5 mr-2" />
                   Bel direct: 085-0477065
                 </Button>

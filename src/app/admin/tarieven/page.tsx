@@ -13,7 +13,9 @@ import {
   CheckCircle,
   XCircle,
   CurrencyEur,
-  Percent
+  Percent,
+  Sparkle,
+  ArrowRight
 } from '@phosphor-icons/react'
 
 interface OverheidsTarief {
@@ -615,6 +617,49 @@ export default function TarievenPage() {
             </button>
           </div>
         )}
+      </div>
+
+      {/* Aanbiedingspagina's Section */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-brand-navy-500 mb-1 flex items-center gap-2">
+              <Sparkle size={24} weight="duotone" className="text-brand-teal-600" />
+              Aanbiedingspagina&apos;s
+            </h2>
+            <p className="text-sm text-gray-600">
+              Pas de tarieven aan die op de losse aanbieding-landingspagina&apos;s getoond worden
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link
+            href="/admin/tarieven/aanbieding/clean-energy-ets2"
+            className="group bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-brand-teal-400 hover:shadow-md transition-all"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-brand-teal-50 flex items-center justify-center">
+                <Sparkle size={24} weight="duotone" className="text-brand-teal-600" />
+              </div>
+              <ArrowRight
+                size={20}
+                weight="bold"
+                className="text-gray-300 group-hover:text-brand-teal-600 group-hover:translate-x-1 transition-all"
+              />
+            </div>
+            <h3 className="font-bold text-brand-navy-500 mb-1">
+              Clean Energy ETS-2
+            </h3>
+            <p className="text-sm text-gray-600 mb-3">
+              5 jaar vast gas (ETS-2 beschermd) — bewerk tarieven & hero badges
+            </p>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-teal-600">
+              <Pencil size={14} weight="bold" />
+              Tarieven bewerken
+            </span>
+          </Link>
+        </div>
       </div>
 
       {/* Netbeheertarieven Section */}
