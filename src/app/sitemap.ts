@@ -225,6 +225,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/aanbieding/gas-vastzetten`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
   ]
 
   const articlePages: MetadataRoute.Sitemap = allArticles.map((article) => ({

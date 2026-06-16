@@ -317,11 +317,18 @@ export interface ContactBevestigingData {
 }
 
 export interface AanbiedingInteresseData {
-  aanbiedingType: 'particulier-3-jaar' | 'mkb-3-jaar' | 'grootzakelijk' | 'dynamisch' | 'clean-energy-ets2'
+  aanbiedingType:
+    | 'particulier-3-jaar'
+    | 'mkb-3-jaar'
+    | 'grootzakelijk'
+    | 'dynamisch'
+    | 'clean-energy-ets2'
+    | 'gas-vastzetten'
   naam: string
-  email: string
+  email?: string
   telefoon: string
   opmerking?: string
+  bedrijfsnaam?: string
   baseUrl: string
 }
 
@@ -1115,12 +1122,13 @@ export function generateLeadFunnelProposalEmail(data: LeadFunnelProposalEmailDat
  * Generate HTML email for aanbieding interesse notification (to PakketAdvies team)
  */
 export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData): string {
-  const { aanbiedingType, naam, email, telefoon, opmerking, baseUrl } = data
+  const { aanbiedingType, naam, email, telefoon, opmerking, bedrijfsnaam, baseUrl } = data
   
   // Escape user input to prevent XSS
   const safeNaam = escapeHtml(naam)
-  const safeEmail = escapeHtml(email)
+  const safeEmail = email ? escapeHtml(email) : ''
   const safeTelefoon = escapeHtml(telefoon)
+  const safeBedrijfsnaam = bedrijfsnaam ? escapeHtml(bedrijfsnaam) : ''
   const safeOpmerking = escapeHtml(opmerking)?.replace(/\n/g, '<br>')
   
   // Map aanbieding type to display name
@@ -1130,6 +1138,7 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
     'grootzakelijk': 'Groot Zakelijk Aanbod',
     'dynamisch': 'Dynamische energietarieven',
     'clean-energy-ets2': 'Clean Energy 5-jarig vast gas (ETS-2 beschermd)',
+    'gas-vastzetten': 'Gastarief vastzetten (tot 4,5 jaar)',
   }
   
   const aanbiedingNaam = aanbiedingNamen[aanbiedingType] || aanbiedingType
@@ -1141,6 +1150,7 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
     'grootzakelijk': `${baseUrl}/aanbieding/grootzakelijk`,
     'dynamisch': `${baseUrl}/aanbieding/dynamisch`,
     'clean-energy-ets2': `${baseUrl}/aanbieding/clean-energy-ets2`,
+    'gas-vastzetten': `${baseUrl}/aanbieding/gas-vastzetten`,
   }
   
   const aanbiedingUrl = aanbiedingUrls[aanbiedingType] || baseUrl
@@ -1191,6 +1201,7 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
                 </tr>
               </table>
 
+              ${safeEmail ? `
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
                 <tr>
                   <td style="padding: 8px 0;">
@@ -1201,6 +1212,18 @@ export function generateAanbiedingInteresseEmail(data: AanbiedingInteresseData):
                   </td>
                 </tr>
               </table>
+              ` : ''}
+
+              ${safeBedrijfsnaam ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <p style="color: #64748B; font-size: 12px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px;">Bedrijfsnaam</p>
+                    <p style="color: #0F4C75; font-size: 16px; margin: 0; font-weight: 500;">${safeBedrijfsnaam}</p>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
 
               ${safeTelefoon ? `
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">

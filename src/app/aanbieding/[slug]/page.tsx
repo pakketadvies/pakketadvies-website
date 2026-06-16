@@ -26,6 +26,9 @@ export default async function AanbiedingSlugPage({
     'mkb': '/aanbieding/mkb-3-jaar',
     'grootzakelijk': '/aanbieding/grootzakelijk',
     'dynamisch': '/aanbieding/dynamisch',
+    'gas': '/aanbieding/gas-vastzetten',
+    'gas-vast': '/aanbieding/gas-vastzetten',
+    'claim': '/aanbieding/gas-vastzetten',
   }
 
   // Check if decoded slug matches a known route
