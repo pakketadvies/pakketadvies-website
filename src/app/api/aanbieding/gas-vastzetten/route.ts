@@ -124,24 +124,19 @@ export async function POST(request: Request) {
 
     // ----------------------------------------------
     // Google Sheets — "Don" tab in de Rick & Don Spreadsheet
-    // Kolommen: Datum | Energieleverancier | Postcode | huisnummer |
-    //           stroom | gas | naam klant | telefoonnummer |
-    //           e-mailadres | belpogingen | opmerkingen
+    // Kolommen: A:Datum | B:Energieleverancier | C:Postcode |
+    //           D:huisnummer | E:stroom | F:gas | G:naam klant |
+    //           H:bedrijfsnaam | I:telefoonnummer | J:e-mailadres |
+    //           K:opmerkingen
     // ----------------------------------------------
     try {
       console.log('📊 [gas-vastzetten] Schrijven naar Don-sheet...')
       await appendLeadToDonSheet({
         datum: formatDonDate(),
-        energieleverancier: '',
-        postcode: '',
-        huisnummer: '',
-        stroom: '',
-        gas: '',
         naamKlant: body.naam,
+        bedrijfsnaam: body.bedrijfsnaam,
         telefoonnummer: body.telefoon,
-        emailadres: '',
-        belpogingen: '',
-        opmerkingen: `Bedrijfsnaam: ${body.bedrijfsnaam} — Bron: gas-vastzetten landingspage (${AANBIEDING_NAAM})`,
+        opmerkingen: `Bron: gas-vastzetten landingspage (${AANBIEDING_NAAM})`,
       })
       console.log('✅ [gas-vastzetten] Don-sheet bijgewerkt')
     } catch (sheetsError) {

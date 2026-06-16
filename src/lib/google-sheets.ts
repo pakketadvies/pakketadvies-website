@@ -30,9 +30,19 @@ interface LeadData {
 
 /**
  * Lead data voor de Don-spreadsheet (gas-vastzetten landingspage).
- * Volgorde matcht de kolomstructuur:
- * Datum | Energieleverancier | Postcode | huisnummer | stroom | gas |
- * naam klant | telefoonnummer | e-mailadres | belpogingen | opmerkingen
+ *
+ * Kolomvolgorde in blad "Don" (zoals door PakketAdvies bepaald):
+ *  A: Datum
+ *  B: Energieleverancier
+ *  C: Postcode
+ *  D: huisnummer
+ *  E: stroom
+ *  F: gas
+ *  G: naam klant
+ *  H: bedrijfsnaam
+ *  I: telefoonnummer
+ *  J: e-mailadres
+ *  K: opmerkingen
  */
 interface DonLeadData {
   datum: string
@@ -42,9 +52,9 @@ interface DonLeadData {
   stroom?: string
   gas?: string
   naamKlant: string
+  bedrijfsnaam?: string
   telefoonnummer: string
   emailadres?: string
-  belpogingen?: string
   opmerkingen?: string
 }
 
@@ -251,7 +261,7 @@ export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
  *
  * Bestemd voor leads die binnenkomen via /aanbieding/gas-vastzetten.
  * Schrijft naar de spreadsheet met ID DON_SPREADSHEET_ID, bladnaam "Don",
- * met de volgende kolomvolgorde:
+ * met de volgende kolomvolgorde (door PakketAdvies bepaald):
  *
  *  A: Datum
  *  B: Energieleverancier
@@ -260,9 +270,9 @@ export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
  *  E: stroom
  *  F: gas
  *  G: naam klant
- *  H: telefoonnummer
- *  I: e-mailadres
- *  J: belpogingen
+ *  H: bedrijfsnaam
+ *  I: telefoonnummer
+ *  J: e-mailadres
  *  K: opmerkingen
  *
  * @param leadData - Lead data to append
@@ -275,6 +285,7 @@ export async function appendLeadToDonSheet(leadData: DonLeadData): Promise<void>
   try {
     console.log('📊 [Google Sheets / Don] Lead data received:', {
       naam: leadData.naamKlant,
+      bedrijfsnaam: leadData.bedrijfsnaam,
       telefoon: leadData.telefoonnummer,
       hasEmail: !!leadData.emailadres,
       hasOpmerkingen: !!leadData.opmerkingen,
@@ -284,17 +295,17 @@ export async function appendLeadToDonSheet(leadData: DonLeadData): Promise<void>
     console.log('✅ [Google Sheets / Don] Authenticated client ready, spreadsheet:', spreadsheetId)
 
     const row = [
-      leadData.datum,
-      leadData.energieleverancier || '',
-      leadData.postcode || '',
-      leadData.huisnummer || '',
-      leadData.stroom || '',
-      leadData.gas || '',
-      leadData.naamKlant,
-      leadData.telefoonnummer,
-      leadData.emailadres || '',
-      leadData.belpogingen || '',
-      leadData.opmerkingen || '',
+      leadData.datum,                     // A: Datum
+      leadData.energieleverancier || '',  // B: Energieleverancier
+      leadData.postcode || '',            // C: Postcode
+      leadData.huisnummer || '',          // D: huisnummer
+      leadData.stroom || '',              // E: stroom
+      leadData.gas || '',                 // F: gas
+      leadData.naamKlant,                 // G: naam klant
+      leadData.bedrijfsnaam || '',        // H: bedrijfsnaam
+      leadData.telefoonnummer,            // I: telefoonnummer
+      leadData.emailadres || '',          // J: e-mailadres
+      leadData.opmerkingen || '',         // K: opmerkingen
     ]
 
     console.log('📊 [Google Sheets / Don] Row data prepared:', {
