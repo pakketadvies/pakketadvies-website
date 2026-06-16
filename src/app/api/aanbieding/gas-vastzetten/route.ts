@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { generateAanbiedingInteresseEmail } from '@/lib/email-templates'
-import { appendLeadToSheet } from '@/lib/google-sheets'
+import { appendLeadToDonSheet } from '@/lib/google-sheets'
 
 interface GasVastzettenClaimData {
   naam: string
@@ -13,13 +13,34 @@ interface GasVastzettenClaimData {
 const AANBIEDING_NAAM = 'Gastarief vastzetten (tot 4,5 jaar)'
 
 /**
+ * Format a Date in Europe/Amsterdam timezone as "YYYY-MM-DD HH:mm:ss".
+ * Wordt gebruikt voor de Datum-kolom in de Don-spreadsheet zodat het past
+ * bij de bestaande rijen.
+ */
+function formatDonDate(date: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
+  return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`
+}
+
+/**
  * POST /api/aanbieding/gas-vastzetten
  *
  * Verwerkt het korte claim-formulier op de pagina
  * /aanbieding/gas-vastzetten. Geen e-mail nodig — alleen
  * naam, telefoon en bedrijfsnaam. Stuurt zowel een
  * notificatie-mail naar het PakketAdvies team als een
- * regel naar de "Advertentieleads" Google Sheet.
+ * regel naar de "Don" sheet in de Rick & Don Spreadsheet.
  */
 export async function POST(request: Request) {
   try {
@@ -102,26 +123,30 @@ export async function POST(request: Request) {
     }
 
     // ----------------------------------------------
-    // Google Sheets (Advertentieleads)
+    // Google Sheets — "Don" tab in de Rick & Don Spreadsheet
+    // Kolommen: Datum | Energieleverancier | Postcode | huisnummer |
+    //           stroom | gas | naam klant | telefoonnummer |
+    //           e-mailadres | belpogingen | opmerkingen
     // ----------------------------------------------
     try {
-      console.log('📊 [gas-vastzetten] Schrijven naar Google Sheets...')
-      await appendLeadToSheet({
-        datumLeadBinnen: new Date().toISOString(),
-        huidigeLeveranciers: '',
+      console.log('📊 [gas-vastzetten] Schrijven naar Don-sheet...')
+      await appendLeadToDonSheet({
+        datum: formatDonDate(),
+        energieleverancier: '',
         postcode: '',
         huisnummer: '',
         stroom: '',
         gas: '',
-        naam: body.naam,
+        naamKlant: body.naam,
         telefoonnummer: body.telefoon,
         emailadres: '',
-        opmerkingen: `Interesse in: ${AANBIEDING_NAAM}\nBedrijfsnaam: ${body.bedrijfsnaam}`,
+        belpogingen: '',
+        opmerkingen: `Bedrijfsnaam: ${body.bedrijfsnaam} — Bron: gas-vastzetten landingspage (${AANBIEDING_NAAM})`,
       })
-      console.log('✅ [gas-vastzetten] Google Sheets bijgewerkt')
+      console.log('✅ [gas-vastzetten] Don-sheet bijgewerkt')
     } catch (sheetsError) {
       console.error(
-        '❌ [gas-vastzetten] Google Sheets fout (non-blocking):',
+        '❌ [gas-vastzetten] Don-sheet fout (non-blocking):',
         sheetsError
       )
       // non-blocking: formulier blijft werken

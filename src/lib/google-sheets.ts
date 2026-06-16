@@ -29,6 +29,35 @@ interface LeadData {
 }
 
 /**
+ * Lead data voor de Don-spreadsheet (gas-vastzetten landingspage).
+ * Volgorde matcht de kolomstructuur:
+ * Datum | Energieleverancier | Postcode | huisnummer | stroom | gas |
+ * naam klant | telefoonnummer | e-mailadres | belpogingen | opmerkingen
+ */
+interface DonLeadData {
+  datum: string
+  energieleverancier?: string
+  postcode?: string
+  huisnummer?: string
+  stroom?: string
+  gas?: string
+  naamKlant: string
+  telefoonnummer: string
+  emailadres?: string
+  belpogingen?: string
+  opmerkingen?: string
+}
+
+/**
+ * Spreadsheet ID van de "Rick en Don Spreadsheet" waar gas-vastzetten leads heen gaan.
+ * Te overriden via env var GOOGLE_SHEETS_GAS_SPREADSHEET_ID.
+ */
+const DON_SPREADSHEET_ID =
+  process.env.GOOGLE_SHEETS_GAS_SPREADSHEET_ID ||
+  '1j3u5AAle7G0w31-BRU59bRSANKS7e0FqOyFc8LOsfjY'
+const DON_SHEET_RANGE = 'Don!A:K'
+
+/**
  * Get Google Sheets configuration from environment variables
  */
 function getConfig(): GoogleSheetsConfig {
@@ -77,11 +106,14 @@ function getConfig(): GoogleSheetsConfig {
 }
 
 /**
- * Create authenticated Google Sheets client
+ * Create authenticated Google Sheets client.
+ * Optioneel kan een andere spreadsheet ID worden meegegeven; default is de
+ * spreadsheet uit GOOGLE_SHEETS_SPREADSHEET_ID.
  */
-async function getAuthenticatedClient() {
+async function getAuthenticatedClient(overrideSpreadsheetId?: string) {
   console.log('🔐 [Google Sheets] Creating authenticated client...')
   const config = getConfig()
+  const spreadsheetId = overrideSpreadsheetId || config.spreadsheetId
 
   try {
     console.log('🔐 [Google Sheets] Initializing GoogleAuth with service account...')
@@ -94,14 +126,14 @@ async function getAuthenticatedClient() {
     })
 
     console.log('🔐 [Google Sheets] Getting auth client...')
-    const authClient = await auth.getClient()
+    await auth.getClient()
     console.log('✅ [Google Sheets] Auth client created successfully')
-    
+
     console.log('🔐 [Google Sheets] Creating Sheets API client...')
     const sheets = google.sheets({ version: 'v4', auth: auth as any })
     console.log('✅ [Google Sheets] Sheets API client created successfully')
 
-    return { sheets, spreadsheetId: config.spreadsheetId }
+    return { sheets, spreadsheetId }
   } catch (error: any) {
     console.error('❌ [Google Sheets] Failed to create authenticated client:', {
       message: error?.message,
@@ -211,6 +243,107 @@ export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
     // Re-throw error zodat de API route het kan loggen
     // Maar dit is non-blocking: formulier blijft werken ook als Google Sheets faalt
     throw new Error(`Google Sheets fout: ${error?.message || 'Unknown error'}`)
+  }
+}
+
+/**
+ * Append lead data to the "Don" sheet in the Rick & Don spreadsheet.
+ *
+ * Bestemd voor leads die binnenkomen via /aanbieding/gas-vastzetten.
+ * Schrijft naar de spreadsheet met ID DON_SPREADSHEET_ID, bladnaam "Don",
+ * met de volgende kolomvolgorde:
+ *
+ *  A: Datum
+ *  B: Energieleverancier
+ *  C: Postcode
+ *  D: huisnummer
+ *  E: stroom
+ *  F: gas
+ *  G: naam klant
+ *  H: telefoonnummer
+ *  I: e-mailadres
+ *  J: belpogingen
+ *  K: opmerkingen
+ *
+ * @param leadData - Lead data to append
+ */
+export async function appendLeadToDonSheet(leadData: DonLeadData): Promise<void> {
+  console.log('📊 [Google Sheets / Don] ========================================')
+  console.log('📊 [Google Sheets / Don] START: Appending lead to Don sheet')
+  console.log('📊 [Google Sheets / Don] ========================================')
+
+  try {
+    console.log('📊 [Google Sheets / Don] Lead data received:', {
+      naam: leadData.naamKlant,
+      telefoon: leadData.telefoonnummer,
+      hasEmail: !!leadData.emailadres,
+      hasOpmerkingen: !!leadData.opmerkingen,
+    })
+
+    const { sheets, spreadsheetId } = await getAuthenticatedClient(DON_SPREADSHEET_ID)
+    console.log('✅ [Google Sheets / Don] Authenticated client ready, spreadsheet:', spreadsheetId)
+
+    const row = [
+      leadData.datum,
+      leadData.energieleverancier || '',
+      leadData.postcode || '',
+      leadData.huisnummer || '',
+      leadData.stroom || '',
+      leadData.gas || '',
+      leadData.naamKlant,
+      leadData.telefoonnummer,
+      leadData.emailadres || '',
+      leadData.belpogingen || '',
+      leadData.opmerkingen || '',
+    ]
+
+    console.log('📊 [Google Sheets / Don] Row data prepared:', {
+      columns: row.length,
+      spreadsheetId,
+      range: DON_SHEET_RANGE,
+    })
+
+    const response = await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: DON_SHEET_RANGE,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [row],
+      },
+    })
+
+    console.log('✅ [Google Sheets / Don] ========================================')
+    console.log('✅ [Google Sheets / Don] SUCCESS: Lead appended to Don sheet!')
+    console.log('✅ [Google Sheets / Don] Updated range:', response.data.updates?.updatedRange)
+    console.log('✅ [Google Sheets / Don] Updated rows:', response.data.updates?.updatedRows)
+    console.log('✅ [Google Sheets / Don] Updated cells:', response.data.updates?.updatedCells)
+    console.log('✅ [Google Sheets / Don] ========================================')
+  } catch (error: any) {
+    console.error('❌ [Google Sheets / Don] ========================================')
+    console.error('❌ [Google Sheets / Don] ERROR: Failed to append lead to Don sheet')
+    console.error('❌ [Google Sheets / Don] ========================================')
+    console.error('❌ [Google Sheets / Don] Error details:', {
+      message: error?.message,
+      code: error?.code,
+      status: error?.status,
+      statusText: error?.statusText,
+    })
+
+    if (error?.response) {
+      console.error('❌ [Google Sheets / Don] API Response error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      })
+    }
+
+    if (error?.stack) {
+      console.error('❌ [Google Sheets / Don] Stack trace:', error.stack)
+    }
+
+    console.error('❌ [Google Sheets / Don] ========================================')
+
+    throw new Error(`Google Sheets (Don) fout: ${error?.message || 'Unknown error'}`)
   }
 }
 
