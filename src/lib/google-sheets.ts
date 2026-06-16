@@ -43,6 +43,7 @@ interface LeadData {
  *  I: telefoonnummer
  *  J: e-mailadres
  *  K: opmerkingen
+ *  L: bron (welke landingspage de lead vandaan komt)
  */
 interface DonLeadData {
   datum: string
@@ -56,6 +57,7 @@ interface DonLeadData {
   telefoonnummer: string
   emailadres?: string
   opmerkingen?: string
+  bron?: string
 }
 
 /**
@@ -65,7 +67,7 @@ interface DonLeadData {
 const DON_SPREADSHEET_ID =
   process.env.GOOGLE_SHEETS_GAS_SPREADSHEET_ID ||
   '1j3u5AAle7G0w31-BRU59bRSANKS7e0FqOyFc8LOsfjY'
-const DON_SHEET_RANGE = 'Don!A:K'
+const DON_SHEET_RANGE = 'Don!A:L'
 
 /**
  * Get Google Sheets configuration from environment variables
@@ -274,6 +276,7 @@ export async function appendLeadToSheet(leadData: LeadData): Promise<void> {
  *  I: telefoonnummer
  *  J: e-mailadres
  *  K: opmerkingen
+ *  L: bron
  *
  * @param leadData - Lead data to append
  */
@@ -289,6 +292,7 @@ export async function appendLeadToDonSheet(leadData: DonLeadData): Promise<void>
       telefoon: leadData.telefoonnummer,
       hasEmail: !!leadData.emailadres,
       hasOpmerkingen: !!leadData.opmerkingen,
+      hasBron: !!leadData.bron,
     })
 
     const { sheets, spreadsheetId } = await getAuthenticatedClient(DON_SPREADSHEET_ID)
@@ -306,6 +310,7 @@ export async function appendLeadToDonSheet(leadData: DonLeadData): Promise<void>
       leadData.telefoonnummer,            // I: telefoonnummer
       leadData.emailadres || '',          // J: e-mailadres
       leadData.opmerkingen || '',         // K: opmerkingen
+      leadData.bron || '',                // L: bron
     ]
 
     console.log('📊 [Google Sheets / Don] Row data prepared:', {

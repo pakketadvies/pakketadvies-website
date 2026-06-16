@@ -127,7 +127,7 @@ export async function POST(request: Request) {
     // Kolommen: A:Datum | B:Energieleverancier | C:Postcode |
     //           D:huisnummer | E:stroom | F:gas | G:naam klant |
     //           H:bedrijfsnaam | I:telefoonnummer | J:e-mailadres |
-    //           K:opmerkingen
+    //           K:opmerkingen | L:bron
     // ----------------------------------------------
     try {
       console.log('📊 [gas-vastzetten] Schrijven naar Don-sheet...')
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
         naamKlant: body.naam,
         bedrijfsnaam: body.bedrijfsnaam,
         telefoonnummer: body.telefoon,
-        opmerkingen: `Bron: gas-vastzetten landingspage (${AANBIEDING_NAAM})`,
+        bron: `gas-vastzetten landingspage (${AANBIEDING_NAAM})`,
       })
       console.log('✅ [gas-vastzetten] Don-sheet bijgewerkt')
     } catch (sheetsError) {
